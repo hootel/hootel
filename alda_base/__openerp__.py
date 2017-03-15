@@ -28,7 +28,6 @@
     'summary': "Alda Base",
     'description': "Alda Base",
     'depends': [
-        'mail',
     ],
     'external_dependencies': {
         'python': []

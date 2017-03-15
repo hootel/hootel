@@ -28,7 +28,6 @@
     'summary': "Alda WuBook",
     'description': "Alda WuBook",
     'depends': [
-        'mail',
     ],
     'external_dependencies': {
         'python': []
