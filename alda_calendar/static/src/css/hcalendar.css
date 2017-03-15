@@ -1,0 +1,195 @@
+/*
+ * Hotel Calendar JS v0.0.1a
+ * GNU Public License - 2017
+ * Aloxa Solucions S.L. <info@aloxa.eu>
+ * Alexandre Díaz <alex@aloxa.eu>
+ */
+ 
+.hcal-table, .hcal-table-day {
+	border-collapse: collapse;
+	width: 100%;
+}
+.hcal-table td {
+	border: 1px solid black;
+	padding: 4px;
+}
+.hcal-table a {
+	text-decoration: none;
+}
+.hcal-table tr:hover td:not(.hcal-cell-highlight):not(.hcal-cell-current-day) {
+	background-color: #F6F6F6;
+}
+
+.hcal-table-day {
+	height: 100%;
+}
+.hcal-table-day td {
+	padding: 4px;
+	height: 10px;
+	border-width: 0;
+}
+.hcal-table-day td:hover:not(.hcal-cell-highlight) {
+	background-color: #FCFEE1 !important;
+}
+.hcal-table-day tr:not(:last-child) td {
+	border-color: lightgray;
+	border-width: 0 0 1px;
+}
+
+.hcal-cell-month {
+	text-align: center;
+	vertical-align: middle;
+	white-space: nowrap;
+}
+
+.hcal-cell-current-day {
+	background-color: #E2EAF9;
+}
+
+.hcal-cell-day-selector {
+	text-align: center;
+	vertical-align: center;
+	max-width: 140px;
+}
+.hcal-cell-day-selector a {
+	font-size: 22px;
+	padding: 0 0.5em;
+}
+.hcal-cell-day-selector span {
+	cursor: pointer;
+}
+.hcal-cell-day-selector input {
+	border: 1px solid lightgray;
+	width: 120px;
+	font-size: large;
+	text-align: center;
+}
+
+.hcal-cell-month {
+	overflow: hidden;
+	max-width: 0;
+}
+.hcal-cell-month:nth-child(n+3) {
+	border-left-width: 2px !important;
+}
+
+.hcal-cell-start-month {
+	border-left-width: 2px !important;
+}
+
+.hcal-room-type:hover {
+	cursor:pointer;
+}
+
+.hcal-cell-highlight {
+	background-color: #F8FD9C;
+}
+
+.hcal-cell-room-type-group-item-day {
+	padding: 0 !important;
+	height: 100%;
+}
+
+.hcal-cell-room-type-group-item-day-occupied {
+	/*background-color: #227eaf;*/
+}
+.hcal-cell-room-type-group-item-day-occupied[data-hcal-reservation-cell-type=soft-start] {
+	background-color: #729fcf;
+	/*border: 2px solid #3465a4;*/
+}
+
+.hcal-reservation {
+	position: absolute;
+	text-align: center;
+	background-color: #729fcf;
+	transform: skewX(-25deg);
+	border: 2px solid #3465a4;
+	color: white;
+	font-size: 14px;
+}
+.hcal-reservation:hover {
+	cursor: pointer;
+	background-color: #4e97bf;
+}
+.hcal-reservation span {
+	position: relative;
+}
+
+.hcal-row-room-type-group-item {
+	text-align: center;
+}
+
+.hcal-cell-month-day {
+	text-align: center;	
+}
+
+.hcal-cell-room-type-group-day {
+	text-align: right;
+}
+
+.hcal-table-type-group-day {
+	border-collapse: collapse;
+	width:100%;
+}
+.hcal-table-type-group-day td {
+	border-width: 0; 
+}
+.hcal-table-type-group-day tr:not(:last-child) td {
+	border-bottom-width: 1px;
+}
+
+.hcal-cell-room-type {
+	cursor: pointer;
+}
+td.hcal-cell-room-type {
+	border-right-width: 2px;
+}
+
+td.hcal-cell-room-type-group-day, td.hcal-cell-room-type {
+	border-top-width: 2px;
+}
+td.hcal-cell-room-type-group-day {
+	padding: 0;
+}
+
+td.hcal-cell-room-type-group-item {
+	border-right-width: 2px;
+}
+
+.hcal-cell-type-group-day-free {
+	text-align: center;
+	font-weight: bold;
+	padding: 0 !important;
+}
+.hcal-cell-type-group-day-price {
+	text-align: center;
+}
+
+td.hcal-cell-header-day {
+	padding: 0;
+}
+.hcal-table-header-day {
+	width: 100%;
+	height: 100%;
+	border-collapse: collapse;
+}
+.hcal-table-header-day td {
+	border-width: 0;
+}
+.hcal-table-header-day tr:not(:last-child) td {
+	border-bottom-width: 1px;
+}
+td.hcal-cell-month-day-occupied {
+	padding: 0;
+	text-align: center;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}

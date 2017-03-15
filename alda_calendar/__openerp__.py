@@ -28,17 +28,28 @@
     'summary': "Alada Calendar",
     'description': "Alda Calendar",
     'depends': [
-        'mail',
+        'base',
+        'web',
+        'hotel_reservation',
     ],
     'external_dependencies': {
         'python': []
     },
     'data': [
+        'views/general.xml',
+
+        'data/views.xml',
+        'data/menus.xml',
+    ],
+    'qweb': [
+        'static/src/xml/*.xml',
     ],
     'test': [
     ],
+
+    'active': True,
     'installable': True,
     'auto_install': False,
-    'application': True,
+    'application': False,
     'license': 'AGPL-3',
 }
