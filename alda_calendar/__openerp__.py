@@ -47,8 +47,8 @@
     'test': [
     ],
 
-    'active': True,
-    'installable': True,
+    'active': False,
+    'installable': False,
     'auto_install': False,
     'application': False,
     'license': 'AGPL-3',

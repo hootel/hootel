@@ -20,24 +20,40 @@
 ##############################################################################
 
 {
-    'name': 'Alda Base',
+    'name': 'Hotel Reservation Advance',
     'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
-    'website': 'https://www.eiqui.com',
-    'category': 'eiqui/alda',
-    'summary': "Alda Base",
-    'description': "Alda Base",
-    'depends': [
+    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>, Darío Lodeiros (Aloxa Solucións S.L.) <dario@aloxa.eu>",
+    'website': 'http://www.aloxa.eu',
+    'category': 'Generic Modules/Hotel Reservation',
+    'summary': "Advances Options to Hotel Reservation",
+    'description': '''    Shared Rooms.-
+    Room to Cleaned.- 
+    Virtual Room.-
+    Types of reservation.-
+    Cancelation policy.-
+    Usability Changes.-
+    Resenvation to assign.-
+    Reservation Restrictions.-
+    Signal Payment control.-
+    New view calendar reservations.-    
+    ''',
+    'depends': ['hotel_reservation',
     ],
     'external_dependencies': {
         'python': []
     },
     'data': [
+        "views/inherit_account_payment_views.xml",
+        "views/inherit_hotel_reservation_views.xml",
+        "views/inherit_hotel_room_views.xml",
+        "views/inherit_res_company_views.xml",
+        "views/reservation_restriction_views.xml",
+        "views/virtual_room_views.xml",
+        
     ],
     'test': [
     ],
     'installable': True,
     'auto_install': False,
-    'application': True,
     'license': 'AGPL-3',
 }

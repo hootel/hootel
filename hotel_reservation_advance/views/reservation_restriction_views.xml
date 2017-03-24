@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+
+	<!-- FORM restriction -->
+	
+		<record id="reservation_restriction_view_form" model="ir.ui.view">
+	        <field name="name">reservation.restriction.form</field>
+	        <field name="model">reservation.restriction</field>  	
+	        <field name="arch" type="xml">
+	        	<form string="Restrictions">	            		
+	       			<group string="Reservation Restrictions" colspan="4">
+		         		<field name="name"/>
+						<field name="room_ids"/>
+						<field name="room_type_ids"/>
+						<field name="init_date"/>
+						<field name="end_date"/>
+						<field name="min_nights"/>								
+	       			</group>
+	        	</form>	
+	        </field>
+	    </record>
+	
+	<!-- TREE restriction -->
+	   <record id="reservation_restriction_view_tree" model="ir.ui.view">
+	 		<field name="name">reservation.restriction.tree</field>
+	 		<field name="model">reservation.restriction</field>	 		
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Restrictions">
+					<field name="name"/>
+					<field name="room_ids"/>
+					<field name="room_type_ids"/>
+					<field name="init_date"/>
+					<field name="end_date"/>
+					<field name="min_nights"/>				       	
+				</tree>
+			</field>
+		</record>
+	
+	 <!-- Action of reservation restriction -->
+	        <record model="ir.actions.act_window" id="reservation_restriction_action">
+	            <field name="name">Reservation restrictions</field>
+	            <field name="res_model">reservation.restriction</field>
+	            <field name="view_type">form</field>
+	            <field name="view_mode">tree,form</field>
+	        </record>
+		
+	<!-- MENUS -->
+		 <menuitem name="Restrictions" id="reservation_restriction_menu"
+	            action="reservation_restriction_action" sequence="22"
+	            parent="hotel.hotel_configuration_menu"/>
+            
+    </data>
+ </openerp>

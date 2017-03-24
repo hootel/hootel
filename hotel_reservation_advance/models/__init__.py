@@ -18,3 +18,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+
+from . import inherit_account_payment
+from . import inherit_hotel_reservation
+from . import inherit_hotelfolio
+from . import inherit_hotelroom
+from . import inherit_res_company
+from . import inherit_reservation_line
+from . import inherit_room_reservation_line
+from . import reservation_restrictions
+from . import virtual_room_reservation
+from . import virtual_room

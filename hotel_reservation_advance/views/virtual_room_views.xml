@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+
+	<!-- FORM restriction -->
+	
+		<record id="virtual_room_view_form" model="ir.ui.view">
+	        <field name="name">virtual.room.view.form</field>
+	        <field name="model">hotel.virtual.room</field>  	
+	        <field name="arch" type="xml">
+	        	<form string="Restrictions">	            		
+	       			<group string="Reservation Restrictions" colspan="4">
+		         		<field name="name"/>
+						<field name="virtual_code"/>
+						<field name="room_ids"/>
+						<field name="room_type_ids"/>
+						<field name="total_rooms_count"/>
+						<field name="max_real_rooms"/>
+						<field name="service_ids"/>									
+	       			</group>
+	        	</form>	
+	        </field>
+	    </record>
+	
+	<!-- TREE restriction -->
+	   <record id="virtual_room_view_tree" model="ir.ui.view">
+	 		<field name="name">virtual.room.view.tree</field>
+	 		<field name="model">hotel.virtual.room</field>	 		
+			<field name="type">tree</field>
+			<field name="arch" type="xml">
+				<tree string="Restrictions">
+					<field name="name"/>
+					<field name="virtual_code"/>
+					<field name="room_ids"/>
+					<field name="room_type_ids"/>
+					<field name="total_rooms_count"/>
+					<field name="max_real_rooms"/>
+					<field name="service_ids"/>			       	
+				</tree>
+			</field>
+		</record>
+	
+	 <!-- Action of reservation restriction -->
+	        <record model="ir.actions.act_window" id="virtual_room_action_form">
+	            <field name="name">Virtual Rooms</field>
+	            <field name="res_model">hotel.virtual.room</field>
+	            <field name="view_type">form</field>
+	            <field name="view_mode">tree,form</field>
+	        </record>
+	        
+	        
+		
+	<!-- MENUS -->
+		 <menuitem name="Virtual rooms" id="virtual_room_menu"
+	            action="virtual_room_action_form" sequence="20"
+	            parent="hotel.menu_hotel_room"/>
+	            
+    </data>
+ </openerp>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+
+		<record id="hotel_reservation_form" model="ir.ui.view">
+		    <field name="model">hotel.reservation</field>
+		    <field name="inherit_id" ref="hotel_reservation.view_hotel_reservation_form" />
+		    <field name="arch" type="xml">
+		        <xpath expr="//button[@name='done']" position="after">
+		        	<label for="to_assign" string="To Assign" />	        		
+		        	<field name="to_assign"/>                                   
+		        </xpath>
+		         <xpath expr="//field[@name='reserve']" position="after">
+		        	<field name="adults"/>
+		        	<field name="children"/>                                
+		        </xpath>
+		    </field>
+	    </record>
+        
+    </data>
+ </openerp>
