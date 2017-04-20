@@ -5,39 +5,55 @@
  * Alexandre Díaz <alex@aloxa.eu>
  */
  
+.btn-hcal { }
+.btn-hcal.hcal-cell-current-day {
+ 	background-color: #0D5A8F;
+}
+.btn-hcal-3d {
+ 	color: white;
+ 	background-color: #307CB0;
+ 	border: 1px solid black;
+ 	border-color: white black black white !important;
+}
+.btn-hcal-flat {
+	background-color: #bdc297;
+ 	border: 1px solid #bdc297;
+}
+ 
 .hcal-table, .hcal-table-day {
-	border-collapse: collapse;
+	border-collapse: initial !important;
 	width: 100%;
 }
+.hcal-table > tbody {
+	max-height: 50vh;
+	overflow: scroll;
+}
 .hcal-table td {
-	border: 1px solid black;
 	padding: 4px;
+	text-align: center !important;
 }
 .hcal-table a {
 	text-decoration: none;
 }
-.hcal-table tr:hover td:not(.hcal-cell-highlight):not(.hcal-cell-current-day) {
+.hcal-table tr:hover td:not(.hcal-cell-highlight):not(.hcal-cell-current-day):not(.btn-hcal) {
 	background-color: #F6F6F6;
 }
 
 .hcal-table-day {
 	height: 100%;
+	border-collapse: collapse !important;
 }
 .hcal-table-day td {
 	padding: 4px;
 	height: 10px;
-	border-width: 0;
+	border: 1px solid lightgray !important;
 }
 .hcal-table-day td:hover:not(.hcal-cell-highlight) {
 	background-color: #FCFEE1 !important;
 }
-.hcal-table-day tr:not(:last-child) td {
-	border-color: lightgray;
-	border-width: 0 0 1px;
-}
 
 .hcal-cell-month {
-	text-align: center;
+	text-align: center !important;
 	vertical-align: middle;
 	white-space: nowrap;
 }
@@ -84,6 +100,7 @@
 .hcal-cell-highlight {
 	background-color: #F8FD9C;
 }
+ 
 
 .hcal-cell-room-type-group-item-day {
 	padding: 0 !important;
@@ -120,11 +137,11 @@
 }
 
 .hcal-cell-month-day {
-	text-align: center;	
+	text-align: center !important;	
 }
 
 .hcal-cell-room-type-group-day {
-	text-align: right;
+	text-align: center !important;
 }
 
 .hcal-table-type-group-day {
@@ -153,6 +170,9 @@ td.hcal-cell-room-type-group-day {
 }
 
 td.hcal-cell-room-type-group-item {
+	text-align: center !important;
+}
+td.hcal-cell-room-type-group-item:last-child {
 	border-right-width: 2px;
 }
 
@@ -184,6 +204,18 @@ td.hcal-cell-month-day-occupied {
 	text-align: center;
 }
 
+.hcal-cell-detail-room-free-type-group-item-day,
+.hcal-cell-detail-room-free-total-group-item-day,
+.hcal-cell-detail-room-perc-occup-group-item-day,
+.hcal-cell-detail-room-price-type-group-item-day,
+.hcal-cell-detail-room-min-stay-group-item-day {
+	border: 1px solid lightgray;
+}
+.hcal-cell-detail-room-min-stay-group-item-day {
+	border-color: #307CB0 lightgray lightgray lightgray;
+	border-width: 2px 1px 1px 1px;
+}
+
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
@@ -192,4 +224,57 @@ td.hcal-cell-month-day-occupied {
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
+}
+
+/** VIEW **/
+.nopadding {
+   padding: 0 !important;
+   margin: 0 !important;
+}
+
+#pms-menu {
+	padding: 0 0.2em !important;
+}
+#pms-menu button {
+	min-height: 62px;
+	margin: 0.2em 0;
+}
+
+#pms-search {
+	padding: 0.1em !important;
+}
+#pms-search fieldset {
+	display: inline-block;
+}
+#pms-search fieldset legend {
+	font-size: initial !important;
+	margin: initial !important;
+}
+#pms-search .list {
+	max-height: 74px;
+	overflow-y: scroll;
+	text-align: left;
+}
+#pms-search-table > tbody > tr > td {
+	background-color: white;
+	padding: 0.1em;
+	border: 1px solid #efefef;
+	border-width: 0 2px;
+	vertical-align: middle;
+	text-align: center;
+}
+#pms-search-table > tbody > tr > td:first-child {
+	border-width: 0 2px 0 0;
+}
+#pms-search-table > tbody > tr > td:last-child {
+	border-width: 0 0 0 2px;
+}
+
+#pms-search-cal-pag .btn {
+	background-color: transparent;
+	padding: 0.5em;
+}
+
+.input-group {
+	padding: 0.1em;
 }

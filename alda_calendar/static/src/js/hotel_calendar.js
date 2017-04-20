@@ -20,8 +20,10 @@ var HotelCalendarView = View.extend({
     icon: 'fa fa-map-marker',
     view_type: "pms",
     _model: null,
+    hcalendar: null,
 
     init: function(parent, dataset, view_id, options) {
+    	console.info("ss2");
         this._super(parent);
         this.ready = $.Deferred();
         this.set_default_options(options);
@@ -98,17 +100,19 @@ var HotelCalendarView = View.extend({
 			rooms: {
 				Simple: {
 					persons: 1,
-					numbers: ['80','81','82','83']
+					numbers: ['80','127','82','83']
 				},
 				Doble: {
 					persons: 2,
-					numbers: ['126','127','128','129','130']
+					numbers: ['126','81','128','129','130']
 				},
 				Triple: {
 					persons: 3,
 					numbers: ['95','96','97']
 				}
-			}
+			},
+			
+			showPaginator: false,
 		};
 		var reservations = [
 			{
@@ -234,7 +238,41 @@ var HotelCalendarView = View.extend({
 		$(document).find('.oe-view-manager-view-pms').css('overflow', 'initial'); // No Scroll here!
 		$(document).find('.oe-control-panel').remove(); // Remove "control panel" in the view
 		
-		var hcalendar = new HotelCalendarJS('#hcalendar', options, reservations, this.$el[0]);
+		/** VIEW SETTINGS **/
+		// DATE TIME PICKERS
+		var $this = this;
+		var DTPickerOptions = { 
+			'viewMode': 'months'
+		};
+		this.$el.find('#pms-search #date_begin').datetimepicker(DTPickerOptions);
+		this.$el.find('#pms-search #date_end').datetimepicker($.extend({}, DTPickerOptions, { 'useCurrent': false }));
+		this.$el.find("#pms-search #date_begin").on("dp.change", function (e) {
+	        $this.$el.find('#pms-search #date_end').data("DateTimePicker").minDate(e.date);
+	    });
+		this.$el.find("#pms-search #date_end").on("dp.change", function (e) {
+	        $this.$el.find('#pms-search #date_begin').data("DateTimePicker").maxDate(e.date);
+	    });
+		
+		console.log("--- LLLLL ----");
+		console.log(options);
+		this.hcalendar = new HotelCalendarJS('#hcalendar', options, reservations, this.$el[0]);
+		this.$el.find("#pms-search #cal-pag-prev-plus").on('click', function(ev){
+			$this.hcalendar.back('15', 'd');
+			ev.preventDefault();
+		});
+		this.$el.find("#pms-search #cal-pag-prev").on('click', function(ev){
+			$this.hcalendar.back('1', 'd');
+			ev.preventDefault();
+		});
+		this.$el.find("#pms-search #cal-pag-next-plus").on('click', function(ev){
+			$this.hcalendar.advance('15', 'd');
+			ev.preventDefault();
+		});
+		this.$el.find("#pms-search #cal-pag-next").on('click', function(ev){
+			$this.hcalendar.advance('1', 'd');
+			ev.preventDefault();
+		});
+		
 		return $.when();
     }
 });

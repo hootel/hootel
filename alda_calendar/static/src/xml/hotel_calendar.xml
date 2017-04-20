@@ -2,7 +2,172 @@
 <templates xml:space="preserve">
 
     <div t-name="HotelCalendarView">
-        <div id="hcalendar"></div>
+    	<div class="col-xs-12 col-lg-12 nopadding">
+    		<div class="col-xs-1 col-lg-1 nopadding" id="pms-menu">
+    			<button class="btn col-xs-12 col-lg-12">
+    				<i class="fa fa-4x fa-cloud"> </i>
+    			</button>
+    			<button class="btn btn-default col-xs-12 col-lg-12">
+    				CHECK-OUT
+    			</button>
+    			<button class="btn btn-default col-xs-12 col-lg-12">
+    				CHECK-IN
+    			</button>
+    			<button class="btn btn-default col-xs-12 col-lg-12">
+    				COBROS
+    			</button>
+    			<button class="btn btn-default col-xs-12 col-lg-12">
+    				LISTADOS
+    			</button>
+    			<button class="btn btn-default col-xs-12 col-lg-12">
+    				<i class="fa fa-4x fa-refresh"> </i>
+    			</button>
+    		</div>
+    		<div class="col-xs-11 col-lg-11 nopadding">
+    			<div class="col-xs-12 col-lg-12 nopadding" id="pms-search">
+    				<table class="col-xs-12 col-lg-12 nopadding" id="pms-search-table">
+    					<tbody>
+    						<tr>
+    							<td class="col-xs-5 col-lg-5">
+									<div class="col-xs-4 col-lg-4">
+				    					<strong>SEGMENTACIÓN</strong><br/>
+				    					<div class="list">
+				    						<div class="checkbox">
+					    						<label>
+					    							<input type="checkbox" value="individual" /> Individual
+					    						</label>
+				    						</div>
+				    						<div class="checkbox">
+					    						<label class="checkbox">
+					    							<input type="checkbox" value="doble" /> Doble
+					    						</label>
+					    					</div>
+				    						<div class="checkbox">
+					    						<label class="checkbox">
+					    							<input type="checkbox" value="triple" /> Triple
+					    						</label>
+					    					</div>
+				    						<div class="checkbox">
+					    						<label class="checkbox">
+					    							<input type="checkbox" value="quadruple" /> Quadruple
+					    						</label>
+					    					</div>
+				    					</div>
+				    				</div>
+				    				<div class="col-xs-4 col-lg-4">
+				    					<strong>UBICACIÓN</strong><br/>
+				    					<div class="list">
+				    						<div class="checkbox">
+					    						<label>
+					    							<input type="checkbox" value="planta_1" /> Planta 1
+					    						</label>
+				    						</div>
+				    						<div class="checkbox">
+					    						<label>
+					    							<input type="checkbox" value="planta_2" /> Planta 2
+					    						</label>
+				    						</div>
+				    						<div class="checkbox">
+					    						<label>
+					    							<input type="checkbox" value="vistas_mar" /> Vistas Mar
+					    						</label>
+				    						</div>
+				    						<div class="checkbox">
+					    						<label>
+					    							<input type="checkbox" value="edificio_a" /> Edificio A
+					    						</label>
+				    						</div>
+				    					</div>
+					    			</div>
+					    			<div class="col-xs-4 col-lg-4">
+				    					<strong>CARACTERÍSTICAS</strong><br/>
+				    					<div class="list">
+				    						<div class="checkbox">
+					    						<label>
+					    							<input type="checkbox" value="banhera" /> Bañera
+					    						</label>
+				    						</div>
+				    						<div class="checkbox">
+					    						<label>
+					    							<input type="checkbox" value="ducha" /> Ducha
+					    						</label>
+				    						</div>
+				    						<div class="checkbox">
+					    						<label>
+					    							<input type="checkbox" value="adapt_mi" /> Adapt. Mi
+					    						</label>
+				    						</div>
+				    						<div class="checkbox">
+					    						<label>
+					    							<input type="checkbox" value="terraza" /> Terraza
+					    						</label>
+				    						</div>
+				    					</div>
+					    			</div>
+    							</td>
+    							<td class="col-xs-4 col-lg-4">
+    								<div class="col-xs-3 col-lg-3">
+					    				<select>
+					    					<option value="reserva">Reserva</option>
+					    					<option value="entrada">Entrada</option>
+					    					<option value="salida">Salida</option>
+					    					<option value="factura">Factura</option>
+					    				</select>
+					    			</div>
+    								<div class="col-xs-9 col-lg-9">
+					    				<table>
+					    					<tbody>
+					    						<tr>
+					    							<td>
+					    								DESDE<br/>
+					    								<div class="input-group date" id="date_begin">
+											                <input type="text" class="form-control" name="date_begin" required="required" />
+											                <span class="input-group-addon">
+											                    <span class="fa fa-calendar"></span>
+											                </span>
+											            </div>
+					    							</td>
+					    							<td>
+					    								HASTA<br/>
+					    								<div class="input-group date" id="date_end">
+											                <input type="text" class="form-control" name="date_end" required="required" />
+											                <span class="input-group-addon">
+											                    <span class="fa fa-calendar"></span>
+											                </span>
+											            </div>
+					    							</td>
+					    						</tr>
+					    						<tr>
+					    							<td colspan="2">
+					    								<div class="input-group" id="search_query">
+					    									<span class="input-group-addon">
+											                    <span class="fa fa-search"></span>
+											                </span>
+											                <input type="text" class="form-control" name="search_query" required="required" />
+											            </div>
+					    							</td>
+					    						</tr>
+					    					</tbody>
+					    				</table>
+					    			</div>
+    							</td>
+    							<td class="col-xs-3 col-lg-3">
+    								<div class="col-xs-12 col-lg-12" id="pms-search-cal-pag">
+					    				<button id="cal-pag-prev-plus" class="btn"><i class="fa fa-3x fa-angle-double-left"></i></button>
+					    				<button id="cal-pag-prev" class="btn"><i class="fa fa-3x fa-angle-left"></i></button>
+					    				<button id="cal-pag-selector" class="btn"><i class="fa fa-4x fa-calendar"></i></button>
+					    				<button id="cal-pag-next" class="btn"><i class="fa fa-3x fa-angle-right"></i></button>
+					    				<button id="cal-pag-next-plus" class="btn"><i class="fa fa-3x fa-angle-double-right"></i></button>
+					    			</div>
+    							</td>
+    						</tr>
+    					</tbody>
+    				</table>
+    			</div>
+    			<div id="hcalendar" class="col-xs-12 col-lg-12 nopadding"></div>
+    			<div style="clear:both;" />
+    		</div>
+    	</div>
     </div>
 
 </templates>
