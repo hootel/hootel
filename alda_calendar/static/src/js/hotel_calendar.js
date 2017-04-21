@@ -3,6 +3,7 @@ odoo.define('alda_calendar.HotelCalendarView', function (require) {
 
 var core = require('web.core');
 var data = require('web.data');
+var time = require('web.time');
 var Model = require('web.DataModel');
 var View = require('web.View');
 var pyeval = require('web.pyeval');
@@ -12,7 +13,6 @@ var HotelCalendarJS = require('alda_calendar.HotelCalendarJS');
 var _t = core._t;
 var _lt = core._lt;
 var QWeb = core.qweb;
-
 
 var HotelCalendarView = View.extend({
 	template: "HotelCalendarView",
@@ -90,172 +90,20 @@ var HotelCalendarView = View.extend({
         return this._super(action);
     },
     
-    init_hotel_calendar: function(domain){
-    	console.log("SS 22");
-    	/*this._model.call('get_reservations_data', [domain]).then(function(results){
-			console.log(results);
-		});*/
-    	
-    	var options = {
-			rooms: {
-				Simple: {
-					persons: 1,
-					numbers: ['80','127','82','83']
-				},
-				Doble: {
-					persons: 2,
-					numbers: ['126','81','128','129','130']
-				},
-				Triple: {
-					persons: 3,
-					numbers: ['95','96','97']
-				}
-			},
-			
-			showPaginator: false,
-		};
-		var reservations = [
-			{
-				room_type: 'Doble',
-				room_number: '128',
-				room_beds: ['0','1'],
-				start_date: '02/03/2017',
-				end_date: '08/03/2017',
-				title: 'Prueba #1',
-				
-			},
-			{
-				room_type: 'Doble',
-				room_number: '126',
-				room_beds: ['0','1'],
-				start_date: '04/03/2017',
-				end_date: '06/03/2017',
-				title: 'Prueba #2',
-				
-			},
-			{
-				room_type: 'Doble',
-				room_number: '127',
-				room_beds: ['0','1'],
-				start_date: '04/03/2017',
-				end_date: '06/03/2017',
-				title: 'Prueba #3',
-				
-			},
-			{
-				room_type: 'Doble',
-				room_number: '129',
-				room_beds: ['0','1'],
-				start_date: '05/03/2017',
-				end_date: '06/03/2017',
-				title: 'Prueba #4',
-				
-			},
-			{
-				room_type: 'Doble',
-				room_number: '130',
-				room_beds: ['0','1'],
-				start_date: '05/03/2017',
-				end_date: '06/03/2017',
-				title: 'Prueba #5',
-				
-			},
-			{
-				room_type: 'Simple',
-				room_number: '81',
-				room_beds: ['0'],
-				start_date: '02/03/2017',
-				end_date: '08/03/2017',
-				title: 'Prueba #6',
-				
-			},
-			{
-				room_type: 'Simple',
-				room_number: '82',
-				room_beds: ['0'],
-				start_date: '04/03/2017',
-				end_date: '16/03/2017',
-				title: 'Prueba #7',
-				
-			},
-			{
-				room_type: 'Simple',
-				room_number: '80',
-				room_beds: ['0'],
-				start_date: '04/03/2017',
-				end_date: '06/03/2017',
-				title: 'Prueba #8',
-				
-			},
-			{
-				room_type: 'Simple',
-				room_number: '83',
-				room_beds: ['0'],
-				start_date: '04/03/2017',
-				end_date: '06/03/2017',
-				title: 'Prueba #9',
-				
-			},
-			{
-				room_type: 'Triple',
-				room_number: '95',
-				room_beds: ['0','1','2'],
-				start_date: '03/03/2017',
-				end_date: '05/03/2017',
-				title: 'Prueba #10',
-				
-			},
-			{
-				room_type: 'Triple',
-				room_number: '96',
-				room_beds: ['0','1','2'],
-				start_date: '03/03/2017',
-				end_date: '05/03/2017',
-				title: 'Prueba #11',
-				
-			},
-			{
-				room_type: 'Triple',
-				room_number: '97',
-				room_beds: ['0','1','2'],
-				start_date: '03/03/2017',
-				end_date: '05/03/2017',
-				title: 'Prueba #12',
-				
-			},
-			{
-				room_type: 'Simple',
-				room_number: '83',
-				room_beds: ['0'],
-				start_date: '07/03/2017',
-				end_date: '09/03/2017',
-				title: 'Prueba #13',
-				
-			}
-		];
-
-		/** FIXME: HACKS **/
-		$(document).find('.oe-view-manager-view-pms').css('overflow', 'initial'); // No Scroll here!
-		$(document).find('.oe-control-panel').remove(); // Remove "control panel" in the view
-		
-		/** VIEW SETTINGS **/
-		// DATE TIME PICKERS
-		var $this = this;
-		var DTPickerOptions = { 
-			'viewMode': 'months'
-		};
-		this.$el.find('#pms-search #date_begin').datetimepicker(DTPickerOptions);
-		this.$el.find('#pms-search #date_end').datetimepicker($.extend({}, DTPickerOptions, { 'useCurrent': false }));
-		this.$el.find("#pms-search #date_begin").on("dp.change", function (e) {
-	        $this.$el.find('#pms-search #date_end').data("DateTimePicker").minDate(e.date);
-	    });
-		this.$el.find("#pms-search #date_end").on("dp.change", function (e) {
-	        $this.$el.find('#pms-search #date_begin').data("DateTimePicker").maxDate(e.date);
-	    });
-		
-		console.log("--- LLLLL ----");
-		console.log(options);
-		this.hcalendar = new HotelCalendarJS('#hcalendar', options, reservations, this.$el[0]);
+    destroy: function () {
+        if (this.$buttons) {
+            this.$buttons.off();
+        }
+        
+        $(document).find('.oe-control-panel').show();
+        
+        return this._super.apply(this, arguments);
+    },
+    
+    create_calendar: function(options) {
+    	var $this = this;
+    	// CALENDAR
+		this.hcalendar = new HotelCalendarJS('#hcalendar', options, null, this.$el[0]);
 		this.$el.find("#pms-search #cal-pag-prev-plus").on('click', function(ev){
 			$this.hcalendar.back('15', 'd');
 			ev.preventDefault();
@@ -272,11 +120,131 @@ var HotelCalendarView = View.extend({
 			$this.hcalendar.advance('1', 'd');
 			ev.preventDefault();
 		});
+    },
+    
+    init_hotel_calendar: function(domain){
+    	/*this._model.call('get_reservations_data', [domain]).then(function(results){
+			console.log(results);
+		});*/
+    	var $this = this;
+    	
+    	// Get Rooms
+		new Model('hotel.room').call('search_read', [[]]).then(function(results){
+			var rooms = {}
+			for (var index in results) {
+				var room = results[index];
+				rooms[room.name] = {
+					persons: room.capacity,
+					shared: room.shared_room,
+					type: room.categ_id[1]
+				};
+			}
+			
+			var options = {
+				rooms: rooms,
+				showPaginator: false,
+			};
+			$this.create_calendar(options);
+			
+			// Get Reservations
+			new Model('hotel.reservation').call('search_read', [[]]).then(function(results){
+				console.log("RESERVAS");
+				console.log(results);
+				var reservation_lines = [];
+				for (var item in results) {
+					reservation_lines = reservation_lines.concat(results[item].reservation_line);
+				}
+				console.log(reservation_lines);
+				var reservs = results;
+				new Model('hotel.room').query(['id','name','categ_id']).filter([["id", "in", reservation_lines]]).all().then(function(resultsR){
+					console.log("OBOOM");
+					console.log(resultsR);
+					
+					var reservations = [];
+					for (var item in resultsR){
+						for (var itemB in results){
+							var room = resultsR[item];
+							var reserv = results[itemB];
+							if (reserv.reservation_line.includes(room.id)) {
+								reservations.push({
+									room_type: room.categ_id[1],
+									room_number: room.name,
+									room_persons: reserv.adults+reserv.children,
+									start_date: moment(reserv.checkin).format("DD/MM/YYYY"),
+									end_date: moment(reserv.checkout).format("DD/MM/YYYY"),
+									title: reserv.partner_id[1]
+								});
+							}
+						}
+					}
+					console.log("RESERVAS");
+					console.log(reservations);
+					$this.hcalendar.setReservations(reservations);
+				});
+			});
+		});
+
+		/** HACKISH ODOO VIEW **/
+		$(document).find('.oe-view-manager-view-pms').css('overflow', 'initial'); // No Scroll here!
+		$(document).find('.oe-control-panel').hide(); // Remove "control panel" in the view
+		
+		/** VIEW CONTROLS INITIALIZATION **/
+		// DATE TIME PICKERS
+		var $this = this;
+		var l10n = _t.database.parameters;
+		var DTPickerOptions = { 
+			viewMode: 'months',
+			icons : {
+                time: 'fa fa-clock-o',
+                date: 'fa fa-calendar',
+                up: 'fa fa-chevron-up',
+                down: 'fa fa-chevron-down'
+               },
+            language : moment.locale(),
+            format : time.strftime_to_moment_format(l10n.date_format),
+		};
+		this.$el.find('#pms-search #date_begin').datetimepicker(DTPickerOptions);
+		this.$el.find('#pms-search #date_end').datetimepicker($.extend({}, DTPickerOptions, { 'useCurrent': false }));
+		this.$el.find("#pms-search #date_begin").on("dp.change", function (e) {
+	        $this.$el.find('#pms-search #date_end').data("DateTimePicker").setMinDate(e.date);
+	    });
+		this.$el.find("#pms-search #date_end").on("dp.change", function (e) {
+	        $this.$el.find('#pms-search #date_begin').data("DateTimePicker").setMaxDate(e.date);
+	    });
+		//this.$el.find('#pms-search #cal-pag-selector').datetimepicker($.extend({}, DTPickerOptions, { 
+		//	'useCurrent': true,
+		//}));
+		
+		// Get Type
+		new Model('hotel.room.type').query(['name']).all().then(function(results){
+			var $list = $this.$el.find('#pms-search #type_list');
+			$list.html('');
+			for (var index in results) {
+				$list.append(`<div class="checkbox"><label><input type="checkbox" value="${results[index].name}" />${results[index].name}</label></div>`);
+			}
+		});
+		// Get Floors
+		new Model('hotel.floor').query(['name']).all().then(function(results){
+			var $list = $this.$el.find('#pms-search #floor_list');
+			$list.html('');
+			for (var index in results) {
+				$list.append(`<div class="checkbox"><label><input type="checkbox" value="${results[index].name}" />${results[index].name}</label></div>`);
+			}
+		});
+		// Get Amenities
+		new Model('hotel.room.amenities').query(['name']).all().then(function(results){
+			var $list = $this.$el.find('#pms-search #amenities_list');
+			$list.html('');
+			for (var index in results) {
+				$list.append(`<div class="checkbox"><label><input type="checkbox" value="${results[index].name}" />${results[index].name}</label></div>`);
+			}
+		});
 		
 		return $.when();
     }
 });
 
 core.view_registry.add('pms', HotelCalendarView);
+return HotelCalendarView;
 
 });

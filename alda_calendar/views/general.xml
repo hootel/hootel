@@ -5,10 +5,8 @@
 	<template id="assets_backend" inherit_id="web.assets_backend">
 		<xpath expr="." position="inside">
 			<link rel="stylesheet" href="/alda_calendar/static/src/css/hcalendar.css" />
-			<link rel="stylesheet" type='text/css' href='/alda_calendar/static/src/libs/bootstrap-datetime-picker/bootstrap-datetimepicker.css' />
-			
+
 			<script type="text/javascript" src="/alda_calendar/static/src/js/moment.js"></script>
-			<script type='text/javascript' src='/alda_calendar/static/src/libs/bootstrap-datetime-picker/bootstrap-datetimepicker.min.js' />
 			<script type="text/javascript" src="/alda_calendar/static/src/js/hcalendar.js"></script>
 			<script type="text/javascript" src="/alda_calendar/static/src/js/hotel_calendar.js"></script>
 		</xpath>

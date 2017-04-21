@@ -36,7 +36,7 @@
     ],
     'test': [
     ],
-    'installable': True,
+    'installable': False,
     'auto_install': False,
     'application': True,
     'license': 'AGPL-3',

@@ -4,8 +4,9 @@
 	
 		<record id="action_hotel_calendar" model="ir.actions.act_window">
 			<field name="name">Hotel Calendar</field>
+			<field name="model">hotel.reservation</field>	
 			<field name="view_mode">pms</field>		
-			<field name="view_type">form</field>				 
+			<field name="view_type">form</field>
 		</record>
 
 		<menuitem id="alda_calendar_menu" name="Hotel Calendar" sequence="1"

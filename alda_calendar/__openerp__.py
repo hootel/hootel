@@ -28,9 +28,8 @@
     'summary': "Alada Calendar",
     'description': "Alda Calendar",
     'depends': [
-        'base',
         'web',
-        'hotel_reservation',
+        'hotel_reservation_advance',
     ],
     'external_dependencies': {
         'python': []
