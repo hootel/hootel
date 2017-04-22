@@ -1,29 +1,36 @@
 odoo.define('alda_calendar.HotelCalendarView', function (require) {
 "use strict";
+/*
+ * Hotel Calendar View
+ * GNU Public License
+ * Aloxa Solucions S.L. <info@aloxa.eu>
+ *     Alexandre Díaz <alex@aloxa.eu>
+ */
 
 var core = require('web.core');
-var data = require('web.data');
+//var data = require('web.data');
 var time = require('web.time');
 var Model = require('web.DataModel');
 var View = require('web.View');
-var pyeval = require('web.pyeval');
-var ActionManager = require('web.ActionManager');
-var HotelCalendarJS = require('alda_calendar.HotelCalendarJS');
+//var pyeval = require('web.pyeval');
+//var ActionManager = require('web.ActionManager');
 
 var _t = core._t;
 var _lt = core._lt;
 var QWeb = core.qweb;
 
 var HotelCalendarView = View.extend({
+	/** VIEW OPTIONS **/
 	template: "HotelCalendarView",
     display_name: _lt('Hotel Calendar'),
     icon: 'fa fa-map-marker',
     view_type: "pms",
     _model: null,
+    // Custom Options
     hcalendar: null,
 
+    /** VIEW METHODS **/
     init: function(parent, dataset, view_id, options) {
-    	console.info("ss2");
         this._super(parent);
         this.ready = $.Deferred();
         this.set_default_options(options);
@@ -100,12 +107,13 @@ var HotelCalendarView = View.extend({
         return this._super.apply(this, arguments);
     },
     
+    /** CUSTOM METHODS **/
     create_calendar: function(options) {
     	var $this = this;
     	// CALENDAR
-		this.hcalendar = new HotelCalendarJS('#hcalendar', options, null, this.$el[0]);
+		this.hcalendar = new HotelCalendar('#hcalendar', options, null, this.$el[0]);
 		this.$el.find("#pms-search #cal-pag-prev-plus").on('click', function(ev){
-			$this.hcalendar.back('15', 'd');
+			$this.hcalendar.back($this.hcalendar.options.days, 'd');
 			ev.preventDefault();
 		});
 		this.$el.find("#pms-search #cal-pag-prev").on('click', function(ev){
@@ -113,7 +121,7 @@ var HotelCalendarView = View.extend({
 			ev.preventDefault();
 		});
 		this.$el.find("#pms-search #cal-pag-next-plus").on('click', function(ev){
-			$this.hcalendar.advance('15', 'd');
+			$this.hcalendar.advance($this.hcalendar.options.days, 'd');
 			ev.preventDefault();
 		});
 		this.$el.find("#pms-search #cal-pag-next").on('click', function(ev){
@@ -148,18 +156,12 @@ var HotelCalendarView = View.extend({
 			
 			// Get Reservations
 			new Model('hotel.reservation').call('search_read', [[]]).then(function(results){
-				console.log("RESERVAS");
-				console.log(results);
 				var reservation_lines = [];
 				for (var item in results) {
 					reservation_lines = reservation_lines.concat(results[item].reservation_line);
 				}
-				console.log(reservation_lines);
 				var reservs = results;
-				new Model('hotel.room').query(['id','name','categ_id']).filter([["id", "in", reservation_lines]]).all().then(function(resultsR){
-					console.log("OBOOM");
-					console.log(resultsR);
-					
+				new Model('hotel.room').query(['id','name','categ_id']).filter([["id", "in", reservation_lines]]).all().then(function(resultsR){					
 					var reservations = [];
 					for (var item in resultsR){
 						for (var itemB in results){
@@ -169,7 +171,7 @@ var HotelCalendarView = View.extend({
 								reservations.push({
 									room_type: room.categ_id[1],
 									room_number: room.name,
-									room_persons: reserv.adults+reserv.children,
+									persons: reserv.adults+reserv.children,
 									start_date: moment(reserv.checkin).format("DD/MM/YYYY"),
 									end_date: moment(reserv.checkout).format("DD/MM/YYYY"),
 									title: reserv.partner_id[1]
@@ -177,8 +179,6 @@ var HotelCalendarView = View.extend({
 							}
 						}
 					}
-					console.log("RESERVAS");
-					console.log(reservations);
 					$this.hcalendar.setReservations(reservations);
 				});
 			});
@@ -215,29 +215,32 @@ var HotelCalendarView = View.extend({
 		//	'useCurrent': true,
 		//}));
 		
-		// Get Type
-		new Model('hotel.room.type').query(['name']).all().then(function(results){
+		// Get Types
+		new Model('hotel.room.type').query(['id','name']).all().then(function(results){
 			var $list = $this.$el.find('#pms-search #type_list');
 			$list.html('');
 			for (var index in results) {
-				$list.append(`<div class="checkbox"><label><input type="checkbox" value="${results[index].name}" />${results[index].name}</label></div>`);
+				$list.append(`<option value="${results[index].id}">${results[index].name}</option>`);
 			}
+			$list.select2();
 		});
 		// Get Floors
-		new Model('hotel.floor').query(['name']).all().then(function(results){
+		new Model('hotel.floor').query(['id','name']).all().then(function(results){
 			var $list = $this.$el.find('#pms-search #floor_list');
 			$list.html('');
 			for (var index in results) {
-				$list.append(`<div class="checkbox"><label><input type="checkbox" value="${results[index].name}" />${results[index].name}</label></div>`);
+				$list.append(`<option value="${results[index].id}">${results[index].name}</option>`);
 			}
+			$list.select2();
 		});
 		// Get Amenities
-		new Model('hotel.room.amenities').query(['name']).all().then(function(results){
+		new Model('hotel.room.amenities').query(['id','name']).all().then(function(results){
 			var $list = $this.$el.find('#pms-search #amenities_list');
 			$list.html('');
 			for (var index in results) {
-				$list.append(`<div class="checkbox"><label><input type="checkbox" value="${results[index].name}" />${results[index].name}</label></div>`);
+				$list.append(`<option value="${results[index].id}">${results[index].name}</option>`);
 			}
+			$list.select2();
 		});
 		
 		return $.when();
