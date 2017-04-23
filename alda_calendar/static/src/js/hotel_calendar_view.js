@@ -137,16 +137,11 @@ var HotelCalendarView = View.extend({
     	var $this = this;
     	
     	// Get Rooms
-		new Model('hotel.room').call('search_read', [[]]).then(function(results){
-			var rooms = {}
-			for (var index in results) {
-				var room = results[index];
-				rooms[room.name] = {
-					persons: room.capacity,
-					shared: room.shared_room,
-					type: room.categ_id[1]
-				};
-			}
+		new Model('hotel.room').call('search_read', [[]]).then(function(resultsHotelRoom){
+			var rooms = [];
+			resultsHotelRoom.forEach(function(item, index){
+				rooms.push(new HRoom(item.name, item.capacity, item.categ_id[1], item.shared));
+			});
 			
 			var options = {
 				rooms: rooms,
@@ -155,32 +150,21 @@ var HotelCalendarView = View.extend({
 			$this.create_calendar(options);
 			
 			// Get Reservations
-			new Model('hotel.reservation').call('search_read', [[]]).then(function(results){
-				var reservation_lines = [];
-				for (var item in results) {
-					reservation_lines = reservation_lines.concat(results[item].reservation_line);
-				}
-				var reservs = results;
-				new Model('hotel.room').query(['id','name','categ_id']).filter([["id", "in", reservation_lines]]).all().then(function(resultsR){					
-					var reservations = [];
-					for (var item in resultsR){
-						for (var itemB in results){
-							var room = resultsR[item];
-							var reserv = results[itemB];
-							if (reserv.reservation_line.includes(room.id)) {
-								reservations.push({
-									room_type: room.categ_id[1],
-									room_number: room.name,
-									persons: reserv.adults+reserv.children,
-									start_date: moment(reserv.checkin).format("DD/MM/YYYY"),
-									end_date: moment(reserv.checkout).format("DD/MM/YYYY"),
-									title: reserv.partner_id[1]
-								});
-							}
+			new Model('hotel.reservation').call('search_read', [[]]).then(function(resultsHotelReservations){
+				var reservs = resultsHotelReservations;
+				var reservations = [];
+				reservs.forEach(function(itemReserv, indexReserv){
+					resultsHotelRoom.forEach(function(itemRoom, indexRoom){
+						if (itemReserv.reservation_line.includes(itemRoom.id)) {
+							var room = $this.hcalendar.getRoom(itemRoom.name);
+							var nres = new HReservation(room, itemReserv.partner_id[1], itemReserv.adults+itemReserv.children);
+							nres.setStartDate(itemReserv.checkin);
+							nres.setEndDate(itemReserv.checkout);
+							reservations.push(nres);
 						}
-					}
-					$this.hcalendar.setReservations(reservations);
+					});
 				});
+				$this.hcalendar.setReservations(reservations);
 			});
 		});
 
@@ -216,30 +200,30 @@ var HotelCalendarView = View.extend({
 		//}));
 		
 		// Get Types
-		new Model('hotel.room.type').query(['id','name']).all().then(function(results){
+		new Model('hotel.room.type').query(['id','name']).all().then(function(resultsHotelRoomType){
 			var $list = $this.$el.find('#pms-search #type_list');
 			$list.html('');
-			for (var index in results) {
-				$list.append(`<option value="${results[index].id}">${results[index].name}</option>`);
-			}
+			resultsHotelRoomType.forEach(function(item, index){
+				$list.append(`<option value="${item.id}">${item.name}</option>`);
+			});
 			$list.select2();
 		});
 		// Get Floors
-		new Model('hotel.floor').query(['id','name']).all().then(function(results){
+		new Model('hotel.floor').query(['id','name']).all().then(function(resultsHotelFloor){
 			var $list = $this.$el.find('#pms-search #floor_list');
 			$list.html('');
-			for (var index in results) {
-				$list.append(`<option value="${results[index].id}">${results[index].name}</option>`);
-			}
+			resultsHotelFloor.forEach(function(item, index){
+				$list.append(`<option value="${item.id}">${item.name}</option>`);
+			});
 			$list.select2();
 		});
 		// Get Amenities
-		new Model('hotel.room.amenities').query(['id','name']).all().then(function(results){
+		new Model('hotel.room.amenities').query(['id','name']).all().then(function(resultsHotelRoomAmenities){
 			var $list = $this.$el.find('#pms-search #amenities_list');
 			$list.html('');
-			for (var index in results) {
-				$list.append(`<option value="${results[index].id}">${results[index].name}</option>`);
-			}
+			resultsHotelRoomAmenities.forEach(function(item, index){
+				$list.append(`<option value="${item.id}">${item.name}</option>`);
+			});
 			$list.select2();
 		});
 		
