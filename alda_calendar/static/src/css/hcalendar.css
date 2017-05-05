@@ -22,10 +22,11 @@
 	background-color: #bdc297;
  	border: 1px solid #bdc297;
 }
- 
+
 .hcal-table, .hcal-table-day {
 	border-collapse: initial !important;
 	width: 100%;
+	table-layout: fixed;
 }
 .hcal-table > tbody {
 	max-height: 50vh;
@@ -128,6 +129,7 @@
 	font-size: 2.2vh;
 	white-space: nowrap;
 	overflow: hidden;
+	z-index:999;
 }
 .hcal-reservation:hover {
 	background-color: #4e97bf;
@@ -136,10 +138,20 @@
 	position: relative;
 }
 
+.hcal-reservation-invalid {
+	background-color: #c8543b;
+	border-color: #6c3624 !important;
+}
+.hcal-reservation-invalid:hover {
+	background-color: #f5b595;
+	border-color: #c8543b !important;
+}
+
 .hcal-reservation-action {
-	border: 2px dashed #3465a4 !important;
+	border: 2px dashed #3465a4;
 	opacity: 0.8;
 	pointer-events: none;
+	z-index:9999;
 }
 
 .hcal-row-room-type-group-item {
@@ -181,6 +193,7 @@ td.hcal-cell-room-type-group-day {
 
 td.hcal-cell-room-type-group-item {
 	text-align: center !important;
+	vertical-align: middle;
 }
 td.hcal-cell-room-type-group-item:last-child {
 	border-right-width: 2px;

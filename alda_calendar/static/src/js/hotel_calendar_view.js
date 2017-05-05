@@ -137,10 +137,10 @@ var HotelCalendarView = View.extend({
     	var $this = this;
     	
     	// Get Rooms
-		new Model('hotel.room').call('search_read', [[]]).then(function(resultsHotelRoom){
+		new Model('hotel.room').query(['id','name','capacity','categ_id', 'shared_room']).all().then(function(resultsHotelRoom){
 			var rooms = [];
 			resultsHotelRoom.forEach(function(item, index){
-				rooms.push(new HRoom(item.name, item.capacity, item.categ_id[1], item.shared));
+				rooms.push(new HRoom(item.name, item.capacity, item.categ_id[1], item.shared_room));
 			});
 			
 			var options = {
@@ -150,21 +150,25 @@ var HotelCalendarView = View.extend({
 			$this.create_calendar(options);
 			
 			// Get Reservations
-			new Model('hotel.reservation').call('search_read', [[]]).then(function(resultsHotelReservations){
+			new Model('hotel.reservation').query(['reservation_line','adults','children','partner_id','checkin','checkout']).all().then(function(resultsHotelReservations){
 				var reservs = resultsHotelReservations;
 				var reservations = [];
 				reservs.forEach(function(itemReserv, indexReserv){
-					resultsHotelRoom.forEach(function(itemRoom, indexRoom){
-						if (itemReserv.reservation_line.includes(itemRoom.id)) {
-							var room = $this.hcalendar.getRoom(itemRoom.name);
-							var nres = new HReservation(room, itemReserv.partner_id[1], itemReserv.adults+itemReserv.children);
-							nres.setStartDate(itemReserv.checkin);
-							nres.setEndDate(itemReserv.checkout);
-							reservations.push(nres);
-						}
+					new Model('hotel_reservation.line').query(['reserve']).filter([['id', 'in', itemReserv.reservation_line]]).all().then(function(resultsHotelReservationLine){
+						resultsHotelReservationLine.forEach(function(itemHotelRervationLine, indexHoteResevationLine){
+							resultsHotelRoom.forEach(function(itemRoom, indexRoom){
+								if (itemHotelRervationLine.reserve.includes(itemRoom.id)) {
+									var room = $this.hcalendar.getRoom(itemRoom.name);
+									var nres = new HReservation(room, itemReserv.partner_id[1], itemReserv.adults+itemReserv.children);
+									nres.setStartDate(itemReserv.checkin);
+									nres.setEndDate(itemReserv.checkout);
+									reservations.push(nres);
+								}
+							});
+						});
+						$this.hcalendar.setReservations(reservations);
 					});
 				});
-				$this.hcalendar.setReservations(reservations);
 			});
 		});
 
