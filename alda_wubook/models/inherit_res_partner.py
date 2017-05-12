@@ -18,29 +18,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-{
-    'name': 'Alda WuBook',
-    'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
-    'website': 'https://www.eiqui.com',
-    'category': 'eiqui/alda',
-    'summary': "Alda WuBook",
-    'description': "Alda WuBook",
-    'depends': [
-        'hotel_reservation_advance',
-    ],
-    'external_dependencies': {
-        'python': ['xmlrpclib']
-    },
-    'data': [
-        'views/inherit_res_partner.xml',
-        'views/res_config.xml'
-    ],
-    'test': [
-    ],
-    'installable': True,
-    'auto_install': False,
-    'application': True,
-    'license': 'AGPL-3',
-}
+from openerp import models, fields
+                                                                                  
+class res_partner(models.Model):
+    _inherit='res.partner'
+    
+    wubook_user = fields.Char('WuBook User')
+    wubook_passwd = fields.Char('WuBook Password')
+    wubook_lcode = fields.Char('WuBook lcode')
+    
+    

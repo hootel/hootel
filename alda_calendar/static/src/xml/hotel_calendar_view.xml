@@ -4,13 +4,17 @@
     <div t-name="HotelCalendarView">
     	<div class="col-xs-12 col-lg-12 nopadding">
     		<div class="col-xs-1 col-lg-1 nopadding" id="pms-menu">
-    			<button class="btn col-xs-12 col-lg-12">
-    				<i class="fa fa-4x fa-cloud"> </i>
+    			<button class="btn col-xs-12 col-lg-12" id="btn_channel_manager_request">
+    				<div class="fa-stack fa-2x">
+    					<i class="fa fa-cloud fa-stack-2x"> </i>
+    					<span class="fa-stack-1x cloud-text">3</span>
+    				</div>
     			</button>
-    			<button class="btn btn-default col-xs-12 col-lg-12">
+    			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_checkout">
     				CHECK-OUT
     			</button>
-    			<button class="btn btn-default col-xs-12 col-lg-12">
+    			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_checkin">
+    				<span class="badge badge-danger">42</span><br/>
     				CHECK-IN
     			</button>
     			<button class="btn btn-default col-xs-12 col-lg-12">
@@ -19,7 +23,7 @@
     			<button class="btn btn-default col-xs-12 col-lg-12">
     				LISTADOS
     			</button>
-    			<button class="btn btn-default col-xs-12 col-lg-12">
+    			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_refresh">
     				<i class="fa fa-4x fa-refresh"> </i>
     			</button>
     		</div>
@@ -53,10 +57,19 @@
 				    						<select class="list form-control" id="amenities_list" multiple="multiple"/>
 				    					</div>
 					    			</div>
+					    			<div class="col-xs-12 col-lg-12 nopadding">
+					    				<div class="col-xs-3 col-lg-3 nopadding text-right filter-title">
+				    						<strong>TIPO VIRTUAL:</strong><br/>
+				    					</div>
+				    					<div class="col-xs-9 col-lg-9">
+				    						<select class="list form-control" id="virtual_list" multiple="multiple"/>
+				    					</div>
+					    			</div>
     							</td>
     							<td class="col-xs-4 col-lg-4">
     								<div class="col-xs-3 col-lg-3">
-					    				<select multiple="multiple">
+					    				<select id="reservation_type" name="reservation_type" size="5" multiple="multiple">
+					    					<option value="all"> </option>
 					    					<option value="reserva">Reserva</option>
 					    					<option value="entrada">Entrada</option>
 					    					<option value="salida">Salida</option>
@@ -70,7 +83,7 @@
 					    							<td>
 					    								DESDE<br/>
 					    								<div class="input-group date" id="date_begin">
-											                <input type="text" class="form-control" name="date_begin" required="required" />
+											                <input type="text" class="form-control" name="date_begin" required="required" readonly="1"/>
 											                <span class="input-group-addon">
 											                    <span class="fa fa-calendar"></span>
 											                </span>
@@ -79,7 +92,7 @@
 					    							<td>
 					    								HASTA<br/>
 					    								<div class="input-group date" id="date_end">
-											                <input type="text" class="form-control" name="date_end" required="required" />
+											                <input type="text" class="form-control" name="date_end" required="required" readonly="1"/>
 											                <span class="input-group-addon">
 											                    <span class="fa fa-calendar"></span>
 											                </span>
@@ -113,7 +126,7 @@
     					</tbody>
     				</table>
     			</div>
-    			<div id="hcalendar" class="col-xs-12 col-lg-12 nopadding"></div>
+    			<div id="hcal_widget" class="col-xs-12 col-lg-12 nopadding"></div>
     			<div style="clear:both;" />
     		</div>
     	</div>

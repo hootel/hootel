@@ -5,6 +5,36 @@
  *     Alexandre Díaz <alex@aloxa.eu>
  */
  
+ /** ANIMATIONS **/
+ @keyframes channel-manager-changes {
+    0% {
+    	color: red;
+    }
+    5% {
+    	transform: rotate(10deg);
+    }
+    10% {
+    	transform: rotate(0deg);
+    }
+    15% {
+    	transform: rotate(-10deg);
+    }
+    20% {
+    	transform: rotate(0deg);
+    }
+    100% {
+    	color: yellow;
+    }
+}
+@keyframes channel-manager-changes-text {
+    from {
+    	color: white;
+    }
+    to {
+    	color: black;
+    }
+}
+ 
 /* .openerp .oe-view-manager {
 	overflow: initial !important;
 }
@@ -20,6 +50,19 @@
 #pms-menu button {
 	min-height: 62px;
 	margin: 0.2em 0;
+}
+
+#pms-menu #btn_channel_manager_request i {
+	animation-name: channel-manager-changes;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+#pms-menu #btn_channel_manager_request span {
+	animation-name: channel-manager-changes-text;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
 }
 
 #pms-search {
@@ -78,4 +121,17 @@
 }
 #pms-search .select2-search-choice-close {
 	top: 1px !important;
+}
+
+/** BOOTSTRAP **/
+.badge-danger {
+	background-color: #d34f2a !important;
+}
+
+/** FONT AWESOME **/
+.cloud-text { 
+	margin-top: .12em; 
+	font-size: 26px;
+	font-family: sans-serif;
+	font-weight: bold;
 }
