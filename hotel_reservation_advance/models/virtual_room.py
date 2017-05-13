@@ -31,16 +31,49 @@ import time
 
 class VirtualRoom(models.Model):
     _name ='hotel.virtual.room'
+    _inherits = {'product.product':'product_id'}
+    
+    @api.depends('room_ids','room_type_ids')
+    def _compute_total_rooms(self):
+	for r in self:
+		count = 0
+		count += len(self.room_ids)#Rooms linked directly
+		room_categories	= self.room_type_ids.mapped('cat_id.id') 		 
+		count += self.env['hotel.room'].search_count([('categ_id.id','in',room_categories)])#Rooms linked through room type
+		self.total_rooms_count = count
+    
+    @api.constrains('room_ids','room_type_ids')
+    def _check_duplicated_rooms(self):
+	warning_msg = ""
+	for r in self:
+		room_categories	= self.room_type_ids.mapped('cat_id.id')
+		if self.room_ids & self.env['hotel.room'].search([('categ_id.id','in',room_categories)]):
+			room_ids = self.room_ids & self.env['hotel.room'].search([('categ_id.id','in',room_categories)]) 
+			rooms_name = ','.join(str(x.name) for x in room_ids)
+			warning_msg += 'You can not enter the same room in duplicate (check the room types) %s' % rooms_name
+			raise models.ValidationError(warning_msg)
+
+    @api.constrains('max_real_rooms','room_ids','room_type_ids')
+    def _check_max_rooms(self):
+	warning_msg = ""
+	for r in self:
+		if self.max_real_rooms > self.total_rooms_count:
+			warning_msg += 'The Maxime rooms allowed can not be greate than total rooms count'
+			raise models.ValidationError(warning_msg)
     
     virtual_code = fields.Char('Code')
     room_ids = fields.Many2many('hotel.room',string='Rooms')
     room_type_ids = fields.Many2many('hotel.room.type',string='Room Types')
-    total_rooms_count = fields.Integer()
+    total_rooms_count = fields.Integer(compute='_compute_total_rooms')
     product_id = fields.Many2one('product.product', 'Product_id',
                                  required=True, delegate=True,
                                  ondelete='cascade')
     service_ids = fields.Many2many('hotel.services',string='Included Services')
     max_real_rooms = fields.Integer('Max Room Allowed')
+    product_id = fields.Many2one(
+		'product.product',
+		ondelete='cascade')
+    
     
     
     
