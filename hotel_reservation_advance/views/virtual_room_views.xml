@@ -2,33 +2,44 @@
 <openerp>
 	<data>
 
-	<!-- FORM restriction -->
+	<!-- FORM Virtual Room -->
 	
 		<record id="virtual_room_view_form" model="ir.ui.view">
 	        <field name="name">virtual.room.view.form</field>
 	        <field name="model">hotel.virtual.room</field>  	
 	        <field name="arch" type="xml">
-	        	<form string="Restrictions">	            		
-	       			<group string="Reservation Restrictions" colspan="4">
-		         		<field name="name"/>
+	        	<form string="Virtual Room">	            		
+	       			<group colspan="4">
+					<group>
+				 		<field name="name"/>
 						<field name="virtual_code"/>
-						<field name="room_ids"/>
-						<field name="room_type_ids"/>
+						<field name="list_price"/>
+					</group>
+					<group>
 						<field name="total_rooms_count"/>
-						<field name="max_real_rooms"/>
-						<field name="service_ids"/>									
+						<field name="max_real_rooms"/>						
+						<field name="room_type_ids" widget="many2many_tags" options="{'no_create': True}"/>
+					</group>																									
 	       			</group>
+				<group colspan="4">
+					<group>
+						<field name="room_ids"/>
+					</group>
+					<group>
+						<field name="service_ids"/>						
+					</group>
+				</group>
 	        	</form>	
 	        </field>
 	    </record>
 	
-	<!-- TREE restriction -->
+	<!-- TREE Virtual Room -->
 	   <record id="virtual_room_view_tree" model="ir.ui.view">
 	 		<field name="name">virtual.room.view.tree</field>
 	 		<field name="model">hotel.virtual.room</field>	 		
 			<field name="type">tree</field>
 			<field name="arch" type="xml">
-				<tree string="Restrictions">
+				<tree string="Virtual Rooms">
 					<field name="name"/>
 					<field name="virtual_code"/>
 					<field name="room_ids"/>
@@ -40,7 +51,6 @@
 			</field>
 		</record>
 	
-	 <!-- Action of reservation restriction -->
 	        <record model="ir.actions.act_window" id="virtual_room_action_form">
 	            <field name="name">Virtual Rooms</field>
 	            <field name="res_model">hotel.virtual.room</field>

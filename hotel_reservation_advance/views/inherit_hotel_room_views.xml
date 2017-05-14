@@ -11,7 +11,7 @@
 	                </xpath>
 	                <xpath expr="//field[@name='floor_id']" position="before">
 	                	<field name="to_be_cleaned"/>                 	                                  
-	                </xpath>
+	                </xpath>				
 	            </field>
 	    </record>
     
