@@ -19,9 +19,6 @@
 #
 ##############################################################################
 from openerp import models, fields, api, _
-from datetime import datetime
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
-import pytz
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -30,7 +27,7 @@ class HotelReservation(models.Model):
     _inherit = "hotel.reservation"
 
     @api.multi
-    def get_hcalendar_data(self, domainRooms, domainReservations):
+    def get_hcalendar_data(self, domainRooms, domainReservations, withRooms=True):
         domainRooms = domainRooms or []
         domainReservations = domainReservations or []
 
@@ -47,7 +44,7 @@ class HotelReservation(models.Model):
 
         room_ids = rooms.mapped('id')
         domainReservations.append(('reservation_line.reserve.id', 'in', room_ids))
-        reservations = self.env['hotel.reservation'].search(domainReservations)
+        reservations = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
         json_reservations = []
         json_reservation_tooltips = {}
         for reserv in reservations:
@@ -71,7 +68,7 @@ class HotelReservation(models.Model):
                             })
 
         return {
-            'rooms': json_rooms,
+            'rooms': withRooms and json_rooms or [],
             'reservations': json_reservations,
             'tooltips': json_reservation_tooltips
         }

@@ -101,11 +101,11 @@
 					    						</tr>
 					    						<tr>
 					    							<td colspan="2">
-					    								<div class="input-group col-xs-12 col-lg-12" id="search_query">
+					    								<div class="input-group col-xs-12 col-lg-12">
 					    									<span class="input-group-addon">
 											                    <span class="fa fa-search"></span>
 											                </span>
-											                <input type="text" class="form-control" name="search_query" required="required" />
+											                <input type="text" class="form-control" id="search_query" name="search_query" required="required" />
 											            </div>
 					    							</td>
 					    						</tr>

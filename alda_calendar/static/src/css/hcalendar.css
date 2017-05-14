@@ -124,7 +124,7 @@
 	background-color: #729fcf;
 	/*transform: skewX(-25deg);*/
 	border-radius: 5px;
-	border: 2px solid #3465a4;
+	border: 2px groove #3465a4;
 	color: white;
 	white-space: nowrap;
 	overflow: hidden;
@@ -146,9 +146,23 @@
 	border-color: #c8543b !important;
 }
 
+.hcal-reservation-foreground {
+	pointer-events: none;
+	opacity: 0.9;
+	background-color:transparent;
+	color: transparent;
+	background: repeating-linear-gradient(
+	  45deg,
+	  #606dbc,
+	  #606dbc 10px,
+	  #465298 10px,
+	  #465298 20px
+	);
+}
+
 .hcal-reservation-action {
 	border: 2px dashed #3465a4;
-	opacity: 0.8;
+	opacity: 0.9;
 	pointer-events: none;
 	z-index:9999;
 }
