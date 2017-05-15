@@ -8,14 +8,15 @@
 		    <field name="arch" type="xml">
 		        <xpath expr="//button[@name='done']" position="after">
 		        	<label for="to_assign" string="To Assign" />	        		
-		        	<field name="to_assign"/>                                   
+		        	<field name="to_assign"/>                               
 		        </xpath>
 		         <xpath expr="//field[@name='reserve']" position="after">
 		        	<field name="adults"/>
 		        	<field name="children"/>                                
-		        </xpath>
+		        </xpath>	                    
+                    
 		    </field>
-	    </record>
-        
+		</record>
+	
     </data>
  </openerp>

@@ -49,7 +49,7 @@
         "views/inherit_res_company_views.xml",
         "views/reservation_restriction_views.xml",
         "views/virtual_room_views.xml",
-        
+        "views/inherit_hotel_folio_views.xml",
     ],
     'test': [
     ],
