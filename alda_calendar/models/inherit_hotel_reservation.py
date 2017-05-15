@@ -77,7 +77,8 @@ class HotelReservation(models.Model):
                             line.children,
                             reserv.checkin,
                             reserv.checkout,
-                            line.id))
+                            line.id,
+                            reserv.reserve_color))
                         json_reservation_tooltips.update({
                             reserv.id: (
                                 reserv.partner_id.name,
@@ -97,7 +98,7 @@ class HotelReservation(models.Model):
                     ('categ_id', '=', cat.id),
                     ('date_start', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
                     ('date_end', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))
-                ], order='sequence ASC', limit=1)
+                ], order='sequence ASC, id DESC', limit=1)
                 json_rooms_prices[cat.name].update({
                     ndate.strftime(DEFAULT_SERVER_DATE_FORMAT): price_list and price_list.fixed_price or 0.0
                 })

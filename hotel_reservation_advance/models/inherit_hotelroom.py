@@ -32,9 +32,8 @@ import time
 class HotelRoom(models.Model):
 
     _inherit ='hotel.room'
-    
+
     shared_room = fields.Boolean('Shared Room')
     to_be_cleaned = fields.Boolean('To be Cleaned')
-    
-
-    
+    virtual_rooms = fields.Many2many('hotel.virtual.room', string='Virtual Rooms')
+ 

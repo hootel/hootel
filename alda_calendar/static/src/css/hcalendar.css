@@ -121,7 +121,7 @@
 .hcal-reservation {
 	position: absolute;
 	text-align: center;
-	background-color: #729fcf;
+	/*background-color: #729fcf;*/
 	/*transform: skewX(-25deg);*/
 	border-radius: 5px;
 	border: 2px groove #3465a4;
@@ -240,6 +240,13 @@ td.hcal-cell-month-day-occupied {
 .hcal-cell-detail-room-min-stay-group-item-day {
 	border-color: #307CB0 lightgray lightgray lightgray;
 	border-width: 2px 1px 1px 1px;
+}
+
+.input-price {
+	width: 100%;
+	border-style: none !important;
+	border-radius: 0 !important;
+	text-align: center;
 }
 
 .noselect {

@@ -273,6 +273,19 @@ var HotelCalendarView = View.extend({
                 }
             }).open();
 		});
+		
+		this.hcalendar.addEventListener('hcalOnChangeRoomTypePrice', function(ev){
+			if (!confirm("¿Estás seguro/a?")) {
+				$this.hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
+				return;
+			}
+			
+			console.log("NEW PRICE!");
+			console.log(ev.detail.room_type);
+			console.log(ev.detail.date);
+			console.log(ev.detail.price);
+			console.log(ev.detail.old_price);
+		});
     },
     
     generate_hotel_calendar: function(){
@@ -312,6 +325,7 @@ var HotelCalendarView = View.extend({
 					r[4], // Childrens
 					moment.utc(r[5]).local(), // Date Start
 					moment.utc(r[6]).local(), // Date End
+					r[8] // Color
 				);
 				nreserv.addUserData({'reservation_line_id': r[7]});
 				reservs.push(nreserv);
@@ -512,8 +526,10 @@ var HotelCalendarView = View.extend({
     	if (floor) { domainRooms.push(['floor_id.id', 'in', floor]); }
     	var amenities = this.$el.find('#pms-search #amenities_list').val();
     	if (amenities) { domainRooms.push(['room_amenities.id', 'in', amenities]); }
-    	//var virtual = this.$el.find('#pms-search #virtual_list').val();
-    	//if (virtual) { domainVirtualRooms.push('id', 'in', virtual); }
+    	var virtual = this.$el.find('#pms-search #virtual_list').val();
+    	if (virtual) { domainRooms.push(['virtual_rooms.id', 'in', virtual]); }
+    	
+    	console.log(domainRooms);
     	
     	var domainReservations = [];
     	var search_query = this.$el.find('#pms-search #search_query').val();
@@ -543,3 +559,15 @@ core.view_registry.add('pms', HotelCalendarView);
 return HotelCalendarView;
 
 });
+
+
+
+/*
+self.action_manager.do_action({
+        type: 'ir.actions.act_window',
+        res_model: "quick.room.reservation",
+        views: [[false, 'form']],
+        target: 'new',
+        context: {"room_id": $(this).attr("data"), 'date': $(this).attr("date")},
+});
+*/

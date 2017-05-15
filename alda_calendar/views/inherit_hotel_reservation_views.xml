@@ -9,7 +9,7 @@
 			   <field name="domain">[('checkin','&gt;=',datetime.datetime.now().replace(hour=0, minute=0, second=0)),
 				('checkin','&lt;=',datetime.datetime.now().replace(hour=23, minute=59, second=59)),
 				('state','!=','checkin')]
-			   </field>		
+			   </field>
 		</record>
 
 		<record id="hotel_reservation_action_checkout" model="ir.actions.act_window">

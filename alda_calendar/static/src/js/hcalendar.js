@@ -478,7 +478,6 @@ HotelCalendar.prototype = {
 						reserv.startDate = moment(date_cell.format('DD-MM-YYYY')+' '+reserv.startDate.format('HH:mm:ss'), 'DD-MM-YYYY HH:mm:ss');
 						var date_end = reserv.startDate.clone().add(diff_date, 'd');
 						reserv.endDate = moment(date_end.format('DD-MM-YYYY')+' '+reserv.endDate.format('HH:mm:ss'), 'DD-MM-YYYY HH:mm:ss');
-						//console.log(reserv.endDate);
 						$this.reservationAction.newReservationObj = reserv;
 						toRoom = +this.dataset.hcalBedNum;
 						needUpdate = true;
@@ -816,8 +815,6 @@ HotelCalendar.prototype = {
 					cell.classList.add('hcal-cell-detail-room-price-type-group-item-day');
 					cell.dataset.hcalParentRow = row.getAttribute('id');
 					cell.dataset.hcalDate = dd.format(HotelCalendar.DATE_FORMAT_SHORT_);
-					var dd_fmrt = dd.format("YYYY-MM-DD");
-					cell.textContent = _.has($this.pricelist[rt], dd_fmrt)?$this.pricelist[rt][dd_fmrt]:'...';
 					var day = +dd.format("D");
 					if (day == 1) {
 						cell.classList.add('hcal-cell-start-month');
@@ -827,6 +824,28 @@ HotelCalendar.prototype = {
 					} else if (dd.format('e') == $this.options.endOfWeek) {
 						cell.classList.add('hcal-cell-end-week');
 					}
+					
+					var dd_fmrt = dd.format("YYYY-MM-DD");
+					var input = document.createElement('input');
+					input.classList.add('input-price');
+					input.setAttribute("type", "text");
+					input.readonly = true;
+					input.value = _.has($this.pricelist[rt], dd_fmrt)?$this.pricelist[rt][dd_fmrt]:'...';
+					input.dataset.ovalue = input.value;
+					input.addEventListener('change', function(ev){
+						var parentRow = $this.edtable.querySelector(`#${this.parentNode.dataset.hcalParentRow}`);
+						$this.e.dispatchEvent(new CustomEvent(
+							'hcalOnChangeRoomTypePrice', 
+							{ 'detail': {
+									'room_type': parentRow.dataset.hcalRoomType,
+									'date': this.parentNode.dataset.hcalDate,
+									'price': this.value,
+									'old_price': this.dataset.ovalue,
+								}
+							}));
+						this.dataset.ovalue = this.value;
+					}, false);
+					cell.appendChild(input);
 				}
 			}
 		}
@@ -920,6 +939,7 @@ HotelCalendar.prototype = {
 		var boundsEnd = limits.right.getBoundingClientRect();
 
 		divRes.style = {}; // FIXME: Reset Style. Good method?
+		divRes.style.backgroundColor = reserv.color;
 		divRes.style.top = `${boundsInit.top-etableOffset.top}px`;
 		var divHeight = (boundsEnd.bottom-etableOffset.top)-(boundsInit.top-etableOffset.top);
 		divRes.style.height = `${divHeight}px`;
@@ -973,6 +993,12 @@ HotelCalendar.prototype = {
 		}
 	},
 	
+	setDetailPrice: function(/*String*/room_type, /*String*/date, /*Float*/price) {
+		var dd = HotelCalendar.toMoment(date);
+		var cell_input = this.edtable.querySelector(`#CELL_PRICE_${room_type}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_SANITIZED_)} input`);
+		cell_input.value = price;
+	},
+	
 	getLinkedReservations: function(/*HReservationObject*/reservationObj) {
 		return _.reject(this.reservations, function(item){ return item === reservationObj || item.id !== reservationObj.id; });
 	},
@@ -991,6 +1017,9 @@ HotelCalendar.prototype = {
 				divRes.dataset.hcalReservationId = indexReserv;
 				divRes.classList.add('hcal-reservation');
 				divRes.classList.add('noselect');
+				divRes.style.backgroundColor = itemReserv.color;
+				console.log("DIV COLOR");
+				console.log(itemReserv.color);
 				divRes.innerText = itemReserv.title;
 				$this.updateDivReservation_(divRes, limits);
 				$this.e.appendChild(divRes);
@@ -1119,7 +1148,7 @@ HotelCalendar.prototype = {
 				var price = this.pricelist[k][prk];
 				var cell = this.edtable.querySelector(`#CELL_PRICE_${k}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_SANITIZED_)}`);
 				if (cell) {
-					cell.textContent = price;
+					cell.firstChild.value = price;
 				}
 			}
 		}
@@ -1338,7 +1367,7 @@ HRoom.prototype = {
 	};
 
 /** RESERVATION OBJECT **/
-function HReservation(/*Int*/id, /*HRoomObject*/room, /*String*/title, /*Int*/adults, /*Int*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate) {
+function HReservation(/*Int*/id, /*HRoomObject*/room, /*String*/title, /*Int*/adults, /*Int*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate, /*String*/color) {
 	if (typeof room === 'undefined') {
 		delete this;
 		console.warn("[Hotel Calendar][HReservation] room can't be empty!");
@@ -1352,6 +1381,7 @@ function HReservation(/*Int*/id, /*HRoomObject*/room, /*String*/title, /*Int*/ad
 	this.title = title || '';
 	this.startDate = null; 	// GMT
 	this.endDate = null;	// GMT
+	this.color = color || '#000000';
 	
 	this.beds_ = [];
 	this.userData_ = {};
