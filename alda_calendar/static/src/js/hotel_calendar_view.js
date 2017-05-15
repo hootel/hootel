@@ -120,7 +120,7 @@ var HotelCalendarView = View.extend({
     },
     
     /** CUSTOM METHODS **/
-    create_calendar: function(options) {
+    create_calendar: function(options, pricelist) {
     	var $this = this;
     	// CALENDAR
     	if (this.hcalendar) {
@@ -131,7 +131,7 @@ var HotelCalendarView = View.extend({
 		if ($hcal) { $hcal.remove(); }
 		$widget.append("<div id='hcalendar'></div>");
   
-		this.hcalendar = new HotelCalendar('#hcalendar', options, null, this.$el[0]);
+		this.hcalendar = new HotelCalendar('#hcalendar', options, pricelist, this.$el[0]);
 		this.hcalendar.addEventListener('hcOnChangeDate', function(ev){
 			var date_begin = moment(ev.detail.newDate);
 			var days = $this.hcalendar.getOptions('days')-1;
@@ -280,7 +280,8 @@ var HotelCalendarView = View.extend({
     	
     	/** DO MAGIC **/
     	var domains = this.generate_domains();
-    	this._model.call('get_hcalendar_data', [false, domains['rooms'] || [], domains['reservations'] || []]).then(function(results){
+    	var full_domain = [false, domains['dates'][0], domains['dates'][1], domains['rooms'] || [], domains['reservations'] || []];
+    	this._model.call('get_hcalendar_data', full_domain).then(function(results){
     		$this.reserv_tooltips = results['tooltips'];
 			var rooms = [];
 			for (var r of results['rooms']) {
@@ -298,7 +299,7 @@ var HotelCalendarView = View.extend({
 			$this.create_calendar({
 				rooms: rooms,
 				showPaginator: false
-			});
+			}, results['pricelist']);
 			
 			var reservs = [];
 			for (var r of results['reservations']) {
@@ -480,7 +481,8 @@ var HotelCalendarView = View.extend({
     reload_hcalendar_reservations: function() {
     	var $this = this;
     	var domains = this.generate_domains();
-    	this._model.call('get_hcalendar_data', [false, domains['rooms'] || [], domains['reservations'] || [], false]).then(function(results){
+    	var full_domain = [false, domains['dates'][0], domains['dates'][1], domains['rooms'] || [], domains['reservations'] || [], false];
+    	this._model.call('get_hcalendar_data', full_domain).then(function(results){
     		$this.reserv_tooltips = results['tooltips'];
     		var reservs = [];
 			for (var r of results['reservations']) {
@@ -497,6 +499,7 @@ var HotelCalendarView = View.extend({
 				nreserv.addUserData({'reservation_line_id': r[7]});
 				reservs.push(nreserv);
 			}
+			$this.hcalendar.pricelist = results['pricelist']
 			$this.hcalendar.setReservations(reservs);
 		});
     },
@@ -513,12 +516,6 @@ var HotelCalendarView = View.extend({
     	//if (virtual) { domainVirtualRooms.push('id', 'in', virtual); }
     	
     	var domainReservations = [];
-    	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
-		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
-    	var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().startOf('day').format("YYYY-MM-DD HH:mm:ss");
-    	var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().endOf('day').format("YYYY-MM-DD HH:mm:ss");
-    	domainReservations.push(['checkin', '<=', date_end]);    	
-    	domainReservations.push(['checkout', '>=', date_begin]);
     	var search_query = this.$el.find('#pms-search #search_query').val();
     	if (search_query) {
     		domainReservations.push('|');
@@ -528,7 +525,17 @@ var HotelCalendarView = View.extend({
     		domainReservations.push(['partner_id.mobile', 'ilike', search_query]);
     	}
     	
-    	return {'rooms':domainRooms, 'reservations':domainReservations};
+    	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
+		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
+    	var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().startOf('day').format("YYYY-MM-DD HH:mm:ss");
+    	var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().endOf('day').format("YYYY-MM-DD HH:mm:ss");
+
+    	
+    	return {
+    		'rooms': domainRooms,
+    		'reservations': domainReservations,
+    		'dates': [date_begin, date_end]
+    	};
     }
 });
 

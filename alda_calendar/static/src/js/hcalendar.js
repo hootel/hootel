@@ -12,7 +12,7 @@
 
 
 /***/ 
-function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/reservations, /*HTMLObject?*/_base) {
+function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/pricelist, /*HTMLObject?*/_base) {
 	if (window === this) {
 		return new HotelCalendar(querySelector, options, reservations);
 	}
@@ -53,7 +53,8 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/r
 	}
 	
 	/** Internal Values **/
-	this.reservations = reservations || [];
+	this.pricelist = pricelist || [];
+	this.reservations = [];
 	this.tableCreated = false;
 	this.cellSelection = {start:false, end:false, current:false};
 	this.numRooms = this.options.rooms.length;
@@ -377,6 +378,7 @@ HotelCalendar.prototype = {
 		var reservs = this.getReservationsByDay(day, true);
 		return Math.round(reservs.length/this.numRooms*100.0);
 	},
+	
 	
 	
 	/** PRIVATE MEMBERS **/	
@@ -706,13 +708,13 @@ HotelCalendar.prototype = {
 		// Rooms Free Types
 		if (this.options.rooms) {
 			var room_types = this.getRoomTypes();
-			room_types.forEach(function(itemRoomType, indexRoomType){
+			for (var rt of room_types) {
 				row = tbody.insertRow();
-				row.setAttribute('id', `ROW_DETAIL_FREE_TYPE_${itemRoomType}`);
-				row.dataset.hcalRoomType = itemRoomType;
+				row.setAttribute('id', `ROW_DETAIL_FREE_TYPE_${rt}`);
+				row.dataset.hcalRoomType = rt;
 				row.classList.add('hcal-row-detail-room-free-type-group-item');
 				cell = row.insertCell();
-				cell.textContent = $this.toAbbreviation(itemRoomType);
+				cell.textContent = $this.toAbbreviation(rt);
 				cell.classList.add('hcal-cell-detail-room-free-type-group-item');
 				cell.classList.add('btn-hcal');
 				cell.classList.add('btn-hcal-flat');
@@ -720,7 +722,7 @@ HotelCalendar.prototype = {
 				for (var i=0; i<$this.options.days; i++) {
 					var dd = $this.options.startDate.clone().add(i,'d');
 					cell = row.insertCell();
-					cell.setAttribute('id', `${itemRoomType}_${indexRoomType}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_SANITIZED_)}`);
+					cell.setAttribute('id', `CELL_FREE_${rt}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_SANITIZED_)}`);
 					cell.classList.add('hcal-cell-detail-room-free-type-group-item-day');
 					cell.dataset.hcalParentRow = row.getAttribute('id');
 					cell.dataset.hcalDate = dd.format(HotelCalendar.DATE_FORMAT_SHORT_);
@@ -735,7 +737,7 @@ HotelCalendar.prototype = {
 						cell.classList.add('hcal-cell-end-week');
 					}
 				}
-			});
+			}
 		}
 		// Total Free
 		row = tbody.insertRow();
@@ -796,13 +798,13 @@ HotelCalendar.prototype = {
 		// Rooms Price Types
 		if (this.options.rooms) {
 			var room_types = this.getRoomTypes();
-			room_types.forEach(function(itemRoomType, indexRoomType){
+			for (var rt of room_types) {
 				row = tbody.insertRow();
-				row.setAttribute('id', `ROW_DETAIL_PRICE_TYPE_${itemRoomType}`);
-				row.dataset.hcalRoomType = itemRoomType;
+				row.setAttribute('id', `ROW_DETAIL_PRICE_TYPE_${rt}`);
+				row.dataset.hcalRoomType = rt;
 				row.classList.add('hcal-row-detail-room-price-type-group-item');
 				cell = row.insertCell();
-				cell.textContent = $this.toAbbreviation(itemRoomType)+' €';
+				cell.textContent = $this.toAbbreviation(rt)+' €';
 				cell.classList.add('hcal-cell-detail-room-price-type-group-item');
 				cell.classList.add('btn-hcal');
 				cell.classList.add('btn-hcal-flat');
@@ -810,11 +812,12 @@ HotelCalendar.prototype = {
 				for (var i=0; i<$this.options.days; i++) {
 					var dd = $this.options.startDate.clone().add(i,'d');
 					cell = row.insertCell();
-					cell.setAttribute('id', `${itemRoomType}_${indexRoomType}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_SANITIZED_)}`);
+					cell.setAttribute('id', `CELL_PRICE_${rt}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_SANITIZED_)}`);
 					cell.classList.add('hcal-cell-detail-room-price-type-group-item-day');
 					cell.dataset.hcalParentRow = row.getAttribute('id');
 					cell.dataset.hcalDate = dd.format(HotelCalendar.DATE_FORMAT_SHORT_);
-					cell.textContent = '0';
+					var dd_fmrt = dd.format("YYYY-MM-DD");
+					cell.textContent = _.has($this.pricelist[rt], dd_fmrt)?$this.pricelist[rt][dd_fmrt]:'...';
 					var day = +dd.format("D");
 					if (day == 1) {
 						cell.classList.add('hcal-cell-start-month');
@@ -825,7 +828,7 @@ HotelCalendar.prototype = {
 						cell.classList.add('hcal-cell-end-week');
 					}
 				}
-			});
+			}
 		}
 		// Minimum Stay
 		/*row = tbody.insertRow();
@@ -1006,6 +1009,7 @@ HotelCalendar.prototype = {
 		this.assignReservationsEvents_();
 		
 		this.updateReservationOccupation_();
+		this.updatePriceList_();
 		//this.updateRoomTypeFreeRooms_();
 		
 		if (errors.length) {
@@ -1102,6 +1106,22 @@ HotelCalendar.prototype = {
 			var occup = this.calcDayRoomTypeReservations(cell_date, parentRow.dataset.hcalRoomType);
 			cell.innerText = occup;
 			cell.style.backgroundColor = this.generateColor_(occup, num_rooms, 0.35, true, true);
+		}
+	},
+	
+	updatePriceList_: function() {
+		var keys = _.keys(this.pricelist);
+		for (var k of keys) {
+			var pr = this.pricelist[k];
+			var pr_keys = _.keys(this.pricelist[k]);
+			for (var prk of pr_keys) {
+				var dd = moment(prk);
+				var price = this.pricelist[k][prk];
+				var cell = this.edtable.querySelector(`#CELL_PRICE_${k}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_SANITIZED_)}`);
+				if (cell) {
+					cell.textContent = price;
+				}
+			}
 		}
 	},
 	
