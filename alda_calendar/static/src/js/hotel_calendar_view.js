@@ -6,6 +6,10 @@ odoo.define('alda_calendar.HotelCalendarView', function (require) {
  * Aloxa Solucions S.L. <info@aloxa.eu>
  *     Alexandre Díaz <alex@aloxa.eu>
  */
+/* TODO (TOFIX):
+ *  1. When change date with filter buttons, the calendar reload two times because datetime-pickers updating.
+ *        Easy to resolve if adds 'search' button instead use 'onchange' events.
+ */
 
 var core = require('web.core');
 //var data = require('web.data');
@@ -15,6 +19,7 @@ var View = require('web.View');
 var common = require('web.form_common');
 //var pyeval = require('web.pyeval');
 var ActionManager = require('web.ActionManager');
+var utils = require('web.utils');
 
 var _t = core._t;
 var _lt = core._lt;
@@ -47,10 +52,7 @@ var HotelCalendarView = View.extend({
         this.selected_filters = [];
         this._model = new Model(this.dataset.model);
         this.action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager });
-        
-        this.date_begin = moment(new Date()).subtract('1','d');
-		var days = moment(this.date_begin).daysInMonth()+1;
-		this.date_end = this.date_begin.clone().add(days, 'd');
+        this.mutex = new utils.Mutex();
     },    
 
     view_loading: function(r) {
@@ -79,7 +81,7 @@ var HotelCalendarView = View.extend({
 	        .then(function (create_right) {
 	            self.create_right = create_right;
 	            self.init_calendar_view().then(function() {
-	                $(window).trigger('resize');
+	                //$(window).trigger('resize');
 	                self.trigger('hotel_calendar_view_loaded', fv);
 	                self.ready.resolve();
 	            });
@@ -118,7 +120,7 @@ var HotelCalendarView = View.extend({
     },
     
     /** CUSTOM METHODS **/
-    create_calendar: function(options) {
+    create_calendar: function(options, pricelist) {
     	var $this = this;
     	// CALENDAR
     	if (this.hcalendar) {
@@ -129,16 +131,22 @@ var HotelCalendarView = View.extend({
 		if ($hcal) { $hcal.remove(); }
 		$widget.append("<div id='hcalendar'></div>");
   
-		this.hcalendar = new HotelCalendar('#hcalendar', options, null, this.$el[0]);
+		this.hcalendar = new HotelCalendar('#hcalendar', options, pricelist, this.$el[0]);
 		this.hcalendar.addEventListener('hcOnChangeDate', function(ev){
-			$this.date_begin = ev.detail.newDate;
-			var days = moment($this.date_begin || new Date()).daysInMonth()+1;
-			$this.date_end = $this.date_begin.clone().add(days, 'd');
-			$this.reload_hcalendar_widget();
+			var date_begin = moment(ev.detail.newDate);
+			var days = $this.hcalendar.getOptions('days')-1;
+			var date_end = date_begin.clone().add(days, 'd');
+			
+			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
+			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
+			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+			
+			$this.reload_hcalendar_reservations();
 		});
 		this.hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){
 			var tp = $this.reserv_tooltips[ev.detail.reservationObj.id];
-			var arrival_hour = moment(moment.utc(tp[2]).toDate()).format('HH:mm:ss'); // UTC -> Local Time
+			var arrival_hour = moment.utc(tp[2]).local().format('HH:mm');
 			$(ev.detail.reservationDiv).tooltip({
 				animation: true,
 				html: true,
@@ -157,14 +165,14 @@ var HotelCalendarView = View.extend({
 	                readonly: false
 	            }).open();
 				pop.on('write_completed', self, function(){
-					$this.reload_hcalendar_widget();
+					$this.generate_hotel_calendar();
                     $this.trigger('changed_value');
                 });
 			});
 		});
 		this.hcalendar.addEventListener('hcalOnChangeReservation', function(ev){
-			var newReservation = ev.detail.new;
-			var oldReservation = ev.detail.old;
+			var newReservation = ev.detail.newReserv;
+			var oldReservation = ev.detail.oldReserv;
 			
 			if (!confirm("¿Estás seguro/a?")) {
 				$this.hcalendar.swapReservation(newReservation, oldReservation);
@@ -185,9 +193,8 @@ var HotelCalendarView = View.extend({
 			}
 
 			var write_values = {
-				// TODO: Revisar porque falla con formato UTC
-				'checkin': newReservation.startDate.format("YYYY-MM-DD HH:mm:ss"),
-				'checkout': newReservation.endDate.format("YYYY-MM-DD HH:mm:ss"),
+				'checkin': newReservation.startDate.utc().format("YYYY-MM-DD HH:mm:ss"),
+				'checkout': newReservation.endDate.utc().format("YYYY-MM-DD HH:mm:ss"),
 				'reservation_line': x2xCommands
 			};
 			new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
@@ -198,76 +205,83 @@ var HotelCalendarView = View.extend({
 			var parentRow = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentRow}`);
 			var parentCellStart = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentCell}`);
 			var parentCellEnd = document.querySelector(`#${ev.detail.cellEnd.dataset.hcalParentCell}`);
-			var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate).utc().format("YYYY-MM-DD HH:mm:ss");
-			var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate).utc().format("YYYY-MM-DD HH:mm:ss");
+			var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate).utc();
+			var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate).utc();
 			var room = $this.hcalendar.getRoom(parentRow.dataset.hcalRoomObjId);
+			var numBeds = room.shared?(ev.detail.cellEnd.dataset.hcalBedNum - ev.detail.cellStart.dataset.hcalBedNum)+1:room.capacity;
 			
-			$this._model.call('get_formview_id', [false]).then(function(view_id){
-				new common.SelectCreateDialog(this, {
-	                res_model: 'hotel.reservation',
-	                context: {
-	                	'default_checkin': startDate,
-	                	'default_checkout': endDate,
-	                	'default_reservation_line': [
-	                		[0, false, {
-	                			'adults': 0,
-	                			'children': 0,
-	                			'categ_id': room.getUserData('categ_id'),
-	                			'name': false,
-	                			'reserve': [[6, false, [room.id]]]
-	                		}]
-	                	]
-	                },
-	                title: _t("Create: ") + _t("Reservation"),
-	                initial_view: "form",
-	                create_function: function(data, options) {
-	                    var def = $.Deferred();
-	                    var dataset = $this.dataset;
-	                    options = options || {};
-	                    var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
-	                    return dataset.create(data, internal_options).then(function (id) {
-	                        dataset.ids.push(id);
-	                    });
-	                },
-	                read_function: function(ids, fields, options) {
-	                	return $this.dataset.read_ids(ids, fields, options);
-	                },
-	                parent_view: view_id,
-	                form_view_options: {'not_interactible_on_create':true},
-	                on_selected: function() {
-	                    $this.reload_hcalendar_widget();
-	                }
-	            }).open();
-			});
-		});
-		
-		
-		// View Events
-		this.$el.find("#pms-search #cal-pag-prev-plus").on('click', function(ev){
-			$this.hcalendar.back($this.hcalendar.options.days, 'd');
-			ev.preventDefault();
-		});
-		this.$el.find("#pms-search #cal-pag-prev").on('click', function(ev){
-			$this.hcalendar.back('1', 'd');
-			ev.preventDefault();
-		});
-		this.$el.find("#pms-search #cal-pag-next-plus").on('click', function(ev){
-			$this.hcalendar.advance($this.hcalendar.options.days, 'd');
-			ev.preventDefault();
-		});
-		this.$el.find("#pms-search #cal-pag-next").on('click', function(ev){
-			$this.hcalendar.advance('1', 'd');
-			ev.preventDefault();
+			if (numBeds <= 0) {
+				return;
+			}
+			
+			// Normalize Dates
+			if (startDate.isAfter(endDate)) {
+				var tt = endDate;
+				endDate = startDate;
+				startDate = tt;
+			}
+			
+			// If start 'today' put the current hour
+			var now = moment(new Date()).utc();
+			if (startDate.isSame(now, 'day')) {
+				startDate = now;
+			}
+			
+			new common.SelectCreateDialog(this, {
+                res_model: 'hotel.reservation',
+                context: {
+                	'default_adults': numBeds,
+                	'default_checkin': startDate.format("YYYY-MM-DD HH:mm:ss"),
+                	'default_checkout': endDate.format("YYYY-MM-DD HH:mm:ss"),
+                	'default_reservation_line': [
+                		[0, false, {
+                			'adults': numBeds,
+                			'children': 0,
+                			'categ_id': room.getUserData('categ_id'),
+                			'name': false,
+                			'reserve': [[6, false, [room.id]]]
+                		}]
+                	]
+                },
+                title: _t("Create: ") + _t("Reservation"),
+                initial_view: "form",
+                create_function: function(data, options) {
+                    var def = $.Deferred();
+                    var res = true;
+                    var dataset = $this.dataset;
+                    options = options || {};
+                    var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
+                    
+                    $this.mutex.exec(function(){
+                    	return dataset.create(data, internal_options).then(function (id) {
+                            dataset.ids.push(id);
+                            res = id;
+                        });
+                    });
+                    $this.mutex.def.then(function () {
+                        $this.trigger("change:commands", options);
+                        def.resolve(res);
+                    });
+                    
+                    return def;
+                },
+                read_function: function(ids, fields, options) {
+                	return $this.dataset.read_ids(ids, fields, options);
+                },
+                on_selected: function() {
+                    $this.generate_hotel_calendar();
+                }
+            }).open();
 		});
     },
     
-    generate_hotel_calendar: function(domainRooms, domainReservations){
+    generate_hotel_calendar: function(){
     	var $this = this;
-    	domainRooms = domainRooms || [];
-    	domainReservations = domainReservations || [];
     	
     	/** DO MAGIC **/
-    	this._model.call('get_hcalendar_data', [false, domainRooms, domainReservations]).then(function(results){
+    	var domains = this.generate_domains();
+    	var full_domain = [false, domains['dates'][0], domains['dates'][1], domains['rooms'] || [], domains['reservations'] || []];
+    	this._model.call('get_hcalendar_data', full_domain).then(function(results){
     		$this.reserv_tooltips = results['tooltips'];
 			var rooms = [];
 			for (var r of results['rooms']) {
@@ -285,7 +299,7 @@ var HotelCalendarView = View.extend({
 			$this.create_calendar({
 				rooms: rooms,
 				showPaginator: false
-			});
+			}, results['pricelist']);
 			
 			var reservs = [];
 			for (var r of results['reservations']) {
@@ -296,8 +310,8 @@ var HotelCalendarView = View.extend({
 					r[2], // Title
 					r[3], // Adults
 					r[4], // Childrens
-					moment.utc(r[5]).toDate(), // Date Start
-					moment.utc(r[6]).toDate(), // Date End
+					moment.utc(r[5]).local(), // Date Start
+					moment.utc(r[6]).local(), // Date End
 				);
 				nreserv.addUserData({'reservation_line_id': r[7]});
 				reservs.push(nreserv);
@@ -333,18 +347,72 @@ var HotelCalendarView = View.extend({
 		$dateTimePickerEnd.datetimepicker($.extend({}, DTPickerOptions, { 'useCurrent': false }));
 		$dateTimePickerBegin.on("dp.change", function (e) {
 			$dateTimePickerEnd.data("DateTimePicker").setMinDate(e.date);
-			$this.reload_hcalendar_widget();
+			$this.on_change_filter_date(e);
 	    });
 		$dateTimePickerEnd.on("dp.change", function (e) {
-			$dateTimePickerBegin.data("DateTimePicker").setMaxDate(e.date);
-			$this.reload_hcalendar_widget();
+			$this.on_change_filter_date(e);
 	    });
 		//this.$el.find('#pms-search #cal-pag-selector').datetimepicker($.extend({}, DTPickerOptions, { 
 		//	'useCurrent': true,
 		//}));
 		
+        var date_begin = moment(new Date());
+		var days = moment(date_begin).daysInMonth();
+		var date_end = date_begin.clone().add(days, 'd');
+		$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+		$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+		
+		// View Events
+		this.$el.find("#pms-search #search_query").on('change', function(ev){
+			$this.reload_hcalendar_reservations();
+		});
+		this.$el.find("#pms-search #cal-pag-prev-plus").on('click', function(ev){
+			// FIXME: Ugly repeated code. Change place.
+			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
+			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
+			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(15, 'd');
+			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(15, 'd');
+			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+			
+			ev.preventDefault();
+		});
+		this.$el.find("#pms-search #cal-pag-prev").on('click', function(ev){
+			// FIXME: Ugly repeated code. Change place.
+			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
+			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
+			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(1, 'd');
+			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(1, 'd');
+			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+
+			ev.preventDefault();
+		});
+		this.$el.find("#pms-search #cal-pag-next-plus").on('click', function(ev){
+			// FIXME: Ugly repeated code. Change place.
+			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
+			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
+			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(15, 'd');
+			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(15, 'd');
+			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+			
+			ev.preventDefault();
+		});
+		this.$el.find("#pms-search #cal-pag-next").on('click', function(ev){
+			// FIXME: Ugly repeated code. Change place.
+			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
+			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
+			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(1, 'd');
+			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(1, 'd');
+			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+			
+			ev.preventDefault();
+		});
+		
     	/** RENDER CALENDAR **/
-		this.reload_hcalendar_widget();
+		this.generate_hotel_calendar();
 		
 		/** DATABASE QUERIES **/
 		// Get Types
@@ -356,7 +424,7 @@ var HotelCalendarView = View.extend({
 			});
 			$list.select2();
 			$list.on('change', function(ev){
-				$this.reload_hcalendar_widget();
+				$this.generate_hotel_calendar();
 			});
 		});
 		// Get Floors
@@ -368,7 +436,7 @@ var HotelCalendarView = View.extend({
 			});
 			$list.select2();
 			$list.on('change', function(ev){
-				$this.reload_hcalendar_widget();
+				$this.generate_hotel_calendar();
 			});
 		});
 		// Get Amenities
@@ -380,7 +448,7 @@ var HotelCalendarView = View.extend({
 			});
 			$list.select2();
 			$list.on('change', function(ev){
-				$this.reload_hcalendar_widget();
+				$this.generate_hotel_calendar();
 			});
 		});
 		// Get Virtual Rooms
@@ -392,16 +460,48 @@ var HotelCalendarView = View.extend({
 			});
 			$list.select2();
 			$list.on('change', function(ev){
-				$this.reload_hcalendar_widget();
+				$this.generate_hotel_calendar();
 			});
 		});
 		
 		return $.when();
     },
     
-    reload_hcalendar_widget: function() {
+    on_change_filter_date: function(ev) {
+    	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
+		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
+		var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate();
+		var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate();
+    	if (date_begin && date_end && !date_begin.isSame(date_end) && this.hcalendar) {
+    		this.hcalendar.setStartDate(date_begin, date_end.diff(date_begin,'days')+1);
+    		this.reload_hcalendar_reservations();
+    	}
+    },
+    
+    reload_hcalendar_reservations: function() {
+    	var $this = this;
     	var domains = this.generate_domains();
-		this.generate_hotel_calendar(domains['rooms'], domains['reservations']);
+    	var full_domain = [false, domains['dates'][0], domains['dates'][1], domains['rooms'] || [], domains['reservations'] || [], false];
+    	this._model.call('get_hcalendar_data', full_domain).then(function(results){
+    		$this.reserv_tooltips = results['tooltips'];
+    		var reservs = [];
+			for (var r of results['reservations']) {
+				var room = $this.hcalendar.getRoom(r[0]);
+				var nreserv = new HReservation(
+					r[1], // Id
+					room, // Room
+					r[2], // Title
+					r[3], // Adults
+					r[4], // Childrens
+					moment.utc(r[5]).local(), // Date Start
+					moment.utc(r[6]).local(), // Date End
+				);
+				nreserv.addUserData({'reservation_line_id': r[7]});
+				reservs.push(nreserv);
+			}
+			$this.hcalendar.pricelist = results['pricelist']
+			$this.hcalendar.setReservations(reservs);
+		});
     },
     
     generate_domains: function() {
@@ -415,13 +515,27 @@ var HotelCalendarView = View.extend({
     	//var virtual = this.$el.find('#pms-search #virtual_list').val();
     	//if (virtual) { domainVirtualRooms.push('id', 'in', virtual); }
     	
-    	var domainReservations = [];    	
-    	var date_begin = this.date_begin.format("YYYY-MM-DD HH:mm:ss");
-    	if (date_begin) { domainReservations.push(['checkin', '>=', date_begin]); }
-    	var date_end = this.date_end.format("YYYY-MM-DD HH:mm:ss");
-    	if (date_end) { domainReservations.push(['checkout', '<=', date_end]); }
+    	var domainReservations = [];
+    	var search_query = this.$el.find('#pms-search #search_query').val();
+    	if (search_query) {
+    		domainReservations.push('|');
+    		domainReservations.push('|');
+    		domainReservations.push(['partner_id.name', 'ilike', search_query]);
+    		domainReservations.push(['partner_id.phone', 'ilike', search_query]);
+    		domainReservations.push(['partner_id.mobile', 'ilike', search_query]);
+    	}
     	
-    	return {'rooms':domainRooms, 'reservations':domainReservations};
+    	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
+		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
+    	var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().startOf('day').format("YYYY-MM-DD HH:mm:ss");
+    	var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().endOf('day').format("YYYY-MM-DD HH:mm:ss");
+
+    	
+    	return {
+    		'rooms': domainRooms,
+    		'reservations': domainReservations,
+    		'dates': [date_begin, date_end]
+    	};
     }
 });
 

@@ -19,9 +19,8 @@
 #
 ##############################################################################
 from openerp import models, fields, api, _
-from datetime import datetime
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
-import pytz
+from datetime import datetime, timedelta
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -30,10 +29,23 @@ class HotelReservation(models.Model):
     _inherit = "hotel.reservation"
 
     @api.multi
-    def get_hcalendar_data(self, domainRooms, domainReservations):
+    def get_hcalendar_data(self, checkin, checkout, domainRooms, domainReservations, withRooms=True):
+        if not checkin or not checkout:
+            return {
+                'rooms': [],
+                'reservations': [],
+                'tooltips': {},
+                'pricelist': {}
+            }
+
         domainRooms = domainRooms or []
         domainReservations = domainReservations or []
 
+        # Need one day less
+        date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
+
+        # Get Rooms
         rooms = self.env['hotel.room'].search(domainRooms)
         json_rooms = []
         for room in rooms:
@@ -45,9 +57,12 @@ class HotelReservation(models.Model):
                 room.categ_id.name,
                 room.shared_room))
 
+        # Get Reservations
         room_ids = rooms.mapped('id')
         domainReservations.append(('reservation_line.reserve.id', 'in', room_ids))
-        reservations = self.env['hotel.reservation'].search(domainReservations)
+        domainReservations.append(('checkin', '>=', date_start.strftime(DEFAULT_SERVER_DATE_FORMAT)))
+        domainReservations.append(('checkout', '<=', date_end.strftime(DEFAULT_SERVER_DATE_FORMAT)))
+        reservations = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
         json_reservations = []
         json_reservation_tooltips = {}
         for reserv in reservations:
@@ -70,8 +85,26 @@ class HotelReservation(models.Model):
                                 reserv.checkin)
                             })
 
+        # Get Prices
+        categs = rooms.mapped('categ_id')
+        date_diff = abs((date_start - date_end).days)
+        json_rooms_prices = {}
+        for cat in categs:
+            json_rooms_prices.update({cat.name: {}})
+            for i in range(0, date_diff-1):
+                ndate = date_start + timedelta(days=i)
+                price_list = self.env['product.pricelist.item'].search([
+                    ('categ_id', '=', cat.id),
+                    ('date_start', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                    ('date_end', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                ], order='sequence ASC', limit=1)
+                json_rooms_prices[cat.name].update({
+                    ndate.strftime(DEFAULT_SERVER_DATE_FORMAT): price_list and price_list.fixed_price or 0.0
+                })
+
         return {
-            'rooms': json_rooms,
+            'rooms': withRooms and json_rooms or [],
             'reservations': json_reservations,
-            'tooltips': json_reservation_tooltips
+            'tooltips': json_reservation_tooltips,
+            'pricelist': json_rooms_prices,
         }
