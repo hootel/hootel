@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+
+		<record id="hotel_reservation_action_checkin" model="ir.actions.act_window">
+			   <field name="name">Checkins</field>
+			   <field name="res_model">hotel.reservation</field>
+			   <field name="view_mode">tree,form</field>
+			   <field name="domain">[('checkin','&gt;=',datetime.datetime.now().replace(hour=0, minute=0, second=0)),
+				('checkin','&lt;=',datetime.datetime.now().replace(hour=23, minute=59, second=59)),
+				('state','!=','checkin')]
+			   </field>		
+		</record>
+
+		<record id="hotel_reservation_action_checkout" model="ir.actions.act_window">
+			   <field name="name">Checkout</field>
+			   <field name="res_model">hotel.reservation</field>
+			   <field name="view_mode">tree,form</field>
+			   <field name="domain">[('checkout','&gt;=',datetime.datetime.now().replace(hour=0, minute=0, second=0)),
+				('checkout','&lt;=',datetime.datetime.now().replace(hour=23, minute=59, second=59)),
+				('state','=','checkin')]
+			   </field>		
+		</record>
+
+		<record id="hotel_reservation_action_paydue" model="ir.actions.act_window">
+			   <field name="name">Pending Payments</field>
+			   <field name="res_model">hotel.folio</field>
+			   <field name="view_mode">tree,form</field>
+			   <field name="domain">[('invoice_status','in',['to invoice','no']),('reservation_id','!=',False)]</field>
+		</record>	
+
+ 	</data>
+ </openerp>
