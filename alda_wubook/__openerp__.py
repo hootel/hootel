@@ -29,6 +29,7 @@
     'description': "Alda WuBook",
     'depends': [
         'hotel_reservation_advance',
+        'connector'
     ],
     'external_dependencies': {
         'python': ['xmlrpclib']

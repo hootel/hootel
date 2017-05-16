@@ -940,6 +940,10 @@ HotelCalendar.prototype = {
 
 		divRes.style = {}; // FIXME: Reset Style. Good method?
 		divRes.style.backgroundColor = reserv.color;
+		
+		var rgb = window.getComputedStyle(divRes).color.match(/\d+/g);
+		var invColor = this.getInverseColor_(rgb[0]/255, rgb[1]/255, rgb[2]/255);
+		divRes.style.color = `rgb(${invColor[0]*255},${invColor[1]*255},${invColor[2]*255})`;
 		divRes.style.top = `${boundsInit.top-etableOffset.top}px`;
 		var divHeight = (boundsEnd.bottom-etableOffset.top)-(boundsInit.top-etableOffset.top);
 		divRes.style.height = `${divHeight}px`;
@@ -1017,9 +1021,6 @@ HotelCalendar.prototype = {
 				divRes.dataset.hcalReservationId = indexReserv;
 				divRes.classList.add('hcal-reservation');
 				divRes.classList.add('noselect');
-				divRes.style.backgroundColor = itemReserv.color;
-				console.log("DIV COLOR");
-				console.log(itemReserv.color);
 				divRes.innerText = itemReserv.title;
 				$this.updateDivReservation_(divRes, limits);
 				$this.e.appendChild(divRes);
@@ -1280,7 +1281,7 @@ HotelCalendar.prototype = {
 		input.focus();
 	},
 	
-	//==== COLOR FUNCTIONS
+	//==== COLOR FUNCTIONS (RANGE: 0.0|1.0)
 	hueToRgb_: function(/*Int*/v1, /*Int*/v2, /*Int*/h) {
 		if (h<0.0) { h+=1; }
 		if (h>1.0) { h-=1; }
@@ -1300,6 +1301,11 @@ HotelCalendar.prototype = {
 			this.hueToRgb_(v1,v2,h+(1.0/3.0)),
 			this.hueToRgb_(v1,v2,h),
 			this.hueToRgb_(v1,v2,h-(1.0/3.0))];
+	},
+	
+	getInverseColor_: function(/*Int*/r, /*Int*/g, /*Int*/b) {
+		//return this.hslToRgb_(hsl[0], hsl[1], hsl[2]);
+		return [1.0-r, 1.0-g, 1.0-b];
 	},
 	
 	generateColor_: function(/*Int*/value, /*Int*/max, /*Int*/offset, /*Bool*/reverse, /*Bool*/strmode) {
@@ -1367,7 +1373,7 @@ HRoom.prototype = {
 	};
 
 /** RESERVATION OBJECT **/
-function HReservation(/*Int*/id, /*HRoomObject*/room, /*String*/title, /*Int*/adults, /*Int*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate, /*String*/color) {
+function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/adults, /*Int?*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate, /*String?*/color) {
 	if (typeof room === 'undefined') {
 		delete this;
 		console.warn("[Hotel Calendar][HReservation] room can't be empty!");
@@ -1379,9 +1385,9 @@ function HReservation(/*Int*/id, /*HRoomObject*/room, /*String*/title, /*Int*/ad
 	this.adults = adults || 1;
 	this.childrens = childrens || 0;
 	this.title = title || '';
-	this.startDate = null; 	// GMT
-	this.endDate = null;	// GMT
-	this.color = color || '#000000';
+	this.startDate = null; 	// Local Time
+	this.endDate = null;	// Local Time
+	this.color = color || '#000';
 	
 	this.beds_ = [];
 	this.userData_ = {};

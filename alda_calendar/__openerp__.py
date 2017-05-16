@@ -36,7 +36,7 @@
     },
     'data': [
         'views/general.xml',
-	'views/inherit_hotel_reservation_views.xml',
+        'views/actions.xml',
         'data/views.xml',
         'data/menus.xml',
     ],

@@ -138,19 +138,18 @@
 }
 
 .hcal-reservation-invalid {
-	background-color: #c8543b;
+	background-color: #c8543b !important;
 	border-color: #6c3624 !important;
 }
 .hcal-reservation-invalid:hover {
-	background-color: #f5b595;
+	background-color: #f5b595 !important;
 	border-color: #c8543b !important;
 }
 
 .hcal-reservation-foreground {
 	pointer-events: none;
 	opacity: 0.9;
-	background-color:transparent;
-	color: transparent;
+	color: transparent !important;
 	background: repeating-linear-gradient(
 	  45deg,
 	  #606dbc,

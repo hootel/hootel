@@ -24,6 +24,8 @@ from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FO
 import logging
 _logger = logging.getLogger(__name__)
 
+PUBLIC_PRICELIST_ID = 1  # Hard-Coded public pricelist
+
 
 class HotelReservation(models.Model):
     _inherit = "hotel.reservation"
@@ -87,6 +89,10 @@ class HotelReservation(models.Model):
                             })
 
         # Get Prices
+        price_list_global = self.env['product.pricelist.item'].search([
+            ('compute_price', '=', 'fixed'),
+            ('applied_on', '=', '3_global')
+        ], order='sequence ASC, id DESC', limit=1)
         categs = rooms.mapped('categ_id')
         date_diff = abs((date_start - date_end).days)
         json_rooms_prices = {}
@@ -95,12 +101,15 @@ class HotelReservation(models.Model):
             for i in range(0, date_diff-1):
                 ndate = date_start + timedelta(days=i)
                 price_list = self.env['product.pricelist.item'].search([
+                    ('pricelist_id', '=', PUBLIC_PRICELIST_ID), # FIXME: Hard-Coded Public List ID
+                    ('applied_on', '=', '2_product_category'),
                     ('categ_id', '=', cat.id),
                     ('date_start', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                    ('date_end', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                    ('date_end', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                    ('compute_price', '=', 'fixed'),
                 ], order='sequence ASC, id DESC', limit=1)
                 json_rooms_prices[cat.name].update({
-                    ndate.strftime(DEFAULT_SERVER_DATE_FORMAT): price_list and price_list.fixed_price or 0.0
+                    ndate.strftime(DEFAULT_SERVER_DATE_FORMAT): (price_list and price_list.fixed_price) or (price_list_global and price_list_global.fixed_price) or 0.0
                 })
 
         return {

@@ -37,10 +37,10 @@ class VirtualRoom(models.Model):
     def _compute_total_rooms(self):
 	for r in self:
 		count = 0
-		count += len(self.room_ids)#Rooms linked directly
-		room_categories	= self.room_type_ids.mapped('cat_id.id') 		 
+		count += len(r.room_ids) #Rooms linked directly
+		room_categories	= r.room_type_ids.mapped('cat_id.id') 		 
 		count += self.env['hotel.room'].search_count([('categ_id.id','in',room_categories)])#Rooms linked through room type
-		self.total_rooms_count = count
+		r.total_rooms_count = count
     
     @api.constrains('room_ids','room_type_ids')
     def _check_duplicated_rooms(self):

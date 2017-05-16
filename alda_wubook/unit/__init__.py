@@ -18,11 +18,5 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import fields, models
-
-
-class ResConfiguration(models.TransientModel):
-    _inherit = 'base.config.settings'
-
-    wubook_server = fields.Char(string='WuBook Server', default='https://wubook.net/xrws/') 
-    wubook_pkey = fields.Char('WuBook PKey')
+from . import adapter
+from . import room_synchronizer

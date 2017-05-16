@@ -25,12 +25,16 @@ var _t = core._t;
 var _lt = core._lt;
 var QWeb = core.qweb;
 
+var PUBLIC_PRICELIST_ID = 1; // Hard-Coded public pricelist id
+
 var HotelCalendarView = View.extend({
 	/** VIEW OPTIONS **/
 	template: "HotelCalendarView",
     display_name: _lt('Hotel Calendar'),
     icon: 'fa fa-map-marker',
     view_type: "pms",
+    searchable: false,
+    searchview_hidden: true,
     _model: null,
     // Custom Options
     hcalendar: null,
@@ -57,10 +61,6 @@ var HotelCalendarView = View.extend({
 
     view_loading: function(r) {
         return this.load_custom_view(r);
-    },
-
-    destroy: function () {
-    	this._super.apply(this, arguments);
     },
 
     load_custom_view: function(fv) {
@@ -90,15 +90,19 @@ var HotelCalendarView = View.extend({
     },
     
     do_show: function() {
-        if (this.$calendar) {
-            this.$calendar.show();
+    	var $widget = this.$el.find("#hcal_widget");
+        if ($widget) {
+        	$(document).find('.oe-control-panel').hide();
+        	$widget.show();
         }
         this.do_push_state({});
         return this._super();
     },
     do_hide: function () {
-        if (this.$calendar) {
-            this.$calendar.hide();
+    	var $widget = this.$el.find("#hcal_widget");
+        if ($widget) {
+        	$(document).find('.oe-control-panel').show();
+        	$widget.hide();
         }
         return this._super();
     },
@@ -110,12 +114,7 @@ var HotelCalendarView = View.extend({
     },
     
     destroy: function () {
-        if (this.$buttons) {
-            this.$buttons.off();
-        }
-        
         $(document).find('.oe-control-panel').show();
-        
         return this._super.apply(this, arguments);
     },
     
@@ -162,12 +161,30 @@ var HotelCalendarView = View.extend({
 	                res_id: res_id,
 	                title: _t("Open: ") + ev.detail.reservationObj.title,
 	                view_id: view_id,
-	                readonly: false
+	                //readonly: false
+	                write_function: function(id, data, options) {
+	                	var def = $.Deferred();
+	                    var res = true;
+	                    var dataset = $this.dataset;
+	                    options = options || {};
+	                    var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
+	                    
+	                    $this.mutex.exec(function(){
+	                    	return dataset.data_update(id, data, options).done(function() {
+	                    		console.log(data);
+		                    	$this.reload_hcalendar_reservations();
+		                        $this.trigger('changed_value');
+		                        rest = id;
+		                    });
+	                    });
+	                    $this.mutex.def.then(function () {
+	                        $this.trigger("change:commands", options);
+	                        def.resolve(res);
+	                    });
+	                    
+	                    return def;
+	                },
 	            }).open();
-				pop.on('write_completed', self, function(){
-					$this.generate_hotel_calendar();
-                    $this.trigger('changed_value');
-                });
 			});
 		});
 		this.hcalendar.addEventListener('hcalOnChangeReservation', function(ev){
@@ -279,6 +296,22 @@ var HotelCalendarView = View.extend({
 				$this.hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
 				return;
 			}
+			console.log(ev.detail.date);
+			var categ_id = $this.hcalendar.getRoomsByType(ev.detail.room_type)[0].getUserData('categ_id');
+			var data = {
+				'pricelist_id': PUBLIC_PRICELIST_ID,
+				'applied_on': '2_product_category',
+				'categ_id': categ_id,
+				'compute_price': 'fixed',
+				'date_start': moment(ev.detail.date, HotelCalendar.DATE_FORMAT_SHORT_).format('YYYY-MM-DD'),
+				'date_end': moment(ev.detail.date, HotelCalendar.DATE_FORMAT_SHORT_).format('YYYY-MM-DD'),
+				'fixed_price': ev.detail.price,
+				'sequence': 0,
+			};
+			new Model('product.pricelist.item').call('create', [data]).fail(function(err, ev){
+				alert("[Hotel Calendar]\nERROR: Can't update price!");
+				$this.hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
+			});
 			
 			console.log("NEW PRICE!");
 			console.log(ev.detail.room_type);
@@ -334,12 +367,16 @@ var HotelCalendarView = View.extend({
 		});
     },
     
+    call_action: function(action) {
+    	this.action_manager.do_action(action);
+		$(document).find('.oe-control-panel').show();
+    },
+    
     init_calendar_view: function(){
     	var $this = this;
 
 		/** HACKISH ODOO VIEW **/
 		$(document).find('.oe-view-manager-view-pms').css('overflow', 'initial'); // No Scroll here!
-		$(document).find('.oe-control-panel').hide(); // Remove "control panel" in the view
 		
 		/** VIEW CONTROLS INITIALIZATION **/
 		// DATE TIME PICKERS
@@ -423,6 +460,20 @@ var HotelCalendarView = View.extend({
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
 			ev.preventDefault();
+		});
+		
+		/* BUTTONS */
+		this.$el.find("#btn_action_checkout").on('click', function(ev){
+			$this.call_action('alda_calendar.hotel_reservation_action_checkout');
+		});
+		this.$el.find("#btn_action_checkin").on('click', function(ev){
+			$this.call_action('alda_calendar.hotel_reservation_action_checkin');
+		});
+		this.$el.find("#btn_action_paydue").on('click', function(ev){
+			$this.call_action('alda_calendar.hotel_reservation_action_paydue');
+		});
+		this.$el.find("#btn_action_refresh").on('click', function(ev){
+			window.location.reload();
 		});
 		
     	/** RENDER CALENDAR **/
@@ -509,6 +560,7 @@ var HotelCalendarView = View.extend({
 					r[4], // Childrens
 					moment.utc(r[5]).local(), // Date Start
 					moment.utc(r[6]).local(), // Date End
+					r[8], // Color
 				);
 				nreserv.addUserData({'reservation_line_id': r[7]});
 				reservs.push(nreserv);
@@ -528,8 +580,6 @@ var HotelCalendarView = View.extend({
     	if (amenities) { domainRooms.push(['room_amenities.id', 'in', amenities]); }
     	var virtual = this.$el.find('#pms-search #virtual_list').val();
     	if (virtual) { domainRooms.push(['virtual_rooms.id', 'in', virtual]); }
-    	
-    	console.log(domainRooms);
     	
     	var domainReservations = [];
     	var search_query = this.$el.find('#pms-search #search_query').val();

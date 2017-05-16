@@ -17,11 +17,11 @@
     				<span class="badge badge-danger">42</span><br/>
     				CHECK-IN
     			</button>
-    			<button class="btn btn-default col-xs-12 col-lg-12">
-    				COBROS
+    			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_paydue">
+    				CHARGES
     			</button>
     			<button class="btn btn-default col-xs-12 col-lg-12">
-    				LISTADOS
+    				LIST
     			</button>
     			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_refresh">
     				<i class="fa fa-4x fa-refresh"> </i>

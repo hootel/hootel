@@ -18,34 +18,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import api, fields, models
-import xmlrpclib
+import openerp.addons.connector.backend as backend
 
-class WuBook(models.TransientModel):
-    _name = 'wubook'
-    
-    
-    @api.multi    
-    def create_room(self, room_id):
-        user_id = self.env['res.users'].browser([self.uid])
-        user_id.partner_id.wubook_passwd
-        
-        wServer = xmlrpclib.Server(user_id.company_id.wubook_server)
-        res, tok = wServer.acquire_token(
-                user_id.partner_id.wubook_user,
-                user_id.partner_id.wubook_passwd,
-                user_id.company_id.wubook_pkey)
-        
-        res, rid = wServer.new_room(
-            tok,
-            user_id.partner_id.wubook_lcode,
-            0,
-            room_id.name,
-            room_id.beds,
-            room_id.price,
-            room_id.avail,
-            room_id.shortname,
-            room_id.defborad
-            )
-        
-        wServer.release_token(tok)
+wubook = backend.Backend('wubook')
+
+wubook_base = backend.Backend(parent=wubook, version='1.0')
