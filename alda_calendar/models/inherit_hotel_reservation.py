@@ -61,9 +61,9 @@ class HotelReservation(models.Model):
 
         # Get Reservations
         room_ids = rooms.mapped('id')
-        domainReservations.append(('reservation_line.reserve.id', 'in', room_ids))
-        domainReservations.append(('checkin', '>=', date_start.strftime(DEFAULT_SERVER_DATE_FORMAT)))
-        domainReservations.append(('checkout', '<=', date_end.strftime(DEFAULT_SERVER_DATE_FORMAT)))
+        domainReservations.insert(0, ('reservation_line.reserve.id', 'in', room_ids))
+        domainReservations.insert(0, ('checkin', '<=', date_end.strftime(DEFAULT_SERVER_DATE_FORMAT)))
+        domainReservations.insert(0, ('checkout', '>=', date_start.strftime(DEFAULT_SERVER_DATE_FORMAT)))
         reservations = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
         json_reservations = []
         json_reservation_tooltips = {}
@@ -90,6 +90,7 @@ class HotelReservation(models.Model):
 
         # Get Prices
         price_list_global = self.env['product.pricelist.item'].search([
+            ('pricelist_id', '=', PUBLIC_PRICELIST_ID),
             ('compute_price', '=', 'fixed'),
             ('applied_on', '=', '3_global')
         ], order='sequence ASC, id DESC', limit=1)
@@ -104,8 +105,12 @@ class HotelReservation(models.Model):
                     ('pricelist_id', '=', PUBLIC_PRICELIST_ID), # FIXME: Hard-Coded Public List ID
                     ('applied_on', '=', '2_product_category'),
                     ('categ_id', '=', cat.id),
-                    ('date_start', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                    ('date_end', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                    '|',
+                    ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                    ('date_start', '=', False),
+                    '|',
+                    ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                    ('date_end', '=', False),
                     ('compute_price', '=', 'fixed'),
                 ], order='sequence ASC, id DESC', limit=1)
                 json_rooms_prices[cat.name].update({

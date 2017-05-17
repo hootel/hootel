@@ -241,7 +241,7 @@ var HotelCalendarView = View.extend({
 			// If start 'today' put the current hour
 			var now = moment(new Date()).utc();
 			if (startDate.isSame(now, 'day')) {
-				startDate = now;
+				startDate = now.add(30,'m'); // +30 mins
 			}
 			
 			new common.SelectCreateDialog(this, {
@@ -372,6 +372,50 @@ var HotelCalendarView = View.extend({
 		$(document).find('.oe-control-panel').show();
     },
     
+    get_pms_buttons_counts: function() {
+    	this.$el.find('div.ninfo').hide();
+    	
+    	var domain = [];
+    	var $badge = false;
+    	
+    	// Checkout Button
+    	domain = [['checkout', '>=', moment().utc().startOf('day').format("YYYY-MM-DD HH:mm:ss")],
+			['checkout','<=', moment().utc().endOf('day').format("YYYY-MM-DD HH:mm:ss")],
+			['state','=','checkin']];
+
+		var $badge_checkout = this.$el.find('#pms-menu #btn_action_checkout .badge');
+		this._model.call('search_count', [domain]).then(function(count){
+			if (count > 0) {
+				$badge_checkout.text(count);
+				$badge_checkout.parent().show();
+			}
+		});
+    	
+    	// Checkin Button
+    	domain = [['checkin', '>=', moment().utc().startOf('day').format("YYYY-MM-DD HH:mm:ss")],
+						['checkin','<=', moment().utc().endOf('day').format("YYYY-MM-DD HH:mm:ss")],
+						['state','!=','checkin']];
+    	
+    	var $badge_checkin = this.$el.find('#pms-menu #btn_action_checkin .badge');
+    	this._model.call('search_count', [domain]).then(function(count){
+    		if (count > 0) {
+    			$badge_checkin.text(count);
+    			$badge_checkin.parent().show();
+    		}
+    	});
+    	
+    	// Charges Button
+    	domain = [['invoice_status', 'in', ['to invoice', 'no']], ['reservation_id', '!=', false]];
+    	
+    	var $badge_charges = this.$el.find('#pms-menu #btn_action_paydue .badge');
+    	new Model('hotel.folio').call('search_count', [domain]).then(function(count){
+    		if (count > 0) {
+    			$badge_charges.text(count);
+    			$badge_charges.parent().show();
+    		}
+    	});
+    },
+    
     init_calendar_view: function(){
     	var $this = this;
 
@@ -406,6 +450,17 @@ var HotelCalendarView = View.extend({
 		//this.$el.find('#pms-search #cal-pag-selector').datetimepicker($.extend({}, DTPickerOptions, { 
 		//	'useCurrent': true,
 		//}));
+		
+		//var $dateTimePickerSelector = this.$el.find('#pms-search #cal-pag-selector-calendar');		
+		//$dateTimePickerSelector.datetimepicker($.extend({}, DTPickerOptions, {'inline':true, 'sideBySide': false}));
+		//$dateTimePickerSelector.on("dp.change", function (e) {
+		//	console.log(e);
+			/*var date_begin = moment(this.data("DateTimePicker").getDate());
+			var days = moment(date_begin).daysInMonth();
+			var date_end = date_begin.clone().add(days, 'd');
+			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);*/
+	    //});
 		
         var date_begin = moment(new Date());
 		var days = moment(date_begin).daysInMonth();
@@ -461,8 +516,21 @@ var HotelCalendarView = View.extend({
 			
 			ev.preventDefault();
 		});
+		this.$el.find("#pms-search #cal-pag-selector").on('click', function(ev){
+			// FIXME: Ugly repeated code. Change place.
+			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
+			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
+			var date_begin = moment();
+			var days = moment(date_begin).daysInMonth();
+			var date_end = date_begin.clone().add(days, 'd');
+			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+			
+			ev.preventDefault();
+		});
 		
 		/* BUTTONS */
+		this.get_pms_buttons_counts();
 		this.$el.find("#btn_action_checkout").on('click', function(ev){
 			$this.call_action('alda_calendar.hotel_reservation_action_checkout');
 		});
