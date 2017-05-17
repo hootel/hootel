@@ -965,10 +965,10 @@ HotelCalendar.prototype = {
 
 		divRes.style = {}; // FIXME: Reset Style. Good method?
 		divRes.style.backgroundColor = reserv.color;
-		
-		var rgb = window.getComputedStyle(divRes).backgroundColor.match(/\d+/g);
+		var rgb = this.hexToRGB_(`0x${reserv.color.substr(1)}`);
 		var invColor = this.getInverseColor_(rgb[0]/255, rgb[1]/255, rgb[2]/255);
 		divRes.style.color = `rgb(${invColor[0]*255},${invColor[1]*255},${invColor[2]*255})`;
+		
 		divRes.style.top = `${boundsInit.top-etableOffset.top}px`;
 		var divHeight = (boundsEnd.bottom-etableOffset.top)-(boundsInit.top-etableOffset.top);
 		divRes.style.height = `${divHeight}px`;
@@ -1344,6 +1344,20 @@ HotelCalendar.prototype = {
 			this.hueToRgb_(v1,v2,h+(1.0/3.0)),
 			this.hueToRgb_(v1,v2,h),
 			this.hueToRgb_(v1,v2,h-(1.0/3.0))];
+	},
+
+	RGBToHex_: function(/*Int*/r, /*Int*/g, /*Int*/b){
+	    var bin = r << 16 | g << 8 | b;
+	    return (function(h){
+	        return new Array(7-h.length).join("0")+h;
+	    })(bin.toString(16).toUpperCase());
+	},
+	
+	hexToRGB_: function(/*String*/hex){
+	    var r = hex >> 16;
+	    var g = hex >> 8 & 0xFF;
+	    var b = hex & 0xFF;
+	    return [r,g,b];
 	},
 	
 	getInverseColor_: function(/*Int*/r, /*Int*/g, /*Int*/b) {

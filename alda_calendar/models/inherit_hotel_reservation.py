@@ -62,7 +62,7 @@ class HotelReservation(models.Model):
         # Get Reservations
         room_ids = rooms.mapped('id')
         domainReservations.insert(0, ('reservation_line.reserve.id', 'in', room_ids))
-        domainReservations.insert(0, ('checkin', '<=', date_end.strftime(DEFAULT_SERVER_DATE_FORMAT)))
+        domainReservations.insert(0, ('checkin', '<', date_end.strftime(DEFAULT_SERVER_DATE_FORMAT)))
         domainReservations.insert(0, ('checkout', '>=', date_start.strftime(DEFAULT_SERVER_DATE_FORMAT)))
         reservations = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
         json_reservations = []

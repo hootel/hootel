@@ -55,7 +55,7 @@ var HotelCalendarView = View.extend({
         this.view_type = 'pms';
         this.selected_filters = [];
         this._model = new Model(this.dataset.model);
-        this.action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager });
+        this.action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
         this.mutex = new utils.Mutex();
     },    
 
@@ -612,12 +612,12 @@ var HotelCalendarView = View.extend({
 					r[4], // Childrens
 					moment.utc(r[5]).local(), // Date Start
 					moment.utc(r[6]).local(), // Date End
-					r[8], // Color
+					r[8] // Color
 				);
 				nreserv.addUserData({'reservation_line_id': r[7]});
 				reservs.push(nreserv);
 			}
-			$this.hcalendar.pricelist = results['pricelist']
+			$this.hcalendar.pricelist = results['pricelist'];
 			$this.hcalendar.setReservations(reservs);
 		});
     },
