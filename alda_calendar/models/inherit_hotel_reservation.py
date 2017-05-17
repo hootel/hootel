@@ -105,12 +105,8 @@ class HotelReservation(models.Model):
                     ('pricelist_id', '=', PUBLIC_PRICELIST_ID), # FIXME: Hard-Coded Public List ID
                     ('applied_on', '=', '2_product_category'),
                     ('categ_id', '=', cat.id),
-                    '|',
-                    ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                    ('date_start', '=', False),
-                    '|',
-                    ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                    ('date_end', '=', False),
+                    ('date_start', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                    ('date_end', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
                     ('compute_price', '=', 'fixed'),
                 ], order='sequence ASC, id DESC', limit=1)
                 json_rooms_prices[cat.name].update({
