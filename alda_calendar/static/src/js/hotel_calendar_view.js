@@ -162,29 +162,13 @@ var HotelCalendarView = View.extend({
 	                title: _t("Open: ") + ev.detail.reservationObj.title,
 	                view_id: view_id,
 	                //readonly: false
-	                write_function: function(id, data, options) {
-	                	var def = $.Deferred();
-	                    var res = true;
-	                    var dataset = $this.dataset;
-	                    options = options || {};
-	                    var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
-	                    
-	                    $this.mutex.exec(function(){
-	                    	return dataset.data_update(id, data, options).done(function() {
-	                    		console.log(data);
-		                    	$this.reload_hcalendar_reservations();
-		                        $this.trigger('changed_value');
-		                        rest = id;
-		                    });
-	                    });
-	                    $this.mutex.def.then(function () {
-	                        $this.trigger("change:commands", options);
-	                        def.resolve(res);
-	                    });
-	                    
-	                    return def;
-	                },
 	            }).open();
+				pop.on('write_completed', $this, function(){
+                    $this.trigger('changed_value');
+                });
+				pop.on('closed', $this, function(){
+                    $this.reload_hcalendar_reservations(); // Here because don't trigger 'write_completed' when change state to confirm
+                });
 			});
 		});
 		this.hcalendar.addEventListener('hcalOnChangeReservation', function(ev){
