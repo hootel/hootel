@@ -28,6 +28,8 @@ from dateutil.relativedelta import relativedelta
 import datetime
 import urllib2
 import time
+import logging
+_logger=logging.getLogger(__name__)
 
 COLOR_TYPES = {'pre-reservation':'#A4A4A4',
                'reservation':'#0000FF',
@@ -79,9 +81,57 @@ class HotelReservation(models.Model):
     out_service_description = fields.Text('Cause of out of service')
     reserve_color = fields.Char(compute='_compute_color',string='Color', store=True)
     
-    
-    
-			
+    @api.constrains('checkin', 'checkout')
+    def check_dates(self):
+        """
+        check the reservation dates are not occuped
+        """
+        reservation_line_obj = self.env['hotel.room.reservation.line']
+        for reservation in self:
+            self._cr.execute("select count(*) from hotel_reservation as hr "
+                             "inner join hotel_reservation_line as hrl on \
+                             hrl.line_id = hr.id "
+                             "inner join hotel_reservation_line_room_rel as \
+                             hrlrr on hrlrr.room_id = hrl.id "
+                             "where (checkin,checkout) overlaps \
+                             ( timestamp %s, timestamp %s ) "
+                             "and hr.id <> cast(%s as integer) "
+                             "and hr.state = 'confirm' "
+                             "and hrlrr.hotel_reservation_line_id in ("
+                             "select hrlrr.hotel_reservation_line_id \
+                             from hotel_reservation as hr "
+                             "inner join hotel_reservation_line as \
+                             hrl on hrl.line_id = hr.id "
+                             "inner join hotel_reservation_line_room_rel \
+                             as hrlrr on hrlrr.room_id = hrl.id "
+                             "where hr.id = cast(%s as integer) )",
+                             (reservation.checkin, reservation.checkout,
+                              str(reservation.id), str(reservation.id)))
+            res = self._cr.fetchone()
+            roomcount = res and res[0] or 0.0	   
+            if roomcount:
+                raise ValidationError(_('You tried to confirm \
+                reservation with room those already reserved in this \
+                reservation period'))
+        drafts_res = self.env['hotel.reservation'].search([
+		('id','!=',self.id),
+	   	('state','=','draft'),
+		('reservation_line.reserve','in',self.reservation_line.reserve.id)			
+		])
+	drafts_in = self.env['hotel.reservation'].search([
+		('checkin','>=',self.checkin),
+		('checkin','<=',self.checkout)])
+	drafts_out = self.env['hotel.reservation'].search([
+		('checkout','>=',self.checkin),
+		('checkout','<=',self.checkout)])
+	drafts = drafts_in | drafts_out	
+	drafts &= drafts_res
+	drafts_name = ','.join(str(x.reservation_no) for x in drafts)
+        if drafts:
+	   warning_msg = 'You tried to confirm \
+           reservation with room those already reserved in this \
+           reservation period: %s' % drafts_name
+	   raise ValidationError(warning_msg)     
 	
 	
 		
