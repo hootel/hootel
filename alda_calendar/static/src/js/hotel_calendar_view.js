@@ -55,7 +55,7 @@ var HotelCalendarView = View.extend({
         this.view_type = 'pms';
         this.selected_filters = [];
         this._model = new Model(this.dataset.model);
-        this.action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager });
+        this.action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
         this.mutex = new utils.Mutex();
     },    
 
@@ -446,9 +446,9 @@ var HotelCalendarView = View.extend({
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);*/
 	    //});
 		
-        var date_begin = moment(new Date());
+        var date_begin = moment().startOf('day');
 		var days = moment(date_begin).daysInMonth();
-		var date_end = date_begin.clone().add(days, 'd');
+		var date_end = date_begin.clone().add(days, 'd').endOf('day');
 		$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 		$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 		
@@ -612,12 +612,12 @@ var HotelCalendarView = View.extend({
 					r[4], // Childrens
 					moment.utc(r[5]).local(), // Date Start
 					moment.utc(r[6]).local(), // Date End
-					r[8], // Color
+					r[8] // Color
 				);
 				nreserv.addUserData({'reservation_line_id': r[7]});
 				reservs.push(nreserv);
 			}
-			$this.hcalendar.pricelist = results['pricelist']
+			$this.hcalendar.pricelist = results['pricelist'];
 			$this.hcalendar.setReservations(reservs);
 		});
     },
@@ -645,8 +645,9 @@ var HotelCalendarView = View.extend({
     	
     	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
 		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
-    	var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().startOf('day').format("YYYY-MM-DD HH:mm:ss");
-    	var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().endOf('day').format("YYYY-MM-DD HH:mm:ss");
+
+    	var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).utc().startOf('day').format("YYYY-MM-DD HH:mm:ss");
+    	var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate()).utc().startOf('day').format("YYYY-MM-DD HH:mm:ss");
 
     	
     	return {
