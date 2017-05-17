@@ -446,9 +446,9 @@ var HotelCalendarView = View.extend({
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);*/
 	    //});
 		
-        var date_begin = moment(new Date());
+        var date_begin = moment().startOf('day');
 		var days = moment(date_begin).daysInMonth();
-		var date_end = date_begin.clone().add(days, 'd');
+		var date_end = date_begin.clone().add(days, 'd').endOf('day');
 		$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 		$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 		
@@ -646,8 +646,8 @@ var HotelCalendarView = View.extend({
     	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
 		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
 
-    	var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate().startOf('day')).utc().format("YYYY-MM-DD HH:mm:ss");
-    	var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate().startOf('day')).utc().format("YYYY-MM-DD HH:mm:ss");
+    	var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).utc().startOf('day').format("YYYY-MM-DD HH:mm:ss");
+    	var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate()).utc().startOf('day').format("YYYY-MM-DD HH:mm:ss");
 
     	
     	return {

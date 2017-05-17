@@ -46,6 +46,9 @@ class HotelReservation(models.Model):
         # Need move one day less
         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
         date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+        
+        _logger.info(date_start)
+        _logger.info(date_end)
  
         # Get Rooms
         rooms = self.env['hotel.room'].search(domainRooms)
@@ -99,18 +102,18 @@ class HotelReservation(models.Model):
             ('applied_on', '=', '3_global')
         ], order='sequence ASC, id DESC', limit=1)
         categs = rooms.mapped('categ_id')
-        date_diff = abs((date_start - date_end).days)
+        date_diff = abs((date_end - date_start).days)
         json_rooms_prices = {}
         for cat in categs:
             json_rooms_prices.update({cat.name: {}})
-            for i in range(0, date_diff):
+            for i in range(0, date_diff+1):
                 ndate = date_start + timedelta(days=i)
                 price_list = self.env['product.pricelist.item'].search([
                     ('pricelist_id', '=', PUBLIC_PRICELIST_ID), # FIXME: Hard-Coded Public List ID
                     ('applied_on', '=', '2_product_category'),
                     ('categ_id', '=', cat.id),
-                    ('date_start', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                    ('date_end', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                    ('date_start', '<=', ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
+                    ('date_end', '>=', ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
                     ('compute_price', '=', 'fixed'),
                 ], order='sequence ASC, id DESC', limit=1)
                 json_rooms_prices[cat.name].update({
