@@ -43,10 +43,10 @@ class HotelReservation(models.Model):
         domainRooms = domainRooms or []
         domainReservations = domainReservations or []
 
-        # Need one day less
+        # Need move one day less
         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
-        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
-
+        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+ 
         # Get Rooms
         rooms = self.env['hotel.room'].search(domainRooms)
         json_rooms = []
@@ -62,31 +62,35 @@ class HotelReservation(models.Model):
         # Get Reservations
         room_ids = rooms.mapped('id')
         domainReservations.insert(0, ('reservation_line.reserve.id', 'in', room_ids))
-        domainReservations.insert(0, ('checkin', '<', date_end.strftime(DEFAULT_SERVER_DATE_FORMAT)))
-        domainReservations.insert(0, ('checkout', '>=', date_start.strftime(DEFAULT_SERVER_DATE_FORMAT)))
+        domainReservations.insert(0, ('checkin', '<', date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)))
+        domainReservations.insert(0, ('checkout', '>=', date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)))
         reservations = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
         json_reservations = []
         json_reservation_tooltips = {}
         for reserv in reservations:
+            #r_cin = datetime.strptime(reserv.checkin, DEFAULT_SERVER_DATETIME_FORMAT)
+            #r_cout = datetime.strptime(reserv.checkout, DEFAULT_SERVER_DATETIME_FORMAT)
+            #if r_cin >= date_end or r_cout < date_start:
+            #    continue
+            
             for line in reserv.reservation_line:
                 for r in line.reserve:
-                    if r.id in room_ids:
-                        json_reservations.append((
-                            r.id,
-                            reserv.id,
+                    json_reservations.append((
+                        r.id,
+                        reserv.id,
+                        reserv.partner_id.name,
+                        line.adults,
+                        line.children,
+                        reserv.checkin,
+                        reserv.checkout,
+                        line.id,
+                        reserv.reserve_color))
+                    json_reservation_tooltips.update({
+                        reserv.id: (
                             reserv.partner_id.name,
-                            line.adults,
-                            line.children,
-                            reserv.checkin,
-                            reserv.checkout,
-                            line.id,
-                            reserv.reserve_color))
-                        json_reservation_tooltips.update({
-                            reserv.id: (
-                                reserv.partner_id.name,
-                                reserv.partner_id.mobile or reserv.partner_id.phone or _('Undefined'),
-                                reserv.checkin)
-                            })
+                            reserv.partner_id.mobile or reserv.partner_id.phone or _('Undefined'),
+                            reserv.checkin)
+                        })
 
         # Get Prices
         price_list_global = self.env['product.pricelist.item'].search([
@@ -99,7 +103,7 @@ class HotelReservation(models.Model):
         json_rooms_prices = {}
         for cat in categs:
             json_rooms_prices.update({cat.name: {}})
-            for i in range(0, date_diff-1):
+            for i in range(0, date_diff):
                 ndate = date_start + timedelta(days=i)
                 price_list = self.env['product.pricelist.item'].search([
                     ('pricelist_id', '=', PUBLIC_PRICELIST_ID), # FIXME: Hard-Coded Public List ID

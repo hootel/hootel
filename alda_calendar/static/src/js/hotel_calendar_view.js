@@ -645,8 +645,9 @@ var HotelCalendarView = View.extend({
     	
     	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
 		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
-    	var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().startOf('day').format("YYYY-MM-DD HH:mm:ss");
-    	var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().endOf('day').format("YYYY-MM-DD HH:mm:ss");
+
+    	var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate().startOf('day')).utc().format("YYYY-MM-DD HH:mm:ss");
+    	var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate().startOf('day')).utc().format("YYYY-MM-DD HH:mm:ss");
 
     	
     	return {
