@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_general_configuration" model="ir.ui.view">
+            <field name="model">base.config.settings</field>
+            <field name="inherit_id" ref="base_setup.view_general_configuration" />
+            <field name="arch" type="xml">
+            	<xpath expr="//group[@name='google']" position="before">
+                    <group string="WuBook Integration">
+                        <label for="wubook_server"/>
+                        <div name="wubook_server">
+                            <div class="oe_inline">
+                            	<field name="wubook_server" placeholder="WuBook Server"/>
+                            </div>
+                        </div>
+                        <label for="wubook_pkey"/>
+                        <div name="wubook_pkey">
+                            <div class="oe_inline">
+                                <field name="wubook_pkey" placeholder="Your WuBook PKey"/>
+                            </div>
+                        </div>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+        
+    </data>
+</openerp>
