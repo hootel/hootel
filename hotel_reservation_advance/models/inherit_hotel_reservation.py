@@ -59,14 +59,14 @@ class HotelReservation(models.Model):
                                 rec.checkout,
                                 DEFAULT_SERVER_DATETIME_FORMAT))
             difference_checkout = relativedelta(now_date, checkout_date)
-            if rec.state == 'draft':
-                rec.reserve_color = COLOR_TYPES.get('pre-reservation')
-            elif rec.reservation_type == 'reservation':
-                rec.reserve_color = COLOR_TYPES.get('reservation')
-            elif rec.reservation_type == 'staff':
+	    if rec.reservation_type == 'staff':
                 rec.reserve_color = COLOR_TYPES.get('staff')
             elif rec.reservation_type == 'out':
                 rec.reserve_color = COLOR_TYPES.get('dontsell')
+            elif rec.state == 'draft':
+                rec.reserve_color = COLOR_TYPES.get('pre-reservation')
+            elif rec.state == 'confirm':
+                rec.reserve_color = COLOR_TYPES.get('reservation')           
             elif rec.state == 'checkin' and difference_checkout.days == 0:
                 rec.reserve_color = COLOR_TYPES.get('checkout')
             else:
