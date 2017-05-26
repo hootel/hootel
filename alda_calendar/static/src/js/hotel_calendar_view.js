@@ -11,21 +11,26 @@ odoo.define('alda_calendar.HotelCalendarView', function (require) {
  *        Easy to resolve if adds 'search' button instead use 'onchange' events.
  */
 
-var core = require('web.core');
+var Core = require('web.core');
 //var data = require('web.data');
-var time = require('web.time');
+var Time = require('web.time');
 var Model = require('web.DataModel');
 var View = require('web.View');
-var common = require('web.form_common');
+var Common = require('web.form_common');
 //var pyeval = require('web.pyeval');
 var ActionManager = require('web.ActionManager');
-var utils = require('web.utils');
+var Utils = require('web.utils');
+var Dialog = require('web.Dialog');
 
-var _t = core._t;
-var _lt = core._lt;
-var QWeb = core.qweb;
+var _t = Core._t;
+var _lt = Core._lt;
+var QWeb = Core.qweb;
+var l10n = _t.database.parameters;
 
 var PUBLIC_PRICELIST_ID = 1; // Hard-Coded public pricelist id
+var ODOO_DATETIME_MOMENT_FORMAT = "YYYY-MM-DD HH:mm:ss";
+var L10N_DATETIME_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format + ' ' + l10n.time_format);
+var L10N_DATE_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format);
 
 var HotelCalendarView = View.extend({
 	/** VIEW OPTIONS **/
@@ -56,7 +61,7 @@ var HotelCalendarView = View.extend({
         this.selected_filters = [];
         this._model = new Model(this.dataset.model);
         this.action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
-        this.mutex = new utils.Mutex();
+        this.mutex = new Utils.Mutex();
     },    
 
     view_loading: function(r) {
@@ -68,9 +73,7 @@ var HotelCalendarView = View.extend({
         var attrs = fv.arch.attrs,
             self = this;
         this.fields_view = fv;
-        //this.$calendar = $(QWeb.render("HotelCalendarView"));
-        //this.$el.append(this.$calendar);
-        
+
         var edit_check = new Model(this.dataset.model)
         	.call("check_access_rights", ["write", false])
         	.then(function (write_right) {
@@ -146,17 +149,24 @@ var HotelCalendarView = View.extend({
 		this.hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){
 			var tp = $this.reserv_tooltips[ev.detail.reservationObj.id];
 			var arrival_hour = moment.utc(tp[2]).local().format('HH:mm');
+			
+			var qdict = {
+				'name': tp[0],
+				'phone': tp[1],
+				'arrival_hour': arrival_hour
+			};
+			
 			$(ev.detail.reservationDiv).tooltip({
 				animation: true,
 				html: true,
 				placement: 'bottom',
-				title: `<b>${_t('Name:')}</b> ${tp[0]}<br/><b>${_t('Phone:')}</b> ${tp[1]}<br/><b>${_t('Arrival Hour:')}</b> ${arrival_hour}`,
+				title: QWeb.render('HotelCalendar.Tooltip', qdict)
 			}).tooltip('show');
 		});
 		this.hcalendar.addEventListener('hcalOnContextMenuReservation', function(ev){
 			var res_id = ev.detail.reservationObj.id;
 			$this._model.call('get_formview_id', [res_id]).then(function(view_id){
-				var pop = new common.FormViewDialog($this, {
+				var pop = new Common.FormViewDialog($this, {
 	                res_model: 'hotel.reservation',
 	                res_id: res_id,
 	                title: _t("Open: ") + ev.detail.reservationObj.title,
@@ -175,39 +185,63 @@ var HotelCalendarView = View.extend({
 			var newReservation = ev.detail.newReserv;
 			var oldReservation = ev.detail.oldReserv;
 			
-			if (!confirm("¿Estás seguro/a?")) {
-				$this.hcalendar.swapReservation(newReservation, oldReservation);
-				return;
-			}
-			
-			var linkedReservations = $this.hcalendar.getLinkedReservations(newReservation).concat(newReservation);
-			var x2xCommands = [];
-			for (var r of linkedReservations) {
-				var room = $this.hcalendar.getRoom(r.room.id);
-				x2xCommands.push([1, r.getUserData('reservation_line_id'), {
-        			//'adults': r.adults,
-        			//'children': r.childrens,
-        			'categ_id': r.room.getUserData('categ_id'),
-        			'name': false,
-        			'reserve': [[6, false, [r.room.id]]]
-        		}]);
-			}
+			var qdict = {
+	            ncheckin: newReservation.startDate.format(L10N_DATETIME_MOMENT_FORMAT),
+	            ncheckout: newReservation.endDate.format(L10N_DATETIME_MOMENT_FORMAT),
+	            nroom: newReservation.room.number,
+	            ocheckin: oldReservation.startDate.format(L10N_DATETIME_MOMENT_FORMAT),
+	            ocheckout: oldReservation.endDate.format(L10N_DATETIME_MOMENT_FORMAT),
+	            oroom: oldReservation.room.number
+	        };
+			new Dialog($this, {
+                title: _t("Confirm Reservation Changes"),
+                buttons: [
+                	{
+                		text: _t("Yes, change it"),
+                		classes: 'btn-primary',
+                		close: true,
+                		disabled: !newReservation.id,
+                		click: function () {
+                			var linkedReservations = $this.hcalendar.getLinkedReservations(newReservation).concat(newReservation);
+                			var x2xCommands = [];
+                			for (var r of linkedReservations) {
+                				var room = $this.hcalendar.getRoom(r.room.id);
+                				x2xCommands.push([1, r.getUserData('reservation_line_id'), {
+                        			//'adults': r.adults,
+                        			//'children': r.childrens,
+                        			'categ_id': r.room.getUserData('categ_id'),
+                        			'name': false,
+                        			'reserve': [[6, false, [r.room.id]]]
+                        		}]);
+                			}
 
-			var write_values = {
-				'checkin': newReservation.startDate.utc().format("YYYY-MM-DD HH:mm:ss"),
-				'checkout': newReservation.endDate.utc().format("YYYY-MM-DD HH:mm:ss"),
-				'reservation_line': x2xCommands
-			};
-			new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
-				$this.hcalendar.swapReservation(newReservation, oldReservation);
-			});
+                			var write_values = {
+                				'checkin': newReservation.startDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
+                				'checkout': newReservation.endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
+                				'reservation_line': x2xCommands
+                			};
+                			new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
+                				$this.hcalendar.swapReservation(newReservation, oldReservation);
+                			});
+                		}
+                	}, 
+                	{
+                		text: _t("No"),
+                		close: true,
+                		click: function() {
+                			$this.hcalendar.swapReservation(newReservation, oldReservation);
+                		}
+                	}
+                ],
+                $content: QWeb.render('HotelCalendar.ConfirmReservationChanges', qdict)
+            }).open();			
 		});
 		this.hcalendar.addEventListener('hcalOnChangeSelection', function(ev){
 			var parentRow = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentRow}`);
 			var parentCellStart = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentCell}`);
 			var parentCellEnd = document.querySelector(`#${ev.detail.cellEnd.dataset.hcalParentCell}`);
-			var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate).utc();
-			var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate).utc();
+			var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate).startOf('day').utc();
+			var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate).endOf('day').utc();
 			var room = $this.hcalendar.getRoom(parentRow.dataset.hcalRoomObjId);
 			var numBeds = room.shared?(ev.detail.cellEnd.dataset.hcalBedNum - ev.detail.cellStart.dataset.hcalBedNum)+1:room.capacity;
 			
@@ -228,12 +262,12 @@ var HotelCalendarView = View.extend({
 				startDate = now.add(30,'m'); // +30 mins
 			}
 			
-			new common.SelectCreateDialog(this, {
+			new Common.SelectCreateDialog(this, {
                 res_model: 'hotel.reservation',
                 context: {
                 	'default_adults': numBeds,
-                	'default_checkin': startDate.format("YYYY-MM-DD HH:mm:ss"),
-                	'default_checkout': endDate.format("YYYY-MM-DD HH:mm:ss"),
+                	'default_checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                	'default_checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
                 	'default_reservation_line': [
                 		[0, false, {
                 			'adults': numBeds,
@@ -276,32 +310,47 @@ var HotelCalendarView = View.extend({
 		});
 		
 		this.hcalendar.addEventListener('hcalOnChangeRoomTypePrice', function(ev){
-			if (!confirm("¿Estás seguro/a?")) {
-				$this.hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
-				return;
-			}
-			console.log(ev.detail.date);
-			var categ_id = $this.hcalendar.getRoomsByType(ev.detail.room_type)[0].getUserData('categ_id');
-			var data = {
-				'pricelist_id': PUBLIC_PRICELIST_ID,
-				'applied_on': '2_product_category',
-				'categ_id': categ_id,
-				'compute_price': 'fixed',
-				'date_start': moment(ev.detail.date, HotelCalendar.DATE_FORMAT_SHORT_).format('YYYY-MM-DD'),
-				'date_end': moment(ev.detail.date, HotelCalendar.DATE_FORMAT_SHORT_).format('YYYY-MM-DD'),
-				'fixed_price': ev.detail.price,
-				'sequence': 0,
+			var qdict = {
+				'date':  ev.detail.date.local().format(L10N_DATE_MOMENT_FORMAT),
+				'old_price': ev.detail.old_price,
+				'new_price': ev.detail.price
 			};
-			new Model('product.pricelist.item').call('create', [data]).fail(function(err, ev){
-				alert("[Hotel Calendar]\nERROR: Can't update price!");
-				$this.hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
-			});
-			
-			console.log("NEW PRICE!");
-			console.log(ev.detail.room_type);
-			console.log(ev.detail.date);
-			console.log(ev.detail.price);
-			console.log(ev.detail.old_price);
+			new Dialog($this, {
+                title: _t("Confirm Price Change"),
+                buttons: [
+                	{
+                		text: _t("Yes, change it"),
+                		classes: 'btn-primary',
+                		close: true,
+                		disabled: !ev.detail.date,
+                		click: function () {
+                			var categ_id = $this.hcalendar.getRoomsByType(ev.detail.room_type)[0].getUserData('categ_id');
+                			var data = {
+                				'pricelist_id': PUBLIC_PRICELIST_ID,
+                				'applied_on': '2_product_category',
+                				'categ_id': categ_id,
+                				'compute_price': 'fixed',
+                				'date_start': ev.detail.date.format(ODOO_DATETIME_MOMENT_FORMAT),
+                				'date_end': ev.detail.date.format(ODOO_DATETIME_MOMENT_FORMAT),
+                				'fixed_price': ev.detail.price,
+                				'sequence': 0,
+                			};
+                			new Model('product.pricelist.item').call('create', [data]).fail(function(err, ev){
+                				alert("[Hotel Calendar]\nERROR: Can't update price!");
+                				$this.hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
+                			});
+                		}
+                	}, 
+                	{
+                		text: _t("No"),
+                		close: true,
+                		click: function() {
+                			$this.hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
+                		}
+                	}
+                ],
+                $content: QWeb.render('HotelCalendar.ConfirmPriceChange', qdict)
+            }).open();
 		});
     },
     
@@ -363,8 +412,8 @@ var HotelCalendarView = View.extend({
     	var $badge = false;
     	
     	// Checkout Button
-    	domain = [['checkout', '>=', moment().utc().startOf('day').format("YYYY-MM-DD HH:mm:ss")],
-			['checkout','<=', moment().utc().endOf('day').format("YYYY-MM-DD HH:mm:ss")],
+    	domain = [['checkout', '>=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
+			['checkout','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
 			['state','=','checkin']];
 
 		var $badge_checkout = this.$el.find('#pms-menu #btn_action_checkout .badge');
@@ -376,9 +425,11 @@ var HotelCalendarView = View.extend({
 		});
     	
     	// Checkin Button
-    	domain = [['checkin', '>=', moment().utc().startOf('day').format("YYYY-MM-DD HH:mm:ss")],
-						['checkin','<=', moment().utc().endOf('day').format("YYYY-MM-DD HH:mm:ss")],
+    	domain = [['checkin', '>=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
+						['checkin','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
 						['state','!=','checkin']];
+    	
+    	console.log(domain);
     	
     	var $badge_checkin = this.$el.find('#pms-menu #btn_action_checkin .badge');
     	this._model.call('search_count', [domain]).then(function(count){
@@ -408,7 +459,6 @@ var HotelCalendarView = View.extend({
 		
 		/** VIEW CONTROLS INITIALIZATION **/
 		// DATE TIME PICKERS
-		var l10n = _t.database.parameters;
 		var DTPickerOptions = { 
 			viewMode: 'months',
 			icons : {
@@ -418,18 +468,19 @@ var HotelCalendarView = View.extend({
                 down: 'fa fa-chevron-down'
                },
             language : moment.locale(),
-            format : time.strftime_to_moment_format(l10n.date_format),
+            format : L10N_DATE_MOMENT_FORMAT,
 		};
 		var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
 		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
 		$dateTimePickerBegin.datetimepicker(DTPickerOptions);
 		$dateTimePickerEnd.datetimepicker($.extend({}, DTPickerOptions, { 'useCurrent': false }));
 		$dateTimePickerBegin.on("dp.change", function (e) {
-			$dateTimePickerEnd.data("DateTimePicker").setMinDate(e.date);
-			$this.on_change_filter_date(e);
+			$dateTimePickerEnd.data("DateTimePicker").setMinDate(e.date.add(3,'d'));
+			$dateTimePickerEnd.data("DateTimePicker").setMaxDate(e.date.add(2,'M'));
+			$this.on_change_filter_date(e, true);
 	    });
 		$dateTimePickerEnd.on("dp.change", function (e) {
-			$this.on_change_filter_date(e);
+			$this.on_change_filter_date(e, false);
 	    });
 		//this.$el.find('#pms-search #cal-pag-selector').datetimepicker($.extend({}, DTPickerOptions, { 
 		//	'useCurrent': true,
@@ -460,8 +511,8 @@ var HotelCalendarView = View.extend({
 			// FIXME: Ugly repeated code. Change place.
 			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
-			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(15, 'd');
-			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(15, 'd');
+			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(15, 'd').startOf('day');
+			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(15, 'd').endOf('day');
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
@@ -471,8 +522,8 @@ var HotelCalendarView = View.extend({
 			// FIXME: Ugly repeated code. Change place.
 			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
-			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(1, 'd');
-			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(1, 'd');
+			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(1, 'd').startOf('day');
+			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(1, 'd').endOf('day');
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 
@@ -482,8 +533,8 @@ var HotelCalendarView = View.extend({
 			// FIXME: Ugly repeated code. Change place.
 			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
-			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(15, 'd');
-			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(15, 'd');
+			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(15, 'd').startOf('day');
+			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(15, 'd').endOf('day');
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
@@ -493,8 +544,8 @@ var HotelCalendarView = View.extend({
 			// FIXME: Ugly repeated code. Change place.
 			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
-			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(1, 'd');
-			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(1, 'd');
+			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(1, 'd').startOf('day');
+			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(1, 'd').endOf('day');
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
@@ -504,9 +555,9 @@ var HotelCalendarView = View.extend({
 			// FIXME: Ugly repeated code. Change place.
 			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
-			var date_begin = moment();
+			var date_begin = moment().startOf('day');
 			var days = moment(date_begin).daysInMonth();
-			var date_end = date_begin.clone().add(days, 'd');
+			var date_end = date_begin.clone().add(days, 'd').endOf('day');
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
@@ -584,13 +635,15 @@ var HotelCalendarView = View.extend({
 		return $.when();
     },
     
-    on_change_filter_date: function(ev) {
+    on_change_filter_date: function(ev, isStartDate) {
+    	isStartDate = isStartDate || false;
     	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
 		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
 		var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate();
 		var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate();
-    	if (date_begin && date_end && !date_begin.isSame(date_end) && this.hcalendar) {
-    		this.hcalendar.setStartDate(date_begin, date_end.diff(date_begin,'days')+1);
+    	if (date_begin && date_end && date_begin.isBefore(date_end) && this.hcalendar) {
+    		var days = isStartDate?date_begin.daysInMonth():date_end.diff(date_begin,'days')+1;
+    		this.hcalendar.setStartDate(date_begin, days);
     		this.reload_hcalendar_reservations();
     	}
     },
@@ -617,6 +670,8 @@ var HotelCalendarView = View.extend({
 				nreserv.addUserData({'reservation_line_id': r[7]});
 				reservs.push(nreserv);
 			}
+			
+			console.log(results['pricelist']);
 			$this.hcalendar.pricelist = results['pricelist'];
 			$this.hcalendar.setReservations(reservs);
 		});
@@ -645,11 +700,10 @@ var HotelCalendarView = View.extend({
     	
     	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
 		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
+	
+    	var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT);
+    	var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate()).endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT);
 
-    	var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).utc().startOf('day').format("YYYY-MM-DD HH:mm:ss");
-    	var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate()).utc().startOf('day').format("YYYY-MM-DD HH:mm:ss");
-
-    	
     	return {
     		'rooms': domainRooms,
     		'reservations': domainReservations,
@@ -658,19 +712,7 @@ var HotelCalendarView = View.extend({
     }
 });
 
-core.view_registry.add('pms', HotelCalendarView);
+Core.view_registry.add('pms', HotelCalendarView);
 return HotelCalendarView;
 
 });
-
-
-
-/*
-self.action_manager.do_action({
-        type: 'ir.actions.act_window',
-        res_model: "quick.room.reservation",
-        views: [[false, 'form']],
-        target: 'new',
-        context: {"room_id": $(this).attr("data"), 'date': $(this).attr("date")},
-});
-*/

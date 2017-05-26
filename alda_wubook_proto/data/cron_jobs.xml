@@ -1,0 +1,50 @@
+<openerp>
+    <data noupdate="1">
+    
+        <record id="wubook_push_prices" model="ir.cron">
+            <field name="name">WuBook Push Prices</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="doal">1</field>
+            <!--<field name="nextcall" >2016-12-31 23:59:59</field>-->
+            <field name="model" eval="'wubook'" />
+            <field name="function" eval="'push_prices'" />
+            <field name="args" eval="" />
+            <!--<field name="priority" eval="5" />-->
+        </record>
+        
+        <record id="wubook_corporate_fetch" model="ir.cron">
+            <field name="name">WuBook Corporate Fetchable Properties</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">4</field>
+            <field name="interval_type">hours</field>
+            <field name="numbercall">-1</field>
+            <field name="doal">1</field>
+            <!--<field name="nextcall" >2016-12-31 23:59:59</field>-->
+            <field name="model" eval="'wubook'" />
+            <field name="function" eval="'corporate_fetch'" />
+            <field name="args" eval="" />
+            <!--<field name="priority" eval="5" />-->
+        </record>
+        
+        <record id="wubook_active_push" model="ir.cron">
+            <field name="name">WuBook Initialize</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+            <field name="interval_number">10</field>
+            <field name="interval_type">seconds</field>
+            <field name="numbercall">1</field>
+            <field name="doal">0</field>
+            <!--<field name="nextcall" >2016-12-31 23:59:59</field>-->
+            <field name="model" eval="'wubook'" />
+            <field name="function" eval="'initialize'" />
+            <field name="args" eval="" />
+            <!--<field name="priority" eval="5" />-->
+        </record>
+        
+    </data>
+</openerp>

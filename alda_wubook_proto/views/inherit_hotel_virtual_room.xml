@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<openerp>
+	<data>
+
+		<record id="virtual_room_view_form" model="ir.ui.view">
+	        <field name="model">hotel.virtual.room</field>
+	        <field name="inherit_id">hotel_reservation_advance.virtual_room_view_form</field>
+	        <field name="arch" type="xml">
+	        	<xpath expr="//field[@name='name']" position="after">
+	        		<field name="wscode" readonly="True" />
+	        		<field name="wrid" />
+	        	</xpath>
+	        </field>
+	    </record>
+	    
+	</data>
+</openerp>

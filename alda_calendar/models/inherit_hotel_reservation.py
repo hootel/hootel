@@ -65,7 +65,7 @@ class HotelReservation(models.Model):
         # Get Reservations
         room_ids = rooms.mapped('id')
         domainReservations.insert(0, ('reservation_line.reserve.id', 'in', room_ids))
-        domainReservations.insert(0, ('checkin', '<', date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)))
+        domainReservations.insert(0, ('checkin', '<=', date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)))
         domainReservations.insert(0, ('checkout', '>=', date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)))
         reservations = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
         json_reservations = []
@@ -102,23 +102,25 @@ class HotelReservation(models.Model):
             ('applied_on', '=', '3_global')
         ], order='sequence ASC, id DESC', limit=1)
         categs = rooms.mapped('categ_id')
-        date_diff = abs((date_end - date_start).days)
+        date_diff = abs((date_start-date_end).days)+1
         json_rooms_prices = {}
         for cat in categs:
             json_rooms_prices.update({cat.name: {}})
-            for i in range(0, date_diff+1):
+            for i in range(0, date_diff):
                 ndate = date_start + timedelta(days=i)
                 price_list = self.env['product.pricelist.item'].search([
                     ('pricelist_id', '=', PUBLIC_PRICELIST_ID), # FIXME: Hard-Coded Public List ID
                     ('applied_on', '=', '2_product_category'),
                     ('categ_id', '=', cat.id),
-                    ('date_start', '<=', ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
-                    ('date_end', '>=', ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
+                    ('date_start', '<=', ndate.replace(hour=0, minute=0, second=0).strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
+                    ('date_end', '>=', ndate.replace(hour=23, minute=59, second=59).strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
                     ('compute_price', '=', 'fixed'),
                 ], order='sequence ASC, id DESC', limit=1)
                 json_rooms_prices[cat.name].update({
                     ndate.strftime(DEFAULT_SERVER_DATE_FORMAT): (price_list and price_list.fixed_price) or (price_list_global and price_list_global.fixed_price) or 0.0
                 })
+                
+        _logger.info(json_rooms_prices)
 
         return {
             'rooms': withRooms and json_rooms or [],

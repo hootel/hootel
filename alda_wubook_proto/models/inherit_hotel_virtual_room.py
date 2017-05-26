@@ -18,31 +18,23 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp import models, fields, api
 
-{
-    'name': 'Alda WuBook Prototype',
-    'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
-    'website': 'https://www.eiqui.com',
-    'category': 'eiqui/alda',
-    'summary': "Alda WuBook",
-    'description': "Alda WuBook Prototype",
-    'depends': [
-        'hotel_reservation_advance',
-    ],
-    'external_dependencies': {
-        'python': ['xmlrpclib']
-    },
-    'data': [
-        'data/sequence.xml',
-        'data/cron_jobs.xml',
-        'views/inherit_res_partner.xml',
-        #'views/res_config.xml'
-    ],
-    'test': [
-    ],
-    'installable': True,
-    'auto_install': False,
-    'application': False,
-    'license': 'AGPL-3',
-}
+
+class hotel_virtual_room(models.Model):
+    _inherit = 'hotel.virtual.room'
+
+    wscode = fields.Char("Short Code")
+    wrid = fields.Char("WuBook Room ID")
+
+    @api.multi
+    def create(self, vals):
+        new_id = super(hotel_virtual_room, self).create(vals)
+        self.env['wubook'].create_room(new_id)
+        return new_id
+
+    @api.multi
+    def write(self, vals):
+        ret_vals = super(hotel_virtual_room, self).write(vals)
+        self.env['wubook'].modify_room(self.id)
+        return ret_vals

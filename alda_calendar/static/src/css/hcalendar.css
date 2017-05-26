@@ -34,6 +34,7 @@
 }
 .hcal-table td {
 	text-align: center !important;
+	min-width: 100px;
 }
 .hcal-table a {
 	text-decoration: none;

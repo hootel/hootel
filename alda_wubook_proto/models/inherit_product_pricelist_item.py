@@ -18,31 +18,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp import models, fields, api
 
-{
-    'name': 'Alda WuBook Prototype',
-    'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
-    'website': 'https://www.eiqui.com',
-    'category': 'eiqui/alda',
-    'summary': "Alda WuBook",
-    'description': "Alda WuBook Prototype",
-    'depends': [
-        'hotel_reservation_advance',
-    ],
-    'external_dependencies': {
-        'python': ['xmlrpclib']
-    },
-    'data': [
-        'data/sequence.xml',
-        'data/cron_jobs.xml',
-        'views/inherit_res_partner.xml',
-        #'views/res_config.xml'
-    ],
-    'test': [
-    ],
-    'installable': True,
-    'auto_install': False,
-    'application': False,
-    'license': 'AGPL-3',
-}
+
+class product_pricelist_item(models.Model):
+    _inherit = 'product.pricelist.item'
+
+    wpushed = fields.Boolean("WuBook Pushed", default=False)

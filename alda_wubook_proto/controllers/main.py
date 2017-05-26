@@ -18,31 +18,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp import http
+import logging
+_logger = logging.getLogger(__name__)
 
-{
-    'name': 'Alda WuBook Prototype',
-    'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
-    'website': 'https://www.eiqui.com',
-    'category': 'eiqui/alda',
-    'summary': "Alda WuBook",
-    'description': "Alda WuBook Prototype",
-    'depends': [
-        'hotel_reservation_advance',
-    ],
-    'external_dependencies': {
-        'python': ['xmlrpclib']
-    },
-    'data': [
-        'data/sequence.xml',
-        'data/cron_jobs.xml',
-        'views/inherit_res_partner.xml',
-        #'views/res_config.xml'
-    ],
-    'test': [
-    ],
-    'installable': True,
-    'auto_install': False,
-    'application': False,
-    'license': 'AGPL-3',
-}
+
+class website_wubook(http.Controller):
+    @http.route(['/wubook/push'], type='http', auth="public", methods=['POST'], website=True)
+    def wubook_push(self, **kwargs):
+        _logger.info("WUBOOK PUSH")
+        _logger.info(kwargs)

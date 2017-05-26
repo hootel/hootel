@@ -29,104 +29,159 @@ _logger = logging.getLogger(__name__)
 class WuBook(models.TransientModel):
     _name = 'wubook'
 
-    @api.multi
-    def create_room(self, vals):
+    def __init__(self, pool, cr):
+        init_res = super(WuBook, self).__init__(pool, cr)
+        self.SERVER = False
+        self.LCODE = False
+        self.TOKEN = False
+        return init_res
+
+    def init_connection_(self):
         user_r = self.env['res.users'].browse(self.env.uid)
 
         user = user_r.partner_id.wubook_user
         passwd = user_r.partner_id.wubook_passwd
-        lcode = user_r.partner_id.wubook_lcode
+        self.LCODE = user_r.partner_id.wubook_lcode
         pkey = user_r.partner_id.wubook_pkey
-        wserver = user_r.partner_id.wubook_server
+        server_addr = user_r.partner_id.wubook_server
 
-        _logger.info("PASA 11")
-        _logger.info(user)
-        _logger.info(passwd)
-        _logger.info(lcode)
-        _logger.info(pkey)
-        _logger.info(wserver)
+        self.SERVER = xmlrpclib.Server(server_addr)
+        res, tok = self.SERVER.acquire_token(user, passwd, pkey)
+        self.TOKEN = tok
 
-        wServer = xmlrpclib.Server(wserver)
-        res, tok = wServer.acquire_token(user, passwd, pkey)
+        return res
 
-        _logger.info("PASA 22")
+    def close_connection_(self):
+        self.SERVER.release_token(self.TOKEN)
+        self.TOKEN = False
+        self.SERVER = False
 
-        _logger.info(res)
-        _logger.info(tok)
-        shortcode = "V%s" % vals['name']
+    @api.multi
+    def create_room(self, vroomid):
+        isConnected = self.init_connection_()
+        if not isConnected:
+            return False
 
-        _logger.info(shortcode)
+        vroom = self.env['hotel.virtual.room'].browse([vroomid])
 
-        res, rid = wServer.new_room(
-            tok,
-            lcode,
+        shortcode = self.env['ir.sequence'].get('seq_vroom_id')
+
+        res, rid = self.SERVER.new_room(
+            self.TOKEN,
+            self.LCODE,
             0,
-            vals['name'],
+            vroom.name,
             2,
-            900,
-            1,
+            vroom.list_price,
+            vroom.max_real_rooms,
             shortcode[:4],
             'nb'
             #rtype=('name' in vals and vals['name'] and 3) or 1
         )
 
-        wServer.release_token(tok)
+        self.close_connection_()
 
-        vals.update({'virtual_code': rid})
+        vroom.write({'wrid': rid})
+        return True
 
-        _logger.info("PASA FIN")
+    @api.multi
+    def modify_room(self, vroomid):
+        isConnected = self.init_connection_()
+        if not isConnected:
+            return False
+
+        vroom = self.env['hotel.virtual.room'].browse([vroomid])
+
+        res, rid = self.SERVER.mod_room(
+            self.TOKEN,
+            self.LCODE,
+            vroom.wrid,
+            vroom.name,
+            2,
+            vroom.list_price,
+            vroom.max_real_rooms,
+            vroom.wscode,
+            'nb'
+            #rtype=('name' in vals and vals['name'] and 3) or 1
+        )
+
+        self.close_connection_()
+        return True
+
+    @api.multi
+    def push_prices(self):
+
+        if True:
+            return True
+
+        isConnected = self.init_connection_()
+        if not isConnected:
+            return False
+
+        vroom = self.env['hotel.virtual.room'].browse([])
+
+        res, rid = self.SERVER.mod_room(
+            self.TOKEN,
+            self.LCODE,
+            vroom.wrid,
+            vroom.name,
+            2,
+            vroom.list_price,
+            vroom.max_real_rooms,
+            vroom.wscode,
+            'nb'
+            #rtype=('name' in vals and vals['name'] and 3) or 1
+        )
+
+        self.close_connection_()
+        return True
+
+    @api.multi
+    def push_activation(self):
+        isConnected = self.init_connection_()
+        if not isConnected:
+            return False
+
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        res = self.SERVER.push_activation(self.TOKEN,
+                                          self.LCODE,
+                                          urljoin(base_url, "/wubook/push"), 1)
+
+        self.close_connection_()
+        return True
+
+    @api.multi
+    def corporate_fetch(self):
+        isConnected = self.init_connection_()
+        if not isConnected:
+            return False
+
+        res = self.SERVER.corporate_fetchable_properties(self.TOKEN)
+
+        self.close_connection_()
+        return True
+
+    @api.multi
+    def fetch_new_bookings(self):
+        isConnected = self.init_connection_()
+        if not isConnected:
+            return False
+
+        res, bookings = self.SERVER.fetch_new_bookings(self.TOKEN,
+                                                       self.LCODE,
+                                                       1,
+                                                       0)
+        _logger.info("FETCH NEW BOOKINGS")
         _logger.info(res)
-        _logger.info(vals)
+        _logger.info(bookings)
 
-        return vals
+        self.close_connection_()
+        return True
 
-
-# CREATE
-create_original = BaseModel.create
-
-
-@api.model
-@api.returns('self', lambda value: value.id)
-def create(self, vals):
-    nvals = wubook_handle_create(self, vals)
-    _logger.info("NVALS")
-    _logger.info(nvals)
-    record_id = create_original(self, nvals)
-    return record_id
-
-
-BaseModel.create = create
-
-
-# WRITE
-write_original = BaseModel.write
-
-
-@api.multi
-def write(self, vals):
-    result = write_original(self, vals)
-#     auto_refresh_kanban_list(self)
-    return result
-
-
-BaseModel.write = write
-
-
-# UNLINK
-unlink_original = BaseModel.unlink
-
-
-@api.multi
-def unlink(self):
-    result = unlink_original(self)
-#     auto_refresh_kanban_list(self)
-    return result
-
-
-BaseModel.unlink = unlink
-
-
-def wubook_handle_create(model, vals):
-    if model._name == 'hotel.virtual.room':
-        return model.env['wubook'].create_room(vals)
-    return vals
+    @api.multi
+    def initialize(self):
+        _logger.info("INITIALIZE WUBOOK")
+        noErrors = self.push_activation()
+        if noErrors:
+            noErrors = self.fetch_new_bookings()
+        return noErrors
