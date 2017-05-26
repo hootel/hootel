@@ -133,6 +133,10 @@ HotelCalendar.prototype = {
 		for (var i=reservs.length; i>0; this.e.removeChild(reservs[--i]));
 	},
 	
+	getReservations: function(/*HReservation*/ignoreThis) {
+		return _.reject(this.reservations, function(item){ return item===ignoreThis; });
+	},
+	
 	getReservation: function(/*Int*/id) {
 		return this.reservations[id];
 	},
@@ -187,7 +191,7 @@ HotelCalendar.prototype = {
 		
 		var bedNum = 0;
 		if (typeof nbed === 'undefined') {
-			bedNum = reservation.beds_.length?reservation.beds_[0]:0;
+			bedNum = (reservation.beds_&&reservation.beds_.length)?reservation.beds_[0]:0;
 		} else {
 			bedNum = nbed;
 		}
@@ -1028,6 +1032,7 @@ HotelCalendar.prototype = {
 				this.updateDivReservation_(reservationDiv, limits);
 			}
 		}
+		this.updateReservationOccupation_();
 	},
 	
 	setDetailPrice: function(/*String*/room_type, /*String*/date, /*Float*/price) {
@@ -1231,7 +1236,7 @@ HotelCalendar.prototype = {
 			return false;
 		}
 
-		var reservs = _.reject(this.reservations, function(item){ return reservationObj===item; });
+		var reservs = this.getReservations(reservationObj);
 		for (var r of reservs) {
 			if ((reservationObj.room.number == r.room.number)
 				&& (_.difference(reservationObj.beds_, r.beds_).length != reservationObj.beds_.length)

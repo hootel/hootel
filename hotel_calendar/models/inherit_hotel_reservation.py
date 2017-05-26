@@ -55,7 +55,7 @@ class HotelReservation(models.Model):
         json_rooms = []
         for room in rooms:
             json_rooms.append((
-                room.id,
+                room.product_id.id,
                 room.name,
                 room.capacity,
                 room.categ_id.id,
@@ -63,7 +63,7 @@ class HotelReservation(models.Model):
                 room.shared_room))
 
         # Get Reservations
-        room_ids = rooms.mapped('id')
+        room_ids = rooms.mapped('product_id.id')
         domainReservations.insert(0, ('product_id.id', 'in', room_ids))
         domainReservations.insert(0, ('checkin', '<=', date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)))
         domainReservations.insert(0, ('checkout', '>=', date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)))
@@ -75,25 +75,22 @@ class HotelReservation(models.Model):
             #r_cout = datetime.strptime(reserv.checkout, DEFAULT_SERVER_DATETIME_FORMAT)
             #if r_cin >= date_end or r_cout < date_start:
             #    continue
-            
-            for line in reserv.reservation_line:
-                for r in line.reserve:
-                    json_reservations.append((
-                        r.id,
-                        reserv.id,
-                        reserv.partner_id.name,
-                        line.adults,
-                        line.children,
-                        reserv.checkin,
-                        reserv.checkout,
-                        line.id,
-                        reserv.reserve_color))
-                    json_reservation_tooltips.update({
-                        reserv.id: (
-                            reserv.partner_id.name,
-                            reserv.partner_id.mobile or reserv.partner_id.phone or _('Undefined'),
-                            reserv.checkin)
-                        })
+            json_reservations.append((
+                reserv.product_id.id,
+                reserv.id,
+                reserv.folio_id.partner_id.name,
+                reserv.adults,
+                reserv.children,
+                reserv.checkin,
+                reserv.checkout,
+                reserv.folio_id.id,
+                reserv.reserve_color))
+            json_reservation_tooltips.update({
+                reserv.id: (
+                    reserv.folio_id.partner_id.name,
+                    reserv.folio_id.partner_id.mobile or reserv.folio_id.partner_id.phone or _('Undefined'),
+                    reserv.checkin)
+                })
 
         # Get Prices
         price_list_global = self.env['product.pricelist.item'].search([

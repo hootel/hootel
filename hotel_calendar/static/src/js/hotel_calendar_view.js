@@ -164,10 +164,10 @@ var HotelCalendarView = View.extend({
 			}).tooltip('show');
 		});
 		this.hcalendar.addEventListener('hcalOnContextMenuReservation', function(ev){
-			var res_id = ev.detail.reservationObj.id;
+			var res_id = ev.detail.reservationObj.getUserData('folio_id');
 			$this._model.call('get_formview_id', [res_id]).then(function(view_id){
 				var pop = new Common.FormViewDialog($this, {
-	                res_model: 'hotel.reservation',
+	                res_model: 'hotel.folio',
 	                res_id: res_id,
 	                title: _t("Open: ") + ev.detail.reservationObj.title,
 	                view_id: view_id,
@@ -184,6 +184,12 @@ var HotelCalendarView = View.extend({
 		this.hcalendar.addEventListener('hcalOnChangeReservation', function(ev){
 			var newReservation = ev.detail.newReserv;
 			var oldReservation = ev.detail.oldReserv;
+			var folio_id = newReservation.getUserData('folio_id');
+			
+			var reservs = $this.hcalendar.getReservations(newReservation);
+			var linkedReservs = _.find(reservs, function(item){ 
+				return (item.getUserData('folio_id') === folio_id);
+			});
 			
 			var qdict = {
 	            ncheckin: newReservation.startDate.format(L10N_DATETIME_MOMENT_FORMAT),
@@ -191,7 +197,8 @@ var HotelCalendarView = View.extend({
 	            nroom: newReservation.room.number,
 	            ocheckin: oldReservation.startDate.format(L10N_DATETIME_MOMENT_FORMAT),
 	            ocheckout: oldReservation.endDate.format(L10N_DATETIME_MOMENT_FORMAT),
-	            oroom: oldReservation.room.number
+	            oroom: oldReservation.room.number,
+	            hasReservesLinked: (linkedReservs && linkedReservs.length != 0)?true:false
 	        };
 			new Dialog($this, {
                 title: _t("Confirm Reservation Changes"),
@@ -202,23 +209,10 @@ var HotelCalendarView = View.extend({
                 		close: true,
                 		disabled: !newReservation.id,
                 		click: function () {
-                			var linkedReservations = $this.hcalendar.getLinkedReservations(newReservation).concat(newReservation);
-                			var x2xCommands = [];
-                			for (var r of linkedReservations) {
-                				var room = $this.hcalendar.getRoom(r.room.id);
-                				x2xCommands.push([1, r.getUserData('reservation_line_id'), {
-                        			//'adults': r.adults,
-                        			//'children': r.childrens,
-                        			'categ_id': r.room.getUserData('categ_id'),
-                        			'name': false,
-                        			'reserve': [[6, false, [r.room.id]]]
-                        		}]);
-                			}
-
                 			var write_values = {
                 				'checkin': newReservation.startDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
                 				'checkout': newReservation.endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
-                				'reservation_line': x2xCommands
+                				'product_id': newReservation.room.id
                 			};
                 			new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
                 				$this.hcalendar.swapReservation(newReservation, oldReservation);
@@ -263,22 +257,24 @@ var HotelCalendarView = View.extend({
 			}
 			
 			new Common.SelectCreateDialog(this, {
-                res_model: 'hotel.reservation',
+                res_model: 'hotel.folio',
                 context: {
                 	'default_adults': numBeds,
                 	'default_checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
                 	'default_checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
-                	'default_reservation_line': [
+                	'default_room_lines': [
                 		[0, false, {
+                			'checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                        	'checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
                 			'adults': numBeds,
                 			'children': 0,
-                			'categ_id': room.getUserData('categ_id'),
-                			'name': false,
-                			'reserve': [[6, false, [room.id]]]
+                			'product_id': room.id,
+                			'name': `${room.id}`,
+                			'price_unit': 1.0 // FIXME: Traer el precio de la habitacion!
                 		}]
                 	]
                 },
-                title: _t("Create: ") + _t("Reservation"),
+                title: _t("Create: ") + _t("Folio"),
                 initial_view: "form",
                 create_function: function(data, options) {
                     var def = $.Deferred();
@@ -383,6 +379,7 @@ var HotelCalendarView = View.extend({
 			var reservs = [];
 			for (var r of results['reservations']) {
 				var room = $this.hcalendar.getRoom(r[0]);
+				console.log(room);
 				var nreserv = new HReservation(
 					r[1], // Id
 					room, // Room
@@ -393,7 +390,7 @@ var HotelCalendarView = View.extend({
 					moment.utc(r[6]).local(), // Date End
 					r[8] // Color
 				);
-				nreserv.addUserData({'reservation_line_id': r[7]});
+				nreserv.addUserData({'folio_id': r[7]});
 				reservs.push(nreserv);
 			}
 			$this.hcalendar.setReservations(reservs);
@@ -665,7 +662,7 @@ var HotelCalendarView = View.extend({
 					moment.utc(r[6]).local(), // Date End
 					r[8] // Color
 				);
-				nreserv.addUserData({'reservation_line_id': r[7]});
+				nreserv.addUserData({'folio_id': r[7]});
 				reservs.push(nreserv);
 			}
 			
