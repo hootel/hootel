@@ -429,8 +429,6 @@ var HotelCalendarView = View.extend({
 						['checkin','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
 						['state','!=','checkin']];
     	
-    	console.log(domain);
-    	
     	var $badge_checkin = this.$el.find('#pms-menu #btn_action_checkin .badge');
     	this._model.call('search_count', [domain]).then(function(count){
     		if (count > 0) {
@@ -565,7 +563,7 @@ var HotelCalendarView = View.extend({
 		});
 		
 		/* BUTTONS */
-		this.get_pms_buttons_counts();
+		//this.get_pms_buttons_counts();
 		this.$el.find("#btn_action_checkout").on('click', function(ev){
 			$this.call_action('alda_calendar.hotel_reservation_action_checkout');
 		});

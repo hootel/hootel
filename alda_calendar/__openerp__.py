@@ -29,7 +29,7 @@
     'description': "Alda Calendar",
     'depends': [
         'web',
-        'hotel_reservation_advance',
+        'hotel',
     ],
     'external_dependencies': {
         'python': []
