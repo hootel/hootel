@@ -20,34 +20,28 @@
 ##############################################################################
 
 {
-    'name': 'Alda Calendar',
+    'name': 'Hotel WuBook',
     'version': '1.0',
     'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
     'website': 'https://www.eiqui.com',
-    'category': 'eiqui/alda',
-    'summary': "Alada Calendar",
-    'description': "Alda Calendar",
+    'category': 'eiqui/hotel',
+    'summary': "Hotel WuBook",
+    'description': "Hotel WuBook",
     'depends': [
-        'web',
         'hotel',
+        'connector'
     ],
     'external_dependencies': {
-        'python': []
+        'python': ['xmlrpclib']
     },
     'data': [
-        'views/general.xml',
-        'views/actions.xml',
-        'data/views.xml',
-        'data/menus.xml',
-    ],
-    'qweb': [
-        'static/src/xml/*.xml',
+        'views/inherit_res_partner.xml',
+        'views/res_config.xml'
     ],
     'test': [
     ],
-
-    'installable': True,
+    'installable': False,
     'auto_install': False,
-    'application': True,
+    'application': False,
     'license': 'AGPL-3',
 }

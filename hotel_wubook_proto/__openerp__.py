@@ -20,15 +20,15 @@
 ##############################################################################
 
 {
-    'name': 'Alda WuBook Prototype',
+    'name': 'Hotel WuBook Prototype',
     'version': '1.0',
     'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
     'website': 'https://www.eiqui.com',
-    'category': 'eiqui/alda',
-    'summary': "Alda WuBook",
-    'description': "Alda WuBook Prototype",
+    'category': 'eiqui/hotel',
+    'summary': "Hotel WuBook",
+    'description': "Hotel WuBook Prototype",
     'depends': [
-        'hotel_reservation_advance',
+        'hotel',
     ],
     'external_dependencies': {
         'python': ['xmlrpclib']
@@ -37,6 +37,7 @@
         'data/sequence.xml',
         'data/cron_jobs.xml',
         'views/inherit_res_partner.xml',
+        'views/inherit_hotel_virtual_room.xml',
         #'views/res_config.xml'
     ],
     'test': [
