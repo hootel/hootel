@@ -27,8 +27,8 @@ _logger = logging.getLogger(__name__)
 PUBLIC_PRICELIST_ID = 1  # Hard-Coded public pricelist
 
 
-class HotelReservation(models.Model):
-    _inherit = "hotel.reservation"
+class HotelFolio(models.Model):
+    _inherit = "hotel.folio"
 
     @api.multi
     def get_hcalendar_data(self, checkin, checkout, domainRooms, domainReservations, withRooms=True):
@@ -46,7 +46,7 @@ class HotelReservation(models.Model):
         # Need move one day less
         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
         date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
-        
+
         _logger.info(date_start)
         _logger.info(date_end)
  
@@ -60,7 +60,8 @@ class HotelReservation(models.Model):
                 room.capacity,
                 room.categ_id.id,
                 room.categ_id.name,
-                room.shared_room))
+                room.shared_room,
+                room.uom_id.id))
 
         # Get Reservations
         room_ids = rooms.mapped('product_id.id')
@@ -116,8 +117,6 @@ class HotelReservation(models.Model):
                 json_rooms_prices[cat.name].update({
                     ndate.strftime(DEFAULT_SERVER_DATE_FORMAT): (price_list and price_list.fixed_price) or (price_list_global and price_list_global.fixed_price) or 0.0
                 })
-                
-        _logger.info(json_rooms_prices)
 
         return {
             'rooms': withRooms and json_rooms or [],
@@ -125,3 +124,25 @@ class HotelReservation(models.Model):
             'tooltips': json_reservation_tooltips,
             'pricelist': json_rooms_prices,
         }
+
+    @api.multi
+    def get_vroom_price(self, product_id, checkin, checkout):
+        product = self.env['product.product'].browse([product_id])
+        partner = self.env['res.users'].browse(self.env.uid).partner_id
+
+        date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
+        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
+        date_diff = abs((date_start-date_end).days)+1
+
+        price = 0.0
+        for i in range(0, date_diff-1):
+            ndate = date_start + timedelta(days=i)
+            prod = product.with_context(
+                lang=partner.lang,
+                partner=partner.id,
+                quantity=1,
+                date_order=ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                pricelist=partner.property_product_pricelist.id,
+                uom=product.product_tmpl_id.uom_id.id)
+            price += prod.price
+        return {'unit_price': price}

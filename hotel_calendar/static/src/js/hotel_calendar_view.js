@@ -21,6 +21,7 @@ var Common = require('web.form_common');
 var ActionManager = require('web.ActionManager');
 var Utils = require('web.utils');
 var Dialog = require('web.Dialog');
+var Ajax = require('web.ajax');
 
 var _t = Core._t;
 var _lt = Core._lt;
@@ -256,53 +257,69 @@ var HotelCalendarView = View.extend({
 				startDate = now.add(30,'m'); // +30 mins
 			}
 			
-			new Common.SelectCreateDialog(this, {
-                res_model: 'hotel.folio',
-                context: {
-                	'default_adults': numBeds,
-                	'default_checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
-                	'default_checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
-                	'default_room_lines': [
-                		[0, false, {
-                			'checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
-                        	'checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
-                			'adults': numBeds,
-                			'children': 0,
-                			'product_id': room.id,
-                			'name': `${room.id}`,
-                			'price_unit': 1.0 // FIXME: Traer el precio de la habitacion!
-                		}]
-                	]
-                },
-                title: _t("Create: ") + _t("Folio"),
-                initial_view: "form",
-                create_function: function(data, options) {
-                    var def = $.Deferred();
-                    var res = true;
-                    var dataset = $this.dataset;
-                    options = options || {};
-                    var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
-                    
-                    $this.mutex.exec(function(){
-                    	return dataset.create(data, internal_options).then(function (id) {
-                            dataset.ids.push(id);
-                            res = id;
+			// Get Unit Price of Virtual Room
+			new Model('hotel.folio').call('get_vroom_price', [false, room.id, startDate.format(ODOO_DATETIME_MOMENT_FORMAT), endDate.format(ODOO_DATETIME_MOMENT_FORMAT)]).then(function(result){
+				new Common.SelectCreateDialog(this, {
+                    res_model: 'hotel.folio',
+                    context: {
+                    	'default_adults': numBeds,
+                    	'default_partner_id': 1,
+                    	'default_checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                    	'default_checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                    	'default_room_lines': [
+                    		[0, false, {
+                    			'checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                            	'checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                    			'adults': numBeds,
+                    			'children': 0,
+                    			'product_id': room.id,
+                    			'product_uom': +room.getUserData('uom_id'),
+                    			'order_line_id.product_uom': +room.getUserData('uom_id'),
+                    			'product_uom_qty': 1,
+                    			'product_uos': 1,
+                    			'name': `${room.number}`,
+                    			'price_unit': result['unit_price'],
+                    			//'order_id': 1
+                    		}]
+                    	]
+                    },
+                    title: _t("Create: ") + _t("Folio"),
+                    initial_view: "form",
+                    form_view_options: {'not_interactible_on_create':true},
+                    create_function: function(data, options) {
+                    	console.log("PASA POR CREATE FUNCTION");
+                    	console.log(data);
+                    	console.log(options);
+                    	console.log("FIN");
+                    	
+                        var def = $.Deferred();
+                        var res = true;
+                        var dataset = $this.dataset;
+                        options = options || {};
+                        var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
+                        
+                        $this.mutex.exec(function(){
+                        	return dataset.create(data, internal_options).then(function (id) {
+                                dataset.ids.push(id);
+                                res = id;
+                            });
                         });
-                    });
-                    $this.mutex.def.then(function () {
-                        $this.trigger("change:commands", options);
-                        def.resolve(res);
-                    });
-                    
-                    return def;
-                },
-                read_function: function(ids, fields, options) {
-                	return $this.dataset.read_ids(ids, fields, options);
-                },
-                on_selected: function() {
-                    $this.generate_hotel_calendar();
-                }
-            }).open();
+                        $this.mutex.def.then(function () {
+                            $this.trigger("change:commands", options);
+                            def.resolve(res);
+                        });
+                        
+                        return def;
+                    },
+                    read_function: function(ids, fields, options) {
+                    	console.log("PASA AAA 1");
+                    	return $this.dataset.read_ids(ids, fields, options);
+                    },
+                    on_selected: function() {
+                        $this.generate_hotel_calendar();
+                    }
+                }).open();
+			});	
 		});
 		
 		this.hcalendar.addEventListener('hcalOnChangeRoomTypePrice', function(ev){
@@ -367,7 +384,10 @@ var HotelCalendarView = View.extend({
 					r[4], // Category
 					r[5]  // Shared Room
 				);
-				nroom.addUserData({'categ_id': r[3]});
+				nroom.addUserData({
+					'categ_id': r[3],
+					'uom_id': r[6]
+				});
 				rooms.push(nroom);
 			}
 			
@@ -435,15 +455,15 @@ var HotelCalendarView = View.extend({
     	});
     	
     	// Charges Button
-    	domain = [['invoice_status', 'in', ['to invoice', 'no']], ['reservation_id', '!=', false]];
-    	
-    	var $badge_charges = this.$el.find('#pms-menu #btn_action_paydue .badge');
-    	new Model('hotel.folio').call('search_count', [domain]).then(function(count){
-    		if (count > 0) {
-    			$badge_charges.text(count);
-    			$badge_charges.parent().show();
-    		}
-    	});
+//    	domain = [['invoice_status', 'in', ['to invoice', 'no']], ['reservation_id', '!=', false]];
+//    	
+//    	var $badge_charges = this.$el.find('#pms-menu #btn_action_paydue .badge');
+//    	new Model('hotel.folio').call('search_count', [domain]).then(function(count){
+//    		if (count > 0) {
+//    			$badge_charges.text(count);
+//    			$badge_charges.parent().show();
+//    		}
+//    	});
     },
     
     init_calendar_view: function(){

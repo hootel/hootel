@@ -30,6 +30,7 @@
     'depends': [
         'web',
         'hotel',
+        'sale',
     ],
     'external_dependencies': {
         'python': []
