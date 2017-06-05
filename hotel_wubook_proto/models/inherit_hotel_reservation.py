@@ -19,36 +19,34 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+from openerp.exceptions import except_orm, UserError, ValidationError
 
 
-class hotel_virtual_room(models.Model):
-    _inherit = 'hotel.virtual.room'
+class HotelReservation(models.Model):
+    _inherit = 'hotel.reservation'
 
-    wscode = fields.Char("Short Code")
-    wrid = fields.Char("WuBook Room ID")
+    wrid = fields.Char("WuBook Reservation ID")
+    wota = fields.Boolean("WuBook OTA", default=False)
 
 #     @api.multi
 #     def create(self, vals, check=True):
 #         if check:
-#             vals = self.env['wubook'].create_room(vals)
-#         return super(hotel_virtual_room, self).create(vals, check=check)
-
-    @api.multi
-    def write(self, vals, check=True):
-        ret_vals = super(hotel_virtual_room, self).write(vals)
-        if check:
-            for record in self:
-                self.env['wubook'].modify_room(record.id)
-        return ret_vals
-    
-    @api.multi
-    def unlink(self):
-        for record in self:
-            self.env['wubook'].delete_room(record.id)
-        return super(hotel_virtual_room, self).unlink()
-
-    @api.multi
-    def import_rooms(self):
-        wubook = self.env['wubook']
-        wubook.import_rooms()
-        return True
+#             vals = self.env['wubook'].create_reservation(vals)
+#         return super(HotelReservation, self).create(vals)
+# 
+#     @api.multi
+#     def write(self, vals):
+#         ret_vals = super(HotelReservation, self).write(vals)
+#         for record in self:
+#             if not record.wota:
+#                 self.env['wubook'].cancel_reservation(record.id, 'Modificated by admin')
+#                 self.env['wubook'].create_reservation(record.id)
+#         return ret_vals
+#     
+#     @api.multi
+#     def unlink(self):
+#         for record in self:
+#             if not self.wota:
+#                 self.env['wubook'].cancel_reservation(record.id, 'Cancelled by admin')
+#             
+#         return super(HotelReservation, self).unlink()

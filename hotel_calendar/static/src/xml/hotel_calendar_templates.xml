@@ -43,4 +43,10 @@
 	</ul>
 </t>
 
+<t t-name="HotelCalendar.ConfirmFolio">
+	<div class="content">
+		<p>Do you want to confirm this folio?</p>
+	</div>
+</t>
+
 </template>

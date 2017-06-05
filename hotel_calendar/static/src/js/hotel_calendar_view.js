@@ -258,7 +258,7 @@ var HotelCalendarView = View.extend({
 			}
 			
 			// Get Unit Price of Virtual Room
-			new Model('hotel.folio').call('get_vroom_price', [false, room.id, startDate.format(ODOO_DATETIME_MOMENT_FORMAT), endDate.format(ODOO_DATETIME_MOMENT_FORMAT)]).then(function(result){
+			$this._model.call('get_vroom_price', [false, room.id, startDate.format(ODOO_DATETIME_MOMENT_FORMAT), endDate.format(ODOO_DATETIME_MOMENT_FORMAT)]).then(function(result){
 				new Common.SelectCreateDialog(this, {
                     res_model: 'hotel.folio',
                     context: {
@@ -285,13 +285,8 @@ var HotelCalendarView = View.extend({
                     },
                     title: _t("Create: ") + _t("Folio"),
                     initial_view: "form",
-                    form_view_options: {'not_interactible_on_create':true},
+                    form_view_options: { 'not_interactible_on_create':true },
                     create_function: function(data, options) {
-                    	console.log("PASA POR CREATE FUNCTION");
-                    	console.log(data);
-                    	console.log(options);
-                    	console.log("FIN");
-                    	
                         var def = $.Deferred();
                         var res = true;
                         var dataset = $this.dataset;
@@ -304,18 +299,43 @@ var HotelCalendarView = View.extend({
                                 res = id;
                             });
                         });
-                        $this.mutex.def.then(function () {
-                            $this.trigger("change:commands", options);
-                            def.resolve(res);
+                        $this.mutex.def.then(function () { 
+                			var dialog = new Dialog($this, {
+                                title: _t("Confirm Folio"),
+                                buttons: [
+                                	{
+                                		text: _t("Yes, confirm it"),
+                                		classes: 'btn-primary',
+                                		close: true,
+                                		disabled: res < 0,
+                                		click: function () {
+                                			$this._model.call('action_confirm', [res]).then(function(results){
+                                				$this.generate_hotel_calendar();
+                                			}).fail(function(err, ev){
+                                				alert(_t("[Hotel Calendar]\nERROR: Can't confirm folio!"));
+                                			});
+                                		}
+                                	}, 
+                                	{
+                                		text: _t("No"),
+                                		close: true
+                                	}
+                                ],
+                                $content: QWeb.render('HotelCalendar.ConfirmFolio')
+                            }).open();
+                			dialog.on("closed", null, function(){
+                                $this.trigger("change:commands", options);
+                                def.resolve(res);
+                			});
                         });
                         
                         return def;
                     },
                     read_function: function(ids, fields, options) {
-                    	console.log("PASA AAA 1");
                     	return $this.dataset.read_ids(ids, fields, options);
                     },
                     on_selected: function() {
+                        $this.generate_hotel_calendar();
                         $this.generate_hotel_calendar();
                     }
                 }).open();
@@ -349,7 +369,7 @@ var HotelCalendarView = View.extend({
                 				'sequence': 0,
                 			};
                 			new Model('product.pricelist.item').call('create', [data]).fail(function(err, ev){
-                				alert("[Hotel Calendar]\nERROR: Can't update price!");
+                				alert(_t("[Hotel Calendar]\nERROR: Can't update price!"));
                 				$this.hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
                 			});
                 		}

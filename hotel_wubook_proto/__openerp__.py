@@ -36,6 +36,7 @@
     'data': [
         'data/sequence.xml',
         'data/cron_jobs.xml',
+        'views/general.xml',
         'views/inherit_res_partner.xml',
         'views/inherit_hotel_virtual_room.xml',
         #'views/res_config.xml'
