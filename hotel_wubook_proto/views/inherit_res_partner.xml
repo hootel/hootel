@@ -14,7 +14,7 @@
 			    	</group>
 			    	<group>
 			    		<field name="wubook_user" />
-			    		<field name="wubook_passwd" />
+			    		<field name="wubook_passwd" password="True" />
 			    	</group>
 			    </page>
 			</xpath>

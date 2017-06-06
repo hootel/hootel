@@ -25,8 +25,8 @@ from openerp.exceptions import except_orm, UserError, ValidationError
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
 
-    wrid = fields.Char("WuBook Reservation ID")
-    wota = fields.Boolean("WuBook OTA", default=False)
+    wrid = fields.Char("WuBook Reservation ID", readonly=True)
+    wota = fields.Boolean("WuBook OTA", default=False, readonly=True)
 
 #     @api.multi
 #     def create(self, vals, check=True):

@@ -26,8 +26,10 @@ from openerp.exceptions import except_orm, UserError, ValidationError
 import logging
 _logger = logging.getLogger(__name__)
 
+
 def _partner_split_name(partner_name):
     return [' '.join(partner_name.split()[:-1]), ' '.join(partner_name.split()[-1:])]
+
 
 class WuBook(models.TransientModel):
     _name = 'wubook'
@@ -51,10 +53,10 @@ class WuBook(models.TransientModel):
         self.SERVER = xmlrpclib.Server(server_addr)
         res, tok = self.SERVER.acquire_token(user, passwd, pkey)
         self.TOKEN = tok
-        
+
         if res != 0:
             raise UserError("Can't connect with WuBook!")
-        
+
         return True
 
     def close_connection_(self):
@@ -64,14 +66,8 @@ class WuBook(models.TransientModel):
 
     @api.multi
     def create_room(self, vals):
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
-
+        self.init_connection_()
         shortcode = self.env['ir.sequence'].get('seq_vroom_id')
-        
-        _logger.info("CREANDO HABITACION!: %s" % shortcode)
-
         res, rid = self.SERVER.new_room(
             self.TOKEN,
             self.LCODE,
@@ -84,7 +80,6 @@ class WuBook(models.TransientModel):
             'nb'
             #rtype=('name' in vals and vals['name'] and 3) or 1
         )
-
         self.close_connection_()
 
         if res == 0:
@@ -95,12 +90,8 @@ class WuBook(models.TransientModel):
 
     @api.multi
     def modify_room(self, vroomid):
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
-
+        self.init_connection_()
         vroom = self.env['hotel.virtual.room'].browse([vroomid])
-
         res, rid = self.SERVER.mod_room(
             self.TOKEN,
             self.LCODE,
@@ -113,51 +104,40 @@ class WuBook(models.TransientModel):
             'nb'
             #rtype=('name' in vals and vals['name'] and 3) or 1
         )
-
         self.close_connection_()
-        
+
         if res != 0:
             raise UserError("Can't modify room in WuBook!")
-        
+
         return True
-    
+
     @api.multi
     def delete_room(self, vroomid):
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
-
+        self.init_connection_()
         vroom = self.env['hotel.virtual.room'].browse([vroomid])
-
         res, rid = self.SERVER.del_room(
             self.TOKEN,
             self.LCODE,
             vroom.wrid
         )
-
         self.close_connection_()
-        
+
         if res != 0:
             raise UserError("Can't delete room in WuBook!")
-        
+
         return True
-    
+
     @api.multi
     def import_rooms(self):
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
-
+        self.init_connection_()
         res, rooms = self.SERVER.fetch_rooms(
             self.TOKEN,
             self.LCODE,
             0
         )
-        
         self.close_connection_()
-        
+
         vroom_obj = self.env['hotel.virtual.room']
-        
         if res == 0:
             for room in rooms:
                 vroom = vroom_obj.search([('wrid', '=', room['id'])], limit=1)
@@ -165,29 +145,23 @@ class WuBook(models.TransientModel):
                     'name': room['name'],
                     'wrid': room['id'],
                     'wscode': room['shortname'],
-                    'list_price': room['price'],                    
+                    'list_price': room['price'],
                 }
                 if vroom:
-                    vroom.write(vals, check=False)
+                    vroom.with_context({'wubook_action': False}).write(vals)
                 else:
-                    vroom_obj.create(vals, check=False)
+                    vroom_obj.with_context({'wubook_action': False}).create(vals)
         else:
             raise UserError("Can't import rooms from WuBook!")
-        
+
         return True
 
     @api.multi
     def push_prices(self):
+        return True
 
-        if True:
-            return True
-
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
-
+        self.init_connection_()
         vroom = self.env['hotel.virtual.room'].browse([])
-
         res, rid = self.SERVER.mod_room(
             self.TOKEN,
             self.LCODE,
@@ -200,41 +174,44 @@ class WuBook(models.TransientModel):
             'nb'
             #rtype=('name' in vals and vals['name'] and 3) or 1
         )
-
         self.close_connection_()
         return True
 
     @api.multi
     def push_activation(self):
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
+        self.init_connection_()
+        errors = []
 
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         res = self.SERVER.push_activation(self.TOKEN,
                                           self.LCODE,
-                                          urljoin(base_url, "/wubook/push"), 1)
+                                          urljoin(base_url, "/wubook/push/reservations"), 1)
+        if res != 0:
+            errors.append("Can't activate push reservations")
+
+        res = self.SERVER.push_update_activation(self.TOKEN,
+                                                 self.LCODE,
+                                                 urljoin(base_url, "/wubook/push/rooms"))
+        if res != 0:
+            errors.append("Can't activate push rooms")
 
         self.close_connection_()
+
+        if any(errors):
+            raise UserError('\n'.join(errors))
+
         return True
 
     @api.multi
     def corporate_fetch(self):
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
-
+        self.init_connection_()
         res = self.SERVER.corporate_fetchable_properties(self.TOKEN)
-
         self.close_connection_()
         return True
 
     @api.multi
     def fetch_new_bookings(self):
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
-
+        self.init_connection_()
         res, bookings = self.SERVER.fetch_new_bookings(self.TOKEN,
                                                        self.LCODE,
                                                        1,
@@ -242,33 +219,27 @@ class WuBook(models.TransientModel):
         _logger.info("FETCH NEW BOOKINGS")
         _logger.info(res)
         _logger.info(bookings)
-
         self.close_connection_()
         return True
 
     @api.multi
     def initialize(self):
-        _logger.info("INITIALIZE WUBOOK")
-        noErrors = self.push_activation()
-        if noErrors:
-            noErrors = self.fetch_new_bookings()
-        return noErrors
-    
+        self.push_activation()
+        self.import_rooms()
+        self.fetch_new_bookings()
+        return True
+
     # TODO: Saber a que habitacion virtual pertenece la reserva de una real
     @api.multi
     def create_reservation(self, reservid):
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
-
+        self.init_connection_()
         reserv = self.env['hotel.reservation'].browse([reservid])
-
         vroom = self.env['hotel.virtual.room'].search([('product_id', '=', reserv.product_id.id)], limit=1)
         res, rcode = self.SERVER.new_reservation(self.TOKEN,
-                                                 self.LCODE, 
+                                                 self.LCODE,
                                                  reserv.checkin,
                                                  reserv.checkout,
-                                                 { vroom.wrid: [reserv.adults+reserv.children, 'nb'] },
+                                                 {vroom.wrid: [reserv.adults+reserv.children, 'nb']},
                                                  {
                                                     'lname': _partner_split_name(reserv.partner_id.name)[1],
                                                     'fname': _partner_split_name(reserv.partner_id.name)[0],
@@ -283,26 +254,20 @@ class WuBook(models.TransientModel):
                                                  reserv.adults+reserv.children)
 
         self.close_connection_()
-        
         reserv.write({'wrid': rcode})
         return True
-    
+
     @api.multi
     def cancel_reservation(self, reservid, reason=""):
-        isConnected = self.init_connection_()
-        if not isConnected:
-            return False
-
+        self.init_connection_()
         reserv = self.env['hotel.reservation'].browse([reservid])
-        
         res, rcode = self.SERVER.cancel_reservation(self.TOKEN,
                                                     self.LCODE,
                                                     reserv.wrid,
                                                     reason)
-        
         self.close_connection_()
-        
+
         if res != 0:
             raise UserError("Can't cancel reservation in WuBook!")
-        
+
         return True

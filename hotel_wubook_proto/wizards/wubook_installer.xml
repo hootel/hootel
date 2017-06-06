@@ -1,0 +1,51 @@
+<odoo>
+
+	<record id="view_wubook_configuration_installer" model="ir.ui.view">
+		<field name="name">wubook.installer.form</field>
+		<field name="model">wubook.installer</field>
+		<field name="inherit_id" ref="base.res_config_installer"/>
+		<field name="arch" type="xml">
+			<xpath expr="//form[1]" position="attributes">
+				<attribute name="string">WuBook Configuration</attribute>
+			</xpath>
+			<xpath expr="//footer[1]" position="replace">
+				<footer>
+					<button name="action_next" type="object" string="Finish Installation" class="oe_highlight"/>
+				</footer>
+			</xpath>
+			<xpath expr="//form/separator[1]" position="replace">
+				<p class="oe_grey">
+					WuBook API Configuration. This wizard will activate push request and synchronize rooms &amp; reservations with Odoo.
+				</p>
+				<group>
+					<field name="wubook_server" />
+				</group>
+				<group>
+					<field name="wubook_user" />
+					<field name="wubook_passwd" password="True" />
+				</group>
+				<group>
+					<field name="wubook_lcode" />
+					<field name="wubook_pkey" />
+				</group>
+			</xpath>
+		</field>
+	</record>
+
+	<record id="action_wubook_configuration_installer" model="ir.actions.act_window">
+		<field name="name">Configure WuBook Data</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">wubook.installer</field>
+		<field name="view_id" ref="view_wubook_configuration_installer"/>
+		<field name="view_type">form</field>
+		<field name="view_mode">form</field>
+		<field name="target">new</field>
+	</record>
+
+	<record id="wubook_configuration_installer_todo" model="ir.actions.todo">
+		<field name="action_id" ref="action_wubook_configuration_installer"/>
+		<field name="sequence">3</field>
+		<field name="type">automatic</field>
+	</record>
+       
+</odoo>

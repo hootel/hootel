@@ -24,27 +24,28 @@ from openerp import models, fields, api
 class hotel_virtual_room(models.Model):
     _inherit = 'hotel.virtual.room'
 
-    wscode = fields.Char("Short Code")
-    wrid = fields.Char("WuBook Room ID")
-
-#     @api.multi
-#     def create(self, vals, check=True):
-#         if check:
-#             vals = self.env['wubook'].create_room(vals)
-#         return super(hotel_virtual_room, self).create(vals, check=check)
+    wscode = fields.Char("WuBook Short Code")
+    wrid = fields.Char("WuBook Room ID", readonly=True)
 
     @api.multi
-    def write(self, vals, check=True):
+    def create(self, vals):
+        if self._context.get('wubook_action', True):
+            vals = self.env['wubook'].create_room(vals)
+        return super(hotel_virtual_room, self).create(vals)
+
+    @api.multi
+    def write(self, vals):
         ret_vals = super(hotel_virtual_room, self).write(vals)
-        if check:
+        if self._context.get('wubook_action', True):
             for record in self:
                 self.env['wubook'].modify_room(record.id)
         return ret_vals
-    
+
     @api.multi
     def unlink(self):
-        for record in self:
-            self.env['wubook'].delete_room(record.id)
+        if self._context.get('wubook_action', True):
+            for record in self:
+                self.env['wubook'].delete_room(record.id)
         return super(hotel_virtual_room, self).unlink()
 
     @api.multi
