@@ -27,7 +27,7 @@ class hotel_virtual_room(models.Model):
     wscode = fields.Char("WuBook Short Code")
     wrid = fields.Char("WuBook Room ID", readonly=True)
 
-    @api.multi
+    @api.model
     def create(self, vals):
         if self._context.get('wubook_action', True):
             vals = self.env['wubook'].create_room(vals)
