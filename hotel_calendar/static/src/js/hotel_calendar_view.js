@@ -448,9 +448,7 @@ var HotelCalendarView = View.extend({
     	var $badge = false;
     	
     	// Checkout Button
-    	domain = [['checkout', '>=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
-			['checkout','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
-			['state','=','checkin']];
+    	domain = [['checkins_reservations','=',True]];
 
 		var $badge_checkout = this.$el.find('#pms-menu #btn_action_checkout .badge');
 		this._model.call('search_count', [domain]).then(function(count){
@@ -461,9 +459,7 @@ var HotelCalendarView = View.extend({
 		});
     	
     	// Checkin Button
-    	domain = [['checkin', '>=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
-						['checkin','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
-						['state','!=','checkin']];
+    	domain = [['checkouts_reservations','=',True]];
     	
     	var $badge_checkin = this.$el.find('#pms-menu #btn_action_checkin .badge');
     	this._model.call('search_count', [domain]).then(function(count){
@@ -474,7 +470,7 @@ var HotelCalendarView = View.extend({
     	});
     	
     	// Charges Button
-//    	domain = [['invoice_status', 'in', ['to invoice', 'no']], ['reservation_id', '!=', false]];
+//    	domain = [[('invoices_amount','>',0)],['checkin','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)]];
 //    	
 //    	var $badge_charges = this.$el.find('#pms-menu #btn_action_paydue .badge');
 //    	new Model('hotel.folio').call('search_count', [domain]).then(function(count){
@@ -601,13 +597,13 @@ var HotelCalendarView = View.extend({
 		/* BUTTONS */
 		//this.get_pms_buttons_counts();
 		this.$el.find("#btn_action_checkout").on('click', function(ev){
-			$this.call_action('alda_calendar.hotel_reservation_action_checkout');
+			$this.call_action('hotel_calendar.hotel_reservation_action_checkout');
 		});
 		this.$el.find("#btn_action_checkin").on('click', function(ev){
-			$this.call_action('alda_calendar.hotel_reservation_action_checkin');
+			$this.call_action('hotel_calendar.hotel_reservation_action_checkin');
 		});
 		this.$el.find("#btn_action_paydue").on('click', function(ev){
-			$this.call_action('alda_calendar.hotel_reservation_action_paydue');
+			$this.call_action('hotel_calendar.hotel_reservation_action_paydue');
 		});
 		this.$el.find("#btn_action_refresh").on('click', function(ev){
 			window.location.reload();

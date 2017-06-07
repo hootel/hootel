@@ -21,7 +21,7 @@
                <field name="name">Pending Payments</field>
                <field name="res_model">hotel.folio</field>
                <field name="view_mode">tree,form</field>
-               <field name="domain">[('invoices_amount','>',0),('checkin','&lt;=',datetime.datetime.now().replace(hour=23, minute=59, second=59)]</field>
+               <field name="domain">[('invoices_amount','>',0),('checkin','&lt;=',datetime.datetime.now().replace(hour=23, minute=59, second=59))]</field>
         </record>
 
     </data>
