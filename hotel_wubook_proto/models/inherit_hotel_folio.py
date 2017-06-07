@@ -19,14 +19,15 @@
 #
 ##############################################################################
 from openerp import models, fields, api
-from openerp.exceptions import except_orm, UserError, ValidationError
 
 
 class HotelFolio(models.Model):
     _inherit = 'hotel.folio'
 
+    wseed = fields.Char("WuBook Session Seed", readonly=True)
+
     @api.multi
     def import_reservations(self):
         wubook = self.env['wubook']
-        wubook.import_reservations()
+        wubook.fetch_new_bookings()
         return True

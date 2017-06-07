@@ -180,32 +180,28 @@ class WuBook(models.TransientModel):
 
     @api.multi
     def push_activation(self):
-        self.init_connection_()
         errors = []
-        
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
-        _logger.info(re.sub(r"https?:\/\/", "", urljoin(base_url, "/wubook/push/reservations")))
+
+        self.init_connection_()
 
         res, code = self.SERVER.push_activation(self.TOKEN,
                                           self.LCODE,
                                           urljoin(base_url, "/wubook/push/reservations"),
                                           1)
-        
-        _logger.info(res)
-        _logger.info(code)
         if res != 0:
-            errors.append("Can't activate push reservations")
+            errors.append("Can't activate push reservations: %s" % code)
 
         res, code = self.SERVER.push_update_activation(self.TOKEN,
                                                  self.LCODE,
                                                  urljoin(base_url, "/wubook/push/rooms"))
         if res != 0:
-            errors.append("Can't activate push rooms")
+            errors.append("Can't activate push rooms: %s" % code)
 
         self.close_connection_()
 
-        if any(errors):
-            raise UserError('\n'.join(errors))
+        #if any(errors):
+        #    raise UserError('\n'.join(errors))
 
         return True
 
@@ -223,16 +219,21 @@ class WuBook(models.TransientModel):
                                                        self.LCODE,
                                                        1,
                                                        0)
-        
+        self.close_connection_()
+
         _logger.info("FETCH NEW BOOKINGS")
         _logger.info(res)
         _logger.info(bookings)
-        
+
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
+        hotel_folio_obj = self.env['hotel.folio']
         for book in bookings:
             # Already Exists?
-            hotel_reserv_obj.search([('wrid', '=', book[''])])
+            reserv = hotel_reserv_obj.search([('wrid', '=', book['reservation_code'])], limit=1)
+            if reserv:
+                continue
+
             # Search Customer
             partner_id = res_partner_obj.search([('email', '=', book.get('customer_mail', False))], limit=1)
             if not partner_id:
@@ -247,10 +248,35 @@ class WuBook(models.TransientModel):
                     #'lang': book['customer_language']
                 }
                 partner_id = res_partner_obj.create(vals)
-            
-            # Create Folio
 
-        self.close_connection_()
+            # Create Folio
+            vals = {}
+            hotel_folio_id = hotel_folio_obj.search([('wseed', '=', book['sessionSeed'])], limit=1)
+            if hotel_folio_id:
+#                 hotel_folio_id.write({
+#                     'room_lines': [(0, False, {
+#                     })]
+#                 })
+                print "lll"
+            else:
+                vals.update({
+                    'partern_id': partner_id.id,
+                    'wseed': book['sessionSeed'],
+    #                 'room_lines': [(0, False, {
+    #                                 'checkin': "%s %s" % (book['date_arrival'], book['arrival_hour']),
+    #                                 'checkout': book['date_departure'],
+    #                                 'adults': book['men'],
+    #                                 'children': book['children'],
+    #                                 'product_id': room.id,
+    #                                 'product_uom': +room.getUserData('uom_id'),
+    #                                 'product_uom_qty': 1,
+    #                                 'product_uos': 1,
+    #                                 'name': `${room.number}`,
+    #                                 'price_unit': result['unit_price'],
+    #                             })] 
+                })
+                hotel_folio_id = hotel_folio_obj.create(vals)
+
         return True
 
     @api.multi
