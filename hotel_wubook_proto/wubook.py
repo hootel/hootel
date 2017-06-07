@@ -236,10 +236,11 @@ class WuBook(models.TransientModel):
 
             # Search Customer
             partner_id = res_partner_obj.search([('email', '=', book.get('customer_mail', False))], limit=1)
+            country_id = self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1)
             if not partner_id:
                 vals = {
-                    'name': "%s %s" % (book.customer_name, book.customer_surname),
-                    'country_id': self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1).id,
+                    'name': "%s %s" % (book['customer_name'], book['customer_surname']),
+                    'country_id': country_id and country_id.id,
                     'city': book['customer_city'],
                     'comment': book['customer_notes'],
                     'phone': book['customer_phone'],
