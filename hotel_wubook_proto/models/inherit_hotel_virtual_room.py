@@ -19,13 +19,25 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class hotel_virtual_room(models.Model):
     _inherit = 'hotel.virtual.room'
 
+    @api.depends('wpersons')
+    def _get_persons(self):
+        min = 0
+        for rec in self:
+            totals = rec.room_lines.mapped(lambda x: x.adults+x.children)
+            _logger.info("PERSONAS")
+            _logger.info(totals)
+            rec.wpersons = 0
+
     wscode = fields.Char("WuBook Short Code")
     wrid = fields.Char("WuBook Room ID", readonly=True)
+    wpersons = fields.Integer(compute=_get_persons, readonly=True)
 
     @api.model
     def create(self, vals):

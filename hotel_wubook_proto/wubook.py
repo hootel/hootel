@@ -200,8 +200,8 @@ class WuBook(models.TransientModel):
 
         self.close_connection_()
 
-        #if any(errors):
-        #    raise UserError('\n'.join(errors))
+        if any(errors):
+            raise UserError('\n'.join(errors))
 
         return True
 
@@ -246,6 +246,7 @@ class WuBook(models.TransientModel):
                     'phone': book['customer_phone'],
                     'zip': book['customer_zip'],
                     'street': book['customer_address'],
+                    'email': book['customer_mail'],
                     #'lang': book['customer_language']
                 }
                 partner_id = res_partner_obj.create(vals)

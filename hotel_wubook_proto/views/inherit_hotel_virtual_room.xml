@@ -7,7 +7,8 @@
         <field name="arch" type="xml">
         	<xpath expr="//field[@name='name']" position="after">
         		<field name="wscode" readonly="True" />
-        		<field name="wrid" />
+        		<field name="wrid" readonly="True"  />
+        		<field name="wpersons" readonly="True" />
         	</xpath>
         </field>
     </record>
