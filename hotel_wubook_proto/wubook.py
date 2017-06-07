@@ -278,7 +278,7 @@ class WuBook(models.TransientModel):
             raise UserError("Can't cancel reservation in WuBook!")
 
         return True
-    
+
     @api.model
     def generate_reservations(self, bookings):
         res_partner_obj = self.env['res.partner']
