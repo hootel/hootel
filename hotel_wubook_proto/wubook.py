@@ -54,6 +54,9 @@ class WuBook(models.TransientModel):
         self.SERVER = xmlrpclib.Server(server_addr)
         res, tok = self.SERVER.acquire_token(user, passwd, pkey)
         self.TOKEN = tok
+        
+        _logger.info("CONECTADO")
+        _logger.info(self.TOKEN)
 
         if res != 0:
             raise UserError("Can't connect with WuBook!")
