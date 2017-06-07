@@ -54,9 +54,6 @@ class WuBook(models.TransientModel):
         self.SERVER = xmlrpclib.Server(server_addr)
         res, tok = self.SERVER.acquire_token(user, passwd, pkey)
         self.TOKEN = tok
-        
-        _logger.info("CONECTADO")
-        _logger.info(self.TOKEN)
 
         if res != 0:
             raise UserError("Can't connect with WuBook!")
@@ -189,14 +186,17 @@ class WuBook(models.TransientModel):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         _logger.info(re.sub(r"https?:\/\/", "", urljoin(base_url, "/wubook/push/reservations")))
 
-        res = self.SERVER.push_activation(self.TOKEN,
+        res, code = self.SERVER.push_activation(self.TOKEN,
                                           self.LCODE,
                                           re.sub(r"https?:\/\/", "", urljoin(base_url, "/wubook/push/reservations")),
                                           1)
+        
+        _logger.info(res)
+        _logger.info(code)
         if res != 0:
             errors.append("Can't activate push reservations")
 
-        res = self.SERVER.push_update_activation(self.TOKEN,
+        res, code = self.SERVER.push_update_activation(self.TOKEN,
                                                  self.LCODE,
                                                  re.sub(r'https?:\/\/', '', urljoin(base_url, "/wubook/push/rooms")))
         if res != 0:
