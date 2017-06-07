@@ -225,6 +225,62 @@ class WuBook(models.TransientModel):
         _logger.info(res)
         _logger.info(bookings)
 
+        self.generate_reservations(bookings)
+
+        return True
+
+    @api.multi
+    def initialize(self):
+        self.push_activation()
+        self.import_rooms()
+        self.fetch_new_bookings()
+        return True
+
+    # TODO: Saber a que habitacion virtual pertenece la reserva de una real
+    @api.multi
+    def create_reservation(self, reservid):
+        self.init_connection_()
+        reserv = self.env['hotel.reservation'].browse([reservid])
+        vroom = self.env['hotel.virtual.room'].search([('product_id', '=', reserv.product_id.id)], limit=1)
+        res, rcode = self.SERVER.new_reservation(self.TOKEN,
+                                                 self.LCODE,
+                                                 reserv.checkin,
+                                                 reserv.checkout,
+                                                 {vroom.wrid: [reserv.adults+reserv.children, 'nb']},
+                                                 {
+                                                    'lname': _partner_split_name(reserv.partner_id.name)[1],
+                                                    'fname': _partner_split_name(reserv.partner_id.name)[0],
+                                                    'email': reserv.partner_id.email,
+                                                    'city': reserv.partner_id.city,
+                                                    'phone': reserv.partner_id.phone,
+                                                    'street': reserv.partner_id.street,
+                                                    'country': reserv.partner_id.country_id.code,
+                                                    'arrival_hour': datetime.strptime(reserv.checkin, "%H:%M:%S"),
+                                                    'notes': '' # TODO: Falta poner el cajetin de observaciones en folio o reserva..
+                                                 },
+                                                 reserv.adults+reserv.children)
+
+        self.close_connection_()
+        reserv.write({'wrid': rcode})
+        return True
+
+    @api.multi
+    def cancel_reservation(self, reservid, reason=""):
+        self.init_connection_()
+        reserv = self.env['hotel.reservation'].browse([reservid])
+        res, rcode = self.SERVER.cancel_reservation(self.TOKEN,
+                                                    self.LCODE,
+                                                    reserv.wrid,
+                                                    reason)
+        self.close_connection_()
+
+        if res != 0:
+            raise UserError("Can't cancel reservation in WuBook!")
+
+        return True
+    
+    @api.model
+    def generate_reservations(self, bookings):
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
@@ -281,55 +337,3 @@ class WuBook(models.TransientModel):
 #     #                             })] 
 #                 })
 #                 hotel_folio_id = hotel_folio_obj.create(vals)
-
-        return True
-
-    @api.multi
-    def initialize(self):
-        self.push_activation()
-        self.import_rooms()
-        self.fetch_new_bookings()
-        return True
-
-    # TODO: Saber a que habitacion virtual pertenece la reserva de una real
-    @api.multi
-    def create_reservation(self, reservid):
-        self.init_connection_()
-        reserv = self.env['hotel.reservation'].browse([reservid])
-        vroom = self.env['hotel.virtual.room'].search([('product_id', '=', reserv.product_id.id)], limit=1)
-        res, rcode = self.SERVER.new_reservation(self.TOKEN,
-                                                 self.LCODE,
-                                                 reserv.checkin,
-                                                 reserv.checkout,
-                                                 {vroom.wrid: [reserv.adults+reserv.children, 'nb']},
-                                                 {
-                                                    'lname': _partner_split_name(reserv.partner_id.name)[1],
-                                                    'fname': _partner_split_name(reserv.partner_id.name)[0],
-                                                    'email': reserv.partner_id.email,
-                                                    'city': reserv.partner_id.city,
-                                                    'phone': reserv.partner_id.phone,
-                                                    'street': reserv.partner_id.street,
-                                                    'country': reserv.partner_id.country_id.code,
-                                                    'arrival_hour': datetime.strptime(reserv.checkin, "%H:%M:%S"),
-                                                    'notes': '' # TODO: Falta poner el cajetin de observaciones en folio o reserva..
-                                                 },
-                                                 reserv.adults+reserv.children)
-
-        self.close_connection_()
-        reserv.write({'wrid': rcode})
-        return True
-
-    @api.multi
-    def cancel_reservation(self, reservid, reason=""):
-        self.init_connection_()
-        reserv = self.env['hotel.reservation'].browse([reservid])
-        res, rcode = self.SERVER.cancel_reservation(self.TOKEN,
-                                                    self.LCODE,
-                                                    reserv.wrid,
-                                                    reason)
-        self.close_connection_()
-
-        if res != 0:
-            raise UserError("Can't cancel reservation in WuBook!")
-
-        return True

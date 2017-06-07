@@ -19,6 +19,7 @@
 #
 ##############################################################################
 from openerp import http
+from openerp.http import request
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -27,13 +28,26 @@ class website_wubook(http.Controller):
     @http.route(['/wubook/push/reservations'], type='http', cors="*",
                 auth="public", methods=['POST'], website=True, csrf=False)
     def wubook_push_reservations(self, **kwargs):
+        rcode = kwargs['rcode']
+        lcode = kwargs['lcode']
+
+        # WuBook Check
+        if rcode == 2000 and lcode == 1000:
+            return request.make_response('200 OK', [('Content-Type', 'text/plain')])
+
+        # TODO: SECURITY CHECK HERE... LCODE DEFINED?
+
+        # Create Reservation
+        request.env['wubook'].generate_reservations(kwargs)
+
+        # New Reservation
         _logger.info("WUBOOK PUSH RESERVATIONS")
         _logger.info(kwargs)
-        return True
+        return request.make_response('200 OK', [('Content-Type', 'text/plain')])
 
     @http.route(['/wubook/push/rooms'], type='http', cors="*",
                 auth="public", methods=['POST'], website=True, csrf=False)
     def wubook_push_rooms(self, **kwargs):
         _logger.info("WUBOOK PUSH ROOMS")
         _logger.info(kwargs)
-        return True
+        return request.make_response('200 OK', [('Content-Type', 'text/plain')])
