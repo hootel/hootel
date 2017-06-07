@@ -188,7 +188,7 @@ class WuBook(models.TransientModel):
 
         res, code = self.SERVER.push_activation(self.TOKEN,
                                           self.LCODE,
-                                          re.sub(r"https?:\/\/", "", urljoin(base_url, "/wubook/push/reservations")),
+                                          urljoin(base_url, "/wubook/push/reservations"),
                                           1)
         
         _logger.info(res)
@@ -198,7 +198,7 @@ class WuBook(models.TransientModel):
 
         res, code = self.SERVER.push_update_activation(self.TOKEN,
                                                  self.LCODE,
-                                                 re.sub(r'https?:\/\/', '', urljoin(base_url, "/wubook/push/rooms")))
+                                                 urljoin(base_url, "/wubook/push/rooms"))
         if res != 0:
             errors.append("Can't activate push rooms")
 
