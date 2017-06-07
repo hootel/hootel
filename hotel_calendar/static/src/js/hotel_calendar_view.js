@@ -263,7 +263,6 @@ var HotelCalendarView = View.extend({
                     res_model: 'hotel.folio',
                     context: {
                     	'default_adults': numBeds,
-                    	'default_partner_id': 1,
                     	'default_checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
                     	'default_checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
                     	'default_room_lines': [
@@ -274,7 +273,7 @@ var HotelCalendarView = View.extend({
                     			'children': 0,
                     			'product_id': room.id,
                     			'product_uom': +room.getUserData('uom_id'),
-                    			'order_line_id.product_uom': +room.getUserData('uom_id'),
+                    			//'order_line_id.product_uom': +room.getUserData('uom_id'),
                     			'product_uom_qty': 1,
                     			'product_uos': 1,
                     			'name': `${room.number}`,

@@ -2,6 +2,7 @@
 <openerp>
     <data>
 
+
         <record id="hotel_reservation_action_checkin" model="ir.actions.act_window">
                <field name="name">Checkins</field>
                <field name="res_model">hotel.folio</field>
@@ -18,7 +19,7 @@
                </field>
         </record>
 
-        <record id="hotel_reservation_action_paydue" model="ir.actions.act_window">
+       <record id="hotel_reservation_action_paydue" model="ir.actions.act_window">
                <field name="name">Pending Payments</field>
                <field name="res_model">hotel.folio</field>
                <field name="view_mode">tree,form</field>

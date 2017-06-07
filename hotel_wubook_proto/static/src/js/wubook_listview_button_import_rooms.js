@@ -3,12 +3,16 @@ odoo.define('wubook.listview_button_import_rooms', function(require) {
     
     var ListView = require('web.ListView');
     
-    function import_rooms(){
-        var self = this;
-        
-        console.log(this.dataset._model);
-        
+    function import_rooms(){ 
         this.dataset._model.call('import_rooms', [false]).then(function(results){
+        	window.location.reload();
+        });
+ 
+        return false;
+    }
+    
+    function import_reservations(){
+        this.dataset._model.call('import_reservations', [false]).then(function(results){
         	window.location.reload();
         });
  
@@ -22,6 +26,10 @@ odoo.define('wubook.listview_button_import_rooms', function(require) {
             if (this.dataset.model == 'hotel.virtual.room') {
             	this.$buttons.append("<button class='oe_button oe_wubook_import_rooms oe_highlight' type='button'>Import Rooms From WuBook</button>");
             	this.$buttons.find('.oe_wubook_import_rooms').on('click', import_rooms.bind(this));
+            }
+            else if (this.dataset.model == 'hotel.folio') {
+            	this.$buttons.append("<button class='oe_button oe_wubook_import_reservations oe_highlight' type='button'>Import Reservations From WuBook</button>");
+            	this.$buttons.find('.oe_wubook_import_reservations').on('click', import_reservations.bind(this));
             }
         }
     });

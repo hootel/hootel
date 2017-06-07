@@ -25,10 +25,10 @@ from openerp.exceptions import except_orm, UserError, ValidationError
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
 
-    wrid = fields.Char("WuBook Reservation ID")
-    wota = fields.Boolean("WuBook OTA", default=False)
+    wrid = fields.Char("WuBook Reservation ID", default="none", readonly=True)
+    wota = fields.Boolean("WuBook OTA", default=False, readonly=True)
 
-#     @api.multi
+#     @api.model
 #     def create(self, vals, check=True):
 #         if check:
 #             vals = self.env['wubook'].create_reservation(vals)
@@ -42,11 +42,11 @@ class HotelReservation(models.Model):
 #                 self.env['wubook'].cancel_reservation(record.id, 'Modificated by admin')
 #                 self.env['wubook'].create_reservation(record.id)
 #         return ret_vals
-#     
+
 #     @api.multi
 #     def unlink(self):
 #         for record in self:
 #             if not self.wota:
 #                 self.env['wubook'].cancel_reservation(record.id, 'Cancelled by admin')
-#             
+
 #         return super(HotelReservation, self).unlink()

@@ -19,32 +19,45 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class hotel_virtual_room(models.Model):
     _inherit = 'hotel.virtual.room'
 
-    wscode = fields.Char("Short Code")
-    wrid = fields.Char("WuBook Room ID")
+    @api.depends('wpersons')
+    def _get_persons(self):
+        min = 0
+        for rec in self:
+            totals = rec.room_ids.mapped(lambda x: x.adults+x.children)
+            _logger.info("PERSONAS")
+            _logger.info(totals)
+            rec.wpersons = 0
 
-#     @api.multi
-#     def create(self, vals, check=True):
-#         if check:
-#             vals = self.env['wubook'].create_room(vals)
-#         return super(hotel_virtual_room, self).create(vals, check=check)
+    wscode = fields.Char("WuBook Short Code")
+    wrid = fields.Char("WuBook Room ID", readonly=True)
+    wpersons = fields.Integer(compute=_get_persons, readonly=True)
+
+    @api.model
+    def create(self, vals):
+        if self._context.get('wubook_action', True):
+            vals = self.env['wubook'].create_room(vals)
+        return super(hotel_virtual_room, self).create(vals)
 
     @api.multi
-    def write(self, vals, check=True):
+    def write(self, vals):
         ret_vals = super(hotel_virtual_room, self).write(vals)
-        if check:
+        if self._context.get('wubook_action', True):
             for record in self:
                 self.env['wubook'].modify_room(record.id)
         return ret_vals
-    
+
     @api.multi
     def unlink(self):
-        for record in self:
-            self.env['wubook'].delete_room(record.id)
+        if self._context.get('wubook_action', True):
+            for record in self:
+                self.env['wubook'].delete_room(record.id)
         return super(hotel_virtual_room, self).unlink()
 
     @api.multi
@@ -52,3 +65,15 @@ class hotel_virtual_room(models.Model):
         wubook = self.env['wubook']
         wubook.import_rooms()
         return True
+
+    @api.multi
+    def get_availability(self, date):
+        folio_obj = self.env['hotel.folio']
+
+        folios = folio_obj.search([('room_lines.checkin', '>=', date),
+                                   ('room_lines.checkout', '<=', date),
+                                   ('room_lines.id', 'in', self.room_ids.ids)])
+
+        for folio in folios:
+            for reserv in folios.room_lines:
+                return True

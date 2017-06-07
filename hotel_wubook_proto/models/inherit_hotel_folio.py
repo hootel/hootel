@@ -18,7 +18,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import controllers
-from . import models
-from . import wubook
-from . import wizards
+from openerp import models, fields, api
+
+
+class HotelFolio(models.Model):
+    _inherit = 'hotel.folio'
+
+    wseed = fields.Char("WuBook Session Seed", readonly=True)
+
+    @api.multi
+    def import_reservations(self):
+        wubook = self.env['wubook']
+        wubook.fetch_new_bookings()
+        return True
