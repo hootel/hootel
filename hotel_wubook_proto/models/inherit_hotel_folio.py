@@ -22,31 +22,11 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm, UserError, ValidationError
 
 
-class HotelReservation(models.Model):
-    _inherit = 'hotel.reservation'
+class HotelFolio(models.Model):
+    _inherit = 'hotel.folio'
 
-    wrid = fields.Char("WuBook Reservation ID", default="none", readonly=True)
-    wota = fields.Boolean("WuBook OTA", default=False, readonly=True)
-
-#     @api.model
-#     def create(self, vals, check=True):
-#         if check:
-#             vals = self.env['wubook'].create_reservation(vals)
-#         return super(HotelReservation, self).create(vals)
-# 
-#     @api.multi
-#     def write(self, vals):
-#         ret_vals = super(HotelReservation, self).write(vals)
-#         for record in self:
-#             if not record.wota:
-#                 self.env['wubook'].cancel_reservation(record.id, 'Modificated by admin')
-#                 self.env['wubook'].create_reservation(record.id)
-#         return ret_vals
-
-#     @api.multi
-#     def unlink(self):
-#         for record in self:
-#             if not self.wota:
-#                 self.env['wubook'].cancel_reservation(record.id, 'Cancelled by admin')
-
-#         return super(HotelReservation, self).unlink()
+    @api.multi
+    def import_reservations(self):
+        wubook = self.env['wubook']
+        wubook.import_reservations()
+        return True

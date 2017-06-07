@@ -53,3 +53,15 @@ class hotel_virtual_room(models.Model):
         wubook = self.env['wubook']
         wubook.import_rooms()
         return True
+
+    @api.multi
+    def get_availability(self, date):
+        folio_obj = self.env['hotel.folio']
+
+        folios = folio_obj.search([('room_lines.checkin', '>=', date),
+                                   ('room_lines.checkout', '<=', date),
+                                   ('room_lines.id', 'in', self.room_ids.ids)])
+
+        for folio in folios:
+            for reserv in folios.room_lines:
+                return True

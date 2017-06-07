@@ -23,3 +23,4 @@ from . import inherit_res_partner
 from . import inherit_hotel_virtual_room
 from . import inherit_product_pricelist_item
 from . import inherit_hotel_reservation
+from . import inherit_hotel_folio

@@ -181,8 +181,11 @@ class WuBook(models.TransientModel):
     def push_activation(self):
         self.init_connection_()
         errors = []
-
+        
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        _logger.info(urljoin(base_url, "/wubook/push/reservations"))
+        _logger.info(urljoin(base_url, "/wubook/push/rooms"))
+
         res = self.SERVER.push_activation(self.TOKEN,
                                           self.LCODE,
                                           urljoin(base_url, "/wubook/push/reservations"), 1)
@@ -216,9 +219,33 @@ class WuBook(models.TransientModel):
                                                        self.LCODE,
                                                        1,
                                                        0)
+        
         _logger.info("FETCH NEW BOOKINGS")
         _logger.info(res)
         _logger.info(bookings)
+        
+        res_partner_obj = self.env['res.partner']
+        hotel_reserv_obj = self.env['hotel.reservation']
+        for book in bookings:
+            # Already Exists?
+            hotel_reserv_obj.search([('wrid', '=', book[''])])
+            # Search Customer
+            partner_id = res_partner_obj.search([('email', '=', book.get('customer_mail', False))], limit=1)
+            if not partner_id:
+                vals = {
+                    'name': "%s %s" % (book.customer_name, book.customer_surname),
+                    'country_id': self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1).id,
+                    'city': book['customer_city'],
+                    'comment': book['customer_notes'],
+                    'phone': book['customer_phone'],
+                    'zip': book['customer_zip'],
+                    'street': book['customer_address'],
+                    #'lang': book['customer_language']
+                }
+                partner_id = res_partner_obj.create(vals)
+            
+            # Create Folio
+
         self.close_connection_()
         return True
 
