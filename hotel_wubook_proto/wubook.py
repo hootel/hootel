@@ -259,27 +259,27 @@ class WuBook(models.TransientModel):
 #                     })]
 #                 })
                 print "lll"
-            else:
-                vals.update({
-                    'partern_id': partner_id.id,
-                    'partner_invoice_id': partner_id.id,
-                    'partner_shipping_id': partner_id.id,
-                    'pricelist_id': partner_id.property_product_pricelist.id,
-                    'wseed': book['sessionSeed'],
-    #                 'room_lines': [(0, False, {
-    #                                 'checkin': "%s %s" % (book['date_arrival'], book['arrival_hour']),
-    #                                 'checkout': book['date_departure'],
-    #                                 'adults': book['men'],
-    #                                 'children': book['children'],
-    #                                 'product_id': room.id,
-    #                                 'product_uom': +room.getUserData('uom_id'),
-    #                                 'product_uom_qty': 1,
-    #                                 'product_uos': 1,
-    #                                 'name': `${room.number}`,
-    #                                 'price_unit': result['unit_price'],
-    #                             })] 
-                })
-                hotel_folio_id = hotel_folio_obj.create(vals)
+#             else:
+#                 vals.update({
+#                     'partern_id': partner_id.id,
+#                     'partner_invoice_id': partner_id.id,
+#                     'partner_shipping_id': partner_id.id,
+#                     'pricelist_id': partner_id.property_product_pricelist.id,
+#                     'wseed': book['sessionSeed'],
+#     #                 'room_lines': [(0, False, {
+#     #                                 'checkin': "%s %s" % (book['date_arrival'], book['arrival_hour']),
+#     #                                 'checkout': book['date_departure'],
+#     #                                 'adults': book['men'],
+#     #                                 'children': book['children'],
+#     #                                 'product_id': room.id,
+#     #                                 'product_uom': +room.getUserData('uom_id'),
+#     #                                 'product_uom_qty': 1,
+#     #                                 'product_uos': 1,
+#     #                                 'name': `${room.number}`,
+#     #                                 'price_unit': result['unit_price'],
+#     #                             })] 
+#                 })
+#                 hotel_folio_id = hotel_folio_obj.create(vals)
 
         return True
 
