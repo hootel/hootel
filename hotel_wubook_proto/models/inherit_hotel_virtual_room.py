@@ -30,7 +30,7 @@ class hotel_virtual_room(models.Model):
     def _get_persons(self):
         min = 0
         for rec in self:
-            totals = rec.room_lines.mapped(lambda x: x.adults+x.children)
+            totals = rec.room_ids.mapped(lambda x: x.adults+x.children)
             _logger.info("PERSONAS")
             _logger.info(totals)
             rec.wpersons = 0
