@@ -181,7 +181,7 @@ class WuBook(models.TransientModel):
     @api.multi
     def push_activation(self):
         errors = []
-        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url').replace("http://", "https://")
 
         self.init_connection_()
 
