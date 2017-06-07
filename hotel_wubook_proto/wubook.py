@@ -253,7 +253,7 @@ class WuBook(models.TransientModel):
             # Create Folio
             vals = {}
             hotel_folio_id = hotel_folio_obj.search([('wseed', '=', book['sessionSeed'])], limit=1)
-            if hotel_folio_id:
+            if hotel_folio_id and book['sessionSeed'] != '':
 #                 hotel_folio_id.write({
 #                     'room_lines': [(0, False, {
 #                     })]
@@ -262,6 +262,9 @@ class WuBook(models.TransientModel):
             else:
                 vals.update({
                     'partern_id': partner_id.id,
+                    'partner_invoice_id': partner_id.id,
+                    'partner_shipping_id': partner_id.id,
+                    'pricelist_id': partner_id.property_product_pricelist.id,
                     'wseed': book['sessionSeed'],
     #                 'room_lines': [(0, False, {
     #                                 'checkin': "%s %s" % (book['date_arrival'], book['arrival_hour']),
