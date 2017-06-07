@@ -8,7 +8,6 @@
                <field name="res_model">hotel.folio</field>
                <field name="view_mode">tree,form</field>
                <field name="domain">[('checkins_reservations','=',True)]</field>
-               </field>
         </record>
 
         <record id="hotel_reservation_action_checkout" model="ir.actions.act_window">
@@ -16,7 +15,6 @@
                <field name="res_model">hotel.folio</field>
                <field name="view_mode">tree,form</field>
                <field name="domain">[('checkouts_reservations','=',True)]</field>
-               </field>
         </record>
 
        <record id="hotel_reservation_action_paydue" model="ir.actions.act_window">
