@@ -43,8 +43,8 @@ class HotelReservation(models.Model):
 
     @api.model
     def create(self, vals):
-#         if self._context.get('wubook_action', True):
-#             self.env['wubook'].update_availability(vals)
+        if self._context.get('wubook_action', True):
+            self.env['wubook'].update_availability(vals)
         res = super(HotelReservation, self).create(vals)
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.wubook', self.env.uid), "wubook_reservation")
         return res
