@@ -379,9 +379,6 @@ class WuBook(models.TransientModel):
 
     @api.model
     def update_availability(self, vals):
-        _logger.info("UPDATE AVAIL")
-        _logger.info(vals)
-
         date_start = datetime.strptime(vals['checkin'], DEFAULT_SERVER_DATETIME_FORMAT)
         date_end = datetime.strptime(vals['checkout'], DEFAULT_SERVER_DATETIME_FORMAT)
         date_diff = abs((date_start-date_end).days)
