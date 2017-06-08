@@ -388,7 +388,7 @@ class WuBook(models.TransientModel):
 
         hotel_vroom_obj = self.env['hotel.virtual.room']
         rooms_avail = []
-        vrooms = self.env['hotel.virtual.room'].search(['room_ids.product_id', '=', vals['product_id']])
+        vrooms = self.env['hotel.virtual.room'].search([('room_ids.product_id', '=', vals['product_id'])])
         for vroom in vrooms:
             rdays = []
             for i in range(0, date_diff-1):
