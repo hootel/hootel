@@ -393,7 +393,7 @@ class WuBook(models.TransientModel):
             rdays = []
             for i in range(0, date_diff-1):
                 ndate = date_start + timedelta(days=i)
-                rdays.update({
+                rdays.append({
                     'date': ndate.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                     'avail': len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                                                                                  ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
