@@ -30,9 +30,6 @@ class website_wubook(http.Controller):
     def wubook_push_reservations(self, **kwargs):
         rcode = kwargs['rcode']
         lcode = kwargs['lcode']
-        
-        _logger.info("WUBOOK PUSH RESERVATIONS")
-        _logger.info(kwargs)
 
         # WuBook Check
         if rcode == '2000' and lcode == '1000':
@@ -41,7 +38,7 @@ class website_wubook(http.Controller):
         # TODO: SECURITY CHECK HERE... LCODE DEFINED?
 
         # Create Reservation
-        request.env['wubook'].generate_reservations(kwargs)
+        request.env['wubook'].fetch_booking(lcode, rcode)
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
 

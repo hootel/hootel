@@ -219,6 +219,25 @@ class WuBook(models.TransientModel):
         return True
 
     @api.model
+    def fetch_booking(self, lcode, rcode):
+        self.init_connection_()
+        res, bookings = self.SERVER.fetch_booking(self.TOKEN,
+                                                  lcode,
+                                                  rcode)
+        if res == 0:
+            processed_rids = self.generate_reservations(bookings)
+            if any(processed_rids):
+                res, data = self.SERVER.mark_bookings(self.TOKEN,
+                                                      self.LCODE,
+                                                      processed_rids)
+        self.close_connection_()
+
+        if res != 0:
+            raise ValidationError("Can't process reservations from wubook!")
+
+        return True
+
+    @api.model
     def initialize(self):
         self.push_activation()
         self.import_rooms()

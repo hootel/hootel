@@ -126,6 +126,8 @@ var HotelCalendarView = View.extend({
     
     /** CUSTOM METHODS **/
     _wubook_reservation: function(notification) {
+    	console.log("NOTIF!");
+    	console.log(notification[0]);
     	if (notification[0][1] === "wubook_reservation") {
     		this.reload_hcalendar_reservations();
     		this.get_pms_buttons_counts();
