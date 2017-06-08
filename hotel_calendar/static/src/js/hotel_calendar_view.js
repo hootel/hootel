@@ -620,6 +620,7 @@ var HotelCalendarView = View.extend({
 		});
 		
 		/* BUTTONS */
+		this.get_pms_buttons_counts();
 		this.$el.find("#btn_channel_manager_request").on('click', function(ev){
 			var pop = new Common.SelectCreateDialog($this, {
                 res_model: 'hotel.reservation',
