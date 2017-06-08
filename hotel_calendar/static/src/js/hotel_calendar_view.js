@@ -629,9 +629,22 @@ var HotelCalendarView = View.extend({
                 disable_multiple_selection: true,
                 no_create: true,
                 on_selected: function(element_ids) {
-                	var def = $.Deferred();
-                	$this.reload_hcalendar_reservations();
-                    return def
+                	console.log(element_ids);
+                	return new Model('hotel.reservation').call('get_formview_id', [element_ids]).then(function(view_id){
+        				var pop = new Common.FormViewDialog($this, {
+        	                res_model: 'hotel.reservation',
+        	                res_id: element_ids[0],
+        	                title: _t("Open: ") + _t("Reservation"),
+        	                view_id: view_id,
+        	                //readonly: false
+        	            }).open();
+        				pop.on('write_completed', $this, function(){
+                            $this.trigger('changed_value');
+                        });
+        				pop.on('closed', $this, function(){
+                            $this.reload_hcalendar_reservations(); // Here because don't trigger 'write_completed' when change state to confirm
+                        });
+        			});
                 }
             }).open();
 		});
