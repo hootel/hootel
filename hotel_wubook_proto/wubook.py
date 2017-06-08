@@ -153,7 +153,7 @@ class WuBook(models.TransientModel):
                     'wrid': room['id'],
                     'wscode': room['shortname'],
                     'list_price': room['price'],
-                    'max_real_rooms': room['availability'],
+                    #'max_real_rooms': room['availability'],
                 }
                 if vroom:
                     vroom.with_context({'wubook_action': False}).write(vals)
