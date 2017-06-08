@@ -241,7 +241,7 @@ class WuBook(models.TransientModel):
     def initialize(self):
         self.push_activation()
         self.import_rooms()
-        self.fetch_new_bookings()
+        #self.fetch_new_bookings()
         return True
 
     @api.model
