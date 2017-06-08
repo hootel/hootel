@@ -317,7 +317,8 @@ class WuBook(models.TransientModel):
                 partner_id = res_partner_obj.create(vals)
 
             # Obtener habitacion libre
-            checkin = "%s %s" % (book['date_arrival'], book['arrival_hour'])
+            arr_hour = book['arrival_hour'] == "--" and '00:00' or book['arrival_hour']
+            checkin = "%s %s" % (book['date_arrival'], arr_hour)
             checkin_dt = datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT)
             checkin = checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
