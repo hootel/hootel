@@ -379,6 +379,9 @@ class WuBook(models.TransientModel):
 
     @api.model
     def update_availability(self, vals):
+        if 'checkin' not in vals or 'checkout' not in vals or 'product_id' not in vals:
+            return False
+
         date_start = datetime.strptime(vals['checkin'], DEFAULT_SERVER_DATETIME_FORMAT)
         date_end = datetime.strptime(vals['checkout'], DEFAULT_SERVER_DATETIME_FORMAT)
         date_diff = abs((date_start-date_end).days)
