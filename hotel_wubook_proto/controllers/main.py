@@ -38,7 +38,7 @@ class website_wubook(http.Controller):
         # TODO: SECURITY CHECK HERE... LCODE DEFINED?
 
         # Create Reservation
-        request.env['wubook'].fetch_booking(lcode, rcode)
+        request.env['wubook'].sudo().fetch_booking(lcode, rcode)
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
 
