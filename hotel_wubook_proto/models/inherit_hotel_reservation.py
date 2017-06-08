@@ -60,6 +60,7 @@ class HotelReservation(models.Model):
         ret_vals = super(HotelReservation, self).write(vals)
         if self._context.get('wubook_action', True):
             self.env['wubook'].update_availability(vals)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.wubook', self.env.uid), "wubook_reservation")
         return ret_vals
 
     @api.multi
@@ -74,4 +75,5 @@ class HotelReservation(models.Model):
             'checkout': self.checkout,
         })
 
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.wubook', self.env.uid), "wubook_reservation")
         return super(HotelReservation, self).unlink()

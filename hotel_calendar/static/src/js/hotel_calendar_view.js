@@ -130,7 +130,6 @@ var HotelCalendarView = View.extend({
     	console.log(notification[0]);
     	if (notification[0][1] === "wubook_reservation") {
     		this.reload_hcalendar_reservations();
-    		this.get_pms_buttons_counts();
     	}
     },
     
@@ -462,11 +461,11 @@ var HotelCalendarView = View.extend({
     	var $button = this.$el.find("#btn_channel_manager_request");
     	var $text = this.$el.find("#btn_channel_manager_request .cloud-text");
     	$text.hide();
-    	$button.removeClass('active');
+    	$button.removeClass('incoming');
     	domain = [['wrid', '!=', 'none'], ['to_assign', '=', true]];
     	new Model('hotel.reservation').call('search_count', [domain]).then(function(count){
 			if (count > 0) {
-				$button.addClass('active');
+				$button.addClass('incoming');
 				$text.text(count);
 				$text.show();
 			}
@@ -621,9 +620,19 @@ var HotelCalendarView = View.extend({
 		});
 		
 		/* BUTTONS */
-		this.get_pms_buttons_counts();
 		this.$el.find("#btn_channel_manager_request").on('click', function(ev){
-			$this.call_action('hotel_calendar.hotel_reservation_action_manager_request');
+			var pop = new Common.SelectCreateDialog($this, {
+                res_model: 'hotel.reservation',
+                domain: [['wrid', '!=', 'none'], ['to_assign', '=', true]],
+                title: _t("WuBook Reservations to Assign"),
+                disable_multiple_selection: true,
+                no_create: true,
+                on_selected: function(element_ids) {
+                	var def = $.Deferred();
+                	$this.reload_hcalendar_reservations();
+                    return def
+                }
+            }).open();
 		});
 		this.$el.find("#btn_action_checkout").on('click', function(ev){
 			$this.call_action('hotel_calendar.hotel_reservation_action_checkout');
@@ -734,6 +743,7 @@ var HotelCalendarView = View.extend({
 			$this.hcalendar.pricelist = results['pricelist'];
 			$this.hcalendar.setReservations(reservs);
 		});
+    	this.get_pms_buttons_counts();
     },
     
     generate_domains: function() {
