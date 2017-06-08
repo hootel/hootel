@@ -29,6 +29,7 @@
                 <field name="wstatus"/>
                 <field name="wchannel_id"/>
                 <field name="to_assign" invisible="True" />
+                <field name="state" invisible="True" />
             </tree>
         </field>
     </record>
