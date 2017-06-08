@@ -26,18 +26,16 @@ _logger = logging.getLogger(__name__)
 class hotel_virtual_room(models.Model):
     _inherit = 'hotel.virtual.room'
 
-    @api.depends('wpersons')
-    def _get_persons(self):
-        min = 0
+    @api.depends('wcapacity')
+    @api.onchange('room_ids')
+    def _get_capacity(self):
         for rec in self:
-            totals = rec.room_ids.mapped(lambda x: x.adults+x.children)
-            _logger.info("PERSONAS")
-            _logger.info(totals)
-            rec.wpersons = 0
+            capacities = rec.room_ids.mapped('capacity')
+            rec.wcapacity = any(capacities) and min(capacities) or 0
 
     wscode = fields.Char("WuBook Short Code")
     wrid = fields.Char("WuBook Room ID", readonly=True)
-    wpersons = fields.Integer(compute=_get_persons, readonly=True)
+    wcapacity = fields.Integer(compute=_get_capacity, readonly=True)
 
     @api.model
     def create(self, vals):
@@ -65,15 +63,3 @@ class hotel_virtual_room(models.Model):
         wubook = self.env['wubook']
         wubook.import_rooms()
         return True
-
-    @api.multi
-    def get_availability(self, date):
-        folio_obj = self.env['hotel.folio']
-
-        folios = folio_obj.search([('room_lines.checkin', '>=', date),
-                                   ('room_lines.checkout', '<=', date),
-                                   ('room_lines.id', 'in', self.room_ids.ids)])
-
-        for folio in folios:
-            for reserv in folios.room_lines:
-                return True

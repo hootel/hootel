@@ -2,6 +2,12 @@
 <openerp>
     <data>
 
+        <record id="hotel_reservation_action_manager_request" model="ir.actions.act_window">
+               <field name="name">Reservations to Assign from WuBook</field>
+               <field name="res_model">hotel.reservation</field>
+               <field name="view_mode">tree,form</field>
+               <field name="domain">[('wrid','!=','none'),('to_assign','=',True)]</field>
+        </record>
 
         <record id="hotel_reservation_action_checkin" model="ir.actions.act_window">
                <field name="name">Checkins</field>

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<odoo>
+
+	<record id="hotel_reservation_view_form" model="ir.ui.view">
+        <field name="model">hotel.reservation</field>
+        <field name="inherit_id" ref="hotel.view_hotel_reservation_form" />
+        <field name="arch" type="xml">
+        	<xpath expr="//field[@name='invoice_status']" position="after">
+        		<field name="wrid" readonly="True" />
+        		<field name="wchannel_id" readonly="True"  />
+        		<field name="wchannel_reservation_code" readonly="True" />
+        		<field name="wstatus" readonly="True" />
+        	</xpath>
+        </field>
+    </record>
+    
+</odoo>

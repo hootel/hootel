@@ -132,7 +132,7 @@ class HotelFolio(models.Model):
 
         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
         date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
-        date_diff = abs((date_start-date_end).days)+1
+        date_diff = abs((date_start-date_end).days)
 
         price = 0.0
         for i in range(0, date_diff-1):

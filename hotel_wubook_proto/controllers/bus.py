@@ -18,36 +18,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp.addons.bus.controllers.main import BusController
+from openerp.http import request
 
-{
-    'name': 'Hotel WuBook Prototype',
-    'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
-    'website': 'https://www.eiqui.com',
-    'category': 'eiqui/hotel',
-    'summary': "Hotel WuBook",
-    'description': "Hotel WuBook Prototype",
-    'depends': [
-        'bus',
-        'hotel',
-    ],
-    'external_dependencies': {
-        'python': ['xmlrpclib']
-    },
-    'data': [
-        'data/sequence.xml',
-        'data/cron_jobs.xml',
-        'wizards/wubook_installer.xml',
-        'views/general.xml',
-        'views/inherit_res_partner.xml',
-        'views/inherit_hotel_reservation.xml',
-        'views/inherit_hotel_virtual_room.xml',
-        #'views/res_config.xml'
-    ],
-    'test': [
-    ],
-    'installable': True,
-    'auto_install': False,
-    'application': False,
-    'license': 'AGPL-3',
-}
+
+class Controller(BusController):
+    def _poll(self, dbname, channels, last, options):
+        if request.session.uid:
+            registry, cr, uid, context = request.registry, request.cr, request.session.uid, request.context
+            new_channel = (request.db, 'hotel.wubook', request.uid)
+            channels.append(new_channel)
+        return super(Controller, self)._poll(dbname, channels, last, options)

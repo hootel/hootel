@@ -26,27 +26,52 @@ class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
 
     wrid = fields.Char("WuBook Reservation ID", default="none", readonly=True)
-    wota = fields.Boolean("WuBook OTA", default=False, readonly=True)
+    wchannel_id = fields.Char("WuBook Channel ID", default='none',
+                              readonly=True)
+    wchannel_reservation_code = fields.Char("WuBook Channel Reservation Code",
+                                            default='none', readonly=True)
 
-#     @api.model
-#     def create(self, vals, check=True):
-#         if check:
-#             vals = self.env['wubook'].create_reservation(vals)
-#         return super(HotelReservation, self).create(vals)
-# 
-#     @api.multi
-#     def write(self, vals):
-#         ret_vals = super(HotelReservation, self).write(vals)
-#         for record in self:
-#             if not record.wota:
-#                 self.env['wubook'].cancel_reservation(record.id, 'Modificated by admin')
-#                 self.env['wubook'].create_reservation(record.id)
-#         return ret_vals
+    wstatus = fields.Selection([
+        ('0', 'No WuBook'),
+        ('1', 'Confirmed'),
+        ('2', 'Waiting'),
+        ('3', 'Refused'),
+        ('4', 'Accepted'),
+        ('5', 'Cancelled'),
+        ('6', 'Cancelled with penalty')], string='WuBook Status', default='0',
+                                        readonly=True)
 
-#     @api.multi
-#     def unlink(self):
-#         for record in self:
-#             if not self.wota:
-#                 self.env['wubook'].cancel_reservation(record.id, 'Cancelled by admin')
+    @api.model
+    def create(self, vals):
+#         if self._context.get('wubook_action', True):
+#             self.env['wubook'].update_availability(vals)
+        res = super(HotelReservation, self).create(vals)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.wubook', self.env.uid), "wubook_reservation")
+        return res
 
-#         return super(HotelReservation, self).unlink()
+    @api.multi
+    def write(self, vals):
+        if self._context.get('wubook_action', True):
+            self.env['wubook'].update_availability({
+                'product_id': self.product_id.id,
+                'checkin': self.checkin,
+                'checkout': self.checkout,
+            })
+        ret_vals = super(HotelReservation, self).write(vals)
+        if self._context.get('wubook_action', True):
+            self.env['wubook'].update_availability(vals)
+        return ret_vals
+
+    @api.multi
+    def unlink(self):
+        for record in self:
+            if self.wchannel_id == '0':
+                self.env['wubook'].cancel_reservation(record.id, 'Cancelled by admin')
+
+        self.env['wubook'].update_availability({
+            'product_id': self.product_id.id,
+            'checkin': self.checkin,
+            'checkout': self.checkout,
+        })
+
+        return super(HotelReservation, self).unlink()

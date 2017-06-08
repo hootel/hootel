@@ -1,4 +1,4 @@
-odoo.define('alda_calendar.HotelCalendarView', function (require) {
+odoo.define('hotel_calendar.HotelCalendarView', function (require) {
 "use strict";
 /*
  * Hotel Calendar View
@@ -12,6 +12,7 @@ odoo.define('alda_calendar.HotelCalendarView', function (require) {
  */
 
 var Core = require('web.core');
+var Bus = require('bus.bus').bus;
 //var data = require('web.data');
 var Time = require('web.time');
 var Model = require('web.DataModel');
@@ -63,6 +64,7 @@ var HotelCalendarView = View.extend({
         this._model = new Model(this.dataset.model);
         this.action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
         this.mutex = new Utils.Mutex();
+        Bus.on("notification", this, this._wubook_reservation);
     },    
 
     view_loading: function(r) {
@@ -123,6 +125,13 @@ var HotelCalendarView = View.extend({
     },
     
     /** CUSTOM METHODS **/
+    _wubook_reservation: function(notification) {
+    	if (notification[0][1] === "wubook_reservation") {
+    		this.reload_hcalendar_reservations();
+    		this.get_pms_buttons_counts();
+    	}
+    },
+    
     create_calendar: function(options, pricelist) {
     	var $this = this;
     	// CALENDAR
@@ -447,8 +456,23 @@ var HotelCalendarView = View.extend({
     	var domain = [];
     	var $badge = false;
     	
+    	// Cloud Reservations
+    	var $button = this.$el.find("#btn_channel_manager_request");
+    	var $text = this.$el.find("#btn_channel_manager_request .cloud-text");
+    	$text.hide();
+    	$button.removeClass('active');
+    	domain = [['wrid', '!=', 'none'], ['to_assign', '=', true]];
+    	new Model('hotel.reservation').call('search_count', [domain]).then(function(count){
+			if (count > 0) {
+				$button.addClass('active');
+				$text.text(count);
+				$text.show();
+			}
+		});
+    	
+    	
     	// Checkout Button
-    	domain = [['checkins_reservations','=',True]];
+    	domain = [['checkins_reservations','=',true]];
 
 		var $badge_checkout = this.$el.find('#pms-menu #btn_action_checkout .badge');
 		this._model.call('search_count', [domain]).then(function(count){
@@ -459,7 +483,7 @@ var HotelCalendarView = View.extend({
 		});
     	
     	// Checkin Button
-    	domain = [['checkouts_reservations','=',True]];
+    	domain = [['checkouts_reservations','=',true]];
     	
     	var $badge_checkin = this.$el.find('#pms-menu #btn_action_checkin .badge');
     	this._model.call('search_count', [domain]).then(function(count){
@@ -595,7 +619,10 @@ var HotelCalendarView = View.extend({
 		});
 		
 		/* BUTTONS */
-		//this.get_pms_buttons_counts();
+		this.get_pms_buttons_counts();
+		this.$el.find("#btn_channel_manager_request").on('click', function(ev){
+			$this.call_action('hotel_calendar.hotel_reservation_action_manager_request');
+		});
 		this.$el.find("#btn_action_checkout").on('click', function(ev){
 			$this.call_action('hotel_calendar.hotel_reservation_action_checkout');
 		});

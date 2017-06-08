@@ -20,12 +20,18 @@
 ##############################################################################
 import xmlrpclib
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from urlparse import urljoin
 from openerp import models, api
 from openerp.exceptions import except_orm, UserError, ValidationError
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 import logging
 _logger = logging.getLogger(__name__)
+
+DEFAULT_WUBOOK_DATE_FORMAT = "%d/%m/%Y"
+DEFAULT_WUBOOK_TIME_FORMAT = "%H:%M"
+DEFAULT_WUBOOK_DATETIME_FORMAT = "%s %s" % (DEFAULT_WUBOOK_DATE_FORMAT,
+                                            DEFAULT_WUBOOK_TIME_FORMAT)
 
 
 def _partner_split_name(partner_name):
@@ -65,7 +71,7 @@ class WuBook(models.TransientModel):
         self.TOKEN = False
         self.SERVER = False
 
-    @api.multi
+    @api.model
     def create_room(self, vals):
         self.init_connection_()
         shortcode = self.env['ir.sequence'].get('seq_vroom_id')
@@ -74,7 +80,7 @@ class WuBook(models.TransientModel):
             self.LCODE,
             0,
             vals['name'],
-            2,
+            vals['wcapacity'],
             vals['list_price'],
             'max_real_rooms' in vals and vals['max_real_rooms'] or 1,
             shortcode[:4],
@@ -89,7 +95,7 @@ class WuBook(models.TransientModel):
             raise UserError("Can't create room in WuBook!")
         return vals
 
-    @api.multi
+    @api.model
     def modify_room(self, vroomid):
         self.init_connection_()
         vroom = self.env['hotel.virtual.room'].browse([vroomid])
@@ -98,7 +104,7 @@ class WuBook(models.TransientModel):
             self.LCODE,
             vroom.wrid,
             vroom.name,
-            2,
+            vroom.wcapacity,
             vroom.list_price,
             vroom.max_real_rooms,
             vroom.wscode,
@@ -112,7 +118,7 @@ class WuBook(models.TransientModel):
 
         return True
 
-    @api.multi
+    @api.model
     def delete_room(self, vroomid):
         self.init_connection_()
         vroom = self.env['hotel.virtual.room'].browse([vroomid])
@@ -128,7 +134,7 @@ class WuBook(models.TransientModel):
 
         return True
 
-    @api.multi
+    @api.model
     def import_rooms(self):
         self.init_connection_()
         res, rooms = self.SERVER.fetch_rooms(
@@ -147,6 +153,7 @@ class WuBook(models.TransientModel):
                     'wrid': room['id'],
                     'wscode': room['shortname'],
                     'list_price': room['price'],
+                    'max_real_rooms': room['availability'],
                 }
                 if vroom:
                     vroom.with_context({'wubook_action': False}).write(vals)
@@ -157,28 +164,7 @@ class WuBook(models.TransientModel):
 
         return True
 
-    @api.multi
-    def push_prices(self):
-        return True
-
-        self.init_connection_()
-        vroom = self.env['hotel.virtual.room'].browse([])
-        res, rid = self.SERVER.mod_room(
-            self.TOKEN,
-            self.LCODE,
-            vroom.wrid,
-            vroom.name,
-            2,
-            vroom.list_price,
-            vroom.max_real_rooms,
-            vroom.wscode,
-            'nb'
-            #rtype=('name' in vals and vals['name'] and 3) or 1
-        )
-        self.close_connection_()
-        return True
-
-    @api.multi
+    @api.model
     def push_activation(self):
         errors = []
         base_url = self.env['ir.config_parameter'].get_param('web.base.url').replace("http://", "https://")
@@ -186,15 +172,15 @@ class WuBook(models.TransientModel):
         self.init_connection_()
 
         res, code = self.SERVER.push_activation(self.TOKEN,
-                                          self.LCODE,
-                                          urljoin(base_url, "/wubook/push/reservations"),
-                                          1)
+                                                self.LCODE,
+                                                urljoin(base_url, "/wubook/push/reservations"),
+                                                1)
         if res != 0:
             errors.append("Can't activate push reservations: %s" % code)
 
         res, code = self.SERVER.push_update_activation(self.TOKEN,
-                                                 self.LCODE,
-                                                 urljoin(base_url, "/wubook/push/rooms"))
+                                                       self.LCODE,
+                                                       urljoin(base_url, "/wubook/push/rooms"))
         if res != 0:
             errors.append("Can't activate push rooms: %s" % code)
 
@@ -205,39 +191,41 @@ class WuBook(models.TransientModel):
 
         return True
 
-    @api.multi
+    @api.model
     def corporate_fetch(self):
         self.init_connection_()
         res = self.SERVER.corporate_fetchable_properties(self.TOKEN)
         self.close_connection_()
         return True
 
-    @api.multi
+    @api.model
     def fetch_new_bookings(self):
         self.init_connection_()
         res, bookings = self.SERVER.fetch_new_bookings(self.TOKEN,
                                                        self.LCODE,
                                                        1,
                                                        0)
+        if res == 0:
+            processed_rids = self.generate_reservations(bookings)
+            if any(processed_rids):
+                res, data = self.SERVER.mark_bookings(self.TOKEN,
+                                                      self.LCODE,
+                                                      processed_rids)
         self.close_connection_()
 
-        _logger.info("FETCH NEW BOOKINGS")
-        _logger.info(res)
-        _logger.info(bookings)
-
-        self.generate_reservations(bookings)
+        if res != 0:
+            raise ValidationError("Can't process reservations from wubook!")
 
         return True
 
-    @api.multi
+    @api.model
     def initialize(self):
         self.push_activation()
         self.import_rooms()
         self.fetch_new_bookings()
         return True
 
-    # TODO: Saber a que habitacion virtual pertenece la reserva de una real
-    @api.multi
+    @api.model
     def create_reservation(self, reservid):
         self.init_connection_()
         reserv = self.env['hotel.reservation'].browse([reservid])
@@ -264,10 +252,10 @@ class WuBook(models.TransientModel):
         reserv.write({'wrid': rcode})
         return True
 
-    @api.multi
+    @api.model
     def cancel_reservation(self, reservid, reason=""):
-        self.init_connection_()
         reserv = self.env['hotel.reservation'].browse([reservid])
+        self.init_connection_()
         res, rcode = self.SERVER.cancel_reservation(self.TOKEN,
                                                     self.LCODE,
                                                     reserv.wrid,
@@ -284,6 +272,8 @@ class WuBook(models.TransientModel):
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
+        hotel_vroom_obj = self.env['hotel.virtual.room']
+        processed_rids = []
         for book in bookings:
             # Already Exists?
             reserv = hotel_reserv_obj.search([('wrid', '=', book['reservation_code'])], limit=1)
@@ -307,33 +297,98 @@ class WuBook(models.TransientModel):
                 }
                 partner_id = res_partner_obj.create(vals)
 
+            # Obtener habitacion libre
+            checkin = "%s %s" % (book['date_arrival'], book['arrival_hour'])
+            checkin_dt = datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT)
+            checkin = checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
+            checkout = "%s 21:59" % book['date_departure'] # FIXME: Usar UTC
+            checkout_dt = datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT)
+            checkout = checkout_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
+            vrooms_ids = book['rooms'].split(',')
+            vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])
+
+            reservations = []
+            for vroom in vrooms:
+                free_rooms = hotel_vroom_obj.check_availability_virtual_room(checkin,
+                                                                             checkout,
+                                                                             vroom.id)
+                if any(free_rooms):
+                    # Total Price Room
+                    tprice = 0.0
+                    for broom in book['booked_rooms']:
+                        if broom['room_id'] == int(vroom.wrid):
+                            for brday in broom['roomdays']:
+                                tprice += brday['price']
+                            break
+
+                    vals = {
+                        'checkin': checkin,
+                        'checkout': checkout,
+                        'adults': book['men'],
+                        'children': book['children'],
+                        'product_id': free_rooms[0].product_id.id,
+                        'product_uom': free_rooms[0].product_id.product_tmpl_id.uom_id.id,
+                        'product_uom_qty': 1,
+                        'product_uos': 1,
+                        'name': free_rooms[0].name,
+                        'price_unit': tprice,
+                        'to_assign': True,
+                        'wrid': str(book['reservation_code']),
+                        'wchannel_id': str(book['id_channel']),
+                        'wchannel_reservation_code': str(book['channel_reservation_code']),
+                        'wstatus': str(book['status']),
+                    }
+                    reservations.append((0, False, vals))
+                else:
+                    raise ValidationError("Can't found a free room for reservation from wubook!!!")
             # Create Folio
-            vals = {}
+            vals = {'room_lines': reservations}
             hotel_folio_id = hotel_folio_obj.search([('wseed', '=', book['sessionSeed'])], limit=1)
             if hotel_folio_id and book['sessionSeed'] != '':
-#                 hotel_folio_id.write({
-#                     'room_lines': [(0, False, {
-#                     })]
-#                 })
-                print "lll"
-#             else:
-#                 vals.update({
-#                     'partern_id': partner_id.id,
-#                     'partner_invoice_id': partner_id.id,
-#                     'partner_shipping_id': partner_id.id,
-#                     'pricelist_id': partner_id.property_product_pricelist.id,
-#                     'wseed': book['sessionSeed'],
-#     #                 'room_lines': [(0, False, {
-#     #                                 'checkin': "%s %s" % (book['date_arrival'], book['arrival_hour']),
-#     #                                 'checkout': book['date_departure'],
-#     #                                 'adults': book['men'],
-#     #                                 'children': book['children'],
-#     #                                 'product_id': room.id,
-#     #                                 'product_uom': +room.getUserData('uom_id'),
-#     #                                 'product_uom_qty': 1,
-#     #                                 'product_uos': 1,
-#     #                                 'name': `${room.number}`,
-#     #                                 'price_unit': result['unit_price'],
-#     #                             })] 
-#                 })
-#                 hotel_folio_id = hotel_folio_obj.create(vals)
+                hotel_folio_id.with_context({'wubook_action': False}).write(vals)
+            else:
+                vals.update({
+                    'partner_id': partner_id.id,
+                    'wseed': book['sessionSeed']
+                })
+                hotel_folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
+            processed_rids.append(book['reservation_code'])
+        return processed_rids
+
+    @api.model
+    def update_availability(self, vals):
+        _logger.info("UPDATE AVAIL")
+        _logger.info(vals)
+
+        date_start = datetime.strptime(vals['checkin'], DEFAULT_SERVER_DATETIME_FORMAT)
+        date_end = datetime.strptime(vals['checkout'], DEFAULT_SERVER_DATETIME_FORMAT)
+        date_diff = abs((date_start-date_end).days)
+
+        hotel_vroom_obj = self.env['hotel.virtual.room']
+        rooms_avail = []
+        vrooms = self.env['hotel.virtual.room'].search(['room_ids.product_id', '=', vals['product_id']])
+        for vroom in vrooms:
+            rdays = []
+            for i in range(0, date_diff-1):
+                ndate = date_start + timedelta(days=i)
+                rdays.update({
+                    'date': ndate.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    'avail': len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                                                                 ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                                                                 vroom.id))
+                })
+            ravail = {'id': vroom.wrid, 'days': rdays}
+            rooms_avail.append(ravail)
+
+        self.init_connection_()
+        res, rcode = self.SERVER.update_sparse_avail(self.TOKEN,
+                                                     self.LCODE,
+                                                     rooms_avail)
+        self.close_connection_()
+
+        if res != 0:
+            raise UserError("Can't update rooms availability in WuBook!")
+
+        return True

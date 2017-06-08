@@ -52,13 +52,13 @@
 	margin: 0.2em 0;
 }
 
-#pms-menu #btn_channel_manager_request i {
+#pms-menu #btn_channel_manager_request.active i {
 	animation-name: channel-manager-changes;
     animation-duration: 2s;
     animation-iteration-count: infinite;
     animation-direction: alternate;
 }
-#pms-menu #btn_channel_manager_request span {
+#pms-menu #btn_channel_manager_request.active span {
 	animation-name: channel-manager-changes-text;
     animation-duration: 2s;
     animation-iteration-count: infinite;

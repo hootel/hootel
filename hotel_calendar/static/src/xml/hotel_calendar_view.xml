@@ -7,7 +7,7 @@
     			<button class="btn col-xs-12 col-lg-12" id="btn_channel_manager_request">
     				<div class="fa-stack fa-2x">
     					<i class="fa fa-cloud fa-stack-2x"> </i>
-    					<span class="fa-stack-1x cloud-text">3</span>
+    					<span class="fa-stack-1x cloud-text">0</span>
     				</div>
     			</button>
     			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_checkout">
