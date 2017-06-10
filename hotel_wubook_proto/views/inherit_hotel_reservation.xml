@@ -19,7 +19,7 @@
         <field name="name">hotel.reservation.tree</field>
         <field name="model">hotel.reservation</field>
         <field name="arch" type="xml">
-            <tree string="Hotel Reservation" colors="yellow:to_assign == True">
+            <tree string="Hotel Reservation">
             	<field name="product_id"/>
                 <field name="checkin"/>
                 <field name="checkout"/>

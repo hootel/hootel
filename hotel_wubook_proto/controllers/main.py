@@ -31,6 +31,9 @@ class website_wubook(http.Controller):
         rcode = kwargs['rcode']
         lcode = kwargs['lcode']
 
+        _logger.info("WUBOOK PUSH RESERVATIONS")
+        _logger.info(kwargs)
+
         # WuBook Check
         if rcode == '2000' and lcode == '1000':
             return request.make_response('200 OK', [('Content-Type', 'text/plain')])

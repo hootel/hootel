@@ -32,6 +32,7 @@ DEFAULT_WUBOOK_DATE_FORMAT = "%d/%m/%Y"
 DEFAULT_WUBOOK_TIME_FORMAT = "%H:%M"
 DEFAULT_WUBOOK_DATETIME_FORMAT = "%s %s" % (DEFAULT_WUBOOK_DATE_FORMAT,
                                             DEFAULT_WUBOOK_TIME_FORMAT)
+WUBOOK_STATUS_CANCELLED = 5
 
 
 def _partner_split_name(partner_name):
@@ -228,7 +229,7 @@ class WuBook(models.TransientModel):
             processed_rids = self.generate_reservations(bookings)
             if any(processed_rids):
                 res, data = self.SERVER.mark_bookings(self.TOKEN,
-                                                      self.LCODE,
+                                                      lcode,
                                                       processed_rids)
         self.close_connection_()
 
@@ -294,14 +295,12 @@ class WuBook(models.TransientModel):
         hotel_vroom_obj = self.env['hotel.virtual.room']
         processed_rids = []
         for book in bookings:
-            # Already Exists?
-            reserv = hotel_reserv_obj.search([('wrid', '=', book['reservation_code'])], limit=1)
-            if reserv:
-                continue
-
             # Search Customer
-            partner_id = res_partner_obj.search([('email', '=', book.get('customer_mail', False))], limit=1)
             country_id = self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1)
+            customer_mail = book.get('customer_mail', False)
+            partner_id = False
+            if customer_mail:
+                partner_id = res_partner_obj.search([('email', '=', customer_mail)], limit=1)
             if not partner_id:
                 vals = {
                     'name': "%s %s" % (book['customer_name'], book['customer_surname']),
@@ -315,6 +314,20 @@ class WuBook(models.TransientModel):
                     #'lang': book['customer_language']
                 }
                 partner_id = res_partner_obj.create(vals)
+
+            # Already Exists?
+            reserv = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
+                                              ('wchannel_reservation_code','=', str(book['channel_reservation_code']))], limit=1)
+            if reserv:
+                reserv.write({
+                    'partner_id': partner_id.id,
+                    'wstatus': str(book['status'])
+                })
+
+                if book['status'] == WUBOOK_STATUS_CANCELLED:
+                    reserv.action_cancel()
+                else:
+                    continue
 
             # Obtener habitacion libre
             arr_hour = book['arrival_hour'] == "--" and '00:00' or book['arrival_hour']
@@ -336,22 +349,35 @@ class WuBook(models.TransientModel):
                                                                              vroom.id)
                 if any(free_rooms):
                     # Total Price Room
+                    reservation_lines = [];
                     tprice = 0.0
                     for broom in book['booked_rooms']:
-                        if broom['room_id'] == int(vroom.wrid):
+                        if str(broom['room_id']) == vroom.wrid:
                             for brday in broom['roomdays']:
+                                wndate = datetime.strptime(brday['date'], DEFAULT_WUBOOK_DATE_FORMAT)
+                                reservation_lines.append((0, False, {
+                                    'date': wndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'price': brday['price']
+                                }))
                                 tprice += brday['price']
+                            break
+                    # Occupancy
+                    occupancy = 0
+                    for broom in book['rooms_occupancies']:
+                        if str(broom['id']) == vroom.wrid:
+                            occupancy = broom['occupancy']
                             break
 
                     vals = {
                         'checkin': checkin,
                         'checkout': checkout,
-                        'adults': book['men'],
-                        'children': book['children'],
+                        'adults': occupancy,
+                        'children': 0,
                         'product_id': free_rooms[0].product_id.id,
                         'product_uom': free_rooms[0].product_id.product_tmpl_id.uom_id.id,
                         'product_uom_qty': 1,
                         'product_uos': 1,
+                        'reservation_lines': reservation_lines,
                         'name': free_rooms[0].name,
                         'price_unit': tprice,
                         'to_assign': True,
