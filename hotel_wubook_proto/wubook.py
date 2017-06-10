@@ -294,6 +294,8 @@ class WuBook(models.TransientModel):
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
         processed_rids = []
+        _logger.info("GENERATE RESERVS")
+        _logger.info(bookings)
         for book in bookings:
             # Search Customer
             country_id = self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1)
