@@ -25,6 +25,7 @@ class HotelFolio(models.Model):
     _inherit = 'hotel.folio'
 
     wseed = fields.Char("WuBook Session Seed", readonly=True)
+    wcustomer_notes = fields.Text("WuBook Customer Notes", readonly=True)
 
     @api.multi
     def import_reservations(self):

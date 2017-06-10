@@ -40,6 +40,7 @@ class HotelReservation(models.Model):
         ('5', 'Cancelled'),
         ('6', 'Cancelled with penalty')], string='WuBook Status', default='0',
                                         readonly=True)
+    wstatus_reason = fields.Char("WuBook Status Reason", readonly=True)
 
     @api.model
     def create(self, vals):

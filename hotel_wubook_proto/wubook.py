@@ -33,6 +33,7 @@ DEFAULT_WUBOOK_TIME_FORMAT = "%H:%M"
 DEFAULT_WUBOOK_DATETIME_FORMAT = "%s %s" % (DEFAULT_WUBOOK_DATE_FORMAT,
                                             DEFAULT_WUBOOK_TIME_FORMAT)
 WUBOOK_STATUS_CANCELLED = 5
+WUBOOK_STATUS_REFUSED = 5
 
 
 def _partner_split_name(partner_name):
@@ -323,10 +324,11 @@ class WuBook(models.TransientModel):
             if reserv:
                 reserv.write({
                     'partner_id': partner_id.id,
-                    'wstatus': str(book['status'])
+                    'wstatus': str(book['status']),
+                    'wstatus_reason': book.get('status_reason', ''),
                 })
 
-                if book['status'] == WUBOOK_STATUS_CANCELLED:
+                if book['status'] == WUBOOK_STATUS_CANCELLED or book['status'] == WUBOOK_STATUS_REFUSED:
                     reserv.action_cancel()
                 else:
                     continue

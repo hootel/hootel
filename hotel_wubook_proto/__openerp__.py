@@ -42,6 +42,7 @@
         'views/inherit_res_partner.xml',
         'views/inherit_hotel_reservation.xml',
         'views/inherit_hotel_virtual_room.xml',
+        'views/inherit_hotel_folio.xml',
         #'views/res_config.xml'
     ],
     'test': [
