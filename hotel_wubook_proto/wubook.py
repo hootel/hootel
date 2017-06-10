@@ -33,7 +33,7 @@ DEFAULT_WUBOOK_TIME_FORMAT = "%H:%M"
 DEFAULT_WUBOOK_DATETIME_FORMAT = "%s %s" % (DEFAULT_WUBOOK_DATE_FORMAT,
                                             DEFAULT_WUBOOK_TIME_FORMAT)
 WUBOOK_STATUS_CANCELLED = 5
-WUBOOK_STATUS_REFUSED = 5
+WUBOOK_STATUS_REFUSED = 3
 
 
 def _partner_split_name(partner_name):
@@ -299,18 +299,18 @@ class WuBook(models.TransientModel):
         _logger.info(bookings)
         for book in bookings:
             # Already Exists?
-            reserv = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
-                                              ('wchannel_reservation_code', '=', str(book['channel_reservation_code']))], limit=1)
-            if reserv:
-                reserv.write({
-                    'wstatus': str(book['status']),
-                    'wstatus_reason': book.get('status_reason', ''),
-                })
-
-                if book['status'] == WUBOOK_STATUS_CANCELLED \
-                        or book['status'] == WUBOOK_STATUS_REFUSED:
-                    reserv.action_cancel()
-
+            reservs = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
+                                              ('wchannel_reservation_code', '=', str(book['channel_reservation_code']))])
+            if any(reservs):
+                for reserv in reservs:
+                    reserv.write({
+                        'wstatus': str(book['status']),
+                        'wstatus_reason': book.get('status_reason', ''),
+                    })
+    
+                    if book['status'] == WUBOOK_STATUS_CANCELLED \
+                            or book['status'] == WUBOOK_STATUS_REFUSED:
+                        reserv.action_cancel()
                 continue
 
             # Search Customer
