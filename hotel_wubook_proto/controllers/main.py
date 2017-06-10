@@ -51,7 +51,7 @@ class website_wubook(http.Controller):
         _logger.info("WUBOOK PUSH ROOMS")
         _logger.info(kwargs)
 
-        # {'dfrom': u'22/06/2017', 'dto': u'24/06/2017', 'lcode': u'1484131114'}
+        # {'dfrom': u'22/06/2017', 'dto': u'24/06/2017', 'lcode': u'NUM'}
         # More Info: http://tdocs.wubook.net/wired/avail.html?highlight=fetch_rooms_values#fetch_rooms_values
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
