@@ -298,6 +298,21 @@ class WuBook(models.TransientModel):
         _logger.info("GENERATE RESERVS")
         _logger.info(bookings)
         for book in bookings:
+            # Already Exists?
+            reserv = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
+                                              ('wchannel_reservation_code', '=', str(book['channel_reservation_code']))], limit=1)
+            if reserv:
+                reserv.write({
+                    'wstatus': str(book['status']),
+                    'wstatus_reason': book.get('status_reason', ''),
+                })
+
+                if book['status'] == WUBOOK_STATUS_CANCELLED \
+                        or book['status'] == WUBOOK_STATUS_REFUSED:
+                    reserv.action_cancel()
+
+                continue
+
             # Search Customer
             country_id = self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1)
             customer_mail = book.get('customer_mail', False)
@@ -305,6 +320,7 @@ class WuBook(models.TransientModel):
             if customer_mail:
                 partner_id = res_partner_obj.search([('email', '=', customer_mail)], limit=1)
             if not partner_id:
+                lang = self.env['res.lang'].search([('iso_code', 'ilike', book['customer_language_iso'])], limit=1)
                 vals = {
                     'name': "%s %s" % (book['customer_name'], book['customer_surname']),
                     'country_id': country_id and country_id.id,
@@ -314,24 +330,10 @@ class WuBook(models.TransientModel):
                     'zip': book['customer_zip'],
                     'street': book['customer_address'],
                     'email': book['customer_mail'],
+                    'lang': lang and lang.id,
                     #'lang': book['customer_language']
                 }
                 partner_id = res_partner_obj.create(vals)
-
-            # Already Exists?
-            reserv = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
-                                              ('wchannel_reservation_code','=', str(book['channel_reservation_code']))], limit=1)
-            if reserv:
-                reserv.write({
-                    'partner_id': partner_id.id,
-                    'wstatus': str(book['status']),
-                    'wstatus_reason': book.get('status_reason', ''),
-                })
-
-                if book['status'] == WUBOOK_STATUS_CANCELLED or book['status'] == WUBOOK_STATUS_REFUSED:
-                    reserv.action_cancel()
-                else:
-                    continue
 
             # Obtener habitacion libre
             arr_hour = book['arrival_hour'] == "--" and '00:00' or book['arrival_hour']
@@ -358,7 +360,7 @@ class WuBook(models.TransientModel):
                     for broom in book['booked_rooms']:
                         if str(broom['room_id']) == vroom.wrid:
                             for brday in broom['roomdays']:
-                                wndate = datetime.strptime(brday['date'], DEFAULT_WUBOOK_DATE_FORMAT)
+                                wndate = datetime.strptime(brday['day'], DEFAULT_WUBOOK_DATE_FORMAT)
                                 reservation_lines.append((0, False, {
                                     'date': wndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                                     'price': brday['price']
@@ -406,6 +408,61 @@ class WuBook(models.TransientModel):
                 hotel_folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
             processed_rids.append(book['reservation_code'])
         return processed_rids
+    
+    def prepare_reservation_line_values(self, book):
+        # Obtener habitacion libre
+        arr_hour = book['arrival_hour'] == "--" and '00:00' or book['arrival_hour']
+        checkin = "%s %s" % (book['date_arrival'], arr_hour)
+        checkin_dt = datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT)
+        checkin = checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
+        checkout = "%s 21:59" % book['date_departure'] # FIXME: Usar UTC
+        checkout_dt = datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT)
+        checkout = checkout_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
+        vrooms_ids = book['rooms'].split(',')
+        vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])
+
+        reservations = []
+        for vroom in vrooms:
+            # Total Price Room
+            reservation_lines = [];
+            tprice = 0.0
+            for broom in book['booked_rooms']:
+                if str(broom['room_id']) == vroom.wrid:
+                    for brday in broom['roomdays']:
+                        wndate = datetime.strptime(brday['day'], DEFAULT_WUBOOK_DATE_FORMAT)
+                        reservation_lines.append((0, False, {
+                            'date': wndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                            'price': brday['price']
+                        }))
+                        tprice += brday['price']
+                    break
+            # Occupancy
+            occupancy = 0
+            for broom in book['rooms_occupancies']:
+                if str(broom['id']) == vroom.wrid:
+                    occupancy = broom['occupancy']
+                    break
+
+            vals = {
+                'checkin': checkin,
+                'checkout': checkout,
+                'adults': occupancy,
+                'children': 0,
+                'product_id': free_rooms[0].product_id.id,
+                'product_uom': free_rooms[0].product_id.product_tmpl_id.uom_id.id,
+                'product_uom_qty': 1,
+                'product_uos': 1,
+                'reservation_lines': reservation_lines,
+                'name': free_rooms[0].name,
+                'price_unit': tprice,
+                'to_assign': True,
+                'wrid': str(book['reservation_code']),
+                'wchannel_id': str(book['id_channel']),
+                'wchannel_reservation_code': str(book['channel_reservation_code']),
+                'wstatus': str(book['status']),
+            }
 
     @api.model
     def update_availability(self, vals):
