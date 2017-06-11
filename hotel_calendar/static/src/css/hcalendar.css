@@ -171,8 +171,6 @@
 	border: 2px solid #99995b;
 	color: white !important;
 	font-weight: bold;
-	pointer-events: none;
-	z-index:9999;
 	background: #e1ff00;
 	background: repeating-radial-gradient(circle farthest-corner at bottom right, #e1ff00 0%, #e1ff00 10%, #000000 10%, #000000 20%);
 	background: -webkit-repeating-radial-gradient(circle farthest-corner at bottom right, #e1ff00 0%, #e1ff00 10%, #000000 10%, #000000 20%);
