@@ -15,29 +15,30 @@ var Core = require('web.core');
 var _t = Core._t;
 
 var HotelCalendarViewWuBook = HotelCalendarView.include({
-	calc_buttons_counts: function() {
-		var res = this._super();
+	update_buttons_counter: function() {
+		this._super();
+		var $this = this;
 		
 		// Cloud Reservations
-    	var $button = this.$el.find("#btn_channel_manager_request");
-    	var $text = this.$el.find("#btn_channel_manager_request .cloud-text");
-    	$text.hide();
-    	$button.removeClass('incoming');
-    	var domain = [['wrid', '!=', 'none'], ['to_assign', '=', true]];
+    	var domain = [['wrid', '!=', 'none'], '|', ['to_assign', '=', true], ['to_read', '=', true]];
     	new Model('hotel.reservation').call('search_count', [domain]).then(function(count){
+    		var $button = $this.$el.find("#btn_channel_manager_request");
+    		var $text = $this.$el.find("#btn_channel_manager_request .cloud-text");
 			if (count > 0) {
 				$button.addClass('incoming');
 				$text.text(count);
 				$text.show();
+			} else {
+				$button.removeClass('incoming');
+				$text.hide();
 			}
 		});
-    	
-    	return res;
 	},
 	
 	init_calendar_view: function() {
-		var res = this._super();
+		this._super();
 		var $this = this;
+		
 		this.$el.find("#btn_channel_manager_request").on('click', function(ev){
 			var pop = new Common.SelectCreateDialog($this, {
                 res_model: 'hotel.reservation',
@@ -46,7 +47,7 @@ var HotelCalendarViewWuBook = HotelCalendarView.include({
                 disable_multiple_selection: true,
                 no_create: true,
                 on_selected: function(element_ids) {
-                	return new Model('hotel.reservation').call('get_formview_id', [element_ids]).then(function(view_id){
+                	return new Model('hotel.reservation').call('get_formview_id', [element_ids[0]]).then(function(view_id){
         				var pop = new Common.FormViewDialog($this, {
         	                res_model: 'hotel.reservation',
         	                res_id: element_ids[0],
@@ -64,7 +65,6 @@ var HotelCalendarViewWuBook = HotelCalendarView.include({
                 }
             }).open();
 		});
-		return res;
 	}
 });
 

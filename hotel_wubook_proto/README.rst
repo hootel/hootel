@@ -1,4 +1,4 @@
-HOTEL WUBOOK PROTOTYPE (NOT USING BANDCAMP ODOO CONNECTOR)
+HOTEL WUBOOK PROTOTYPE (NOT USING ODOO CONNECTOR)
 =============
 - Experimental Connector for WuBook
     - Active push notifications

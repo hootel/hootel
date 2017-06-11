@@ -443,33 +443,35 @@ var HotelCalendarView = View.extend({
 		$(document).find('.oe-control-panel').show();
     },
     
-    calc_buttons_counts: function() {
-    	this.$el.find('div.ninfo').hide();
-    	
+    update_buttons_counter: function() {
     	var domain = [];
-    	var $badge = false;
-    	
-    	
-    	// Checkout Button
-    	domain = [['checkins_reservations','=',true]];
 
-		var $badge_checkout = this.$el.find('#pms-menu #btn_action_checkout .badge');
+    	// Checkouts Button
+    	domain = [['checkins_reservations','=',true]];
 		this._model.call('search_count', [domain]).then(function(count){
+			var $ninfo = $this.$el.find('#pms-menu #btn_action_checkout div.ninfo');
+			var $badge_checkout = $ninfo.find('.badge');
 			if (count > 0) {
 				$badge_checkout.text(count);
 				$badge_checkout.parent().show();
+				$ninfo.show();
+			} else {
+				$ninfo.hide();
 			}
 		});
     	
-    	// Checkin Button
+    	// Checkins Button
     	domain = [['checkouts_reservations','=',true]];
-    	
-    	var $badge_checkin = this.$el.find('#pms-menu #btn_action_checkin .badge');
     	this._model.call('search_count', [domain]).then(function(count){
+    		var $ninfo = $this.$el.find('#pms-menu #btn_action_checkin div.ninfo');
+    		var $badge_checkin = $ninfo.find('.badge');
     		if (count > 0) {
     			$badge_checkin.text(count);
     			$badge_checkin.parent().show();
-    		}
+    			$ninfo.show();
+    		} else {
+				$ninfo.hide();
+			}
     	});
     	
     	// Charges Button
@@ -598,7 +600,7 @@ var HotelCalendarView = View.extend({
 		});
 		
 		/* BUTTONS */
-		this.calc_buttons_counts();
+		this.update_buttons_counter();
 		this.$el.find("#btn_action_checkout").on('click', function(ev){
 			$this.call_action('hotel_calendar.hotel_reservation_action_checkout');
 		});
@@ -715,7 +717,7 @@ var HotelCalendarView = View.extend({
 			$this._hcalendar.pricelist = results['pricelist'];
 			$this._hcalendar.setReservations(reservs);
 		});
-    	this.calc_buttons_counts();
+    	this.update_buttons_counter();
     },
     
     generate_domains: function() {

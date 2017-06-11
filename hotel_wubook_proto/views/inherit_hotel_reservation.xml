@@ -24,6 +24,7 @@
                 <field name="wrid"/>
                 <field name="wstatus"/>
                 <field name="wchannel_id"/>
+                <button name="mark_as_read" string="Mark as Read" class="oe_highlight"/>
         	</xpath>
         </field>
     </record>

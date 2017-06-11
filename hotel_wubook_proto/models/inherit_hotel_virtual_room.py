@@ -40,7 +40,13 @@ class hotel_virtual_room(models.Model):
     @api.model
     def create(self, vals):
         if self._context.get('wubook_action', True):
-            vals = self.env['wubook'].create_room(vals)
+            wrid = self.env['wubook'].create_room(
+                vals['name'],
+                vals['wcapacity'],
+                vals['list_price'],
+                vals.get('max_real_rooms', 1)
+            )
+            vals.update({'wrid': wrid})
         return super(hotel_virtual_room, self).create(vals)
 
     @api.multi
@@ -48,14 +54,14 @@ class hotel_virtual_room(models.Model):
         ret_vals = super(hotel_virtual_room, self).write(vals)
         if self._context.get('wubook_action', True):
             for record in self:
-                self.env['wubook'].modify_room(record.id)
+                self.env['wubook'].modify_room(record)
         return ret_vals
 
     @api.multi
     def unlink(self):
         if self._context.get('wubook_action', True):
             for record in self:
-                self.env['wubook'].delete_room(record.id)
+                self.env['wubook'].delete_room(record.wrid)
         return super(hotel_virtual_room, self).unlink()
 
     @api.multi

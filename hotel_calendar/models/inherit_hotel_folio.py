@@ -45,7 +45,7 @@ class HotelFolio(models.Model):
 
         # Need move one day less
         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
-        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-2)     # -2  Because starts from zero
 
         _logger.info(date_start)
         _logger.info(date_end)
@@ -101,11 +101,11 @@ class HotelFolio(models.Model):
             ('applied_on', '=', '3_global')
         ], order='sequence ASC, id DESC', limit=1)
         categs = rooms.mapped('categ_id')
-        date_diff = abs((date_start-date_end).days)+1
+        date_diff = abs((date_start-date_end).days)
         json_rooms_prices = {}
         for cat in categs:
             json_rooms_prices.update({cat.name: {}})
-            for i in range(0, date_diff):
+            for i in range(0, date_diff+1):
                 ndate = date_start + timedelta(days=i)
                 price_list = self.env['product.pricelist.item'].search([
                     ('pricelist_id', '=', PUBLIC_PRICELIST_ID), # FIXME: Hard-Coded Public List ID

@@ -18,8 +18,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from datetime import datetime, timedelta
 from openerp import models, fields, api
 from openerp.exceptions import except_orm, UserError, ValidationError
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 
 class HotelReservation(models.Model):
@@ -39,6 +42,7 @@ class HotelReservation(models.Model):
     wis_from_channel = fields.Boolean('WuBooK Is From Channel',
                                       compute=_is_from_channel, store=False,
                                       readonly=True)
+    to_read = fields.Boolean('To Read', default=False)
 
     wstatus = fields.Selection([
         ('0', 'No WuBook'),
@@ -54,31 +58,90 @@ class HotelReservation(models.Model):
     @api.model
     def create(self, vals):
         if self._context.get('wubook_action', True):
-            self.env['wubook'].update_availability(vals)
+            rooms_avail = self.get_availability(vals['checkin'],
+                                                vals['checkout'],
+                                                vals['product_id'])
+            self.env['wubook'].update_availability(rooms_avail)
         res = super(HotelReservation, self).create(vals)
         return res
 
     @api.multi
+    def read(self, fields=None, load='_classic_read'):
+        self.to_read = False
+        return super(HotelReservation, self).read(fields=fields, load=load)
+
+    @api.multi
     def write(self, vals):
-        if self._context.get('wubook_action', True):
-            self.env['wubook'].update_availability({
-                'product_id': self.product_id.id,
-                'checkin': self.checkin,
-                'checkout': self.checkout,
-            })
+        older_vals = {
+            'checkin': self.checkin,
+            'checkout': self.checkout,
+            'product_id': self.product_id,
+        }
         ret_vals = super(HotelReservation, self).write(vals)
         if self._context.get('wubook_action', True):
-            self.env['wubook'].update_availability(vals)
+            rooms_avail = self.get_availability(older_vals['checkin'],
+                                                older_vals['checkout'],
+                                                older_vals['product_id'])
+            rooms_avail += self.get_availability(vals['checkin'],
+                                                 vals['checkout'],
+                                                 vals['product_id'])
+            rooms_avail = list({v['date']: v for v in rooms_avail}.values())
+            self.env['wubook'].update_availability(rooms_avail)
         return ret_vals
 
     @api.multi
     def unlink(self):
-        for record in self:
-            if self.wchannel_id == '0':
-                self.env['wubook'].cancel_reservation(record.id, 'Cancelled by admin')
-        self.env['wubook'].update_availability({
-            'product_id': self.product_id.id,
-            'checkin': self.checkin,
-            'checkout': self.checkout,
-        })
+        if self._context.get('wubook_action', True):
+            partner_id = self.env['res.users'].browse(self.env.uid).partner_id
+            for record in self:
+                if self.wchannel_id == '0':
+                    self.env['wubook'].cancel_reservation(record.wrid,
+                                                          'Cancelled by %s' % partner_id.name)
+            rooms_avail = self.get_availability(self.checkin,
+                                                self.checkout,
+                                                self.product_id)
+            self.env['wubook'].update_availability(rooms_avail)
         return super(HotelReservation, self).unlink()
+
+    @api.multi
+    def action_cancel(self):
+        partner_id = self.env['res.users'].browse(self.env.uid).partner_id
+        for record in self:
+                if self.wchannel_id == '0':
+                    self.env['wubook'].cancel_reservation(record.wrid,
+                                                          'Cancelled by %s' % partner_id.name)
+        ret_vals = super(HotelReservation, self).action_cancel()
+        rooms_avail = self.get_availability(self.checkin,
+                                            self.checkout,
+                                            self.product_id)
+        self.env['wubook'].update_availability(rooms_avail)
+        return ret_vals
+
+    @api.multi
+    def mark_as_read(self):
+        for record in self:
+            record.to_read = False
+
+    @api.model
+    def get_availability(self, checkin, checkout, product_id):
+        date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
+        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
+        date_diff = abs((date_start-date_end).days)
+
+        hotel_vroom_obj = self.env['hotel.virtual.room']
+        rooms_avail = []
+        vrooms = self.env['hotel.virtual.room'].search([('room_ids.product_id', '=', product_id)])
+        for vroom in vrooms:
+            rdays = []
+            for i in range(0, date_diff):
+                ndate = date_start + timedelta(days=i)
+                rdays.append({
+                    'date': ndate.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    'avail': len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                                                                 ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                                                                 vroom.id))
+                })
+            ravail = {'id': vroom.wrid, 'days': rdays}
+            rooms_avail.append(ravail)
+
+        return rooms_avail

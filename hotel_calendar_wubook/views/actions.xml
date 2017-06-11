@@ -6,7 +6,7 @@
                <field name="name">Reservations to Assign from WuBook</field>
                <field name="res_model">hotel.reservation</field>
                <field name="view_mode">tree,form</field>
-               <field name="domain">[('wrid','!=','none'),('to_assign','=',True)]</field>
+               <field name="domain">[('wrid','!=','none'),'|',('to_assign','=',True),('to_read','=',True)]</field>
         </record>
 
     </data>
