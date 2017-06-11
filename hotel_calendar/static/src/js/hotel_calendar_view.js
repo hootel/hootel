@@ -444,6 +444,7 @@ var HotelCalendarView = View.extend({
     },
     
     update_buttons_counter: function() {
+    	var $this = this;
     	var domain = [];
 
     	// Checkouts Button
