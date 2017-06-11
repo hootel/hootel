@@ -168,10 +168,11 @@
 }
 
 .hcal-reservation-action-cancel {
-	border: 2px dashed #a61e1e;
+	border: 4px solid #99995b;
+	color: black !important;
 	pointer-events: none;
 	z-index:9999;
-	background-color: #EE2C2C !important;
+	background-color: #FFFF99 !important;
 }
 
 .hcal-row-room-type-group-item {
