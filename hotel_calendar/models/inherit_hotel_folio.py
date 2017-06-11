@@ -45,7 +45,7 @@ class HotelFolio(models.Model):
 
         # Need move one day less
         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
-        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-2)     # -2  Because starts from zero
+        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
 
         _logger.info(date_start)
         _logger.info(date_end)
@@ -64,11 +64,18 @@ class HotelFolio(models.Model):
                 room.uom_id.id))
 
         # Get Reservations
+        date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        date_end_str = date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         room_ids = rooms.mapped('product_id.id')
         domainReservations.insert(0, ('product_id.id', 'in', room_ids))
-        domainReservations.insert(0, ('checkin', '<=', date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)))
-        domainReservations.insert(0, ('checkout', '>=', date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)))
-        reservations = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
+        reservations_raw = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
+        reservations_ld = self.env['hotel.reservation'].search([
+            ('checkin', '>=', date_start_str)
+            ('checkout', '<=', date_end_str)])
+        reservations_lr = self.env['hotel.reservation'].search([
+            ('checkout', '>=', date_start_str)
+            ('checkin', '<=', date_end_str)])
+        reservations = (reservations_ld | reservations_lr) & reservations_raw
         json_reservations = []
         json_reservation_tooltips = {}
         for reserv in reservations:

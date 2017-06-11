@@ -23,6 +23,8 @@ from openerp import models, fields, api
 from openerp.exceptions import except_orm, UserError, ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class HotelReservation(models.Model):
@@ -119,6 +121,7 @@ class HotelReservation(models.Model):
 
     @api.multi
     def mark_as_read(self):
+        _logger.info("MARK AS READ!")
         for record in self:
             record.to_read = False
 

@@ -24,8 +24,10 @@
                 <field name="wrid"/>
                 <field name="wstatus"/>
                 <field name="wchannel_id"/>
-                <field name="to_read" invisible="1"/>
-                <button name="mark_as_read" string="Mark as Read" class="oe_highlight" invisible="context.get('to_read')"/>
+        	</xpath>
+        	<xpath expr="//field[@name='state']" position="after">
+        		<field name="to_read" invisible="1"/>
+        		<button name="mark_as_read" string="Read &amp; Hide" class="oe_highlight" invisible="context.get('to_read')==False"/>
         	</xpath>
         </field>
     </record>
