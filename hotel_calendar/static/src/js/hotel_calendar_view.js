@@ -23,6 +23,8 @@ var ActionManager = require('web.ActionManager');
 var Utils = require('web.utils');
 var Dialog = require('web.Dialog');
 var Ajax = require('web.ajax');
+var ControlPanelMixin = require('web.ControlPanelMixin');
+var Session = require('web.session');
 
 var _t = Core._t;
 var _lt = Core._lt;
@@ -34,6 +36,20 @@ var ODOO_DATETIME_MOMENT_FORMAT = "YYYY-MM-DD HH:mm:ss";
 var L10N_DATETIME_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format + ' ' + l10n.time_format);
 var L10N_DATE_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format);
 
+
+/* HIDE SIDEBAR */
+//ControlPanelMixin.include({
+//    init : function(parent, context) {
+//    	this._super(parent);
+//        console.log(this.getParent().view_type);
+//        if (this.getParent().view_type == "pms"){
+//        	console.log("PASA PORE AKI1!");
+//            this.destroy();
+//        }
+//    }
+//});
+
+
 var HotelCalendarView = View.extend({
 	/** VIEW OPTIONS **/
 	template: "hotel_calendar.HotelCalendarView",
@@ -42,8 +58,9 @@ var HotelCalendarView = View.extend({
     view_type: "pms",
     searchable: false,
     searchview_hidden: true,
-    _model: null,
+    
     // Custom Options
+    _model: null,
     _hcalendar: null,
     _reserv_tooltips: {},
     _action_manager: null,
@@ -97,7 +114,7 @@ var HotelCalendarView = View.extend({
     do_show: function() {
     	var $widget = this.$el.find("#hcal_widget");
         if ($widget) {
-        	$(document).find('.oe-control-panel').hide();
+        	$(document).find('.oe-control-panel').hide(); // FIXME: Hackish control panel
         	$widget.show();
         }
         this.do_push_state({});
@@ -106,7 +123,7 @@ var HotelCalendarView = View.extend({
     do_hide: function () {
     	var $widget = this.$el.find("#hcal_widget");
         if ($widget) {
-        	$(document).find('.oe-control-panel').show();
+        	$(document).find('.oe-control-panel').show(); // FIXME: Hackish control panel
         	$widget.hide();
         }
         return this._super();
@@ -119,7 +136,7 @@ var HotelCalendarView = View.extend({
     },
     
     destroy: function () {
-        $(document).find('.oe-control-panel').show();
+        $(document).find('.oe-control-panel').show(); // FIXME: Hackish control panel
         return this._super.apply(this, arguments);
     },
     
@@ -167,7 +184,7 @@ var HotelCalendarView = View.extend({
 		});
 		this._hcalendar.addEventListener('hcalOnContextMenuReservation', function(ev){
 			var res_id = ev.detail.reservationObj.getUserData('folio_id');
-			$this._model.call('get_formview_id', [res_id]).then(function(view_id){
+			$this._model.call('get_formview_id', [res_id, Session.user_context]).then(function(view_id){
 				var pop = new Common.FormViewDialog($this, {
 	                res_model: 'hotel.folio',
 	                res_id: res_id,
@@ -440,7 +457,7 @@ var HotelCalendarView = View.extend({
     
     call_action: function(action) {
     	this._action_manager.do_action(action);
-		$(document).find('.oe-control-panel').show();
+		$(document).find('.oe-control-panel').show(); // FIXME: Hackish control panel
     },
     
     update_buttons_counter: function() {
