@@ -443,7 +443,7 @@ var HotelCalendarView = View.extend({
 		$(document).find('.oe-control-panel').show();
     },
     
-    get_pms_buttons_counts: function() {
+    calc_buttons_counts: function() {
     	this.$el.find('div.ninfo').hide();
     	
     	var domain = [];
@@ -598,7 +598,7 @@ var HotelCalendarView = View.extend({
 		});
 		
 		/* BUTTONS */
-		this.get_pms_buttons_counts();
+		this.calc_buttons_counts();
 		this.$el.find("#btn_action_checkout").on('click', function(ev){
 			$this.call_action('hotel_calendar.hotel_reservation_action_checkout');
 		});
@@ -715,7 +715,7 @@ var HotelCalendarView = View.extend({
 			$this._hcalendar.pricelist = results['pricelist'];
 			$this._hcalendar.setReservations(reservs);
 		});
-    	this.get_pms_buttons_counts();
+    	this.calc_buttons_counts();
     },
     
     generate_domains: function() {

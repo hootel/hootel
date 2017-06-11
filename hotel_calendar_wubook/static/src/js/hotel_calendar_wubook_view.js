@@ -15,7 +15,7 @@ var Core = require('web.core');
 var _t = Core._t;
 
 var HotelCalendarViewWuBook = HotelCalendarView.include({
-	get_pms_buttons_counts: function() {
+	calc_buttons_counts: function() {
 		var res = this._super();
 		
 		// Cloud Reservations
