@@ -36,7 +36,7 @@ var HotelCalendarViewWuBook = HotelCalendarView.include({
 	},
 	
 	init_calendar_view: function() {
-		this._super();
+		var $ret = this._super();
 		var $this = this;
 		
 		this.$el.find("#btn_channel_manager_request").on('click', function(ev){
@@ -65,6 +65,8 @@ var HotelCalendarViewWuBook = HotelCalendarView.include({
                 }
             }).open();
 		});
+		
+		return $ret;
 	}
 });
 
