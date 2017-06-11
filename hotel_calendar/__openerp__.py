@@ -28,9 +28,9 @@
     'summary': "Hotel Calendar",
     'description': "Hotel Calendar",
     'depends': [
+        'bus',
         'web',
         'hotel',
-        'sale',
     ],
     'external_dependencies': {
         'python': []

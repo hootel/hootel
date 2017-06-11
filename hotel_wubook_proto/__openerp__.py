@@ -28,7 +28,6 @@
     'summary': "Hotel WuBook",
     'description': "Hotel WuBook Prototype",
     'depends': [
-        'bus',
         'hotel',
     ],
     'external_dependencies': {

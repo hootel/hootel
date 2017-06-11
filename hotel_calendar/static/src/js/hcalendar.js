@@ -1439,7 +1439,7 @@ HRoom.prototype = {
 };
 
 /** RESERVATION OBJECT **/
-function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/adults, /*Int?*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate, /*String?*/color, /*Boolean?*/readonly) {
+function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/adults, /*Int?*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate, /*String?*/color, /*Boolean?*/readOnly) {
 	if (typeof room === 'undefined') {
 		delete this;
 		console.warn("[Hotel Calendar][HReservation] room can't be empty!");
