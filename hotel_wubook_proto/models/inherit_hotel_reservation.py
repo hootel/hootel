@@ -65,10 +65,10 @@ class HotelReservation(models.Model):
         res = super(HotelReservation, self).create(vals)
         return res
 
-    @api.multi
-    def read(self, fields=None, load='_classic_read'):
-        self.to_read = False
-        return super(HotelReservation, self).read(fields=fields, load=load)
+#     @api.multi
+#     def read(self, fields=None, load='_classic_read'):
+#         self.to_read = False
+#         return super(HotelReservation, self).read(fields=fields, load=load)
 
     @api.multi
     def write(self, vals):
