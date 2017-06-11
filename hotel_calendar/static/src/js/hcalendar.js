@@ -1104,6 +1104,7 @@ HotelCalendar.prototype = {
 
 					var reserv = $this.reservations[this.dataset.hcalReservationId];
 					if (reserv.readOnly) {
+						$this.reservationAction.action = this.ACTION.NONE;
 						var reservationDiv = $this.getReservationDiv(reserv);
 						reservationDiv.classList.add('hcal-reservation-action-cancel');
 						return false;
