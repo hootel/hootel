@@ -1101,8 +1101,13 @@ HotelCalendar.prototype = {
 						action: $this.getRerservationPositionAction_(this, ev.layerX, ev.layerY),
 						reservation: this
 					};
-					
-					var reserv = $this.reservations[$this.reservationAction.reservation.dataset.hcalReservationId];
+
+					var reserv = $this.reservations[this.dataset.hcalReservationId];
+					if (reserv.readOnly) {
+						var reservationDiv = $this.getReservationDiv(reserv);
+						reservationDiv.classList.add('hcal-reservation-action-cancel');
+						return false;
+					}
 					var linkedReservations = $this.getLinkedReservations(reserv);
 					linkedReservations.push(reserv);
 					for (var lr of linkedReservations) {
@@ -1260,6 +1265,7 @@ HotelCalendar.prototype = {
 		if (this.reservationAction.reservation) {
 			var reservDiv = this.reservationAction.reservation;
 			reservDiv.classList.remove('hcal-reservation-action');
+			reservDiv.classList.remove('hcal-reservation-action-cancel');
 			
 			var rdivs = this.e.querySelectorAll('div.hcal-reservation.hcal-reservation-foreground');
 			for (var rd of rdivs) { rd.classList.remove('hcal-reservation-foreground'); }
@@ -1433,7 +1439,7 @@ HRoom.prototype = {
 };
 
 /** RESERVATION OBJECT **/
-function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/adults, /*Int?*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate, /*String?*/color) {
+function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/adults, /*Int?*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate, /*String?*/color, /*Boolean?*/readonly) {
 	if (typeof room === 'undefined') {
 		delete this;
 		console.warn("[Hotel Calendar][HReservation] room can't be empty!");
@@ -1448,6 +1454,7 @@ function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/
 	this.startDate = null; 	// Local Time
 	this.endDate = null;	// Local Time
 	this.color = color || '#000';
+	this.readOnly = readOnly || false;
 	
 	this.beds_ = [];
 	this.userData_ = {};

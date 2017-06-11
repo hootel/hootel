@@ -25,11 +25,20 @@ from openerp.exceptions import except_orm, UserError, ValidationError
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
 
+    @api.depends('wrid', 'wchannel_id')
+    def _is_from_channel(self):
+        for record in self:
+            record.wis_from_channel = record.wrid != 'none' \
+                                        and record.wchannel_id != 'none'
+
     wrid = fields.Char("WuBook Reservation ID", default="none", readonly=True)
     wchannel_id = fields.Char("WuBook Channel ID", default='none',
                               readonly=True)
     wchannel_reservation_code = fields.Char("WuBook Channel Reservation Code",
                                             default='none', readonly=True)
+    wis_from_channel = fields.Boolean('WuBooK Is From Channel',
+                                      compute=_is_from_channel, store=False,
+                                      readonly=True)
 
     wstatus = fields.Selection([
         ('0', 'No WuBook'),
@@ -47,7 +56,6 @@ class HotelReservation(models.Model):
         if self._context.get('wubook_action', True):
             self.env['wubook'].update_availability(vals)
         res = super(HotelReservation, self).create(vals)
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.wubook', self.env.uid), "wubook_reservation")
         return res
 
     @api.multi
@@ -61,7 +69,6 @@ class HotelReservation(models.Model):
         ret_vals = super(HotelReservation, self).write(vals)
         if self._context.get('wubook_action', True):
             self.env['wubook'].update_availability(vals)
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.wubook', self.env.uid), "wubook_reservation")
         return ret_vals
 
     @api.multi
@@ -69,12 +76,9 @@ class HotelReservation(models.Model):
         for record in self:
             if self.wchannel_id == '0':
                 self.env['wubook'].cancel_reservation(record.id, 'Cancelled by admin')
-
         self.env['wubook'].update_availability({
             'product_id': self.product_id.id,
             'checkin': self.checkin,
             'checkout': self.checkout,
         })
-
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.wubook', self.env.uid), "wubook_reservation")
         return super(HotelReservation, self).unlink()

@@ -85,7 +85,8 @@ class HotelFolio(models.Model):
                 reserv.checkin,
                 reserv.checkout,
                 reserv.folio_id.id,
-                reserv.reserve_color))
+                reserv.reserve_color,
+                False))
             json_reservation_tooltips.update({
                 reserv.id: (
                     reserv.folio_id.partner_id.name,

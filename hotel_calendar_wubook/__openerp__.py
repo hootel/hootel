@@ -18,5 +18,34 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import inherit_hotel_folio
-from . import inherit_hotel_reservation
+
+{
+    'name': 'Hotel Calendar WuBook',
+    'version': '1.0',
+    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
+    'website': 'https://www.eiqui.com',
+    'category': 'eiqui/hotel',
+    'summary': "Hotel Calendar",
+    'description': "Hotel Calendar WuBook",
+    'depends': [
+        'hotel_calendar',
+        'hotel_wubook_proto',
+    ],
+    'external_dependencies': {
+        'python': []
+    },
+    'data': [
+        'views/general.xml',
+        'views/actions.xml',
+    ],
+    'qweb': [
+        'static/src/xml/*.xml',
+    ],
+    'test': [
+    ],
+
+    'installable': True,
+    'auto_install': False,
+    'application': True,
+    'license': 'AGPL-3',
+}

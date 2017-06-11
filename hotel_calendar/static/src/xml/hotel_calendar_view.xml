@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <div t-name="HotelCalendarView">
+    <t t-name="hotel_calendar.HotelCalendarView">
     	<div class="col-xs-12 col-lg-12 nopadding">
     		<div class="col-xs-1 col-lg-1 nopadding" id="pms-menu">
-    			<button class="btn col-xs-12 col-lg-12" id="btn_channel_manager_request">
-    				<div class="fa-stack fa-2x">
-    					<i class="fa fa-cloud fa-stack-2x"> </i>
-    					<span class="fa-stack-1x cloud-text">0</span>
-    				</div>
-    			</button>
     			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_checkout">
     				<div class="ninfo"><span class="badge badge-danger">0</span></div>
     				CHECK-OUT
@@ -146,6 +140,6 @@
     			<div style="clear:both;" />
     		</div>
     	</div>
-    </div>
+    </t>
 
 </templates>

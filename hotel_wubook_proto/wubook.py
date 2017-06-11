@@ -307,7 +307,7 @@ class WuBook(models.TransientModel):
                         'wstatus': str(book['status']),
                         'wstatus_reason': book.get('status_reason', ''),
                     })
-    
+
                     if book['status'] == WUBOOK_STATUS_CANCELLED \
                             or book['status'] == WUBOOK_STATUS_REFUSED:
                         reserv.action_cancel()

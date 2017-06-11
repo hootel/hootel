@@ -167,6 +167,13 @@
 	z-index:9999;
 }
 
+.hcal-reservation-action-cancel {
+	border: 2px dashed #a61e1e;
+	pointer-events: none;
+	z-index:9999;
+	background-color: #EE2C2C !important;
+}
+
 .hcal-row-room-type-group-item {
 	text-align: center;
 }

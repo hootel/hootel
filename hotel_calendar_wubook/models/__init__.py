@@ -19,4 +19,3 @@
 #
 ##############################################################################
 from . import inherit_hotel_folio
-from . import inherit_hotel_reservation

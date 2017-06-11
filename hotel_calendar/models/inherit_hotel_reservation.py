@@ -18,5 +18,27 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import inherit_hotel_folio
-from . import inherit_hotel_reservation
+from openerp import models, fields, api
+from openerp.exceptions import except_orm, UserError, ValidationError
+
+
+class HotelReservation(models.Model):
+    _inherit = 'hotel.reservation'
+
+    @api.model
+    def create(self, vals):
+        ret_vals = super(HotelReservation, self).create(vals)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), "hotel_reservations_changed")
+        return ret_vals
+
+    @api.multi
+    def write(self, vals):
+        ret_vals = super(HotelReservation, self).write(vals)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), "hotel_reservations_changed")
+        return ret_vals
+
+    @api.multi
+    def unlink(self):
+        ret_vals = super(HotelReservation, self).unlink()
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), "hotel_reservations_changed")
+        return ret_vals

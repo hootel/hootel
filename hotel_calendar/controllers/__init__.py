@@ -18,14 +18,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp.addons.bus.controllers.main import BusController
-from openerp.http import request
-
-
-class Controller(BusController):
-    def _poll(self, dbname, channels, last, options):
-        if request.session.uid:
-            registry, cr, uid, context = request.registry, request.cr, request.session.uid, request.context
-            new_channel = (request.db, 'hotel.wubook', request.uid)
-            channels.append(new_channel)
-        return super(Controller, self)._poll(dbname, channels, last, options)
+from . import bus
