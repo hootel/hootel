@@ -1063,6 +1063,10 @@ HotelCalendar.prototype = {
 				$this.updateDivReservation_(divRes, limits);
 				$this.e.appendChild(divRes);
 				
+				if (itemReserv.readOnly) {
+					divRes.classList.add('hcal-reservation-readonly');
+				}
+				
 				var cells = $this.getCells(limits);
 				for (var c of cells) {
 					c.classList.add('hcal-cell-room-type-group-item-day-occupied');
@@ -1105,8 +1109,6 @@ HotelCalendar.prototype = {
 					var reserv = $this.reservations[this.dataset.hcalReservationId];
 					if (reserv.readOnly) {
 						$this.reservationAction.action = $this.ACTION.NONE;
-						var reservationDiv = $this.getReservationDiv(reserv);
-						reservationDiv.classList.add('hcal-reservation-action-cancel');
 						return false;
 					}
 					var linkedReservations = $this.getLinkedReservations(reserv);
@@ -1266,7 +1268,6 @@ HotelCalendar.prototype = {
 		if (this.reservationAction.reservation) {
 			var reservDiv = this.reservationAction.reservation;
 			reservDiv.classList.remove('hcal-reservation-action');
-			reservDiv.classList.remove('hcal-reservation-action-cancel');
 			
 			var rdivs = this.e.querySelectorAll('div.hcal-reservation.hcal-reservation-foreground');
 			for (var rd of rdivs) { rd.classList.remove('hcal-reservation-foreground'); }

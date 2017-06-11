@@ -167,9 +167,10 @@
 	z-index:9999;
 }
 
-.hcal-reservation-action-cancel {
+.hcal-reservation-readonly {
 	border: 2px solid #99995b;
-	color: black !important;
+	color: white !important;
+	font-weight: bold;
 	pointer-events: none;
 	z-index:9999;
 	background: #e1ff00;
