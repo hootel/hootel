@@ -1,4 +1,4 @@
-ALDA CALENDAR
+HOTEL CALENDAR
 =============
 - Adds new view 'pms' for see reservations in a calendar
 	- Can resize & move reservations
