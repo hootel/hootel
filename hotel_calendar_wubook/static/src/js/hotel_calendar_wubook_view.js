@@ -43,7 +43,7 @@ var HotelCalendarViewWuBook = HotelCalendarView.include({
 		var $this = this;
 		return $.when(this._super()).then(function(){
             var deferred_promises = [];
-			this.$el.find("#btn_channel_manager_request").on('click', function(ev){
+			$this.$el.find("#btn_channel_manager_request").on('click', function(ev){
 				var pop = new Common.SelectCreateDialog($this, {
 	                res_model: 'hotel.reservation',
 	                domain: _wubook_notif_reservations_domain,
