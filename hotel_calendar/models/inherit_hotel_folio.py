@@ -70,10 +70,10 @@ class HotelFolio(models.Model):
         domainReservations.insert(0, ('product_id.id', 'in', room_ids))
         reservations_raw = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
         reservations_ld = self.env['hotel.reservation'].search([
-            ('checkin', '>=', date_start_str)
+            ('checkin', '>=', date_start_str),
             ('checkout', '<=', date_end_str)])
         reservations_lr = self.env['hotel.reservation'].search([
-            ('checkout', '>=', date_start_str)
+            ('checkout', '>=', date_start_str),
             ('checkin', '<=', date_end_str)])
         reservations = (reservations_ld | reservations_lr) & reservations_raw
         json_reservations = []
