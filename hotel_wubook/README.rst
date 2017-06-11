@@ -1,5 +1,6 @@
-ALDA WUBOOK
+HOTEL WUBOOK
 =============
+- Doesn't do anything for now
 
 ** UNDER DEVELOPMENT: NOT USE IN PRODUCTION **
 

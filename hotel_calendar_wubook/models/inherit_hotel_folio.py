@@ -21,10 +21,6 @@
 from openerp import models, fields, api, _
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
-import logging
-_logger = logging.getLogger(__name__)
-
-PUBLIC_PRICELIST_ID = 1  # Hard-Coded public pricelist
 
 
 class HotelFolio(models.Model):
