@@ -148,3 +148,9 @@ class HotelReservation(models.Model):
             rooms_avail.append(ravail)
 
         return rooms_avail
+
+    @api.onchange('checkin', 'checkout', 'product_id')
+    def on_change_checkin_checkout_product_id(self):
+        if self.wis_from_channel:
+            return True
+        return super(HotelReservation, self).on_change_checkin_checkout_product_id()
