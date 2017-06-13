@@ -16,22 +16,22 @@
         	
         	<!-- ALLOW ONLY-READ -->
         	<xpath expr="//field[@name='adults']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=','True')]}</attribute>
+     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
         	</xpath>
         	<xpath expr="//field[@name='children']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=','True')]}</attribute>
+     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
         	</xpath>
         	<xpath expr="//field[@name='checkin']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=','True')]}</attribute>
+     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
         	</xpath>
         	<xpath expr="//field[@name='checkout']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=','True')]}</attribute>
+     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
         	</xpath>
         	<xpath expr="//field[@name='reservation_lines']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=','True')]}</attribute>
+     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
         	</xpath>
         	<xpath expr="//field[@name='price_unit']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=','True')]}</attribute>
+     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
         	</xpath>
         </field>
     </record>

@@ -40,7 +40,7 @@ var L10N_DATE_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format);
 
 
 /* HIDE CONTROL PANEL */
-/* FIXME: Look's like a hackish... not stable solution */
+/* FIXME: Look's like a hackish solution */
 ControlPanel.include({
     update: function(status, options) {
     	this._super(status, options);
