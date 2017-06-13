@@ -7,8 +7,10 @@ odoo.define('hotel_calendar.HotelCalendarView', function (require) {
  *     Alexandre Díaz <alex@aloxa.eu>
  */
 /* TODO (TOFIX):
- *  1. When change date with filter buttons, the calendar reload two times because datetime-pickers updating.
- *        Easy to resolve if adds 'search' button instead use 'onchange' events.
+ *  1. Performance... calendar redraw 2 times and reservations 4 times when change dates!!
+ *        - 2 times for movement calendar (redraw all!) [1 Checkin data change, 1 Checkout data change]
+ *        - 2 times for new reservations (post-move) [1 Checkin data change, 1 Checkout data change]
+ *        Can reduce easy to 2 times for all if adds 'search' button instead use 'onchange' events.
  */
 
 var Core = require('web.core');
@@ -23,7 +25,7 @@ var ActionManager = require('web.ActionManager');
 var Utils = require('web.utils');
 var Dialog = require('web.Dialog');
 var Ajax = require('web.ajax');
-var ControlPanelMixin = require('web.ControlPanelMixin');
+var ControlPanel = require('web.ControlPanel');
 var Session = require('web.session');
 
 var _t = Core._t;
@@ -37,18 +39,21 @@ var L10N_DATETIME_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_forma
 var L10N_DATE_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format);
 
 
-/* HIDE SIDEBAR */
-//ControlPanelMixin.include({
-//    init : function(parent, context) {
-//    	this._super(parent);
-//        console.log(this.getParent().view_type);
-//        if (this.getParent().view_type == "pms"){
-//        	console.log("PASA PORE AKI1!");
-//            this.destroy();
-//        }
-//    }
-//});
-
+/* HIDE CONTROL PANEL */
+/* FIXME: Look's like a hackish... not stable solution */
+ControlPanel.include({
+    update: function(status, options) {
+    	this._super(status, options);
+    	var action_stack = this.getParent().action_stack;
+    	if (action_stack) {
+	    	if (action_stack[action_stack.length-1].widget.active_view.type === 'pms'){
+	            this._toggle_visibility(false);
+	        } else {
+	        	this._toggle_visibility(true);
+	        }
+    	}
+    }
+});
 
 var HotelCalendarView = View.extend({
 	/** VIEW OPTIONS **/
@@ -64,6 +69,7 @@ var HotelCalendarView = View.extend({
     _hcalendar: null,
     _reserv_tooltips: {},
     _action_manager: null,
+    _flag_ignore_action: false,
     
     /** VIEW METHODS **/
     init: function(parent, dataset, view_id, options) {
@@ -114,7 +120,6 @@ var HotelCalendarView = View.extend({
     do_show: function() {
     	var $widget = this.$el.find("#hcal_widget");
         if ($widget) {
-        	$(document).find('.oe-control-panel').hide(); // FIXME: Hackish control panel
         	$widget.show();
         }
         this.do_push_state({});
@@ -123,7 +128,6 @@ var HotelCalendarView = View.extend({
     do_hide: function () {
     	var $widget = this.$el.find("#hcal_widget");
         if ($widget) {
-        	$(document).find('.oe-control-panel').show(); // FIXME: Hackish control panel
         	$widget.hide();
         }
         return this._super();
@@ -136,7 +140,6 @@ var HotelCalendarView = View.extend({
     },
     
     destroy: function () {
-        $(document).find('.oe-control-panel').show(); // FIXME: Hackish control panel
         return this._super.apply(this, arguments);
     },
     
@@ -160,6 +163,7 @@ var HotelCalendarView = View.extend({
 			
 			var $dateTimePickerBegin = $this.$el.find('#pms-search #date_begin');
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
+			$dateTimePickerBegin.data("ignore_onchange", true);
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
@@ -436,7 +440,6 @@ var HotelCalendarView = View.extend({
 			var reservs = [];
 			for (var r of results['reservations']) {
 				var room = $this._hcalendar.getRoom(r[0]);
-				console.log(room);
 				var nreserv = new HReservation(
 					r[1], // Id
 					room, // Room
@@ -457,7 +460,6 @@ var HotelCalendarView = View.extend({
     
     call_action: function(action) {
     	this._action_manager.do_action(action);
-		$(document).find('.oe-control-panel').show(); // FIXME: Hackish control panel
     },
     
     update_buttons_counter: function() {
@@ -508,6 +510,7 @@ var HotelCalendarView = View.extend({
     	var $this = this;
 
 		/** HACKISH ODOO VIEW **/
+        //this._action_manager.main_control_panel.$el.hide();
 		$(document).find('.oe-view-manager-view-pms').css('overflow', 'initial'); // No Scroll here!
 		
 		/** VIEW CONTROLS INITIALIZATION **/
@@ -553,6 +556,7 @@ var HotelCalendarView = View.extend({
         var date_begin = moment().startOf('day');
 		var days = moment(date_begin).daysInMonth();
 		var date_end = date_begin.clone().add(days, 'd').endOf('day');
+		$dateTimePickerBegin.data("ignore_onchange", true);
 		$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 		$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 		
@@ -566,6 +570,7 @@ var HotelCalendarView = View.extend({
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
 			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(15, 'd').startOf('day');
 			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(15, 'd').endOf('day');
+			$dateTimePickerBegin.data("ignore_onchange", true);
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
@@ -577,6 +582,7 @@ var HotelCalendarView = View.extend({
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
 			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(1, 'd').startOf('day');
 			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(1, 'd').endOf('day');
+			$dateTimePickerBegin.data("ignore_onchange", true);
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 
@@ -588,6 +594,7 @@ var HotelCalendarView = View.extend({
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
 			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(15, 'd').startOf('day');
 			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(15, 'd').endOf('day');
+			$dateTimePickerBegin.data("ignore_onchange", true);
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
@@ -599,6 +606,7 @@ var HotelCalendarView = View.extend({
 			var $dateTimePickerEnd = $this.$el.find('#pms-search #date_end');
 			var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(1, 'd').startOf('day');
 			var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(1, 'd').endOf('day');
+			$dateTimePickerBegin.data("ignore_onchange", true);
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
@@ -611,6 +619,7 @@ var HotelCalendarView = View.extend({
 			var date_begin = moment().startOf('day');
 			var days = moment(date_begin).daysInMonth();
 			var date_end = date_begin.clone().add(days, 'd').endOf('day');
+			$dateTimePickerBegin.data("ignore_onchange", true);
 			$dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
 			$dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 			
@@ -692,6 +701,14 @@ var HotelCalendarView = View.extend({
     	isStartDate = isStartDate || false;
     	var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
 		var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
+		
+		// FIXME: Hackish onchange ignore (Used when change dates from code)
+		if ($dateTimePickerBegin.data("ignore_onchange") || $dateTimePickerEnd.data("ignore_onchange")) {
+			$dateTimePickerBegin.data("ignore_onchange", false);
+			$dateTimePickerEnd.data("ignore_onchange", false)
+			return true;
+		}
+		
 		var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate();
 		var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate();
     	if (date_begin && date_end && date_begin.isBefore(date_end) && this._hcalendar) {
@@ -731,7 +748,6 @@ var HotelCalendarView = View.extend({
 				reservs.push(nreserv);
 			}
 			
-			console.log(results['pricelist']);
 			$this._hcalendar.pricelist = results['pricelist'];
 			$this._hcalendar.setReservations(reservs);
 		});

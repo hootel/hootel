@@ -12,6 +12,11 @@
         		<field name="wstatus" readonly="True" />
         		<field name="wstatus_reason" readonly="True" />
         	</xpath>
+        	
+        	<!-- ALLOW ONLY-READ -->
+        	<xpath expr="//field" position="attributes">
+     			<attribute name="attrs">{'readonly': [('wis_from_channel','=','True')]}</attribute>
+        	</xpath>
         </field>
     </record>
     

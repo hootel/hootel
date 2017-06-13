@@ -218,6 +218,9 @@ class WuBook(models.TransientModel):
         rcode, results = self.SERVER.corporate_fetchable_properties(self.TOKEN)
         self.close_connection_()
 
+        _logger.info("CORPORATE FETCH");
+        _logger.info(results)
+
         if rcode != 0:
             raise UserError("Can't call 'corporate_fetch' from WuBook: %s" % results)
 

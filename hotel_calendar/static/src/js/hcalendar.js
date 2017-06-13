@@ -853,8 +853,6 @@ HotelCalendar.prototype = {
 						cell.classList.add('hcal-cell-end-week');
 					}
 					
-					//console.log("MIRA EEE");
-					//console.log(dd.format("YYYY-MM-DD"));
 					var dd_fmrt = dd.startOf('day').utc().format("YYYY-MM-DD"); // Local -> UTC
 					//console.log(dd_fmrt);
 					var input = document.createElement('input');
@@ -1049,6 +1047,8 @@ HotelCalendar.prototype = {
 		var $this = this;
 		this.clearReservationDivs();
 		
+		console.log("MIRA PASA POR AQUI====================");
+		
 		var errors = [];
 		this.reservations.forEach(function(itemReserv, indexReserv){
 			var limits = $this.getReservationCellLimits(itemReserv);
@@ -1079,14 +1079,12 @@ HotelCalendar.prototype = {
 		});
 		
 		this.assignReservationsEvents_();
-		
 		this.updateReservationOccupation_();
 		this.updatePriceList_();
-		//this.updateRoomTypeFreeRooms_();
 		
-		if (errors.length && this.isNRerservation) {
-			alert("[Hotel Calendar]\nWARNING: Can't show all reservations!\n\nSee debugger for more details.");
-		}
+//		if (errors.length && this.isNRerservation) {
+//			alert("[Hotel Calendar]\nWARNING: Can't show all reservations!\n\nSee debugger for more details.");
+//		}
 		this.isNRerservation = false;
 	},
 	
