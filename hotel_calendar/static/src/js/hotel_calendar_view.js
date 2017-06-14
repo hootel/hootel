@@ -281,7 +281,7 @@ var HotelCalendarView = View.extend({
 			
 			// Get Unit Price of Virtual Room
 			$this._model.call('get_vroom_price', [false, room.id, startDate.format(ODOO_DATETIME_MOMENT_FORMAT), endDate.format(ODOO_DATETIME_MOMENT_FORMAT)]).then(function(result){
-				new Common.SelectCreateDialog(this, {
+				new Common.FormViewDialog(this, {
                     res_model: 'hotel.folio',
                     context: {
                     	'default_adults': numBeds,
@@ -306,6 +306,7 @@ var HotelCalendarView = View.extend({
                     },
                     title: _t("Create: ") + _t("Folio"),
                     initial_view: "form",
+                    disable_multiple_selection: true,
                     form_view_options: { 'not_interactible_on_create':true },
                     create_function: function(data, options) {
                         var def = $.Deferred();
@@ -356,7 +357,6 @@ var HotelCalendarView = View.extend({
                     	return $this.dataset.read_ids(ids, fields, options);
                     },
                     on_selected: function() {
-                        $this.generate_hotel_calendar();
                         $this.generate_hotel_calendar();
                     }
                 }).open();
