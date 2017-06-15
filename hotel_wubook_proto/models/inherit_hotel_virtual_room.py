@@ -29,8 +29,11 @@ class hotel_virtual_room(models.Model):
     @api.depends('wcapacity')
     @api.onchange('room_ids')
     def _get_capacity(self):
+        hotel_room_obj = self.env['hotel.room']
         for rec in self:
-            capacities = rec.room_ids.mapped('capacity')
+            room_categories = rec.room_type_ids.mapped('cat_id.id')
+            room_ids = rec.room_ids & hotel_room_obj.search([('categ_id.id', 'in', room_categories)])
+            capacities = room_ids.mapped('capacity')
             rec.wcapacity = any(capacities) and min(capacities) or 0
 
     wscode = fields.Char("WuBook Short Code")

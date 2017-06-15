@@ -143,11 +143,13 @@ class HotelReservation(models.Model):
             rdays = []
             for i in range(0, date_diff):
                 ndate = date_start + timedelta(days=i)
+                avail = len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                                                            ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                                                            vroom.id))
+                avail = min(avail, vroom.max_real_rooms)
                 rdays.append({
                     'date': ndate.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                    'avail': len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                                                                 ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                                                                 vroom.id))
+                    'avail': avail,
                 })
             ravail = {'id': vroom.wrid, 'days': rdays}
             rooms_avail.append(ravail)
@@ -155,4 +157,4 @@ class HotelReservation(models.Model):
         return rooms_avail
 
     def on_change_checkin_checkout_product_id(self):
-        return super(HotelReservation, self).with_context(regenerate=not self.wis_from_channel).on_change_checkin_checkout_product_id()
+        return super(HotelReservation, self.with_context(regenerate=not self.wis_from_channel)).on_change_checkin_checkout_product_id()

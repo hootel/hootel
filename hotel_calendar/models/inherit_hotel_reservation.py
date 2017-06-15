@@ -28,17 +28,33 @@ class HotelReservation(models.Model):
     @api.model
     def create(self, vals):
         ret_vals = super(HotelReservation, self).create(vals)
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), "hotel_reservations_changed")
+        partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
+        notification = {
+            'type': 'reservation',
+            'subtype': 'created',
+            'name': partner_id and partner_id.name,
+        }
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), notification)
         return ret_vals
 
     @api.multi
     def write(self, vals):
         ret_vals = super(HotelReservation, self).write(vals)
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), "hotel_reservations_changed")
+        partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
+        notification = {
+            'type': 'reservation',
+            'subtype': 'write',
+            'name': partner_id.name,
+        }
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), notification)
         return ret_vals
 
     @api.multi
     def unlink(self):
-        ret_vals = super(HotelReservation, self).unlink()
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), "hotel_reservations_changed")
-        return ret_vals
+        notification = {
+            'type': 'reservation',
+            'subtype': 'unlink',
+            'name': self.partner_id.name,
+        }
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), notification)
+        return super(HotelReservation, self).unlink()
