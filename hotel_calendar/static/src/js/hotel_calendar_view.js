@@ -515,8 +515,7 @@ var HotelCalendarView = View.extend({
 		/** HACKISH ODOO VIEW **/
         //this._action_manager.main_control_panel.$el.hide();
 		$(document).find('.oe-view-manager-view-pms').css('overflow', 'initial'); // No Scroll here!
-		console.log(this.$el.parent());
-		this.$el.parent().parent().css('overflow', 'none');
+		//this.$el.parent().parent().css('overflow', 'none');
 		
 		/** VIEW CONTROLS INITIALIZATION **/
 		// DATE TIME PICKERS
