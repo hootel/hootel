@@ -154,6 +154,5 @@ class HotelReservation(models.Model):
 
         return rooms_avail
 
-    @api.onchange('checkin', 'checkout', 'product_id')
     def on_change_checkin_checkout_product_id(self):
         return super(HotelReservation, self).with_context(regenerate=not self.wis_from_channel).on_change_checkin_checkout_product_id()
