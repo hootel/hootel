@@ -62,7 +62,7 @@ class HotelReservation(models.Model):
         if self._context.get('wubook_action', True):
             rooms_avail = self.get_availability(vals['checkin'],
                                                 vals['checkout'],
-                                                vals['product_id'].id)
+                                                vals['product_id'])
             self.env['wubook'].update_availability(rooms_avail)
         res = super(HotelReservation, self).create(vals)
         return res
@@ -77,7 +77,7 @@ class HotelReservation(models.Model):
         older_vals = {
             'checkin': self.checkin,
             'checkout': self.checkout,
-            'product_id': self.product_id,
+            'product_id': self.product_id.id,
         }
         new_vals = {
             'checkin': vals.get('checkin'),
