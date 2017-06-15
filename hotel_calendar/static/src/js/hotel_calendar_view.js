@@ -278,10 +278,9 @@ var HotelCalendarView = View.extend({
 			if (startDate.isSame(now, 'day')) {
 				startDate = now.add(30,'m'); // +30 mins
 			}
-			
 			// Get Unit Price of Virtual Room
 			$this._model.call('get_vroom_price', [false, room.id, startDate.format(ODOO_DATETIME_MOMENT_FORMAT), endDate.format(ODOO_DATETIME_MOMENT_FORMAT)]).then(function(result){
-				new Common.FormViewDialog(this, {
+				var pop = new Common.FormViewDialog(this, {
                     res_model: 'hotel.folio',
                     context: {
                     	'default_adults': numBeds,
@@ -294,10 +293,9 @@ var HotelCalendarView = View.extend({
                     			'adults': numBeds,
                     			'children': 0,
                     			'product_id': room.id,
-                    			'product_uom': +room.getUserData('uom_id'),
-                    			//'order_line_id.product_uom': +room.getUserData('uom_id'),
+                    			'product_uom': 1,//room.getUserData('uom_id'),
                     			'product_uom_qty': 1,
-                    			'product_uos': 1,
+                    			//'product_uos': 1,
                     			'name': `${room.number}`,
                     			'price_unit': result['unit_price'],
                     			//'order_id': 1
@@ -309,6 +307,7 @@ var HotelCalendarView = View.extend({
                     disable_multiple_selection: true,
                     form_view_options: { 'not_interactible_on_create':true },
                     create_function: function(data, options) {
+                    	console.log(this);
                         var def = $.Deferred();
                         var res = true;
                         var dataset = $this.dataset;
@@ -360,6 +359,8 @@ var HotelCalendarView = View.extend({
                         $this.generate_hotel_calendar();
                     }
                 }).open();
+				
+				console.log(pop);
 			});	
 		});
 		
@@ -512,6 +513,8 @@ var HotelCalendarView = View.extend({
 		/** HACKISH ODOO VIEW **/
         //this._action_manager.main_control_panel.$el.hide();
 		$(document).find('.oe-view-manager-view-pms').css('overflow', 'initial'); // No Scroll here!
+		console.log(this.$el.parent());
+		this.$el.parent().parent().css('overflow', 'none');
 		
 		/** VIEW CONTROLS INITIALIZATION **/
 		// DATE TIME PICKERS
