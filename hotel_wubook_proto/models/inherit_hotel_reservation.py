@@ -62,7 +62,7 @@ class HotelReservation(models.Model):
         if self._context.get('wubook_action', True):
             rooms_avail = self.get_availability(vals['checkin'],
                                                 vals['checkout'],
-                                                vals['product_id'])
+                                                vals['product_id'].id)
             self.env['wubook'].update_availability(rooms_avail)
         res = super(HotelReservation, self).create(vals)
         return res
@@ -112,7 +112,7 @@ class HotelReservation(models.Model):
                                                           'Cancelled by %s' % partner_id.name)
             rooms_avail = self.get_availability(self.checkin,
                                                 self.checkout,
-                                                self.product_id)
+                                                self.product_id.id)
             self.env['wubook'].update_availability(rooms_avail)
         return super(HotelReservation, self).unlink()
 
@@ -138,7 +138,7 @@ class HotelReservation(models.Model):
 
         hotel_vroom_obj = self.env['hotel.virtual.room']
         rooms_avail = []
-        vrooms = self.env['hotel.virtual.room'].search([('room_ids.product_id', '=', product_id)])
+        vrooms = self.env['hotel.virtual.room'].search([('room_ids.product_id', '=', product_id.id)])
         for vroom in vrooms:
             rdays = []
             for i in range(0, date_diff):
