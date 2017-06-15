@@ -30,7 +30,7 @@ class HotelReservation(models.Model):
         reservation_id = super(HotelReservation, self).create(vals)
         notification = {
             'type': 'reservation',
-            'subtype': 'created',
+            'subtype': 'create',
             'name': reservation_id.partner_id.name,
         }
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), notification)
@@ -39,7 +39,9 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         ret_vals = super(HotelReservation, self).write(vals)
-        partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
+        partner_id = self.parnter_id
+        if vals.get('partner_id'):
+            partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
         notification = {
             'type': 'reservation',
             'subtype': 'write',
