@@ -32,7 +32,7 @@ class HotelReservation(models.Model):
         notification = {
             'type': 'reservation',
             'subtype': 'created',
-            'name': partner_id and partner_id.name,
+            'name': partner_id.name if partner_id else '',
         }
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), notification)
         return ret_vals
