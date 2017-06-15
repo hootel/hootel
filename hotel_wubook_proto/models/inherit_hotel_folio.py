@@ -41,6 +41,5 @@ class HotelFolio(models.Model):
     @api.multi
     def import_reservations(self):
         wubook = self.env['wubook']
-        #wubook.fetch_new_bookings()
-        wubook.corporate_fetch()
+        wubook.fetch_new_bookings()
         return True

@@ -35,7 +35,7 @@
     },
     'data': [
         'data/sequence.xml',
-        'data/cron_jobs.xml',
+        #'data/cron_jobs.xml',
         'wizards/wubook_installer.xml',
         'views/general.xml',
         'views/inherit_res_partner.xml',
