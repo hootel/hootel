@@ -43,3 +43,10 @@ class HotelFolio(models.Model):
         wubook = self.env['wubook']
         wubook.fetch_new_bookings()
         return True
+
+    @api.multi
+    def action_confirm(self):
+        for rec in self:
+            for room in rec.room_lines:
+                room.to_read = False
+        return super(HotelFolio, self).action_confirm()

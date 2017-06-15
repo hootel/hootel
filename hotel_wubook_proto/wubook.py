@@ -397,6 +397,10 @@ class WuBook(models.TransientModel):
                             occupancy = broom['occupancy']
                             break
 
+                    rstate = 'draft'
+                    if book['status'] == WUBOOK_STATUS_CANCELLED \
+                            or book['status'] == WUBOOK_STATUS_REFUSED:
+                        rstate = 'cancelled'
                     vals = {
                         'checkin': checkin,
                         'checkout': checkout,
@@ -415,6 +419,7 @@ class WuBook(models.TransientModel):
                         'wchannel_reservation_code': str(book['channel_reservation_code']),
                         'wstatus': str(book['status']),
                         'to_read': True,
+                        'state': rstate,
                     }
                     reservations.append((0, False, vals))
                 else:
