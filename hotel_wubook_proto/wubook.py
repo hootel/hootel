@@ -349,7 +349,7 @@ class WuBook(models.TransientModel):
                     'name': "%s %s" % (book['customer_name'], book['customer_surname']),
                     'country_id': country_id and country_id.id,
                     'city': book['customer_city'],
-                    'comment': book['customer_notes'],
+                    'wcustomer_notes': book['customer_notes'],
                     'phone': book['customer_phone'],
                     'zip': book['customer_zip'],
                     'street': book['customer_address'],
