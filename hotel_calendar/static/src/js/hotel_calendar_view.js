@@ -46,7 +46,9 @@ ControlPanel.include({
     	this._super(status, options);
     	var action_stack = this.getParent().action_stack;
     	if (action_stack && action_stack.length) {
-	    	if (action_stack[action_stack.length-1].widget.active_view.type === 'pms'){
+    		var active_action = action_stack[action_stack.length-1];
+	    	if (active_action.widget && active_action.widget.active_view &&
+	    			active_action.widget.active_view.type === 'pms'){
 	            this._toggle_visibility(false);
 	        } else {
 	        	this._toggle_visibility(true);
