@@ -27,15 +27,14 @@ class HotelReservation(models.Model):
 
     @api.model
     def create(self, vals):
-        ret_vals = super(HotelReservation, self).create(vals)
-        partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
+        reservation_id = super(HotelReservation, self).create(vals)
         notification = {
             'type': 'reservation',
             'subtype': 'created',
-            'name': partner_id.name if partner_id else '',
+            'name': reservation_id.partner_id.name,
         }
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), notification)
-        return ret_vals
+        return reservation_id
 
     @api.multi
     def write(self, vals):
