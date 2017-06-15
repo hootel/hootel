@@ -81,14 +81,18 @@ class HotelReservation(models.Model):
         }
         ret_vals = super(HotelReservation, self).write(vals)
         if self._context.get('wubook_action', True):
-            rooms_avail = self.get_availability(older_vals['checkin'],
-                                                older_vals['checkout'],
-                                                older_vals['product_id'])
-            rooms_avail += self.get_availability(vals['checkin'],
-                                                 vals['checkout'],
-                                                 vals['product_id'])
-            rooms_avail = list({v['date']: v for v in rooms_avail}.values())
-            self.env['wubook'].update_availability(rooms_avail)
+            rooms_avail = []
+            if older_vals['checkin'] and older_vals['checkout'] and older_vals['product_id']:
+                rooms_avail = self.get_availability(older_vals['checkin'],
+                                                    older_vals['checkout'],
+                                                    older_vals['product_id'])
+            if vals['checkin'] and vals['checkout'] and vals['product_id']:
+                rooms_avail += self.get_availability(vals['checkin'],
+                                                     vals['checkout'],
+                                                     vals['product_id'])
+            if any(rooms_avail):
+                rooms_avail = list({v['date']: v for v in rooms_avail}.values())
+                self.env['wubook'].update_availability(rooms_avail)
         return ret_vals
 
     @api.multi
