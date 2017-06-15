@@ -45,7 +45,7 @@ ControlPanel.include({
     update: function(status, options) {
     	this._super(status, options);
     	var action_stack = this.getParent().action_stack;
-    	if (action_stack) {
+    	if (action_stack && action_stack.length) {
 	    	if (action_stack[action_stack.length-1].widget.active_view.type === 'pms'){
 	            this._toggle_visibility(false);
 	        } else {
