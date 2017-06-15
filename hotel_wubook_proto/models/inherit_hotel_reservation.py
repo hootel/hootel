@@ -95,6 +95,7 @@ class HotelReservation(models.Model):
                 rooms_avail += self.get_availability(new_vals['checkin'],
                                                      new_vals['checkout'],
                                                      new_vals['product_id'])
+            _logger.info(rooms_avail)
             if any(rooms_avail):
                 rooms_avail = list({v['date']: v for v in rooms_avail}.values())
                 self.env['wubook'].update_availability(rooms_avail)
