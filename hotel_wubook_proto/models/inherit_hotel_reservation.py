@@ -79,6 +79,11 @@ class HotelReservation(models.Model):
             'checkout': self.checkout,
             'product_id': self.product_id,
         }
+        new_vals = {
+            'checkin': vals.get('checkin'),
+            'checkout': vals.get('checkout'),
+            'product_id': vals.get('product_id'),
+        }
         ret_vals = super(HotelReservation, self).write(vals)
         if self._context.get('wubook_action', True):
             rooms_avail = []
@@ -86,10 +91,10 @@ class HotelReservation(models.Model):
                 rooms_avail = self.get_availability(older_vals['checkin'],
                                                     older_vals['checkout'],
                                                     older_vals['product_id'])
-            if vals['checkin'] and vals['checkout'] and vals['product_id']:
-                rooms_avail += self.get_availability(vals['checkin'],
-                                                     vals['checkout'],
-                                                     vals['product_id'])
+            if new_vals['checkin'] and new_vals['checkout'] and new_vals['product_id']:
+                rooms_avail += self.get_availability(new_vals['checkin'],
+                                                     new_vals['checkout'],
+                                                     new_vals['product_id'])
             if any(rooms_avail):
                 rooms_avail = list({v['date']: v for v in rooms_avail}.values())
                 self.env['wubook'].update_availability(rooms_avail)
