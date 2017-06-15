@@ -318,6 +318,7 @@ class WuBook(models.TransientModel):
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
         processed_rids = []
+        _logger.info(bookings)
         for book in bookings:
             # Already Exists?
             reservs = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
