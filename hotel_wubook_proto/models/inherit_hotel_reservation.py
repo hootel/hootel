@@ -109,19 +109,13 @@ class HotelReservation(models.Model):
     def action_cancel(self):
         partner_id = self.env['res.users'].browse(self.env.uid).partner_id
         for record in self:
-                if self.wchannel_id == '0':
+                if self.wchannel_id == '0':     # Only can cancel reservations created directly in wubook
                     self.env['wubook'].cancel_reservation(record.wrid,
                                                           'Cancelled by %s' % partner_id.name)
-        ret_vals = super(HotelReservation, self).action_cancel()
-        rooms_avail = self.get_availability(self.checkin,
-                                            self.checkout,
-                                            self.product_id)
-        self.env['wubook'].update_availability(rooms_avail)
-        return ret_vals
+        return super(HotelReservation, self).action_cancel()
 
     @api.multi
     def mark_as_read(self):
-        _logger.info("MARK AS READ!")
         for record in self:
             record.to_read = False
 
@@ -133,7 +127,7 @@ class HotelReservation(models.Model):
 
         hotel_vroom_obj = self.env['hotel.virtual.room']
         rooms_avail = []
-        vrooms = self.env['hotel.virtual.room'].search([('room_ids.product_id', '=', product_id)])
+        vrooms = self.env['hotel.virtual.room'].search([('room_ids.product_id', '=', product_id.id)])
         for vroom in vrooms:
             rdays = []
             for i in range(0, date_diff):

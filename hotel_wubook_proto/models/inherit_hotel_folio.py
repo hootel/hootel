@@ -24,22 +24,23 @@ from openerp import models, fields, api
 class HotelFolio(models.Model):
     _inherit = 'hotel.folio'
 
-    @api.multi
-    def has_wubook_reservations(self):
+    @api.depends('whas_wubook_reservations', 'room_lines')
+    def _has_wubook_reservations(self):
         if any(self.room_lines):
             for room in self.room_lines:
                 if room.wrid != 'none':
                     self.whas_wubook_reservations = True
-                    break
+                    return
         self.whas_wubook_reservations = False
 
     wseed = fields.Char("WuBook Session Seed", readonly=True)
     wcustomer_notes = fields.Text("WuBook Customer Notes", readonly=True)
-    whas_wubook_reservations = fields.Boolean(compute=has_wubook_reservations,
+    whas_wubook_reservations = fields.Boolean(compute=_has_wubook_reservations,
                                               store=False)
 
     @api.multi
     def import_reservations(self):
         wubook = self.env['wubook']
-        wubook.fetch_new_bookings()
+        #wubook.fetch_new_bookings()
+        wubook.corporate_fetch()
         return True
