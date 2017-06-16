@@ -735,14 +735,15 @@ var HotelCalendarView = View.extend({
     _on_bus_signal: function(notifications) {
     	var need_reload = false;
     	for (var notif of notifications) {
-    		console.log(notif);
     		if (notif[0][1] === 'hotel.reservation' && notif[1]['type'] === "reservation") {
+    			var reservation = notif[1]['reservation'];
+    			var msg = `Name: ${reservation['name']}\nRoom: ${reservation['room_name']}\nCheck-In: ${reservation['checkin']}\nCheck-Out: ${reservation['checkout']}`;
     			if (notif[1]['subtype'] === "create") {
-    				this.do_notify(_t("Reservation Created"), `Name: ${notif[1]['name']}`, true);
+    				this.do_notify(_t("Reservation Created"), msg, true);
     			} else if (notif[1]['subtype'] === "write") {
-    				this.do_notify(_t("Reservation Changed"), `Name: ${notif[1]['name']}`, true);
+    				this.do_notify(_t("Reservation Changed"), msg, true);
     			} else if (notif[1]['subtype'] === "unlink") {
-    				this.do_notify(_t("Reservation Deleted"), `Name: ${notif[1]['name']}`, true);
+    				this.do_notify(_t("Reservation Deleted"), msg, true);
     			}
     			need_reload = true;
     		}

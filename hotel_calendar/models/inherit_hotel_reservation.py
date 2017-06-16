@@ -31,7 +31,12 @@ class HotelReservation(models.Model):
         notification = {
             'type': 'reservation',
             'subtype': 'create',
-            'name': reservation_id.partner_id.name,
+            'reservation': {
+                'name': reservation_id.partner_id.name,
+                'checkin': reservation_id.checkin,
+                'checkout': reservation_id.checkout,
+                'room_name': reservation_id.product_id.name,
+            },
         }
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), notification)
         return reservation_id
@@ -40,12 +45,26 @@ class HotelReservation(models.Model):
     def write(self, vals):
         ret_vals = super(HotelReservation, self).write(vals)
         partner_id = self.partner_id
+        checkin = self.checkin
+        checkout = self.checkout
+        product_id = self.product_id
         if vals.get('partner_id'):
             partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
+        if vals.get('checkin'):
+            checkin = vals.get('checkin')
+        if vals.get('checkout'):
+            checkout = vals.get('checkout')
+        if vals.get('product_id'):
+            product_id = self.env['product.product'].browse(vals.get('product_id'))
         notification = {
             'type': 'reservation',
             'subtype': 'write',
-            'name': partner_id.name,
+            'reservation': {
+                'name': partner_id.name,
+                'checkin': checkin,
+                'checkout': checkout,
+                'room_name': product_id.name,
+            },
         }
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), notification)
         return ret_vals
@@ -55,7 +74,12 @@ class HotelReservation(models.Model):
         notification = {
             'type': 'reservation',
             'subtype': 'unlink',
-            'name': self.partner_id.name,
+            'reservation': {
+                'name': self.partner_id.name,
+                'checkin': self.checkin,
+                'checkout': self.checkout,
+                'room_name': self.product_id.name,
+            },
         }
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', self.env.uid), notification)
         return super(HotelReservation, self).unlink()
