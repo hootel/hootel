@@ -68,7 +68,10 @@ class HotelFolio(models.Model):
         date_end_str = date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         room_ids = rooms.mapped('product_id.id')
         domainReservations.insert(0, ('product_id', 'in', room_ids))
-        #domainReservations.insert(0, ('state', '!=', 'cancelled'))
+        domainReservations.insert(0, ('state', 'in', ['draft',
+                                                      'confirm',
+                                                      'booking',
+                                                      'done']))
         reservations_raw = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
         reservations_ld = self.env['hotel.reservation'].search([
             ('checkin', '>=', date_start_str),
