@@ -479,7 +479,7 @@ var HotelCalendarView = View.extend({
             ['room_lines.checkout','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
             ];
         this._model.call('search_count', [domain]).then(function(count){
-            var $ninfo = $this.$el.find('#pms-menu #btn_action_checkout div.ninfo');
+            var $ninfo = self.$el.find('#pms-menu #btn_action_checkout div.ninfo');
             var $badge_checkout = $ninfo.find('.badge');
             if (count > 0) {
                 $badge_checkout.text(count);
@@ -495,7 +495,7 @@ var HotelCalendarView = View.extend({
                         ['room_lines.checkin','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
                         ];
         this._model.call('search_count', [domain]).then(function(count){
-            var $ninfo = $this.$el.find('#pms-menu #btn_action_checkin div.ninfo');
+            var $ninfo = self.$el.find('#pms-menu #btn_action_checkin div.ninfo');
             var $badge_checkin = $ninfo.find('.badge');
             if (count > 0) {
                 $badge_checkin.text(count);
