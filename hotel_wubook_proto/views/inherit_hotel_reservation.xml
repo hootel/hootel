@@ -48,7 +48,7 @@
         	</xpath>
         	<xpath expr="//field[@name='state']" position="after">
         		<field name="to_read" invisible="1"/>
-        		<button name="mark_as_read" type="object" string="Read &amp; Hide" class="oe_highlight" attrs="{'invisible':[('to_read', '=', True)]}" />
+        		<button name="mark_as_read" type="object" string="Read &amp; Hide" class="oe_highlight" attrs="{'invisible':['|',('to_assign', '=', True),('to_read', '=', True)]}" />
         	</xpath>
         </field>
     </record>

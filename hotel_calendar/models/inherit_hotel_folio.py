@@ -143,15 +143,21 @@ class HotelFolio(models.Model):
         date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
         date_diff = abs((date_start-date_end).days)
 
-        price = 0.0
+        total_price = 0.0
+        priceday = []
         for i in range(0, date_diff-1):
             ndate = date_start + timedelta(days=i)
+            ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
             prod = product.with_context(
                 lang=partner.lang,
                 partner=partner.id,
                 quantity=1,
-                date_order=ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                date_order=ndate_str,
                 pricelist=partner.property_product_pricelist.id,
                 uom=product.product_tmpl_id.uom_id.id)
-            price += prod.price
-        return {'unit_price': price}
+            priceday.append({
+                'date': ndate_str,
+                'price': prod.price,
+            })
+            total_price += prod.price
+        return {'total_price': total_price, 'priceday': priceday}

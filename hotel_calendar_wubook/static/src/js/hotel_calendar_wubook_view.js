@@ -22,12 +22,12 @@ var _wubook_notif_reservations_domain = [
 var HotelCalendarViewWuBook = HotelCalendarView.include({
 	update_buttons_counter: function() {
 		this._super();
-		var $this = this;
+		var self = this;
 		
 		// Cloud Reservations
     	new Model('hotel.reservation').call('search_count', [_wubook_notif_reservations_domain]).then(function(count){
-    		var $button = $this.$el.find("#btn_channel_manager_request");
-    		var $text = $this.$el.find("#btn_channel_manager_request .cloud-text");
+    		var $button = self.$el.find("#btn_channel_manager_request");
+    		var $text = self.$el.find("#btn_channel_manager_request .cloud-text");
 			if (count > 0) {
 				$button.addClass('incoming');
 				$text.text(count);
@@ -40,11 +40,11 @@ var HotelCalendarViewWuBook = HotelCalendarView.include({
 	},
 	
 	init_calendar_view: function() {
-		var $this = this;
+		var self = this;
 		return $.when(this._super()).then(function(){
             var deferred_promises = [];
-			$this.$el.find("#btn_channel_manager_request").on('click', function(ev){
-				var pop = new Common.SelectCreateDialog($this, {
+			self.$el.find("#btn_channel_manager_request").on('click', function(ev){
+				var pop = new Common.SelectCreateDialog(self, {
 	                res_model: 'hotel.reservation',
 	                domain: _wubook_notif_reservations_domain,
 	                title: _t("WuBook Reservations to Assign"),
@@ -52,17 +52,17 @@ var HotelCalendarViewWuBook = HotelCalendarView.include({
 	                no_create: true,
 	                on_selected: function(element_ids) {
 	                	return new Model('hotel.reservation').call('get_formview_id', [element_ids[0], Session.user_context]).then(function(view_id){
-	        				var pop = new Common.FormViewDialog($this, {
+	        				var pop = new Common.FormViewDialog(self, {
 	        	                res_model: 'hotel.reservation',
 	        	                res_id: element_ids[0],
 	        	                title: _t("Open: ") + _t("Reservation"),
 	        	                view_id: view_id
 	        	            }).open();
-	        				pop.on('write_completed', $this, function(){
-	                            $this.trigger('changed_value');
+	        				pop.on('write_completed', self, function(){
+	                            self.trigger('changed_value');
 	                        });
-	        				pop.on('closed', $this, function(){
-	                            $this.reload_hcalendar_reservations(); // Here because don't trigger 'write_completed' when change state to confirm
+	        				pop.on('closed', self, function(){
+	                            self.reload_hcalendar_reservations(); // Here because don't trigger 'write_completed' when change state to confirm
 	                        });
 	        			});
 	                }
