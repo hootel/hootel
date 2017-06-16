@@ -39,7 +39,7 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         ret_vals = super(HotelReservation, self).write(vals)
-        partner_id = self.parnter_id
+        partner_id = self.partner_id
         if vals.get('partner_id'):
             partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
         notification = {
