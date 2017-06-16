@@ -71,7 +71,8 @@ class HotelFolio(models.Model):
         domainReservations.insert(0, ('state', 'in', ['draft',
                                                       'confirm',
                                                       'booking',
-                                                      'done']))
+                                                      'done',
+                                                      False]))
         reservations_raw = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
         reservations_ld = self.env['hotel.reservation'].search([
             ('checkin', '>=', date_start_str),

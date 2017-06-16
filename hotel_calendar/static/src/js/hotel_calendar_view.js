@@ -301,6 +301,7 @@ var HotelCalendarView = View.extend({
                     			'product_id': room.id,
                     			'product_uom': room.getUserData('uom_id'),
                     			'product_uom_qty': 1,
+                    			'state': 'draft',
                     			//'product_uos': 1,
                     			'name': `${room.number}`,
                     			'reservation_lines': reservation_lines,
