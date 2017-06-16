@@ -469,44 +469,48 @@ var HotelCalendarView = View.extend({
     	var $this = this;
     	var domain = [];
 
-    	// Checkouts Button
-    	domain = [['checkins_reservations','=',true]];
-		this._model.call('search_count', [domain]).then(function(count){
-			var $ninfo = $this.$el.find('#pms-menu #btn_action_checkout div.ninfo');
-			var $badge_checkout = $ninfo.find('.badge');
-			if (count > 0) {
-				$badge_checkout.text(count);
-				$badge_checkout.parent().show();
-				$ninfo.show();
-			} else {
-				$ninfo.hide();
-			}
-		});
-    	
-    	// Checkins Button
-    	domain = [['checkouts_reservations','=',true]];
-    	this._model.call('search_count', [domain]).then(function(count){
-    		var $ninfo = $this.$el.find('#pms-menu #btn_action_checkin div.ninfo');
-    		var $badge_checkin = $ninfo.find('.badge');
-    		if (count > 0) {
-    			$badge_checkin.text(count);
-    			$badge_checkin.parent().show();
-    			$ninfo.show();
-    		} else {
-				$ninfo.hide();
-			}
-    	});
-    	
-    	// Charges Button
-//    	domain = [[('invoices_amount','>',0)],['checkin','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)]];
-//    	
-//    	var $badge_charges = this.$el.find('#pms-menu #btn_action_paydue .badge');
-//    	new Model('hotel.folio').call('search_count', [domain]).then(function(count){
-//    		if (count > 0) {
-//    			$badge_charges.text(count);
-//    			$badge_charges.parent().show();
-//    		}
-//    	});
+    	 // Checkouts Button
+        domain = [['room_lines.checkout', '>=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
+            ['room_lines.checkout','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
+            ];
+        this._model.call('search_count', [domain]).then(function(count){
+            var $ninfo = $this.$el.find('#pms-menu #btn_action_checkout div.ninfo');
+            var $badge_checkout = $ninfo.find('.badge');
+            if (count > 0) {
+                $badge_checkout.text(count);
+                $badge_checkout.parent().show();
+                $ninfo.show();
+            } else {
+                $ninfo.hide();
+            }
+        });
+
+        // Checkins Button
+        domain = [['room_lines.checkin', '>=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
+                        ['room_lines.checkin','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
+                        ];
+        this._model.call('search_count', [domain]).then(function(count){
+            var $ninfo = $this.$el.find('#pms-menu #btn_action_checkin div.ninfo');
+            var $badge_checkin = $ninfo.find('.badge');
+            if (count > 0) {
+                $badge_checkin.text(count);
+                $badge_checkin.parent().show();
+                $ninfo.show();
+            } else {
+                $ninfo.hide();
+            }
+        });
+
+        // Charges Button
+        //domain = [['invoice_ids.residual','>',0 ],['room_lines.checkin','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)]];
+
+        //var $badge_charges = this.$el.find('#pms-menu #btn_action_paydue .badge');
+    //new Model('hotel.folio').call('search_count', [domain]).then(function(count){
+        //if (count > 0) {
+          //  $badge_charges.text(count);
+            //    $badge_charges.parent().show();
+            //}
+      //  });
     },
     
     init_calendar_view: function(){
