@@ -201,9 +201,6 @@ var HotelCalendarView = View.extend({
 				pop.on('write_completed', self, function(){
                     self.trigger('changed_value');
                 });
-				pop.on('closed', self, function(){
-                    self.reload_hcalendar_reservations(); // Here because don't trigger 'write_completed' when change state to confirm
-                });
 			});
 		});
 		this._hcalendar.addEventListener('hcalOnChangeReservation', function(ev){
@@ -339,7 +336,6 @@ var HotelCalendarView = View.extend({
                                 		disabled: res < 0,
                                 		click: function () {
                                 			self._model.call('action_confirm', [res]).then(function(results){
-                                				self.generate_hotel_calendar();
                                 			}).fail(function(err, ev){
                                 				alert(_t("[Hotel Calendar]\nERROR: Can't confirm folio!"));
                                 			});
@@ -363,9 +359,6 @@ var HotelCalendarView = View.extend({
                     read_function: function(ids, fields, options) {
                     	return self.dataset.read_ids(ids, fields, options);
                     },
-                    on_selected: function() {
-                        self.generate_hotel_calendar();
-                    }
                 }).open();
 				
 				console.log(pop);
@@ -727,6 +720,11 @@ var HotelCalendarView = View.extend({
 		var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate();
     	if (date_begin && date_end && date_begin.isBefore(date_end) && this._hcalendar) {
     		var days = isStartDate?date_begin.daysInMonth():date_end.diff(date_begin,'days')+1;
+    		if (isStartDate) {
+    			var ndate_end = date_begin.clone().add(days, 'd');
+    			$dateTimePickerEnd.data("ignore_onchange", true);
+    			$dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end);
+    		}
     		this._hcalendar.setStartDate(date_begin, days);
     		this.reload_hcalendar_reservations();
     	}
@@ -737,7 +735,7 @@ var HotelCalendarView = View.extend({
     	for (var notif of notifications) {
     		if (notif[0][1] === 'hotel.reservation' && notif[1]['type'] === "reservation") {
     			var reservation = notif[1]['reservation'];
-    			var msg = `Name: ${reservation['name']}\nRoom: ${reservation['room_name']}\nCheck-In: ${reservation['checkin']}\nCheck-Out: ${reservation['checkout']}`;
+    			var msg = `<b>Name:</b> ${reservation['name']}<br/><b>Room:</b> ${reservation['room_name']}<br/><b>Check-In:</b> ${reservation['checkin']}<br/><b>Check-Out:</b> ${reservation['checkout']}`;
     			if (notif[1]['subtype'] === "create") {
     				this.do_notify(_t("Reservation Created"), msg, true);
     			} else if (notif[1]['subtype'] === "write") {
