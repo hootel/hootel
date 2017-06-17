@@ -331,8 +331,8 @@ class WuBook(models.TransientModel):
                         'to_read': True,
                     })
 
-                    if book['status'] == WUBOOK_STATUS_CANCELLED \
-                            or book['status'] == WUBOOK_STATUS_REFUSED:
+                    if book['status'] in [WUBOOK_STATUS_CANCELLED,
+                                          WUBOOK_STATUS_REFUSED]:
                         reserv.action_cancel()
                 processed_rids.append(book['reservation_code'])
                 continue

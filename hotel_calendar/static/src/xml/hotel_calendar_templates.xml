@@ -49,4 +49,13 @@
 	</div>
 </t>
 
+<t t-name="HotelCalendar.Notification">
+	<ul>
+		<li><b>Name:</b> <t t-esc="name"/></li>
+		<li><b>Room:</b> <t t-esc="room_name"/></li>
+		<li><b>Check-In:</b> <t t-esc="checkin"/></li>
+		<li><b>Check-Out:</b> <t t-esc="checkout"/></li>
+	</ul>
+</t>
+
 </template>

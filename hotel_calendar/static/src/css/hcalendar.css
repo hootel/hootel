@@ -5,6 +5,29 @@
  *     Alexandre Díaz <alex@aloxa.eu>
  */
  
+/** ANIMATIONS **/
+@keyframes cell-invalid {
+	0% {
+		background: #ff0000;
+		background: repeating-linear-gradient(141deg,#ff0000 10%, #ff0000 40%, rgba(255,0,0,0.51) 30%, rgba(255,0,0,0.51) 50%);
+		background: -webkit-repeating-linear-gradient(141deg,#ff0000 10%, #ff0000 40%, rgba(255,0,0,0.51) 30%, rgba(255,0,0,0.51) 50%);
+		background: -moz-repeating-linear-gradient(141deg,#ff0000 10%, #ff0000 40%, rgba(255,0,0,0.51) 30%, rgba(255,0,0,0.51) 50%);
+    }
+	50% {
+		background: #ff0000;
+		background: repeating-linear-gradient(141deg,#ff0000 10%, #ff0000 40%, rgba(255,0,0,0.51) 30%, rgba(255,0,0,0.51) 50%);
+		background: -webkit-repeating-linear-gradient(141deg,#ff0000 10%, #ff0000 35%, rgba(255,0,0,0.51) 30%, rgba(255,0,0,0.51) 50%);
+		background: -moz-repeating-linear-gradient(141deg,#ff0000 10%, #ff0000 40%, rgba(255,0,0,0.51) 30%, rgba(255,0,0,0.51) 50%);
+    }
+    100% {
+		background: #ff0000;
+		background: repeating-linear-gradient(141deg,#ff0000 10%, #ff0000 30%, rgba(255,0,0,0.51) 30%, rgba(255,0,0,0.51) 50%);
+		background: -webkit-repeating-linear-gradient(141deg,#ff0000 10%, #ff0000 30%, rgba(255,0,0,0.51) 30%, rgba(255,0,0,0.51) 50%);
+		background: -moz-repeating-linear-gradient(141deg,#ff0000 10%, #ff0000 30%, rgba(255,0,0,0.51) 30%, rgba(255,0,0,0.51) 50%);
+    }
+}
+
+
 .btn-hcal { }
 .btn-hcal.hcal-cell-current-day {
  	background-color: #B3EE3A;
@@ -39,7 +62,7 @@
 .hcal-table a {
 	text-decoration: none;
 }
-.hcal-table tr:hover td:not(.hcal-cell-highlight):not(.hcal-cell-current-day):not(.hcal-cell-end-week):not(.btn-hcal) {
+.hcal-table tr:hover td:not(.hcal-cell-highlight):not(.hcal-cell-current-day):not(.hcal-cell-end-week):not(.btn-hcal):not(.hcal-cell-invalid) {
 	background-color: #F6F6F6;
 }
 
@@ -52,7 +75,7 @@
 	height: 10px;
 	border: 1px solid lightgray !important;
 }
-.hcal-table-day td:hover:not(.hcal-cell-highlight) {
+.hcal-table-day td:hover:not(.hcal-cell-highlight):not(.hcal-cell-invalid) {
 	background-color: #FCFEE1 !important;
 }
 
@@ -103,6 +126,10 @@
 
 .hcal-cell-highlight {
 	background-color: #F8FD9C;
+}
+
+.hcal-cell-invalid {
+	background-color: #e58e92;
 }
  
 

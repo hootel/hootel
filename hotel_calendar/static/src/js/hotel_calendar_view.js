@@ -299,7 +299,7 @@ var HotelCalendarView = View.extend({
                     			'product_uom': room.getUserData('uom_id'),
                     			'product_uom_qty': 1,
                     			'state': 'draft',
-                    			//'product_uos': 1,
+//                    			//'product_uos': 1,
                     			'name': `${room.number}`,
                     			'reservation_lines': reservation_lines,
                     			'price_unit': result['total_price']
@@ -451,7 +451,9 @@ var HotelCalendarView = View.extend({
 					moment.utc(r[5]).local(), // Date Start
 					moment.utc(r[6]).local(), // Date End
 					r[8], // Color
-					r[9] || false // Read Only
+					r[9] || false, // Read Only
+					r[10] || false, // Move Days
+					r[11] || false // Move Rooms
 				);
 				nreserv.addUserData({'folio_id': r[7]});
 				reservs.push(nreserv);
@@ -718,9 +720,10 @@ var HotelCalendarView = View.extend({
 		
 		var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate();
 		var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate();
-    	if (date_begin && date_end && date_begin.isBefore(date_end) && this._hcalendar) {
-    		var days = isStartDate?date_begin.daysInMonth():date_end.diff(date_begin,'days')+1;
-    		if (isStartDate) {
+		var hardmode = isStartDate || date_begin.isAfter(date_end);
+    	if (date_begin && date_end && this._hcalendar) {
+    		var days = hardmode?date_begin.daysInMonth():date_end.diff(date_begin,'days')+1;
+    		if (hardmode) {
     			var ndate_end = date_begin.clone().add(days, 'd');
     			$dateTimePickerEnd.data("ignore_onchange", true);
     			$dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end);
@@ -734,8 +737,7 @@ var HotelCalendarView = View.extend({
     	var need_reload = false;
     	for (var notif of notifications) {
     		if (notif[0][1] === 'hotel.reservation' && notif[1]['type'] === "reservation") {
-    			var reservation = notif[1]['reservation'];
-    			var msg = `<b>Name:</b> ${reservation['name']}<br/><b>Room:</b> ${reservation['room_name']}<br/><b>Check-In:</b> ${reservation['checkin']}<br/><b>Check-Out:</b> ${reservation['checkout']}`;
+    			var msg = QWeb.render('HotelCalendar.Notification', notif[1]['reservation']);
     			if (notif[1]['subtype'] === "create") {
     				this.do_notify(_t("Reservation Created"), msg, true);
     			} else if (notif[1]['subtype'] === "write") {
@@ -769,7 +771,9 @@ var HotelCalendarView = View.extend({
 					moment.utc(r[5]).local(), // Date Start
 					moment.utc(r[6]).local(), // Date End
 					r[8], // Color
-					r[9] || false // Read Only
+					r[9] || false, // Read Only
+					r[10] || false, // Move Days
+					r[11] || false // Move Rooms
 				);
 				nreserv.addUserData({'folio_id': r[7]});
 				reservs.push(nreserv);

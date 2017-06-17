@@ -5,36 +5,7 @@
  *     Alexandre Díaz <alex@aloxa.eu>
  */
  
- /** ANIMATIONS **/
- @keyframes channel-manager-changes {
-    0% {
-    	color: red;
-    }
-    5% {
-    	transform: rotate(10deg);
-    }
-    10% {
-    	transform: rotate(0deg);
-    }
-    15% {
-    	transform: rotate(-10deg);
-    }
-    20% {
-    	transform: rotate(0deg);
-    }
-    100% {
-    	color: yellow;
-    }
-}
-@keyframes channel-manager-changes-text {
-    from {
-    	color: white;
-    }
-    to {
-    	color: black;
-    }
-}
- 
+
 /* .openerp .oe-view-manager {
 	overflow: initial !important;
 }
