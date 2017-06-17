@@ -962,7 +962,7 @@ HotelCalendar.prototype = {
 				date.add(1, 'd');
 			}
 			if (selector.length) {
-				var elms = this.etable.querySelectorAll(`td:${selector.join(':')} table td`);
+				var elms = this.etable.querySelectorAll(`td:${selector.join(':')}`+ ' table td');
 				for (var tdCell of elms) {
 					tdCell.classList.add('hcal-cell-invalid');
 				}
