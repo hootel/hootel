@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+encoding//hotel_calendar/models/inherit_hotel_folio.py=utf-8
+encoding//hotel_wubook_proto/models/inherit_hotel_folio.py=utf-8
+encoding//hotel_wubook_proto/models/inherit_hotel_reservation.py=utf-8
+encoding//hotel_wubook_proto/models/inherit_hotel_virtual_room.py=utf-8
+encoding//hotel_wubook_proto/wubook.py=utf-8

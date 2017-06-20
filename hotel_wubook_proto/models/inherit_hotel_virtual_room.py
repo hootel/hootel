@@ -19,6 +19,7 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+from openerp.exceptions import ValidationError
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -36,9 +37,16 @@ class hotel_virtual_room(models.Model):
             capacities = room_ids.mapped('capacity')
             rec.wcapacity = any(capacities) and min(capacities) or 0
 
-    wscode = fields.Char("WuBook Short Code")
+    wscode = fields.Char("WuBook Short Code", required=True)
     wrid = fields.Char("WuBook Room ID", readonly=True)
     wcapacity = fields.Integer(compute=_get_capacity, readonly=True)
+
+    @api.multi
+    @api.constrains('wscode')
+    def _check_wscode(self):
+        for record in self:
+            if len(record.wscode) > 4:  # Wubook scode max. length
+                raise ValidationError(_("SCODE Can't be longer than 4 characters"))
 
     @api.model
     def create(self, vals):
@@ -47,18 +55,23 @@ class hotel_virtual_room(models.Model):
                 vals['name'],
                 vals['wcapacity'],
                 vals['list_price'],
-                vals.get('max_real_rooms', 1)
+                vals.get('max_real_rooms', 1),
+                vals['wscode'],
             )
             vals.update({'wrid': wrid})
         return super(hotel_virtual_room, self).create(vals)
 
     @api.multi
     def write(self, vals):
-        ret_vals = super(hotel_virtual_room, self).write(vals)
         if self._context.get('wubook_action', True):
             for record in self:
-                self.env['wubook'].modify_room(record)
-        return ret_vals
+                self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
+                                               vals.get('name', record.name),
+                                               vals.get('wcapacity', record.wcapacity),
+                                               vals.get('list_price', record.list_price),
+                                               vals.get('max_real_rooms', record.max_real_rooms),
+                                               vals.get('wscode', record.wscode))
+        return super(hotel_virtual_room, self).write(vals)
 
     @api.multi
     def unlink(self):

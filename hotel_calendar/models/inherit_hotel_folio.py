@@ -99,7 +99,7 @@ class HotelFolio(models.Model):
                 reserv.folio_id.id,
                 reserv.reserve_color,
                 False,  # Read-Only
-                True,   # Fix Days
+                False,   # Fix Days
                 False))  # Fix Rooms
             json_reservation_tooltips.update({
                 reserv.id: (
