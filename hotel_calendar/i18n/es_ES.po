@@ -1,0 +1,383 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* hotel_calendar
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 9.0c\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-06-21 12:01+0000\n"
+"PO-Revision-Date: 2017-06-22 12:39+0200\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: es_ES\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:50
+#, python-format
+msgid "AMENITIES:"
+msgstr "Comodidades:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:25
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:34
+#, python-format
+msgid "Are you sure you want to make this changes?"
+msgstr "Está seguro de que quiere realizar los cambios?"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:42
+#, python-format
+msgid "Arrival Hour:"
+msgstr "Hora de Llegada:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:16
+#, python-format
+msgid "CHARGES"
+msgstr "CARGAS"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:12
+#, python-format
+msgid "CHECK-IN"
+msgstr "CHECK-IN"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:8
+#, python-format
+msgid "CHECK-OUT"
+msgstr "CHECK-OUT"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:56
+#, python-format
+msgid "Check-In:"
+msgstr "Check-In:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:57
+#, python-format
+msgid "Check-Out:"
+msgstr "Check-Out:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:11
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:19
+#, python-format
+msgid "Checkin:"
+msgstr "Checkin:"
+
+#. module: hotel_calendar
+#: model:ir.actions.server,name:hotel_calendar.hotel_reservation_action_checkin
+msgid "Checkins"
+msgstr "Checkins"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:12
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:20
+#, python-format
+msgid "Checkout:"
+msgstr "Checkout:"
+
+#. module: hotel_calendar
+#: model:ir.actions.server,name:hotel_calendar.hotel_reservation_action_checkout
+msgid "Checkouts"
+msgstr "Checkouts"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:330
+#, python-format
+msgid "Confirm Folio"
+msgstr "Confirmar Folio"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:375
+#, python-format
+msgid "Confirm Price Change"
+msgstr "Confirmarar el Cambio de Precio"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:226
+#, python-format
+msgid "Confirm Reservation Changes"
+msgstr "Confirmar Reserva Cambios"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:309
+#, python-format
+msgid "Create: "
+msgstr "Creado: "
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:32
+#, python-format
+msgid "Current Price:"
+msgstr "Precio Actual:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:48
+#, python-format
+msgid "Do you want to confirm this folio?"
+msgstr "Deseas confirmar el folio?"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:70
+#, python-format
+msgid "Entrada"
+msgstr "Entrada"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:79
+#, python-format
+msgid "FROM"
+msgstr "DE"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:72
+#, python-format
+msgid "Factura"
+msgstr "Factura"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:309
+#, python-format
+msgid "Folio"
+msgstr "Folio"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:63
+#: model:ir.actions.act_window,name:hotel_calendar.action_hotel_calendar
+#: model:ir.ui.menu,name:hotel_calendar.hotel_calendar_menu
+#, python-format
+msgid "Hotel Calendar"
+msgstr "Calendario del Hotel"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:19
+#, python-format
+msgid "LIST"
+msgstr "LISTA"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:42
+#, python-format
+msgid "LOCATION:"
+msgstr "UBICACIÓN:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:54
+#, python-format
+msgid "Name:"
+msgstr "Nombre:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:33
+#, python-format
+msgid "New Price:"
+msgstr "Nuevo Precio:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:245
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:345
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:401
+#, python-format
+msgid "No"
+msgstr "No"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:197
+#, python-format
+msgid "Open: "
+msgstr "Open: "
+
+#. module: hotel_calendar
+#: model:ir.actions.server,name:hotel_calendar.hotel_reservation_action_paydue
+msgid "Paydue"
+msgstr "Pagar"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:41
+#, python-format
+msgid "Phone:"
+msgstr "Teléfono:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:69
+#, python-format
+msgid "Reserva"
+msgstr "Reserva"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:744
+#, python-format
+msgid "Reservation Changed"
+msgstr "Reserva Cambiada"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:742
+#, python-format
+msgid "Reservation Created"
+msgstr "Reserva Creada"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:746
+#, python-format
+msgid "Reservation Deleted"
+msgstr "Reserva Eliminada"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:17
+#, python-format
+msgid "Reserve changed:"
+msgstr "Reserva modificada:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:9
+#, python-format
+msgid "Reserve unchanged:"
+msgstr "Reserva no modificada:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:13
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:21
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:55
+#, python-format
+msgid "Room:"
+msgstr "Habitación:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:34
+#, python-format
+msgid "SEGMENTATION:"
+msgstr "SEGMENTACIÓN:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:71
+#, python-format
+msgid "Salida"
+msgstr "Salida"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:88
+#, python-format
+msgid "TO"
+msgstr "A"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:5
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:31
+#, python-format
+msgid "The following changes will be made..."
+msgstr "Los próximos cambios serán realizados..."
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:6
+#, python-format
+msgid "This reservation belongs to a folio with more reservations!"
+msgstr "Esta reserva pertenece a un folio con más reservas!"
+
+#. module: hotel_calendar
+#: code:addons/hotel_calendar/models/inherit_hotel_folio.py:107
+#, python-format
+msgid "Undefined"
+msgstr "Indefinido"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:58
+#, python-format
+msgid "VIRTUAL TYPE:"
+msgstr "TIPO VIRTUAL:"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:229
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:378
+#, python-format
+msgid "Yes, change it"
+msgstr "Confirmar cambio"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:333
+#, python-format
+msgid "Yes, confirm it"
+msgstr "Confirmar"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:340
+#, python-format
+msgid ""
+"[Hotel Calendar]\n"
+"ERROR: Can't confirm folio!"
+msgstr ""
+"[Hotel Calendario]\n"
+"ERROR: El folio no puede ser confirmado!"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:395
+#, python-format
+msgid ""
+"[Hotel Calendar]\n"
+"ERROR: Can't update price!"
+msgstr ""
+"[Hotel Calendario]\n"
+"ERROR: No se puede actualizar el precio!"
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_hotel_folio
+msgid "hotel folio new"
+msgstr "nuevo folio"
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_hotel_reservation
+msgid "hotel folio1 room line"
+msgstr "el folio tiene 1 línea de habitación"
