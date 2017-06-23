@@ -37,7 +37,6 @@
         'views/inherit_product_pricelist.xml'
     ],
     'qweb': [
-        'static/src/xml/*.xml',
     ],
     'test': [
     ],
