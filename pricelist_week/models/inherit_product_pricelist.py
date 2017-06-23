@@ -23,8 +23,6 @@ from openerp import models, fields, api
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime
 import time
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class ProductPricelist(models.Model):
@@ -56,8 +54,6 @@ class ProductPricelist(models.Model):
         else:
             prod_ids = [product.id for product in products]
             prod_tmpl_ids = [product.product_tmpl_id.id for product in products]
-            
-        _logger.info("PAAAAA DDD")
 
         # Load all rules
         cr.execute(
