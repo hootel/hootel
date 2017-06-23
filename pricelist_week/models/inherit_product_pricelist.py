@@ -28,6 +28,7 @@ import time
 class ProductPricelist(models.Model):
     _inherit = "product.pricelist"
 
+    @api.v7
     def _price_rule_get_multi(self, cr, uid, pricelist, products_by_qty_by_partner, context=None):
         results = super(ProductPricelist, self)._price_rule_get_multi(cr, uid, pricelist, products_by_qty_by_partner, context=context)
         if not any(results):
