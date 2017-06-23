@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+	<record id="product_pricelist_item_form_view" model="ir.ui.view">
+		<field name="model">product.pricelist.item</field>
+		<field name="inherit_id" ref="product.product_pricelist_item_form_view" />
+		<field name="arch" type="xml">
+			<xpath expr="//field[@name='date_end']" position="after">
+				<group name="weekdays">
+					<field name="mo"/>
+					<field name="tu"/>
+					<field name="we"/>
+					<field name="th"/>
+					<field name="fr"/>
+					<field name="sa"/>
+					<field name="su"/>
+				</group>
+			</xpath>
+		</field>
+	</record>
+
+</odoo>
