@@ -273,11 +273,11 @@ var HotelCalendarView = View.extend({
                 startDate = now.add(30,'m'); // +30 mins
             }
             
-            // Creater/Select Partner
+            // Creater/Select Partner + Create Folio + Create Reservation + Confirm Folio? = Fucking Crazy uH :/
             var pop = new Common.SelectCreateDialog(self, {
                 res_model: 'res.partner',
                 domain: [],
-                title: _t("Select a Partner"),
+                title: _t("Select Partner"),
                 disable_multiple_selection: true,
                 on_selected: function(element_ids) {
                 	var partner_id = element_ids[0];
@@ -324,7 +324,7 @@ var HotelCalendarView = View.extend({
                                     options = options || {};
                                     var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
                                     self.mutex.exec(function(){
-                                    	// FIXME: Need update "data" dict with "default_" values... Delegation problems??
+                                    	// FIXME: Workaround to fill values in 'only-read' fields...
                                     	data = _.extend(data, {
                                     		'folio_id': folio_id,
                                     		'name': `${room.number}`,
@@ -362,9 +362,6 @@ var HotelCalendarView = View.extend({
                                             self.trigger("change:commands", options);
                                             def.resolve(res_id);
                                         });
-                                    	//HotelFolioObj.call('write', [[folio_id], {'room_lines':[[6, false, [res]]]}]).fail(function(err, ev){
-                                    	//	self.reload_hcalendar_reservations();
-                                        //});
                                     });
 
                                     return def;
