@@ -74,7 +74,7 @@ class HotelVirtualRoom(models.Model):
 
                 self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
                                                vals.get('name', record.name),
-                                               capacity,
+                                               2,
                                                vals.get('list_price', record.list_price),
                                                vals.get('max_real_rooms', record.max_real_rooms),
                                                vals.get('wscode', record.wscode))
