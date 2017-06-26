@@ -77,13 +77,8 @@ class ProductPricelist(models.Model):
             price = self.pool['product.template']._price_get(cr, uid, [product], 'list_price', context=context)[product.id]
 
             for rule in items:
-                if (date_dt.weekday() == 0 and not rule.mo) or \
-                        (date_dt.weekday() == 1 and not rule.tu) or \
-                        (date_dt.weekday() == 2 and not rule.we) or \
-                        (date_dt.weekday() == 3 and not rule.th) or \
-                        (date_dt.weekday() == 4 and not rule.fr) or \
-                        (date_dt.weekday() == 5 and not rule.sa) or \
-                        (date_dt.weekday() == 6 and not rule.su):
+                week_days_affected = (rule.mo, rule.tu, rule.we, rule.th, rule.fr, rule.sa, rule.su)
+                if not week_days_affected[date_dt.weekday()]:
                     results[product.id] = (price, False)
 
         return results

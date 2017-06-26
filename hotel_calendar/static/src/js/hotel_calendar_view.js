@@ -65,7 +65,6 @@ var HotelCalendarView = View.extend({
     _hcalendar: null,
     _reserv_tooltips: {},
     _action_manager: null,
-    _flag_ignore_action: false,
 
     /** VIEW METHODS **/
     init: function(parent, dataset, view_id, options) {
@@ -324,7 +323,7 @@ var HotelCalendarView = View.extend({
                                     options = options || {};
                                     var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
                                     self.mutex.exec(function(){
-                                    	// FIXME: Workaround to fill values in 'only-read' fields...
+                                    	// FIXME: Workaround to get values of 'only-read' fields...
                                     	data = _.extend(data, {
                                     		'folio_id': folio_id,
                                     		'name': `${room.number}`,

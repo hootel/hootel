@@ -19,3 +19,4 @@
 #
 ##############################################################################
 from . import wubook_installer
+from . import wubook_import_plan_prices

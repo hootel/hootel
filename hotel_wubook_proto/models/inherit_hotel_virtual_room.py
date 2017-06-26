@@ -24,7 +24,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class hotel_virtual_room(models.Model):
+class HotelVirtualRoom(models.Model):
     _inherit = 'hotel.virtual.room'
 
     @api.depends('wcapacity')
@@ -59,7 +59,7 @@ class hotel_virtual_room(models.Model):
                 vals['wscode'],
             )
             vals.update({'wrid': wrid})
-        return super(hotel_virtual_room, self).create(vals)
+        return super(HotelVirtualRoom, self).create(vals)
 
     @api.multi
     def write(self, vals):
@@ -71,14 +71,14 @@ class hotel_virtual_room(models.Model):
                                                vals.get('list_price', record.list_price),
                                                vals.get('max_real_rooms', record.max_real_rooms),
                                                vals.get('wscode', record.wscode))
-        return super(hotel_virtual_room, self).write(vals)
+        return super(HotelVirtualRoom, self).write(vals)
 
     @api.multi
     def unlink(self):
         if self._context.get('wubook_action', True):
             for record in self:
-                self.env['wubook'].delete_room(record.wrid)
-        return super(hotel_virtual_room, self).unlink()
+                self.env['wubook'].delete_plan(record.wpid)
+        return super(HotelVirtualRoom, self).unlink()
 
     @api.multi
     def import_rooms(self):

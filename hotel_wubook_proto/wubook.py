@@ -267,19 +267,110 @@ class WuBook(models.TransientModel):
         return True
 
     @api.model
+    def create_plan(self, name, daily=1):
+        self.init_connection_()
+        rcode, results = self.SERVER.add_pricing_plan(self.TOKEN,
+                                                      self.LCODE,
+                                                      name,
+                                                      daily)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't add pricing plan to wubook: %s" % results)
+
+        return results
+
+    @api.model
+    def delete_plan(self, pid):
+        self.init_connection_()
+        rcode, results = self.SERVER.del_plan(self.TOKEN,
+                                              self.LCODE,
+                                              pid)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't delete pricing plan from wubook: %s" % results)
+
+        return True
+
+    @api.model
+    def update_plan_name(self, pid, name):
+        self.init_connection_()
+        rcode, results = self.SERVER.update_plan_name(self.TOKEN,
+                                                      self.LCODE,
+                                                      pid,
+                                                      name)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't update pricing plan name in wubook: %s" % results)
+
+        return True
+
+    @api.model
+    def update_plan_periods(self, pid, periods):
+        _logger.info(periods)
+        self.init_connection_()
+        rcode, results = self.SERVER.update_plan_periods(self.TOKEN,
+                                                         self.LCODE,
+                                                         pid,
+                                                         periods)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't update pricing plan name in wubook: %s" % results)
+
+        return True
+
+    @api.model
+    def get_pricing_plans(self):
+        self.init_connection_()
+        rcode, results = self.SERVER.get_pricing_plans(self.TOKEN,
+                                                       self.LCODE)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't get pricing plans from wubook: %s" % results)
+        else:
+            self.generate_pricelists(results)
+
+        return True
+
+    @api.model
+    def fetch_plan_prices(self, pid, dfrom, dto, rooms=[]):
+        _logger.info(dfrom)
+        _logger.info(dto)
+        _logger.info(pid)
+        self.init_connection_()
+        rcode, results = self.SERVER.fetch_plan_prices(self.TOKEN,
+                                                       self.LCODE,
+                                                       pid,
+                                                       dfrom,
+                                                       dto,
+                                                       rooms)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't fetch plan prices from wubook: %s" % results)
+        else:
+            self.generate_pricelist_items(pid, dfrom, dto, results)
+
+        return True
+
+    @api.model
     def create_reservation(self, reserv):
         self.init_connection_()
         vroom = self.env['hotel.virtual.room'].search([('product_id', '=', reserv.product_id.id)], limit=1)
         customer = {
-           'lname': _partner_split_name(reserv.partner_id.name)[1],
-           'fname': _partner_split_name(reserv.partner_id.name)[0],
-           'email': reserv.partner_id.email,
-           'city': reserv.partner_id.city,
-           'phone': reserv.partner_id.phone,
-           'street': reserv.partner_id.street,
-           'country': reserv.partner_id.country_id.code,
-           'arrival_hour': datetime.strptime(reserv.checkin, "%H:%M:%S"),
-           'notes': '' # TODO: Falta poner el cajetin de observaciones en folio o reserva..
+            'lname': _partner_split_name(reserv.partner_id.name)[1],
+            'fname': _partner_split_name(reserv.partner_id.name)[0],
+            'email': reserv.partner_id.email,
+            'city': reserv.partner_id.city,
+            'phone': reserv.partner_id.phone,
+            'street': reserv.partner_id.street,
+            'country': reserv.partner_id.country_id.code,
+            'arrival_hour': datetime.strptime(reserv.checkin, "%H:%M:%S"),
+            'notes': ''     # TODO: Falta poner el cajetin de observaciones en folio o reserva..
         }
         rcode, results = self.SERVER.new_reservation(self.TOKEN,
                                                      self.LCODE,
@@ -310,6 +401,60 @@ class WuBook(models.TransientModel):
             raise ValidationError("Can't cancel reservation in WuBook: %s" % results)
 
         return True
+
+    @api.model
+    def generate_pricelist_items(self, pid, dfrom, dto, plan_prices):
+        pricelist = self.env['product.pricelist'].search([('wpid', '=', pid)], limit=1)
+        if pricelist:
+            dfrom_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
+            dto_dt = datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT)
+            days_diff = abs((dto_dt - dfrom_dt).days)
+            for i in range(0, days_diff):
+                ndate_dt = dfrom_dt + timedelta(days=i)
+                for rid in plan_prices.keys():
+                    vroom = self.env['hotel.virtual.room'].search([('wrid', '=', rid)], limit=1)
+                    if vroom:
+                        pricelist_item = self.env['product.pricelist.item'].search([
+                            ('pricelist_id', '=', pricelist.id),
+                            ('date_start', '=', ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                            ('date_end', '=', ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                            ('compute_price', '=', 'fixed'),
+                            ('applied_on', '=', '1_product'),
+                            ('product_tmpl_id', '=', vroom.product_id.product_tmpl_id.id)
+                        ], limit=1)
+                        vals = {
+                            'fixed_price': plan_prices[rid][i],
+                        }
+                        if pricelist_item:
+                            pricelist_item.with_context({'wubook_action': False}).write(vals)
+                        else:
+                            vals.update({
+                                'pricelist_id': pricelist.id,
+                                'date_start': ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'date_end': ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'compute_price': 'fixed',
+                                'applied_on': '1_product',
+                                'product_tmpl_id': vroom.product_id.product_tmpl_id.id
+                            })
+                            self.env['product.pricelist.item'].with_context({'wubook_action': False}).create(vals)
+
+    @api.model
+    def generate_pricelists(self, price_plans):
+        product_listprice_obj = self.env['product.pricelist']
+        for plan in price_plans:
+            if 'vpid' in plan:
+                continue    # Ignore Virtual Plans
+
+            vals = {
+                'name': plan['name'],
+                'wdaily': plan['daily'] == 1,
+            }
+            plan_id = product_listprice_obj.search([('wpid', '=', str(plan['id']))], limit=1)
+            if not plan_id:
+                vals.update({'wpid': str(plan['id'])})
+                product_listprice_obj.with_context({'wubook_action': False}).create(vals)
+            else:
+                plan_id.with_context({'wubook_action': False}).write(vals)
 
     @api.model
     def generate_reservations(self, bookings):
@@ -364,7 +509,7 @@ class WuBook(models.TransientModel):
             checkin_dt = datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT)
             checkin = checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
-            checkout = "%s 21:59" % book['date_departure'] # FIXME: Usar UTC
+            checkout = "%s 21:59" % book['date_departure']  # FIXME: Usar UTC
             checkout_dt = datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT)
             checkout = checkout_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 

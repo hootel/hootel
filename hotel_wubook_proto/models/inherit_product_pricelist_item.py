@@ -21,7 +21,8 @@
 from openerp import models, fields, api
 
 
-class product_pricelist_item(models.Model):
+class ProductPricelistItem(models.Model):
     _inherit = 'product.pricelist.item'
 
     wpushed = fields.Boolean("WuBook Pushed", default=False, readonly=True)
+    wdaily = fields.Boolean(related='pricelist_id.wdaily', readonly=True)

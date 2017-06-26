@@ -28,6 +28,16 @@ function import_reservations(){
  
 	return false;
 }
+
+function import_price_plans(){
+	var self = this;
+	this.dataset._model.call('import_price_plans', [false]).then(function(results){
+        var active_view = self.ViewManager.active_view;
+        active_view.controller.reload(); // list view only has reload
+	});
+ 
+	return false;
+}
     
 ListView.include({
 	render_buttons: function() {
@@ -39,6 +49,9 @@ ListView.include({
         } else if (this.dataset.model == 'hotel.folio') {
         	this.$buttons.append("<button class='oe_button oe_wubook_import_reservations oe_highlight' type='button'>Import Reservations From WuBook</button>");
         	this.$buttons.find('.oe_wubook_import_reservations').on('click', import_reservations.bind(this));
+        } else if (this.dataset.model == 'product.pricelist') {
+        	this.$buttons.append("<button class='oe_button oe_wubook_import_price_plans oe_highlight' type='button'>Import Price Plans From WuBook</button>");
+        	this.$buttons.find('.oe_wubook_import_price_plans').on('click', import_price_plans.bind(this));
         }
     }
 });

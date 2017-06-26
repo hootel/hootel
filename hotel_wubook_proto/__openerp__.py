@@ -29,6 +29,7 @@
     'description': "Hotel WuBook Prototype",
     'depends': [
         'hotel',
+        'pricelist_week',
     ],
     'external_dependencies': {
         'python': ['xmlrpclib']
@@ -37,11 +38,14 @@
         'data/sequence.xml',
         #'data/cron_jobs.xml',
         'wizards/wubook_installer.xml',
+        'wizards/wubook_import_plan_prices.xml',
         'views/general.xml',
         'views/inherit_res_partner.xml',
         'views/inherit_hotel_reservation.xml',
         'views/inherit_hotel_virtual_room.xml',
         'views/inherit_hotel_folio.xml',
+        'views/inherit_product_pricelist.xml',
+        'views/inherit_product_pricelist_item.xml',
         #'views/res_config.xml'
     ],
     'test': [
