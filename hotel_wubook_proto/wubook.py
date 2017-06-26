@@ -509,7 +509,7 @@ class WuBook(models.TransientModel):
 
             checkout = "%s 12:00" % book['date_departure']  # FIXME: Usar UTC
             checkout_dt = local.localize(datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT))
-            checkout_utc_dt = checkin_dt.astimezone(pytz.utc)
+            checkout_utc_dt = checkout_dt.astimezone(pytz.utc)
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             vrooms_ids = book['rooms'].split(',')
