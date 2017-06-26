@@ -31,9 +31,9 @@ class HotelReservation(models.Model):
     @api.multi
     def get_hcalendar_data(self, checkin, checkout, domainRooms, domainReservations, withRooms=True):
         vals = super(HotelReservation, self).get_hcalendar_data(checkin, checkout,
-                                                          domainRooms,
-                                                          domainReservations,
-                                                          withRooms=withRooms)
+                                                                domainRooms,
+                                                                domainReservations,
+                                                                withRooms=withRooms)
         hotel_reservation_obj = self.env['hotel.reservation']
         json_reservations = []
         for reserv_vals in vals['reservations']:

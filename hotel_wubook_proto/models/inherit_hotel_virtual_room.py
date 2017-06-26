@@ -37,7 +37,7 @@ class HotelVirtualRoom(models.Model):
             capacities = room_ids.mapped('capacity')
             rec.wcapacity = any(capacities) and min(capacities) or 0
 
-    wscode = fields.Char("WuBook Short Code", required=True)
+    wscode = fields.Char("WuBook Short Code", required=True, readonly=True)
     wrid = fields.Char("WuBook Room ID", readonly=True)
     wcapacity = fields.Integer(compute=_get_capacity, readonly=True)
 
@@ -55,8 +55,7 @@ class HotelVirtualRoom(models.Model):
                 vals['name'],
                 vals['wcapacity'],
                 vals['list_price'],
-                vals.get('max_real_rooms', 1),
-                vals['wscode'],
+                vals.get('max_real_rooms', 1)
             )
             vals.update({'wrid': wrid})
         return super(HotelVirtualRoom, self).create(vals)
