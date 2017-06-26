@@ -33,8 +33,7 @@ class HotelReservation(models.Model):
     @api.depends('wrid', 'wchannel_id')
     def _is_from_channel(self):
         for record in self:
-            record.wis_from_channel = record.wrid != 'none' \
-                                        and record.wchannel_id != 'none'
+            record.wis_from_channel = (record.wrid != 'none' and record.wchannel_id != 'none')
 
     wrid = fields.Char("WuBook Reservation ID", default="none", readonly=True)
     wchannel_id = fields.Char("WuBook Channel ID", default='none',

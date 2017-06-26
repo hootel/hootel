@@ -134,13 +134,6 @@ class WuBook(models.TransientModel):
 
     @api.model
     def modify_room(self, rid, name, capacity, price, availability, scode):
-        _logger.info(rid)
-        _logger.info(name)
-        _logger.info(capacity)
-        _logger.info(price)
-        _logger.info(availability)
-        _logger.info(scode)
-        return True
         self.init_connection_()
         rcode, results = self.SERVER.mod_room(
             self.TOKEN,

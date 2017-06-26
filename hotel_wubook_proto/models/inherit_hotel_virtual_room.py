@@ -27,13 +27,13 @@ _logger = logging.getLogger(__name__)
 class HotelVirtualRoom(models.Model):
     _inherit = 'hotel.virtual.room'
 
-    #@api.depends('wcapacity')
+    @api.depends('wcapacity')
     @api.onchange('room_ids')
     def _get_capacity(self):
         hotel_room_obj = self.env['hotel.room']
         for rec in self:
             room_categories = rec.room_type_ids.mapped('cat_id.id')
-            room_ids = rec.room_ids & hotel_room_obj.search([('categ_id.id', 'in', room_categories)])
+            room_ids = rec.room_ids + hotel_room_obj.search([('categ_id.id', 'in', room_categories)])
             capacities = room_ids.mapped('capacity')
             rec.wcapacity = any(capacities) and min(capacities) or 0
 
