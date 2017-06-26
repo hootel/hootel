@@ -530,10 +530,14 @@ var HotelCalendarView = View.extend({
         // Charges Button
         domain = [['invoices_amount','>',0 ],['room_lines.checkout','<=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)]];
         HotelFolioObj.call('search_count', [domain]).then(function(count){
+        	var $ninfo = self.$el.find('#pms-menu #btn_action_paydue div.ninfo');
+        	var $badge_charges = self.$el.find('#pms-menu #btn_action_paydue .badge');
         	if (count > 0) {
-        		var $badge_charges = self.$el.find('#pms-menu #btn_action_paydue .badge');
         		$badge_charges.text(count);
         		$badge_charges.parent().show();
+        		$ninfo.show();
+            } else {
+            	$ninfo.hide();
             }
        });
     },
