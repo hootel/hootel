@@ -468,7 +468,7 @@ class WuBook(models.TransientModel):
         processed_rids = []
         _logger.info(bookings)
         for book in bookings:
-            if book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED]:
+            if book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED] or book['reservation_code'] == 1498486935:
                 continue
             # Already Exists?
             reservs = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
@@ -561,7 +561,7 @@ class WuBook(models.TransientModel):
                         'product_id': free_rooms[0].product_id.id,
                         'product_uom': free_rooms[0].product_id.product_tmpl_id.uom_id.id,
                         'product_uom_qty': 1,
-                        'product_uos': 1,
+                        #'product_uos': 1,
                         'reservation_lines': reservation_lines,
                         'name': free_rooms[0].name,
                         'price_unit': tprice,
