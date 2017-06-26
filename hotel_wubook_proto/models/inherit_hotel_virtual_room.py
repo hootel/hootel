@@ -27,7 +27,7 @@ _logger = logging.getLogger(__name__)
 class HotelVirtualRoom(models.Model):
     _inherit = 'hotel.virtual.room'
 
-    #@api.depends('wcapacity')
+    @api.depends('wcapacity')
     @api.onchange('room_ids', 'room_type_ids')
     def _get_capacity(self):
         hotel_room_obj = self.env['hotel.room']
@@ -39,7 +39,7 @@ class HotelVirtualRoom(models.Model):
 
     wscode = fields.Char("WuBook Short Code", required=True, readonly=True)
     wrid = fields.Char("WuBook Room ID", readonly=True)
-    wcapacity = fields.Integer(compute=_get_capacity, readonly=True, store=True)
+    wcapacity = fields.Integer(compute=_get_capacity, readonly=True)
 
     @api.multi
     @api.constrains('wscode')
@@ -64,14 +64,6 @@ class HotelVirtualRoom(models.Model):
     def write(self, vals):
         if self._context.get('wubook_action', True):
             for record in self:
-                hotel_room_obj = self.env['hotel.room']
-                capacity = 0
-
-                room_categories = record.room_type_ids.mapped('cat_id.id')
-                room_ids = record.room_ids + hotel_room_obj.search([('categ_id.id', 'in', room_categories)])
-                capacities = room_ids.mapped('capacity')
-                capacity = any(capacities) and min(capacities) or 0
-
                 self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
                                                vals.get('name', record.name),
                                                2,

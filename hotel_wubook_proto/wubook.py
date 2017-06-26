@@ -573,6 +573,8 @@ class WuBook(models.TransientModel):
                     }
                     reservations.append((0, False, vals))
                 else:
+                    _logger.info("ERROR!!")
+                    _logger.info(str(book['reservation_code']))
                     raise ValidationError("Can't found a free room for reservation from wubook!!!")
             # Create Folio
             vals = {
