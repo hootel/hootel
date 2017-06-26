@@ -499,7 +499,7 @@ class WuBook(models.TransientModel):
                     'zip': book['customer_zip'],
                     'street': book['customer_address'],
                     'email': book['customer_mail'],
-                    'lang': lang and lang.id,
+                    #'lang': lang and lang.id,
                 }
                 partner_id = res_partner_obj.create(vals)
 
