@@ -676,9 +676,9 @@ var HotelCalendarView = View.extend({
         this.$el.find("#btn_action_paydue").on('click', function(ev){
             self.call_action('hotel_calendar.hotel_reservation_action_paydue');
         });
-        this.$el.find("#btn_action_refresh").on('click', function(ev){
-            window.location.reload();
-        });
+//        this.$el.find("#btn_action_refresh").on('click', function(ev){
+//            window.location.reload();
+//        });
 
         /** RENDER CALENDAR **/
         this.generate_hotel_calendar();

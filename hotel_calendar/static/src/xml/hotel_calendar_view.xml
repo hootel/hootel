@@ -19,9 +19,9 @@
     			<button class="btn btn-default col-xs-12 col-lg-12">
     				LIST
     			</button>
-    			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_refresh">
+    			<!--button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_refresh">
     				<i class="fa fa-4x fa-refresh"> </i>
-    			</button>
+    			</button-->
     		</div>
     		<div class="col-xs-11 col-lg-11 nopadding">
     			<div class="col-xs-12 col-lg-12 nopadding" id="pms-search">
