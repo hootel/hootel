@@ -467,7 +467,11 @@ class WuBook(models.TransientModel):
         hotel_vroom_obj = self.env['hotel.virtual.room']
         processed_rids = []
         _logger.info(bookings)
+        _processed_ids = []
         for book in bookings:
+            if book['reservation_code'] in _processed_ids:
+                continue
+            _processed_ids.append(book['reservation_code'])
             # Already Exists?
             reservs = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
                                               ('wchannel_reservation_code', '=', str(book['channel_reservation_code']))])
