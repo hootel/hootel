@@ -583,7 +583,7 @@ HotelCalendar.prototype = {
 			var keys = Object.keys(this.options.rooms);
 			
 			for (var r of this.options.rooms) {
-				rooms[r.number] = [this.toAbbreviation(r.type), r.capacity];
+				rooms[r.number] = [r.type, r.capacity];
 			}
 		}
 		return rooms;
@@ -687,7 +687,7 @@ HotelCalendar.prototype = {
 			cell.classList.add('btn-hcal');
 			cell.classList.add('btn-hcal-3d');
 			cell = row.insertCell();
-			cell.textContent = $this.toAbbreviation(itemRoom.type);
+			cell.textContent = itemRoom.type;
 			cell.classList.add('hcal-cell-room-type-group-item');
 			cell.classList.add('btn-hcal');
 			cell.classList.add('btn-hcal-flat');
@@ -757,7 +757,7 @@ HotelCalendar.prototype = {
 				row.dataset.hcalRoomType = rt;
 				row.classList.add('hcal-row-detail-room-free-type-group-item');
 				cell = row.insertCell();
-				cell.textContent = this.toAbbreviation(rt);
+				cell.textContent = rt;
 				cell.classList.add('hcal-cell-detail-room-free-type-group-item');
 				cell.classList.add('btn-hcal');
 				cell.classList.add('btn-hcal-flat');
@@ -847,7 +847,7 @@ HotelCalendar.prototype = {
 				row.dataset.hcalRoomType = rt;
 				row.classList.add('hcal-row-detail-room-price-type-group-item');
 				cell = row.insertCell();
-				cell.textContent = $this.toAbbreviation(rt)+' €';
+				cell.textContent = rt+' €';
 				cell.classList.add('hcal-cell-detail-room-price-type-group-item');
 				cell.classList.add('btn-hcal');
 				cell.classList.add('btn-hcal-flat');

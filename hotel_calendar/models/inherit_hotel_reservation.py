@@ -50,12 +50,13 @@ class HotelReservation(models.Model):
         rooms = self.env['hotel.room'].search(domainRooms)
         json_rooms = []
         for room in rooms:
+            room_type = self.env['hotel.room.type'].search([('cat_id', '=', room.categ_id.id)], limit=1)
             json_rooms.append((
                 room.product_id.id,
                 room.name,
                 room.capacity,
                 room.categ_id.id,
-                room.categ_id.name,
+                room_type.code_type,
                 room.shared_room,
                 room.uom_id.id))
 
@@ -110,7 +111,8 @@ class HotelReservation(models.Model):
         date_diff = abs((date_start - date_end).days)
         json_rooms_prices = {}
         for cat in categs:
-            json_rooms_prices.update({cat.name: {}})
+            room_type = self.env['hotel.room.type'].search([('cat_id', '=', cat.id)], limit=1)
+            json_rooms_prices.update({room_type.code_type: {}})
             for i in range(0, date_diff + 1):
                 ndate = date_start + timedelta(days=i)
                 price_list = self.env['product.pricelist.item'].search([
@@ -121,7 +123,7 @@ class HotelReservation(models.Model):
                     ('date_end', '>=', ndate.replace(hour=23, minute=59, second=59).strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
                     ('compute_price', '=', 'fixed'),
                 ], order='sequence ASC, id DESC', limit=1)
-                json_rooms_prices[cat.name].update({
+                json_rooms_prices[room_type.code_type].update({
                     ndate.strftime(DEFAULT_SERVER_DATE_FORMAT): (price_list and price_list.fixed_price) or (price_list_global and price_list_global.fixed_price) or 0.0
                 })
 
