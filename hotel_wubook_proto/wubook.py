@@ -133,17 +133,17 @@ class WuBook(models.TransientModel):
         return results
 
     @api.model
-    def modify_room(self, rid, name, capacity, availability, scode):
+    def modify_room(self, rid, name, capacity, price, availability, scode):
         self.init_connection_()
         rcode, results = self.SERVER.mod_room(
             self.TOKEN,
             self.LCODE,
-            vroom.wrid,
-            vroom.name,
-            vroom.wcapacity,
-            vroom.list_price,
-            vroom.max_real_rooms,
-            vroom.wscode,
+            rid,
+            name,
+            capacity,
+            price,
+            availability,
+            scode,
             'nb'
             #rtype=('name' in vals and vals['name'] and 3) or 1
         )

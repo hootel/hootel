@@ -21,6 +21,8 @@
 from openerp import models, fields, api
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, timedelta
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class ProductPricelist(models.Model):
@@ -58,10 +60,12 @@ class ProductPricelist(models.Model):
                         date_order=ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                         pricelist=self.id,
                         uom=vroom.product_id.product_tmpl_id.uom_id.id)
-                    prices[vroom.wrid].append(product_id.list_price)
+                    prices[vroom.wrid].append(product_id.price)
         else:
             vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', False)])
             for item in self.item_ids:
+                if not item.date_start or not item.date_end:
+                    continue
                 date_start_dt = fields.Datetime.from_string(item.date_start)
                 date_end_dt = fields.Datetime.from_string(item.date_end)
                 days_diff = abs((date_end_dt - date_start_dt).days)
@@ -75,7 +79,7 @@ class ProductPricelist(models.Model):
                             date_order=ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                             pricelist=self.id,
                             uom=vroom.product_id.product_tmpl_id.uom_id.id)
-                        wdays[ndate_dt.weekday()] = product_id.list_price
+                        wdays[ndate_dt.weekday()] = product_id.price
                     vals.update({vroom.wrid: wdays})
                 prices.update({
                     'dfrom': item.date_start,
@@ -107,9 +111,10 @@ class ProductPricelist(models.Model):
         updated = super(ProductPricelist, self).write(vals)
         if updated and self._context.get('wubook_action', True):
             pricelist = self.browse(self.id)
-            prices = pricelist.get_wubook_prices()
+            prices = self.get_wubook_prices()
             if any(prices):
                 self.env['wubook'].update_plan_periods(pricelist.wpid, prices)
+        _logger.info("DDD");
         return updated
 
     @api.multi
