@@ -36,6 +36,7 @@ class HotelFolio(models.Model):
                                                           withRooms=withRooms)
         hotel_reservation_obj = self.env['hotel.reservation']
         json_reservations = []
+        _logger.info(vals)
         for reserv_vals in vals['reservations']:
             reserv = hotel_reservation_obj.browse(reserv_vals[1])
             _logger.info("PASA RESERV")
