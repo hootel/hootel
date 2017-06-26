@@ -64,9 +64,17 @@ class HotelVirtualRoom(models.Model):
     def write(self, vals):
         if self._context.get('wubook_action', True):
             for record in self:
+                hotel_room_obj = self.env['hotel.room']
+                capacity = 0
+
+                room_categories = record.room_type_ids.mapped('cat_id.id')
+                room_ids = record.room_ids + hotel_room_obj.search([('categ_id.id', 'in', room_categories)])
+                capacities = room_ids.mapped('capacity')
+                capacity = any(capacities) and min(capacities) or 0
+
                 self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
                                                vals.get('name', record.name),
-                                               vals.get('wcapacity', record.wcapacity),
+                                               capacity,
                                                vals.get('list_price', record.list_price),
                                                vals.get('max_real_rooms', record.max_real_rooms),
                                                vals.get('wscode', record.wscode))
