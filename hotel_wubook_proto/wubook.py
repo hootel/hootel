@@ -501,7 +501,6 @@ class WuBook(models.TransientModel):
                     'name': "%s %s" % (book['customer_name'], book['customer_surname']),
                     'country_id': country_id and country_id.id,
                     'city': book['customer_city'],
-                    'wcustomer_notes': book['customer_notes'],
                     'phone': book['customer_phone'],
                     'zip': book['customer_zip'],
                     'street': book['customer_address'],
@@ -577,7 +576,10 @@ class WuBook(models.TransientModel):
                 else:
                     raise ValidationError("Can't found a free room for reservation from wubook!!!")
             # Create Folio
-            vals = {'room_lines': reservations}
+            vals = {
+                'room_lines': reservations,
+                'wcustomer_notes': book['customer_notes'],
+            }
             session_seed = book.get('sessionSeed', '')
             session_seed = session_seed != '' and session_seed
             hotel_folio_id = session_seed and hotel_folio_obj.search([('wseed', '=', session_seed)], limit=1)

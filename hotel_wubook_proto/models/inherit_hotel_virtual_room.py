@@ -27,7 +27,7 @@ _logger = logging.getLogger(__name__)
 class HotelVirtualRoom(models.Model):
     _inherit = 'hotel.virtual.room'
 
-    @api.depends('wcapacity')
+    #@api.depends('wcapacity')
     @api.onchange('room_ids')
     def _get_capacity(self):
         hotel_room_obj = self.env['hotel.room']
