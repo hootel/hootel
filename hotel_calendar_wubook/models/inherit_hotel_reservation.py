@@ -25,8 +25,8 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class HotelFolio(models.Model):
-    _inherit = "hotel.folio"
+class HotelReservation(models.Model):
+    _inherit = "hotel.reservation"
 
     @api.multi
     def get_hcalendar_data(self, checkin, checkout, domainRooms, domainReservations, withRooms=True):
@@ -36,11 +36,8 @@ class HotelFolio(models.Model):
                                                           withRooms=withRooms)
         hotel_reservation_obj = self.env['hotel.reservation']
         json_reservations = []
-        _logger.info(vals)
         for reserv_vals in vals['reservations']:
             reserv = hotel_reservation_obj.browse(reserv_vals[1])
-            _logger.info("PASA RESERV")
-            _logger.info(reserv.wis_from_channel)
             json_reservations.append((
                 reserv.product_id.id,
                 reserv.id,
