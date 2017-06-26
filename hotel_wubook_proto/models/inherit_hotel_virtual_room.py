@@ -28,7 +28,7 @@ class HotelVirtualRoom(models.Model):
     _inherit = 'hotel.virtual.room'
 
     @api.depends('wcapacity')
-    @api.onchange('room_ids')
+    @api.onchange('room_ids', 'room_type_ids')
     def _get_capacity(self):
         hotel_room_obj = self.env['hotel.room']
         for rec in self:
@@ -66,7 +66,7 @@ class HotelVirtualRoom(models.Model):
             for record in self:
                 self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
                                                vals.get('name', record.name),
-                                               record.wcapacity,
+                                               vals.get('wcapacity', record.wcapacity),
                                                vals.get('list_price', record.list_price),
                                                vals.get('max_real_rooms', record.max_real_rooms),
                                                vals.get('wscode', record.wscode))
