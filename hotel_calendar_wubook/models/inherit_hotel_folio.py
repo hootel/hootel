@@ -21,6 +21,8 @@
 from openerp import models, fields, api, _
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class HotelFolio(models.Model):
@@ -36,6 +38,8 @@ class HotelFolio(models.Model):
         json_reservations = []
         for reserv_vals in vals['reservations']:
             reserv = hotel_reservation_obj.browse(reserv_vals[1])
+            _logger.info("PASA RESERV")
+            _logger.info(reserv.wis_from_channel)
             json_reservations.append((
                 reserv.product_id.id,
                 reserv.id,
