@@ -19,7 +19,7 @@
 #
 ##############################################################################
 import xmlrpclib
-import re
+import pytz
 from datetime import datetime, timedelta
 from urlparse import urljoin
 from openerp import models, api
@@ -217,9 +217,6 @@ class WuBook(models.TransientModel):
         self.init_connection_()
         rcode, results = self.SERVER.corporate_fetchable_properties(self.TOKEN)
         self.close_connection_()
-
-        _logger.info("CORPORATE FETCH");
-        _logger.info(results)
 
         if rcode != 0:
             raise UserError("Can't call 'corporate_fetch' from WuBook: %s" % results)
@@ -503,14 +500,17 @@ class WuBook(models.TransientModel):
                 partner_id = res_partner_obj.create(vals)
 
             # Obtener habitacion libre
-            arr_hour = book['arrival_hour'] == "--" and '00:00' or book['arrival_hour']
+            local = pytz.timezone(self.env.context.get('tz', 'UTC'))
+            arr_hour = book['arrival_hour'] == "--" and '14:00' or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)
-            checkin_dt = datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkin = checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+            checkin_dt = local.localize(datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT))
+            checkin_utc_dt = checkin_dt.astimezone(pytz.utc)
+            checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
-            checkout = "%s 21:59" % book['date_departure']  # FIXME: Usar UTC
-            checkout_dt = datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkout = checkout_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+            checkout = "%s 12:00" % book['date_departure']  # FIXME: Usar UTC
+            checkout_dt = local.localize(datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT))
+            checkout_utc_dt = checkin_dt.astimezone(pytz.utc)
+            checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             vrooms_ids = book['rooms'].split(',')
             vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])

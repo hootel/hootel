@@ -21,6 +21,7 @@ var Dialog = require('web.Dialog');
 var Ajax = require('web.ajax');
 var ControlPanel = require('web.ControlPanel');
 var Session = require('web.session');
+var formats = require('web.formats');
 
 var _t = Core._t;
 var _lt = Core._lt;
@@ -249,8 +250,8 @@ var HotelCalendarView = View.extend({
             var parentRow = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentRow}`);
             var parentCellStart = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentCell}`);
             var parentCellEnd = document.querySelector(`#${ev.detail.cellEnd.dataset.hcalParentCell}`);
-            var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate).startOf('day').utc();
-            var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate).endOf('day').utc();
+            var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate).hour(14).minute(0).second(0).utc();
+            var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate).hour(12).minute(0).second(0).utc();
             var room = self._hcalendar.getRoom(parentRow.dataset.hcalRoomObjId);
             var numBeds = room.shared?(ev.detail.cellEnd.dataset.hcalBedNum - ev.detail.cellStart.dataset.hcalBedNum)+1:room.capacity;
             var HotelFolioObj = new Model('hotel.folio');
@@ -563,6 +564,7 @@ var HotelCalendarView = View.extend({
             language : moment.locale(),
             format : L10N_DATE_MOMENT_FORMAT,
         };
+        console.log(DTPickerOptions);
         var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
         $dateTimePickerBegin.datetimepicker(DTPickerOptions);
