@@ -52,8 +52,7 @@ class HotelReservation(models.Model):
         ('3', 'Refused'),
         ('4', 'Accepted'),
         ('5', 'Cancelled'),
-        ('6', 'Cancelled with penalty')], string='WuBook Status', default='0',
-                                        readonly=True)
+        ('6', 'Cancelled with penalty')], string='WuBook Status', default='0', readonly=True)
     wstatus_reason = fields.Char("WuBook Status Reason", readonly=True)
 
     @api.model
@@ -149,7 +148,7 @@ class HotelReservation(models.Model):
     def get_availability(self, checkin, checkout, product_id):
         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
         date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
-        date_diff = abs((date_start-date_end).days)
+        date_diff = abs((date_start - date_end).days)
 
         hotel_vroom_obj = self.env['hotel.virtual.room']
         rooms_avail = []
@@ -173,4 +172,5 @@ class HotelReservation(models.Model):
 
     @api.onchange('checkin', 'checkout', 'product_id')
     def on_change_checkin_checkout_product_id(self):
-        return super(HotelReservation, self.with_context(regenerate=not self.wis_from_channel)).on_change_checkin_checkout_product_id()
+        if not self.wis_from_channel:
+            return super(HotelReservation, self).on_change_checkin_checkout_product_id()

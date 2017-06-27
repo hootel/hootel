@@ -461,7 +461,6 @@ class WuBook(models.TransientModel):
 
     @api.model
     def generate_reservations(self, bookings):
-        _logger.info("PASA PR AKI 2")
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
@@ -472,7 +471,6 @@ class WuBook(models.TransientModel):
             _logger.info(book)
             #if book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED] or book['reservation_code'] == 1498486935:
             #    continue
-            _logger.info("PASA A")
             # Already Exists?
             reservs = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
                                               ('wchannel_reservation_code', '=', str(book['channel_reservation_code']))])
@@ -488,7 +486,6 @@ class WuBook(models.TransientModel):
                                           WUBOOK_STATUS_REFUSED]:
                         reserv.action_cancel()
                 continue
-            _logger.info("PASA B")
             # Search Customer
             country_id = self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1)
             customer_mail = book.get('customer_mail', False)
@@ -508,7 +505,6 @@ class WuBook(models.TransientModel):
                     #'lang': lang and lang.id,
                 }
                 partner_id = res_partner_obj.create(vals)
-            _logger.info("PASA C")
             # Obtener habitacion libre
             local = pytz.timezone(self.env.context.get('tz', 'UTC'))
             arr_hour = book['arrival_hour'] == "--" and '14:00' or book['arrival_hour']
@@ -517,7 +513,7 @@ class WuBook(models.TransientModel):
             checkin_utc_dt = checkin_dt.astimezone(pytz.utc)
             checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
-            checkout = "%s 12:00" % book['date_departure']  # FIXME: Usar UTC
+            checkout = "%s 12:00" % book['date_departure']
             checkout_dt = local.localize(datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT))
             checkout_utc_dt = checkout_dt.astimezone(pytz.utc)
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
@@ -525,14 +521,13 @@ class WuBook(models.TransientModel):
             vrooms_ids = book['rooms'].split(',')
             vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])
 
-            _logger.info("PASA D")
             reservations = []
-            cutomer_room_index = 0
+            customer_room_index = 0
             for vroom in vrooms:
                 free_rooms = hotel_vroom_obj.check_availability_virtual_room(checkin,
                                                                              checkout,
                                                                              vroom.id)
-                if any(free_rooms) and len(free_rooms) > cutomer_room_index:
+                if any(free_rooms) and len(free_rooms) > customer_room_index:
                     # Total Price Room
                     reservation_lines = []
                     tprice = 0.0
@@ -552,26 +547,19 @@ class WuBook(models.TransientModel):
                         if str(broom['id']) == vroom.wrid:
                             occupancy = broom['occupancy']
                             break
-                        
-                    _logger.info("ROOM SELECTED")
-                    _logger.info(vroom.id)
-                    _logger.info(vroom.product_id.id)
 
-                    rstate = 'draft'
-                    if book['status'] == WUBOOK_STATUS_CANCELLED \
-                            or book['status'] == WUBOOK_STATUS_REFUSED:
-                        rstate = 'cancelled'
+                    rstate = 'cancelled' if book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED] else 'draft'
                     vals = {
                         'checkin': checkin,
                         'checkout': checkout,
                         'adults': occupancy,
                         'children': 0,
-                        'product_id': free_rooms[cutomer_room_index].product_id.id,
-                        'product_uom': free_rooms[cutomer_room_index].product_id.product_tmpl_id.uom_id.id,
+                        'product_id': free_rooms[customer_room_index].product_id.id,
+                        'product_uom': free_rooms[customer_room_index].product_id.product_tmpl_id.uom_id.id,
                         'product_uom_qty': 1,
                         #'product_uos': 1,
                         'reservation_lines': reservation_lines,
-                        'name': free_rooms[cutomer_room_index].name,
+                        'name': free_rooms[customer_room_index].name,
                         'price_unit': tprice,
                         'to_assign': True,
                         'wrid': str(book['reservation_code']),
@@ -583,12 +571,11 @@ class WuBook(models.TransientModel):
                         'virtual_room_id': vroom.id,
                     }
                     reservations.append((0, False, vals))
-                    cutomer_room_index = cutomer_room_index + 1
+                    customer_room_index = customer_room_index + 1
                 else:
                     _logger.info("ERROR!!")
                     _logger.info(str(book['reservation_code']))
                     raise ValidationError("Can't found a free room for reservation from wubook!!!")
-            _logger.info("PASA E")
             # Create Folio
             vals = {
                 'room_lines': reservations,
@@ -605,6 +592,5 @@ class WuBook(models.TransientModel):
                     'wseed': book['sessionSeed']
                 })
                 hotel_folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
-            _logger.info("PASA g")
             processed_rids.append(book['reservation_code'])
         return processed_rids
