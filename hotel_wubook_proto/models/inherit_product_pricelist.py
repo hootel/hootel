@@ -114,7 +114,6 @@ class ProductPricelist(models.Model):
             prices = self.get_wubook_prices()
             if any(prices):
                 self.env['wubook'].update_plan_periods(pricelist.wpid, prices)
-        _logger.info("DDD");
         return updated
 
     @api.multi

@@ -110,9 +110,8 @@ class WuBook(models.TransientModel):
 
     # ROOMS
     @api.model
-    def create_room(self, name, capacity, price, availability):
+    def create_room(self, shortcode, name, capacity, price, availability):
         self.init_connection_()
-        shortcode = self.env['ir.sequence'].get('seq_vroom_id')
         rcode, results = self.SERVER.new_room(
             self.TOKEN,
             self.LCODE,

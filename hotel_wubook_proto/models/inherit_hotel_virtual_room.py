@@ -37,9 +37,22 @@ class HotelVirtualRoom(models.Model):
             capacities = room_ids.mapped('capacity')
             rec.wcapacity = any(capacities) and min(capacities) or 0
 
-    wscode = fields.Char("WuBook Short Code", required=True, readonly=True)
+    wscode = fields.Char("WuBook Short Code", readonly=True)
     wrid = fields.Char("WuBook Room ID", readonly=True)
-    wcapacity = fields.Integer(compute=_get_capacity, readonly=True)
+    wcapacity = fields.Integer("WuBook Capacity", default=0, required=True)
+
+    @api.constrains('wcapacity')
+    def _check_wcapacity(self):
+        if self.wcapacity == 0:
+            raise ValidationError("wcapacity can't be zero")
+
+    @api.onchange('room_type_ids', 'room_ids')
+    def on_change_room_type_ids_room_ids(self):
+        hotel_room_obj = self.env['hotel.room']
+        room_categories = self.room_type_ids.mapped('cat_id.id')
+        room_ids = self.room_ids + hotel_room_obj.search([('categ_id.id', 'in', room_categories)])
+        capacities = room_ids.mapped('capacity')
+        self.wcapacity = any(capacities) and min(capacities) or 0
 
     @api.multi
     @api.constrains('wscode')
@@ -50,15 +63,23 @@ class HotelVirtualRoom(models.Model):
 
     @api.model
     def create(self, vals):
+        shortcode = self.env['ir.sequence'].next_by_code('hotel.virtual.room')
+        vals.update({'scode': shortcode[:4]})
+        vroom = super(HotelVirtualRoom, self).create(vals)
         if self._context.get('wubook_action', True):
+            shortcode = self.env['ir.sequence'].next_by_code('hotel.virtual.room')[:4]
             wrid = self.env['wubook'].create_room(
-                vals['name'],
-                vals['wcapacity'],
-                vals['list_price'],
-                vals.get('max_real_rooms', 1)
+                shortcode,
+                vroom.name,
+                vroom.wcapacity,
+                vroom.list_price,
+                vroom.max_real_rooms
             )
-            vals.update({'wrid': wrid})
-        return super(HotelVirtualRoom, self).create(vals)
+            vroom.with_context(wubook_action=False).write({
+                'wrid': wrid,
+                'scode': shortcode,
+            })
+        return vroom
 
     @api.multi
     def write(self, vals):
@@ -66,7 +87,7 @@ class HotelVirtualRoom(models.Model):
             for record in self:
                 self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
                                                vals.get('name', record.name),
-                                               2,
+                                               vals.get('wcapacity', record.wcapacity),
                                                vals.get('list_price', record.list_price),
                                                vals.get('max_real_rooms', record.max_real_rooms),
                                                vals.get('wscode', record.wscode))
@@ -76,7 +97,7 @@ class HotelVirtualRoom(models.Model):
     def unlink(self):
         if self._context.get('wubook_action', True):
             for record in self:
-                self.env['wubook'].delete_plan(record.wpid)
+                self.env['wubook'].delete_room(record.wrid)
         return super(HotelVirtualRoom, self).unlink()
 
     @api.multi

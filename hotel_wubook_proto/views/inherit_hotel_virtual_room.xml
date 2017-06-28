@@ -8,7 +8,7 @@
         	<xpath expr="//field[@name='name']" position="after">
         		<field name="wscode" maxlength="4" readonly="True" />
         		<field name="wrid" readonly="True"  />
-        		<field name="wcapacity" readonly="True" />
+        		<field name="wcapacity" />
         	</xpath>
         </field>
     </record>
