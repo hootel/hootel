@@ -182,7 +182,7 @@ var HotelCalendarView = View.extend({
                 title: QWeb.render('HotelCalendar.Tooltip', qdict)
             }).tooltip('show');
         });
-        this._hcalendar.addEventListener('hcalOnContextMenuReservation', function(ev){
+        this._hcalendar.addEventListener('hcalOnClickReservation', function(ev){
             var res_id = ev.detail.reservationObj.getUserData('folio_id');
             self._model.call('get_formview_id', [res_id, Session.user_context]).then(function(view_id){
                 var pop = new Common.FormViewDialog(self, {

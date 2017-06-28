@@ -1167,7 +1167,6 @@ HotelCalendar.prototype = {
 					if (reserv.readOnly || (reserv.fixDays && ($this.reservationAction.action == $this.ACTION.MOVE_LEFT ||
 							$this.reservationAction.action == $this.ACTION.MOVE_RIGHT))) {
 						$this.reservationAction.action = $this.ACTION.NONE;
-						console.log("PASSAA2");
 						return false;
 					}
 					var linkedReservations = $this.getLinkedReservations(reserv);
@@ -1187,21 +1186,6 @@ HotelCalendar.prototype = {
 						}
 					}
 				}
-			}, false);
-			rdiv.addEventListener('contextmenu', function(ev){
-				$this.e.dispatchEvent(new CustomEvent(
-						'hcalOnContextMenuReservation', 
-						{ 'detail': {
-								'event': ev,
-								'reservationDiv': this,
-								'reservationObj': $this.reservations[this.dataset.hcalReservationId]
-							}
-						}));
-				if(ev.preventDefault != undefined)
-					ev.preventDefault();
-				if(ev.stopPropagation != undefined)
-					ev.stopPropagation();
-				return false;
 			}, false);
 			rdiv.addEventListener('mouseenter', function(ev){
 				$this.e.dispatchEvent(new CustomEvent(
@@ -1362,6 +1346,15 @@ HotelCalendar.prototype = {
 						}));
 					this.updateReservationOccupation_();
 				}
+			} else {
+				this.e.dispatchEvent(new CustomEvent(
+						'hcalOnClickReservation', 
+						{ 'detail': {
+								'event': ev,
+								'reservationDiv': reservDiv,
+								'reservationObj': reserv
+							}
+						}));
 			}
 			this.reset_action_reservation_();
 		}
