@@ -35,7 +35,6 @@
         'python': ['xmlrpclib']
     },
     'data': [
-        'data/sequence.xml',
         #'data/cron_jobs.xml',
         'wizards/wubook_installer.xml',
         'wizards/wubook_import_plan_prices.xml',
@@ -46,6 +45,9 @@
         'views/inherit_hotel_folio.xml',
         'views/inherit_product_pricelist.xml',
         'views/inherit_product_pricelist_item.xml',
+        'views/wubook_channel_info.xml',
+        'data/menus.xml',
+        'data/sequences.xml',
         #'views/res_config.xml'
     ],
     'test': [

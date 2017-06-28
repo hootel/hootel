@@ -54,6 +54,7 @@ class WuBook(models.TransientModel):
     def initialize(self):
         self.push_activation()
         self.import_rooms()
+        self.import_channels_info()
 #         self.fetch_new_bookings()
         return True
 
@@ -405,6 +406,16 @@ class WuBook(models.TransientModel):
         return True
 
     @api.model
+    def import_channels_info(self):
+        self.init_connection_()
+        results = self.SERVER.get_channels_info(self.TOKEN)
+        self.close_connection_()
+
+        self.generate_wubook_channel_info(results)
+
+        return True
+
+    @api.model
     def generate_pricelist_items(self, pid, dfrom, dto, plan_prices):
         pricelist = self.env['product.pricelist'].search([('wpid', '=', pid)], limit=1)
         if pricelist:
@@ -504,6 +515,8 @@ class WuBook(models.TransientModel):
                     #'lang': lang and lang.id,
                 }
                 partner_id = res_partner_obj.create(vals)
+            # Search Wubook Channel Info
+            wchannel_info = self.env['wubook.channel.info'].search([('wid', '=', str(book['id_channel']))], limit=1)
             # Obtener habitacion libre
             local = pytz.timezone(self.env.context.get('tz', 'UTC'))
             arr_hour = book['arrival_hour'] == "--" and '14:00' or book['arrival_hour']
@@ -556,13 +569,12 @@ class WuBook(models.TransientModel):
                         'product_id': free_rooms[customer_room_index].product_id.id,
                         'product_uom': free_rooms[customer_room_index].product_id.product_tmpl_id.uom_id.id,
                         'product_uom_qty': 1,
-                        #'product_uos': 1,
                         'reservation_lines': reservation_lines,
                         'name': free_rooms[customer_room_index].name,
                         'price_unit': tprice,
                         'to_assign': True,
                         'wrid': str(book['reservation_code']),
-                        'wchannel_id': str(book['id_channel']),
+                        'wchannel_id': wchannel_info and wchannel_info.id,
                         'wchannel_reservation_code': str(book['channel_reservation_code']),
                         'wstatus': str(book['status']),
                         'to_read': True,
@@ -572,9 +584,7 @@ class WuBook(models.TransientModel):
                     reservations.append((0, False, vals))
                     customer_room_index = customer_room_index + 1
                 else:
-                    _logger.info("ERROR!!")
-                    _logger.info(str(book['reservation_code']))
-                    raise ValidationError("Can't found a free room for reservation from wubook!!!")
+                    raise ValidationError("Can't found a free room for reservation from wubook [WID: %d]" % book['reservation_code'])
             # Create Folio
             vals = {
                 'room_lines': reservations,
@@ -593,3 +603,20 @@ class WuBook(models.TransientModel):
                 hotel_folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
             processed_rids.append(book['reservation_code'])
         return processed_rids
+
+    @api.model
+    def generate_wubook_channel_info(self, channels):
+        channel_info_obj = self.env['wubook.channel.info']
+        for cid in channels.keys():
+            vals = {
+                'name': channels[cid]['name'],
+                'ical': channels[cid]['ical'] == 1,
+            }
+            channel_info = channel_info_obj.search([('wid', '=', cid)], limit=1)
+            if channel_info:
+                channel_info.write(vals)
+            else:
+                vals.update({
+                    'wid': cid
+                })
+                channel_info_obj.create(vals)

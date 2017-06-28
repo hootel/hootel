@@ -18,10 +18,17 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import inherit_res_partner
-from . import inherit_hotel_virtual_room
-from . import inherit_product_pricelist
-from . import inherit_product_pricelist_item
-from . import inherit_hotel_reservation
-from . import inherit_hotel_folio
-from . import wubook_channel_info
+from openerp import models, fields, api
+
+
+class WuBookChannelInfo(models.Model):
+    _name = 'wubook.channel.info'
+
+    wid = fields.Char("WuBook Channel ID", required=True)
+    name = fields.Char("Channel Name", required=True)
+    ical = fields.Boolean("ical", default=False)
+
+    @api.multi
+    def import_channels_info(self):
+        self.env['wubook'].import_channels_info()
+        return True

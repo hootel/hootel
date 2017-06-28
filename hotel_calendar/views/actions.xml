@@ -4,19 +4,19 @@
 
         <record id="hotel_reservation_action_checkin" model="ir.actions.server">
                <field name="name">Checkins</field>
-               <field name="model_id" ref="model_hotel_folio"/>
+               <field name="model_id" ref="hotel.model_hotel_folio"/>
                <field name="code">action = env["hotel.folio"].action_folios_in()</field>
         </record>
 
         <record id="hotel_reservation_action_checkout" model="ir.actions.server">
                <field name="name">Checkouts</field>
-               <field name="model_id" ref="model_hotel_folio"/>
+               <field name="model_id" ref="hotel.model_hotel_folio"/>
                <field name="code">action = env["hotel.folio"].action_folios_out()</field>
         </record>
 
        <record id="hotel_reservation_action_paydue" model="ir.actions.server">
                <field name="name">Paydue</field>
-               <field name="model_id" ref="model_hotel_folio"/>
+               <field name="model_id" ref="hotel.model_hotel_folio"/>
                <field name="code">action = env["hotel.folio"].action_folios_amount()</field>
 	</record>
 

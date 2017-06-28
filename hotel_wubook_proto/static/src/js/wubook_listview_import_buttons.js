@@ -38,6 +38,16 @@ function import_price_plans(){
  
 	return false;
 }
+
+function import_channels_info(){
+	var self = this;
+	this.dataset._model.call('import_channels_info', [false]).then(function(results){
+        var active_view = self.ViewManager.active_view;
+        active_view.controller.reload(); // list view only has reload
+	});
+ 
+	return false;
+}
     
 ListView.include({
 	render_buttons: function() {
@@ -52,6 +62,9 @@ ListView.include({
         } else if (this.dataset.model == 'product.pricelist') {
         	this.$buttons.append("<button class='oe_button oe_wubook_import_price_plans oe_highlight' type='button'>Import Price Plans From WuBook</button>");
         	this.$buttons.find('.oe_wubook_import_price_plans').on('click', import_price_plans.bind(this));
+        } else if (this.dataset.model == 'wubook.channel.info') {
+        	this.$buttons.append("<button class='oe_button oe_wubook_import_channels_info oe_highlight' type='button'>Import Channels Info From WuBook</button>");
+        	this.$buttons.find('.oe_wubook_import_channels_info').on('click', import_channels_info.bind(this));
         }
     }
 });

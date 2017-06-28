@@ -279,6 +279,10 @@ td.hcal-cell-month-day-occupied {
 	border-width: 2px 1px 1px 1px;
 }
 
+.hcal-cell-room-type-group-item.btn-hcal-flat {
+	font-size: x-small;
+}
+
 .input-price {
 	width: 100%;
 	border-style: none !important;

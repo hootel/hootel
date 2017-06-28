@@ -33,11 +33,11 @@ class HotelReservation(models.Model):
     @api.depends('wrid', 'wchannel_id')
     def _is_from_channel(self):
         for record in self:
-            record.wis_from_channel = (record.wrid != 'none' and record.wchannel_id != 'none')
+            record.wis_from_channel = (record.wrid != 'none' and record.wchannel_id)
 
     wrid = fields.Char("WuBook Reservation ID", default="none", readonly=True)
-    wchannel_id = fields.Char("WuBook Channel ID", default='none',
-                              readonly=True)
+    wchannel_id = fields.Many2one('wubook.channel.info', string='WuBook Channel ID',
+                                  readonly=True)
     wchannel_reservation_code = fields.Char("WuBook Channel Reservation Code",
                                             default='none', readonly=True)
     wis_from_channel = fields.Boolean('WuBooK Is From Channel',
@@ -119,7 +119,7 @@ class HotelReservation(models.Model):
         if self._context.get('wubook_action', True):
             partner_id = self.env['res.users'].browse(self.env.uid).partner_id
             for record in self:
-                if self.wchannel_id == '0':
+                if self.wrid != 'none' and not self.wchannel_id:
                     self.env['wubook'].cancel_reservation(record.wrid,
                                                           'Cancelled by %s' % partner_id.name)
             rooms_avail = self.get_availability(self.checkin,
@@ -133,7 +133,7 @@ class HotelReservation(models.Model):
         res = super(HotelReservation, self).action_cancel()
         partner_id = self.env['res.users'].browse(self.env.uid).partner_id
         for record in self:
-                if self.wchannel_id == '0' and \
+                if self.wird != 'none' and not self.wchannel_id and \
                         self.wstatus in ['1', '2', '4']:     # Only can cancel reservations created directly in wubook
                     self.env['wubook'].cancel_reservation(record.wrid,
                                                           'Cancelled by %s' % partner_id.name)
