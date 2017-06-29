@@ -534,7 +534,6 @@ class WuBook(models.TransientModel):
             vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])
 
             reservations = []
-            customer_room_index = 0
             for vroom in vrooms:
                 free_rooms = hotel_vroom_obj.check_availability_virtual_room(checkin,
                                                                              checkout,
@@ -555,34 +554,33 @@ class WuBook(models.TransientModel):
                             break
                     # Occupancy
                     occupancy = 0
+                    customer_room_index = 0
                     for broom in book['rooms_occupancies']:
                         if str(broom['id']) == vroom.wrid:
                             occupancy = broom['occupancy']
-                            break
-
-                    rstate = 'cancelled' if book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED] else 'draft'
-                    vals = {
-                        'checkin': checkin,
-                        'checkout': checkout,
-                        'adults': occupancy,
-                        'children': 0,
-                        'product_id': free_rooms[customer_room_index].product_id.id,
-                        'product_uom': free_rooms[customer_room_index].product_id.product_tmpl_id.uom_id.id,
-                        'product_uom_qty': 1,
-                        'reservation_lines': reservation_lines,
-                        'name': free_rooms[customer_room_index].name,
-                        'price_unit': tprice,
-                        'to_assign': True,
-                        'wrid': str(book['reservation_code']),
-                        'wchannel_id': wchannel_info and wchannel_info.id,
-                        'wchannel_reservation_code': str(book['channel_reservation_code']),
-                        'wstatus': str(book['status']),
-                        'to_read': True,
-                        'state': rstate,
-                        'virtual_room_id': vroom.id,
-                    }
-                    reservations.append((0, False, vals))
-                    customer_room_index = customer_room_index + 1
+                            rstate = 'cancelled' if book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED] else 'draft'
+                            vals = {
+                                'checkin': checkin,
+                                'checkout': checkout,
+                                'adults': occupancy,
+                                'children': 0,
+                                'product_id': free_rooms[customer_room_index].product_id.id,
+                                'product_uom': free_rooms[customer_room_index].product_id.product_tmpl_id.uom_id.id,
+                                'product_uom_qty': 1,
+                                'reservation_lines': reservation_lines,
+                                'name': free_rooms[customer_room_index].name,
+                                'price_unit': tprice,
+                                'to_assign': True,
+                                'wrid': str(book['reservation_code']),
+                                'wchannel_id': wchannel_info and wchannel_info.id,
+                                'wchannel_reservation_code': str(book['channel_reservation_code']),
+                                'wstatus': str(book['status']),
+                                'to_read': True,
+                                'state': rstate,
+                                'virtual_room_id': vroom.id,
+                            }
+                            reservations.append((0, False, vals))
+                            customer_room_index = customer_room_index + 1
                 else:
                     raise ValidationError("Can't found a free room for reservation from wubook [WID: %d]" % book['reservation_code'])
             # Create Folio
