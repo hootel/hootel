@@ -133,7 +133,7 @@ class HotelReservation(models.Model):
         res = super(HotelReservation, self).action_cancel()
         partner_id = self.env['res.users'].browse(self.env.uid).partner_id
         for record in self:
-                if self.wird != 'none' and not self.wchannel_id and \
+                if self.wrid != 'none' and not self.wchannel_id and \
                         self.wstatus in ['1', '2', '4']:     # Only can cancel reservations created directly in wubook
                     self.env['wubook'].cancel_reservation(record.wrid,
                                                           'Cancelled by %s' % partner_id.name)
