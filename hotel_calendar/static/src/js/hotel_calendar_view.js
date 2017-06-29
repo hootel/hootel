@@ -773,6 +773,7 @@ var HotelCalendarView = View.extend({
         for (var notif of notifications) {
         	console.log(notif);
             if (notif[0][1] === 'hotel.reservation' && notif[1]['type'] === "reservation") {
+            	need_reload = true;
             	if (notif[1]['userid'] == this.dataset.context.uid) { continue; } // Ignore self messages
             	var qdict = notif[1]['reservation'];
             	qdict = _.extend(qdict, {
@@ -787,7 +788,6 @@ var HotelCalendarView = View.extend({
                 } else if (notif[1]['subtype'] === "warn") {
                     this.do_warn(notif[1]['title'], msg, true);
                 }
-                need_reload = true;
             }
         }
         if (need_reload) {
