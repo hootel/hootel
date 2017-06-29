@@ -494,7 +494,7 @@ class WuBook(models.TransientModel):
 
                     if book['status'] in [WUBOOK_STATUS_CANCELLED,
                                           WUBOOK_STATUS_REFUSED]:
-                        reserv.action_cancel()
+                        reserv.with_context({'wubook_action': False}).action_cancel()
                 continue
             # Search Customer
             country_id = self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1)
