@@ -112,7 +112,9 @@ class HotelReservation(models.Model):
                         old_rooms_avail.append(newitem)
                 # Push avail
                 if any(old_rooms_avail):
-                    self.env['wubook'].update_availability(old_rooms_avail)
+                    _logger.info("DISPONIBILIDAD")
+                    _logger.info(old_rooms_avail)
+                    #self.env['wubook'].update_availability(old_rooms_avail)
         return super(HotelReservation, self).write(vals)
 
     @api.multi
