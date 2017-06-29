@@ -486,7 +486,7 @@ class WuBook(models.TransientModel):
                                               ('wchannel_reservation_code', '=', str(book['channel_reservation_code']))])
             if any(reservs):
                 for reserv in reservs:
-                    reserv.write({
+                    reserv.with_context({'wubook_action': False}).write({
                         'wstatus': str(book['status']),
                         'wstatus_reason': book.get('status_reason', ''),
                         'to_read': True,
