@@ -32,6 +32,7 @@ DEFAULT_WUBOOK_DATE_FORMAT = "%d/%m/%Y"
 DEFAULT_WUBOOK_TIME_FORMAT = "%H:%M"
 DEFAULT_WUBOOK_DATETIME_FORMAT = "%s %s" % (DEFAULT_WUBOOK_DATE_FORMAT,
                                             DEFAULT_WUBOOK_TIME_FORMAT)
+WUBOOK_STATUS_CONFIRMED = 1
 WUBOOK_STATUS_CANCELLED = 5
 WUBOOK_STATUS_REFUSED = 3
 
@@ -476,8 +477,12 @@ class WuBook(models.TransientModel):
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
         processed_rids = []
+        cancelled_rids = []
         #s_logger.info(bookings)
         for book in bookings:
+            is_cancellation = book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED]
+            if is_cancellation:
+                cancelled_rids.append(book['reservation_code'])
             _logger.info(book)
             #if book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED] or book['reservation_code'] == 1498486935:
             #    continue
@@ -492,10 +497,14 @@ class WuBook(models.TransientModel):
                         'to_read': True,
                     })
 
-                    if book['status'] in [WUBOOK_STATUS_CANCELLED,
-                                          WUBOOK_STATUS_REFUSED]:
+                    if is_cancellation:
                         reserv.with_context({'wubook_action': False}).action_cancel()
                 continue
+            # Ignore recreation if previusly deleted in same transaction because wubook resend creation
+            if book['status'] == WUBOOK_STATUS_CONFIRMED and any(book['modified_reservations']) \
+                    and book['modified_reservations'][0] in cancelled_rids:
+                continue
+
             # Search Customer
             country_id = self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1)
             customer_mail = book.get('customer_mail', False)
@@ -559,7 +568,7 @@ class WuBook(models.TransientModel):
                         if str(broom['id']) == vroom.wrid:
                             if len(free_rooms) > customer_room_index:
                                 occupancy = broom['occupancy']
-                                rstate = 'cancelled' if book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED] else 'draft'
+                                rstate = 'cancelled' if is_cancellation else 'draft'
                                 vals = {
                                     'checkin': checkin,
                                     'checkout': checkout,
