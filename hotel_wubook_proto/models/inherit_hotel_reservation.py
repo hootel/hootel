@@ -131,12 +131,12 @@ class HotelReservation(models.Model):
     @api.multi
     def action_cancel(self):
         res = super(HotelReservation, self).action_cancel()
-        partner_id = self.env['res.users'].browse(self.env.uid).partner_id
-        for record in self:
-                if self.wrid != 'none' and not self.wchannel_id and \
-                        self.wstatus in ['1', '2', '4']:     # Only can cancel reservations created directly in wubook
-                    self.env['wubook'].cancel_reservation(record.wrid,
-                                                          'Cancelled by %s' % partner_id.name)
+#         partner_id = self.env['res.users'].browse(self.env.uid).partner_id
+#         for record in self:
+#                 if self.wrid != 'none' and not self.wchannel_id and \
+#                         self.wstatus in ['1', '2', '4']:     # Only can cancel reservations created directly in wubook
+#                     self.env['wubook'].cancel_reservation(record.wrid,
+#                                                           'Cancelled by %s' % partner_id.name)
         return res
 
     @api.multi
