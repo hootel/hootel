@@ -83,7 +83,8 @@ class HotelReservation(models.Model):
                 'checkout': vals.get('checkout'),
                 'product_id': vals.get('product_id'),
             }
-            if self._context.get('wubook_action', True):
+            if self._context.get('wubook_action', True) and \
+                    new_vals['checkin'] or new_vals['checkout'] or new_vals['product_id']:
                 old_rooms_avail = []
                 new_rooms_avail = []
                 if older_vals['checkin'] and older_vals['checkout'] and older_vals['product_id']:
@@ -114,7 +115,7 @@ class HotelReservation(models.Model):
                 if any(old_rooms_avail):
                     _logger.info("DISPONIBILIDAD")
                     _logger.info(old_rooms_avail)
-                    #self.env['wubook'].update_availability(old_rooms_avail)
+                    self.env['wubook'].update_availability(old_rooms_avail)
         return super(HotelReservation, self).write(vals)
 
     @api.multi
