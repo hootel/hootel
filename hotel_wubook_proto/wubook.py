@@ -472,6 +472,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def generate_reservations(self, bookings):
+        _logger.info("GENERATIE RESERV!-------------------------------------")
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
