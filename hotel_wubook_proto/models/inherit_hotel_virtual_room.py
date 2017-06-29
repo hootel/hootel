@@ -85,19 +85,21 @@ class HotelVirtualRoom(models.Model):
     def write(self, vals):
         if self._context.get('wubook_action', True):
             for record in self:
-                self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
-                                               vals.get('name', record.name),
-                                               vals.get('wcapacity', record.wcapacity),
-                                               vals.get('list_price', record.list_price),
-                                               vals.get('max_real_rooms', record.max_real_rooms),
-                                               vals.get('wscode', record.wscode))
+                if record.wrid != 'none':
+                    self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
+                                                   vals.get('name', record.name),
+                                                   vals.get('wcapacity', record.wcapacity),
+                                                   vals.get('list_price', record.list_price),
+                                                   vals.get('max_real_rooms', record.max_real_rooms),
+                                                   vals.get('wscode', record.wscode))
         return super(HotelVirtualRoom, self).write(vals)
 
     @api.multi
     def unlink(self):
         if self._context.get('wubook_action', True):
             for record in self:
-                self.env['wubook'].delete_room(record.wrid)
+                if record.wrid != 'none':
+                    self.env['wubook'].delete_room(record.wrid)
         return super(HotelVirtualRoom, self).unlink()
 
     @api.multi
