@@ -18,5 +18,26 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import inherit_hotel_reservation
-from . import bus_hotel_calendar
+from openerp import models, api
+
+
+class BusHotelCalendar(models.TransientModel):
+    _name = 'bus.hotel.calendar'
+
+    @api.model
+    def send_notification(self, ntype, title, name, checkin, checkout, room_name):
+        user_id = self.env['res.users'].browse(self.env.uid)
+        notification = {
+            'type': 'reservation',
+            'subtype': ntype,
+            'title': title,
+            'username': user_id.partner_id.name,
+            'userid': user_id.id,
+            'reservation': {
+                'name': name,
+                'checkin': checkin,
+                'checkout': checkout,
+                'room_name': room_name,
+            },
+        }
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', 'public'), notification)

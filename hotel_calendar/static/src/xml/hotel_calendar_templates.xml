@@ -55,6 +55,7 @@
 		<li><b>Room:</b> <t t-esc="room_name"/></li>
 		<li><b>Check-In:</b> <t t-esc="checkin"/></li>
 		<li><b>Check-Out:</b> <t t-esc="checkout"/></li>
+		<li><b>Made by:</b> <t t-esc="username"/></li>
 	</ul>
 </t>
 

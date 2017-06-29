@@ -28,10 +28,12 @@ var _lt = Core._lt;
 var QWeb = Core.qweb;
 var l10n = _t.database.parameters;
 
+console.log(l10n);
+
 var PUBLIC_PRICELIST_ID = 1; // Hard-Coded public pricelist id
 var ODOO_DATETIME_MOMENT_FORMAT = "YYYY-MM-DD HH:mm:ss";
-var L10N_DATETIME_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format + ' ' + l10n.time_format);
-var L10N_DATE_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format);
+var L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY"; //FIXME: Time.strftime_to_moment_format(l10n.date_format);
+var L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format);
 
 
 /* HIDE CONTROL PANEL */
@@ -83,6 +85,7 @@ var HotelCalendarView = View.extend({
         this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
 
         Bus.on("notification", this, this._on_bus_signal);
+        console.log(L10N_DATE_MOMENT_FORMAT);
     },
 
     view_loading: function(r) {
@@ -553,6 +556,8 @@ var HotelCalendarView = View.extend({
 
         /** VIEW CONTROLS INITIALIZATION **/
         // DATE TIME PICKERS
+        var l10nn = _t.database.parameters
+        console.log(Time.strftime_to_moment_format(l10nn.date_format));
         var DTPickerOptions = {
             viewMode: 'months',
             icons : {
@@ -766,14 +771,21 @@ var HotelCalendarView = View.extend({
     _on_bus_signal: function(notifications) {
         var need_reload = false;
         for (var notif of notifications) {
+        	console.log(notif);
             if (notif[0][1] === 'hotel.reservation' && notif[1]['type'] === "reservation") {
-                var msg = QWeb.render('HotelCalendar.Notification', notif[1]['reservation']);
-                if (notif[1]['subtype'] === "create") {
-                    this.do_notify(_t("Reservation Created"), msg, true);
-                } else if (notif[1]['subtype'] === "write") {
-                    this.do_notify(_t("Reservation Changed"), msg, true);
-                } else if (notif[1]['subtype'] === "unlink") {
-                    this.do_notify(_t("Reservation Deleted"), msg, true);
+            	if (notif[1]['userid'] == this.dataset.context.uid) { continue; } // Ignore self messages
+            	var qdict = notif[1]['reservation'];
+            	qdict = _.extend(qdict, {
+            		'checkin': moment.utc(qdict['checkin']).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
+            		'checkout': moment.utc(qdict['checkout']).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
+            		'username': notif[1]['username'],
+            		'userid': notif[1]['userid']
+            	});
+                var msg = QWeb.render('HotelCalendar.Notification', qdict);
+                if (notif[1]['subtype'] === "notify") {
+                    this.do_notify(notif[1]['title'], msg, true);
+                } else if (notif[1]['subtype'] === "warn") {
+                    this.do_warn(notif[1]['title'], msg, true);
                 }
                 need_reload = true;
             }
@@ -822,7 +834,11 @@ var HotelCalendarView = View.extend({
         var floor = this.$el.find('#pms-search #floor_list').val();
         if (floor) { domainRooms.push(['floor_id.id', 'in', floor]); }
         var amenities = this.$el.find('#pms-search #amenities_list').val();
-        if (amenities) { domainRooms.push(['room_amenities.id', 'in', amenities]); }
+        if (amenities) { 
+        	for (var amenity of amenities) {
+        		domainRooms.push(['room_amenities.id', '=', amenity]);
+        	}
+        }
         var virtual = this.$el.find('#pms-search #virtual_list').val();
         if (virtual) { domainRooms.push(['virtual_rooms.id', 'in', virtual]); }
 
