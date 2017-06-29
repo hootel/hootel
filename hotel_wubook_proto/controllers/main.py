@@ -20,7 +20,6 @@
 ##############################################################################
 from openerp import http
 from openerp.http import request
-import time
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ class website_wubook(http.Controller):
         # TODO: SECURITY CHECK HERE... LCODE DEFINED?
 
         # Create Reservation
-        time.sleep(5)   # Window Time for operations
+        #time.sleep(5)   # Window Time for operations
         request.env['wubook'].sudo().fetch_booking(lcode, rcode)
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
