@@ -20,9 +20,12 @@
 ##############################################################################
 from openerp import http
 from openerp.http import request
+from threading import Lock
 import logging
 _logger = logging.getLogger(__name__)
 
+
+wubook_lock = Lock()
 
 class website_wubook(http.Controller):
     @http.route(['/wubook/push/reservations'], type='http', cors="*",
@@ -38,8 +41,11 @@ class website_wubook(http.Controller):
         # TODO: SECURITY CHECK HERE... LCODE DEFINED?
 
         # Create Reservation
-        #time.sleep(5)   # Window Time for operations
-        request.env['wubook'].sudo().fetch_booking(lcode, rcode)
+        wubook_lock.acquire()
+        try:
+            request.env['wubook'].sudo().fetch_booking(lcode, rcode)
+        finally:
+            wubook_lock.release()
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
 
