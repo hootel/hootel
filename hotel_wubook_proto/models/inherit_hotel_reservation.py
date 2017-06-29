@@ -72,51 +72,51 @@ class HotelReservation(models.Model):
 
     @api.multi
     def write(self, vals):
-        if self._context.get('wubook_action', True):
-            older_vals = {
-                'checkin': self.checkin,
-                'checkout': self.checkout,
-                'product_id': self.product_id.id,
-            }
-            new_vals = {
-                'checkin': vals.get('checkin'),
-                'checkout': vals.get('checkout'),
-                'product_id': vals.get('product_id'),
-            }
-            if self._context.get('wubook_action', True) and \
-                    new_vals['checkin'] or new_vals['checkout'] or new_vals['product_id']:
-                old_rooms_avail = []
-                new_rooms_avail = []
-                if older_vals['checkin'] and older_vals['checkout'] and older_vals['product_id']:
-                    old_rooms_avail = self.get_availability(older_vals['checkin'],
-                                                            older_vals['checkout'],
-                                                            older_vals['product_id'])
-                if new_vals['checkin'] and new_vals['checkout'] and new_vals['product_id']:
-                    new_rooms_avail = self.get_availability(new_vals['checkin'],
-                                                            new_vals['checkout'],
-                                                            new_vals['product_id'])
-                # Merge Old & New Dicts (Updating Old Dict)
-                for newitem in new_rooms_avail:
-                    found = False
-                    for olditem in old_rooms_avail:
-                        if olditem['id'] == newitem['id']:
-                            for newdays in newitem['days']:
-                                foundday = False
-                                for olddays in olditem['days']:
-                                    if olddays['date'] == newdays['date']:
-                                        olddays.update(newdays)
-                                        foundday = True
-                                if not foundday:
-                                    olditem['days'].append(newdays)
-                            found = True
-                    if not found:
-                        old_rooms_avail.append(newitem)
-                # Push avail
-                if any(old_rooms_avail):
-                    _logger.info("DISPONIBILIDAD")
-                    _logger.info(old_rooms_avail)
-                    self.env['wubook'].update_availability(old_rooms_avail)
-        return super(HotelReservation, self).write(vals)
+        res = super(HotelReservation, self).write(vals)
+        older_vals = {
+            'checkin': self.checkin,
+            'checkout': self.checkout,
+            'product_id': self.product_id.id,
+        }
+        new_vals = {
+            'checkin': vals.get('checkin'),
+            'checkout': vals.get('checkout'),
+            'product_id': vals.get('product_id'),
+        }
+        if self._context.get('wubook_action', True) and \
+                new_vals['checkin'] or new_vals['checkout'] or new_vals['product_id']:
+            old_rooms_avail = []
+            new_rooms_avail = []
+            if older_vals['checkin'] and older_vals['checkout'] and older_vals['product_id']:
+                old_rooms_avail = self.get_availability(older_vals['checkin'],
+                                                        older_vals['checkout'],
+                                                        older_vals['product_id'])
+            if new_vals['checkin'] and new_vals['checkout'] and new_vals['product_id']:
+                new_rooms_avail = self.get_availability(new_vals['checkin'],
+                                                        new_vals['checkout'],
+                                                        new_vals['product_id'])
+            # Merge Old & New Dicts (Updating Old Dict)
+            for newitem in new_rooms_avail:
+                found = False
+                for olditem in old_rooms_avail:
+                    if olditem['id'] == newitem['id']:
+                        for newdays in newitem['days']:
+                            foundday = False
+                            for olddays in olditem['days']:
+                                if olddays['date'] == newdays['date']:
+                                    olddays.update(newdays)
+                                    foundday = True
+                            if not foundday:
+                                olditem['days'].append(newdays)
+                        found = True
+                if not found:
+                    old_rooms_avail.append(newitem)
+            # Push avail
+            if any(old_rooms_avail):
+                _logger.info("DISPONIBILIDAD")
+                _logger.info(old_rooms_avail)
+                self.env['wubook'].update_availability(old_rooms_avail)
+        return res
 
     @api.multi
     def unlink(self):
@@ -158,19 +158,20 @@ class HotelReservation(models.Model):
         rooms_avail = []
         vrooms = self.env['hotel.virtual.room'].search([('room_ids.product_id', '=', product_id)])
         for vroom in vrooms:
-            rdays = []
-            for i in range(0, date_diff):
-                ndate = date_start + timedelta(days=i)
-                avail = len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                                                            ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                                                            vroom.id))
-                avail = min(avail, vroom.max_real_rooms)
-                rdays.append({
-                    'date': ndate.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                    'avail': avail,
-                })
-            ravail = {'id': vroom.wrid, 'days': rdays}
-            rooms_avail.append(ravail)
+            if vroom.wrid != 'none':
+                rdays = []
+                for i in range(0, date_diff):
+                    ndate = date_start + timedelta(days=i)
+                    avail = len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                                                                ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                                                                vroom.id))
+                    avail = min(avail, vroom.max_real_rooms)
+                    rdays.append({
+                        'date': ndate.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        'avail': avail,
+                    })
+                ravail = {'id': vroom.wrid, 'days': rdays}
+                rooms_avail.append(ravail)
 
         return rooms_avail
 
