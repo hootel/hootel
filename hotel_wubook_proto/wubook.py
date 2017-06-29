@@ -502,7 +502,7 @@ class WuBook(models.TransientModel):
                 continue
             # Ignore recreation if previusly deleted in same transaction because wubook resend creation
             if book['status'] == WUBOOK_STATUS_CONFIRMED and any(book['modified_reservations']) \
-                    and book['modified_reservations'][0] in cancelled_rids:
+                    and (book['modified_reservations'][0] in cancelled_rids or book['modified_reservations'][0] in processed_rids):
                 continue
 
             # Search Customer
