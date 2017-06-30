@@ -478,32 +478,45 @@ class WuBook(models.TransientModel):
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
         processed_rids = []
-        cancelled_rids = []
         #s_logger.info(bookings)
+        _logger.info(bookings)
         for book in bookings:
             is_cancellation = book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED]
-            if is_cancellation:
-                cancelled_rids.append(book['reservation_code'])
-            _logger.info(book)
-            #if book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED] or book['reservation_code'] == 1498486935:
-            #    continue
-            # Already Exists?
-            reservs = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code'])),
-                                              ('wchannel_reservation_code', '=', str(book['channel_reservation_code']))])
-            if any(reservs):
-                for reserv in reservs:
+
+            # Search Folio. If exists.
+            folio_id = False
+            if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
+                reserv_folio = hotel_reserv_obj.search([('wchannel_reservation_code', '=', str(book['channel_reservation_code']))], limit=1).folio_id
+                if reserv_folio:
+                    folio_id = reserv_folio.folio_id
+
+            if folio_id:
+                # Update Current Reservation status
+                for reserv in folio_id.room_lines:
                     reserv.with_context({'wubook_action': False}).write({
                         'wstatus': str(book['status']),
                         'wstatus_reason': book.get('status_reason', ''),
                         'to_read': True,
                     })
-
                     if is_cancellation:
                         reserv.with_context({'wubook_action': False}).action_cancel()
-                continue
-            # Ignore recreation if previusly deleted in same transaction because wubook resend creation
-            if book['status'] == WUBOOK_STATUS_CONFIRMED and any(book['modified_reservations']) \
-                    and (book['modified_reservations'][0] in cancelled_rids or book['modified_reservations'][0] in processed_rids):
+            else:
+                # Is a reservatoin created only in wubook?
+                reservs = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])
+                if any(reservs):
+                    for reserv in reservs:
+                        reserv.with_context({'wubook_action': False}).write({
+                            'wstatus': str(book['status']),
+                            'wstatus_reason': book.get('status_reason', ''),
+                            'to_read': True,
+                        })
+
+                        if is_cancellation:
+                            reserv.with_context({'wubook_action': False}).action_cancel()
+                    continue
+
+            # Do Nothing if cancellation
+            if is_cancellation:
                 continue
 
             # Search Customer
@@ -601,17 +614,14 @@ class WuBook(models.TransientModel):
                 'room_lines': reservations,
                 'wcustomer_notes': book['customer_notes'],
             }
-            session_seed = book.get('sessionSeed', '')
-            session_seed = session_seed != '' and session_seed
-            hotel_folio_id = session_seed and hotel_folio_obj.search([('wseed', '=', session_seed)], limit=1)
-            if hotel_folio_id:
-                hotel_folio_id.with_context({'wubook_action': False}).write(vals)
+            if folio_id:
+                folio_id.with_context({'wubook_action': False}).write(vals)
             else:
                 vals.update({
                     'partner_id': partner_id.id,
                     'wseed': book['sessionSeed']
                 })
-                hotel_folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
+                folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
             processed_rids.append(book['reservation_code'])
         return processed_rids
 
