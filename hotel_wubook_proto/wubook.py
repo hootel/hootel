@@ -490,33 +490,22 @@ class WuBook(models.TransientModel):
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
 
-            if folio_id:
-                # Update Current Reservation status
-                for reserv in folio_id.room_lines:
+            reservs = folio_id and folio_id.room_lines or hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])
+            if any(reservs):
+                folio_id = reservs[0].folio_id
+                for reserv in reservs:
                     reserv.with_context({'wubook_action': False}).write({
                         'wstatus': str(book['status']),
                         'wstatus_reason': book.get('status_reason', ''),
                         'to_read': True,
                     })
+
                     if is_cancellation:
                         reserv.with_context({'wubook_action': False}).action_cancel()
-            else:
-                # Is a reservatoin created only in wubook?
-                reservs = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])
-                if any(reservs):
-                    for reserv in reservs:
-                        reserv.with_context({'wubook_action': False}).write({
-                            'wstatus': str(book['status']),
-                            'wstatus_reason': book.get('status_reason', ''),
-                            'to_read': True,
-                        })
-
-                        if is_cancellation:
-                            reserv.with_context({'wubook_action': False}).action_cancel()
-                    continue
 
             # Do Nothing if cancellation
             if is_cancellation:
+                processed_rids.append(book['reservation_code'])
                 continue
 
             # Search Customer
