@@ -494,14 +494,14 @@ class WuBook(models.TransientModel):
             if any(reservs):
                 folio_id = reservs[0].folio_id
                 for reserv in reservs:
-                    reserv.with_context({'wubook_action': False}).write({
-                        'wstatus': str(book['status']),
-                        'wstatus_reason': book.get('status_reason', ''),
-                        'to_read': True,
-                    })
-
-                    if is_cancellation:
-                        reserv.with_context({'wubook_action': False}).action_cancel()
+                    if reserv.wrid == str(book['reservation_code']):
+                        reserv.with_context({'wubook_action': False}).write({
+                            'wstatus': str(book['status']),
+                            'wstatus_reason': book.get('status_reason', ''),
+                            'to_read': True,
+                        })
+                        if is_cancellation:
+                            reserv.with_context({'wubook_action': False}).action_cancel()
 
             # Do Nothing if cancellation
             if is_cancellation:
