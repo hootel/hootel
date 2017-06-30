@@ -486,7 +486,7 @@ class WuBook(models.TransientModel):
             # Search Folio. If exists.
             folio_id = False
             if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
-                reserv_folio = hotel_reserv_obj.search([('wchannel_reservation_code', '=', str(book['channel_reservation_code']))], limit=1).folio_id
+                reserv_folio = hotel_reserv_obj.search([('wchannel_reservation_code', '=', str(book['channel_reservation_code']))], limit=1)
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
 
