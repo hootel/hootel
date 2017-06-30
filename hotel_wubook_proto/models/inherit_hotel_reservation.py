@@ -61,6 +61,8 @@ class HotelReservation(models.Model):
             rooms_avail = self.get_availability(vals['checkin'],
                                                 vals['checkout'],
                                                 vals['product_id'])
+            _logger.info("DISPONIBILIDAD CREATE")
+            _logger.info(rooms_avail)
             self.env['wubook'].update_availability(rooms_avail)
         res = super(HotelReservation, self).create(vals)
         return res
@@ -113,7 +115,7 @@ class HotelReservation(models.Model):
                     old_rooms_avail.append(newitem)
             # Push avail
             if any(old_rooms_avail):
-                _logger.info("DISPONIBILIDAD")
+                _logger.info("DISPONIBILIDAD WRITE")
                 _logger.info(old_rooms_avail)
                 self.env['wubook'].update_availability(old_rooms_avail)
         return res
@@ -129,6 +131,8 @@ class HotelReservation(models.Model):
             rooms_avail = self.get_availability(self.checkin,
                                                 self.checkout,
                                                 self.product_id.id)
+            _logger.info("DISPONIBILIDAD UNLINK")
+            _logger.info(rooms_avail)
             self.env['wubook'].update_availability(rooms_avail)
         return super(HotelReservation, self).unlink()
 
