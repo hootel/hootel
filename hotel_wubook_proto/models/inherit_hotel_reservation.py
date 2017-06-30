@@ -60,7 +60,8 @@ class HotelReservation(models.Model):
         if self._context.get('wubook_action', True):
             rooms_avail = self.get_availability(vals['checkin'],
                                                 vals['checkout'],
-                                                vals['product_id'])
+                                                vals['product_id'],
+                                                dbchanged=False)
             _logger.info("DISPONIBILIDAD CREATE")
             _logger.info(rooms_avail)
             self.env['wubook'].update_availability(rooms_avail)
@@ -123,18 +124,17 @@ class HotelReservation(models.Model):
     @api.multi
     def unlink(self):
         if self._context.get('wubook_action', True):
-            partner_id = self.env['res.users'].browse(self.env.uid).partner_id
-            for record in self:
-                if self.wrid != 'none' and not self.wchannel_id:
-                    self.env['wubook'].cancel_reservation(record.wrid,
-                                                          'Cancelled by %s' % partner_id.name)
-            rooms_avail = self.get_availability(self.checkin,
-                                                self.checkout,
-                                                self.product_id.id)
+            checkin = self.checkin
+            checkout = self.checkout
+            product_id = self.product_id.id
+            res = super(HotelReservation, self).unlink()
+            rooms_avail = self.get_availability(checkin,
+                                                checkout,
+                                                product_id)
             _logger.info("DISPONIBILIDAD UNLINK")
             _logger.info(rooms_avail)
             self.env['wubook'].update_availability(rooms_avail)
-        return super(HotelReservation, self).unlink()
+        return res
 
     @api.multi
     def action_cancel(self):
@@ -153,7 +153,7 @@ class HotelReservation(models.Model):
             record.to_read = False
 
     @api.model
-    def get_availability(self, checkin, checkout, product_id):
+    def get_availability(self, checkin, checkout, product_id, dbchanged=True):
         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
         date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
         date_diff = abs((date_start - date_end).days)
@@ -169,6 +169,8 @@ class HotelReservation(models.Model):
                     avail = len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                                                                                 ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                                                                                 vroom.id))
+                    if not dbchanged:
+                        avail = avail - 1
                     avail = min(avail, vroom.max_real_rooms)
                     rdays.append({
                         'date': ndate.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
