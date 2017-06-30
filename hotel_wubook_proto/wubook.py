@@ -260,6 +260,8 @@ class WuBook(models.TransientModel):
         if rcode == 0:
             processed_rids = self.generate_reservations(results)
             if any(processed_rids):
+                _logger.info("PROCESSED Reservations")
+                _logger.info(processed_rids)
                 rcode, results = self.SERVER.mark_bookings(self.TOKEN,
                                                            lcode,
                                                            processed_rids)
@@ -491,6 +493,7 @@ class WuBook(models.TransientModel):
                     folio_id = reserv_folio.folio_id
 
             reservs = folio_id and folio_id.room_lines or hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])
+            reservs_processed = False
             if any(reservs):
                 folio_id = reservs[0].folio_id
                 for reserv in reservs:
@@ -500,11 +503,12 @@ class WuBook(models.TransientModel):
                             'wstatus_reason': book.get('status_reason', ''),
                             'to_read': True,
                         })
+                        reservs_processed = True
                         if is_cancellation:
                             reserv.with_context({'wubook_action': False}).action_cancel()
 
-            # Do Nothing if cancellation
-            if is_cancellation:
+            # Do Nothing if already processed 'wrid'
+            if reservs_processed:
                 processed_rids.append(book['reservation_code'])
                 continue
 
