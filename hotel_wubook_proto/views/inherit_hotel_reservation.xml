@@ -14,7 +14,7 @@
                 <field name="wis_from_channel" readonly="True" />
             </xpath>
             <xpath expr="//field[@name='partner_id']" position="before">
-                <field name="folio_id.wcustomer_notes" readonly="1"/>
+                <field name="wcustomer_notes" readonly="1"/>
             </xpath>
 
             <!-- ALLOW ONLY-READ -->
