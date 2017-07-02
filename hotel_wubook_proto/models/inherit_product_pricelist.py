@@ -95,10 +95,10 @@ class ProductPricelist(models.Model):
                                                   vals.get('wdaily') and 1 or 0)
             vals.update({'wpid': wpid})
         pricelist = super(ProductPricelist, self).create(vals)
-        if self._context.get('wubook_action', True):
-            prices = pricelist.get_wubook_prices()
-            if any(prices):
-                self.env['wubook'].update_plan_periods(pricelist.wpid, prices)
+#         if self._context.get('wubook_action', True):
+#             prices = pricelist.get_wubook_prices()
+#             if any(prices):
+#                 self.env['wubook'].update_plan_periods(pricelist.wpid, prices)
         return pricelist
 
     @api.multi
@@ -109,11 +109,11 @@ class ProductPricelist(models.Model):
                 self.env['wubook'].update_plan_name(vals.get('wpid', record.wpid),
                                                     nname)
         updated = super(ProductPricelist, self).write(vals)
-        if updated and self._context.get('wubook_action', True):
-            pricelist = self.browse(self.id)
-            prices = self.get_wubook_prices()
-            if any(prices):
-                self.env['wubook'].update_plan_periods(pricelist.wpid, prices)
+#         if updated and self._context.get('wubook_action', True):
+#             pricelist = self.browse(self.id)
+#             prices = self.get_wubook_prices()
+#             if any(prices):
+#                 self.env['wubook'].update_plan_periods(pricelist.wpid, prices)
         return updated
 
     @api.multi

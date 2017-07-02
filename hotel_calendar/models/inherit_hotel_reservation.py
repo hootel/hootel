@@ -53,8 +53,7 @@ class HotelReservation(models.Model):
         json_rooms = []
         for room in rooms:
             room_type = self.env['hotel.room.type'].search([('cat_id', '=', room.categ_id.id)], limit=1)
-            room_categories = room.room_type_ids.mapped('cat_id.id')
-            vrooms = self.env['hotel.virtual.room'].search(['|', ('room_ids', 'in', room.id), ('categ_id.id', 'in', room_categories)])
+            vrooms = self.env['hotel.virtual.room'].search(['|', ('room_ids', 'in', room.id), ('room_type_ids.id', '=', room.categ_id.id)])
             json_rooms.append((
                 room.product_id.id,
                 room.name,
