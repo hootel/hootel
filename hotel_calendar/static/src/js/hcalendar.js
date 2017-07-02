@@ -288,9 +288,11 @@ HotelCalendar.prototype = {
 		var elms = this.etable.querySelectorAll("td[data-hcal-date='"+date.format(HotelCalendar.DATE_FORMAT_SHORT_)+"'] table td[data-hcal-bed-num='"+bednum+"']");
 		for (var i=0; i<elms.length; i++) {
 			var parentRow = this.$base.querySelector(`#${elms[i].dataset.hcalParentRow}`);
-			var room = this.getRoom(parentRow.dataset.hcalRoomObjId);
-			if (parentRow && room && room.type == type && room.number == number) {
-				return elms[i];
+			if (parentRow) {
+				var room = this.getRoom(parentRow.dataset.hcalRoomObjId);
+				if (room && room.type == type && room.number == number) {
+					return elms[i];
+				}
 			}
 		}
 		

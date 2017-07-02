@@ -31,6 +31,7 @@
 .btn-hcal { }
 .btn-hcal.hcal-cell-current-day {
  	background-color: #B3EE3A;
+ 	color: #475f17;
 }
 .btn-hcal.hcal-cell-end-week {
 	background-color: #0D5A8F;
@@ -71,8 +72,8 @@
 	border-collapse: collapse !important;
 }
 .hcal-table-day td {
-	padding: 4px;
-	height: 10px;
+	padding: 2px;
+	height: 2.3em;
 	border: 1px solid lightgray !important;
 	font-size: 7px;
 	vertical-align: middle;
@@ -247,6 +248,8 @@ td.hcal-cell-room-type-group-day {
 td.hcal-cell-room-type-group-item {
 	text-align: center !important;
 	vertical-align: middle;
+	font-size: x-small;
+	white-space: nowrap;
 }
 td.hcal-cell-room-type-group-item:last-child {
 	border-right-width: 2px;
@@ -280,10 +283,6 @@ td.hcal-cell-month-day-occupied {
 .hcal-cell-detail-room-min-stay-group-item-day {
 	border-color: #307CB0 lightgray lightgray lightgray;
 	border-width: 2px 1px 1px 1px;
-}
-
-.hcal-cell-room-type-group-item.btn-hcal-flat {
-	font-size: x-small;
 }
 
 .hcal-cell-detail-room-group-item {

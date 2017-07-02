@@ -180,7 +180,7 @@ var HotelCalendarView = View.extend({
                 animation: true,
                 html: true,
                 placement: 'bottom',
-                title: QWeb.render('HotelCalendar.Tooltip', qdict)
+                title: QWeb.render('HotelCalendar.TooltipReservation', qdict)
             }).tooltip('show');
         });
         this._hcalendar.addEventListener('hcalOnClickReservation', function(ev){
@@ -289,100 +289,94 @@ var HotelCalendarView = View.extend({
                 	HotelFolioObj.call('create', [data]).then(function(result){
                         var folio_id = result;
                         // Get Unit Price of Virtual Room
-                        self._model.call('get_vroom_price', [false, room.id, startDate.format(ODOO_DATETIME_MOMENT_FORMAT), endDate.format(ODOO_DATETIME_MOMENT_FORMAT)]).then(function(result){
-                            var reservation_lines = []
-                            for (var reserv of result['priceday']) {
-                                reservation_lines.push([0, false, reserv]);
-                            }
-                            var popCreate = new Common.FormViewDialog(self, {
-                                res_model: 'hotel.reservation',
-                                context: {
-                                	//'default_partner_id': partner_id,
-                                	'default_folio_id': folio_id,
-                                    'default_checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
-                                    'default_checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
-                                    'default_adults': numBeds,
-                                    'default_children': 0,
-                                    'default_order_id.parter_id': partner_id,
-                                    'default_product_id': room.id,
-                                    //'default_product_uom': room.getUserData('uom_id'),
-                                    //'default_product_uom_qty': 1,
-                                    //'default_state': 'draft',
+                        var popCreate = new Common.FormViewDialog(self, {
+                            res_model: 'hotel.reservation',
+                            context: {
+                            	//'default_partner_id': partner_id,
+                            	'default_folio_id': folio_id,
+                                'default_checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                                'default_checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                                'default_adults': numBeds,
+                                'default_children': 0,
+                                'default_order_id.parter_id': partner_id,
+                                'default_product_id': room.id,
+                                //'default_product_uom': room.getUserData('uom_id'),
+                                //'default_product_uom_qty': 1,
+                                //'default_state': 'draft',
 //                                          //'product_uos': 1,
-                                    'default_name': `${room.number}`,
-                                    //'default_reservation_lines': reservation_lines,
-                                    //'default_price_unit': result['total_price']
-                                },
-                                title: _t("Create: ") + _t("Reservation"),
-                                initial_view: "form",
-                                disable_multiple_selection: true,
-                                form_view_options: { 'not_interactible_on_create':true },
-                                create_function: function(data, options) {
-                                	var dself = this;
-                                    var def = $.Deferred();
-                                    var res_id = true;
-                                    var dataset = self.dataset;
-                                    options = options || {};
-                                    var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
-                                    self.mutex.exec(function(){
-                                    	// FIXME: Workaround to get values of 'only-read' fields...
-                                    	data = _.extend(data, {
-                                    		'folio_id': folio_id,
-                                    		'name': `${room.number}`,
-                                    	});
-                                        return dataset.create(data, internal_options).then(function (id) {
-                                            dataset.ids.push(id);
-                                            res_id = id;
-                                            dself._record_created = true;
-                                        });
+                                'default_name': `${room.number}`,
+                                //'default_reservation_lines': reservation_lines,
+                                //'default_price_unit': result['total_price']
+                            },
+                            title: _t("Create: ") + _t("Reservation"),
+                            initial_view: "form",
+                            disable_multiple_selection: true,
+                            form_view_options: { 'not_interactible_on_create':true },
+                            create_function: function(data, options) {
+                            	var dself = this;
+                                var def = $.Deferred();
+                                var res_id = true;
+                                var dataset = self.dataset;
+                                options = options || {};
+                                var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
+                                self.mutex.exec(function(){
+                                	// FIXME: Workaround to get values of 'only-read' fields...
+                                	data = _.extend(data, {
+                                		'folio_id': folio_id,
+                                		'name': `${room.number}`,
+                                	});
+                                    return dataset.create(data, internal_options).then(function (id) {
+                                        dataset.ids.push(id);
+                                        res_id = id;
+                                        dself._record_created = true;
                                     });
-                                    self.mutex.def.then(function () {
-                                    	var dialog = new Dialog(self, {
-                                            title: _t("Confirm Folio"),
-                                            buttons: [
-                                                {
-                                                    text: _t("Yes, confirm it"),
-                                                    classes: 'btn-primary',
-                                                    close: true,
-                                                    disabled: res_id < 0,
-                                                    click: function () {
-                                                    	HotelFolioObj.call('action_confirm', [folio_id]).then(function(results){
-                                                        }).fail(function(err, ev){
-                                                            alert(_t("[Hotel Calendar]\nERROR: Can't confirm folio!"));
-                                                        });
-                                                    }
-                                                },
-                                                {
-                                                    text: _t("No"),
-                                                    close: true
+                                });
+                                self.mutex.def.then(function () {
+                                	var dialog = new Dialog(self, {
+                                        title: _t("Confirm Folio"),
+                                        buttons: [
+                                            {
+                                                text: _t("Yes, confirm it"),
+                                                classes: 'btn-primary',
+                                                close: true,
+                                                disabled: res_id < 0,
+                                                click: function () {
+                                                	HotelFolioObj.call('action_confirm', [folio_id]).then(function(results){
+                                                    }).fail(function(err, ev){
+                                                        alert(_t("[Hotel Calendar]\nERROR: Can't confirm folio!"));
+                                                    });
                                                 }
-                                            ],
-                                            $content: QWeb.render('HotelCalendar.ConfirmFolio')
-                                        }).open();
-                                        dialog.on("closed", null, function(){
-                                            self.trigger("change:commands", options);
-                                            def.resolve(res_id);
-                                        });
+                                            },
+                                            {
+                                                text: _t("No"),
+                                                close: true
+                                            }
+                                        ],
+                                        $content: QWeb.render('HotelCalendar.ConfirmFolio')
+                                    }).open();
+                                    dialog.on("closed", null, function(){
+                                        self.trigger("change:commands", options);
+                                        def.resolve(res_id);
                                     });
+                                });
 
-                                    return def;
-                                },
-                                read_function: function(ids, fields, options) {
-                                    return self.dataset.read_ids(ids, fields, options);
-                                }
-                            }).open();
-                            popCreate.view_form.on('on_button_cancel', popCreate, function(){
-                            	HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
+                                return def;
+                            },
+                            read_function: function(ids, fields, options) {
+                                return self.dataset.read_ids(ids, fields, options);
+                            }
+                        }).open();
+                        popCreate.view_form.on('on_button_cancel', popCreate, function(){
+                        	HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
+                        		
+                        	});
+                        });
+                        popCreate.on('closed', popCreate, function(){
+                        	if (!this.dataset.ids.length) {
+                        		HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
                             		
                             	});
-                            });
-                            popCreate.on('closed', popCreate, function(){
-                            	if (!this.dataset.ids.length) {
-                            		HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
-	                            		
-	                            	});
-                            	}
-                            });
+                        	}
                         });
                     });
                 }
@@ -432,6 +426,25 @@ var HotelCalendarView = View.extend({
                 $content: QWeb.render('HotelCalendar.ConfirmPriceChange', qdict)
             }).open();
         });
+        
+        // Extra Info (Rooms)
+        $(this._hcalendar.etable).find('.hcal-cell-room-type-group-item.btn-hcal-3d').on("mouseenter", function(){
+        	var $this = $(this);
+        	var room = self._hcalendar.getRoom($this.parent().data("hcalRoomObjId"));
+        	var qdict = {
+    			'price_from': room.getUserData('price_from'),
+                'inside_rooms': room.getUserData('inside_rooms'),
+                'num_inside_rooms': room.getUserData('inside_rooms').length,
+                'name': room.number
+        	};
+        	$this.tooltip({
+                animation: true,
+                html: true,
+                placement: 'right',
+                title: QWeb.render('HotelCalendar.TooltipRoom', qdict)
+            }).tooltip('show');
+        });
+        //
     },
 
     generate_hotel_calendar: function(){
@@ -450,11 +463,13 @@ var HotelCalendarView = View.extend({
                     r[2], // Capacity
                     r[4], // Category
                     r[5], // Shared Room
-                    r[7], // Price
+                    r[7]  // Price
                 );
                 nroom.addUserData({
                     'categ_id': r[3],
-                    'uom_id': r[6]
+                    'uom_id': r[6],
+                    'price_from': r[8],
+                    'inside_rooms': r[9]
                 });
                 rooms.push(nroom);
             }

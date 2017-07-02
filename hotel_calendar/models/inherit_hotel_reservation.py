@@ -38,7 +38,7 @@ class HotelReservation(models.Model):
                 'tooltips': {},
                 'pricelist': {}
             }
-            
+
         pricelist_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
 
         domainRooms = domainRooms or []
@@ -53,6 +53,8 @@ class HotelReservation(models.Model):
         json_rooms = []
         for room in rooms:
             room_type = self.env['hotel.room.type'].search([('cat_id', '=', room.categ_id.id)], limit=1)
+            room_categories = room.room_type_ids.mapped('cat_id.id')
+            vrooms = self.env['hotel.virtual.room'].search(['|', ('room_ids', 'in', room.id), ('categ_id.id', 'in', room_categories)])
             json_rooms.append((
                 room.product_id.id,
                 room.name,
@@ -61,7 +63,9 @@ class HotelReservation(models.Model):
                 room_type.code_type,
                 room.shared_room,
                 room.uom_id.id,
-                room.sale_price_type == 'vroom' and ['pricelist', room.price_virtual_room.id, pricelist_id] or ['fixed', room.list_price]))
+                room.sale_price_type == 'vroom' and ['pricelist', room.price_virtual_room.id, pricelist_id] or ['fixed', room.list_price],
+                room.sale_price_type == 'vroom' and room.price_virtual_room.name or 'Fixed Price',
+                vrooms.mapped('name')))
 
         # Get Reservations
         date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
@@ -143,33 +147,33 @@ class HotelReservation(models.Model):
             'pricelist': json_rooms_prices,
         }
 
-    @api.multi
-    def get_vroom_price(self, product_id, checkin, checkout):
-        product = self.env['product.product'].browse([product_id])
-        partner = self.env['res.users'].browse(self.env.uid).partner_id
-
-        date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
-        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
-        date_diff = abs((date_start - date_end).days)
-
-        total_price = 0.0
-        priceday = []
-        for i in range(0, date_diff - 1):
-            ndate = date_start + timedelta(days=i)
-            ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
-            prod = product.with_context(
-                lang=partner.lang,
-                partner=partner.id,
-                quantity=1,
-                date_order=ndate_str,
-                pricelist=partner.property_product_pricelist.id,
-                uom=product.product_tmpl_id.uom_id.id)
-            priceday.append({
-                'date': ndate_str,
-                'price': prod.price,
-            })
-            total_price += prod.price
-        return {'total_price': total_price, 'priceday': priceday}
+#     @api.multi
+#     def get_vroom_price(self, product_id, checkin, checkout):
+#         product = self.env['product.product'].browse([product_id])
+#         partner = self.env['res.users'].browse(self.env.uid).partner_id
+# 
+#         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
+#         date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
+#         date_diff = abs((date_start - date_end).days)
+# 
+#         total_price = 0.0
+#         priceday = []
+#         for i in range(0, date_diff - 1):
+#             ndate = date_start + timedelta(days=i)
+#             ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
+#             prod = product.with_context(
+#                 lang=partner.lang,
+#                 partner=partner.id,
+#                 quantity=1,
+#                 date_order=ndate_str,
+#                 pricelist=partner.property_product_pricelist.id,
+#                 uom=product.product_tmpl_id.uom_id.id)
+#             priceday.append({
+#                 'date': ndate_str,
+#                 'price': prod.price,
+#             })
+#             total_price += prod.price
+#         return {'total_price': total_price, 'priceday': priceday}
 
     @api.model
     def create(self, vals):
