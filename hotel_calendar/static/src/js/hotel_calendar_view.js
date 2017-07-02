@@ -485,6 +485,7 @@ var HotelCalendarView = View.extend({
     },
     
     assign_extra_info_: function() {
+    	var self = this;
         $(this._hcalendar.etable).find('.hcal-cell-room-type-group-item.btn-hcal-3d').on("mouseenter", function(){
         	var $this = $(this);
         	var room = self._hcalendar.getRoom($this.parent().data("hcalRoomObjId"));
