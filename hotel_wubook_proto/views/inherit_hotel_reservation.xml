@@ -1,56 +1,60 @@
 <?xml version="1.0"?>
 <odoo>
 
-	<record id="hotel_reservation_view_form" model="ir.ui.view">
+    <record id="hotel_reservation_view_form" model="ir.ui.view">
         <field name="model">hotel.reservation</field>
         <field name="inherit_id" ref="hotel.view_hotel_reservation_form" />
         <field name="arch" type="xml">
-        	<xpath expr="//field[@name='invoice_status']" position="after">
-        		<field name="wrid" readonly="True" />
-        		<field name="wchannel_id" readonly="True"  />
-        		<field name="wchannel_reservation_code" readonly="True" />
-        		<field name="wstatus" readonly="True" />
-        		<field name="wstatus_reason" readonly="True" />
-        		<field name="wis_from_channel" readonly="True" />
-        	</xpath>
-        	
-        	<!-- ALLOW ONLY-READ -->
-        	<xpath expr="//field[@name='adults']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
-        	</xpath>
-        	<xpath expr="//field[@name='children']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
-        	</xpath>
-        	<xpath expr="//field[@name='checkin']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
-        	</xpath>
-        	<xpath expr="//field[@name='checkout']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
-        	</xpath>
-        	<xpath expr="//field[@name='reservation_lines']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
-        	</xpath>
-        	<xpath expr="//field[@name='price_unit']" position="attributes">
-     			<attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
-        	</xpath>
+            <xpath expr="//field[@name='invoice_status']" position="after">
+                <field name="wrid" readonly="True" />
+                <field name="wchannel_id" readonly="True"  />
+                <field name="wchannel_reservation_code" readonly="True" />
+                <field name="wstatus" readonly="True" />
+                <field name="wstatus_reason" readonly="True" />
+                <field name="wis_from_channel" readonly="True" />
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="wcustomer_notes" readonly="1"/>
+            </xpath>
+
+            <!-- ALLOW ONLY-READ -->
+            <xpath expr="//field[@name='adults']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='children']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='checkin']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='checkout']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='reservation_lines']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='price_unit']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
+            </xpath>
         </field>
     </record>
-    
-	<!-- Tree view of hotel reservation -->
+
+    <!-- Tree view of hotel reservation -->
     <record model="ir.ui.view" id="view_hotel_reservation_tree">
         <field name="model">hotel.reservation</field>
         <field name="inherit_id" ref="hotel.view_hotel_reservation_tree" />
         <field name="arch" type="xml">
-        	<xpath expr="//field[@name='state']" position="before">
+            <xpath expr="//field[@name='state']" position="before">
+                <field name="virtual_room_id"/>
                 <field name="wrid"/>
                 <field name="wstatus"/>
                 <field name="wchannel_id"/>
-        	</xpath>
-        	<xpath expr="//field[@name='state']" position="after">
-        		<field name="to_read" invisible="1"/>
-        		<button name="mark_as_read" type="object" string="Read &amp; Hide" class="oe_highlight" attrs="{'invisible':['|',('to_assign', '=', True),('to_read', '=', True)]}" />
-        	</xpath>
+            </xpath>
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="to_read" invisible="1"/>
+                <button name="mark_as_read" type="object" string="Read &amp; Hide" class="oe_highlight" attrs="{'invisible':['|',('to_assign', '=', True),('to_read', '=', True)]}" />
+            </xpath>
         </field>
     </record>
-    
+
 </odoo>

@@ -44,7 +44,7 @@ class HotelReservation(models.Model):
                                       compute=_is_from_channel, store=False,
                                       readonly=True)
     to_read = fields.Boolean('To Read', default=False)
-
+    
     wstatus = fields.Selection([
         ('0', 'No WuBook'),
         ('1', 'Confirmed'),
@@ -54,6 +54,7 @@ class HotelReservation(models.Model):
         ('5', 'Cancelled'),
         ('6', 'Cancelled with penalty')], string='WuBook Status', default='0', readonly=True)
     wstatus_reason = fields.Char("WuBook Status Reason", readonly=True)
+    wcustomer_notes = fields.Text(related='folio_id.wcustomer_notes')
 
     @api.model
     def create(self, vals):
