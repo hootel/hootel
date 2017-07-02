@@ -21,6 +21,7 @@
 from openerp import http
 from openerp.http import request
 import logging
+from openerp.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 
@@ -35,7 +36,10 @@ class website_wubook(http.Controller):
         if rcode == '2000' and lcode == '1000':
             return request.make_response('200 OK', [('Content-Type', 'text/plain')])
 
-        # TODO: SECURITY CHECK HERE... LCODE DEFINED?
+        # Poor Security Check
+        wlcode = request.env['ir.values'].get_default('wubook.config.settings', 'wubook_lcode')
+        if lcode != wlcode:
+            raise ValidationError("Error! lcode doesn't match!")
 
         # Create Reservation
         request.env['wubook'].sudo().fetch_booking(lcode, rcode)
@@ -45,9 +49,17 @@ class website_wubook(http.Controller):
     @http.route(['/wubook/push/rooms'], type='http', cors="*",
                 auth="public", methods=['POST'], website=True, csrf=False)
     def wubook_push_rooms(self, **kwargs):
-        _logger.info("WUBOOK PUSH ROOMS")
-        _logger.info(kwargs)
+        lcode = kwargs['lcode']
+        dfrom = kwargs['dfrom']
+        dto = kwargs['dto']
 
+        # Poor Security Check
+        wlcode = request.env['ir.values'].get_default('wubook.config.settings', 'wubook_lcode')
+        if lcode != wlcode:
+            raise ValidationError("Error! lcode doesn't match!")
+
+        #request.env['wubook'].sudo().fetch_room_values(dfrom, dto)
+        #request.env['wubook'].sudo().fetch_all_plan_prices(dfrom, dto)
         # {'dfrom': u'22/06/2017', 'dto': u'24/06/2017', 'lcode': u'NUM'}
         # More Info: http://tdocs.wubook.net/wired/avail.html?highlight=fetch_rooms_values#fetch_rooms_values
 

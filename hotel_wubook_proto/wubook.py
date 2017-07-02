@@ -337,9 +337,6 @@ class WuBook(models.TransientModel):
 
     @api.model
     def fetch_plan_prices(self, pid, dfrom, dto, rooms=[]):
-        _logger.info(dfrom)
-        _logger.info(dto)
-        _logger.info(pid)
         self.init_connection_()
         rcode, results = self.SERVER.fetch_plan_prices(self.TOKEN,
                                                        self.LCODE,
@@ -353,6 +350,47 @@ class WuBook(models.TransientModel):
             raise ValidationError("Can't fetch plan prices from wubook: %s" % results)
         else:
             self.generate_pricelist_items(pid, dfrom, dto, results)
+
+        return True
+
+    @api.model
+    def fetch_all_plan_prices(self, dfrom, dto, rooms=[]):
+        errors = False
+        plan_wpids = self.env['product.pricelist'].search([('wpid', '!=', False), ('wpid', '!=', '')]).mapped('wpid')
+        if any(plan_wpids):
+            self.init_connection_()
+            for wpid in plan_wpids:
+                rcode, results = self.SERVER.fetch_plan_prices(self.TOKEN,
+                                                               self.LCODE,
+                                                               wpid,
+                                                               dfrom,
+                                                               dto,
+                                                               rooms)
+                if rcode != 0:
+                    errors = True
+                else:
+                    self.generate_pricelist_items(wpid, dfrom, dto, results)
+            self.close_connection_()
+
+        if errors:
+            raise ValidationError("Can't fetch all plan prices from wubook!")
+
+        return True
+
+    @api.model
+    def fetch_room_values(self, dfrom, dto, rooms=[]):
+        self.init_connection_()
+        rcode, results = self.SERVER.fetch_room_values(self.TOKEN,
+                                                       self.LCODE,
+                                                       dfrom,
+                                                       dto,
+                                                       rooms)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't fetch room values from wubook: %s" % results)
+        else:
+            self.update_room_values(dfrom, dto, results)
 
         return True
 
@@ -408,6 +446,15 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         self.generate_wubook_channel_info(results)
+
+        return True
+
+    @api.model
+    def update_room_values(self, dfrom, dto, rooms):
+        _logger.info("UPDATE ROOM VALUES")
+        _logger.info(dfrom)
+        _logger.info(dto)
+        _logger.info(rooms)
 
         return True
 
