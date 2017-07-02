@@ -190,39 +190,40 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         ret_vals = super(HotelReservation, self).write(vals)
-        partner_id = self.partner_id
-        checkin = self.checkin
-        checkout = self.checkout
-        product_id = self.product_id
-        state = self.state
-        new_state = False
-        need_send_notif = False
-        if vals.get('partner_id'):
-            partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
-            need_send_notif = True
-        if vals.get('checkin'):
-            checkin = vals.get('checkin')
-            need_send_notif = True
-        if vals.get('checkout'):
-            checkout = vals.get('checkout')
-            need_send_notif = True
-        if vals.get('product_id'):
-            product_id = self.env['product.product'].browse(vals.get('product_id'))
-            need_send_notif = True
-        if vals.get('state'):
-            state = vals.get('state')
-            need_send_notif = True
-            new_state = True
+        for record in self:
+            partner_id = record.partner_id
+            checkin = record.checkin
+            checkout = record.checkout
+            product_id = record.product_id
+            state = record.state
+            new_state = False
+            need_send_notif = False
+            if vals.get('partner_id'):
+                partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
+                need_send_notif = True
+            if vals.get('checkin'):
+                checkin = vals.get('checkin')
+                need_send_notif = True
+            if vals.get('checkout'):
+                checkout = vals.get('checkout')
+                need_send_notif = True
+            if vals.get('product_id'):
+                product_id = self.env['product.product'].browse(vals.get('product_id'))
+                need_send_notif = True
+            if vals.get('state'):
+                state = vals.get('state')
+                need_send_notif = True
+                new_state = True
 
-        if need_send_notif:
-            self.env['bus.hotel.calendar'].send_notification(
-                (new_state and state == 'cancelled') and 'warn' or 'notify',
-                (new_state and state == 'cancelled') and _("Reservation Cancelled") or _("Reservation Changed"),
-                partner_id.name,
-                checkin,
-                checkout,
-                product_id.name
-            )
+            if need_send_notif:
+                self.env['bus.hotel.calendar'].send_notification(
+                    (new_state and state == 'cancelled') and 'warn' or 'notify',
+                    (new_state and state == 'cancelled') and _("Reservation Cancelled") or _("Reservation Changed"),
+                    partner_id.name,
+                    checkin,
+                    checkout,
+                    product_id.name
+                )
         return ret_vals
 
     @api.multi
