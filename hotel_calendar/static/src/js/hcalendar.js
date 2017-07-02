@@ -366,6 +366,23 @@ HotelCalendar.prototype = {
 		return _.find(this.options.rooms, function(item){ return item.id == id; });
 	},
 	
+	getRoomPrice: function(/*String*/id, /*String,MomentObject*/day) {
+		var day = HotelCalendar.toMoment(day);
+		if (!day) {
+			return 0.0;
+		}
+		
+		var room = this.getRoom(id);
+		if (room.price[0] == 'fixed') {
+			return room.price[1];
+		} else if (room.price[0] == 'pricelist'){
+			var price_input = this.edtable.querySelector('#'+this.sanitizeId_(`CELL_PRICE_${room.price[2]}_${room.price[1]}_${day.format(HotelCalendar.DATE_FORMAT_SHORT_)}`)+' input');
+			return price_input.value;
+		}
+		
+		return 0.0;
+	},
+	
 	//==== DETAIL CALCS
 	calcDayRoomTypeReservations: function(/*String,MomentObject*/day, /*String*/room_type) {
 		var day = HotelCalendar.toMoment(day);
@@ -459,15 +476,13 @@ HotelCalendar.prototype = {
 			cell.dataset.hcalParentCell = parentCell.getAttribute('id');
 			cell.dataset.hcalBedNum = i;
 			cell.addEventListener('mouseenter', function(ev){
+				var date_cell = HotelCalendar.toMoment($this.etable.querySelector(`#${this.dataset.hcalParentCell}`).dataset.hcalDate);
 				if ($this.isLeftButtonPressed_(ev)) {
 					var reserv = null;
 					var toRoom = undefined;
 					var needUpdate = false;
-					var date_cell = HotelCalendar.toMoment($this.etable.querySelector(`#${this.dataset.hcalParentCell}`).dataset.hcalDate);
 					if (!$this.reservationAction.reservation) {
-						if (!$this.cellSelection.start) {
-							$this.cellSelection.start = this;
-						} else if ($this.cellSelection.start.dataset.hcalParentRow === this.dataset.hcalParentRow) {
+						if ($this.cellSelection.start && $this.cellSelection.start.dataset.hcalParentRow === this.dataset.hcalParentRow) {
 							$this.cellSelection.current = this;
 						}
 						$this.updateCellSelection_();
@@ -552,7 +567,14 @@ HotelCalendar.prototype = {
 							}
 						}
 					}
+				} else {
+					var parentRow = $this.$base.querySelector(`#${this.dataset.hcalParentRow}`);
+					var room_price = $this.getRoomPrice(parentRow.dataset.hcalRoomObjId, date_cell);
+					this.textContent = room_price + ' €';
 				}
+			}, false);
+			cell.addEventListener('mouseleave', function(ev){
+				this.textContent = "";
 			}, false);
 			cell.addEventListener('mousedown', function(ev){
 				$this.cellSelection.start = $this.cellSelection.current = this;
@@ -838,60 +860,65 @@ HotelCalendar.prototype = {
 				cell.classList.add('hcal-cell-end-week');
 			}
 		}
-		// Rooms Price Types
-		if (this.options.rooms) {
-			var room_types = this.getRoomTypes();
-			for (var rt of room_types) {
-				row = tbody.insertRow();
-				row.setAttribute('id', this.sanitizeId_(`ROW_DETAIL_PRICE_TYPE_${rt}`));
-				row.dataset.hcalRoomType = rt;
-				row.classList.add('hcal-row-detail-room-price-type-group-item');
-				cell = row.insertCell();
-				cell.textContent = rt+' €';
-				cell.classList.add('hcal-cell-detail-room-price-type-group-item');
-				cell.classList.add('btn-hcal');
-				cell.classList.add('btn-hcal-flat');
-				cell.setAttribute("colspan", "2");
-				for (var i=0; i<$this.options.days; i++) {
-					var dd = this.options.startDate.clone().add(i,'d');
+		// Rooms Pricelist
+		if (this.pricelist) {
+			var pricelists_keys = _.keys(this.pricelist)
+			for (var key of pricelists_keys) {
+				var pricelist = this.pricelist[key]
+				for (var listitem of pricelist) {
+					row = tbody.insertRow();
+					row.setAttribute('id', this.sanitizeId_(`ROW_DETAIL_PRICE_ROOM_${key}_${listitem.room}`));
+					row.dataset.hcalPricelist = key;
+					row.dataset.hcalRoom = listitem.room
+					row.classList.add('hcal-row-detail-room-price-group-item');
 					cell = row.insertCell();
-					cell.setAttribute('id', this.sanitizeId_(`CELL_PRICE_${rt}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
-					cell.classList.add('hcal-cell-detail-room-price-type-group-item-day');
-					cell.dataset.hcalParentRow = row.getAttribute('id');
-					cell.dataset.hcalDate = dd.format(HotelCalendar.DATE_FORMAT_SHORT_);
-					var day = +dd.format("D");
-					if (day == 1) {
-						cell.classList.add('hcal-cell-start-month');
+					cell.innerHTML = "<marquee behavior='alternate' scrollamount='1' scrolldelay='100'>"+listitem.title + ' €</marquee>';
+					cell.classList.add('hcal-cell-detail-room-group-item');
+					cell.classList.add('btn-hcal');
+					cell.classList.add('btn-hcal-flat');
+					cell.setAttribute("colspan", "2");
+					for (var i=0; i<$this.options.days; i++) {
+						var dd = this.options.startDate.clone().add(i,'d');
+						cell = row.insertCell();
+						cell.setAttribute('id', this.sanitizeId_(`CELL_PRICE_${key}_${listitem.room}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
+						cell.classList.add('hcal-cell-detail-room-price-group-item-day');
+						cell.dataset.hcalParentRow = row.getAttribute('id');
+						cell.dataset.hcalDate = dd.format(HotelCalendar.DATE_FORMAT_SHORT_);
+						var day = +dd.format("D");
+						if (day == 1) {
+							cell.classList.add('hcal-cell-start-month');
+						}
+						if (dd.isSame(now, 'day')) {
+							cell.classList.add('hcal-cell-current-day');
+						} else if (dd.format('e') == $this.options.endOfWeek) {
+							cell.classList.add('hcal-cell-end-week');
+						}
+						
+						var dd_fmrt = dd.startOf('day').utc().format("YYYY-MM-DD"); // Local -> UTC
+						//console.log(dd_fmrt);
+						var input = document.createElement('input');
+						input.classList.add('input-price');
+						input.setAttribute("type", "text");
+						input.readOnly = true; // TODO
+						input.disabled = true; // TODO
+						input.value = _.has(listitem['days'], dd_fmrt)?listitem['days'][dd_fmrt]:'...';
+						input.dataset.ovalue = input.value;
+						input.addEventListener('change', function(ev){
+							var parentRow = $this.edtable.querySelector(`#${this.parentNode.dataset.hcalParentRow}`);
+							var cdate = moment(this.parentNode.dataset.hcalDate, HotelCalendar.DATE_FORMAT_SHORT_).utc();
+							$this.e.dispatchEvent(new CustomEvent(
+								'hcalOnChangeRoomTypePrice', 
+								{ 'detail': {
+										'room_type': parentRow.dataset.hcalRoomType,
+										'date': cdate,
+										'price': this.value,
+										'old_price': this.dataset.ovalue,
+									}
+								}));
+							this.dataset.ovalue = this.value;
+						}, false);
+						cell.appendChild(input);
 					}
-					if (dd.isSame(now, 'day')) {
-						cell.classList.add('hcal-cell-current-day');
-					} else if (dd.format('e') == $this.options.endOfWeek) {
-						cell.classList.add('hcal-cell-end-week');
-					}
-					
-					var dd_fmrt = dd.startOf('day').utc().format("YYYY-MM-DD"); // Local -> UTC
-					//console.log(dd_fmrt);
-					var input = document.createElement('input');
-					input.classList.add('input-price');
-					input.setAttribute("type", "text");
-					input.readonly = true;
-					input.value = _.has($this.pricelist[rt], dd_fmrt)?$this.pricelist[rt][dd_fmrt]:'...';
-					input.dataset.ovalue = input.value;
-					input.addEventListener('change', function(ev){
-						var parentRow = $this.edtable.querySelector(`#${this.parentNode.dataset.hcalParentRow}`);
-						var cdate = moment(this.parentNode.dataset.hcalDate, HotelCalendar.DATE_FORMAT_SHORT_).utc();
-						$this.e.dispatchEvent(new CustomEvent(
-							'hcalOnChangeRoomTypePrice', 
-							{ 'detail': {
-									'room_type': parentRow.dataset.hcalRoomType,
-									'date': cdate,
-									'price': this.value,
-									'old_price': this.dataset.ovalue,
-								}
-							}));
-						this.dataset.ovalue = this.value;
-					}, false);
-					cell.appendChild(input);
 				}
 			}
 		}
@@ -1254,13 +1281,15 @@ HotelCalendar.prototype = {
 		var keys = _.keys(this.pricelist);
 		for (var k of keys) {
 			var pr = this.pricelist[k];
-			var pr_keys = _.keys(this.pricelist[k]);
-			for (var prk of pr_keys) {
-				var dd = moment(prk);
-				var price = this.pricelist[k][prk];
-				var cell = this.edtable.querySelector(this.sanitizeId_(`#CELL_PRICE_${k}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
-				if (cell) {
-					cell.firstChild.value = price;
+			for (var pr_item of pr) {
+				var pr_keys = _.keys(pr_item['days']);
+				for (var prk of pr_keys) {
+					var dd = HotelCalendar.toMoment(prk, HotelCalendar.DATE_FORMAT_SHORT_);
+					var price = pr_item['days'][prk];
+					var cell_input = this.edtable.querySelector('#'+this.sanitizeId_(`CELL_PRICE_${k}_${pr_item['room']}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`)+' input');
+					if (cell_input) {
+						cell_input.value = price;
+					}
 				}
 			}
 		}
@@ -1470,12 +1499,13 @@ HotelCalendar.toMoment = function(/*String,MomentObject*/date, /*String*/format)
 
 
 /** ROOM OBJECT **/
-function HRoom(/*Int*/id, /*String*/number, /*Int*/capacity, /*String*/type, /*Bool*/shared) {
+function HRoom(/*Int*/id, /*String*/number, /*Int*/capacity, /*String*/type, /*Bool*/shared, /*List*/price) {
 	this.id = id || -1;
 	this.number = number || -1;
 	this.capacity = capacity || 1;
 	this.type = type || '';
 	this.shared = shared;
+	this.price = price || false;
 	
 	this.userData_ = {};
 }

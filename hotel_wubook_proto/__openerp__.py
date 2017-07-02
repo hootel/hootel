@@ -39,7 +39,7 @@
         'wizards/wubook_installer.xml',
         'wizards/wubook_import_plan_prices.xml',
         'views/general.xml',
-        'views/inherit_res_partner.xml',
+        'views/res_config.xml',
         'views/inherit_hotel_reservation.xml',
         'views/inherit_hotel_virtual_room.xml',
         'views/inherit_hotel_folio.xml',

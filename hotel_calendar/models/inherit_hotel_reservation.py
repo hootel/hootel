@@ -22,8 +22,8 @@ from openerp import models, fields, api, _
 from openerp.exceptions import except_orm, UserError, ValidationError
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
-
-PUBLIC_PRICELIST_ID = 1  # Hard-Coded public pricelist
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class HotelReservation(models.Model):
@@ -38,6 +38,8 @@ class HotelReservation(models.Model):
                 'tooltips': {},
                 'pricelist': {}
             }
+            
+        pricelist_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
 
         domainRooms = domainRooms or []
         domainReservations = domainReservations or []
@@ -58,7 +60,8 @@ class HotelReservation(models.Model):
                 room.categ_id.id,
                 room_type.code_type,
                 room.shared_room,
-                room.uom_id.id))
+                room.uom_id.id,
+                room.sale_price_type == 'vroom' and ['pricelist', room.price_virtual_room.id, pricelist_id] or ['fixed', room.list_price]))
 
         # Get Reservations
         date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
@@ -103,29 +106,35 @@ class HotelReservation(models.Model):
 
         # Get Prices
         price_list_global = self.env['product.pricelist.item'].search([
-            ('pricelist_id', '=', PUBLIC_PRICELIST_ID),
+            ('pricelist_id', '=', pricelist_id),
             ('compute_price', '=', 'fixed'),
             ('applied_on', '=', '3_global')
         ], order='sequence ASC, id DESC', limit=1)
-        categs = rooms.mapped('categ_id')
+
         date_diff = abs((date_start - date_end).days)
-        json_rooms_prices = {}
-        for cat in categs:
-            room_type = self.env['hotel.room.type'].search([('cat_id', '=', cat.id)], limit=1)
-            json_rooms_prices.update({room_type.code_type: {}})
+        json_rooms_prices = {pricelist_id: []}
+        vrooms = self.env['hotel.virtual.room'].search([])
+        for vroom in vrooms:
+            days = {}
             for i in range(0, date_diff + 1):
                 ndate = date_start + timedelta(days=i)
                 price_list = self.env['product.pricelist.item'].search([
-                    ('pricelist_id', '=', PUBLIC_PRICELIST_ID),     # FIXME: Hard-Coded Public List ID
-                    ('applied_on', '=', '2_product_category'),
-                    ('categ_id', '=', cat.id),
-                    ('date_start', '<=', ndate.replace(hour=0, minute=0, second=0).strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
-                    ('date_end', '>=', ndate.replace(hour=23, minute=59, second=59).strftime(DEFAULT_SERVER_DATETIME_FORMAT)),
+                    ('pricelist_id', '=', pricelist_id),
+                    ('applied_on', '=', '1_product'),
+                    ('product_tmpl_id', '=', vroom.product_id.product_tmpl_id.id),
+                    ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                    ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
                     ('compute_price', '=', 'fixed'),
                 ], order='sequence ASC, id DESC', limit=1)
-                json_rooms_prices[room_type.code_type].update({
-                    ndate.strftime(DEFAULT_SERVER_DATE_FORMAT): (price_list and price_list.fixed_price) or (price_list_global and price_list_global.fixed_price) or 0.0
+                _logger.info(price_list.fixed_price)
+                days.update({
+                    ndate.strftime("%d/%m/%Y"): (price_list and price_list.fixed_price) or (price_list_global and price_list_global.fixed_price) or 0.0
                 })
+            json_rooms_prices[pricelist_id].append({
+                'room': vroom.id,
+                'days': days,
+                'title': vroom.name,
+            })
 
         return {
             'rooms': withRooms and json_rooms or [],

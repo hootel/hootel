@@ -44,14 +44,10 @@ class WuBookInstaller(models.TransientModel):
 
     @api.multi
     def execute_simple(self):
-        user = self.env['res.users'].browse(self.env.uid)
         for rec in self:
-            user.partner_id.write({
-                'wubook_user': rec.wubook_user,
-                'wubook_passwd': rec.wubook_passwd,
-                'wubook_lcode': rec.wubook_lcode,
-                'wubook_server': rec.wubook_server,
-                'wubook_pkey': rec.wubook_pkey
-            })
-
+            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_user', rec.wubook_user)
+            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_passwd', rec.wubook_passwd)
+            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_lcode', rec.wubook_lcode)
+            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_server', rec.wubook_server)
+            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_pkey', rec.wubook_pkey)
         self.env['wubook'].initialize()

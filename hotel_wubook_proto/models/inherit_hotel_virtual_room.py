@@ -63,8 +63,6 @@ class HotelVirtualRoom(models.Model):
 
     @api.model
     def create(self, vals):
-        shortcode = self.env['ir.sequence'].next_by_code('hotel.virtual.room')
-        vals.update({'scode': shortcode[:4]})
         vroom = super(HotelVirtualRoom, self).create(vals)
         if self._context.get('wubook_action', True):
             shortcode = self.env['ir.sequence'].next_by_code('hotel.virtual.room')[:4]
@@ -77,7 +75,7 @@ class HotelVirtualRoom(models.Model):
             )
             vroom.with_context(wubook_action=False).write({
                 'wrid': wrid,
-                'scode': shortcode,
+                'wscode': shortcode,
             })
         return vroom
 

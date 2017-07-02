@@ -74,6 +74,9 @@
 	padding: 4px;
 	height: 10px;
 	border: 1px solid lightgray !important;
+	font-size: 7px;
+	vertical-align: middle;
+	font-weight: bold;
 }
 .hcal-table-day td:hover:not(.hcal-cell-highlight):not(.hcal-cell-invalid) {
 	background-color: #FCFEE1 !important;
@@ -281,6 +284,10 @@ td.hcal-cell-month-day-occupied {
 
 .hcal-cell-room-type-group-item.btn-hcal-flat {
 	font-size: x-small;
+}
+
+.hcal-cell-detail-room-group-item {
+	white-space: nowrap;	
 }
 
 .input-price {

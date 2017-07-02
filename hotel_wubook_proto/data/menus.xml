@@ -9,12 +9,23 @@
 		<field name="view_mode">tree,form</field>
 	</record>
 	
+    <record model="ir.actions.act_window" id="action_wubook_config">
+        <field name="name">Configure WuBook</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">wubook.config.settings</field>
+        <field name="view_id" ref="view_wubook_config_settings"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+    </record>
+	
 	
 	<menuitem id="wubook_menu" name="WuBook"
-	    sequence="25" parent="hotel.hotel_management_menu" />
+	    sequence="25" parent="base.menu_administration" />
             
 	<menuitem id="wubook_channels_info_menu" name="Channels Info"
 		sequence="1" action="open_wubook_channel_info_tree_all" parent="wubook_menu"/>
+	<menuitem id="wubook_config_menu" name="Settings"
+			sequence="2" action="action_wubook_config" parent="wubook_menu"/>
 			
 	</data>
 </openerp>

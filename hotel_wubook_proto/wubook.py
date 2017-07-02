@@ -61,13 +61,11 @@ class WuBook(models.TransientModel):
 
     # NETWORK
     def init_connection_(self):
-        user_r = self.env['res.users'].browse(self.env.uid)
-
-        user = user_r.partner_id.wubook_user
-        passwd = user_r.partner_id.wubook_passwd
-        self.LCODE = user_r.partner_id.wubook_lcode
-        pkey = user_r.partner_id.wubook_pkey
-        server_addr = user_r.partner_id.wubook_server
+        user = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_user')
+        passwd = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_passwd')
+        self.LCODE = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_lcode')
+        pkey = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_pkey')
+        server_addr = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_server')
 
         self.SERVER = xmlrpclib.Server(server_addr)
         res, tok = self.SERVER.acquire_token(user, passwd, pkey)
@@ -135,12 +133,6 @@ class WuBook(models.TransientModel):
 
     @api.model
     def modify_room(self, rid, name, capacity, price, availability, scode):
-        _logger.info(rid)
-        _logger.info(name)
-        _logger.info(capacity)
-        _logger.info(price)
-        _logger.info(availability)
-        _logger.info(scode)
         self.init_connection_()
         rcode, results = self.SERVER.mod_room(
             self.TOKEN,
@@ -195,7 +187,8 @@ class WuBook(models.TransientModel):
                     'wrid': room['id'],
                     'wscode': room['shortname'],
                     'list_price': room['price'],
-                    #'max_real_rooms': room['availability'],
+                    'wcapacity': room['occupancy'],
+                    'max_real_rooms': room['availability'],
                 }
                 if vroom:
                     vroom.with_context({'wubook_action': False}).write(vals)
@@ -420,16 +413,21 @@ class WuBook(models.TransientModel):
 
     @api.model
     def generate_pricelist_items(self, pid, dfrom, dto, plan_prices):
+        _logger.info(plan_prices)
         pricelist = self.env['product.pricelist'].search([('wpid', '=', pid)], limit=1)
         if pricelist:
+            _logger.info("PASA PO")
             dfrom_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
             dto_dt = datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT)
             days_diff = abs((dto_dt - dfrom_dt).days)
             for i in range(0, days_diff):
+                _logger.info("DATE ITER")
                 ndate_dt = dfrom_dt + timedelta(days=i)
                 for rid in plan_prices.keys():
+                    _logger.info("RID ITR")
                     vroom = self.env['hotel.virtual.room'].search([('wrid', '=', rid)], limit=1)
                     if vroom:
+                        _logger.info("VROM ITER")
                         pricelist_item = self.env['product.pricelist.item'].search([
                             ('pricelist_id', '=', pricelist.id),
                             ('date_start', '=', ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
@@ -442,6 +440,8 @@ class WuBook(models.TransientModel):
                             'fixed_price': plan_prices[rid][i],
                         }
                         if pricelist_item:
+                            _logger.info("FOUND")
+                            _logger.info(vals)
                             pricelist_item.with_context({'wubook_action': False}).write(vals)
                         else:
                             vals.update({
@@ -452,6 +452,8 @@ class WuBook(models.TransientModel):
                                 'applied_on': '1_product',
                                 'product_tmpl_id': vroom.product_id.product_tmpl_id.id
                             })
+                            _logger.info("NOT FOUND")
+                            _logger.info(vals)
                             self.env['product.pricelist.item'].with_context({'wubook_action': False}).create(vals)
 
     @api.model
@@ -467,7 +469,9 @@ class WuBook(models.TransientModel):
             }
             plan_id = product_listprice_obj.search([('wpid', '=', str(plan['id']))], limit=1)
             if not plan_id:
-                vals.update({'wpid': str(plan['id'])})
+                vals.update({
+                    'wpid': str(plan['id']),
+                })
                 product_listprice_obj.with_context({'wubook_action': False}).create(vals)
             else:
                 plan_id.with_context({'wubook_action': False}).write(vals)

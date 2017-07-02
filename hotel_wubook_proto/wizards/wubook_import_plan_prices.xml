@@ -6,9 +6,13 @@
 		<field name="model">wubook.wizard.plan.prices</field>
 		<field name="arch" type="xml">
 			<form string="Import WuBook Plan Prices" >
-				<group col="4">
-					<field name="date_start" required="1" />
-					<field name="date_end" required="1" />
+				<group>
+					<group>
+						<field name="date_start" required="1" />
+					</group>
+					<group>
+						<field name="date_end" required="1" />
+					</group>
 				</group>
 				<footer>
 					<button name="import_plan_prices" string="Import" type="object"

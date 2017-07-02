@@ -50,7 +50,7 @@ class ProductPricelist(models.Model):
             if not min_date or not max_date:
                 return prices
             days_diff = abs((max_date - min_date).days)
-            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', False)])
+            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', 'none')])
             for vroom in vrooms:
                 prices.update({vroom.wrid: []})
                 for i in range(0, days_diff or 1):
@@ -62,7 +62,7 @@ class ProductPricelist(models.Model):
                         uom=vroom.product_id.product_tmpl_id.uom_id.id)
                     prices[vroom.wrid].append(product_id.price)
         else:
-            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', False)])
+            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', 'none')])
             for item in self.item_ids:
                 if not item.date_start or not item.date_end:
                     continue

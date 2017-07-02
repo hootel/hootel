@@ -155,9 +155,14 @@ class HotelReservation(models.Model):
         return res
 
     @api.multi
-    def mark_as_read(self):
+    def confirm(self):
+        self.mark_as_readed()
+        return super(HotelReservation, self).confirm()
+
+    @api.multi
+    def mark_as_readed(self):
         for record in self:
-            record.to_read = False
+            record.write({'to_read': False})
 
     @api.model
     def get_availability(self, checkin, checkout, product_id, dbchanged=True):

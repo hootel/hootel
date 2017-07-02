@@ -28,7 +28,6 @@ var _lt = Core._lt;
 var QWeb = Core.qweb;
 var l10n = _t.database.parameters;
 
-console.log(l10n);
 
 var PUBLIC_PRICELIST_ID = 1; // Hard-Coded public pricelist id
 var ODOO_DATETIME_MOMENT_FORMAT = "YYYY-MM-DD HH:mm:ss";
@@ -85,7 +84,6 @@ var HotelCalendarView = View.extend({
         this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
 
         Bus.on("notification", this, this._on_bus_signal);
-        console.log(L10N_DATE_MOMENT_FORMAT);
     },
 
     view_loading: function(r) {
@@ -380,7 +378,6 @@ var HotelCalendarView = View.extend({
                             });
                             popCreate.on('closed', popCreate, function(){
                             	if (!this.dataset.ids.length) {
-                            		console.log("REMOVE!");
                             		HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
 	                            		
 	                            	});
@@ -452,7 +449,8 @@ var HotelCalendarView = View.extend({
                     r[1], // Name
                     r[2], // Capacity
                     r[4], // Category
-                    r[5]  // Shared Room
+                    r[5], // Shared Room
+                    r[7], // Price
                 );
                 nroom.addUserData({
                     'categ_id': r[3],
@@ -557,7 +555,6 @@ var HotelCalendarView = View.extend({
         /** VIEW CONTROLS INITIALIZATION **/
         // DATE TIME PICKERS
         var l10nn = _t.database.parameters
-        console.log(Time.strftime_to_moment_format(l10nn.date_format));
         var DTPickerOptions = {
             viewMode: 'months',
             icons : {
@@ -569,7 +566,6 @@ var HotelCalendarView = View.extend({
             language : moment.locale(),
             format : L10N_DATE_MOMENT_FORMAT,
         };
-        console.log(DTPickerOptions);
         var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
         $dateTimePickerBegin.datetimepicker(DTPickerOptions);
@@ -771,7 +767,6 @@ var HotelCalendarView = View.extend({
     _on_bus_signal: function(notifications) {
         var need_reload = false;
         for (var notif of notifications) {
-        	console.log(notif);
             if (notif[0][1] === 'hotel.reservation' && notif[1]['type'] === "reservation") {
             	need_reload = true;
             	if (notif[1]['userid'] == this.dataset.context.uid) { continue; } // Ignore self messages
