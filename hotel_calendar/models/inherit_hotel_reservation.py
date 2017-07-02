@@ -108,11 +108,11 @@ class HotelReservation(models.Model):
             })
 
         # Get Prices
-        price_list_global = self.env['product.pricelist.item'].search([
-            ('pricelist_id', '=', pricelist_id),
-            ('compute_price', '=', 'fixed'),
-            ('applied_on', '=', '3_global')
-        ], order='sequence ASC, id DESC', limit=1)
+#         price_list_global = self.env['product.pricelist.item'].search([
+#             ('pricelist_id', '=', pricelist_id),
+#             ('compute_price', '=', 'fixed'),
+#             ('applied_on', '=', '3_global')
+#         ], order='sequence ASC, id DESC', limit=1)
 
         date_diff = abs((date_start - date_end).days)
         json_rooms_prices = {pricelist_id: []}
@@ -121,17 +121,21 @@ class HotelReservation(models.Model):
             days = {}
             for i in range(0, date_diff + 1):
                 ndate = date_start + timedelta(days=i)
-                price_list = self.env['product.pricelist.item'].search([
-                    ('pricelist_id', '=', pricelist_id),
-                    ('applied_on', '=', '1_product'),
-                    ('product_tmpl_id', '=', vroom.product_id.product_tmpl_id.id),
-                    ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                    ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                    ('compute_price', '=', 'fixed'),
-                ], order='sequence ASC, id DESC', limit=1)
-                _logger.info(price_list.fixed_price)
+                ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                prod = vroom.product_id.with_context(
+                    quantity=1,
+                    date=ndate_str,
+                    pricelist=pricelist_id)
+#                 price_list = self.env['product.pricelist.item'].search([
+#                     ('pricelist_id', '=', pricelist_id),
+#                     ('applied_on', '=', '1_product'),
+#                     ('product_tmpl_id', '=', vroom.product_id.product_tmpl_id.id),
+#                     ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+#                     ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+#                     ('compute_price', '=', 'fixed'),
+#                 ], order='sequence ASC, id DESC', limit=1)
                 days.update({
-                    ndate.strftime("%d/%m/%Y"): (price_list and price_list.fixed_price) or (price_list_global and price_list_global.fixed_price) or 0.0
+                    ndate.strftime("%d/%m/%Y"): prod.price
                 })
             json_rooms_prices[pricelist_id].append({
                 'room': vroom.id,
