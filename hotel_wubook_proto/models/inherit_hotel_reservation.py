@@ -44,7 +44,7 @@ class HotelReservation(models.Model):
                                       compute=_is_from_channel, store=False,
                                       readonly=True)
     to_read = fields.Boolean('To Read', default=False)
-    
+
     wstatus = fields.Selection([
         ('0', 'No WuBook'),
         ('1', 'Confirmed'),
@@ -160,6 +160,11 @@ class HotelReservation(models.Model):
     def confirm(self):
         self.mark_as_readed()
         return super(HotelReservation, self).confirm()
+
+    @api.multi
+    def action_reservation_checkout(self):
+        self.mark_as_readed()
+        return super(HotelReservation, self).action_reservation_checkout()
 
     @api.multi
     def mark_as_readed(self):
