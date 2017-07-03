@@ -163,12 +163,13 @@ class HotelReservation(models.Model):
 
     @api.multi
     def action_reservation_checkout(self):
-        self.mark_as_readed()
-        if self.state == 'cancelled':
-            return super(HotelReservation, self).action_reservation_checkout()
-            self.state = 'cancelled'
-        else:
-            return super(HotelReservation, self).action_reservation_checkout()
+        for record in self:
+            record.mark_as_readed()
+            if record.state == 'cancelled':
+                return super(HotelReservation, record).action_reservation_checkout()
+                record.state = 'cancelled'
+            else:
+                return super(HotelReservation, record).action_reservation_checkout()
 
     @api.multi
     def mark_as_readed(self):
