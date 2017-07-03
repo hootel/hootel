@@ -57,7 +57,7 @@ class ProductPricelist(models.Model):
                     ndate_dt = min_date + timedelta(days=i)
                     product_id = vroom.product_id.with_context(
                         quantity=1,
-                        date_order=ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                        date=ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                         pricelist=self.id,
                         uom=vroom.product_id.product_tmpl_id.uom_id.id)
                     prices[vroom.wrid].append(product_id.price)
@@ -76,7 +76,7 @@ class ProductPricelist(models.Model):
                         ndate_dt = date_start_dt + timedelta(days=i)
                         product_id = vroom.product_id.with_context(
                             quantity=1,
-                            date_order=ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                            date=ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                             pricelist=self.id,
                             uom=vroom.product_id.product_tmpl_id.uom_id.id)
                         wdays[ndate_dt.weekday()] = product_id.price
