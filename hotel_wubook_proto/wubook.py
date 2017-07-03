@@ -56,6 +56,7 @@ class WuBook(models.TransientModel):
         self.push_activation()
         self.import_rooms()
         self.import_channels_info()
+        self.get_pricing_plans()
 #         self.fetch_new_bookings()
         return True
 
