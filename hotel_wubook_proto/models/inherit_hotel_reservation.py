@@ -166,8 +166,7 @@ class HotelReservation(models.Model):
         for record in self:
             record.mark_as_readed()
             if record.state == 'cancelled':
-                return super(HotelReservation, record).action_reservation_checkout()
-                record.state = 'cancelled'
+                return
             else:
                 return super(HotelReservation, record).action_reservation_checkout()
 
