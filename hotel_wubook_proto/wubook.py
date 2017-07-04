@@ -33,8 +33,9 @@ DEFAULT_WUBOOK_TIME_FORMAT = "%H:%M"
 DEFAULT_WUBOOK_DATETIME_FORMAT = "%s %s" % (DEFAULT_WUBOOK_DATE_FORMAT,
                                             DEFAULT_WUBOOK_TIME_FORMAT)
 WUBOOK_STATUS_CONFIRMED = 1
-WUBOOK_STATUS_CANCELLED = 5
 WUBOOK_STATUS_REFUSED = 3
+WUBOOK_STATUS_CANCELLED = 5
+WUBOOK_STATUS_CANCELLED_PENALTY = 6
 
 
 def _partner_split_name(partner_name):
@@ -535,7 +536,7 @@ class WuBook(models.TransientModel):
         #s_logger.info(bookings)
         _logger.info(bookings)
         for book in bookings:
-            is_cancellation = book['status'] in [WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_REFUSED]
+            is_cancellation = book['status'] in [WUBOOK_STATUS_REFUSED, WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_CANCELLED_PENALTY]
 
             # Search Folio. If exists.
             folio_id = False
