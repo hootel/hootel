@@ -43,6 +43,7 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
 		allowInvalidActions: options.allowInvalidActions || false,
 		assistedMovement: options.assistedMovement || false,
 		endOfWeek: options.endOfWeek || 6,
+		currencySymbol: options.currencySymbol || '€'
 	};
 	// Check correct values
 	if (this.options.rooms.length > 0 && !(this.options.rooms[0] instanceof HRoom)) {
@@ -379,7 +380,7 @@ HotelCalendar.prototype = {
 			return room.price[1];
 		} else if (room.price[0] == 'pricelist'){
 			var price_input = this.edtable.querySelector('#'+this.sanitizeId_(`CELL_PRICE_${room.price[2]}_${room.price[1]}_${day.format(HotelCalendar.DATE_FORMAT_SHORT_)}`)+' input');
-			return price_input.value;
+			return parseFloat(price_input.value.replace(",", "."));
 		}
 		
 		return 0.0;
@@ -569,14 +570,7 @@ HotelCalendar.prototype = {
 							}
 						}
 					}
-				} else {
-					var parentRow = $this.$base.querySelector(`#${this.dataset.hcalParentRow}`);
-					var room_price = $this.getRoomPrice(parentRow.dataset.hcalRoomObjId, date_cell);
-					this.textContent = room_price + ' €';
 				}
-			}, false);
-			cell.addEventListener('mouseleave', function(ev){
-				this.textContent = "";
 			}, false);
 			cell.addEventListener('mousedown', function(ev){
 				$this.cellSelection.start = $this.cellSelection.current = this;
@@ -593,8 +587,6 @@ HotelCalendar.prototype = {
 						'hcalOnChangeSelection', 
 						{'detail': {'cellStart':$this.cellSelection.start, 'cellEnd': $this.cellSelection.end}}));
 				}
-				$this.resetCellSelection_();
-				$this.updateCellSelection_();
 			}, false);
 		}
 		
@@ -874,7 +866,7 @@ HotelCalendar.prototype = {
 					row.dataset.hcalRoom = listitem.room
 					row.classList.add('hcal-row-detail-room-price-group-item');
 					cell = row.insertCell();
-					cell.innerHTML = "<marquee behavior='alternate' scrollamount='1' scrolldelay='100'>"+listitem.title + ' €</marquee>';
+					cell.innerHTML = "<marquee behavior='alternate' scrollamount='1' scrolldelay='100'>"+listitem.title + ' ' + this.options.currencySymbol+ '</marquee>';
 					cell.classList.add('hcal-cell-detail-room-group-item');
 					cell.classList.add('btn-hcal');
 					cell.classList.add('btn-hcal-flat');
@@ -1009,9 +1001,10 @@ HotelCalendar.prototype = {
 	//==== SELECTION
 	updateCellSelection_: function() {
 		// Clear all
-		var tables_td = this.etable.querySelectorAll('.hcal-table-day td');
-		for (var i=0; i<tables_td.length; i++) {
-			tables_td[i].classList.remove('hcal-cell-highlight');
+		var highlighted_td = this.etable.querySelectorAll('td.hcal-cell-highlight');
+		for (var td of highlighted_td) {
+			td.classList.remove('hcal-cell-highlight');
+			td.textContent = '';
 		}
 		
 		// Highlight Selected
@@ -1019,6 +1012,8 @@ HotelCalendar.prototype = {
 			this.cellSelection.current.classList.add('hcal-cell-highlight');
 		}
 		// Highlight Range Cells
+		var cells = false;
+		var total_price = 0.0;
 		var limits = new HLimit(this.cellSelection.start,
 								this.cellSelection.end?this.cellSelection.end:this.cellSelection.current);
 		if (limits.isValid()) {
@@ -1029,11 +1024,28 @@ HotelCalendar.prototype = {
 			if (limitLeftDate.isAfter(limitRightDate)) {
 				limits.swap();
 			}
-			var cells = this.getCells(limits);
+			cells = this.getCells(limits);
 			for (var c of cells) {
 				c.classList.add('hcal-cell-highlight');
+				if (this.pricelist && (c === cells[0] || c !== cells[cells.length-1])) {
+					var date_cell = HotelCalendar.toMoment(this.etable.querySelector(`#${c.dataset.hcalParentCell}`).dataset.hcalDate);
+					var parentRow = this.$base.querySelector(`#${c.dataset.hcalParentRow}`);
+					var room_price = this.getRoomPrice(parentRow.dataset.hcalRoomObjId, date_cell);
+					c.textContent = room_price + ' ' + this.options.currencySymbol;
+					total_price += room_price;
+				}
 			}
 		}
+		
+		this.e.dispatchEvent(new CustomEvent(
+			'hcalOnUpdateSelection', 
+				{ 'detail': {
+					'limits': limits,
+					'cells': cells,
+					'old_cells': highlighted_td,
+					'totalPrice': total_price
+				}
+			}));
 	},
 	
 	resetCellSelection_: function() {
@@ -1389,6 +1401,8 @@ HotelCalendar.prototype = {
 			}
 			this.reset_action_reservation_();
 		}
+		this.resetCellSelection_();
+		this.updateCellSelection_();
 	},
 	
 	onMainResize: function(/*EventObject*/ev) {

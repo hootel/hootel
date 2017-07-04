@@ -247,6 +247,27 @@ var HotelCalendarView = View.extend({
                 $content: QWeb.render('HotelCalendar.ConfirmReservationChanges', qdict)
             }).open();
         });
+        this._hcalendar.addEventListener('hcalOnUpdateSelection', function(ev){
+        	for (var td of ev.detail.old_cells) {
+        		$(td).tooltip('destroy');
+        	}
+        	if (ev.detail.cells.length > 1) {
+	        	var last_cell = ev.detail.cells[ev.detail.cells.length-1];
+	        	var date_cell_start = HotelCalendar.toMoment(self._hcalendar.etable.querySelector(`#${ev.detail.cells[0].dataset.hcalParentCell}`).dataset.hcalDate);
+	        	var date_cell_end = HotelCalendar.toMoment(self._hcalendar.etable.querySelector(`#${last_cell.dataset.hcalParentCell}`).dataset.hcalDate);
+	        	var days = date_cell_end.diff(date_cell_start, 'days');
+	        	var qdict = {
+	        		'total_price': Number(ev.detail.totalPrice).toLocaleString(),
+	        		'days': days
+	        	};
+	        	$(last_cell).tooltip({
+	                animation: false,
+	                html: true,
+	                placement: 'top',
+	                title: QWeb.render('HotelCalendar.TooltipSelection', qdict)
+	            }).tooltip('show');
+        	}
+        });
         this._hcalendar.addEventListener('hcalOnChangeSelection', function(ev){
             var parentRow = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentRow}`);
             var parentCellStart = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentCell}`);

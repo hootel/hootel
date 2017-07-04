@@ -56,6 +56,11 @@
 	</t>
 </t>
 
+<t t-name="HotelCalendar.TooltipSelection">
+	<!-- FIXME: HARD CURRENCY -->
+	<span><b t-esc="days"/> Days: <b t-esc="total_price" t-widget="monetary"/>€</span>
+</t>
+
 <t t-name="HotelCalendar.ConfirmFolio">
 	<div class="content">
 		<p>Do you want to confirm this folio?</p>
