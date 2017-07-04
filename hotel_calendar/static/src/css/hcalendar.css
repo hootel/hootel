@@ -59,6 +59,8 @@
 .hcal-table td {
 	text-align: center !important;
 	min-width: 100px;
+	white-space: nowrap;
+	overflow: hidden;
 }
 .hcal-table a {
 	text-decoration: none;

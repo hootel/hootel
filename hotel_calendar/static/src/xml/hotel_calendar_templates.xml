@@ -58,7 +58,7 @@
 
 <t t-name="HotelCalendar.TooltipSelection">
 	<!-- FIXME: HARD CURRENCY -->
-	<span><b t-esc="days"/> Days: <b t-esc="total_price" t-widget="monetary"/>€</span>
+	<span><b t-esc="days"/> Nights: <b t-esc="total_price" t-widget="monetary"/>€</span>
 </t>
 
 <t t-name="HotelCalendar.ConfirmFolio">
