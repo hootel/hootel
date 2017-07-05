@@ -65,7 +65,8 @@ class HotelReservation(models.Model):
                                                 dbchanged=False)
             _logger.info("DISPONIBILIDAD CREATE")
             _logger.info(rooms_avail)
-            self.env['wubook'].update_availability(rooms_avail)
+            if any(rooms_avail):
+                self.env['wubook'].update_availability(rooms_avail)
         res = super(HotelReservation, self).create(vals)
         return res
 
@@ -135,7 +136,8 @@ class HotelReservation(models.Model):
                                                 product_id)
             _logger.info("DISPONIBILIDAD UNLINK")
             _logger.info(rooms_avail)
-            self.env['wubook'].update_availability(rooms_avail)
+            if any(rooms_avail):
+                self.env['wubook'].update_availability(rooms_avail)
         return res
 
     @api.multi
@@ -153,7 +155,8 @@ class HotelReservation(models.Model):
                                                         record.product_id.id)
                     _logger.info("DISPONIBILIDAD CANCEL")
                     _logger.info(rooms_avail)
-                    self.env['wubook'].update_availability(rooms_avail)
+                    if any(rooms_avail):
+                        self.env['wubook'].update_availability(rooms_avail)
         return res
 
     @api.multi
