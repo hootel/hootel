@@ -1,3 +1,5 @@
+/*jslint devel: true, browser: true, unparam: true, nomen: true, vars: true, debug: false, white: true, maxerr: 50, indent: 4 */
+/*global $, odoo, _, HotelCalendar, moment*/
 odoo.define('hotel_calendar.HotelCalendarView', function (require) {
 "use strict";
 /*
@@ -7,32 +9,31 @@ odoo.define('hotel_calendar.HotelCalendarView', function (require) {
  *     Alexandre Díaz <alex@aloxa.eu>
  */
 
-var Core = require('web.core');
-var Bus = require('bus.bus').bus;
-//var data = require('web.data');
-var Time = require('web.time');
-var Model = require('web.DataModel');
-var View = require('web.View');
-var Common = require('web.form_common');
-//var pyeval = require('web.pyeval');
-var ActionManager = require('web.ActionManager');
-var Utils = require('web.utils');
-var Dialog = require('web.Dialog');
-var Ajax = require('web.ajax');
-var ControlPanel = require('web.ControlPanel');
-var Session = require('web.session');
-var formats = require('web.formats');
+var Core = require('web.core'),
+    Bus = require('bus.bus').bus,
+    //Data = require('web.data'),
+    Time = require('web.time'),
+    Model = require('web.DataModel'),
+    View = require('web.View'),
+    Common = require('web.form_common'),
+    //Pyeval = require('web.pyeval'),
+    ActionManager = require('web.ActionManager'),
+    Utils = require('web.utils'),
+    Dialog = require('web.Dialog'),
+    Ajax = require('web.ajax'),
+    ControlPanel = require('web.ControlPanel'),
+    Session = require('web.session'),
+    formats = require('web.formats'),
 
-var _t = Core._t;
-var _lt = Core._lt;
-var QWeb = Core.qweb;
-var l10n = _t.database.parameters;
+    _t = Core._t,
+    _lt = Core._lt,
+    QWeb = Core.qweb,
+    l10n = _t.database.parameters,
 
-
-var PUBLIC_PRICELIST_ID = 1; // Hard-Coded public pricelist id
-var ODOO_DATETIME_MOMENT_FORMAT = "YYYY-MM-DD HH:mm:ss";
-var L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY"; //FIXME: Time.strftime_to_moment_format(l10n.date_format);
-var L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format);
+    PUBLIC_PRICELIST_ID = 1, // Hard-Coded public pricelist id
+    ODOO_DATETIME_MOMENT_FORMAT = "YYYY-MM-DD HH:mm:ss",
+    L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY", //FIXME: Time.strftime_to_moment_format(l10n.date_format);
+    L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format);
 
 
 /* HIDE CONTROL PANEL */
@@ -67,6 +68,7 @@ var HotelCalendarView = View.extend({
     _hcalendar: null,
     _reserv_tooltips: {},
     _action_manager: null,
+    _last_dates: [false, false],
 
     /** VIEW METHODS **/
     init: function(parent, dataset, view_id, options) {
@@ -92,25 +94,25 @@ var HotelCalendarView = View.extend({
 
     load_custom_view: function(fv) {
         /* xml view calendar options */
-        var attrs = fv.arch.attrs,
-            self = this;
-        this.fields_view = fv;
+        //var attrs = fv.arch.attrs,
+        var self = this;
 
         var edit_check = new Model(this.dataset.model)
-            .call("check_access_rights", ["write", false])
-            .then(function (write_right) {
+              .call("check_access_rights", ["write", false])
+              .then(function (write_right) {
                 self.write_right = write_right;
-            });
-        var init = new Model(this.dataset.model)
-            .call("check_access_rights", ["create", false])
-            .then(function (create_right) {
+              }),
+            init = new Model(this.dataset.model)
+              .call("check_access_rights", ["create", false])
+              .then(function (create_right) {
                 self.create_right = create_right;
                 self.init_calendar_view().then(function() {
-                    //$(window).trigger('resize');
-                    self.trigger('hotel_calendar_view_loaded', fv);
-                    self.ready.resolve();
+                  //$(window).trigger('resize');
+                  self.trigger('hotel_calendar_view_loaded', fv);
+                  self.ready.resolve();
                 });
-            });
+              });
+        this.fields_view = fv;
         return $.when(edit_check, init);
     },
 
@@ -164,7 +166,7 @@ var HotelCalendarView = View.extend({
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
 
-            self.reload_hcalendar_reservations();
+            self.reload_hcalendar_reservations(false, true);
         });
         this._hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){
             var tp = self._reserv_tooltips[ev.detail.reservationObj.id];
@@ -190,7 +192,7 @@ var HotelCalendarView = View.extend({
                     res_model: 'hotel.folio',
                     res_id: res_id,
                     title: _t("Open: ") + ev.detail.reservationObj.title,
-                    view_id: view_id,
+                    view_id: view_id
                     //readonly: false
                 }).open();
                 pop.on('write_completed', self, function(){
@@ -215,7 +217,7 @@ var HotelCalendarView = View.extend({
                 ocheckin: oldReservation.startDate.format(L10N_DATETIME_MOMENT_FORMAT),
                 ocheckout: oldReservation.endDate.format(L10N_DATETIME_MOMENT_FORMAT),
                 oroom: oldReservation.room.number,
-                hasReservesLinked: (linkedReservs && linkedReservs.length != 0)?true:false
+                hasReservesLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
             };
             new Dialog(self, {
                 title: _t("Confirm Reservation Changes"),
@@ -255,10 +257,10 @@ var HotelCalendarView = View.extend({
 	        	var last_cell = ev.detail.cells[ev.detail.cells.length-1];
 	        	var date_cell_start = HotelCalendar.toMoment(self._hcalendar.etable.querySelector(`#${ev.detail.cells[0].dataset.hcalParentCell}`).dataset.hcalDate);
 	        	var date_cell_end = HotelCalendar.toMoment(self._hcalendar.etable.querySelector(`#${last_cell.dataset.hcalParentCell}`).dataset.hcalDate);
-	        	var days = date_cell_end.diff(date_cell_start, 'days');
+	        	var nights = date_cell_end.diff(date_cell_start, 'days');
 	        	var qdict = {
 	        		'total_price': Number(ev.detail.totalPrice).toLocaleString(),
-	        		'days': days
+	        		'nights': nights
 	        	};
 	        	$(last_cell).tooltip({
 	                animation: false,
@@ -277,7 +279,7 @@ var HotelCalendarView = View.extend({
             var room = self._hcalendar.getRoom(parentRow.dataset.hcalRoomObjId);
             var numBeds = room.shared?(ev.detail.cellEnd.dataset.hcalBedNum - ev.detail.cellStart.dataset.hcalBedNum)+1:room.capacity;
             var HotelFolioObj = new Model('hotel.folio');
-            
+
             if (numBeds <= 0) {
                 return;
             }
@@ -294,7 +296,7 @@ var HotelCalendarView = View.extend({
             if (startDate.isSame(now, 'day')) {
                 startDate = now.add(30,'m'); // +30 mins
             }
-            
+
             // Creater/Select Partner + Create Folio + Create Reservation + Confirm Folio? = Fucking Crazy uH :/
             var pop = new Common.SelectCreateDialog(self, {
                 res_model: 'res.partner',
@@ -389,13 +391,13 @@ var HotelCalendarView = View.extend({
                         }).open();
                         popCreate.view_form.on('on_button_cancel', popCreate, function(){
                         	HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
-                        		
+
                         	});
                         });
                         popCreate.on('closed', popCreate, function(){
                         	if (!this.dataset.ids.length) {
                         		HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
-                            		
+
                             	});
                         	}
                         });
@@ -455,7 +457,7 @@ var HotelCalendarView = View.extend({
         /** DO MAGIC **/
         var domains = this.generate_domains();
         var full_domain = [false, domains['dates'][0], domains['dates'][1], domains['rooms'] || [], domains['reservations'] || []];
-        this._model.call('get_hcalendar_data', full_domain).then(function(results){
+        this._model.call('get_hcalendar_all_data', full_domain).then(function(results){
             self._reserv_tooltips = results['tooltips'];
             var rooms = [];
             for (var r of results['rooms']) {
@@ -504,7 +506,7 @@ var HotelCalendarView = View.extend({
             self.assign_extra_info_();
         });
     },
-    
+
     assign_extra_info_: function() {
     	var self = this;
         $(this._hcalendar.etable).find('.hcal-cell-room-type-group-item.btn-hcal-3d').on("mouseenter", function(){
@@ -532,9 +534,9 @@ var HotelCalendarView = View.extend({
     update_buttons_counter: function() {
         var self = this;
         var domain = [];
-        
+
         var HotelFolioObj = new Model('hotel.folio');
-        
+
          // Checkouts Button
         domain = [['room_lines.checkout', '>=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
             ['room_lines.checkout','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
@@ -637,10 +639,12 @@ var HotelCalendarView = View.extend({
         $dateTimePickerBegin.data("ignore_onchange", true);
         $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
         $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+        this._last_dates = [date_begin.format(ODOO_DATETIME_MOMENT_FORMAT),
+                            date_end.format(ODOO_DATETIME_MOMENT_FORMAT)];
 
         // View Events
         this.$el.find("#pms-search #search_query").on('change', function(ev){
-            self.reload_hcalendar_reservations();
+            self.reload_hcalendar_reservations(true, false);
         });
         this.$el.find("#pms-search #cal-pag-prev-plus").on('click', function(ev){
             // FIXME: Ugly repeated code. Change place.
@@ -798,42 +802,94 @@ var HotelCalendarView = View.extend({
                 $dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end);
             }
             this._hcalendar.setStartDate(date_begin, days);
-            this.reload_hcalendar_reservations();
+            this.reload_hcalendar_reservations(false, true);
         }
     },
 
     _on_bus_signal: function(notifications) {
-        var need_reload = false;
+        var need_reload_pricelists = false;
         for (var notif of notifications) {
-            if (notif[0][1] === 'hotel.reservation' && notif[1]['type'] === "reservation") {
-            	need_reload = true;
-            	if (notif[1]['userid'] == this.dataset.context.uid) { continue; } // Ignore self messages
-            	var qdict = notif[1]['reservation'];
-            	qdict = _.extend(qdict, {
-            		'checkin': moment.utc(qdict['checkin']).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
-            		'checkout': moment.utc(qdict['checkout']).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
-            		'username': notif[1]['username'],
-            		'userid': notif[1]['userid']
-            	});
-                var msg = QWeb.render('HotelCalendar.Notification', qdict);
-                if (notif[1]['subtype'] === "notify") {
-                    this.do_notify(notif[1]['title'], msg, true);
-                } else if (notif[1]['subtype'] === "warn") {
-                    this.do_warn(notif[1]['title'], msg, true);
+          if (notif[0][1] === 'hotel.reservation') {
+            switch (notif[1]['type']) {
+              case 'reservation':
+                var reserv = notif[1]['reservation'];
+                // Only show notifications of other users
+                if (notif[1]['userid'] != this.dataset.context.uid) {
+                  var qdict = reserv;
+                  qdict = _.extend(qdict, {
+                    'checkin': moment.utc(qdict['checkin']).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
+                    'checkout': moment.utc(qdict['checkout']).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
+                    'username': notif[1]['username'],
+                    'userid': notif[1]['userid']
+                  });
+                  var msg = QWeb.render('HotelCalendar.Notification', qdict);
+                  if (notif[1]['subtype'] === "notify") {
+                      this.do_notify(notif[1]['title'], msg, true);
+                  } else if (notif[1]['subtype'] === "warn") {
+                      this.do_warn(notif[1]['title'], msg, true);
+                  }
                 }
+
+                // Create/Update/Delete reservation
+                if (notif[1]['action'] === 'unlink' || reserv['state'] === 'cancelled') {
+                  this._hcalendar.removeReservation(reserv['reserv_id']);
+                  this._reserv_tooltips = _.pick(this._reserv_tooltips, function(value, key, obj){ return key != reserv['reserv_id']; });
+                } else {
+                  var room = this._hcalendar.getRoom(reserv['product_id']);
+                  if (room) {
+                    var nreserv = new HReservation(
+                      reserv['reserv_id'],
+                      room,
+                      reserv['partner_name'],
+                      reserv['adults'],
+                      reserv['children'],
+                      moment.utc(reserv['checkin']).local(),
+                      moment.utc(reserv['checkout']).local(),
+                      reserv['reserve_color'],
+                      reserv['read_only'],
+                      reserv['fix_days'],
+                      reserv['fix_rooms']
+                    );
+                    nreserv.addUserData({'folio_id': reserv['folio_id']});
+                    this._reserv_tooltips[reserv['reserv_id']] = notif[1]['tooltip'];
+                    this._hcalendar.addReservations([nreserv]);
+                  }
+                }
+                break;
+              case 'pricelist':
+                need_reload_pricelists = true;
+                break;
+              default:
+                // Do Nothing
             }
-        }
-        if (need_reload) {
-            this.reload_hcalendar_reservations();
+          }
         }
     },
 
-    reload_hcalendar_reservations: function() {
+    reload_hcalendar_reservations: function(clearReservations, withPricelist) {
         var self = this;
         var domains = this.generate_domains();
-        var full_domain = [false, domains['dates'][0], domains['dates'][1], domains['rooms'] || [], domains['reservations'] || [], false];
-        this._model.call('get_hcalendar_data', full_domain).then(function(results){
-            self._reserv_tooltips = results['tooltips'];
+        // Clip dates
+        var mstart = moment(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT).utc(),
+            mend = moment(domains['dates'][1], ODOO_DATETIME_MOMENT_FORMAT).utc(),
+            mostart = moment(this._last_dates[0], ODOO_DATETIME_MOMENT_FORMAT).utc(),
+            moend = moment(this._last_dates[1], ODOO_DATETIME_MOMENT_FORMAT).utc(),
+            dfrom = domains['dates'][0],
+            dto = domains['dates'][1];
+        if (mstart.isBetween(mostart, moend) && mend.isAfter(moend)) {
+          dfrom = this._last_dates[1];
+        } else if (mostart.isBetween(mstart, mend) && moend.isAfter(mstart)) {
+          dto = this._last_dates[0];
+        } else {
+          clearReservations = true;
+        }
+
+        console.log(dfrom);
+        console.log(dto);
+
+        var full_domain = [false, dfrom, dto, domains['rooms'] || [], domains['reservations'] || [], false, withPricelist || false];
+        this._model.call('get_hcalendar_all_data', full_domain).then(function(results){
+            self._reserv_tooltips = _.extend(self._reserv_tooltips, results['tooltips']);
             var reservs = [];
             for (var r of results['reservations']) {
                 var room = self._hcalendar.getRoom(r[0]);
@@ -854,11 +910,18 @@ var HotelCalendarView = View.extend({
                 reservs.push(nreserv);
             }
 
-            self._hcalendar.pricelist = results['pricelist'];
-            self._hcalendar.setReservations(reservs);
+            if (withPricelist) {
+              self._hcalendar.addPricelist(results['pricelist']);
+            }
+            if (clearReservations) {
+              self._hcalendar.setReservations(reservs);
+            } else {
+              self._hcalendar.addReservations(reservs);
+            }
 
             self.assign_extra_info_();
         });
+        this._last_dates = domains['dates'];
         this.update_buttons_counter();
     },
 
@@ -869,7 +932,7 @@ var HotelCalendarView = View.extend({
         var floor = this.$el.find('#pms-search #floor_list').val();
         if (floor) { domainRooms.push(['floor_id.id', 'in', floor]); }
         var amenities = this.$el.find('#pms-search #amenities_list').val();
-        if (amenities) { 
+        if (amenities) {
         	for (var amenity of amenities) {
         		domainRooms.push(['room_amenities.id', '=', amenity]);
         	}

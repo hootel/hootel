@@ -28,6 +28,24 @@ _logger = logging.getLogger(__name__)
 class HotelReservation(models.Model):
     _inherit = "hotel.reservation"
 
+    @api.model
+    def _generate_reservation_notification(self, action, ntype, title, product_id,
+                                           reserv_id, partner_name, adults,
+                                           children, checkin, checkout,
+                                           folio_id, color, room_name,
+                                           partner_phone):
+        vals = super(HotelReservation, self)._generate_reservation_notification(action, ntype, title, product_id,
+                                                                                reserv_id, partner_name, adults,
+                                                                                children, checkin, checkout,
+                                                                                folio_id, color, room_name,
+                                                                                partner_phone)
+        reserv = self.env['hotel.reservation'].browse(vals['reserv_id'])
+        vals['reservation'].update({
+            'fix_days': reserv.wis_from_channel,
+            'wchannel': reserv.wchannel_id and reserv.wchannel_id.name or False,
+        })
+        return vals
+
     @api.multi
     def get_hcalendar_data(self, checkin, checkout, domainRooms, domainReservations, withRooms=True):
         vals = super(HotelReservation, self).get_hcalendar_data(checkin, checkout,

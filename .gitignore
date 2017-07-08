@@ -1,5 +1,4 @@
 *.pyc
-*.e4p
 
 .settings/
-.eric6project/
+

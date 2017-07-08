@@ -18,8 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api, _
-from openerp.exceptions import except_orm, UserError, ValidationError
+from openerp import models, api, _
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 import logging
@@ -29,61 +28,8 @@ _logger = logging.getLogger(__name__)
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
 
-    @api.multi
-    def get_hcalendar_data(self, checkin, checkout, domainRooms, domainReservations, withRooms=True):
-        if not checkin or not checkout:
-            return {
-                'rooms': [],
-                'reservations': [],
-                'tooltips': {},
-                'pricelist': {}
-            }
-
-        pricelist_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
-
-        domainRooms = domainRooms or []
-        domainReservations = domainReservations or []
-
-        # Need move one day less
-        date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
-        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
-
-        # Get Rooms
-        rooms = self.env['hotel.room'].search(domainRooms)
-        json_rooms = []
-        for room in rooms:
-            room_type = self.env['hotel.room.type'].search([('cat_id', '=', room.categ_id.id)], limit=1)
-            vrooms = self.env['hotel.virtual.room'].search(['|', ('room_ids', 'in', room.id), ('room_type_ids.id', '=', room.categ_id.id)])
-            json_rooms.append((
-                room.product_id.id,
-                room.name,
-                room.capacity,
-                room.categ_id.id,
-                room_type.code_type,
-                room.shared_room,
-                room.uom_id.id,
-                room.sale_price_type == 'vroom' and ['pricelist', room.price_virtual_room.id, pricelist_id] or ['fixed', room.list_price],
-                room.sale_price_type == 'vroom' and room.price_virtual_room.name or 'Fixed Price',
-                vrooms.mapped('name')))
-
-        # Get Reservations
-        date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-        date_end_str = date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-        room_ids = rooms.mapped('product_id.id')
-        domainReservations.insert(0, ('product_id', 'in', room_ids))
-        domainReservations.insert(0, ('state', 'in', ['draft',
-                                                      'confirm',
-                                                      'booking',
-                                                      'done',
-                                                      False]))
-        reservations_raw = self.env['hotel.reservation'].search(domainReservations, order="checkin DESC, checkout ASC, adults DESC, children DESC")
-        reservations_ld = self.env['hotel.reservation'].search([
-            ('checkin', '>=', date_start_str),
-            ('checkout', '<=', date_end_str)])
-        reservations_lr = self.env['hotel.reservation'].search([
-            ('checkout', '>=', date_start_str),
-            ('checkin', '<=', date_end_str)])
-        reservations = (reservations_ld | reservations_lr) & reservations_raw
+    @api.model
+    def _hcalendar_reservation_data(self, reservations):
         json_reservations = []
         json_reservation_tooltips = {}
         for reserv in reservations:
@@ -106,14 +52,58 @@ class HotelReservation(models.Model):
                     reserv.folio_id.partner_id.mobile or reserv.folio_id.partner_id.phone or _('Undefined'),
                     reserv.checkin)
             })
+        return (json_reservations, json_reservation_tooltips)
 
+    @api.model
+    def _hcalendar_room_data(self, rooms):
+        pricelist_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+        json_rooms = []
+        for room in rooms:
+            room_type = self.env['hotel.room.type'].search([('cat_id', '=', room.categ_id.id)], limit=1)
+            vrooms = self.env['hotel.virtual.room'].search(['|', ('room_ids', 'in', room.id), ('room_type_ids.id', '=', room.categ_id.id)])
+            json_rooms.append((
+                room.product_id.id,
+                room.name,
+                room.capacity,
+                room.categ_id.id,
+                room_type.code_type,
+                room.shared_room,
+                room.uom_id.id,
+                room.sale_price_type == 'vroom' and ['pricelist', room.price_virtual_room.id, pricelist_id] or ['fixed', room.list_price],
+                room.sale_price_type == 'vroom' and room.price_virtual_room.name or 'Fixed Price',
+                vrooms.mapped('name')))
+        return json_rooms
+
+    @api.multi
+    def get_hcalendar_reservations_data(self, dfrom, dto, domain, rooms):
+        domain = domain or []
+        date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+        date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        date_end_str = date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        room_ids = rooms.mapped('product_id.id')
+        domain.insert(0, ('product_id', 'in', room_ids))
+        domain.insert(0, ('state', 'in', ['draft',
+                                          'confirm',
+                                          'booking',
+                                          'done',
+                                          False]))
+        reservations_raw = self.env['hotel.reservation'].search(domain, order="checkin DESC, checkout ASC, adults DESC, children DESC")
+        reservations_ld = self.env['hotel.reservation'].search([
+            ('checkin', '>=', date_start_str),
+            ('checkout', '<=', date_end_str)])
+        reservations_lr = self.env['hotel.reservation'].search([
+            ('checkout', '>=', date_start_str),
+            ('checkin', '<=', date_end_str)])
+        reservations = (reservations_ld | reservations_lr) & reservations_raw
+        return self._hcalendar_reservation_data(reservations)
+
+    @api.multi
+    def get_hcalendar_pricelist_data(self, dfrom, dto):
+        pricelist_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+        date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
         # Get Prices
-#         price_list_global = self.env['product.pricelist.item'].search([
-#             ('pricelist_id', '=', pricelist_id),
-#             ('compute_price', '=', 'fixed'),
-#             ('applied_on', '=', '3_global')
-#         ], order='sequence ASC, id DESC', limit=1)
-
         date_diff = abs((date_start - date_end).days)
         json_rooms_prices = {pricelist_id: []}
         vrooms = self.env['hotel.virtual.room'].search([])
@@ -126,14 +116,6 @@ class HotelReservation(models.Model):
                     quantity=1,
                     date=ndate_str,
                     pricelist=pricelist_id)
-#                 price_list = self.env['product.pricelist.item'].search([
-#                     ('pricelist_id', '=', pricelist_id),
-#                     ('applied_on', '=', '1_product'),
-#                     ('product_tmpl_id', '=', vroom.product_id.product_tmpl_id.id),
-#                     ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-#                     ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-#                     ('compute_price', '=', 'fixed'),
-#                 ], order='sequence ASC, id DESC', limit=1)
                 days.update({
                     ndate.strftime("%d/%m/%Y"): prod.price
                 })
@@ -142,23 +124,39 @@ class HotelReservation(models.Model):
                 'days': days,
                 'title': vroom.name,
             })
+        return json_rooms_prices
 
+    @api.multi
+    def get_hcalendar_all_data(self, dfrom, dto, domainRooms, domainReservations, withRooms=True, withPricelist=True):
+        if not dfrom or not dto:
+            return {
+                'rooms': [],
+                'reservations': [],
+                'tooltips': {},
+                'pricelist': {}
+            }
+
+        domainRooms = domainRooms or []
+        domainReservations = domainReservations or []
+
+        rooms = self.env['hotel.room'].search(domainRooms)
+        json_reservations, json_reservation_tooltips = self.get_hcalendar_reservations_data(dfrom, dto, domainReservations, rooms)
         return {
-            'rooms': withRooms and json_rooms or [],
+            'rooms': withRooms and self._hcalendar_room_data(rooms) or [],
             'reservations': json_reservations,
             'tooltips': json_reservation_tooltips,
-            'pricelist': json_rooms_prices,
+            'pricelist': withPricelist and self.get_hcalendar_pricelist_data(dfrom, dto) or {},
         }
 
 #     @api.multi
 #     def get_vroom_price(self, product_id, checkin, checkout):
 #         product = self.env['product.product'].browse([product_id])
 #         partner = self.env['res.users'].browse(self.env.uid).partner_id
-# 
+#
 #         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
 #         date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
 #         date_diff = abs((date_start - date_end).days)
-# 
+#
 #         total_price = 0.0
 #         priceday = []
 #         for i in range(0, date_diff - 1):
@@ -181,63 +179,73 @@ class HotelReservation(models.Model):
     @api.model
     def create(self, vals):
         reservation_id = super(HotelReservation, self).create(vals)
-        self.env['bus.hotel.calendar'].send_notification(
+        self.env['bus.hotel.calendar'].send_reservation_notification(
+            'create',
             'notify',
             _("Reservation Created"),
+            reservation_id.product_id.id,
+            reservation_id.id,
             reservation_id.partner_id.name,
+            reservation_id.adults,
+            reservation_id.children,
             reservation_id.checkin,
             reservation_id.checkout,
+            reservation_id.folio_id.id,
+            reservation_id.reserve_color,
             reservation_id.product_id.name,
-        )
+            reservation_id.partner_id.mobile or reservation_id.partner_id.phone or _('Undefined'),
+            reservation_id.state)
         return reservation_id
 
     @api.multi
     def write(self, vals):
         ret_vals = super(HotelReservation, self).write(vals)
         for record in self:
-            partner_id = record.partner_id
-            checkin = record.checkin
-            checkout = record.checkout
-            product_id = record.product_id
-            state = record.state
-            new_state = False
-            need_send_notif = False
-            if vals.get('partner_id'):
-                partner_id = self.env['res.partner'].browse(vals.get('partner_id'))
-                need_send_notif = True
-            if vals.get('checkin'):
-                checkin = vals.get('checkin')
-                need_send_notif = True
-            if vals.get('checkout'):
-                checkout = vals.get('checkout')
-                need_send_notif = True
-            if vals.get('product_id'):
-                product_id = self.env['product.product'].browse(vals.get('product_id'))
-                need_send_notif = True
-            if vals.get('state'):
-                state = vals.get('state')
-                need_send_notif = True
-                new_state = True
+            partner_id = vals.get('partner_id') and self.env['res.partner'].browse(vals.get('partner_id')) or record.partner_id
+            checkin = vals.get('checkin') or record.checkin
+            checkout = vals.get('checkout') or record.checkout
+            product_id = vals.get('product_id') and self.env['product.product'].browse(vals.get('product_id')) or record.product_id
+            adults = vals.get('adults') or record.adults
+            children = vals.get('children') or record.children
+            folio_id = vals.get('folio_id') and self.env['hotel.folio'].browse(vals.get('folio_id')) or record.folio_id
+            color = vals.get('reserve_color') or record.reserve_color
+            state = vals.get('state') or record.state
 
-            if need_send_notif:
-                self.env['bus.hotel.calendar'].send_notification(
-                    (new_state and state == 'cancelled') and 'warn' or 'notify',
-                    (new_state and state == 'cancelled') and _("Reservation Cancelled") or _("Reservation Changed"),
-                    partner_id.name,
-                    checkin,
-                    checkout,
-                    product_id.name
-                )
+            self.env['bus.hotel.calendar'].send_reservation_notification(
+                'write',
+                ('cancelled' == vals.get('state')) and 'warn' or 'notify',
+                ('cancelled' == vals.get('state')) and _("Reservation Cancelled") or _("Reservation Changed"),
+                product_id.id,
+                record.id,
+                partner_id.name,
+                adults,
+                children,
+                checkin,
+                checkout,
+                folio_id.id,
+                color,
+                product_id.name,
+                partner_id.mobile or partner_id.phone or _('Undefined'),
+                state)
         return ret_vals
 
     @api.multi
     def unlink(self):
-        self.env['bus.hotel.calendar'].send_notification(
-            'warn',
-            _("Reservation Deleted"),
-            self.partner_id.name,
-            self.checkin,
-            self.checkout,
-            self.product_id.name
-        )
+        for record in self:
+            self.env['bus.hotel.calendar'].send_reservation_notification(
+                'unlink',
+                'warn',
+                _("Reservation Deleted"),
+                record.product_id.id,
+                record.id,
+                record.partner_id.name,
+                record.adults,
+                record.children,
+                record.checkin,
+                record.checkout,
+                record.folio_id.id,
+                record.reserve_color,
+                record.product_id.name,
+                record.partner_id.mobile or record.partner_id.phone or _('Undefined'),
+                record.state)
         return super(HotelReservation, self).unlink()

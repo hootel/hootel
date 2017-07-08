@@ -25,7 +25,58 @@ class BusHotelCalendar(models.TransientModel):
     _name = 'bus.hotel.calendar'
 
     @api.model
-    def send_notification(self, ntype, title, name, checkin, checkout, room_name):
+    def _generate_reservation_notification(self, action, ntype, title, product_id,
+                                           reserv_id, partner_name, adults,
+                                           children, checkin, checkout,
+                                           folio_id, color, room_name,
+                                           partner_phone, state):
+        user_id = self.env['res.users'].browse(self.env.uid)
+        return {
+            'type': 'reservation',
+            'action': action,
+            'subtype': ntype,
+            'title': title,
+            'username': user_id.partner_id.name,
+            'userid': user_id.id,
+            'reservation': {
+                'product_id': product_id,
+                'reserv_id': reserv_id,
+                'partner_name': partner_name,
+                'adults': adults,
+                'childer': children,
+                'checkin': checkin,
+                'checkout': checkout,
+                'folio_id': folio_id,
+                'reserve_color': color,
+                'room_name': room_name,
+                'state': state,
+                'only_read': False,
+                'fix_days': False,
+                'fix_rooms': False,
+            },
+            'tooltip': [
+                partner_name,
+                partner_phone,
+                checkin
+            ]
+        }
+
+    @api.model
+    def send_reservation_notification(self, action, ntype, title, product_id,
+                                      reserv_id, partner_name, adults, children,
+                                      checkin, checkout, folio_id, color,
+                                      room_name, partner_phone, state):
+        notif = self._generate_reservation_notification(action, ntype, title,
+                                                        product_id, reserv_id,
+                                                        partner_name, adults,
+                                                        children, checkin,
+                                                        checkout, folio_id,
+                                                        color, room_name,
+                                                        partner_phone, state)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', 'public'), notif)
+
+    @api.model
+    def send_pricelist_notification(self, ntype, title, name, checkin, checkout, room_name):
         user_id = self.env['res.users'].browse(self.env.uid)
         notification = {
             'type': 'reservation',

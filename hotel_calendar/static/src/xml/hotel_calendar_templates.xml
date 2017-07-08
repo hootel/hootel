@@ -58,7 +58,7 @@
 
 <t t-name="HotelCalendar.TooltipSelection">
 	<!-- FIXME: HARD CURRENCY -->
-	<span><b t-esc="days"/> Nights: <b t-esc="total_price" t-widget="monetary"/>€</span>
+	<span><b t-esc="nights"/> Nights: <b t-esc="total_price" t-widget="monetary"/>€</span>
 </t>
 
 <t t-name="HotelCalendar.ConfirmFolio">
@@ -69,7 +69,7 @@
 
 <t t-name="HotelCalendar.Notification">
 	<ul>
-		<li><b>Name:</b> <t t-esc="name"/></li>
+		<li><b>Name:</b> <t t-esc="partner_name"/></li>
 		<li><b>Room:</b> <t t-esc="room_name"/></li>
 		<li><b>Check-In:</b> <t t-esc="checkin"/></li>
 		<li><b>Check-Out:</b> <t t-esc="checkout"/></li>
