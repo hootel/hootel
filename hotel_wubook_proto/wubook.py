@@ -52,6 +52,7 @@ class WuBook(models.TransientModel):
         self.TOKEN = False
         return init_res
 
+    # === INITALIZATION
     @api.model
     def initialize(self):
         self.push_activation()
@@ -61,7 +62,7 @@ class WuBook(models.TransientModel):
 #         self.fetch_new_bookings()
         return True
 
-    # NETWORK
+    # === NETWORK
     def init_connection_(self):
         user = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_user')
         passwd = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_passwd')
@@ -110,7 +111,7 @@ class WuBook(models.TransientModel):
 
         return True
 
-    # ROOMS
+    # === ROOMS
     @api.model
     def create_room(self, shortcode, name, capacity, price, availability):
         self.init_connection_()
@@ -225,7 +226,7 @@ class WuBook(models.TransientModel):
 
         return True
 
-    # RESERVATIONS
+    # === RESERVATIONS
     @api.model
     def fetch_new_bookings(self):
         self.init_connection_()
@@ -267,6 +268,7 @@ class WuBook(models.TransientModel):
 
         return True
 
+    # === PRICE PLAN
     @api.model
     def create_plan(self, name, daily=1):
         self.init_connection_()
@@ -379,6 +381,38 @@ class WuBook(models.TransientModel):
 
         return True
 
+    # === RESTRICTION PLAN
+    @api.model
+    def get_restriction_plans(self):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_rplans(self.TOKEN,
+                                                  self.LCODE)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't fetch restriction plans from wubook: %s" % results)
+        else:
+            self.generate_restrictions(results)
+
+        return True
+
+    @api.model
+    def fetch_rplan_restrictions(self, pid, dfrom, dto):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_get_rplan_values(self.TOKEN,
+                                                            self.LCODE,
+                                                            dfrom,
+                                                            dto,
+                                                            pid)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't fetch plan restrictions from wubook: %s" % results)
+        elif any(results):
+            self.generate_restriction_items(pid, dfrom, dto, results)
+
+        return True
+
     @api.model
     def fetch_room_values(self, dfrom, dto, rooms=[]):
         self.init_connection_()
@@ -396,6 +430,7 @@ class WuBook(models.TransientModel):
 
         return True
 
+    # === RESERVATIONS
     @api.model
     def create_reservation(self, reserv):
         self.init_connection_()
@@ -441,6 +476,7 @@ class WuBook(models.TransientModel):
 
         return True
 
+    # === WUBOOK INFO
     @api.model
     def import_channels_info(self):
         self.init_connection_()
@@ -451,6 +487,7 @@ class WuBook(models.TransientModel):
 
         return True
 
+    # === MODEL MANIPULATION
     @api.model
     def update_room_values(self, dfrom, dto, rooms):
         _logger.info("UPDATE ROOM VALUES")
@@ -459,6 +496,66 @@ class WuBook(models.TransientModel):
         _logger.info(rooms)
 
         return True
+
+    @api.model
+    def generate_restrictions(self, restriction_plans):
+        reservation_restriction_obj = self.env['reservation.restriction']
+        for plan in restriction_plans:
+            vals = {
+                'name': plan['name'],
+            }
+            plan_id = reservation_restriction_obj.search([('wpid', '=', str(plan['id']))], limit=1)
+            if not plan_id:
+                vals.update({
+                    'wpid': str(plan['id']),
+                })
+                reservation_restriction_obj.with_context({
+                    'wubook_action': False,
+                    'rules': plan['rules']
+                }).create(vals)
+            else:
+                plan_id.with_context({'wubook_action': False}).write(vals)
+
+    @api.model
+    def generate_restriction_items(self, pid, dfrom, dto, plan_restrictions):
+        _logger.info(plan_restrictions)
+        restriction_id = self.env['reservation.restriction'].search([('wpid', '=', pid)], limit=1)
+        if restriction_id:
+            for rid in plan_restrictions[pid].keys():
+                vroom = self.env['hotel.virtual.room'].search([('wrid', '=', rid)], limit=1)
+                if vroom:
+                    for item in plan_restrictions[pid][rid]:
+                        date_dt = datetime.strptime(item['date'], DEFAULT_WUBOOK_DATE_FORMAT)
+                        restriction_item = self.env['reservation.restriction.item'].search([
+                            ('restriction_id', '=', restriction_id.id),
+                            ('date_start', '=', date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                            ('date_end', '=', date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                            ('applied_on', '=', '0_virtual_room'),
+                            ('virtual_room_id', '=', vroom.id)
+                        ], limit=1)
+                        vals = {
+                            'closed_arrival': item['closed_arrival'],
+                            'closed': item['closed'],
+                            'min_stay': item['min_stay'],
+                            'closed_departure': item['closed_departure'],
+                            'max_stay': item['max_stay'],
+                            'min_stay_arrival': item['min_stay_arrival'],
+                        }
+                        if restriction_item:
+                            _logger.info("FOUND")
+                            _logger.info(vals)
+                            restriction_item.with_context({'wubook_action': False}).write(vals)
+                        else:
+                            vals.update({
+                                'restriction_id': restriction_id.id,
+                                'date_start': date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'date_end': date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'applied_on': '0_virtual_room',
+                                'virtual_room_id': vroom.id
+                            })
+                            _logger.info("NOT FOUND")
+                            _logger.info(vals)
+                            self.env['reservation.restriction.item'].with_context({'wubook_action': False}).create(vals)
 
     @api.model
     def generate_pricelist_items(self, pid, dfrom, dto, plan_prices):

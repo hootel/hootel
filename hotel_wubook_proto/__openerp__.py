@@ -35,9 +35,10 @@
         'python': ['xmlrpclib']
     },
     'data': [
-        #'data/cron_jobs.xml',
+        # 'data/cron_jobs.xml',
         'wizards/wubook_installer.xml',
         'wizards/wubook_import_plan_prices.xml',
+        'wizards/wubook_import_plan_restrictions.xml',
         'views/general.xml',
         'views/res_config.xml',
         'views/inherit_hotel_reservation.xml',
@@ -45,10 +46,12 @@
         'views/inherit_hotel_folio.xml',
         'views/inherit_product_pricelist.xml',
         'views/inherit_product_pricelist_item.xml',
+        'views/inherit_reservation_restriction.xml',
+        'views/inherit_reservation_restriction_item.xml',
         'views/wubook_channel_info.xml',
         'data/menus.xml',
         'data/sequences.xml',
-        #'views/res_config.xml'
+        # 'views/res_config.xml'
     ],
     'test': [
     ],

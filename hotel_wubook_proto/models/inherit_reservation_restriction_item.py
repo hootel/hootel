@@ -18,25 +18,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
 from openerp import models, fields, api
-from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 
-class ImportPlanPricesWizard(models.TransientModel):
-    _name = 'wubook.wizard.plan.prices'
+class ReservationRestrictionItem(models.Model):
+    _inherit = 'reservation.restriction.item'
 
-    date_start = fields.Datetime('Start Date', required=True)
-    date_end = fields.Datetime('End Date', required=True)
-
-    @api.multi
-    def import_plan_prices(self):
-        pricelist = self.env['product.pricelist'].browse(self.env.context.get('active_id'))
-        if pricelist:
-            for record in self:
-                date_start_dt = fields.Datetime.from_string(record.date_start)
-                date_end_dt = fields.Datetime.from_string(record.date_end)
-                self.env['wubook'].fetch_plan_prices(pricelist.wpid,
-                                                     date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                     date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
-        return True
+    wpushed = fields.Boolean("WuBook Pushed", default=False, readonly=True)
