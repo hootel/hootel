@@ -545,7 +545,7 @@ class WuBook(models.TransientModel):
                     vals = {
                         'no_ota': day_vals.get('no_ota'),
                         'booked': day_vals.get('booked'),
-                        'avail': day_vals.get('avail') or -1,
+                        'avail': day_vals.get('avail') or 0,
                     }
                     if vroom_avail:
                         virtual_room_avail_obj.write(vals)
