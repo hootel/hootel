@@ -59,6 +59,11 @@ function import_restriction_plans(){
 	return false;
 }
 
+function import_availability(){
+  this.do_action('hotel_wubook_proto.action_wubook_import_availability');
+	return false;
+}
+
 ListView.include({
 	render_buttons: function() {
 		this._super.apply(this, arguments); // Sets this.$buttons
@@ -78,6 +83,9 @@ ListView.include({
         } else if (this.dataset.model == 'reservation.restriction') {
         	this.$buttons.append("<button class='oe_button oe_wubook_import_restriction_plans oe_highlight' type='button'>Import Restriction Plans From WuBook</button>");
         	this.$buttons.find('.oe_wubook_import_restriction_plans').on('click', import_restriction_plans.bind(this));
+        } else if (this.dataset.model == 'virtual.room.availability') {
+        	this.$buttons.append("<button class='oe_button oe_wubook_import_availability oe_highlight' type='button'>Import Availability From WuBook</button>");
+        	this.$buttons.find('.oe_wubook_import_availability').on('click', import_availability.bind(this));
         }
     }
 });

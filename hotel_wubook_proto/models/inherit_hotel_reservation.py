@@ -191,15 +191,22 @@ class HotelReservation(models.Model):
             if vroom.wrid != 'none':
                 rdays = []
                 for i in range(0, date_diff):
-                    ndate = date_start + timedelta(days=i)
-                    avail = len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                                                                ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    ndate_dt = date_start + timedelta(days=i)
+                    ndate_str = ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                    avail = len(hotel_vroom_obj.check_availability_virtual_room(ndate_str,
+                                                                                ndate_str,
                                                                                 vroom.id))
                     if not dbchanged:
                         avail = avail - 1
-                    avail = min(avail, vroom.max_real_rooms)
+                    vroom_avail_id = self.env['virtal.room.availability'].search([
+                        ('virtual_room_id', '=', vroom.id),
+                        ('date', '=', ndate_str)], limit=1)
+                    max_avail = vroom.max_real_rooms
+                    if vroom_avail_id and vroom_avail_id.avail != -1:
+                        max_avail = vroom_avail_id.avail
+                    avail = min(avail, max_avail)
                     rdays.append({
-                        'date': ndate.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        'date': ndate_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                         'avail': avail,
                     })
                 ravail = {'id': vroom.wrid, 'days': rdays}

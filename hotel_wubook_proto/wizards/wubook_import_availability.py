@@ -23,20 +23,17 @@ from openerp import models, fields, api
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 
-class ImportPlanRestrictionsWizard(models.TransientModel):
-    _name = 'wubook.wizard.plan.restrictions'
+class ImportAvailabilityWizard(models.TransientModel):
+    _name = 'wubook.wizard.availability'
 
     date_start = fields.Datetime('Start Date', required=True)
     date_end = fields.Datetime('End Date', required=True)
 
     @api.multi
-    def import_plan_restrictions(self):
-        restriction_id = self.env['reservation.restriction'].browse(self.env.context.get('active_id'))
-        if restriction_id:
-            for record in self:
-                date_start_dt = fields.Datetime.from_string(record.date_start)
-                date_end_dt = fields.Datetime.from_string(record.date_end)
-                self.env['wubook'].fetch_rplan_restrictions(date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                            date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                            restriction_id.wpid)
+    def import_availability(self):
+        for record in self:
+            date_start_dt = fields.Datetime.from_string(record.date_start)
+            date_end_dt = fields.Datetime.from_string(record.date_end)
+            self.env['wubook'].fetch_rooms_values(date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                                                  date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         return True

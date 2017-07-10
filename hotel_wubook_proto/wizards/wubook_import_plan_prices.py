@@ -31,12 +31,12 @@ class ImportPlanPricesWizard(models.TransientModel):
 
     @api.multi
     def import_plan_prices(self):
-        pricelist = self.env['product.pricelist'].browse(self.env.context.get('active_id'))
-        if pricelist:
+        pricelist_id = self.env['product.pricelist'].browse(self.env.context.get('active_id'))
+        if pricelist_id:
             for record in self:
                 date_start_dt = fields.Datetime.from_string(record.date_start)
                 date_end_dt = fields.Datetime.from_string(record.date_end)
-                self.env['wubook'].fetch_plan_prices(pricelist.wpid,
+                self.env['wubook'].fetch_plan_prices(pricelist_id.wpid,
                                                      date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                                                      date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         return True

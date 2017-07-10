@@ -89,8 +89,8 @@ class ReservationRestriction(models.Model):
         nname = vals.get('name')
         if self._context.get('wubook_action', True) and nname:
             for record in self:
-                self.env['wubook'].update_rplan_name(vals.get('wpid', record.wpid),
-                                                     nname)
+                self.env['wubook'].rename_rplan(vals.get('wpid', record.wpid),
+                                                nname)
         updated = super(ReservationRestriction, self).write(vals)
         return updated
 

@@ -18,25 +18,23 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
 from openerp import models, fields, api
-from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 
-class ImportPlanRestrictionsWizard(models.TransientModel):
-    _name = 'wubook.wizard.plan.restrictions'
+class VirtualRoomAvailability(models.Model):
+    _inherit = 'virtual.room.availability'
 
-    date_start = fields.Datetime('Start Date', required=True)
-    date_end = fields.Datetime('End Date', required=True)
+    wpushed = fields.Booelan("WuBook Pushed", readonly=True, default=False)
 
     @api.multi
-    def import_plan_restrictions(self):
-        restriction_id = self.env['reservation.restriction'].browse(self.env.context.get('active_id'))
-        if restriction_id:
-            for record in self:
-                date_start_dt = fields.Datetime.from_string(record.date_start)
-                date_end_dt = fields.Datetime.from_string(record.date_end)
-                self.env['wubook'].fetch_rplan_restrictions(date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                            date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                            restriction_id.wpid)
-        return True
+    def write(self, vals):
+        vals.update({'wpushed': False})
+        return super(VirtualRoomAvailability, self).write(vals)
+
+    # @api.multi
+    # def unlink(self):
+    #     if self._context.get('wubook_action', True):
+    #         for record in self:
+    #             if record.wrid != 'none':
+    #                 self.env['wubook'].delete_room(record.wrid)
+    #     return super(HotelVirtualRoom, self).unlink()

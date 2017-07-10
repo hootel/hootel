@@ -58,7 +58,8 @@ class website_wubook(http.Controller):
         if lcode != wlcode:
             raise ValidationError("Error! lcode doesn't match!")
 
-        #request.env['wubook'].sudo().fetch_room_values(dfrom, dto)
+        #request.env['wubook'].sudo().fetch_rooms_values(dfrom, dto)
+        #request.env['wubook'].sudo().fetch_all_plan_prices(dfrom, dto)
         #request.env['wubook'].sudo().fetch_all_plan_prices(dfrom, dto)
         # {'dfrom': u'22/06/2017', 'dto': u'24/06/2017', 'lcode': u'NUM'}
         # More Info: http://tdocs.wubook.net/wired/avail.html?highlight=fetch_rooms_values#fetch_rooms_values

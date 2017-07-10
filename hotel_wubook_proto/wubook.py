@@ -23,7 +23,7 @@ import pytz
 from datetime import datetime, timedelta
 from urlparse import urljoin
 from openerp import models, api
-from openerp.exceptions import except_orm, UserError, ValidationError
+from openerp.exceptions import UserError, ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 import logging
 _logger = logging.getLogger(__name__)
@@ -125,7 +125,7 @@ class WuBook(models.TransientModel):
             availability,
             shortcode[:4],
             'nb'
-#             rtype=('name' in vals and vals['name'] and 3) or 1
+            # rtype=('name' in vals and vals['name'] and 3) or 1
         )
         self.close_connection_()
 
@@ -147,7 +147,7 @@ class WuBook(models.TransientModel):
             availability,
             scode,
             'nb'
-            #rtype=('name' in vals and vals['name'] and 3) or 1
+            # rtype=('name' in vals and vals['name'] and 3) or 1
         )
         self.close_connection_()
 
@@ -191,7 +191,7 @@ class WuBook(models.TransientModel):
                     'wscode': room['shortname'],
                     'list_price': room['price'],
                     'wcapacity': room['occupancy'],
-                    #'max_real_rooms': room['availability'],
+                    # 'max_real_rooms': room['availability'],
                 }
                 if vroom:
                     vroom.with_context({'wubook_action': False}).write(vals)
@@ -199,6 +199,23 @@ class WuBook(models.TransientModel):
                     vroom_obj.with_context({'wubook_action': False}).create(vals)
         else:
             raise UserError("Can't import rooms from WuBook: %s" % results)
+
+        return True
+
+    @api.model
+    def fetch_rooms_values(self, dfrom, dto, rooms=False):
+        self.init_connection_()
+        rcode, results = self.SERVER.fetch_rooms_values(self.TOKEN,
+                                                        self.LCODE,
+                                                        dfrom,
+                                                        dto,
+                                                        rooms)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise UserError("Can't fetch rooms values from WuBook: %s" % results)
+
+        self.generate_room_values(dfrom, dto, results)
 
         return True
 
@@ -352,8 +369,8 @@ class WuBook(models.TransientModel):
 
         if rcode != 0:
             raise ValidationError("Can't fetch plan prices from wubook: %s" % results)
-        else:
-            self.generate_pricelist_items(pid, dfrom, dto, results)
+
+        self.generate_pricelist_items(pid, dfrom, dto, results)
 
         return True
 
@@ -391,42 +408,66 @@ class WuBook(models.TransientModel):
 
         if rcode != 0:
             raise ValidationError("Can't fetch restriction plans from wubook: %s" % results)
-        else:
-            self.generate_restrictions(results)
+
+        self.generate_restrictions(results)
 
         return True
 
     @api.model
-    def fetch_rplan_restrictions(self, pid, dfrom, dto):
+    def fetch_rplan_restrictions(self, dfrom, dto, rpid=False):
         self.init_connection_()
         rcode, results = self.SERVER.rplan_get_rplan_values(self.TOKEN,
                                                             self.LCODE,
                                                             dfrom,
                                                             dto,
-                                                            pid)
+                                                            rpid)
         self.close_connection_()
 
         if rcode != 0:
             raise ValidationError("Can't fetch plan restrictions from wubook: %s" % results)
         elif any(results):
-            self.generate_restriction_items(pid, dfrom, dto, results)
+            self.generate_restriction_items(dfrom, dto, results)
 
         return True
 
     @api.model
-    def fetch_room_values(self, dfrom, dto, rooms=[]):
+    def create_rplan(self, name, compact=False):
         self.init_connection_()
-        rcode, results = self.SERVER.fetch_room_values(self.TOKEN,
-                                                       self.LCODE,
-                                                       dfrom,
-                                                       dto,
-                                                       rooms)
+        rcode, results = self.SERVER.rplan_add_rplan(self.TOKEN,
+                                                     self.LCODE,
+                                                     name,
+                                                     compact and 1 or 0)
         self.close_connection_()
 
         if rcode != 0:
-            raise ValidationError("Can't fetch room values from wubook: %s" % results)
-        else:
-            self.update_room_values(dfrom, dto, results)
+            raise ValidationError("Can't create plan restriction in wubook: %s" % results)
+
+        return True
+
+    @api.model
+    def rename_rplan(self, rpid, name):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_rename_rplan(self.TOKEN,
+                                                        self.LCODE,
+                                                        rpid,
+                                                        name)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't rename plan restriction in wubook: %s" % results)
+
+        return True
+
+    @api.model
+    def delete_rplan(self, rpid):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_del_rplan(self.TOKEN,
+                                                     self.LCODE,
+                                                     rpid)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't delete plan restriction on wubook: %s" % results)
 
         return True
 
@@ -455,10 +496,10 @@ class WuBook(models.TransientModel):
                                                      reserv.adults+reserv.children)
         self.close_connection_()
 
-        if rcode == 0:
-            reserv.write({'wrid': results})
-        else:
-            ValidationError("Can't create reservations in wubook: %s" % results)
+        if rcode != 0:
+            raise ValidationError("Can't create reservations in wubook: %s" % results)
+
+        reserv.write({'wrid': results})
 
         return True
 
@@ -489,11 +530,32 @@ class WuBook(models.TransientModel):
 
     # === MODEL MANIPULATION
     @api.model
-    def update_room_values(self, dfrom, dto, rooms):
-        _logger.info("UPDATE ROOM VALUES")
-        _logger.info(dfrom)
-        _logger.info(dto)
-        _logger.info(rooms)
+    def generate_room_values(self, dfrom, dto, values):
+        virtual_room_avail_obj = self.env['virtual.room.availability']
+        hotel_virtual_room_obj = self.env['hotel.virtual.room']
+        for rid in values.keys():
+            vroom = hotel_virtual_room_obj.search([('wrid', '=', rid)], limit=1)
+            if vroom:
+                date_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
+                for day_vals in values[rid]:
+                    _logger.info(day_vals)
+                    date_str = date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                    vroom_avail = virtual_room_avail_obj.search([('virtual_room_id', '=', vroom.id),
+                                                                 ('date', '=', date_str)], limit=1)
+                    vals = {
+                        'no_ota': day_vals.get('no_ota'),
+                        'booked': day_vals.get('booked'),
+                        'avail': day_vals.get('avail') or -1,
+                    }
+                    if vroom_avail:
+                        virtual_room_avail_obj.write(vals)
+                    else:
+                        vals.update({
+                            'virtual_room_id': vroom.id,
+                            'date': date_str,
+                        })
+                        virtual_room_avail_obj.create(vals)
+                    date_dt = date_dt + timedelta(days=1)
 
         return True
 
@@ -517,63 +579,59 @@ class WuBook(models.TransientModel):
                 plan_id.with_context({'wubook_action': False}).write(vals)
 
     @api.model
-    def generate_restriction_items(self, pid, dfrom, dto, plan_restrictions):
-        _logger.info(plan_restrictions)
-        restriction_id = self.env['reservation.restriction'].search([('wpid', '=', pid)], limit=1)
-        if restriction_id:
-            for rid in plan_restrictions[pid].keys():
-                vroom = self.env['hotel.virtual.room'].search([('wrid', '=', rid)], limit=1)
-                if vroom:
-                    for item in plan_restrictions[pid][rid]:
-                        date_dt = datetime.strptime(item['date'], DEFAULT_WUBOOK_DATE_FORMAT)
-                        restriction_item = self.env['reservation.restriction.item'].search([
-                            ('restriction_id', '=', restriction_id.id),
-                            ('date_start', '=', date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                            ('date_end', '=', date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                            ('applied_on', '=', '0_virtual_room'),
-                            ('virtual_room_id', '=', vroom.id)
-                        ], limit=1)
-                        vals = {
-                            'closed_arrival': item['closed_arrival'],
-                            'closed': item['closed'],
-                            'min_stay': item['min_stay'],
-                            'closed_departure': item['closed_departure'],
-                            'max_stay': item['max_stay'],
-                            'min_stay_arrival': item['min_stay_arrival'],
-                        }
-                        if restriction_item:
-                            _logger.info("FOUND")
-                            _logger.info(vals)
-                            restriction_item.with_context({'wubook_action': False}).write(vals)
-                        else:
-                            vals.update({
-                                'restriction_id': restriction_id.id,
-                                'date_start': date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                'date_end': date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                'applied_on': '0_virtual_room',
-                                'virtual_room_id': vroom.id
-                            })
-                            _logger.info("NOT FOUND")
-                            _logger.info(vals)
-                            self.env['reservation.restriction.item'].with_context({'wubook_action': False}).create(vals)
+    def generate_restriction_items(self, dfrom, dto, plan_restrictions):
+        hotel_virtual_room_obj = self.env['hotel.virtual.room']
+        reserv_restriction_obj = self.env['reservation.restriction']
+        reserv_restriction_item_obj = self.env['reservation.restriction.item']
+        for rpid in plan_restrictions.keys():
+            restriction_id = reserv_restriction_obj.search([('wpid', '=', rpid)], limit=1)
+            if restriction_id:
+                for rid in plan_restrictions[rpid].keys():
+                    vroom = hotel_virtual_room_obj.search([('wrid', '=', rid)], limit=1)
+                    if vroom:
+                        for item in plan_restrictions[rpid][rid]:
+                            date_dt = datetime.strptime(item['date'], DEFAULT_WUBOOK_DATE_FORMAT)
+                            restriction_item = reserv_restriction_item_obj.search([
+                                ('restriction_id', '=', restriction_id.id),
+                                ('date_start', '=', date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                                ('date_end', '=', date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                                ('applied_on', '=', '0_virtual_room'),
+                                ('virtual_room_id', '=', vroom.id)
+                            ], limit=1)
+                            vals = {
+                                'closed_arrival': item['closed_arrival'],
+                                'closed': item['closed'],
+                                'min_stay': item['min_stay'],
+                                'closed_departure': item['closed_departure'],
+                                'max_stay': item['max_stay'],
+                                'min_stay_arrival': item['min_stay_arrival'],
+                            }
+                            if restriction_item:
+                                restriction_item.with_context({'wubook_action': False}).write(vals)
+                            else:
+                                vals.update({
+                                    'restriction_id': restriction_id.id,
+                                    'date_start': date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'date_end': date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'applied_on': '0_virtual_room',
+                                    'virtual_room_id': vroom.id
+                                })
+                                self.env['reservation.restriction.item'].with_context({'wubook_action': False}).create(vals)
 
     @api.model
     def generate_pricelist_items(self, pid, dfrom, dto, plan_prices):
         _logger.info(plan_prices)
+        hotel_virtual_room_obj = self.env['hotel.virtual.room']
         pricelist = self.env['product.pricelist'].search([('wpid', '=', pid)], limit=1)
         if pricelist:
-            _logger.info("PASA PO")
             dfrom_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
             dto_dt = datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT)
             days_diff = abs((dto_dt - dfrom_dt).days)
             for i in range(0, days_diff):
-                _logger.info("DATE ITER")
                 ndate_dt = dfrom_dt + timedelta(days=i)
                 for rid in plan_prices.keys():
-                    _logger.info("RID ITR")
-                    vroom = self.env['hotel.virtual.room'].search([('wrid', '=', rid)], limit=1)
+                    vroom = hotel_virtual_room_obj.search([('wrid', '=', rid)], limit=1)
                     if vroom:
-                        _logger.info("VROM ITER")
                         pricelist_item = self.env['product.pricelist.item'].search([
                             ('pricelist_id', '=', pricelist.id),
                             ('date_start', '=', ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
@@ -586,8 +644,6 @@ class WuBook(models.TransientModel):
                             'fixed_price': plan_prices[rid][i],
                         }
                         if pricelist_item:
-                            _logger.info("FOUND")
-                            _logger.info(vals)
                             pricelist_item.with_context({'wubook_action': False}).write(vals)
                         else:
                             vals.update({
@@ -598,8 +654,6 @@ class WuBook(models.TransientModel):
                                 'applied_on': '1_product',
                                 'product_tmpl_id': vroom.product_id.product_tmpl_id.id
                             })
-                            _logger.info("NOT FOUND")
-                            _logger.info(vals)
                             self.env['product.pricelist.item'].with_context({'wubook_action': False}).create(vals)
 
     @api.model
@@ -630,7 +684,6 @@ class WuBook(models.TransientModel):
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
         processed_rids = []
-        #s_logger.info(bookings)
         _logger.info(bookings)
         for book in bookings:
             is_cancellation = book['status'] in [WUBOOK_STATUS_REFUSED, WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_CANCELLED_PENALTY]
@@ -669,7 +722,7 @@ class WuBook(models.TransientModel):
             if customer_mail:
                 partner_id = res_partner_obj.search([('email', '=', customer_mail)], limit=1)
             if not partner_id:
-                lang = self.env['res.lang'].search([('iso_code', 'ilike', book['customer_language_iso'])], limit=1)
+                # lang = self.env['res.lang'].search([('iso_code', 'ilike', book['customer_language_iso'])], limit=1)
                 vals = {
                     'name': "%s %s" % (book['customer_name'], book['customer_surname']),
                     'country_id': country_id and country_id.id,
@@ -678,7 +731,7 @@ class WuBook(models.TransientModel):
                     'zip': book['customer_zip'],
                     'street': book['customer_address'],
                     'email': book['customer_mail'],
-                    #'lang': lang and lang.id,
+                    # 'lang': lang and lang.id,
                 }
                 partner_id = res_partner_obj.create(vals)
             # Search Wubook Channel Info
@@ -784,3 +837,11 @@ class WuBook(models.TransientModel):
                     'wid': cid
                 })
                 channel_info_obj.create(vals)
+
+    @api.model
+    def push_availability(self):
+        vroom_avail_ids = self.env['virtual.room.availability'].search([
+            ('wpushed', '=', False)
+        ])
+        for vroom_avail in vroom_avail_ids:
+            vroom_avail.write({'wpushed': True})
