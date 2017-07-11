@@ -626,7 +626,7 @@ class WuBook(models.TransientModel):
         if pricelist:
             dfrom_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
             dto_dt = datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT)
-            days_diff = abs((dto_dt - dfrom_dt).days)
+            days_diff = abs((dto_dt - dfrom_dt).days) + 1
             for i in range(0, days_diff):
                 ndate_dt = dfrom_dt + timedelta(days=i)
                 for rid in plan_prices.keys():
