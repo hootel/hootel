@@ -19,6 +19,8 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class ProductPricelistItem(models.Model):
@@ -26,21 +28,22 @@ class ProductPricelistItem(models.Model):
 
     @api.model
     def create(self, vals):
-        pricelist_item_id = super(ProductPricelistItem, self).create(vals)
-        pricelist_id = pricelist_item_id.pricelist_id
-        vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', pricelist_item_id.product_tmpl_id.id)], limit=1)
+        pricelist_id = vals.get('pricelist_id')
+        product_tmpl_id = vals.get('product_tmpl_id')
+        date_start = vals.get('date_start')
+        vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', product_tmpl_id)], limit=1)
         if pricelist_id.wpid and vroom:
             prod = vroom.product_id.with_context(
                 quantity=1,
-                date=pricelist_item_id.date_start,
+                date=date_start,
                 pricelist=pricelist_id)
 
             self.env['bus.hotel.calendar'].send_pricelist_notification(
-                pricelist_id.id,
-                pricelist_item_id.date_start,
+                pricelist_id,
+                date_start,
                 vroom.id,
                 prod.price)
-        return pricelist_item_id
+        return super(ProductPricelistItem, self).create(vals)
 
     @api.multi
     def write(self, vals):
