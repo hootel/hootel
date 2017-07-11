@@ -633,13 +633,13 @@ var HotelCalendarView = View.extend({
         //});
 
         var date_begin = moment().startOf('day');
-        var days = moment(date_begin).daysInMonth();
+        var days = date_begin.daysInMonth();
         var date_end = date_begin.clone().add(days, 'd').endOf('day');
         $dateTimePickerBegin.data("ignore_onchange", true);
         $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
         $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-        this._last_dates = [date_begin.format(ODOO_DATETIME_MOMENT_FORMAT),
-                            date_end.format(ODOO_DATETIME_MOMENT_FORMAT)];
+        this._last_dates = [date_begin.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
+                            date_end.utc().format(ODOO_DATETIME_MOMENT_FORMAT)];
 
         // View Events
         this.$el.find("#pms-search #search_query").on('change', function(ev){
@@ -870,10 +870,10 @@ var HotelCalendarView = View.extend({
         var self = this;
         var domains = this.generate_domains();
         // Clip dates
-        var mstart = moment(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT).utc(),
-            mend = moment(domains['dates'][1], ODOO_DATETIME_MOMENT_FORMAT).utc(),
-            mostart = moment(this._last_dates[0], ODOO_DATETIME_MOMENT_FORMAT).utc(),
-            moend = moment(this._last_dates[1], ODOO_DATETIME_MOMENT_FORMAT).utc(),
+        var mstart = moment(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT),
+            mend = moment(domains['dates'][1], ODOO_DATETIME_MOMENT_FORMAT),
+            mostart = moment(this._last_dates[0], ODOO_DATETIME_MOMENT_FORMAT),
+            moend = moment(this._last_dates[1], ODOO_DATETIME_MOMENT_FORMAT),
             dfrom = domains['dates'][0],
             dto = domains['dates'][1];
         if (mstart.isBetween(mostart, moend) && mend.isAfter(moend)) {
@@ -950,8 +950,8 @@ var HotelCalendarView = View.extend({
         var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
 
-        var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT);
-        var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate()).endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT);
+        var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).local().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT);
+        var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate()).local().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT);
 
         return {
             'rooms': domainRooms,

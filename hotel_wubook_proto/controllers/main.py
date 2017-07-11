@@ -26,6 +26,7 @@ _logger = logging.getLogger(__name__)
 
 
 class website_wubook(http.Controller):
+    # Called when created a reservation in wubook
     @http.route(['/wubook/push/reservations'], type='http', cors="*",
                 auth="public", methods=['POST'], website=True, csrf=False)
     def wubook_push_reservations(self, **kwargs):
@@ -50,15 +51,13 @@ class website_wubook(http.Controller):
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
 
+    # Called when modify room values (Delay: ~5mins)
     @http.route(['/wubook/push/rooms'], type='http', cors="*",
                 auth="public", methods=['POST'], website=True, csrf=False)
     def wubook_push_rooms(self, **kwargs):
         lcode = kwargs.get('lcode')
         dfrom = kwargs.get('dfrom')
         dto = kwargs.get('dto')
-
-        _logger.info("PASA PUSH ROOMS!")
-        _logger.info(kwargs)
 
         # Correct Input?
         if not lcode or not dfrom or not dto:

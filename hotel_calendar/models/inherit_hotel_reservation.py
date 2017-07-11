@@ -129,12 +129,7 @@ class HotelReservation(models.Model):
     @api.multi
     def get_hcalendar_all_data(self, dfrom, dto, domainRooms, domainReservations, withRooms=True, withPricelist=True):
         if not dfrom or not dto:
-            return {
-                'rooms': [],
-                'reservations': [],
-                'tooltips': {},
-                'pricelist': {}
-            }
+            raise ValidationError('Input Error: No dates defined!')
 
         domainRooms = domainRooms or []
         domainReservations = domainReservations or []
