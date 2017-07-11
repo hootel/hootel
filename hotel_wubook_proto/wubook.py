@@ -548,13 +548,13 @@ class WuBook(models.TransientModel):
                         'avail': 0 if not day_vals.get('avail') else day_vals['avail'],
                     }
                     if vroom_avail:
-                        virtual_room_avail_obj.write(vals)
+                        vroom_avail.with_context({'wubook_action': False}).write(vals)
                     else:
                         vals.update({
                             'virtual_room_id': vroom.id,
                             'date': date_str,
                         })
-                        virtual_room_avail_obj.create(vals)
+                        virtual_room_avail_obj.with_context({'wubook_action': False}).create(vals)
                     date_dt = date_dt + timedelta(days=1)
 
         return True
