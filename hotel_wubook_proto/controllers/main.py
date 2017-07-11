@@ -29,15 +29,19 @@ class website_wubook(http.Controller):
     @http.route(['/wubook/push/reservations'], type='http', cors="*",
                 auth="public", methods=['POST'], website=True, csrf=False)
     def wubook_push_reservations(self, **kwargs):
-        rcode = kwargs['rcode']
-        lcode = kwargs['lcode']
+        rcode = kwargs.get('rcode')
+        lcode = kwargs.get('lcode')
+
+        # Correct Input?
+        if not lcode or not rcode:
+            raise ValidationError('Invalid Input Parameters!')
 
         # WuBook Check
         if rcode == '2000' and lcode == '1000':
             return request.make_response('200 OK', [('Content-Type', 'text/plain')])
 
         # Poor Security Check
-        wlcode = request.env['ir.values'].get_default('wubook.config.settings', 'wubook_lcode')
+        wlcode = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
         if lcode != wlcode:
             raise ValidationError("Error! lcode doesn't match!")
 
@@ -49,19 +53,23 @@ class website_wubook(http.Controller):
     @http.route(['/wubook/push/rooms'], type='http', cors="*",
                 auth="public", methods=['POST'], website=True, csrf=False)
     def wubook_push_rooms(self, **kwargs):
-        lcode = kwargs['lcode']
-        dfrom = kwargs['dfrom']
-        dto = kwargs['dto']
+        lcode = kwargs.get('lcode')
+        dfrom = kwargs.get('dfrom')
+        dto = kwargs.get('dto')
+
+        # Correct Input?
+        if not lcode or not dfrom or not dto:
+            raise ValidationError('Invalid Input Parameters!')
 
         # Poor Security Check
-        wlcode = request.env['ir.values'].get_default('wubook.config.settings', 'wubook_lcode')
+        wlcode = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
         if lcode != wlcode:
             raise ValidationError("Error! lcode doesn't match!")
 
-        #request.env['wubook'].sudo().fetch_rooms_values(dfrom, dto)
-        #request.env['wubook'].sudo().fetch_all_plan_prices(dfrom, dto)
-        #request.env['wubook'].sudo().fetch_all_plan_prices(dfrom, dto)
-        # {'dfrom': u'22/06/2017', 'dto': u'24/06/2017', 'lcode': u'NUM'}
-        # More Info: http://tdocs.wubook.net/wired/avail.html?highlight=fetch_rooms_values#fetch_rooms_values
+        request.env['wubook'].sudo().fetch_rooms_values(dfrom, dto)
+        request.env['wubook'].sudo().fetch_rplan_restrictions(dfrom, dto)
+        pricelist_id = int(self.env['ir.property'].sudo().search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+        if pricelist_id and pricelist_id.wpid:
+            request.env['wubook'].sudo().fetch_plan_prices(pricelist_id.wpid, dfrom, dto)
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])

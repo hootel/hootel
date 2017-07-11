@@ -1,5 +1,4 @@
-/*jslint devel: true, browser: true, unparam: true, nomen: true, vars: true, debug: false, white: true, maxerr: 50, indent: 4 */
-/*global $, odoo, _, HotelCalendar, moment*/
+/* global $, odoo, _, HotelCalendar, moment */
 odoo.define('hotel_calendar.HotelCalendarView', function (require) {
 "use strict";
 /*
@@ -857,7 +856,8 @@ var HotelCalendarView = View.extend({
                 }
                 break;
               case 'pricelist':
-                need_reload_pricelists = true;
+                var price = notif[1]['price'];
+                this._hcalendar.addPricelist(price);
                 break;
               default:
                 // Do Nothing
@@ -883,9 +883,6 @@ var HotelCalendarView = View.extend({
         } else {
           clearReservations = true;
         }
-
-        console.log(dfrom);
-        console.log(dto);
 
         var full_domain = [false, dfrom, dto, domains['rooms'] || [], domains['reservations'] || [], false, withPricelist || false];
         this._model.call('get_hcalendar_all_data', full_domain).then(function(results){

@@ -19,4 +19,5 @@
 #
 ##############################################################################
 from . import inherit_hotel_reservation
+from . import inherit_product_pricelist_item
 from . import bus_hotel_calendar

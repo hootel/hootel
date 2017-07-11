@@ -18,6 +18,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from datetime import datetime
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from openerp import models, api
 
 
@@ -62,6 +64,21 @@ class BusHotelCalendar(models.TransientModel):
         }
 
     @api.model
+    def _generate_pricelist_notification(self, pricelist, date, vroom, price):
+        date_dt = datetime.strptime(date, DEFAULT_SERVER_DATE_FORMAT)
+        return {
+            'type': 'pricelist',
+            'price': {
+                pricelist: [{
+                    'days': {
+                        date_dt.strftime("%d/%m/%Y"): price,    # WuBook European Format
+                    },
+                    'room': vroom,
+                }],
+            },
+        }
+
+    @api.model
     def send_reservation_notification(self, action, ntype, title, product_id,
                                       reserv_id, partner_name, adults, children,
                                       checkin, checkout, folio_id, color,
@@ -76,19 +93,6 @@ class BusHotelCalendar(models.TransientModel):
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', 'public'), notif)
 
     @api.model
-    def send_pricelist_notification(self, ntype, title, name, checkin, checkout, room_name):
-        user_id = self.env['res.users'].browse(self.env.uid)
-        notification = {
-            'type': 'reservation',
-            'subtype': ntype,
-            'title': title,
-            'username': user_id.partner_id.name,
-            'userid': user_id.id,
-            'reservation': {
-                'name': name,
-                'checkin': checkin,
-                'checkout': checkout,
-                'room_name': room_name,
-            },
-        }
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', 'public'), notification)
+    def send_pricelist_notification(self, pricelist, date, vroom, price):
+        notif = self._generate_pricelist_notification(pricelist, date, vroom, price)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', 'public'), notif)

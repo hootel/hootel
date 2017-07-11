@@ -185,8 +185,10 @@ class HotelReservation(models.Model):
         date_diff = abs((date_start - date_end).days)
 
         hotel_vroom_obj = self.env['hotel.virtual.room']
+        virtual_room_avail_obj = self.env['virtual.room.availability']
+
         rooms_avail = []
-        vrooms = self.env['hotel.virtual.room'].search([('room_ids.product_id', '=', product_id)])
+        vrooms = hotel_vroom_obj.search([('room_ids.product_id', '=', product_id)])
         for vroom in vrooms:
             if vroom.wrid != 'none':
                 rdays = []
@@ -198,11 +200,11 @@ class HotelReservation(models.Model):
                                                                                 vroom.id))
                     if not dbchanged:
                         avail = avail - 1
-                    vroom_avail_id = self.env['virtal.room.availability'].search([
+                    vroom_avail_id = virtual_room_avail_obj.search([
                         ('virtual_room_id', '=', vroom.id),
                         ('date', '=', ndate_str)], limit=1)
                     max_avail = vroom.max_real_rooms
-                    if vroom_avail_id and vroom_avail_id.avail != -1:
+                    if vroom_avail_id:
                         max_avail = vroom_avail_id.avail
                     avail = min(avail, max_avail)
                     rdays.append({
