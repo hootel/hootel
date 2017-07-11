@@ -150,6 +150,10 @@ HotelCalendar.prototype = {
   },
 
   setReservations: function(/*List*/reservations) {
+    var ids = _.pluck(this.reservations, 'id');
+    for (var id of ids) {
+      this.removeReservation(id, true);
+    }
     this.reservations = [];
     this.addReservations(reservations);
   },
@@ -1212,7 +1216,7 @@ HotelCalendar.prototype = {
 
       // Delete Reservations with errors
       for (var reservID of errors) {
-        this.removeReservation(reservID);
+        this.removeReservation(reservID, true);
       }
 
       //this.assignReservationsEvents_();
@@ -1343,7 +1347,6 @@ HotelCalendar.prototype = {
         var pr_item = pricelist[k][pr_k];
         var pr_fk = _.findKey(this._pricelist[k], {'room': pr_item.room});
         if (pr_fk) {
-          console.log("ENCONTRADO");
           this._pricelist[k][pr_fk].room = pr_item.room;
           this._pricelist[k][pr_fk].days = _.extend(this._pricelist[k][pr_fk].days, pr_item.days);
           if (pr_item.title) {
@@ -1374,7 +1377,6 @@ HotelCalendar.prototype = {
         for (var prk of pr_keys) {
           var dd = HotelCalendar.toMoment(prk, HotelCalendar.DATE_FORMAT_SHORT_);
           var price = pr_item['days'][prk];
-          console.log("SET PTICE: " + price);
           var cell_input = this.edtable.querySelector('#'+this.sanitizeId_(`CELL_PRICE_${k}_${pr_item['room']}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`)+' input');
           if (cell_input) {
             cell_input.value = price;
