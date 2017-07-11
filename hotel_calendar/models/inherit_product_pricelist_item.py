@@ -40,7 +40,7 @@ class ProductPricelistItem(models.Model):
                 pricelist_item_id.date_start,
                 vroom.id,
                 prod.price)
-        return reservation_id
+        return pricelist_item_id
 
     @api.multi
     def write(self, vals):
