@@ -57,28 +57,23 @@ class website_wubook(http.Controller):
         dfrom = kwargs.get('dfrom')
         dto = kwargs.get('dto')
 
-        _logger.info("PASA AAA")
+        _logger.info("PASA PUSH ROOMS!")
+        _logger.info(kwargs)
 
         # Correct Input?
         if not lcode or not dfrom or not dto:
             raise ValidationError('Invalid Input Parameters!')
-
-        _logger.info("PASA bbb")
 
         # Poor Security Check
         wlcode = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
         if lcode != wlcode:
             raise ValidationError("Error! lcode doesn't match!")
 
-        _logger.info("PASA ccc")
-
         request.env['wubook'].sudo().fetch_rooms_values(dfrom, dto)
         request.env['wubook'].sudo().fetch_rplan_restrictions(dfrom, dto)
-        pricelist = int(self.env['ir.property'].sudo().search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+        pricelist = int(request.env['ir.property'].sudo().search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
         pricelist_id = request.env['product.pricelist'].sudo().browse(pricelist)
         if pricelist_id and pricelist_id.wpid:
             request.env['wubook'].sudo().fetch_plan_prices(pricelist_id.wpid, dfrom, dto)
-
-        _logger.info("PASA fff")
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
