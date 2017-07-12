@@ -22,7 +22,7 @@ import xmlrpclib
 import pytz
 from datetime import datetime, timedelta
 from urlparse import urljoin
-from openerp import models, api
+from openerp import models, api, fields
 from openerp.exceptions import UserError, ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 import logging
@@ -328,6 +328,21 @@ class WuBook(models.TransientModel):
         return True
 
     @api.model
+    def update_plan_prices(self, pid, dfrom, prices):
+        self.init_connection_()
+        rcode, results = self.SERVER.update_plan_prices(self.TOKEN,
+                                                        self.LCODE,
+                                                        pid,
+                                                        dfrom,
+                                                        prices)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't update pricing plan in wubook: %s" % results)
+
+        return True
+
+    @api.model
     def update_plan_periods(self, pid, periods):
         _logger.info(periods)
         self.init_connection_()
@@ -338,7 +353,7 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            raise ValidationError("Can't update pricing plan name in wubook: %s" % results)
+            raise ValidationError("Can't update pricing plan period in wubook: %s" % results)
 
         return True
 
@@ -839,9 +854,67 @@ class WuBook(models.TransientModel):
                 channel_info_obj.create(vals)
 
     @api.model
+    def push_changes(self):
+        self.push_availability()
+        self.push_priceplans()
+
+    @api.model
     def push_availability(self):
         vroom_avail_ids = self.env['virtual.room.availability'].search([
-            ('wpushed', '=', False)
+            ('wpushed', '=', False),
+            ('date', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))
         ])
-        for vroom_avail in vroom_avail_ids:
-            vroom_avail.write({'wpushed': True})
+
+        vrooms = vroom_avail_ids.mapped('virtual_room_id')
+        avails = []
+        for vroom in vrooms:
+            vroom_avails = vroom_avail_ids.filtered(lambda x: x.virtual_room_id.id == vroom.id)
+            days = []
+            for vroom_avail in vroom_avails:
+                vroom_avail.with_context({'wubook_action': False}).write({'wpushed': True})
+                date_dt = datetime.strptime(vroom_avail.date, DEFAULT_SERVER_DATE_FORMAT)
+                days.append({
+                    'date': date_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    'avail': vroom_avail.avail,
+                    'no_ota': vroom_avail.no_ota and 1 or 0,
+                    # 'booked': vroom_avail.booked and 1 or 0,
+                })
+            avails.append({'id': vroom.wrid, 'days': days})
+        _logger.info(avails)
+        if any(avails):
+            self.update_availability(avails)
+
+    @api.model
+    def push_priceplans(self):
+        unpushed = self.env['product.pricelist.item'].search([('wpushed', '=', False), ('date_start', '!=', False)], order="date_start ASC")
+        if any(unpushed):
+            date_start = datetime.strptime(unpushed[0].date_start, DEFAULT_SERVER_DATE_FORMAT)
+            date_end = datetime.strptime(unpushed[-1].date_start, DEFAULT_SERVER_DATE_FORMAT)
+            days_diff = abs((date_end-date_start).days) + 1
+
+            prices = {}
+            pricelist_ids = self.env['product.pricelist'].search([('wpid', '!=', False), ('active', '=', True)])
+            for pr in pricelist_ids:
+                prices.update({pr.wpid: {}})
+                unpushed_pl = self.env['product.pricelist.item'].search(
+                    [('wpushed', '=', False), ('pricelist_id', '=', pr.id)])
+                product_tmpl_ids = unpushed_pl.mapped('product_tmpl_id')
+                for pt_id in product_tmpl_ids:
+                    vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', pt_id.id)], limit=1)
+                    if vroom:
+                        prices[pr.wpid].update({vroom.wrid: []})
+                        for i in range(0, days_diff):
+                            prod = vroom.product_id.with_context({
+                                    'quantity': 1,
+                                    'pricelist': pr.id,
+                                    'date': (date_start + timedelta(days=i)).strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                })
+                            prices[pr.wpid][vroom.wrid].append(prod.price)
+            plan_keys = prices.keys()
+            for pk in plan_keys:
+                if any(prices[pk]):
+                    self.update_plan_prices(pk, date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT), prices[pk])
+
+            _logger.info(prices)
+            for pli in unpushed:
+                pli.with_context({'wubook_action': False}).write({'wpushed': True})

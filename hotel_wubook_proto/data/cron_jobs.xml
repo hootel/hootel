@@ -8,11 +8,11 @@
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
-            <field name="doal">1</field>
+            <field name="doall">0</field>
             <field name="model" eval="'wubook'" />
-            <field name="function" eval="'push_availability'" />
+            <field name="function" eval="'push_changes'" />
             <field name="args" eval="" />
-        </record>
+          </record>
 
 <!--          <record id="wubook_corporate_fetch" model="ir.cron">
             <field name="name">WuBook Corporate Fetchable Properties</field>

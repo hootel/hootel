@@ -25,3 +25,9 @@ class ReservationRestrictionItem(models.Model):
     _inherit = 'reservation.restriction.item'
 
     wpushed = fields.Boolean("WuBook Pushed", default=False, readonly=True)
+
+    @api.multi
+    def write(self, vals):
+        if self._context.get('wubook_action', True):
+            vals.update({'wpushed': False})
+        return super(ReservationRestrictionItem, self).write(vals)

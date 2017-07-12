@@ -24,11 +24,12 @@ from openerp import models, fields, api
 class VirtualRoomAvailability(models.Model):
     _inherit = 'virtual.room.availability'
 
-    wpushed = fields.Booelan("WuBook Pushed", readonly=True, default=False)
+    wpushed = fields.Boolean("WuBook Pushed", readonly=True, default=False)
 
     @api.multi
     def write(self, vals):
-        vals.update({'wpushed': False})
+        if self._context.get('wubook_action', True):
+            vals.update({'wpushed': False})
         return super(VirtualRoomAvailability, self).write(vals)
 
     # @api.multi
