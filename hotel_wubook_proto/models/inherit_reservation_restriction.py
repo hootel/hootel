@@ -29,6 +29,7 @@ class ReservationRestriction(models.Model):
     _inherit = 'reservation.restriction'
 
     wpid = fields.Char("WuBook Plan ID", readonly=True)
+    wdaily = fields.Char("Plan Daily", default=True, readonly=True)
 
     @api.multi
     def get_wubook_restrictions(self):
@@ -66,9 +67,13 @@ class ReservationRestriction(models.Model):
         if self._context.get('wubook_action', True):
             wpid = self.env['wubook'].create_rplan(vals['name'])
             vals.update({'wpid': wpid})
-        restriction = super(ReservationRestriction, self).create(vals)
 
         rules = self._context.get('rules')
+        if rules:
+            vals.update({'wdaily': False})
+
+        restriction = super(ReservationRestriction, self).create(vals)
+
         if rules:
             # Basic Rules
             self.env['reservation.restriction.item'].with_context({'wubook_action': False}).create({

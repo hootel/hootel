@@ -446,6 +446,21 @@ class WuBook(models.TransientModel):
         return True
 
     @api.model
+    def update_rplan_values(self, rpid, dfrom, values):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_update_rplan_values(self.TOKEN,
+                                                               self.LCODE,
+                                                               rpid,
+                                                               dfrom,
+                                                               values)
+        self.close_connection_()
+
+        if rcode != 0:
+            raise ValidationError("Can't update plan restrictions on wubook: %s" % results)
+
+        return True
+
+    @api.model
     def create_rplan(self, name, compact=False):
         self.init_connection_()
         rcode, results = self.SERVER.rplan_add_rplan(self.TOKEN,
@@ -577,6 +592,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def generate_restrictions(self, restriction_plans):
+        _logger.info(restriction_plans)
         reservation_restriction_obj = self.env['reservation.restriction']
         for plan in restriction_plans:
             vals = {
@@ -589,7 +605,7 @@ class WuBook(models.TransientModel):
                 })
                 reservation_restriction_obj.with_context({
                     'wubook_action': False,
-                    'rules': plan['rules']
+                    'rules': plan.get('rules'),
                 }).create(vals)
             else:
                 plan_id.with_context({'wubook_action': False}).write(vals)
@@ -860,6 +876,7 @@ class WuBook(models.TransientModel):
     def push_changes(self):
         self.push_availability()
         self.push_priceplans()
+        # self.push_restrictions()
 
     @api.model
     def push_availability(self):
@@ -889,14 +906,17 @@ class WuBook(models.TransientModel):
 
     @api.model
     def push_priceplans(self):
-        unpushed = self.env['product.pricelist.item'].search([('wpushed', '=', False), ('date_start', '!=', False)], order="date_start ASC")
+        unpushed = self.env['product.pricelist.item'].search([('wpushed', '=', False),
+                                                              ('date_start', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))],
+                                                             order="date_start ASC")
         if any(unpushed):
             date_start = datetime.strptime(unpushed[0].date_start, DEFAULT_SERVER_DATE_FORMAT)
             date_end = datetime.strptime(unpushed[-1].date_start, DEFAULT_SERVER_DATE_FORMAT)
             days_diff = abs((date_end-date_start).days) + 1
 
             prices = {}
-            pricelist_ids = self.env['product.pricelist'].search([('wpid', '!=', False), ('active', '=', True)])
+            pricelist_ids = self.env['product.pricelist'].search([('wpid', '!=', False),
+                                                                  ('active', '=', True)])
             for pr in pricelist_ids:
                 prices.update({pr.wpid: {}})
                 unpushed_pl = self.env['product.pricelist.item'].search(
@@ -913,11 +933,51 @@ class WuBook(models.TransientModel):
                                     'date': (date_start + timedelta(days=i)).strftime(DEFAULT_SERVER_DATE_FORMAT),
                                 })
                             prices[pr.wpid][vroom.wrid].append(prod.price)
+            _logger.info(prices)
             plan_keys = prices.keys()
             for pk in plan_keys:
                 if any(prices[pk]):
                     self.update_plan_prices(pk, date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT), prices[pk])
 
-            _logger.info(prices)
             for pli in unpushed:
                 pli.with_context({'wubook_action': False}).write({'wpushed': True})
+
+    @api.model
+    def push_restrictions(self):
+        unpushed = self.env['reservation.restriction.item'].search([('wpushed', '=', False),
+                                                                    ('date_start', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))],
+                                                                   order="date_start ASC")
+        if any(unpushed):
+            date_start = datetime.strptime(unpushed[0].date_start, DEFAULT_SERVER_DATE_FORMAT)
+            date_end = datetime.strptime(unpushed[-1].date_start, DEFAULT_SERVER_DATE_FORMAT)
+            days_diff = abs((date_end-date_start).days) + 1
+
+            restrictions = {}
+            restriction_plan_ids = self.env['reservation.restriction'].search([('wpid', '!=', False),
+                                                                               ('active', '=', True)])
+            for rp in restriction_plan_ids:
+                restrictions.update({rp.wpid: {}})
+                unpushed_rp = self.env['reservation.restriction.item'].search(
+                    [('wpushed', '=', False), ('restriction_id', '=', rp.id)])
+                virtual_room_ids = unpushed_rp.mapped('virtual_room_id')
+                for vroom in virtual_room_ids:
+                    restrictions[rp.wpid].update({vroom.wrid: []})
+                    for i in range(0, days_diff):
+                        restr = vroom.get_restrictions(date_start.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                        restrictions[rp.wpid][vroom.wrid].append({
+                            'min_stay': restr and restr.min_stay or 0,
+                            'min_stay_arrival': restr and restr.min_stay_arrival or 0,
+                            'max_stay': restr and restr.max_stay or 0,
+                            'closed': (restr and restr.closed) and 1 or 0,
+                            'closed_arrival': (restr and restr.closed_arrival) and 1 or 0,
+                            'closed_departure': (restr and restr.closed_departure) and 1 or 0,
+                        })
+            _logger.info(restrictions)
+            plan_keys = restrictions.keys()
+            for pk in plan_keys:
+                if any(restrictions[pk]):
+                    self.update_rplan_values(pk,
+                                             date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                                             restrictions[pk])
+            for rpi in unpushed:
+                rpi.with_context({'wubook_action': False}).write({'wpushed': True})

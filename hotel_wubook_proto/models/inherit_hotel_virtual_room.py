@@ -61,6 +61,27 @@ class HotelVirtualRoom(models.Model):
             if len(record.wscode) > 4:  # Wubook scode max. length
                 raise ValidationError(_("SCODE Can't be longer than 4 characters"))
 
+    @api.multi
+    def get_restrictions(self, date):
+        restriction_plan_id = 4     # TODO: Campo para establecer el plan de restricciones activo
+        self.ensure_one()
+        restriction = self.env['reservation.restriction.item'].search([
+            ('date_start', '=', date),
+            ('date_end', '=', date),
+            ('virtual_room_id', '=', self.id),
+            ('restriction_id', '=', restriction_plan_id)
+        ], limit=1)
+        if restriction:
+            return restriction
+        else:
+            global_restr = self.env['reservation.restriction.item'].search([
+                ('applied_on', '=', '1_global'),
+                ('restriction_id', '=', restriction_plan_id)
+            ], limit=1)
+            if global_restr:
+                return global_restr
+        return False
+
     @api.model
     def create(self, vals):
         vroom = super(HotelVirtualRoom, self).create(vals)

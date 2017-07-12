@@ -12,6 +12,7 @@
 					</xpath>
         	<xpath expr="//field[@name='active']" position="after">
         		<field name="wpid" />
+						<field name="wdaily" />
         	</xpath>
         </field>
     </record>
