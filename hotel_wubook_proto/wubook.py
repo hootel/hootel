@@ -561,6 +561,7 @@ class WuBook(models.TransientModel):
                         'no_ota': day_vals.get('no_ota'),
                         'booked': day_vals.get('booked'),
                         'avail': 0 if not day_vals.get('avail') else day_vals['avail'],
+                        'wpushed': True,
                     }
                     if vroom_avail:
                         vroom_avail.with_context({'wubook_action': False}).write(vals)
@@ -620,6 +621,7 @@ class WuBook(models.TransientModel):
                                 'closed_departure': item['closed_departure'],
                                 'max_stay': item['max_stay'],
                                 'min_stay_arrival': item['min_stay_arrival'],
+                                'wpushed': True,
                             }
                             if restriction_item:
                                 restriction_item.with_context({'wubook_action': False}).write(vals)
@@ -657,6 +659,7 @@ class WuBook(models.TransientModel):
                         ], limit=1)
                         vals = {
                             'fixed_price': plan_prices[rid][i],
+                            'wpushed': True,
                         }
                         if pricelist_item:
                             pricelist_item.with_context({'wubook_action': False}).write(vals)
