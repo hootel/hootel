@@ -911,13 +911,13 @@ class WuBook(models.TransientModel):
                                     'reservation_lines': reservation_lines,
                                     'name': free_rooms[customer_room_index].name,
                                     'price_unit': tprice,
-                                    'to_assign': True,
+                                    'to_assign': not is_cancellation,
                                     'wrid': str(book['reservation_code']),
                                     'wchannel_id': wchannel_info and wchannel_info.id,
                                     'wchannel_reservation_code': str(book['channel_reservation_code']),
                                     'wstatus': str(book['status']),
                                     'to_read': True,
-                                    'state': 'draft',
+                                    'state': is_cancellation and 'cancelled' or 'draft',
                                     'virtual_room_id': vroom.id,
                                 }
                                 reservations.append((0, False, vals))
