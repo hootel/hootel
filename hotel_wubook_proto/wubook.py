@@ -786,6 +786,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def generate_reservations(self, bookings):
+        user_id = self.env['res.users'].browse(self.env.uid)
+        local = pytz.timezone(user_id and user_id.tz or 'UTC')
         _logger.info("GENERATIE RESERV!-------------------------------------")
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
@@ -857,7 +859,6 @@ class WuBook(models.TransientModel):
             # Search Wubook Channel Info
             wchannel_info = self.env['wubook.channel.info'].search([('wid', '=', str(book['id_channel']))], limit=1)
             # Obtener habitacion libre
-            local = pytz.timezone(self.env.context.get('tz', 'UTC'))
             arr_hour = book['arrival_hour'] == "--" and '14:00' or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)
             checkin_dt = local.localize(datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT))
