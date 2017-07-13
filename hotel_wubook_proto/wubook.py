@@ -804,12 +804,17 @@ class WuBook(models.TransientModel):
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
 
+            if not folio_id:
+                reserv_folio = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))], limit=1)
+                if reserv_folio:
+                    folio_id = reserv_folio.folio_id
+
             # Can't cancel if not exists
             if is_cancellation and not folio_id:
                 errors = True
                 self.create_wubook_issue('reservation',
                                          "Can't cancel a reservation that not exists!",
-                                         '', wid= book['reservation_code'])
+                                         '', wid=book['reservation_code'])
                 continue
 
             reservs = folio_id and folio_id.room_lines or hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])

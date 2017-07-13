@@ -35,7 +35,7 @@ class WuBookIssue(models.Model):
     to_read = fields.Boolean("To Read", default=True)
     message = fields.Char("Internal Message")
     date_start = fields.Date("From")
-    date_end = fields.Date("From")
+    date_end = fields.Date("To")
     wid = fields.Char("WuBook ID")
     wmessage = fields.Char("WuBook Message")
 
