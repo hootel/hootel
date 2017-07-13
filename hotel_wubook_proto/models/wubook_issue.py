@@ -21,13 +21,32 @@
 from openerp import models, fields, api
 
 
-class WuBookChannelInfo(models.Model):
-    _name = 'wubook.channel.info'
+class WuBookIssue(models.Model):
+    _inherit = ['ir.needaction_mixin']
+    _name = 'wubook.issue'
 
-    wid = fields.Char("WuBook Channel ID", required=True)
-    name = fields.Char("Channel Name", required=True)
-    ical = fields.Boolean("ical", default=False)
+    section = fields.Selection([
+        ('wubook', 'WuBook'),
+        ('reservation', 'Reservation'),
+        ('rplan', 'Restriction Plan'),
+        ('plan', 'Price Plan'),
+        ('room', 'Room'),
+        ('avail', 'Availability')], required=True)
+    to_read = fields.Boolean("To Read", default=True)
+    message = fields.Char("Internal Message")
+    wid = fields.Char("WuBook ID")
+    wmessage = fields.Char("WuBook Message")
 
     @api.multi
-    def import_channels_info(self):
-        return self.env['wubook'].import_channels_info()
+    def mark_readed(self):
+        for record in self:
+            record.to_read = False
+
+    @api.multi
+    def toggle_to_read(self):
+        for record in self:
+            record.to_read = not record.to_read
+
+    @api.model
+    def _needaction_domain_get(self):
+        return [('to_read', '=', True)]

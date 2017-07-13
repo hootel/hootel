@@ -19,6 +19,7 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, timedelta
 import logging
@@ -93,6 +94,8 @@ class ProductPricelist(models.Model):
         if self._context.get('wubook_action', True):
             wpid = self.env['wubook'].create_plan(vals['name'],
                                                   vals.get('wdaily') and 1 or 0)
+            if not wpid:
+                raise ValidationError("Can't create plan on WuBook")
             vals.update({'wpid': wpid})
         pricelist = super(ProductPricelist, self).create(vals)
 #         if self._context.get('wubook_action', True):
@@ -106,8 +109,10 @@ class ProductPricelist(models.Model):
         nname = vals.get('name')
         if self._context.get('wubook_action', True) and nname:
             for record in self:
-                self.env['wubook'].update_plan_name(vals.get('wpid', record.wpid),
-                                                    nname)
+                wres = self.env['wubook'].update_plan_name(vals.get('wpid', record.wpid),
+                                                           nname)
+                if not wres:
+                    raise ValidationError("Can't update plan name on WuBook")
         updated = super(ProductPricelist, self).write(vals)
 #         if updated and self._context.get('wubook_action', True):
 #             pricelist = self.browse(self.id)
@@ -120,10 +125,11 @@ class ProductPricelist(models.Model):
     def unlink(self):
         if self._context.get('wubook_action', True):
             for record in self:
-                self.env['wubook'].delete_plan(record.wpid)
+                wres = self.env['wubook'].delete_plan(record.wpid)
+                if not wres:
+                    raise ValidationError("Can't delete plan on WuBook")
         return super(ProductPricelist, self).unlink()
 
     @api.multi
     def import_price_plans(self):
-        self.env['wubook'].get_pricing_plans()
-        return True
+        return self.env['wubook'].import_pricing_plans()

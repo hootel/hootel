@@ -104,12 +104,12 @@ class HotelReservation(models.Model):
         date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
         date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
         # Get Prices
-        date_diff = abs((date_start - date_end).days)
+        date_diff = abs((date_start - date_end).days) + 1
         json_rooms_prices = {pricelist_id: []}
         vrooms = self.env['hotel.virtual.room'].search([])
         for vroom in vrooms:
             days = {}
-            for i in range(0, date_diff + 1):
+            for i in range(0, date_diff):
                 ndate = date_start + timedelta(days=i)
                 ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
                 prod = vroom.product_id.with_context(

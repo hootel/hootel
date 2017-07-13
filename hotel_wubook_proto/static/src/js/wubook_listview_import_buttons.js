@@ -8,12 +8,25 @@ odoo.define('wubook.listview_button_import_rooms', function(require) {
  */
 
 var ListView = require('web.ListView');
+var Core = require('web.core');
+
+var _t = Core._t;
 
 function import_rooms(){
 	var self = this;
     this.dataset._model.call('import_rooms', [false]).then(function(results){
+			if (!results[0]) {
+				self.do_warn(_t('Operation Errors'), _t('Errors while importing rooms. See issues registry.'), true);
+			}
+			if (results[0] || results[1] > 0) {
+				if (results[1] > 0) {
+					self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Rooms successfully imported'), false);
+				} else {
+					self.do_notify(_t('Operation Success'), _t('No new rooms found. All are done.'), false);
+				}
         var active_view = self.ViewManager.active_view;
         active_view.controller.reload(); // list view only has reload
+			}
 	});
 
 	return false;
@@ -22,8 +35,19 @@ function import_rooms(){
 function import_reservations(){
 	var self = this;
 	this.dataset._model.call('import_reservations', [false]).then(function(results){
-        var active_view = self.ViewManager.active_view;
-        active_view.controller.reload(); // list view only has reload
+		console.log(results);
+		if (!results[0]) {
+			self.do_warn(_t('Operation Errors'), _t('Errors while importing reservations. See issues registry.'), true);
+		}
+		if (results[0] || results[1] > 0) {
+			if (results[1] > 0) {
+				self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Reservations successfully imported'), false);
+			} else {
+				self.do_notify(_t('Operation Success'), _t('No new reservations found. All are done.'), false);
+			}
+			var active_view = self.ViewManager.active_view;
+      active_view.controller.reload(); // list view only has reload
+		}
 	});
 
 	return false;
@@ -32,8 +56,18 @@ function import_reservations(){
 function import_price_plans(){
 	var self = this;
 	this.dataset._model.call('import_price_plans', [false]).then(function(results){
-        var active_view = self.ViewManager.active_view;
-        active_view.controller.reload(); // list view only has reload
+		if (!results[0]) {
+			self.do_warn(_t('Operation Errors'), _t('Errors while importing price plans from WuBook. See issues log.'), true);
+		}
+		if (results[0] || results[1] > 0) {
+			if (results[1] > 0) {
+				self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Price Plans successfully imported'), false);
+			} else {
+				self.do_notify(_t('Operation Success'), _t('No new price plans found. All are done.'), false);
+			}
+      var active_view = self.ViewManager.active_view;
+      active_view.controller.reload(); // list view only has reload
+		}
 	});
 
 	return false;
@@ -42,8 +76,18 @@ function import_price_plans(){
 function import_channels_info(){
 	var self = this;
 	this.dataset._model.call('import_channels_info', [false]).then(function(results){
-        var active_view = self.ViewManager.active_view;
-        active_view.controller.reload(); // list view only has reload
+		if (!results[0]) {
+			self.do_warn(_t('Operation Errors'), _t('Errors while importing channels info from WuBook. See issues log.'), true);
+		}
+		if (results[0] || results[1] > 0) {
+			if (results[1] > 0) {
+				self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Channels Info successfully imported'), false);
+			} else {
+				self.do_notify(_t('Operation Success'), _t('No new channels info found. All are done.'), false);
+			}
+      var active_view = self.ViewManager.active_view;
+      active_view.controller.reload(); // list view only has reload
+		}
 	});
 
 	return false;
@@ -52,8 +96,18 @@ function import_channels_info(){
 function import_restriction_plans(){
 	var self = this;
 	this.dataset._model.call('import_restriction_plans', [false]).then(function(results){
-        var active_view = self.ViewManager.active_view;
-        active_view.controller.reload(); // list view only has reload
+		if (!results[0]) {
+			self.do_warn(_t('Operation Errors'), _t('Errors while importing restriction plans from WuBook. See issues log.'), true);
+		}
+		if (results[0] || results[1] > 0) {
+			if (results[1] > 0) {
+				self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Restriction Plans successfully imported'), false);
+			} else {
+				self.do_notify(_t('Operation Success'), _t('No new restriction plans found. All are done.'), false);
+			}
+      var active_view = self.ViewManager.active_view;
+      active_view.controller.reload(); // list view only has reload
+		}
 	});
 
 	return false;

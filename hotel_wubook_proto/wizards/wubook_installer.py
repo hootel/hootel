@@ -50,4 +50,6 @@ class WuBookInstaller(models.TransientModel):
             self.env['ir.values'].set_default('wubook.config.settings', 'wubook_lcode', rec.wubook_lcode)
             self.env['ir.values'].set_default('wubook.config.settings', 'wubook_server', rec.wubook_server)
             self.env['ir.values'].set_default('wubook.config.settings', 'wubook_pkey', rec.wubook_pkey)
-        self.env['wubook'].initialize()
+        wres = self.env['wubook'].initialize()
+        if not wres:
+            raise ValidationError("Can't finish installation!")

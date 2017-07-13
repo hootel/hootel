@@ -31,11 +31,3 @@ class VirtualRoomAvailability(models.Model):
         if self._context.get('wubook_action', True):
             vals.update({'wpushed': False})
         return super(VirtualRoomAvailability, self).write(vals)
-
-    # @api.multi
-    # def unlink(self):
-    #     if self._context.get('wubook_action', True):
-    #         for record in self:
-    #             if record.wrid != 'none':
-    #                 self.env['wubook'].delete_room(record.wrid)
-    #     return super(HotelVirtualRoom, self).unlink()

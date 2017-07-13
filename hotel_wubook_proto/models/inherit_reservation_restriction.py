@@ -19,6 +19,7 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, timedelta
 import logging
@@ -66,6 +67,8 @@ class ReservationRestriction(models.Model):
     def create(self, vals):
         if self._context.get('wubook_action', True):
             wpid = self.env['wubook'].create_rplan(vals['name'])
+            if not wpid:
+                raise ValidationError("Can't create rplan on WuBook")
             vals.update({'wpid': wpid})
 
         rules = self._context.get('rules')
@@ -94,8 +97,10 @@ class ReservationRestriction(models.Model):
         nname = vals.get('name')
         if self._context.get('wubook_action', True) and nname:
             for record in self:
-                self.env['wubook'].rename_rplan(vals.get('wpid', record.wpid),
-                                                nname)
+                wres = self.env['wubook'].rename_rplan(vals.get('wpid', record.wpid),
+                                                       nname)
+                if not wres:
+                    raise ValidationError("Can't rname rplan on WuBook")
         updated = super(ReservationRestriction, self).write(vals)
         return updated
 
@@ -103,10 +108,11 @@ class ReservationRestriction(models.Model):
     def unlink(self):
         if self._context.get('wubook_action', True):
             for record in self:
-                self.env['wubook'].delete_rplan(record.wpid)
+                wres = self.env['wubook'].delete_rplan(record.wpid)
+                if not wres:
+                    raise ValidationError("Can't delete rplan on WuBook")
         return super(ReservationRestriction, self).unlink()
 
     @api.multi
     def import_restriction_plans(self):
-        self.env['wubook'].get_restriction_plans()
-        return True
+        return self.env['wubook'].import_restriction_plans()

@@ -50,6 +50,7 @@
         'views/inherit_reservation_restriction.xml',
         'views/inherit_reservation_restriction_item.xml',
         'views/wubook_channel_info.xml',
+        'views/wubook_issue.xml',
         'data/menus.xml',
         'data/sequences.xml',
         # 'views/res_config.xml'

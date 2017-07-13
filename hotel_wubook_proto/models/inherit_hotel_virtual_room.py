@@ -94,6 +94,8 @@ class HotelVirtualRoom(models.Model):
                 vroom.list_price,
                 vroom.max_real_rooms
             )
+            if not wrid:
+                raise ValidationError("Can't create room on WuBook")
             vroom.with_context(wubook_action=False).write({
                 'wrid': wrid,
                 'wscode': shortcode,
@@ -105,12 +107,14 @@ class HotelVirtualRoom(models.Model):
         if self._context.get('wubook_action', True):
             for record in self:
                 if record.wrid != 'none':
-                    self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
-                                                   vals.get('name', record.name),
-                                                   vals.get('wcapacity', record.wcapacity),
-                                                   vals.get('list_price', record.list_price),
-                                                   vals.get('max_real_rooms', record.max_real_rooms),
-                                                   vals.get('wscode', record.wscode))
+                    wres = self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
+                                                          vals.get('name', record.name),
+                                                          vals.get('wcapacity', record.wcapacity),
+                                                          vals.get('list_price', record.list_price),
+                                                          vals.get('max_real_rooms', record.max_real_rooms),
+                                                          vals.get('wscode', record.wscode))
+                    if not wres:
+                        raise ValidationError("Can't modify room on WuBook")
         return super(HotelVirtualRoom, self).write(vals)
 
     @api.multi
@@ -118,11 +122,11 @@ class HotelVirtualRoom(models.Model):
         if self._context.get('wubook_action', True):
             for record in self:
                 if record.wrid != 'none':
-                    self.env['wubook'].delete_room(record.wrid)
+                    wres = self.env['wubook'].delete_room(record.wrid)
+                    if not wres:
+                        raise ValidationError("Can't delete room on WuBook")
         return super(HotelVirtualRoom, self).unlink()
 
     @api.multi
     def import_rooms(self):
-        wubook = self.env['wubook']
-        wubook.import_rooms()
-        return True
+        return self.env['wubook'].import_rooms()

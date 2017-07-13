@@ -25,42 +25,67 @@ from urlparse import urljoin
 from openerp import models, api, fields
 from openerp.exceptions import UserError, ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.addons.payment.models.payment_acquirer import _partner_split_name
 import logging
 _logger = logging.getLogger(__name__)
 
+# GLOBAL VARS
 DEFAULT_WUBOOK_DATE_FORMAT = "%d/%m/%Y"
 DEFAULT_WUBOOK_TIME_FORMAT = "%H:%M"
 DEFAULT_WUBOOK_DATETIME_FORMAT = "%s %s" % (DEFAULT_WUBOOK_DATE_FORMAT,
                                             DEFAULT_WUBOOK_TIME_FORMAT)
 WUBOOK_STATUS_CONFIRMED = 1
+WUBOOK_STATUS_WAITING = 2
 WUBOOK_STATUS_REFUSED = 3
+WUBOOK_STATUS_ACCEPTED = 4
 WUBOOK_STATUS_CANCELLED = 5
 WUBOOK_STATUS_CANCELLED_PENALTY = 6
 
+WUBOOK_STATUS_GOOD = [WUBOOK_STATUS_CONFIRMED, WUBOOK_STATUS_WAITING, WUBOOK_STATUS_ACCEPTED]
+WUBOOK_STATUS_BAD = [WUBOOK_STATUS_REFUSED, WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_CANCELLED_PENALTY]
 
-def _partner_split_name(partner_name):
-    return [' '.join(partner_name.split()[:-1]), ' '.join(partner_name.split()[-1:])]
 
-
+# WUBOOK
 class WuBook(models.TransientModel):
     _name = 'wubook'
 
+    # === INITALIZATION
     def __init__(self, pool, cr):
-        init_res = super(WuBook, self).__init__(pool, cr)
+        super(WuBook, self).__init__(pool, cr)
         self.SERVER = False
         self.LCODE = False
         self.TOKEN = False
-        return init_res
 
-    # === INITALIZATION
     @api.model
     def initialize(self):
-        self.push_activation()
-        self.import_rooms()
-        self.import_channels_info()
-        self.get_pricing_plans()
-#         self.fetch_new_bookings()
-        return True
+        return (
+            self.push_activation()
+            and self.import_rooms()[0]
+            and self.import_channels_info()[0]
+            and self.import_pricing_plans()[0]
+            and self.import_restriction_plans()[0])
+
+    @api.model
+    def push_activation(self):
+        errors = []
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url').replace("http://", "https://")
+
+        self.init_connection_()
+        rcode_a, results_a = self.SERVER.push_activation(self.TOKEN,
+                                                         self.LCODE,
+                                                         urljoin(base_url, "/wubook/push/reservations"),
+                                                         1)
+        rcode_ua, results_ua = self.SERVER.push_update_activation(self.TOKEN,
+                                                                  self.LCODE,
+                                                                  urljoin(base_url, "/wubook/push/rooms"))
+        self.close_connection_()
+
+        if rcode_a != 0:
+            self.create_wubook_issue('wubook', "Can't activate push reservations", 0, results)
+        if rcode_ua != 0:
+            self.create_wubook_issue('wubook', "Can't activate push rooms", 0, results)
+
+        return rcode_a == 0 and rcode_ua == 0
 
     # === NETWORK
     def init_connection_(self):
@@ -75,41 +100,24 @@ class WuBook(models.TransientModel):
         self.TOKEN = tok
 
         if res != 0:
-            raise UserError("Can't connect with WuBook!")
+            self.create_wubook_issue('wubook', "Can't connect with WuBook!", 0, results)
 
-        return True
+        return res == 0
 
     def close_connection_(self):
         self.SERVER.release_token(self.TOKEN)
         self.TOKEN = False
         self.SERVER = False
 
+    # === HELPER FUNCTIONS
     @api.model
-    def push_activation(self):
-        errors = []
-        base_url = self.env['ir.config_parameter'].get_param('web.base.url').replace("http://", "https://")
-
-        self.init_connection_()
-
-        rcode, results = self.SERVER.push_activation(self.TOKEN,
-                                                     self.LCODE,
-                                                     urljoin(base_url, "/wubook/push/reservations"),
-                                                     1)
-        if rcode != 0:
-            errors.append("Can't activate push reservations: %s" % results)
-
-        rcode, results = self.SERVER.push_update_activation(self.TOKEN,
-                                                            self.LCODE,
-                                                            urljoin(base_url, "/wubook/push/rooms"))
-        if rcode != 0:
-            errors.append("Can't activate push rooms: %s" % results)
-
-        self.close_connection_()
-
-        if any(errors):
-            raise UserError('\n'.join(errors))
-
-        return True
+    def create_wubook_issue(self, section, message, wid, wmessage):
+        self.env['wubook.issue'].create({
+            'section': section,
+            'message': message,
+            'wid': wid,
+            'wmessage': wmessage,
+        })
 
     # === ROOMS
     @api.model
@@ -124,23 +132,24 @@ class WuBook(models.TransientModel):
             price,
             availability,
             shortcode[:4],
-            'nb'
+            'nb'    # TODO: Complete this part
             # rtype=('name' in vals and vals['name'] and 3) or 1
         )
         self.close_connection_()
 
         if rcode != 0:
-            raise UserError("Can't create room in WuBook: %s" % results)
+            self.create_wubook_issue('room', "Can't create room in WuBook", 0, results)
+            return False
 
         return results
 
     @api.model
-    def modify_room(self, rid, name, capacity, price, availability, scode):
+    def modify_room(self, wrid, name, capacity, price, availability, scode):
         self.init_connection_()
         rcode, results = self.SERVER.mod_room(
             self.TOKEN,
             self.LCODE,
-            rid,
+            wrid,
             name,
             capacity,
             price,
@@ -152,9 +161,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            raise UserError("Can't modify room in WuBook: %s" % results)
+            self.create_wubook_issue('room', "Can't modify room in WuBook", wrid, results)
 
-        return True
+        return rcode == 0
 
     @api.model
     def delete_room(self, wrid):
@@ -167,9 +176,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            raise UserError("Can't delete room in WuBook: %s" % results)
+            self.create_wubook_issue('room', "Can't delete room in WuBook", wrid, results)
 
-        return True
+        return rcode == 0
 
     @api.model
     def import_rooms(self):
@@ -182,7 +191,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         vroom_obj = self.env['hotel.virtual.room']
+        count = 0
         if rcode == 0:
+            count = len(results)
             for room in results:
                 vroom = vroom_obj.search([('wrid', '=', room['id'])], limit=1)
                 vals = {
@@ -198,9 +209,9 @@ class WuBook(models.TransientModel):
                 else:
                     vroom_obj.with_context({'wubook_action': False}).create(vals)
         else:
-            raise UserError("Can't import rooms from WuBook: %s" % results)
+            self.create_wubook_issue('room', "Can't import rooms from WuBook", 0, results)
 
-        return True
+        return (rcode == 0, count)
 
     @api.model
     def fetch_rooms_values(self, dfrom, dto, rooms=False):
@@ -213,11 +224,11 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            raise UserError("Can't fetch rooms values from WuBook: %s" % results)
+            self.create_wubook_issue('room', "Can't fetch rooms values from WuBook", 0, results)
+        else:
+            self.generate_room_values(dfrom, dto, results)
 
-        self.generate_room_values(dfrom, dto, results)
-
-        return True
+        return rcode == 0
 
     @api.model
     def update_availability(self, rooms_avail):
@@ -228,9 +239,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            raise UserError("Can't update rooms availability in WuBook: %s" % results)
+            self.create_wubook_issue('room', "Can't update rooms availability in WuBook", 0, results)
 
-        return True
+        return rcode == 0
 
     @api.model
     def corporate_fetch(self):
@@ -239,267 +250,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            raise UserError("Can't call 'corporate_fetch' from WuBook: %s" % results)
+            self.create_wubook_issue('wubook', "Can't call 'corporate_fetch' from WuBook", 0, results)
 
-        return True
-
-    # === RESERVATIONS
-    @api.model
-    def fetch_new_bookings(self):
-        self.init_connection_()
-        rcode, results = self.SERVER.fetch_new_bookings(self.TOKEN,
-                                                        self.LCODE,
-                                                        1,
-                                                        0)
-        if rcode == 0:
-            processed_rids = self.generate_reservations(results)
-            if any(processed_rids):
-                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
-                                                           self.LCODE,
-                                                           processed_rids)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't process reservations from wubook: %s" % results)
-
-        return True
-
-    @api.model
-    def fetch_booking(self, lcode, wrid):
-        self.init_connection_()
-        rcode, results = self.SERVER.fetch_booking(self.TOKEN,
-                                                   lcode,
-                                                   wrid)
-        if rcode == 0:
-            processed_rids = self.generate_reservations(results)
-            if any(processed_rids):
-                _logger.info("PROCESSED Reservations")
-                _logger.info(processed_rids)
-                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
-                                                           lcode,
-                                                           processed_rids)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't process reservations from wubook: %s" % results)
-
-        return True
-
-    # === PRICE PLAN
-    @api.model
-    def create_plan(self, name, daily=1):
-        self.init_connection_()
-        rcode, results = self.SERVER.add_pricing_plan(self.TOKEN,
-                                                      self.LCODE,
-                                                      name,
-                                                      daily)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't add pricing plan to wubook: %s" % results)
-
-        return results
-
-    @api.model
-    def delete_plan(self, pid):
-        self.init_connection_()
-        rcode, results = self.SERVER.del_plan(self.TOKEN,
-                                              self.LCODE,
-                                              pid)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't delete pricing plan from wubook: %s" % results)
-
-        return True
-
-    @api.model
-    def update_plan_name(self, pid, name):
-        self.init_connection_()
-        rcode, results = self.SERVER.update_plan_name(self.TOKEN,
-                                                      self.LCODE,
-                                                      pid,
-                                                      name)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't update pricing plan name in wubook: %s" % results)
-
-        return True
-
-    @api.model
-    def update_plan_prices(self, pid, dfrom, prices):
-        self.init_connection_()
-        rcode, results = self.SERVER.update_plan_prices(self.TOKEN,
-                                                        self.LCODE,
-                                                        pid,
-                                                        dfrom,
-                                                        prices)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't update pricing plan in wubook: %s" % results)
-
-        return True
-
-    @api.model
-    def update_plan_periods(self, pid, periods):
-        _logger.info(periods)
-        self.init_connection_()
-        rcode, results = self.SERVER.update_plan_periods(self.TOKEN,
-                                                         self.LCODE,
-                                                         pid,
-                                                         periods)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't update pricing plan period in wubook: %s" % results)
-
-        return True
-
-    @api.model
-    def get_pricing_plans(self):
-        self.init_connection_()
-        rcode, results = self.SERVER.get_pricing_plans(self.TOKEN,
-                                                       self.LCODE)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't get pricing plans from wubook: %s" % results)
-        else:
-            self.generate_pricelists(results)
-
-        return True
-
-    @api.model
-    def fetch_plan_prices(self, pid, dfrom, dto, rooms=[]):
-        self.init_connection_()
-        rcode, results = self.SERVER.fetch_plan_prices(self.TOKEN,
-                                                       self.LCODE,
-                                                       pid,
-                                                       dfrom,
-                                                       dto,
-                                                       rooms)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't fetch plan prices from wubook: %s" % results)
-
-        self.generate_pricelist_items(pid, dfrom, dto, results)
-
-        return True
-
-    @api.model
-    def fetch_all_plan_prices(self, dfrom, dto, rooms=[]):
-        errors = False
-        plan_wpids = self.env['product.pricelist'].search([('wpid', '!=', False), ('wpid', '!=', '')]).mapped('wpid')
-        if any(plan_wpids):
-            self.init_connection_()
-            for wpid in plan_wpids:
-                rcode, results = self.SERVER.fetch_plan_prices(self.TOKEN,
-                                                               self.LCODE,
-                                                               wpid,
-                                                               dfrom,
-                                                               dto,
-                                                               rooms)
-                if rcode != 0:
-                    errors = True
-                else:
-                    self.generate_pricelist_items(wpid, dfrom, dto, results)
-            self.close_connection_()
-
-        if errors:
-            raise ValidationError("Can't fetch all plan prices from wubook!")
-
-        return True
-
-    # === RESTRICTION PLAN
-    @api.model
-    def get_restriction_plans(self):
-        self.init_connection_()
-        rcode, results = self.SERVER.rplan_rplans(self.TOKEN,
-                                                  self.LCODE)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't fetch restriction plans from wubook: %s" % results)
-
-        self.generate_restrictions(results)
-
-        return True
-
-    @api.model
-    def fetch_rplan_restrictions(self, dfrom, dto, rpid=False):
-        self.init_connection_()
-        rcode, results = self.SERVER.rplan_get_rplan_values(self.TOKEN,
-                                                            self.LCODE,
-                                                            dfrom,
-                                                            dto,
-                                                            rpid)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't fetch plan restrictions from wubook: %s" % results)
-        elif any(results):
-            self.generate_restriction_items(dfrom, dto, results)
-
-        return True
-
-    @api.model
-    def update_rplan_values(self, rpid, dfrom, values):
-        self.init_connection_()
-        rcode, results = self.SERVER.rplan_update_rplan_values(self.TOKEN,
-                                                               self.LCODE,
-                                                               rpid,
-                                                               dfrom,
-                                                               values)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't update plan restrictions on wubook: %s" % results)
-
-        return True
-
-    @api.model
-    def create_rplan(self, name, compact=False):
-        self.init_connection_()
-        rcode, results = self.SERVER.rplan_add_rplan(self.TOKEN,
-                                                     self.LCODE,
-                                                     name,
-                                                     compact and 1 or 0)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't create plan restriction in wubook: %s" % results)
-
-        return True
-
-    @api.model
-    def rename_rplan(self, rpid, name):
-        self.init_connection_()
-        rcode, results = self.SERVER.rplan_rename_rplan(self.TOKEN,
-                                                        self.LCODE,
-                                                        rpid,
-                                                        name)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't rename plan restriction in wubook: %s" % results)
-
-        return True
-
-    @api.model
-    def delete_rplan(self, rpid):
-        self.init_connection_()
-        rcode, results = self.SERVER.rplan_del_rplan(self.TOKEN,
-                                                     self.LCODE,
-                                                     rpid)
-        self.close_connection_()
-
-        if rcode != 0:
-            raise ValidationError("Can't delete plan restriction on wubook: %s" % results)
-
-        return True
+        return rcode == 0
 
     # === RESERVATIONS
     @api.model
@@ -527,11 +280,11 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            raise ValidationError("Can't create reservations in wubook: %s" % results)
+            self.create_wubook_issue('reservation', "Can't create reservations in wubook", 0, results)
+        else:
+            reserv.write({'wrid': results})
 
-        reserv.write({'wrid': results})
-
-        return True
+        return rcode == 0
 
     @api.model
     def cancel_reservation(self, wrid, reason=""):
@@ -543,9 +296,274 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            raise ValidationError("Can't cancel reservation in WuBook: %s" % results)
+            self.create_wubook_issue('reservation', "Can't cancel reservation in WuBook", wrid, results)
 
-        return True
+        return rcode == 0
+
+    @api.model
+    def fetch_new_bookings(self):
+        self.init_connection_()
+        rcode, results = self.SERVER.fetch_new_bookings(self.TOKEN,
+                                                        self.LCODE,
+                                                        1,
+                                                        0)
+        errors = False
+        processed_rids = []
+        if rcode == 0:
+            processed_rids, errors = self.generate_reservations(results)
+            if any(processed_rids):
+                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
+                                                           self.LCODE,
+                                                           processed_rids)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('reservation', "Can't process reservations from wubook", 0, results)
+
+        return ((rcode == 0 and not errors), len(processed_rids))
+
+    @api.model
+    def fetch_booking(self, lcode, wrid):
+        self.init_connection_()
+        rcode, results = self.SERVER.fetch_booking(self.TOKEN,
+                                                   lcode,
+                                                   wrid)
+        errors = False
+        processed_rids = []
+        if rcode == 0:
+            processed_rids, errors = self.generate_reservations(results)
+            if any(processed_rids):
+                _logger.info("PROCESSED Reservations")
+                _logger.info(processed_rids)
+                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
+                                                           lcode,
+                                                           processed_rids)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('reservation', "Can't process reservations from wubook", wrid, results)
+
+        return ((rcode == 0 and not errors), len(processed_rids))
+
+    # === PRICE PLANS
+    @api.model
+    def create_plan(self, name, daily=1):
+        self.init_connection_()
+        rcode, results = self.SERVER.add_pricing_plan(self.TOKEN,
+                                                      self.LCODE,
+                                                      name,
+                                                      daily)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('plan', "Can't add pricing plan to wubook", 0, results)
+            return False
+
+        return results
+
+    @api.model
+    def delete_plan(self, pid):
+        self.init_connection_()
+        rcode, results = self.SERVER.del_plan(self.TOKEN,
+                                              self.LCODE,
+                                              pid)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('plan', "Can't delete pricing plan from wubook", pid, results)
+
+        return rcode == 0
+
+    @api.model
+    def update_plan_name(self, pid, name):
+        self.init_connection_()
+        rcode, results = self.SERVER.update_plan_name(self.TOKEN,
+                                                      self.LCODE,
+                                                      pid,
+                                                      name)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('plan', "Can't update pricing plan name in wubook", pid, results)
+
+        return rcode == 0
+
+    @api.model
+    def update_plan_prices(self, pid, dfrom, prices):
+        self.init_connection_()
+        rcode, results = self.SERVER.update_plan_prices(self.TOKEN,
+                                                        self.LCODE,
+                                                        pid,
+                                                        dfrom,
+                                                        prices)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('plan', "Can't update pricing plan in wubook", pid, results)
+
+        return rcode == 0
+
+    @api.model
+    def update_plan_periods(self, pid, periods):
+        _logger.info(periods)
+        self.init_connection_()
+        rcode, results = self.SERVER.update_plan_periods(self.TOKEN,
+                                                         self.LCODE,
+                                                         pid,
+                                                         periods)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('plan', "Can't update pricing plan period in wubook", pid, results)
+
+        return rcode == 0
+
+    @api.model
+    def import_pricing_plans(self):
+        self.init_connection_()
+        rcode, results = self.SERVER.get_pricing_plans(self.TOKEN,
+                                                       self.LCODE)
+        self.close_connection_()
+
+        count = 0
+        if rcode != 0:
+            self.create_wubook_issue('plan', "Can't get pricing plans from wubook", 0, results)
+        else:
+            count = self.generate_pricelists(results)
+
+        return (rcode == 0, count)
+
+    @api.model
+    def fetch_plan_prices(self, pid, dfrom, dto, rooms=[]):
+        self.init_connection_()
+        rcode, results = self.SERVER.fetch_plan_prices(self.TOKEN,
+                                                       self.LCODE,
+                                                       pid,
+                                                       dfrom,
+                                                       dto,
+                                                       rooms)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('plan', "Can't fetch plan prices from wubook", pid, results)
+        else:
+            self.generate_pricelist_items(pid, dfrom, dto, results)
+
+        return rcode == 0
+
+    @api.model
+    def fetch_all_plan_prices(self, dfrom, dto, rooms=[]):
+        no_errors = True
+        plan_wpids = self.env['product.pricelist'].search([('wpid', '!=', False), ('wpid', '!=', '')]).mapped('wpid')
+        if any(plan_wpids):
+            self.init_connection_()
+            for wpid in plan_wpids:
+                rcode, results = self.SERVER.fetch_plan_prices(self.TOKEN,
+                                                               self.LCODE,
+                                                               wpid,
+                                                               dfrom,
+                                                               dto,
+                                                               rooms)
+                if rcode != 0:
+                    no_errors = False
+                else:
+                    self.generate_pricelist_items(wpid, dfrom, dto, results)
+            self.close_connection_()
+
+        if not no_errors:
+            self.create_wubook_issue('plan', "Can't fetch all plan prices from wubook!", pid, '')
+
+        return no_errors
+
+    # === RESTRICTION PLANS
+    @api.model
+    def import_restriction_plans(self):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_rplans(self.TOKEN,
+                                                  self.LCODE)
+        self.close_connection_()
+
+        count = 0
+        if rcode != 0:
+            self.create_wubook_issue('rplan', "Can't fetch restriction plans from wubook", 0, results)
+        else:
+            count = self.generate_restrictions(results)
+
+        return (rcode == 0, count)
+
+    @api.model
+    def fetch_rplan_restrictions(self, dfrom, dto, rpid=False):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_get_rplan_values(self.TOKEN,
+                                                            self.LCODE,
+                                                            dfrom,
+                                                            dto,
+                                                            rpid)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('rplan', "Can't fetch plan restrictions from wubook", rpid, results)
+        elif any(results):
+            self.generate_restriction_items(dfrom, dto, results)
+
+        return rcode == 0
+
+    @api.model
+    def update_rplan_values(self, rpid, dfrom, values):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_update_rplan_values(self.TOKEN,
+                                                               self.LCODE,
+                                                               rpid,
+                                                               dfrom,
+                                                               values)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('rplan', "Can't update plan restrictions on wubook", rpid, results)
+
+        return rcode == 0
+
+    @api.model
+    def create_rplan(self, name, compact=False):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_add_rplan(self.TOKEN,
+                                                     self.LCODE,
+                                                     name,
+                                                     compact and 1 or 0)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('rplan', "Can't create plan restriction in wubook", 0, results)
+            return False
+
+        return results
+
+    @api.model
+    def rename_rplan(self, rpid, name):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_rename_rplan(self.TOKEN,
+                                                        self.LCODE,
+                                                        rpid,
+                                                        name)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('rplan', "Can't rename plan restriction in wubook", rpid, results)
+
+        return rcode == 0
+
+    @api.model
+    def delete_rplan(self, rpid):
+        self.init_connection_()
+        rcode, results = self.SERVER.rplan_del_rplan(self.TOKEN,
+                                                     self.LCODE,
+                                                     rpid)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('rplan', "Can't delete plan restriction on wubook", rpid, results)
+
+        return rcode == 0
 
     # === WUBOOK INFO
     @api.model
@@ -554,11 +572,11 @@ class WuBook(models.TransientModel):
         results = self.SERVER.get_channels_info(self.TOKEN)
         self.close_connection_()
 
-        self.generate_wubook_channel_info(results)
+        count = self.generate_wubook_channel_info(results)
 
-        return True
+        return count
 
-    # === MODEL MANIPULATION
+    # === WUBOOK -> ODOO
     @api.model
     def generate_room_values(self, dfrom, dto, values):
         virtual_room_avail_obj = self.env['virtual.room.availability']
@@ -594,6 +612,7 @@ class WuBook(models.TransientModel):
     def generate_restrictions(self, restriction_plans):
         _logger.info(restriction_plans)
         reservation_restriction_obj = self.env['reservation.restriction']
+        count = 0
         for plan in restriction_plans:
             vals = {
                 'name': plan['name'],
@@ -609,6 +628,8 @@ class WuBook(models.TransientModel):
                 }).create(vals)
             else:
                 plan_id.with_context({'wubook_action': False}).write(vals)
+            count = count + 1
+        return count
 
     @api.model
     def generate_restriction_items(self, dfrom, dto, plan_restrictions):
@@ -651,6 +672,8 @@ class WuBook(models.TransientModel):
                                 })
                                 self.env['reservation.restriction.item'].with_context({'wubook_action': False}).create(vals)
 
+        return True
+
     @api.model
     def generate_pricelist_items(self, pid, dfrom, dto, plan_prices):
         _logger.info(plan_prices)
@@ -689,10 +712,12 @@ class WuBook(models.TransientModel):
                                 'product_tmpl_id': vroom.product_id.product_tmpl_id.id
                             })
                             self.env['product.pricelist.item'].with_context({'wubook_action': False}).create(vals)
+        return True
 
     @api.model
     def generate_pricelists(self, price_plans):
         product_listprice_obj = self.env['product.pricelist']
+        count = 0
         for plan in price_plans:
             if 'vpid' in plan:
                 continue    # Ignore Virtual Plans
@@ -709,6 +734,8 @@ class WuBook(models.TransientModel):
                 product_listprice_obj.with_context({'wubook_action': False}).create(vals)
             else:
                 plan_id.with_context({'wubook_action': False}).write(vals)
+            count = count + 1
+        return count
 
     @api.model
     def generate_reservations(self, bookings):
@@ -718,9 +745,10 @@ class WuBook(models.TransientModel):
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
         processed_rids = []
+        errors = False
         _logger.info(bookings)
         for book in bookings:
-            is_cancellation = book['status'] in [WUBOOK_STATUS_REFUSED, WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_CANCELLED_PENALTY]
+            is_cancellation = book['status'] in WUBOOK_STATUS_BAD
 
             # Search Folio. If exists.
             folio_id = False
@@ -728,6 +756,12 @@ class WuBook(models.TransientModel):
                 reserv_folio = hotel_reserv_obj.search([('wchannel_reservation_code', '=', str(book['channel_reservation_code']))], limit=1)
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
+
+            # Can't cancel if not exists
+            if is_cancellation and not folio_id:
+                errors = True
+                self.create_wubook_issue('reservation', "Can't cancel a reservation that not exists!", book['reservation_code'], '')
+                continue
 
             reservs = folio_id and folio_id.room_lines or hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])
             reservs_processed = False
@@ -812,7 +846,6 @@ class WuBook(models.TransientModel):
                         if str(broom['id']) == vroom.wrid:
                             if len(free_rooms) > customer_room_index:
                                 occupancy = broom['occupancy']
-                                rstate = 'cancelled' if is_cancellation else 'draft'
                                 vals = {
                                     'checkin': checkin,
                                     'checkout': checkout,
@@ -830,30 +863,33 @@ class WuBook(models.TransientModel):
                                     'wchannel_reservation_code': str(book['channel_reservation_code']),
                                     'wstatus': str(book['status']),
                                     'to_read': True,
-                                    'state': rstate,
+                                    'state': 'draft',
                                     'virtual_room_id': vroom.id,
                                 }
                                 reservations.append((0, False, vals))
                                 customer_room_index = customer_room_index + 1
                             else:
-                                raise ValidationError("Can't found a free room for reservation from wubook [WID: %d]" % book['reservation_code'])
+                                errors = True
+                                self.create_wubook_issue('reservation', "Can't found a free room for reservation from wubook", book['reservation_code'], '')
                 else:
-                    raise ValidationError("Can't found a free room for reservation from wubook [WID: %d]" % book['reservation_code'])
+                    errors = True
+                    self.create_wubook_issue('reservation', "Can't found a free room for reservation from wubook", book['reservation_code'], '')
             # Create Folio
-            vals = {
-                'room_lines': reservations,
-                'wcustomer_notes': book['customer_notes'],
-            }
-            if folio_id:
-                folio_id.with_context({'wubook_action': False}).write(vals)
-            else:
-                vals.update({
-                    'partner_id': partner_id.id,
-                    'wseed': book['sessionSeed']
-                })
-                folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
-            processed_rids.append(book['reservation_code'])
-        return processed_rids
+            if not errors:
+                vals = {
+                    'room_lines': reservations,
+                    'wcustomer_notes': book['customer_notes'],
+                }
+                if folio_id:
+                    folio_id.with_context({'wubook_action': False}).write(vals)
+                else:
+                    vals.update({
+                        'partner_id': partner_id.id,
+                        'wseed': book['sessionSeed']
+                    })
+                    folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
+                processed_rids.append(book['reservation_code'])
+        return (processed_rids, errors)
 
     @api.model
     def generate_wubook_channel_info(self, channels):
@@ -871,7 +907,10 @@ class WuBook(models.TransientModel):
                     'wid': cid
                 })
                 channel_info_obj.create(vals)
+            count = count + 1
+        return count
 
+    # === ODOO -> WUBOOK
     @api.model
     def push_changes(self):
         self.push_availability()
@@ -903,6 +942,7 @@ class WuBook(models.TransientModel):
         _logger.info(avails)
         if any(avails):
             self.update_availability(avails)
+        return True
 
     @api.model
     def push_priceplans(self):
@@ -941,6 +981,7 @@ class WuBook(models.TransientModel):
 
             for pli in unpushed:
                 pli.with_context({'wubook_action': False}).write({'wpushed': True})
+        return True
 
     @api.model
     def push_restrictions(self):
@@ -981,3 +1022,4 @@ class WuBook(models.TransientModel):
                                              restrictions[pk])
             for rpi in unpushed:
                 rpi.with_context({'wubook_action': False}).write({'wpushed': True})
+        return True

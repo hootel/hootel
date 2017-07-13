@@ -18,7 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
+from openerp.exceptions import ValidationError
 from openerp import models, fields, api
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
@@ -36,7 +36,9 @@ class ImportPlanPricesWizard(models.TransientModel):
             for record in self:
                 date_start_dt = fields.Datetime.from_string(record.date_start)
                 date_end_dt = fields.Datetime.from_string(record.date_end)
-                self.env['wubook'].fetch_plan_prices(pricelist_id.wpid,
-                                                     date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                     date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                wres = self.env['wubook'].fetch_plan_prices(pricelist_id.wpid,
+                                                            date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                                                            date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                if not wres:
+                    raise ValidationError("Can't fetch plan prices from WuBook")
         return True

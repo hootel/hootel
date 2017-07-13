@@ -40,9 +40,7 @@ class HotelFolio(models.Model):
 
     @api.multi
     def import_reservations(self):
-        wubook = self.env['wubook']
-        wubook.fetch_new_bookings()
-        return True
+        return self.env['wubook'].fetch_new_bookings()
 
     @api.multi
     def action_confirm(self):

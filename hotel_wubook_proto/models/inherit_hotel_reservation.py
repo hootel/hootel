@@ -20,9 +20,11 @@
 ##############################################################################
 from datetime import datetime, timedelta
 from openerp import models, fields, api
-from openerp.exceptions import except_orm, UserError, ValidationError
+from openerp.exceptions import UserError, ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
-from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
+from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT, WUBOOK_STATUS_CONFIRMED, \
+    WUBOOK_STATUS_WAITING, WUBOOK_STATUS_REFUSED, WUBOOK_STATUS_ACCEPTED, \
+    WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_CANCELLED_PENALTY
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -36,7 +38,8 @@ class HotelReservation(models.Model):
             record.wis_from_channel = (record.wrid != 'none' and record.wchannel_id)
 
     wrid = fields.Char("WuBook Reservation ID", default="none", readonly=True)
-    wchannel_id = fields.Many2one('wubook.channel.info', string='WuBook Channel ID',
+    wchannel_id = fields.Many2one('wubook.channel.info',
+                                  string='WuBook Channel ID',
                                   readonly=True)
     wchannel_reservation_code = fields.Char("WuBook Channel Reservation Code",
                                             default='none', readonly=True)
@@ -47,12 +50,14 @@ class HotelReservation(models.Model):
 
     wstatus = fields.Selection([
         ('0', 'No WuBook'),
-        ('1', 'Confirmed'),
-        ('2', 'Waiting'),
-        ('3', 'Refused'),
-        ('4', 'Accepted'),
-        ('5', 'Cancelled'),
-        ('6', 'Cancelled with penalty')], string='WuBook Status', default='0', readonly=True)
+        (str(WUBOOK_STATUS_CONFIRMED), 'Confirmed'),
+        (str(WUBOOK_STATUS_WAITING), 'Waiting'),
+        (str(WUBOOK_STATUS_REFUSED), 'Refused'),
+        (str(WUBOOK_STATUS_ACCEPTED), 'Accepted'),
+        (str(WUBOOK_STATUS_CANCELLED), 'Cancelled'),
+        (str(WUBOOK_STATUS_CANCELLED_PENALTY), 'Cancelled with penalty')],
+                               string='WuBook Status', default='0',
+                               readonly=True)
     wstatus_reason = fields.Char("WuBook Status Reason", readonly=True)
     wcustomer_notes = fields.Text(related='folio_id.wcustomer_notes')
 
@@ -66,7 +71,9 @@ class HotelReservation(models.Model):
             _logger.info("DISPONIBILIDAD CREATE")
             _logger.info(rooms_avail)
             if any(rooms_avail):
-                self.env['wubook'].update_availability(rooms_avail)
+                wres = self.env['wubook'].update_availability(rooms_avail)
+                if not wres:
+                    raise ValidationError("Can't update availability on WuBook")
         res = super(HotelReservation, self).create(vals)
         return res
 
@@ -121,7 +128,9 @@ class HotelReservation(models.Model):
                 if any(old_rooms_avail):
                     _logger.info("DISPONIBILIDAD WRITE")
                     _logger.info(old_rooms_avail)
-                    self.env['wubook'].update_availability(old_rooms_avail)
+                    wres = self.env['wubook'].update_availability(old_rooms_avail)
+                    if not wres:
+                        raise ValidationError("Can't update availability on WuBook")
         return res
 
     @api.multi
@@ -137,7 +146,9 @@ class HotelReservation(models.Model):
             _logger.info("DISPONIBILIDAD UNLINK")
             _logger.info(rooms_avail)
             if any(rooms_avail):
-                self.env['wubook'].update_availability(rooms_avail)
+                wres = self.env['wubook'].update_availability(rooms_avail)
+                if not wres:
+                    raise ValidationError("Can't update availability on WuBook")
         return res
 
     @api.multi
@@ -148,15 +159,19 @@ class HotelReservation(models.Model):
             for record in self:
                     if self.wrid != 'none' and not self.wchannel_id and \
                             self.wstatus in ['1', '2', '4']:     # Only can cancel reservations created directly in wubook
-                        self.env['wubook'].cancel_reservation(record.wrid,
-                                                              'Cancelled by %s' % partner_id.name)
+                        wres = self.env['wubook'].cancel_reservation(record.wrid,
+                                                                     'Cancelled by %s' % partner_id.name)
+                        if not wres:
+                            raise ValidationError("Can't cancel reservation on WuBook")
                     rooms_avail = self.get_availability(record.checkin,
                                                         record.checkout,
                                                         record.product_id.id)
                     _logger.info("DISPONIBILIDAD CANCEL")
                     _logger.info(rooms_avail)
                     if any(rooms_avail):
-                        self.env['wubook'].update_availability(rooms_avail)
+                        wres = self.env['wubook'].update_availability(rooms_avail)
+                        if not wres:
+                            raise ValidationError("Can't update availability on WuBook")
         return res
 
     @api.multi
