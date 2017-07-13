@@ -792,7 +792,7 @@ class WuBook(models.TransientModel):
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
         processed_rids = []
-        errors = False
+        failed_reservations = []
         _logger.info(bookings)
         for book in bookings:
             is_cancellation = book['status'] in WUBOOK_STATUS_BAD
@@ -808,9 +808,8 @@ class WuBook(models.TransientModel):
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
 
-            # Can't cancel if not exists
-            if is_cancellation and not folio_id:
-                errors = True
+            # Can't cancel if not exists and is failed
+            if is_cancellation and not folio_id and book['channel_reservation_code'] in failed_reservations:
                 self.create_wubook_issue('reservation',
                                          "Can't cancel a reservation that not exists!",
                                          '', wid=book['reservation_code'])
@@ -925,17 +924,19 @@ class WuBook(models.TransientModel):
                                 used_rooms.append(free_rooms[customer_room_index].id)
                                 customer_room_index = customer_room_index + 1
                             else:
-                                errors = True
+                                if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
+                                    failed_reservations.append(book['channel_reservation_code'])
                                 self.create_wubook_issue('reservation',
                                                          "Can't found a free room for reservation from wubook",
                                                          '', wid=book['reservation_code'])
                 else:
-                    errors = True
+                    if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
+                        failed_reservations.append(book['channel_reservation_code'])
                     self.create_wubook_issue('reservation',
                                              "Can't found a free room for reservation from wubook",
                                              '', wid=book['reservation_code'])
             # Create Folio
-            if not errors:
+            if not any(failed_reservations):
                 vals = {
                     'room_lines': reservations,
                     'wcustomer_notes': book['customer_notes'],
@@ -949,7 +950,7 @@ class WuBook(models.TransientModel):
                     })
                     folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
                 processed_rids.append(book['reservation_code'])
-        return (processed_rids, errors)
+        return (processed_rids, any(failed_reservations))
 
     @api.model
     def generate_wubook_channel_info(self, channels):
