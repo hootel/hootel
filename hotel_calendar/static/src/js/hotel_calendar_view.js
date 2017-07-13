@@ -500,6 +500,7 @@ var HotelCalendarView = View.extend({
                 );
                 nreserv.addUserData({'folio_id': r[7]});
                 reservs.push(nreserv);
+                console.log(nreserv);
             }
             self._hcalendar.setReservations(reservs);
             self.assign_extra_info_();

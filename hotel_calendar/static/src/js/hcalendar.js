@@ -209,7 +209,9 @@ HotelCalendar.prototype = {
     var reserv = _.find(this.reservations, {'id': reservationID});
     if (reserv) {
       var resDiv = this.getReservationDiv(reserv);
-      resDiv.parentNode.removeChild(resDiv);
+      if (resDiv) {
+        resDiv.parentNode.removeChild(resDiv);
+      }
       this.reservations = _.without(this.reservations, reserv);
       this.isNRerservation = true;
       if (!noupdate) {

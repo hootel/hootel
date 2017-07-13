@@ -33,7 +33,7 @@ class HotelReservation(models.Model):
                                            reserv_id, partner_name, adults,
                                            children, checkin, checkout,
                                            folio_id, color, room_name,
-                                           partner_phone):
+                                           partner_phone, state):
         vals = super(HotelReservation, self)._generate_reservation_notification(action, ntype, title, product_id,
                                                                                 reserv_id, partner_name, adults,
                                                                                 children, checkin, checkout,
@@ -47,14 +47,11 @@ class HotelReservation(models.Model):
         return vals
 
     @api.multi
-    def get_hcalendar_data(self, checkin, checkout, domainRooms, domainReservations, withRooms=True):
-        vals = super(HotelReservation, self).get_hcalendar_data(checkin, checkout,
-                                                                domainRooms,
-                                                                domainReservations,
-                                                                withRooms=withRooms)
+    def _hcalendar_reservation_data(self, reservations):
+        vals = super(HotelReservation, self)._hcalendar_reservation_data(reservations)
         hotel_reservation_obj = self.env['hotel.reservation']
         json_reservations = []
-        for reserv_vals in vals['reservations']:
+        for reserv_vals in vals[0]:
             reserv = hotel_reservation_obj.browse(reserv_vals[1])
             json_reservations.append((
                 reserv.product_id.id,
@@ -69,5 +66,4 @@ class HotelReservation(models.Model):
                 False,  # Read-Only
                 reserv.wrid != 'none',  # Fix Days
                 False))   # Fix Rooms
-        vals['reservations'] = json_reservations
-        return vals
+        return (json_reservations, vals[1])
