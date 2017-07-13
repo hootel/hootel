@@ -797,6 +797,13 @@ class WuBook(models.TransientModel):
         for book in bookings:
             is_cancellation = book['status'] in WUBOOK_STATUS_BAD
 
+            # Can't process failed reservations
+            if book['channel_reservation_code'] in failed_reservations:
+                self.create_wubook_issue('reservation',
+                                         "Can't process a reservation that previusly failed!",
+                                         '', wid=book['reservation_code'])
+                continue
+
             # Search Folio. If exists.
             folio_id = False
             if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
@@ -807,13 +814,6 @@ class WuBook(models.TransientModel):
                 reserv_folio = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))], limit=1)
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
-
-            # Can't cancel if not exists and is failed
-            if is_cancellation and not folio_id and book['channel_reservation_code'] in failed_reservations:
-                self.create_wubook_issue('reservation',
-                                         "Can't cancel a reservation that not exists!",
-                                         '', wid=book['reservation_code'])
-                continue
 
             reservs = folio_id and folio_id.room_lines or hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])
             reservs_processed = False
