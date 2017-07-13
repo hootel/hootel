@@ -803,7 +803,7 @@ class WuBook(models.TransientModel):
                 reserv_folio = hotel_reserv_obj.search([('wchannel_reservation_code', '=', str(book['channel_reservation_code']))], limit=1)
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
-            elif:
+            else:
                 reserv_folio = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))], limit=1)
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
