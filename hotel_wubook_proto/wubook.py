@@ -874,10 +874,12 @@ class WuBook(models.TransientModel):
             vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])
 
             reservations = []
+            used_rooms = []
             for vroom in vrooms:
                 free_rooms = hotel_vroom_obj.check_availability_virtual_room(checkin,
                                                                              checkout,
-                                                                             vroom.id)
+                                                                             virtual_room_id=vroom.id,
+                                                                             notthis=used_rooms)
                 if any(free_rooms):
                     # Total Price Room
                     reservation_lines = []
@@ -920,6 +922,7 @@ class WuBook(models.TransientModel):
                                     'virtual_room_id': vroom.id,
                                 }
                                 reservations.append((0, False, vals))
+                                used_rooms.append(free_rooms[customer_room_index].id)
                                 customer_room_index = customer_room_index + 1
                             else:
                                 errors = True

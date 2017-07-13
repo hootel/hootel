@@ -212,7 +212,7 @@ class HotelReservation(models.Model):
                     ndate_str = ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
                     avail = len(hotel_vroom_obj.check_availability_virtual_room(ndate_str,
                                                                                 ndate_str,
-                                                                                vroom.id))
+                                                                                virtual_room_id=vroom.id))
                     if not dbchanged:
                         avail = avail - 1
                     vroom_avail_id = virtual_room_avail_obj.search([
