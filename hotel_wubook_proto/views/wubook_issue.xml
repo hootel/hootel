@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <odoo>
 
-  <!-- FORM restriction -->
+  <!-- FORM issue -->
   <record id="wubook_issue_view_form" model="ir.ui.view">
     <field name="name">wubook.issue.form</field>
     <field name="model">wubook.issue</field>
@@ -18,6 +18,10 @@
             <field name="message"/>
           </group>
           <group>
+            <field name="date_start"/>
+            <field name="date_end"/>
+          </group>
+          <group>
             <field name="wid"/>
             <field name="wmessage"/>
           </group>
@@ -26,7 +30,7 @@
     </field>
   </record>
 
-  <!-- TREE restriction -->
+  <!-- TREE issue -->
   <record id="wubook_issue_view_tree" model="ir.ui.view">
     <field name="name">wubook.issue.tree</field>
     <field name="model">wubook.issue</field>
@@ -36,9 +40,27 @@
         <field name="create_date"/>
         <field name="section"/>
         <field name="message"/>
+        <field name="date_start"/>
+        <field name="date_end"/>
         <field name="wid"/>
       </tree>
     </field>
   </record>
 
+  <!-- SEARCH issue -->
+  <record id="view_wubook_issue_form_search" model="ir.ui.view">
+      <field name="name">wubook.issue.search</field>
+      <field name="model">wubook.issue</field>
+      <field name="arch" type="xml">
+          <search string="Issues">
+            <field name="create_date"/>
+            <field name="section"/>
+            <field name="message"/>
+            <field name="date_start"/>
+            <field name="date_end"/>
+            <field name="wid"/>
+            <field name="to_read"/>
+          </search>
+      </field>
+  </record>
  </odoo>

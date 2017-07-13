@@ -81,9 +81,12 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode_a != 0:
-            self.create_wubook_issue('wubook', "Can't activate push reservations", 0, results)
+            self.create_wubook_issue('wubook',
+                                     "Can't activate push reservations",
+                                     results)
         if rcode_ua != 0:
-            self.create_wubook_issue('wubook', "Can't activate push rooms", 0, results)
+            self.create_wubook_issue('wubook', "Can't activate push rooms",
+                                     results)
 
         return rcode_a == 0 and rcode_ua == 0
 
@@ -100,7 +103,8 @@ class WuBook(models.TransientModel):
         self.TOKEN = tok
 
         if res != 0:
-            self.create_wubook_issue('wubook', "Can't connect with WuBook!", 0, results)
+            self.create_wubook_issue('wubook', "Can't connect with WuBook!",
+                                     results)
 
         return res == 0
 
@@ -111,12 +115,14 @@ class WuBook(models.TransientModel):
 
     # === HELPER FUNCTIONS
     @api.model
-    def create_wubook_issue(self, section, message, wid, wmessage):
+    def create_wubook_issue(self, section, message, wmessage, wid=False, dfrom=False, dto=False):
         self.env['wubook.issue'].create({
             'section': section,
             'message': message,
             'wid': wid,
             'wmessage': wmessage,
+            'date_start': dfrom and datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT).strftime(DEFAULT_SERVER_DATE_FORMAT),
+            'date_end': dto and datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT).strftime(DEFAULT_SERVER_DATE_FORMAT),
         })
 
     # === ROOMS
@@ -138,7 +144,7 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('room', "Can't create room in WuBook", 0, results)
+            self.create_wubook_issue('room', "Can't create room in WuBook", results)
             return False
 
         return results
@@ -161,7 +167,8 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('room', "Can't modify room in WuBook", wrid, results)
+            self.create_wubook_issue('room', "Can't modify room in WuBook",
+                                     results, wid=wrid)
 
         return rcode == 0
 
@@ -176,7 +183,8 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('room', "Can't delete room in WuBook", wrid, results)
+            self.create_wubook_issue('room', "Can't delete room in WuBook",
+                                     results, wid=wrid)
 
         return rcode == 0
 
@@ -209,7 +217,8 @@ class WuBook(models.TransientModel):
                 else:
                     vroom_obj.with_context({'wubook_action': False}).create(vals)
         else:
-            self.create_wubook_issue('room', "Can't import rooms from WuBook", 0, results)
+            self.create_wubook_issue('room', "Can't import rooms from WuBook",
+                                     results)
 
         return (rcode == 0, count)
 
@@ -224,7 +233,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('room', "Can't fetch rooms values from WuBook", 0, results)
+            self.create_wubook_issue('room',
+                                     "Can't fetch rooms values from WuBook",
+                                     results, dfrom=dfrom, dto=dto)
         else:
             self.generate_room_values(dfrom, dto, results)
 
@@ -239,7 +250,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('room', "Can't update rooms availability in WuBook", 0, results)
+            self.create_wubook_issue('room',
+                                     "Can't update rooms availability in WuBook",
+                                     results)
 
         return rcode == 0
 
@@ -250,7 +263,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('wubook', "Can't call 'corporate_fetch' from WuBook", 0, results)
+            self.create_wubook_issue('wubook',
+                                     "Can't call 'corporate_fetch' from WuBook",
+                                     results)
 
         return rcode == 0
 
@@ -280,7 +295,10 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('reservation', "Can't create reservations in wubook", 0, results)
+            self.create_wubook_issue('reservation',
+                                     "Can't create reservations in wubook",
+                                     results,
+                                     dfrom=reserv.checkin, dto=reserv.checkout)
         else:
             reserv.write({'wrid': results})
 
@@ -296,7 +314,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('reservation', "Can't cancel reservation in WuBook", wrid, results)
+            self.create_wubook_issue('reservation',
+                                     "Can't cancel reservation in WuBook",
+                                     results, wid=wrid)
 
         return rcode == 0
 
@@ -318,7 +338,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('reservation', "Can't process reservations from wubook", 0, results)
+            self.create_wubook_issue('reservation',
+                                     "Can't process reservations from wubook",
+                                     results)
 
         return ((rcode == 0 and not errors), len(processed_rids))
 
@@ -341,7 +363,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('reservation', "Can't process reservations from wubook", wrid, results)
+            self.create_wubook_issue('reservation',
+                                     "Can't process reservations from wubook",
+                                     results, wid=wrid)
 
         return ((rcode == 0 and not errors), len(processed_rids))
 
@@ -356,7 +380,8 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't add pricing plan to wubook", 0, results)
+            self.create_wubook_issue('plan', "Can't add pricing plan to wubook",
+                                     results)
             return False
 
         return results
@@ -370,7 +395,10 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't delete pricing plan from wubook", pid, results)
+            self.create_wubook_issue('plan',
+                                     "Can't delete pricing plan from wubook",
+                                     results,
+                                     wid=pid)
 
         return rcode == 0
 
@@ -384,7 +412,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't update pricing plan name in wubook", pid, results)
+            self.create_wubook_issue('plan',
+                                     "Can't update pricing plan name in wubook",
+                                     results, wid=pid)
 
         return rcode == 0
 
@@ -399,7 +429,8 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't update pricing plan in wubook", pid, results)
+            self.create_wubook_issue('plan', "Can't update pricing plan in wubook",
+                                     results, wid=pid, dfrom=dfrom)
 
         return rcode == 0
 
@@ -414,7 +445,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't update pricing plan period in wubook", pid, results)
+            self.create_wubook_issue('plan',
+                                     "Can't update pricing plan period in wubook",
+                                     results, wid=pid)
 
         return rcode == 0
 
@@ -427,7 +460,8 @@ class WuBook(models.TransientModel):
 
         count = 0
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't get pricing plans from wubook", 0, results)
+            self.create_wubook_issue('plan', "Can't get pricing plans from wubook",
+                                     results)
         else:
             count = self.generate_pricelists(results)
 
@@ -445,7 +479,8 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't fetch plan prices from wubook", pid, results)
+            self.create_wubook_issue('plan', "Can't fetch plan prices from wubook",
+                                     results, wid=pid, dfrom=dfrom, dto=dto)
         else:
             self.generate_pricelist_items(pid, dfrom, dto, results)
 
@@ -465,13 +500,13 @@ class WuBook(models.TransientModel):
                                                                dto,
                                                                rooms)
                 if rcode != 0:
+                    self.create_wubook_issue('plan',
+                                             "Can't fetch all plan prices from wubook!",
+                                             results, wid=wpid, dfrom=dfrom, dto=dto)
                     no_errors = False
                 else:
                     self.generate_pricelist_items(wpid, dfrom, dto, results)
             self.close_connection_()
-
-        if not no_errors:
-            self.create_wubook_issue('plan', "Can't fetch all plan prices from wubook!", pid, '')
 
         return no_errors
 
@@ -485,7 +520,9 @@ class WuBook(models.TransientModel):
 
         count = 0
         if rcode != 0:
-            self.create_wubook_issue('rplan', "Can't fetch restriction plans from wubook", 0, results)
+            self.create_wubook_issue('rplan',
+                                     "Can't fetch restriction plans from wubook",
+                                     results)
         else:
             count = self.generate_restrictions(results)
 
@@ -502,7 +539,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('rplan', "Can't fetch plan restrictions from wubook", rpid, results)
+            self.create_wubook_issue('rplan',
+                                     "Can't fetch plan restrictions from wubook",
+                                     results, wid=rpid, dfrom=dfrom, dto=dto)
         elif any(results):
             self.generate_restriction_items(dfrom, dto, results)
 
@@ -519,7 +558,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('rplan', "Can't update plan restrictions on wubook", rpid, results)
+            self.create_wubook_issue('rplan',
+                                     "Can't update plan restrictions on wubook",
+                                     results, wid=rpid, dfrom=dfrom)
 
         return rcode == 0
 
@@ -533,7 +574,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('rplan', "Can't create plan restriction in wubook", 0, results)
+            self.create_wubook_issue('rplan',
+                                     "Can't create plan restriction in wubook",
+                                     results)
             return False
 
         return results
@@ -548,7 +591,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('rplan', "Can't rename plan restriction in wubook", rpid, results)
+            self.create_wubook_issue('rplan',
+                                     "Can't rename plan restriction in wubook",
+                                     results, wid=rpid)
 
         return rcode == 0
 
@@ -561,7 +606,9 @@ class WuBook(models.TransientModel):
         self.close_connection_()
 
         if rcode != 0:
-            self.create_wubook_issue('rplan', "Can't delete plan restriction on wubook", rpid, results)
+            self.create_wubook_issue('rplan',
+                                     "Can't delete plan restriction on wubook",
+                                     results, wid=rpid)
 
         return rcode == 0
 
@@ -760,7 +807,9 @@ class WuBook(models.TransientModel):
             # Can't cancel if not exists
             if is_cancellation and not folio_id:
                 errors = True
-                self.create_wubook_issue('reservation', "Can't cancel a reservation that not exists!", book['reservation_code'], '')
+                self.create_wubook_issue('reservation',
+                                         "Can't cancel a reservation that not exists!",
+                                         '', wid= book['reservation_code'])
                 continue
 
             reservs = folio_id and folio_id.room_lines or hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])
@@ -870,10 +919,14 @@ class WuBook(models.TransientModel):
                                 customer_room_index = customer_room_index + 1
                             else:
                                 errors = True
-                                self.create_wubook_issue('reservation', "Can't found a free room for reservation from wubook", book['reservation_code'], '')
+                                self.create_wubook_issue('reservation',
+                                                         "Can't found a free room for reservation from wubook",
+                                                         '', wid=book['reservation_code'])
                 else:
                     errors = True
-                    self.create_wubook_issue('reservation', "Can't found a free room for reservation from wubook", book['reservation_code'], '')
+                    self.create_wubook_issue('reservation',
+                                             "Can't found a free room for reservation from wubook",
+                                             '', wid=book['reservation_code'])
             # Create Folio
             if not errors:
                 vals = {

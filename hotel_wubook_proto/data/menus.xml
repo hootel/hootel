@@ -14,6 +14,8 @@
 		<field name="res_model">wubook.issue</field>
 		<field name="view_type">form</field>
 		<field name="view_mode">tree,form</field>
+		<field name="search_view_id" ref="view_wubook_issue_form_search"/>
+		<field name="context">{"search_default_to_read":True}</field>
 	</record>
 
     <record model="ir.actions.act_window" id="action_wubook_config">
