@@ -41,7 +41,7 @@ class HotelReservation(models.Model):
                                                                                 partner_phone)
         reserv = self.env['hotel.reservation'].browse(vals['reserv_id'])
         vals['reservation'].update({
-            'fix_days': reserv.wis_from_channel,
+            'fix_days': reserv.wrid != 'none',
             'wchannel': reserv.wchannel_id and reserv.wchannel_id.name or False,
         })
         return vals
@@ -67,7 +67,7 @@ class HotelReservation(models.Model):
                 reserv.folio_id.id,
                 reserv.reserve_color,
                 False,  # Read-Only
-                reserv.wis_from_channel,  # Fix Days
+                reserv.wrid != 'none',  # Fix Days
                 False))   # Fix Rooms
         vals['reservations'] = json_reservations
         return vals
