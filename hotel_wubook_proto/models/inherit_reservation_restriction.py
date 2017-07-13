@@ -30,7 +30,7 @@ class ReservationRestriction(models.Model):
     _inherit = 'reservation.restriction'
 
     wpid = fields.Char("WuBook Plan ID", readonly=True)
-    wdaily = fields.Char("Plan Daily", default=True, readonly=True)
+    wdaily = fields.Boolean("Plan Daily", default=True, readonly=True)
 
     @api.multi
     def get_wubook_restrictions(self):

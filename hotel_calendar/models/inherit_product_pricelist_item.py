@@ -32,7 +32,7 @@ class ProductPricelistItem(models.Model):
         product_tmpl_id = vals.get('product_tmpl_id')
         date_start = vals.get('date_start')
         vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', product_tmpl_id)], limit=1)
-        if pricelist_id.wpid and vroom:
+        if pricelist_id and vroom:
             prod = vroom.product_id.with_context(
                 quantity=1,
                 date=date_start,

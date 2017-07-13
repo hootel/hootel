@@ -22,7 +22,7 @@ function import_rooms(){
 				if (results[1] > 0) {
 					self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Rooms successfully imported'), false);
 				} else {
-					self.do_notify(_t('Operation Success'), _t('No new rooms found. All are done.'), false);
+					self.do_notify(_t('Operation Success'), _t('No new rooms found. Everything is done.'), false);
 				}
         var active_view = self.ViewManager.active_view;
         active_view.controller.reload(); // list view only has reload
@@ -43,7 +43,7 @@ function import_reservations(){
 			if (results[1] > 0) {
 				self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Reservations successfully imported'), false);
 			} else {
-				self.do_notify(_t('Operation Success'), _t('No new reservations found. All are done.'), false);
+				self.do_notify(_t('Operation Success'), _t('No new reservations found. Everything is done.'), false);
 			}
 			var active_view = self.ViewManager.active_view;
       active_view.controller.reload(); // list view only has reload
@@ -63,7 +63,7 @@ function import_price_plans(){
 			if (results[1] > 0) {
 				self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Price Plans successfully imported'), false);
 			} else {
-				self.do_notify(_t('Operation Success'), _t('No new price plans found. All are done.'), false);
+				self.do_notify(_t('Operation Success'), _t('No new price plans found. Everything is done.'), false);
 			}
       var active_view = self.ViewManager.active_view;
       active_view.controller.reload(); // list view only has reload
@@ -83,7 +83,7 @@ function import_channels_info(){
 			if (results[1] > 0) {
 				self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Channels Info successfully imported'), false);
 			} else {
-				self.do_notify(_t('Operation Success'), _t('No new channels info found. All are done.'), false);
+				self.do_notify(_t('Operation Success'), _t('No new channels info found. Everything is done.'), false);
 			}
       var active_view = self.ViewManager.active_view;
       active_view.controller.reload(); // list view only has reload
@@ -103,7 +103,7 @@ function import_restriction_plans(){
 			if (results[1] > 0) {
 				self.do_notify(_t('Operation Success'), `<b>${results[1]}</b>` + ' ' + _t('Restriction Plans successfully imported'), false);
 			} else {
-				self.do_notify(_t('Operation Success'), _t('No new restriction plans found. All are done.'), false);
+				self.do_notify(_t('Operation Success'), _t('No new restriction plans found. Everything is done.'), false);
 			}
       var active_view = self.ViewManager.active_view;
       active_view.controller.reload(); // list view only has reload
