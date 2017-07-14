@@ -838,13 +838,13 @@ class WuBook(models.TransientModel):
                 continue
 
             # Search Customer
-            country_id = self.env['res.country'].search([('name', 'ilike', book['customer_country'])], limit=1)
+            country_id = self.env['res.country'].search([('code', '=', book['customer_country'])], limit=1)
             customer_mail = book.get('customer_mail', False)
             partner_id = False
             if customer_mail:
                 partner_id = res_partner_obj.search([('email', '=', customer_mail)], limit=1)
             if not partner_id:
-                # lang = self.env['res.lang'].search([('iso_code', 'ilike', book['customer_language_iso'])], limit=1)
+                # lang = self.env['res.lang'].search([('code', '=', book['customer_language_iso'])], limit=1)
                 vals = {
                     'name': "%s %s" % (book['customer_name'], book['customer_surname']),
                     'country_id': country_id and country_id.id,
@@ -857,7 +857,8 @@ class WuBook(models.TransientModel):
                 }
                 partner_id = res_partner_obj.create(vals)
             # Search Wubook Channel Info
-            wchannel_info = self.env['wubook.channel.info'].search([('wid', '=', str(book['id_channel']))], limit=1)
+            wchannel_info = self.env['wubook.channel.info'].search(
+                [('wid', '=', str(book['id_channel']))], limit=1)
             # Obtener habitacion libre
             arr_hour = book['arrival_hour'] == "--" and '14:00' or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)

@@ -38,7 +38,7 @@ class HotelReservation(models.Model):
                                                                                 reserv_id, partner_name, adults,
                                                                                 children, checkin, checkout,
                                                                                 folio_id, color, room_name,
-                                                                                partner_phone)
+                                                                                partner_phone, state)
         reserv = self.env['hotel.reservation'].browse(vals['reserv_id'])
         vals['reservation'].update({
             'fix_days': reserv.wrid != 'none',
