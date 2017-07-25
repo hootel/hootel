@@ -10,8 +10,13 @@
         <sheet>
           <div class="oe_button_box" name="button_box">
               <button name="toggle_to_read" type="object" class="oe_stat_button" icon="fa-eye">
-                  <field name="to_read" widget="boolean_button" options='{"terminology": "read"}'/>
+                  <field name="to_read" widget="boolean_button" options='{"terminology": "see"}'/>
               </button>
+              <button name="mark_as_read" type="object"
+                string="Mark as Readed"
+                groups="hotel.group_hotel_manager"
+                class="oe_stat_button" icon="fa-warning"
+                attrs="{'invisible':['|', ['section', '!=', 'reservation'], ['wid', '=', False]]}"/>
           </div>
           <group>
             <field name="section"/>

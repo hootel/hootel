@@ -18,6 +18,19 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import inherit_hotel_reservation
-from . import inherit_bus_hotel_calendar
-from . import inherit_wubook_issue
+from openerp import models, fields, api, _
+
+
+class WuBookIssue(models.Model):
+    _inherit = 'wubook.issue'
+
+    @api.model
+    def create(self, vals):
+        issue_id = super(WuBookIssue, self).create(vals)
+        self.env['bus.hotel.calendar'].send_issue_notification(
+            'warn',
+            _("Oops! Issue Reported!!"),
+            issue_id.id,
+            issue_id.section,
+            issue_id.message)
+        return issue_id

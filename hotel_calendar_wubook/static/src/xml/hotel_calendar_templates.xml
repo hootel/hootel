@@ -1,0 +1,8 @@
+<template>
+
+<t t-name="HotelCalendarWuBook.NotificationIssue">
+	<b>Section:</b> <t t-esc="section"/><br/>
+	<t t-esc="message"/>
+</t>
+
+</template>

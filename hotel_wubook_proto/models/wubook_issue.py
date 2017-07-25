@@ -19,6 +19,7 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+from openerp.exceptions import ValidationError
 
 
 class WuBookIssue(models.Model):
@@ -34,10 +35,10 @@ class WuBookIssue(models.Model):
         ('avail', 'Availability')], required=True)
     to_read = fields.Boolean("To Read", default=True)
     message = fields.Char("Internal Message")
-    date_start = fields.Date("From")
-    date_end = fields.Date("To")
-    wid = fields.Char("WuBook ID")
-    wmessage = fields.Char("WuBook Message")
+    date_start = fields.Date("From", readonly=True)
+    date_end = fields.Date("To", readonly=True)
+    wid = fields.Char("WuBook ID", readonly=True)
+    wmessage = fields.Char("WuBook Message", readonly=True)
 
     @api.multi
     def mark_readed(self):
@@ -48,6 +49,18 @@ class WuBookIssue(models.Model):
     def toggle_to_read(self):
         for record in self:
             record.to_read = not record.to_read
+
+    @api.multi
+    def mark_as_read(self):
+        reserv_ids = []
+        for record in self:
+            if record.section == 'reservation' and record.wid:
+                reserv_ids.append(record.wid)
+                record.to_read = False
+        if any(reserv_ids):
+            res = self.env['wubook'].mark_bookings(reserv_ids)
+            if not res:
+                raise ValidationError("Can't mark reservation as readed in WuBook!")
 
     @api.model
     def _needaction_domain_get(self):

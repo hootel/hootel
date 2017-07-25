@@ -3,10 +3,17 @@
     <data>
 
         <record id="hotel_reservation_action_manager_request" model="ir.actions.act_window">
-               <field name="name">Reservations to Assign from WuBook</field>
-               <field name="res_model">hotel.reservation</field>
-               <field name="view_mode">tree,form</field>
-               <field name="domain">[('wrid','!=','none'),'|',('to_assign','=',True),('to_read','=',True)]</field>
+             <field name="name">Reservations to Assign from WuBook</field>
+             <field name="res_model">hotel.reservation</field>
+             <field name="view_mode">tree,form</field>
+             <field name="domain">[('wrid','!=','none'),'|',('to_assign','=',True),('to_read','=',True)]</field>
+        </record>
+
+        <record id="calendar_wubook_issues_action" model="ir.actions.act_window">
+            <field name="name">WuBook Issues</field>
+            <field name="res_model">wubook.issue</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('to_read','=',True)]</field>
         </record>
 
     </data>

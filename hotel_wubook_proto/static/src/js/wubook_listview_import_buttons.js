@@ -9,6 +9,7 @@ odoo.define('wubook.listview_button_import_rooms', function(require) {
 
 var ListView = require('web.ListView');
 var Core = require('web.core');
+var Model = require('web.DataModel');
 
 var _t = Core._t;
 
@@ -73,6 +74,18 @@ function import_price_plans(){
 	return false;
 }
 
+
+function push_price_plans(){
+	var self = this;
+	new Model('wubook').call('push_price_plans', [false]).then(function(results){
+			self.do_notify(_t('Operation Success'), _t('Price Plans successfully pushed'), false);
+	}).fail(function(){
+		self.do_warn(_t('Operation Errors'), _t('Errors while pushing price plans to WuBook. See issues log.'), true);
+	});
+
+	return false;
+}
+
 function import_channels_info(){
 	var self = this;
 	this.dataset._model.call('import_channels_info', [false]).then(function(results){
@@ -113,35 +126,64 @@ function import_restriction_plans(){
 	return false;
 }
 
+function push_restriction_plans(){
+	var self = this;
+	new Model('wubook').call('push_restrictions', [false]).then(function(results){
+			self.do_notify(_t('Operation Success'), _t('Restrictions successfully pushed'), false);
+	}).fail(function(){
+		self.do_warn(_t('Operation Errors'), _t('Errors while pushing restrictions to WuBook. See issues log.'), true);
+	});
+
+	return false;
+}
+
 function import_availability(){
   this.do_action('hotel_wubook_proto.action_wubook_import_availability');
 	return false;
 }
 
+
+function push_availability(){
+	var self = this;
+	new Model('wubook').call('push_availability', [false]).then(function(results){
+			self.do_notify(_t('Operation Success'), _t('Availability successfully pushed'), false);
+	}).fail(function(){
+		self.do_warn(_t('Operation Errors'), _t('Errors while pushing availability to WuBook. See issues log.'), true);
+	});
+
+	return false;
+}
+
 ListView.include({
-	render_buttons: function() {
+	render_buttons: function () {
 		this._super.apply(this, arguments); // Sets this.$buttons
 
-		if (this.dataset.model == 'hotel.virtual.room') {
-        	this.$buttons.append("<button class='oe_button oe_wubook_import_rooms oe_highlight' type='button'>Import Rooms From WuBook</button>");
-        	this.$buttons.find('.oe_wubook_import_rooms').on('click', import_rooms.bind(this));
-        } else if (this.dataset.model == 'hotel.folio') {
-        	this.$buttons.append("<button class='oe_button oe_wubook_import_reservations oe_highlight' type='button'>Import Reservations From WuBook</button>");
-        	this.$buttons.find('.oe_wubook_import_reservations').on('click', import_reservations.bind(this));
-        } else if (this.dataset.model == 'product.pricelist') {
-        	this.$buttons.append("<button class='oe_button oe_wubook_import_price_plans oe_highlight' type='button'>Import Price Plans From WuBook</button>");
-        	this.$buttons.find('.oe_wubook_import_price_plans').on('click', import_price_plans.bind(this));
-        } else if (this.dataset.model == 'wubook.channel.info') {
-        	this.$buttons.append("<button class='oe_button oe_wubook_import_channels_info oe_highlight' type='button'>Import Channels Info From WuBook</button>");
-        	this.$buttons.find('.oe_wubook_import_channels_info').on('click', import_channels_info.bind(this));
-        } else if (this.dataset.model == 'reservation.restriction') {
-        	this.$buttons.append("<button class='oe_button oe_wubook_import_restriction_plans oe_highlight' type='button'>Import Restriction Plans From WuBook</button>");
-        	this.$buttons.find('.oe_wubook_import_restriction_plans').on('click', import_restriction_plans.bind(this));
-        } else if (this.dataset.model == 'virtual.room.availability') {
-        	this.$buttons.append("<button class='oe_button oe_wubook_import_availability oe_highlight' type='button'>Import Availability From WuBook</button>");
-        	this.$buttons.find('.oe_wubook_import_availability').on('click', import_availability.bind(this));
-        }
-    }
+		if (this.dataset.model === 'hotel.virtual.room') {
+	    	this.$buttons.append("<button class='oe_button oe_wubook_import_rooms oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
+	    	this.$buttons.find('.oe_wubook_import_rooms').on('click', import_rooms.bind(this));
+    } else if (this.dataset.model === 'hotel.folio') {
+    	this.$buttons.append("<button class='oe_button oe_wubook_import_reservations oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
+    	this.$buttons.find('.oe_wubook_import_reservations').on('click', import_reservations.bind(this));
+    } else if (this.dataset.model === 'product.pricelist') {
+    	this.$buttons.append("<button class='oe_button oe_wubook_import_price_plans oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
+    	this.$buttons.find('.oe_wubook_import_price_plans').on('click', import_price_plans.bind(this));
+			this.$buttons.append("<button class='oe_button oe_wubook_push_price_plans' style='background-color:red; color:white;' type='button'>"+_t('Push to WuBook')+"</button>");
+    	this.$buttons.find('.oe_wubook_push_price_plans').on('click', push_price_plans.bind(this));
+    } else if (this.dataset.model === 'wubook.channel.info') {
+    	this.$buttons.append("<button class='oe_button oe_wubook_import_channels_info oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
+    	this.$buttons.find('.oe_wubook_import_channels_info').on('click', import_channels_info.bind(this));
+    } else if (this.dataset.model === 'reservation.restriction') {
+    	this.$buttons.append("<button class='oe_button oe_wubook_import_restriction_plans oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
+    	this.$buttons.find('.oe_wubook_import_restriction_plans').on('click', import_restriction_plans.bind(this));
+			this.$buttons.append("<button class='oe_button oe_wubook_push_restriction_plans' style='background-color:red; color:white;' type='button'>"+_t('Push to WuBook')+"</button>");
+			this.$buttons.find('.oe_wubook_push_restriction_plans').on('click', push_restriction_plans.bind(this));
+		} else if (this.dataset.model === 'virtual.room.availability') {
+    	this.$buttons.append("<button class='oe_button oe_wubook_import_availability oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
+    	this.$buttons.find('.oe_wubook_import_availability').on('click', import_availability.bind(this));
+			this.$buttons.append("<button class='oe_button oe_wubook_push_availability' style='background-color:red; color:white;' type='button'>"+_t('Push to WuBook')+"</button>");
+    	this.$buttons.find('.oe_wubook_push_availability').on('click', push_availability.bind(this));
+		}
+  }
 });
 
 });

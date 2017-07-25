@@ -369,6 +369,21 @@ class WuBook(models.TransientModel):
 
         return ((rcode == 0 and not errors), len(processed_rids))
 
+    @api.model
+    def mark_bookings(self, wrids):
+        self.init_connection_()
+        rcode, results = self.SERVER.mark_bookings(self.TOKEN,
+                                                   self.LCODE,
+                                                   wrids)
+        self.close_connection_()
+
+        if rcode != 0:
+            self.create_wubook_issue('reservation',
+                                     "Can't mark as readed a reservation in wubook",
+                                     results, wid=wrid)
+
+        return rcode == 0
+
     # === PRICE PLANS
     @api.model
     def create_plan(self, name, daily=1):
@@ -929,7 +944,7 @@ class WuBook(models.TransientModel):
                                 if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
                                     failed_reservations.append(book['channel_reservation_code'])
                                 self.create_wubook_issue('reservation',
-                                                         "Can't found a free room for reservation from wubook",
+                                                         "Can't found a free room for reservation from wubook (#B)",
                                                          '', wid=book['reservation_code'])
                 else:
                     if book['channel_reservation_code'] and book['channel_reservation_code'] != '':

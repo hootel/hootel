@@ -4,7 +4,7 @@
  * Aloxa Solucions S.L. <info@aloxa.eu>
  *     Alexandre Díaz <alex@aloxa.eu>
  */
- 
+
 /** ANIMATIONS **/
 @keyframes cell-invalid {
 	0% {
@@ -69,17 +69,34 @@
 	background-color: #F6F6F6;
 }
 
+.hcal-table tr:hover td.hcal-cell-room-type-group-item {
+  background-color: #9bcd9b;
+	color: black;
+}
+
 .hcal-table-day {
 	height: 100%;
 	border-collapse: collapse !important;
 }
+/*.hcal-table-day tr:first-child td{
+	border: 1px solid #727272 !important;
+	border-width: 0 1px 0 0 !important;
+}
+.hcal-table tr:not(:last-child) .hcal-table-day tr:last-child td {
+	border-style: solid;
+	border-color: #727272 !important;
+	border-bottom-width: 1px !important;
+}
+.hcal-table-day tr:not(:last-child):not(:first-child) td {
+	border-width: 0;
+}*/
 .hcal-table-day td {
 	padding: 2px;
 	height: 2.3em;
-	border: 1px solid lightgray !important;
 	font-size: 7px;
 	vertical-align: middle;
 	font-weight: bold;
+	border: 1px solid #cecece !important;
 }
 .hcal-table-day td:hover:not(.hcal-cell-highlight):not(.hcal-cell-invalid) {
 	background-color: #FCFEE1 !important;
@@ -137,7 +154,7 @@
 .hcal-cell-invalid {
 	background-color: #e58e92;
 }
- 
+
 
 .hcal-cell-room-type-group-item-day {
 	padding: 0 !important;
@@ -215,7 +232,7 @@
 }
 
 .hcal-cell-month-day {
-	text-align: center !important;	
+	text-align: center !important;
 }
 
 .hcal-cell-room-type-group-day {
@@ -227,7 +244,7 @@
 	width:100%;
 }
 .hcal-table-type-group-day td {
-	border-width: 0; 
+	border-width: 0;
 }
 .hcal-table-type-group-day tr:not(:last-child) td {
 	border-bottom-width: 1px;
@@ -288,7 +305,7 @@ td.hcal-cell-month-day-occupied {
 }
 
 .hcal-cell-detail-room-group-item {
-	white-space: nowrap;	
+	white-space: nowrap;
 }
 
 .input-price {

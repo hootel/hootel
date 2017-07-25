@@ -16,7 +16,7 @@
     				<div class="ninfo"><span class="badge badge-danger">0</span></div>
     				CHARGES
     			</button>
-    			<button class="btn btn-default col-xs-12 col-lg-12">
+    			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_lists">
     				LIST
     			</button>
     			<!--button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_refresh">
