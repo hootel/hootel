@@ -2,23 +2,27 @@
 <openerp>
     <data>
 
-        <record id="hotel_reservation_action_checkin" model="ir.actions.server">
-               <field name="name">Checkins</field>
-               <field name="model_id" ref="hotel.model_hotel_folio"/>
-               <field name="code">action = env["hotel.folio"].action_folios_in()</field>
+        <record model="ir.actions.act_window" id="hotel_reservation_action_checkin">
+            <field name="name">Hotel folio checkin</field>
+            <field name="res_model">hotel.folio</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('checkins_reservations','>', 0)]</field>
         </record>
 
-        <record id="hotel_reservation_action_checkout" model="ir.actions.server">
-               <field name="name">Checkouts</field>
-               <field name="model_id" ref="hotel.model_hotel_folio"/>
-               <field name="code">action = env["hotel.folio"].action_folios_out()</field>
+        <record model="ir.actions.act_window" id="hotel_reservation_action_checkout">
+            <field name="name">Hotel folio checkout</field>
+            <field name="res_model">hotel.folio</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('checkouts_reservations','>', 0)]</field>
         </record>
 
-       <record id="hotel_reservation_action_paydue" model="ir.actions.server">
+        <record id="hotel_reservation_action_paydue" model="ir.actions.server">
                <field name="name">Paydue</field>
                <field name="model_id" ref="hotel.model_hotel_folio"/>
                <field name="code">action = env["hotel.folio"].action_folios_amount()</field>
-	</record>
+        </record>
 
     </data>
  </openerp>
