@@ -537,9 +537,7 @@ var HotelCalendarView = View.extend({
         var HotelFolioObj = new Model('hotel.folio');
 
          // Checkouts Button
-        domain = [['room_lines.checkout', '>=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
-            ['room_lines.checkout','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
-            ['room_lines.state','=','booking']];
+        domain = [['checkouts_reservations', '>', 0]];
         HotelFolioObj.call('search_count', [domain]).then(function(count){
             var $ninfo = self.$el.find('#pms-menu #btn_action_checkout div.ninfo');
             var $badge_checkout = $ninfo.find('.badge');
@@ -553,9 +551,7 @@ var HotelCalendarView = View.extend({
         });
 
         // Checkins Button
-        domain = [['room_lines.checkin', '>=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
-                 ['room_lines.checkin','<=', moment().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)],
-                 ['room_lines.state','!=','booking'],];
+        domain = [['checkins_reservations', '>', 0]];
         HotelFolioObj.call('search_count', [domain]).then(function(count){
             var $ninfo = self.$el.find('#pms-menu #btn_action_checkin div.ninfo');
             var $badge_checkin = $ninfo.find('.badge');
