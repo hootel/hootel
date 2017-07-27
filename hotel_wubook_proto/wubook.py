@@ -355,7 +355,7 @@ class WuBook(models.TransientModel):
         if rcode == 0:
             processed_rids, errors = self.generate_reservations(results)
             if any(processed_rids):
-                _logger.info("PROCESSED Reservations")
+                _logger.info("[WuBook] PROCESSED Reservations:")
                 _logger.info(processed_rids)
                 rcode, results = self.SERVER.mark_bookings(self.TOKEN,
                                                            lcode,
@@ -451,6 +451,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def update_plan_periods(self, pid, periods):
+        _logger.info("[WuBook] Updating Plan Periods...")
         _logger.info(periods)
         self.init_connection_()
         rcode, results = self.SERVER.update_plan_periods(self.TOKEN,
@@ -648,7 +649,6 @@ class WuBook(models.TransientModel):
             if vroom:
                 date_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
                 for day_vals in values[rid]:
-                    _logger.info(day_vals)
                     date_str = date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
                     vroom_avail = virtual_room_avail_obj.search([('virtual_room_id', '=', vroom.id),
                                                                  ('date', '=', date_str)], limit=1)
@@ -672,7 +672,6 @@ class WuBook(models.TransientModel):
 
     @api.model
     def generate_restrictions(self, restriction_plans):
-        _logger.info(restriction_plans)
         reservation_restriction_obj = self.env['reservation.restriction']
         count = 0
         for plan in restriction_plans:
@@ -738,7 +737,6 @@ class WuBook(models.TransientModel):
 
     @api.model
     def generate_pricelist_items(self, pid, dfrom, dto, plan_prices):
-        _logger.info(plan_prices)
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
         pricelist = self.env['product.pricelist'].search([('wpid', '=', pid)], limit=1)
         if pricelist:
@@ -803,7 +801,6 @@ class WuBook(models.TransientModel):
     def generate_reservations(self, bookings):
         user_id = self.env['res.users'].browse(self.env.uid)
         local = pytz.timezone(user_id and user_id.tz or 'UTC')
-        _logger.info("GENERATIE RESERV!-------------------------------------")
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
@@ -821,6 +818,17 @@ class WuBook(models.TransientModel):
                                          "Can't process a reservation that previusly failed!",
                                          '', wid=book['reservation_code'])
                 continue
+
+            arr_hour = book['arrival_hour'] == "--" and '14:00' or book['arrival_hour']
+            checkin = "%s %s" % (book['date_arrival'], arr_hour)
+            checkin_dt = local.localize(datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT))
+            checkin_utc_dt = checkin_dt.astimezone(pytz.utc)
+            checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
+            checkout = "%s 12:00" % book['date_departure']
+            checkout_dt = local.localize(datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT))
+            checkout_utc_dt = checkout_dt.astimezone(pytz.utc)
+            checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             # Search Folio. If exists.
             folio_id = False
@@ -847,6 +855,16 @@ class WuBook(models.TransientModel):
                         reservs_processed = True
                         if is_cancellation:
                             reserv.with_context({'wubook_action': False}).action_cancel()
+                            # Update Odoo avacon a dilability (don't wait for wubook)
+                            avails_ids = vroom_avail_obj.search([('virtual_room_id', '=', vroom.id),
+                                                                 ('date', '>=', checkin_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                                                                 ('date', '<', checkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))])
+                            for rec_avail in avails_ids:
+                                if not is_cancellation:
+                                    rec_avail.with_context({'wubook_action': False}).write({
+                                        'avail': rec_avail.avail+1,
+                                        'wpushed': True,
+                                        })
 
             # Do Nothing if already processed 'wrid'
             if reservs_processed:
@@ -875,18 +893,8 @@ class WuBook(models.TransientModel):
             # Search Wubook Channel Info
             wchannel_info = self.env['wubook.channel.info'].search(
                 [('wid', '=', str(book['id_channel']))], limit=1)
+
             # Obtener habitacion libre
-            arr_hour = book['arrival_hour'] == "--" and '14:00' or book['arrival_hour']
-            checkin = "%s %s" % (book['date_arrival'], arr_hour)
-            checkin_dt = local.localize(datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT))
-            checkin_utc_dt = checkin_dt.astimezone(pytz.utc)
-            checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-
-            checkout = "%s 12:00" % book['date_departure']
-            checkout_dt = local.localize(datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT))
-            checkout_utc_dt = checkout_dt.astimezone(pytz.utc)
-            checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-
             vrooms_ids = book['rooms'].split(',')
             vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])
 
@@ -943,11 +951,15 @@ class WuBook(models.TransientModel):
                                 customer_room_index = customer_room_index + 1
 
                                 # Update Odoo avacon a dilability (don't wait for wubook)
-                                # avails_ids = vroom_avail_obj.search([('virtual_room_id', '=', vroom.id),
-                                #                                      ('date', '>=', checkin_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                                #                                      ('date', '<', checkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))])
-                                # for rec_avail in avails_ids:
-                                #     rec_avail.with_context({'wubook_action': False}).write('avail': rec_avail.avail+1 and is_cancellation or max(rec_avail.avail-1, 0))
+                                avails_ids = vroom_avail_obj.search([('virtual_room_id', '=', vroom.id),
+                                                                     ('date', '>=', checkin_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                                                                     ('date', '<', checkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))])
+                                for rec_avail in avails_ids:
+                                    if not is_cancellation:
+                                        rec_avail.with_context({'wubook_action': False}).write({
+                                            'avail': max(rec_avail.avail-1, 0),
+                                            'wpushed': True,
+                                            })
                             else:
                                 if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
                                     failed_reservations.append(book['channel_reservation_code'])
