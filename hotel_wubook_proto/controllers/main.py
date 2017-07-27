@@ -46,6 +46,7 @@ class website_wubook(http.Controller):
         if lcode != wlcode:
             raise ValidationError("Error! lcode doesn't match!")
 
+        _logger.info("[WUBOOK] Importing Reservations...")
         # Create Reservation
         request.env['wubook'].sudo().fetch_booking(lcode, rcode)
 
@@ -68,12 +69,12 @@ class website_wubook(http.Controller):
         if lcode != wlcode:
             raise ValidationError("Error! lcode doesn't match!")
 
+        _logger.info("[WUBOOK] Updating values...")
         request.env['wubook'].sudo().fetch_rooms_values(dfrom, dto)
         request.env['wubook'].sudo().fetch_rplan_restrictions(dfrom, dto)
         pricelist = int(request.env['ir.property'].sudo().search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
         pricelist_id = request.env['product.pricelist'].sudo().browse(pricelist)
         if pricelist_id and pricelist_id.wpid:
-            _logger.info("Pidiendo Precios!")
             request.env['wubook'].sudo().fetch_plan_prices(pricelist_id.wpid, dfrom, dto)
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])

@@ -808,6 +808,7 @@ class WuBook(models.TransientModel):
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
+        vroom_avail_obj = self.env['virtual.room.availability']
         processed_rids = []
         failed_reservations = []
         _logger.info(bookings)
@@ -940,6 +941,13 @@ class WuBook(models.TransientModel):
                                 reservations.append((0, False, vals))
                                 used_rooms.append(free_rooms[customer_room_index].id)
                                 customer_room_index = customer_room_index + 1
+
+                                # Update Odoo avacon a dilability (don't wait for wubook)
+                                # avails_ids = vroom_avail_obj.search([('virtual_room_id', '=', vroom.id),
+                                #                                      ('date', '>=', checkin_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                                #                                      ('date', '<', checkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))])
+                                # for rec_avail in avails_ids:
+                                #     rec_avail.with_context({'wubook_action': False}).write('avail': rec_avail.avail+1 and is_cancellation or max(rec_avail.avail-1, 0))
                             else:
                                 if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
                                     failed_reservations.append(book['channel_reservation_code'])
