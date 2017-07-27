@@ -797,8 +797,22 @@ class WuBook(models.TransientModel):
             count = count + 1
         return count
 
+    # FIXME: Super big method!!! O_o
     @api.model
     def generate_reservations(self, bookings):
+        def fetch_values(dfrom, dto):
+            rcode, results = self.SERVER.fetch_rooms_values(self.TOKEN,
+                                                            self.LCODE,
+                                                            dfrom,
+                                                            dto,
+                                                            False)
+            if rcode != 0:
+                self.create_wubook_issue('room',
+                                         "Can't fetch rooms values from WuBook",
+                                         results, dfrom=dfrom, dto=dto)
+            else:
+                self.generate_room_values(dfrom, dto, results)
+
         user_id = self.env['res.users'].browse(self.env.uid)
         local = pytz.timezone(user_id and user_id.tz or 'UTC')
         res_partner_obj = self.env['res.partner']
@@ -862,8 +876,8 @@ class WuBook(models.TransientModel):
             if reservs_processed:
                 processed_rids.append(book['reservation_code'])
                 # Update Odoo availability (don't wait for wubook)
-                self.fetch_rooms_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                        checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                             checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
                 continue
 
             # Search Customer
@@ -973,8 +987,8 @@ class WuBook(models.TransientModel):
                 processed_rids.append(book['reservation_code'])
 
             # Update Odoo availability (don't wait for wubook)
-            self.fetch_rooms_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                    checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+            fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                         checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         return (processed_rids, any(failed_reservations))
 
     @api.model
