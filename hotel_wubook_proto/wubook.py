@@ -862,8 +862,8 @@ class WuBook(models.TransientModel):
             if reservs_processed:
                 processed_rids.append(book['reservation_code'])
                 # Update Odoo availability (don't wait for wubook)
-                self.fetch_rooms_values(checkin_utc_dt.strftime(),
-                                        checkout_utc_dt.strftime())
+                self.fetch_rooms_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                                        checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
                 continue
 
             # Search Customer
@@ -973,8 +973,8 @@ class WuBook(models.TransientModel):
                 processed_rids.append(book['reservation_code'])
 
             # Update Odoo availability (don't wait for wubook)
-            self.fetch_rooms_values(checkin_utc_dt.strftime(),
-                                    checkout_utc_dt.strftime())
+            self.fetch_rooms_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                                    checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         return (processed_rids, any(failed_reservations))
 
     @api.model
