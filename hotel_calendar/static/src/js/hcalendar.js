@@ -939,7 +939,7 @@ HotelCalendar.prototype = {
               cell.classList.add('hcal-cell-end-week');
             }
 
-            var dd_fmrt = dd.startOf('day').utc().format(HotelCalendar.DATE_FORMAT_SHORT_); // Local -> UTC
+            var dd_fmrt = dd.format(HotelCalendar.DATE_FORMAT_SHORT_); // Local -> UTC
             //console.log(dd_fmrt);
             var input = document.createElement('input');
             input.classList.add('input-price');
