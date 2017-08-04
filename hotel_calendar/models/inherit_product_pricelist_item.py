@@ -81,12 +81,13 @@ class ProductPricelistItem(models.Model):
                         quantity=1,
                         date=date_start,
                         pricelist=pricelist_id)
+                    prod_price = prod.price
 
                     self.env['bus.hotel.calendar'].send_pricelist_notification(
                         pricelist_id,
                         date_start,
                         vroom.id,
-                        prod.price)
+                        prod_price)
 
                     vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
                     vroom_pr_cached_id = vroom_pr_cached_obj.search([
