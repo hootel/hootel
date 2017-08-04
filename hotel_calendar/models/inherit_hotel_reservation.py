@@ -107,17 +107,18 @@ class HotelReservation(models.Model):
         date_diff = abs((date_start - date_end).days) + 1
         json_rooms_prices = {pricelist_id: []}
         vrooms = self.env['hotel.virtual.room'].search([])
+        vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
         for vroom in vrooms:
             days = {}
             for i in range(0, date_diff):
                 ndate = date_start + timedelta(days=i)
                 ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
-                prod = vroom.product_id.with_context(
-                    quantity=1,
-                    date=ndate_str,
-                    pricelist=pricelist_id)
+                prod_price_id = vroom_pr_cached_obj.search([
+                    ('virtual_room_id', '=', vroom.id),
+                    ('date', '=', ndate_str)
+                ], limit=1)
                 days.update({
-                    ndate.strftime("%d/%m/%Y"): prod.price
+                    ndate.strftime("%d/%m/%Y"): prod_price_id and prod_price_id.price or vroom.product_id.lst_price
                 })
             json_rooms_prices[pricelist_id].append({
                 'room': vroom.id,

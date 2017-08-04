@@ -18,7 +18,17 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import inherit_hotel_reservation
-from . import inherit_product_pricelist_item
-from . import bus_hotel_calendar
-from . import virtual_room_pricelist_cached
+from openerp import models, fields, api
+from openerp.exceptions import ValidationError
+
+
+class VirtualRoomPricelistCached(models.Model):
+    '''
+    Cached Pricelist. Used only for Calendar Values
+    '''
+
+    _name = 'virtual.room.pricelist.cached'
+
+    virtual_room_id = fields.Many2one('hotel.virtual.room', 'Virtual Room', required=True, track_visibility='always')
+    price = fields.Float('Price', default=0.0)
+    date = fields.Date('Date', required=True, track_visibility='always')
