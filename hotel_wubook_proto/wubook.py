@@ -994,6 +994,7 @@ class WuBook(models.TransientModel):
     @api.model
     def generate_wubook_channel_info(self, channels):
         channel_info_obj = self.env['wubook.channel.info']
+        count = 0
         for cid in channels.keys():
             vals = {
                 'name': channels[cid]['name'],
