@@ -637,7 +637,7 @@ class WuBook(models.TransientModel):
 
         count = self.generate_wubook_channel_info(results)
 
-        return count
+        return (True, count)
 
     # === WUBOOK -> ODOO
     @api.model
