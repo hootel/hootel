@@ -22,3 +22,4 @@ from . import wubook_installer
 from . import wubook_import_plan_prices
 from . import wubook_import_plan_restrictions
 from . import wubook_import_availability
+from . import wubook_massive_changes

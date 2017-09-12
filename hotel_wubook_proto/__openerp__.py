@@ -40,6 +40,7 @@
         'wizards/wubook_import_plan_prices.xml',
         'wizards/wubook_import_plan_restrictions.xml',
         'wizards/wubook_import_availability.xml',
+        'wizards/wubook_massive_changes.xml',
         'views/general.xml',
         'views/res_config.xml',
         'views/inherit_hotel_reservation.xml',

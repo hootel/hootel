@@ -38,5 +38,8 @@
 	<menuitem id="wubook_config_menu" name="Settings"
 			sequence="3" action="action_wubook_config" parent="wubook_menu"/>
 
+	<menuitem id="wubook_massive_change" parent="hotel.hotel_configuration_menu"
+		sequence="10" action="action_wubook_massive_change" name="Massive Changes"/>
+
 	</data>
 </openerp>
