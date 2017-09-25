@@ -1016,7 +1016,7 @@ class WuBook(models.TransientModel):
     def push_changes(self):
         self.push_availability()
         self.push_priceplans()
-        # self.push_restrictions()
+        self.push_restrictions()
 
     @api.model
     def push_availability(self):

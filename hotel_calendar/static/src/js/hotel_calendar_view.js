@@ -38,19 +38,20 @@ var Core = require('web.core'),
 /* HIDE CONTROL PANEL */
 /* FIXME: Look's like a hackish solution */
 ControlPanel.include({
-    update: function(status, options) {
-        this._super(status, options);
-        var action_stack = this.getParent().action_stack;
-        if (action_stack && action_stack.length) {
-            var active_action = action_stack[action_stack.length-1];
-            if (active_action.widget && active_action.widget.active_view &&
-                    active_action.widget.active_view.type === 'pms'){
-                this._toggle_visibility(false);
-            } else {
-                this._toggle_visibility(true);
-            }
-        }
-    }
+  update: function(status, options) {
+      if (typeof options.toHide === 'undefined')
+          options.toHide = false;
+      var action_stack = this.getParent().action_stack;
+      if (action_stack && action_stack.length) {
+          var active_action = action_stack[action_stack.length-1];
+          if (active_action.widget && active_action.widget.active_view &&
+                  active_action.widget.active_view.type === 'pms'){
+              options.toHide = true;
+          }
+      }
+      this._super(status, options);
+      this._toggle_visibility(!options.toHide);
+  }
 });
 
 var HotelCalendarView = View.extend({
@@ -628,7 +629,7 @@ var HotelCalendarView = View.extend({
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);*/
         //});
 
-        var date_begin = moment().startOf('day');
+        var date_begin = moment().utc().startOf('day');
         var days = date_begin.daysInMonth();
         var date_end = date_begin.clone().add(days, 'd').endOf('day');
         $dateTimePickerBegin.data("ignore_onchange", true);
@@ -693,7 +694,7 @@ var HotelCalendarView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
-            var date_begin = moment().startOf('day');
+            var date_begin = moment().utc().startOf('day');
             var days = moment(date_begin).daysInMonth();
             var date_end = date_begin.clone().add(days, 'd').endOf('day');
             $dateTimePickerBegin.data("ignore_onchange", true);
@@ -790,7 +791,7 @@ var HotelCalendarView = View.extend({
         var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate();
         var hardmode = isStartDate || date_begin.isAfter(date_end);
         if (date_begin && date_end && this._hcalendar) {
-            var days = hardmode?date_begin.daysInMonth():date_end.diff(date_begin,'days')+1;
+            var days = hardmode?date_begin.daysInMonth():date_end.diff(date_begin,'days');
             if (hardmode) {
                 var ndate_end = date_begin.clone().add(days, 'd');
                 $dateTimePickerEnd.data("ignore_onchange", true);

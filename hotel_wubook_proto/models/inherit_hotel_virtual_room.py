@@ -32,10 +32,7 @@ class HotelVirtualRoom(models.Model):
     def _get_capacity(self):
         hotel_room_obj = self.env['hotel.room']
         for rec in self:
-            room_categories = rec.room_type_ids.mapped('cat_id.id')
-            room_ids = rec.room_ids + hotel_room_obj.search([('categ_id.id', 'in', room_categories)])
-            capacities = room_ids.mapped('capacity')
-            rec.wcapacity = any(capacities) and min(capacities) or 0
+            rec.wcapacity = rec.get_capacity()
 
     wscode = fields.Char("WuBook Short Code", readonly=True)
     wrid = fields.Char("WuBook Room ID", readonly=True)
@@ -45,14 +42,6 @@ class HotelVirtualRoom(models.Model):
     def _check_wcapacity(self):
         if self.wcapacity == 0:
             raise ValidationError("wcapacity can't be zero")
-
-    @api.onchange('room_type_ids', 'room_ids')
-    def on_change_room_type_ids_room_ids(self):
-        hotel_room_obj = self.env['hotel.room']
-        room_categories = self.room_type_ids.mapped('cat_id.id')
-        room_ids = self.room_ids + hotel_room_obj.search([('categ_id.id', 'in', room_categories)])
-        capacities = room_ids.mapped('capacity')
-        self.wcapacity = any(capacities) and min(capacities) or 0
 
     @api.multi
     @api.constrains('wscode')

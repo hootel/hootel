@@ -77,4 +77,11 @@
 	</ul>
 </t>
 
+<t t-name="HotelCalendarManagement.UnsavedChanges">
+	<div class="content">
+		<p>Have unsaved changes!</p>
+		<p>Do you want to save these changes?</p>
+	</div>
+</t>
+
 </template>
