@@ -430,8 +430,8 @@ HotelCalendar.prototype = {
     if (room.price[0] == 'fixed') {
       return room.price[1];
     } else if (room.price[0] == 'pricelist'){
-      var price_input = this.edtable.querySelector('#'+this.sanitizeId_(`CELL_PRICE_${room.price[2]}_${room.price[1]}_${day.format(HotelCalendar.DATE_FORMAT_SHORT_)}`)+' input');
-      return parseFloat(price_input.value.replace(",", "."));
+      var price_input = this.edtable.querySelector('#'+this.sanitizeId_(`CELL_PRICE_${room.price[2]}_${room.price[1]}_${day.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
+      return parseFloat(price_input.textContent.replace(",", "."));
     }
 
     return 0.0;
