@@ -179,7 +179,7 @@ class HotelCalendarManagement(models.TransientModel):
                 pricelist_id = int(pricelist_id)
                 vals.update({'pricelist_id': pricelist_id})
         if not restriction_id:
-            restriction_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id'))
+            restriction_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id')
             if restriction_id:
                 restriction_id = int(restriction_id)
                 vals.update({'restriction_id': restriction_id})
