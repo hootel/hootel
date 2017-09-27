@@ -102,7 +102,9 @@ class HotelReservation(models.Model):
 
     @api.multi
     def get_hcalendar_pricelist_data(self, dfrom, dto):
-        pricelist_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
+        pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+        if pricelist_id:
+            pricelist_id = int(pricelist_id)
         date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
         date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
         # Get Prices
