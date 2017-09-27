@@ -108,8 +108,7 @@ class WuBook(models.TransientModel):
         self.TOKEN = tok
 
         if res != 0:
-            self.create_wubook_issue('wubook', "Can't connect with WuBook!",
-                                     results)
+            self.create_wubook_issue('wubook', "Can't connect with WuBook! Invalid user name or password?", '')
 
         return res == 0
 
