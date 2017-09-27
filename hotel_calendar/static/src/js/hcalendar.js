@@ -1357,9 +1357,9 @@ HotelCalendar.prototype = {
         for (var prk of pr_keys) {
           var dd = HotelCalendar.toMoment(prk, HotelCalendar.DATE_FORMAT_SHORT_);
           var price = pr_item['days'][prk];
-          var cell_input = this.edtable.querySelector('#'+this.sanitizeId_(`CELL_PRICE_${k}_${pr_item['room']}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`)+' input');
-          if (cell_input) {
-            cell_input.value = price;
+          var cell = this.edtable.querySelector('#'+this.sanitizeId_(`CELL_PRICE_${k}_${pr_item['room']}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
+          if (cell) {
+            cell.textContent = price;
           }
         }
       }

@@ -31,7 +31,7 @@ class ImportPlanRestrictionsWizard(models.TransientModel):
 
     @api.multi
     def import_plan_restrictions(self):
-        restriction_id = self.env['reservation.restriction'].browse(self.env.context.get('active_id'))
+        restriction_id = self.env['hotel.virtual.room.restriction'].browse(self.env.context.get('active_id'))
         if restriction_id:
             for record in self:
                 date_start_dt = fields.Datetime.from_string(record.date_start)

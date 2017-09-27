@@ -29,11 +29,6 @@ class HotelCalendarManagement(models.TransientModel):
 
     @api.multi
     def save_changes(self, pricelist_id, restriction_id, pricelist, restrictions, availability):
-        _logger.info("=== SAVE CHANGES")
-        _logger.info(pricelist)
-        _logger.info(restrictions)
-        _logger.info(availability)
-
         # Save Pricelist
         for k_price in pricelist.keys():
             room_id = self.env['hotel.virtual.room'].browse([int(k_price)])
@@ -63,14 +58,14 @@ class HotelCalendarManagement(models.TransientModel):
         # Save Restrictions
         for k_res in restrictions.keys():
             for restriction in restrictions[k_res]:
-                res_id = self.env['reservation.restriction.item'].search([
+                res_id = self.env['hotel.virtual.room.restriction.item'].search([
                     ('date_start', '>=', restriction['date']), ('date_end', '<=', restriction['date']),
                     ('restriction_id', '=', int(restriction_id)),
                     ('applied_on', '=', '0_virtual_room'),
                     ('virtual_room_id', '=', int(k_res)),
                 ], limit=1)
                 if not res_id:
-                    self.env['reservation.restriction.item'].create({
+                    self.env['hotel.virtual.room.restriction.item'].create({
                         'date_start': restriction['date'],
                         'date_end': restriction['date'],
                         'restriction_id': int(restriction_id),
@@ -96,12 +91,12 @@ class HotelCalendarManagement(models.TransientModel):
         # Save Availability
         for k_avail in availability.keys():
             for avail in availability[k_avail]:
-                avail_id = self.env['virtual.room.availability'].search([
+                avail_id = self.env['hotel.virtual.room.availabity'].search([
                     ('date', '=', avail['date']),
                     ('virtual_room_id', '=', int(k_avail)),
                 ], limit=1)
                 if not avail_id:
-                    self.env['virtual.room.availability'].create({
+                    self.env['hotel.virtual.room.availabity'].create({
                         'date': avail['date'],
                         'no_ota': avail['no_ota'],
                         'avail': avail['avail'],
@@ -179,42 +174,30 @@ class HotelCalendarManagement(models.TransientModel):
             raise ValidationError('Input Error: No dates defined!')
         vals = {}
         if not pricelist_id:
-            pricelist_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+            pricelist_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
             vals.update({'pricelist_id': pricelist_id})
         if not restriction_id:
-            restriction_id = 4
+            restriction_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id'))
             vals.update({'restriction_id': restriction_id})
 
-        avail_ids = self.env['virtual.room.availability'].search([
+        avail_ids = self.env['hotel.virtual.room.availabity'].search([
             ('date', '>=', dfrom), ('date', '<=', dto),
         ])
-        restriction_item_ids = self.env['reservation.restriction.item'].search([
+        restriction_item_ids = self.env['hotel.virtual.room.restriction.item'].search([
             ('date_start', '>=', dfrom), ('date_end', '<=', dto),
             ('restriction_id', '=', int(restriction_id)),
             ('applied_on', '=', '0_virtual_room'),
         ])
-        _logger.info(restriction_item_ids)
-        restriction_item_global_id = self.env['reservation.restriction.item'].search([
-            ('restriction_id', '=', int(restriction_id)),
-            ('applied_on', '=', '1_global'),
-        ], limit=1)
+
         pricelist_item_ids = self.env['product.pricelist.item'].search([
             ('date_start', '>=', dfrom), ('date_end', '<=', dto),
             ('pricelist_id', '=', int(pricelist_id)),
             ('applied_on', '=', '1_product'),
             ('compute_price', '=', 'fixed'),
         ])
-        _logger.info(pricelist_item_ids)
-        pricelist_item_global_id = self.env['product.pricelist.item'].search([
-            ('pricelist_id', '=', int(restriction_id)),
-            ('applied_on', '=', '3_global'),
-            ('compute_price', '=', 'fixed'),
-        ], limit=1)
 
         vals.update({
-            'price_global': self._hcalendar_pricelist_json_data(pricelist_item_global_id) or False,
             'prices': self._hcalendar_pricelist_json_data(pricelist_item_ids) or [],
-            'restriction_global': self._hcalendar_restriction_json_data(restriction_item_global_id) or False,
             'restrictions': self._hcalendar_restriction_json_data(restriction_item_ids) or [],
             'availability': self._hcalendar_availability_json_data(avail_ids) or [],
         })

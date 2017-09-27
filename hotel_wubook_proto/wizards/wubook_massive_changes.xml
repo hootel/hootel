@@ -15,13 +15,13 @@
 				<group colspan="8" col="8">
 					<field name="date_start" required="1"  colspan="4"/>
 					<field name="date_end" required="1" colspan="4" />
-					<field name="dmo" required="1" colspan="1" />
-					<field name="dtu" required="1" colspan="1" />
-					<field name="dwe" required="1" colspan="1" />
-					<field name="dth" required="1" colspan="1" />
-					<field name="dfr" required="1" colspan="1" />
-					<field name="dsa" required="1" colspan="1" />
-					<field name="dsu" required="1" colspan="1" />
+					<field name="dmo" colspan="1" />
+					<field name="dtu" colspan="1" />
+					<field name="dwe" colspan="1" />
+					<field name="dth" colspan="1" />
+					<field name="dfr" colspan="1" />
+					<field name="dsa" colspan="1" />
+					<field name="dsu" colspan="1" />
 				</group>
 				<!-- Availability Fields -->
 				<group col="3" colspan="3" attrs="{'invisible':[('section', '!=', '0')]}">

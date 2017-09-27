@@ -29,7 +29,7 @@ class ProductPricelistItem(models.Model):
     @api.model
     def create(self, vals):
         res = super(ProductPricelistItem, self).create(vals)
-        pricelist_parity_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+        pricelist_parity_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
         pricelist_id = res.pricelist_id.id
         product_tmpl_id = res.product_tmpl_id.id
         date_start = res.date_start
@@ -64,7 +64,7 @@ class ProductPricelistItem(models.Model):
 
     @api.multi
     def write(self, vals):
-        pricelist_parity_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+        pricelist_parity_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
         ret_vals = super(ProductPricelistItem, self).write(vals)
         if vals.get('fixed_price'):
             for record in self:
@@ -100,7 +100,7 @@ class ProductPricelistItem(models.Model):
 
     @api.multi
     def unlink(self):
-        pricelist_parity_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+        pricelist_parity_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
         unlink_vals = {}
         for record in self:
             if not record.pricelist_id == pricelist_parity_id:

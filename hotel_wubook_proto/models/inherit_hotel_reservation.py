@@ -200,7 +200,7 @@ class HotelReservation(models.Model):
         date_diff = abs((date_start - date_end).days)
 
         hotel_vroom_obj = self.env['hotel.virtual.room']
-        virtual_room_avail_obj = self.env['virtual.room.availability']
+        virtual_room_avail_obj = self.env['hotel.virtual.room.availabity']
 
         rooms_avail = []
         vrooms = hotel_vroom_obj.search([('room_ids.product_id', '=', product_id)])

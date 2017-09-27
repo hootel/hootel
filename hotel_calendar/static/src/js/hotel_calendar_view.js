@@ -479,6 +479,7 @@ var HotelCalendarView = View.extend({
             }
 
             self.create_calendar({
+                startDate: moment(domains['dates'][0]).add(1, 'd'),
                 rooms: rooms,
                 showPaginator: false
             }, results['pricelist']);
@@ -635,8 +636,7 @@ var HotelCalendarView = View.extend({
         $dateTimePickerBegin.data("ignore_onchange", true);
         $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
         $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-        this._last_dates = [date_begin.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
-                            date_end.utc().format(ODOO_DATETIME_MOMENT_FORMAT)];
+        this._last_dates = this.generate_domains()['dates'];
 
         // View Events
         this.$el.find("#pms-search #search_query").on('change', function(ev){
@@ -873,13 +873,16 @@ var HotelCalendarView = View.extend({
             moend = moment(this._last_dates[1], ODOO_DATETIME_MOMENT_FORMAT),
             dfrom = domains['dates'][0],
             dto = domains['dates'][1];
-        if (mstart.isBetween(mostart, moend) && mend.isAfter(moend)) {
+        if (mstart.isBetween(mostart, moend, 'days') && mend.isAfter(moend, 'day')) {
           dfrom = this._last_dates[1];
-        } else if (mostart.isBetween(mstart, mend) && moend.isAfter(mstart)) {
+        } else if (mostart.isBetween(mstart, mend, 'days') && moend.isAfter(mstart, 'day')) {
           dto = this._last_dates[0];
         } else {
           clearReservations = true;
         }
+
+        console.log(dfrom);
+        console.log(dto);
 
         var full_domain = [false, dfrom, dto, domains['rooms'] || [], domains['reservations'] || [], false, withPricelist || false];
         this._model.call('get_hcalendar_all_data', full_domain).then(function(results){

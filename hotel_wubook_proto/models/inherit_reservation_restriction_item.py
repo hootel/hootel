@@ -22,7 +22,7 @@ from openerp import models, fields, api
 
 
 class ReservationRestrictionItem(models.Model):
-    _inherit = 'reservation.restriction.item'
+    _inherit = 'hotel.virtual.room.restriction.item'
 
     wpushed = fields.Boolean("WuBook Pushed", default=False, readonly=True)
 

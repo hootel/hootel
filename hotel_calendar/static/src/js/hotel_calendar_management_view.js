@@ -238,7 +238,7 @@ var HotelCalendarManagementView = View.extend({
 
             // Get Restrictions
             self._restriction_id = results['restriction_id'];
-            new Model('reservation.restriction').query(['id','name']).all().then(function(resultsRestrictions){
+            new Model('hotel.virtual.room.restriction').query(['id','name']).all().then(function(resultsRestrictions){
                 var $list = self.$el.find('#pms-search #restriction_list');
                 $list.html('');
                 resultsRestrictions.forEach(function(item, index){
@@ -444,6 +444,7 @@ var HotelCalendarManagementView = View.extend({
             self._hcalendar.setPricelist(results['prices']);
             self._hcalendar.setRestrictions(results['restrictions']);
             self._hcalendar.setAvailability(results['availability']);
+            self._hcalendar.updateView_();
         });
         this._last_dates = params['dates'];
     },

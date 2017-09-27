@@ -55,7 +55,7 @@ class MassiveChangesWizard(models.TransientModel):
     no_ota = fields.Boolean('No OTA', default=False)
 
     # Restriction fields
-    restriction_id = fields.Many2one('reservation.restriction', 'Restriction Plan')
+    restriction_id = fields.Many2one('hotel.virtual.room.restriction', 'Restriction Plan')
     change_min_stay = fields.Boolean(default=False)
     min_stay = fields.Integer("Min. Stay")
     change_min_stay_arrival = fields.Boolean(default=False)
@@ -82,6 +82,7 @@ class MassiveChangesWizard(models.TransientModel):
         wedays = [self.dmo, self.dtu, self.dwe, self.dth, self.dfr, self.dsa, self.dsu]
         return (chkdate >= self.date_start and chkdate <= self.date_end and wedays[wday])
 
+    # FIXME: Method too long!
     @api.multi
     def massive_change(self):
         for record in self:
@@ -97,7 +98,7 @@ class MassiveChangesWizard(models.TransientModel):
                     domain = [('date', '=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))]
                     if record.applied_on == '1':
                         domain.append(('virtual_room_id', 'in', record.virtual_room_ids.ids))
-                    vrooms = self.env['virtual.room.availability'].search(domain)
+                    vrooms = self.env['hotel.virtual.room.availabity'].search(domain)
                     vals = {}
                     if record.change_avail:
                         vals.update({'avail': record.avail})
@@ -105,6 +106,13 @@ class MassiveChangesWizard(models.TransientModel):
                         vals.update({'no_ota': record.no_ota})
                     if any(vals):
                         vrooms.write(vals)
+                    else:
+                        for vroom_id in record.virtual_room_ids.ids:
+                            vals.update({
+                                'date': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'virtual_room_id': vroom_id
+                            })
+                            self.env['hotel.virtual.room.availabity'].create(vals)
                 elif record.section == '1':
                     domain = [
                         ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
@@ -113,7 +121,7 @@ class MassiveChangesWizard(models.TransientModel):
                     ]
                     if record.applied_on == '1':
                         domain.append(('virtual_room_id', 'in', record.virtual_room_ids.ids))
-                    rresctriction_item_ids = self.env['reservation.restriction.item'].search(domain)
+                    rresctriction_item_ids = self.env['hotel.virtual.room.restriction.item'].search(domain)
                     vals = {}
                     if record.change_min_stay:
                         vals.update({'min_stay': record.min_stay})
@@ -129,6 +137,15 @@ class MassiveChangesWizard(models.TransientModel):
                         vals.update({'closed_arrival': record.closed_arrival})
                     if any(vals):
                         rresctriction_item_ids.write(vals)
+                    else:
+                        for vroom_id in record.virtual_room_ids.ids:
+                            vals.update({
+                                'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'restriction_id': record.restriction_id.id,
+                                'virtual_room_id': vroom_id
+                            })
+                            self.env['hotel.virtual.room.restriction.item'].create(vals)
                 elif record.section == '2':
                     price = 0.0
                     operation = 'a'
@@ -154,33 +171,36 @@ class MassiveChangesWizard(models.TransientModel):
                         ('compute_price', '=', 'fixed'),
                         ('applied_on', '=', '1_product'),
                     ]
+                    product_tmpl_ids = record.virtual_room_ids.mapped('product_id.product_tmpl_id.id')
                     if record.applied_on == '1':
-                        product_tmpl_ids = record.virtual_room_ids.mapped('product_id.product_tmpl_id.id')
                         domain.append(('product_tmpl_id', '=', product_tmpl_ids))
                     pricelist_item_ids = self.env['product.pricelist.item'].search(domain)
 
-                    if operation == 'a':
-                        for pli in pricelist_item_ids:
-                            pli_price = pli.fixed_price
-                            pli.write({'fixed_price': pli_price + price})
-                    elif operation == 'ap':
-                        for pli in pricelist_item_ids:
-                            pli_price = pli.fixed_price
-                            pli.write({'fixed_price': pli_price + price * pli_price * 0.01})
-                    elif operation == 's':
-                        for pli in pricelist_item_ids:
-                            pli_price = pli.fixed_price
-                            pli.write({'fixed_price': pli_price - price})
-                    elif operation == 'sp':
-                        for pli in pricelist_item_ids:
-                            pli_price = pli.fixed_price
-                            pli.write({'fixed_price': pli_price - price * pli_price * 0.01})
-                    elif operation == 'np':
-                        for pli in pricelist_item_ids:
-                            pli_price = pli.fixed_price
-                            pli.write({'fixed_price': price * pli_price * 0.01})
+                    if any(pricelist_item_ids):
+                        if operation != 'n':
+                            for pli in pricelist_item_ids:
+                                pli_price = pli.fixed_price
+                                if operation == 'a':
+                                    pli.write({'fixed_price': pli_price + price})
+                                elif operation == 'ap':
+                                    pli.write({'fixed_price': pli_price + price * pli_price * 0.01})
+                                elif operation == 's':
+                                    pli.write({'fixed_price': pli_price - price})
+                                elif operation == 'sp':
+                                    pli.write({'fixed_price': pli_price - price * pli_price * 0.01})
+                                elif operation == 'np':
+                                    pli.write({'fixed_price': price * pli_price * 0.01})
+                        else:
+                            pricelist_item_ids.write({'fixed_price': price})
                     else:
-                        pricelist_item_ids.write({'fixed_price': price})
-
-
+                        for product_tmpl_id in product_tmpl_ids.ids:
+                            self.env['hotel.virtual.room.restriction.item'].create({
+                                'pricelist_id': record.pricelist_id.id,
+                                'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'compute_price': 'fixed',
+                                'applied_on': '1_product',
+                                'product_tmpl_id': product_tmpl_id,
+                                'fixed_price': price,
+                            })
         return True

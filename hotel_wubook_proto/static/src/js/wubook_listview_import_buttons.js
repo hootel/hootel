@@ -172,12 +172,12 @@ ListView.include({
     } else if (this.dataset.model === 'wubook.channel.info') {
     	this.$buttons.append("<button class='oe_button oe_wubook_import_channels_info oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
     	this.$buttons.find('.oe_wubook_import_channels_info').on('click', import_channels_info.bind(this));
-    } else if (this.dataset.model === 'reservation.restriction') {
+    } else if (this.dataset.model === 'hotel.virtual.room.restriction') {
     	this.$buttons.append("<button class='oe_button oe_wubook_import_restriction_plans oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
     	this.$buttons.find('.oe_wubook_import_restriction_plans').on('click', import_restriction_plans.bind(this));
 			this.$buttons.append("<button class='oe_button oe_wubook_push_restriction_plans' style='background-color:red; color:white;' type='button'>"+_t('Push to WuBook')+"</button>");
 			this.$buttons.find('.oe_wubook_push_restriction_plans').on('click', push_restriction_plans.bind(this));
-		} else if (this.dataset.model === 'virtual.room.availability') {
+		} else if (this.dataset.model === 'hotel.virtual.room.availabity') {
     	this.$buttons.append("<button class='oe_button oe_wubook_import_availability oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
     	this.$buttons.find('.oe_wubook_import_availability').on('click', import_availability.bind(this));
 			this.$buttons.append("<button class='oe_button oe_wubook_push_availability' style='background-color:red; color:white;' type='button'>"+_t('Push to WuBook')+"</button>");

@@ -56,7 +56,7 @@ class HotelReservation(models.Model):
 
     @api.model
     def _hcalendar_room_data(self, rooms):
-        pricelist_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+        pricelist_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
         json_rooms = []
         for room in rooms:
             room_type = self.env['hotel.room.type'].search([('cat_id', '=', room.categ_id.id)], limit=1)
@@ -100,7 +100,7 @@ class HotelReservation(models.Model):
 
     @api.multi
     def get_hcalendar_pricelist_data(self, dfrom, dto):
-        pricelist_id = int(self.env['ir.property'].search([('name', '=', 'property_product_pricelist')], limit=1).value_reference.split(',')[1])
+        pricelist_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
         date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
         date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
         # Get Prices

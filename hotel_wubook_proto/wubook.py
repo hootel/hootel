@@ -70,7 +70,8 @@ class WuBook(models.TransientModel):
         errors = []
         base_url = self.env['ir.config_parameter'].get_param('web.base.url').replace("http://", "https://")
 
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode_a, results_a = self.SERVER.push_activation(self.TOKEN,
                                                          self.LCODE,
                                                          urljoin(base_url, "/wubook/push/reservations"),
@@ -83,10 +84,10 @@ class WuBook(models.TransientModel):
         if rcode_a != 0:
             self.create_wubook_issue('wubook',
                                      "Can't activate push reservations",
-                                     results)
+                                     results_a)
         if rcode_ua != 0:
             self.create_wubook_issue('wubook', "Can't activate push rooms",
-                                     results)
+                                     results_ua)
 
         return rcode_a == 0 and rcode_ua == 0
 
@@ -97,6 +98,10 @@ class WuBook(models.TransientModel):
         self.LCODE = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_lcode')
         pkey = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_pkey')
         server_addr = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_server')
+
+        if not user or not passwd or not pkey or not server_addr:
+            self.create_wubook_issue('wubook', "Can't connect with WuBook! Perhaps account not configured...", "")
+            return False
 
         self.SERVER = xmlrpclib.Server(server_addr)
         res, tok = self.SERVER.acquire_token(user, passwd, pkey)
@@ -128,7 +133,8 @@ class WuBook(models.TransientModel):
     # === ROOMS
     @api.model
     def create_room(self, shortcode, name, capacity, price, availability):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.new_room(
             self.TOKEN,
             self.LCODE,
@@ -151,7 +157,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def modify_room(self, wrid, name, capacity, price, availability, scode):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.mod_room(
             self.TOKEN,
             self.LCODE,
@@ -174,7 +181,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def delete_room(self, wrid):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.del_room(
             self.TOKEN,
             self.LCODE,
@@ -190,7 +198,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def import_rooms(self):
-        self.init_connection_()
+        if not self.init_connection_():
+            return (False, 0)
         rcode, results = self.SERVER.fetch_rooms(
             self.TOKEN,
             self.LCODE,
@@ -224,7 +233,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def fetch_rooms_values(self, dfrom, dto, rooms=False):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.fetch_rooms_values(self.TOKEN,
                                                         self.LCODE,
                                                         dfrom,
@@ -243,7 +253,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def update_availability(self, rooms_avail):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.update_sparse_avail(self.TOKEN,
                                                          self.LCODE,
                                                          rooms_avail)
@@ -258,7 +269,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def corporate_fetch(self):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.corporate_fetchable_properties(self.TOKEN)
         self.close_connection_()
 
@@ -272,7 +284,8 @@ class WuBook(models.TransientModel):
     # === RESERVATIONS
     @api.model
     def create_reservation(self, reserv):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         vroom = self.env['hotel.virtual.room'].search([('product_id', '=', reserv.product_id.id)], limit=1)
         customer = {
             'lname': _partner_split_name(reserv.partner_id.name)[1],
@@ -306,7 +319,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def cancel_reservation(self, wrid, reason=""):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.cancel_reservation(self.TOKEN,
                                                         self.LCODE,
                                                         wrid,
@@ -322,7 +336,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def fetch_new_bookings(self):
-        self.init_connection_()
+        if not self.init_connection_():
+            return (False, 0)
         rcode, results = self.SERVER.fetch_new_bookings(self.TOKEN,
                                                         self.LCODE,
                                                         1,
@@ -346,7 +361,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def fetch_booking(self, lcode, wrid):
-        self.init_connection_()
+        if not self.init_connection_():
+            return (False, 0)
         rcode, results = self.SERVER.fetch_booking(self.TOKEN,
                                                    lcode,
                                                    wrid)
@@ -371,7 +387,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def mark_bookings(self, wrids):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.mark_bookings(self.TOKEN,
                                                    self.LCODE,
                                                    wrids)
@@ -387,7 +404,8 @@ class WuBook(models.TransientModel):
     # === PRICE PLANS
     @api.model
     def create_plan(self, name, daily=1):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.add_pricing_plan(self.TOKEN,
                                                       self.LCODE,
                                                       name,
@@ -403,7 +421,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def delete_plan(self, pid):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.del_plan(self.TOKEN,
                                               self.LCODE,
                                               pid)
@@ -419,7 +438,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def update_plan_name(self, pid, name):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.update_plan_name(self.TOKEN,
                                                       self.LCODE,
                                                       pid,
@@ -435,7 +455,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def update_plan_prices(self, pid, dfrom, prices):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.update_plan_prices(self.TOKEN,
                                                         self.LCODE,
                                                         pid,
@@ -453,7 +474,8 @@ class WuBook(models.TransientModel):
     def update_plan_periods(self, pid, periods):
         _logger.info("[WuBook] Updating Plan Periods...")
         _logger.info(periods)
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.update_plan_periods(self.TOKEN,
                                                          self.LCODE,
                                                          pid,
@@ -469,7 +491,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def import_pricing_plans(self):
-        self.init_connection_()
+        if not self.init_connection_():
+            return (False, 0)
         rcode, results = self.SERVER.get_pricing_plans(self.TOKEN,
                                                        self.LCODE)
         self.close_connection_()
@@ -485,7 +508,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def fetch_plan_prices(self, pid, dfrom, dto, rooms=[]):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.fetch_plan_prices(self.TOKEN,
                                                        self.LCODE,
                                                        pid,
@@ -507,7 +531,8 @@ class WuBook(models.TransientModel):
         no_errors = True
         plan_wpids = self.env['product.pricelist'].search([('wpid', '!=', False), ('wpid', '!=', '')]).mapped('wpid')
         if any(plan_wpids):
-            self.init_connection_()
+            if not self.init_connection_():
+                return False
             for wpid in plan_wpids:
                 rcode, results = self.SERVER.fetch_plan_prices(self.TOKEN,
                                                                self.LCODE,
@@ -529,7 +554,8 @@ class WuBook(models.TransientModel):
     # === RESTRICTION PLANS
     @api.model
     def import_restriction_plans(self):
-        self.init_connection_()
+        if not self.init_connection_():
+            return (False, 0)
         rcode, results = self.SERVER.rplan_rplans(self.TOKEN,
                                                   self.LCODE)
         self.close_connection_()
@@ -546,7 +572,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def fetch_rplan_restrictions(self, dfrom, dto, rpid=False):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.rplan_get_rplan_values(self.TOKEN,
                                                             self.LCODE,
                                                             dfrom,
@@ -565,7 +592,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def update_rplan_values(self, rpid, dfrom, values):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.rplan_update_rplan_values(self.TOKEN,
                                                                self.LCODE,
                                                                rpid,
@@ -582,7 +610,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def create_rplan(self, name, compact=False):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.rplan_add_rplan(self.TOKEN,
                                                      self.LCODE,
                                                      name,
@@ -599,7 +628,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def rename_rplan(self, rpid, name):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.rplan_rename_rplan(self.TOKEN,
                                                         self.LCODE,
                                                         rpid,
@@ -615,7 +645,8 @@ class WuBook(models.TransientModel):
 
     @api.model
     def delete_rplan(self, rpid):
-        self.init_connection_()
+        if not self.init_connection_():
+            return False
         rcode, results = self.SERVER.rplan_del_rplan(self.TOKEN,
                                                      self.LCODE,
                                                      rpid)
@@ -631,7 +662,8 @@ class WuBook(models.TransientModel):
     # === WUBOOK INFO
     @api.model
     def import_channels_info(self):
-        self.init_connection_()
+        if not self.init_connection_():
+            return (False, 0)
         results = self.SERVER.get_channels_info(self.TOKEN)
         self.close_connection_()
 
@@ -642,7 +674,7 @@ class WuBook(models.TransientModel):
     # === WUBOOK -> ODOO
     @api.model
     def generate_room_values(self, dfrom, dto, values):
-        virtual_room_avail_obj = self.env['virtual.room.availability']
+        virtual_room_avail_obj = self.env['hotel.virtual.room.availabity']
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
         for rid in values.keys():
             vroom = hotel_virtual_room_obj.search([('wrid', '=', rid)], limit=1)
@@ -672,7 +704,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def generate_restrictions(self, restriction_plans):
-        reservation_restriction_obj = self.env['reservation.restriction']
+        reservation_restriction_obj = self.env['hotel.virtual.room.restriction']
         count = 0
         for plan in restriction_plans:
             vals = {
@@ -695,8 +727,8 @@ class WuBook(models.TransientModel):
     @api.model
     def generate_restriction_items(self, dfrom, dto, plan_restrictions):
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
-        reserv_restriction_obj = self.env['reservation.restriction']
-        reserv_restriction_item_obj = self.env['reservation.restriction.item']
+        reserv_restriction_obj = self.env['hotel.virtual.room.restriction']
+        reserv_restriction_item_obj = self.env['hotel.virtual.room.restriction.item']
         for rpid in plan_restrictions.keys():
             restriction_id = reserv_restriction_obj.search([('wpid', '=', rpid)], limit=1)
             if restriction_id:
@@ -731,7 +763,7 @@ class WuBook(models.TransientModel):
                                     'applied_on': '0_virtual_room',
                                     'virtual_room_id': vroom.id
                                 })
-                                self.env['reservation.restriction.item'].with_context({'wubook_action': False}).create(vals)
+                                self.env['hotel.virtual.room.restriction.item'].with_context({'wubook_action': False}).create(vals)
 
         return True
 
@@ -819,7 +851,7 @@ class WuBook(models.TransientModel):
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
-        vroom_avail_obj = self.env['virtual.room.availability']
+        vroom_avail_obj = self.env['hotel.virtual.room.availabity']
         processed_rids = []
         failed_reservations = []
         _logger.info(bookings)
@@ -1020,7 +1052,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def push_availability(self):
-        vroom_avail_ids = self.env['virtual.room.availability'].search([
+        vroom_avail_ids = self.env['hotel.virtual.room.availabity'].search([
             ('wpushed', '=', False),
             ('date', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))
         ])
@@ -1086,7 +1118,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def push_restrictions(self):
-        unpushed = self.env['reservation.restriction.item'].search([('wpushed', '=', False),
+        unpushed = self.env['hotel.virtual.room.restriction.item'].search([('wpushed', '=', False),
                                                                     ('date_start', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))],
                                                                    order="date_start ASC")
         if any(unpushed):
@@ -1095,11 +1127,11 @@ class WuBook(models.TransientModel):
             days_diff = abs((date_end-date_start).days) + 1
 
             restrictions = {}
-            restriction_plan_ids = self.env['reservation.restriction'].search([('wpid', '!=', False),
+            restriction_plan_ids = self.env['hotel.virtual.room.restriction'].search([('wpid', '!=', False),
                                                                                ('active', '=', True)])
             for rp in restriction_plan_ids:
                 restrictions.update({rp.wpid: {}})
-                unpushed_rp = self.env['reservation.restriction.item'].search(
+                unpushed_rp = self.env['hotel.virtual.room.restriction.item'].search(
                     [('wpushed', '=', False), ('restriction_id', '=', rp.id)])
                 virtual_room_ids = unpushed_rp.mapped('virtual_room_id')
                 for vroom in virtual_room_ids:

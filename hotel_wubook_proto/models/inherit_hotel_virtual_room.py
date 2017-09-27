@@ -52,9 +52,9 @@ class HotelVirtualRoom(models.Model):
 
     @api.multi
     def get_restrictions(self, date):
-        restriction_plan_id = 4     # TODO: Campo para establecer el plan de restricciones activo
+        restriction_plan_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id'))
         self.ensure_one()
-        restriction = self.env['reservation.restriction.item'].search([
+        restriction = self.env['hotel.virtual.room.restriction.item'].search([
             ('date_start', '=', date),
             ('date_end', '=', date),
             ('virtual_room_id', '=', self.id),
@@ -63,7 +63,7 @@ class HotelVirtualRoom(models.Model):
         if restriction:
             return restriction
         else:
-            global_restr = self.env['reservation.restriction.item'].search([
+            global_restr = self.env['hotel.virtual.room.restriction.item'].search([
                 ('applied_on', '=', '1_global'),
                 ('restriction_id', '=', restriction_plan_id)
             ], limit=1)

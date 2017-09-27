@@ -27,7 +27,7 @@ _logger = logging.getLogger(__name__)
 
 
 class ReservationRestriction(models.Model):
-    _inherit = 'reservation.restriction'
+    _inherit = 'hotel.virtual.room.restriction'
 
     wpid = fields.Char("WuBook Plan ID", readonly=True)
     wdaily = fields.Boolean("Plan Daily", default=True, readonly=True)
@@ -79,7 +79,7 @@ class ReservationRestriction(models.Model):
 
         if rules:
             # Basic Rules
-            self.env['reservation.restriction.item'].with_context({'wubook_action': False}).create({
+            self.env['hotel.virtual.room.restriction.item'].with_context({'wubook_action': False}).create({
                 'closed_arrival': rules['closed_arrival'],
                 'closed': rules['closed'],
                 'min_stay': rules['min_stay'],
