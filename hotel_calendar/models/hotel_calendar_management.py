@@ -189,13 +189,13 @@ class HotelCalendarManagement(models.TransientModel):
         ])
         restriction_item_ids = self.env['hotel.virtual.room.restriction.item'].search([
             ('date_start', '>=', dfrom), ('date_end', '<=', dto),
-            ('restriction_id', '=', int(restriction_id)),
+            ('restriction_id', '=', restriction_id),
             ('applied_on', '=', '0_virtual_room'),
         ])
 
         pricelist_item_ids = self.env['product.pricelist.item'].search([
             ('date_start', '>=', dfrom), ('date_end', '<=', dto),
-            ('pricelist_id', '=', int(pricelist_id)),
+            ('pricelist_id', '=', pricelist_id),
             ('applied_on', '=', '1_product'),
             ('compute_price', '=', 'fixed'),
         ])
