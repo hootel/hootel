@@ -66,7 +66,9 @@ class ProductPricelistItem(models.Model):
 
     @api.multi
     def write(self, vals):
-        pricelist_parity_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
+        pricelist_parity_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+        if pricelist_parity_id:
+            pricelist_parity_id = int(pricelist_parity_id)
         ret_vals = super(ProductPricelistItem, self).write(vals)
         if vals.get('fixed_price'):
             for record in self:
@@ -102,7 +104,9 @@ class ProductPricelistItem(models.Model):
 
     @api.multi
     def unlink(self):
-        pricelist_parity_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
+        pricelist_parity_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+        if pricelist_parity_id:
+            pricelist_parity_id = int(pricelist_parity_id)
         unlink_vals = {}
         for record in self:
             if not record.pricelist_id == pricelist_parity_id:
