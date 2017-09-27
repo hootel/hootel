@@ -29,7 +29,9 @@ class ProductPricelistItem(models.Model):
     @api.model
     def create(self, vals):
         res = super(ProductPricelistItem, self).create(vals)
-        pricelist_parity_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
+        pricelist_parity_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+        if pricelist_parity_id:
+            pricelist_parity_id = int(pricelist_parity_id)
         pricelist_id = res.pricelist_id.id
         product_tmpl_id = res.product_tmpl_id.id
         date_start = res.date_start

@@ -56,7 +56,9 @@ class HotelReservation(models.Model):
 
     @api.model
     def _hcalendar_room_data(self, rooms):
-        pricelist_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
+        pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+        if pricelist_id:
+            pricelist_id = int(pricelist_id)
         json_rooms = []
         for room in rooms:
             room_type = self.env['hotel.room.type'].search([('cat_id', '=', room.categ_id.id)], limit=1)
