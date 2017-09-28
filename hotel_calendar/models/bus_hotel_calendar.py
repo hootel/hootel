@@ -71,7 +71,7 @@ class BusHotelCalendar(models.TransientModel):
             'price': {
                 pricelist: [{
                     'days': {
-                        date_dt.strftime("%d/%m/%Y"): price,    # WuBook European Format
+                        date_dt.strftime("%d/%m/%Y"): price,    # European Format
                     },
                     'room': vroom,
                 }],

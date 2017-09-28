@@ -30,7 +30,10 @@ var Core = require('web.core'),
     l10n = _t.database.parameters,
 
     PUBLIC_PRICELIST_ID = 1, // Hard-Coded public pricelist id
-    ODOO_DATETIME_MOMENT_FORMAT = "YYYY-MM-DD HH:mm:ss",
+    DEFAULT_ARRIVAL_HOUR = 14,
+    DEFAULT_DEPARTURE_HOUR = 12,
+    ODOO_DATE_MOMENT_FORMAT = 'YYYY-MM-DD',
+    ODOO_DATETIME_MOMENT_FORMAT = ODOO_DATE_MOMENT_FORMAT + ' HH:mm:ss',
     L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY", //FIXME: Time.strftime_to_moment_format(l10n.date_format);
     L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format);
 
@@ -156,7 +159,7 @@ var HotelCalendarView = View.extend({
 
         this._hcalendar = new HotelCalendar('#hcalendar', options, pricelist, this.$el[0]);
         this._hcalendar.addEventListener('hcOnChangeDate', function(ev){
-            var date_begin = moment(ev.detail.newDate);
+            var date_begin = ev.detail.newDate;
             var days = self._hcalendar.getOptions('days')-1;
             var date_end = date_begin.clone().add(days, 'd');
 
@@ -170,7 +173,7 @@ var HotelCalendarView = View.extend({
         });
         this._hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){
             var tp = self._reserv_tooltips[ev.detail.reservationObj.id];
-            var arrival_hour = moment.utc(tp[2]).local().format('HH:mm');
+            var arrival_hour = HotelCalendar.toMomentUTC(tp[2], ODOO_DATETIME_MOMENT_FORMAT).local().format('HH:mm'); // UTC to Local
 
             var qdict = {
                 'name': tp[0],
@@ -211,14 +214,15 @@ var HotelCalendarView = View.extend({
             });
 
             var qdict = {
-                ncheckin: newReservation.startDate.format(L10N_DATETIME_MOMENT_FORMAT),
-                ncheckout: newReservation.endDate.format(L10N_DATETIME_MOMENT_FORMAT),
+                ncheckin: newReservation.startDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
+                ncheckout: newReservation.endDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
                 nroom: newReservation.room.number,
-                ocheckin: oldReservation.startDate.format(L10N_DATETIME_MOMENT_FORMAT),
-                ocheckout: oldReservation.endDate.format(L10N_DATETIME_MOMENT_FORMAT),
+                ocheckin: oldReservation.startDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
+                ocheckout: oldReservation.endDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
                 oroom: oldReservation.room.number,
                 hasReservesLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
             };
+            console.log(qdict);
             new Dialog(self, {
                 title: _t("Confirm Reservation Changes"),
                 buttons: [
@@ -229,8 +233,8 @@ var HotelCalendarView = View.extend({
                         disabled: !newReservation.id,
                         click: function () {
                             var write_values = {
-                                'checkin': newReservation.startDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
-                                'checkout': newReservation.endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
+                                'checkin': newReservation.startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                                'checkout': newReservation.endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
                                 'product_id': newReservation.room.id
                             };
                             new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
@@ -274,8 +278,8 @@ var HotelCalendarView = View.extend({
             var parentRow = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentRow}`);
             var parentCellStart = document.querySelector(`#${ev.detail.cellStart.dataset.hcalParentCell}`);
             var parentCellEnd = document.querySelector(`#${ev.detail.cellEnd.dataset.hcalParentCell}`);
-            var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate).hour(14).minute(0).second(0).utc();
-            var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate).hour(12).minute(0).second(0).utc();
+            var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate);
+            var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate);
             var room = self._hcalendar.getRoom(parentRow.dataset.hcalRoomObjId);
             var numBeds = room.shared?(ev.detail.cellEnd.dataset.hcalBedNum - ev.detail.cellStart.dataset.hcalBedNum)+1:room.capacity;
             var HotelFolioObj = new Model('hotel.folio');
@@ -297,6 +301,9 @@ var HotelCalendarView = View.extend({
                 startDate = now.add(30,'m'); // +30 mins
             }
 
+            startDate.set({'hour': DEFAULT_ARRIVAL_HOUR, 'minute': 0, 'second': 0});
+            endDate.set({'hour': DEFAULT_DEPARTURE_HOUR, 'minute': 0, 'second': 0});
+
             // Creater/Select Partner + Create Folio + Create Reservation + Confirm Folio? = Fucking Crazy uH :/
             var pop = new Common.SelectCreateDialog(self, {
                 res_model: 'res.partner',
@@ -317,8 +324,8 @@ var HotelCalendarView = View.extend({
                             context: {
                             	//'default_partner_id': partner_id,
                             	'default_folio_id': folio_id,
-                                'default_checkin': startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
-                                'default_checkout': endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
+                                'default_checkin': startDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
+                                'default_checkout': endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
                                 'default_adults': numBeds,
                                 'default_children': 0,
                                 'default_order_id.parter_id': partner_id,
@@ -408,7 +415,7 @@ var HotelCalendarView = View.extend({
 
         this._hcalendar.addEventListener('hcalOnChangeRoomTypePrice', function(ev){
             var qdict = {
-                'date':  ev.detail.date.local().format(L10N_DATE_MOMENT_FORMAT),
+                'date':  ev.detail.date.clone().local().format(L10N_DATE_MOMENT_FORMAT),
                 'old_price': ev.detail.old_price,
                 'new_price': ev.detail.price
             };
@@ -456,8 +463,14 @@ var HotelCalendarView = View.extend({
 
         /** DO MAGIC **/
         var domains = this.generate_domains();
-        var full_domain = [false, domains['dates'][0], domains['dates'][1], domains['rooms'] || [], domains['reservations'] || []];
-        this._model.call('get_hcalendar_all_data', full_domain).then(function(results){
+        var oparams = [
+          false,
+          domains['dates'][0].format(ODOO_DATETIME_MOMENT_FORMAT),
+          domains['dates'][1].format(ODOO_DATETIME_MOMENT_FORMAT),
+          domains['rooms'] || [],
+          domains['reservations'] || []
+        ];
+        this._model.call('get_hcalendar_all_data', oparams).then(function(results){
             self._reserv_tooltips = results['tooltips'];
             var rooms = [];
             for (var r of results['rooms']) {
@@ -477,15 +490,17 @@ var HotelCalendarView = View.extend({
                 });
                 rooms.push(nroom);
             }
-
+            console.log(domains['dates']);
             self.create_calendar({
-                startDate: moment(domains['dates'][0]).add(1, 'd'),
+                startDate: HotelCalendar.toMomentUTC(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT),
                 rooms: rooms,
                 showPaginator: false
             }, results['pricelist']);
 
             var reservs = [];
             for (var r of results['reservations']) {
+            	console.log("===BBBB");
+            	console.log(HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT));
                 var room = self._hcalendar.getRoom(r[0]);
                 var nreserv = new HReservation(
                     r[1], // Id
@@ -493,8 +508,8 @@ var HotelCalendarView = View.extend({
                     r[2], // Title
                     r[3], // Adults
                     r[4], // Childrens
-                    moment.utc(r[5]).local(), // Date Start
-                    moment.utc(r[6]).local(), // Date End
+                    HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT), // Date Start
+                    HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT), // Date End
                     r[8], // Color
                     r[9] || false, // Read Only
                     r[10] || false, // Move Days
@@ -630,7 +645,7 @@ var HotelCalendarView = View.extend({
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);*/
         //});
 
-        var date_begin = moment().utc().startOf('day');
+        var date_begin = moment().startOf('day');
         var days = date_begin.daysInMonth();
         var date_end = date_begin.clone().add(days, 'd').endOf('day');
         $dateTimePickerBegin.data("ignore_onchange", true);
@@ -694,7 +709,7 @@ var HotelCalendarView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
-            var date_begin = moment().utc().startOf('day');
+            var date_begin = moment().startOf('day').utc();
             var days = moment(date_begin).daysInMonth();
             var date_end = date_begin.clone().add(days, 'd').endOf('day');
             $dateTimePickerBegin.data("ignore_onchange", true);
@@ -813,8 +828,8 @@ var HotelCalendarView = View.extend({
                 if (notif[1]['userid'] != this.dataset.context.uid) {
                   var qdict = reserv;
                   qdict = _.extend(qdict, {
-                    'checkin': moment.utc(qdict['checkin']).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
-                    'checkout': moment.utc(qdict['checkout']).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
+                    'checkin': HotelCalendar.toMomentUTC(qdict['checkin'], ODOO_DATETIME_MOMENT_FORMAT).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
+                    'checkout': HotelCalendar.toMomentUTC(qdict['checkout'], ODOO_DATETIME_MOMENT_FORMAT).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
                     'username': notif[1]['username'],
                     'userid': notif[1]['userid']
                   });
@@ -839,8 +854,8 @@ var HotelCalendarView = View.extend({
                       reserv['partner_name'],
                       reserv['adults'],
                       reserv['children'],
-                      moment.utc(reserv['checkin']).local(),
-                      moment.utc(reserv['checkout']).local(),
+                      HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT),
+                      HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT),
                       reserv['reserve_color'],
                       reserv['read_only'],
                       reserv['fix_days'],
@@ -867,25 +882,29 @@ var HotelCalendarView = View.extend({
         var self = this;
         var domains = this.generate_domains();
         // Clip dates
-        var mstart = moment(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT),
-            mend = moment(domains['dates'][1], ODOO_DATETIME_MOMENT_FORMAT),
-            mostart = moment(this._last_dates[0], ODOO_DATETIME_MOMENT_FORMAT),
-            moend = moment(this._last_dates[1], ODOO_DATETIME_MOMENT_FORMAT),
-            dfrom = domains['dates'][0],
+        var dfrom = domains['dates'][0],
             dto = domains['dates'][1];
-        if (mstart.isBetween(mostart, moend, 'days') && mend.isAfter(moend, 'day')) {
+        if (dfrom.isBetween(this._last_dates[0], this._last_dates[1], 'days') && dto.isAfter(this._last_dates[1], 'day')) {
           dfrom = this._last_dates[1];
-        } else if (mostart.isBetween(mstart, mend, 'days') && moend.isAfter(mstart, 'day')) {
+        } else if (this._last_dates[0].isBetween(dfrom, dto, 'days') && this._last_dates[1].isAfter(dfrom, 'day')) {
           dto = this._last_dates[0];
         } else {
           clearReservations = true;
         }
 
-        console.log(dfrom);
-        console.log(dto);
+        dfrom = dfrom.local().startOf('day').utc();
+        dto = dto.local().endOf('day').utc();
 
-        var full_domain = [false, dfrom, dto, domains['rooms'] || [], domains['reservations'] || [], false, withPricelist || false];
-        this._model.call('get_hcalendar_all_data', full_domain).then(function(results){
+        var oparams = [
+          false,
+          dfrom.format(ODOO_DATETIME_MOMENT_FORMAT),
+          dto.format(ODOO_DATETIME_MOMENT_FORMAT),
+          domains['rooms'] || [],
+          domains['reservations'] || [],
+          false,
+          withPricelist || false
+        ];
+        this._model.call('get_hcalendar_all_data', oparams).then(function(results){
             self._reserv_tooltips = _.extend(self._reserv_tooltips, results['tooltips']);
             var reservs = [];
             for (var r of results['reservations']) {
@@ -896,8 +915,8 @@ var HotelCalendarView = View.extend({
                     r[2], // Title
                     r[3], // Adults
                     r[4], // Childrens
-                    moment.utc(r[5]).local(), // Date Start
-                    moment.utc(r[6]).local(), // Date End
+                    HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT), // Date Start
+                    HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT), // Date End
                     r[8], // Color
                     r[9] || false, // Read Only
                     r[10] || false, // Move Days
@@ -950,9 +969,9 @@ var HotelCalendarView = View.extend({
         var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
 
-        var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).local().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT);
-        var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate()).local().endOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT);
-
+        var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).startOf('day').utc();
+        var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate()).endOf('day').utc();
+        
         return {
             'rooms': domainRooms,
             'reservations': domainReservations,
