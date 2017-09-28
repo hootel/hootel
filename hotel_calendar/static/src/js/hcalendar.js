@@ -35,7 +35,6 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
   }
 
   /** Options **/
-  console.log(options.startDate);
   if (!options) { options = {}; }
   this.options = {
     startDate: moment(options.startDate || new Date()).subtract('1', 'd'),
@@ -242,8 +241,6 @@ HotelCalendar.prototype = {
 
   getReservationCellLimits: function(/*HReservationObject*/reservation, /*Int?*/nbed, /*Bool?*/notCheck) {
     var limits = new HLimit();
-
-    console.log("CALCULATING POSITOIN");
 
     var bedNum = 0;
     if (typeof nbed === 'undefined') {
@@ -1234,8 +1231,6 @@ HotelCalendar.prototype = {
           };
 
           var reserv = $this.getReservation(this.dataset.hcalReservationObjId);
-          console.log("=== RR");
-          console.log(reserv);
           $this.updateHighlightInvalidZones(reserv);
           if (reserv.readOnly || (reserv.fixDays && ($this.reservationAction.action == $this.ACTION.MOVE_LEFT ||
                 $this.reservationAction.action == $this.ACTION.MOVE_RIGHT))) {
@@ -1643,9 +1638,6 @@ function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/
   this.fixDays = fixDays || false;
   this.fixRooms = fixRooms || false;
   
-  console.log(startDate);
-  console.log(endDate);
-
   this.beds_ = [];
   this.userData_ = {};
 }

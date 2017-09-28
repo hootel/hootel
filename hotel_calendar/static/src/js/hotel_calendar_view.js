@@ -222,7 +222,6 @@ var HotelCalendarView = View.extend({
                 oroom: oldReservation.room.number,
                 hasReservesLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
             };
-            console.log(qdict);
             new Dialog(self, {
                 title: _t("Confirm Reservation Changes"),
                 buttons: [
@@ -490,7 +489,6 @@ var HotelCalendarView = View.extend({
                 });
                 rooms.push(nroom);
             }
-            console.log(domains['dates']);
             self.create_calendar({
                 startDate: HotelCalendar.toMomentUTC(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT),
                 rooms: rooms,
@@ -499,8 +497,6 @@ var HotelCalendarView = View.extend({
 
             var reservs = [];
             for (var r of results['reservations']) {
-            	console.log("===BBBB");
-            	console.log(HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT));
                 var room = self._hcalendar.getRoom(r[0]);
                 var nreserv = new HReservation(
                     r[1], // Id
@@ -709,7 +705,7 @@ var HotelCalendarView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
-            var date_begin = moment().startOf('day').utc();
+            var date_begin = moment().startOf('day');
             var days = moment(date_begin).daysInMonth();
             var date_end = date_begin.clone().add(days, 'd').endOf('day');
             $dateTimePickerBegin.data("ignore_onchange", true);
