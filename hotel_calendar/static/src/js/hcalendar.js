@@ -37,8 +37,8 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
   /** Options **/
   if (!options) { options = {}; }
   this.options = {
-    startDate: moment(options.startDate || new Date()).subtract('1', 'd'),
-    days: (options.days + 1) || (moment(options.startDate || new Date()).daysInMonth() + 1),
+    startDate: ((options.startDate && HotelCalendar.toMomentUTC(options.startDate)) || moment(new Date()).utc()).subtract('1', 'd'),
+    days: (options.days || ((options.startDate && HotelCalendar.toMomentUTC(options.startDate)) || moment(new Date())).clone().local().daysInMonth()),
     rooms: options.rooms || [],
     showPaginator: options.showPaginator || false,
     allowInvalidActions: options.allowInvalidActions || false,
@@ -85,16 +85,16 @@ HotelCalendar.prototype = {
   //==== CALENDAR
   setStartDate: function(/*String,MomentObject*/date, /*Int?*/days) {
     if (moment.isMoment(date)) {
-      this.options.startDate = date.subtract('1','d');
+      this.options.startDate = date.local().subtract('1','d').utc();
     } else if (typeof date === 'string'){
-      this.options.startDate = moment(date).subtract('1','d');
+      this.options.startDate = HotelCalendar.toMomentUTC(date).local().subtract('1','d').utc();
     } else {
       console.warn("[Hotel Calendar][setStartDate] Invalid date format!");
       return;
     }
 
     if (typeof days !== 'undefined') {
-      this.options.days = days + 1;
+      this.options.days = days;
     }
 
     /*this.e.dispatchEvent(new CustomEvent(
@@ -703,25 +703,29 @@ HotelCalendar.prototype = {
     // Render Next Days
     row = thead.insertRow();
     var months = { };
-    var cur_month = this.options.startDate.format("MMMM");
+    var cur_month = this.options.startDate.clone().local().format("MMMM");
     months[cur_month] = {};
-    months[cur_month].year = this.options.startDate.format("YYYY");
+    months[cur_month].year = this.options.startDate.clone().local().format("YYYY");
     months[cur_month].colspan = 0;
     var now = moment().utc();
+    console.log(this.options.startDate);
     for (var i=0; i<=this.options.days; i++) {
-      var dd = this.options.startDate.clone().add(i,'d');
+      var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
+      var dd_local = dd.clone().local();
+      console.log(dd);
+      console.log(dd_local.format(HotelCalendar.DATETIME_FORMAT_SHORT_));
       cell = row.insertCell();
       cell.setAttribute('id', this.sanitizeId_(`hday_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
       cell.classList.add('hcal-cell-header-day');
       cell.classList.add('btn-hcal');
       cell.classList.add('btn-hcal-3d');
-      cell.dataset.hcalDate = dd.local().format(HotelCalendar.DATE_FORMAT_SHORT_);
-      cell.innerHTML = `${dd.local().format('D')}<br/>${dd.local().format('ddd')}`;
-      cell.setAttribute('title', dd.local().format('dddd'))
-      var day = +dd.local().format('D');
+      cell.dataset.hcalDate = dd_local.format(HotelCalendar.DATE_FORMAT_SHORT_);
+      cell.innerHTML = `${dd_local.format('D')}<br/>${dd_local.format('ddd')}`;
+      cell.setAttribute('title', dd_local.format('dddd'))
+      var day = +dd_local.format('D');
       if (day == 1) {
         cell.classList.add('hcal-cell-start-month');
-        cur_month = dd.local().format('MMMM');
+        cur_month = dd_local.format('MMMM');
         months[cur_month] = {};
         months[cur_month].year = dd.format('YYYY');
         months[cur_month].colspan = 0;
@@ -797,16 +801,17 @@ HotelCalendar.prototype = {
     cell.setAttribute('colspan', 2);
     cell.setAttribute('class', 'col-xs-1 col-lg-1');
     for (var i=0; i<=this.options.days; i++) {
-      var dd = this.options.startDate.clone().add(i,'d');
+      var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
+      var dd_local = dd.clone().local();
       cell = row.insertCell();
       cell.setAttribute('id', this.sanitizeId_(`hday_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
       cell.classList.add('hcal-cell-header-day');
       cell.classList.add('btn-hcal');
       cell.classList.add('btn-hcal-3d');
-      cell.dataset.hcalDate = dd.local().format(HotelCalendar.DATE_FORMAT_SHORT_);
-      cell.innerHTML = `${dd.local().format('D')}<br/>${dd.local().format('ddd')}`;
-      cell.setAttribute('title', dd.format("dddd"))
-      var day = +dd.format("D");
+      cell.dataset.hcalDate = dd_local.format(HotelCalendar.DATE_FORMAT_SHORT_);
+      cell.innerHTML = `${dd_local.format('D')}<br/>${dd_local.format('ddd')}`;
+      cell.setAttribute('title', dd_local.format("dddd"))
+      var day = +dd_local.format("D");
       if (day == 1) {
         cell.classList.add('hcal-cell-start-month');
       }
