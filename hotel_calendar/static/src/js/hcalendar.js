@@ -708,12 +708,9 @@ HotelCalendar.prototype = {
     months[cur_month].year = this.options.startDate.clone().local().format("YYYY");
     months[cur_month].colspan = 0;
     var now = moment().utc();
-    console.log(this.options.startDate);
     for (var i=0; i<=this.options.days; i++) {
       var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
       var dd_local = dd.clone().local();
-      console.log(dd);
-      console.log(dd_local.format(HotelCalendar.DATETIME_FORMAT_SHORT_));
       cell = row.insertCell();
       cell.setAttribute('id', this.sanitizeId_(`hday_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
       cell.classList.add('hcal-cell-header-day');
