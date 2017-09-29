@@ -249,20 +249,20 @@ HotelCalendar.prototype = {
       bedNum = nbed;
     }
 
-    var diff_date = reservation.endDate.diff(reservation.startDate, 'days');
+    var diff_date = reservation.endDate.diff(reservation.startDate, 'days') + 1;
     var rpersons = reservation.room.shared?reservation.room.capacity:1;
     var cellFound = false;
     var cellStartType = '';
     var cellEndType = '';
 
     // Search Initial Cell
-    var cell = this.getCell(reservation.startDate.clone().startOf('day'),
+    var cell = this.getCell(reservation.startDate.clone().local().startOf('day'),
                             reservation.room.type,
                             reservation.room.number,
                             bedNum);
     if (!cell) {
-      var date = reservation.startDate.clone().startOf('day');
-      for (var i=0; i<diff_date; i++) {
+      var date = reservation.startDate.clone().local().startOf('day');
+      for (var i=0; i<=diff_date; i++) {
         cell = this.getCell(
           date.add(1, 'd'),
           reservation.room.type,
@@ -286,13 +286,13 @@ HotelCalendar.prototype = {
     }
 
     // Search End Cell
-    var cell = this.getCell(reservation.endDate.clone().endOf('day'),
+    var cell = this.getCell(reservation.endDate.clone().local().endOf('day'),
                             reservation.room.type,
                             reservation.room.number,
                             bedNum);
     if (!cell) {
-      var date = reservation.endDate.clone().endOf('day');
-      for (var i=0; i<diff_date; i++) {
+      var date = reservation.endDate.clone().local().endOf('day');
+      for (var i=0; i<=diff_date; i++) {
         cell = this.getCell(
           date.subtract(1, 'd'),
           reservation.room.type,
@@ -313,11 +313,11 @@ HotelCalendar.prototype = {
     if (!notCheck && limits.isValid()) {
       var limitLeftDate = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`).dataset.hcalDate);
       var limitRightDate = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.right.dataset.hcalParentCell}`).dataset.hcalDate);
-      var diff_date = limitRightDate.diff(limitLeftDate, 'days');
+      var diff_date = limitRightDate.diff(limitLeftDate, 'days') + 1;
       var numBeds = +limits.right.dataset.hcalBedNum - +limits.left.dataset.hcalBedNum;
       var parentRow = this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`);
       var ndate = HotelCalendar.toMoment(parentRow.dataset.hcalDate).startOf('day').subtract(1, 'd');
-      for (var i=0; i<diff_date; i++) {
+      for (var i=0; i<=diff_date; i++) {
         ndate.add(1, 'd');
         for (var b=0; b<=numBeds; b++) {
           var reservs = this.getReservationsByDay(ndate, false, reservation.room.number, +limits.left.dataset.hcalBedNum+b);
