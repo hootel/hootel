@@ -38,6 +38,7 @@
     'data': [
         'views/general.xml',
         'views/actions.xml',
+        'views/res_config.xml',
         'data/views.xml',
         'data/menus.xml',
     ],

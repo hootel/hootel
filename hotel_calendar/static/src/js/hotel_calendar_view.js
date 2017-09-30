@@ -267,7 +267,7 @@ var HotelCalendarView = View.extend({
             var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate);
             var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate);
             var room = self._hcalendar.getRoom(parentRow.dataset.hcalRoomObjId);
-            var numBeds = room.shared?(ev.detail.cellEnd.dataset.hcalBedNum - ev.detail.cellStart.dataset.hcalBedNum)+1:room.capacity;
+            var numBeds = (room.shared || self._hcalendar.getOptions('divideRoomsByCapacity'))?(ev.detail.cellEnd.dataset.hcalBedNum - ev.detail.cellStart.dataset.hcalBedNum)+1:room.capacity;
             var HotelFolioObj = new Model('hotel.folio');
 
             if (numBeds <= 0) {
@@ -476,11 +476,16 @@ var HotelCalendarView = View.extend({
                 });
                 rooms.push(nroom);
             }
+            console.log(results['options']);
             self.create_calendar({
                 startDate: HotelCalendar.toMomentUTC(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT).local().startOf('day').utc(),
                 days: domains['dates'][1].diff(domains['dates'][0],'days'),
                 rooms: rooms,
-                showPaginator: false
+                showPaginator: false,
+                endOfWeek: parseInt(results['options']['eday_week']) || 6,
+                divideRoomsByCapacity: results['options']['divide_rooms_by_capacity'] || false,
+                allowInvalidActions: results['options']['allow_invalid_actions'] || false,
+                assistedMovement: results['options']['assisted_movement'] || false
             }, results['pricelist']);
 
             var reservs = [];
@@ -888,7 +893,8 @@ var HotelCalendarView = View.extend({
           domains['rooms'] || [],
           domains['reservations'] || [],
           false,
-          withPricelist || false
+          withPricelist || false,
+          false
         ];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
             self._reserv_tooltips = _.extend(self._reserv_tooltips, results['tooltips']);
@@ -913,7 +919,6 @@ var HotelCalendarView = View.extend({
             }
 
             if (withPricelist) {
-            	console.log(results['pricelist']);
               self._hcalendar.addPricelist(results['pricelist']);
             }
             if (clearReservations) {

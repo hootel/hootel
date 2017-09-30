@@ -77,6 +77,8 @@
 .hcal-table-day {
 	height: 100%;
 	border-collapse: collapse !important;
+	border: 0 dotted #cfcfcf;
+  border-width: 2px 0;
 }
 /*.hcal-table-day tr:first-child td{
 	border: 1px solid #727272 !important;

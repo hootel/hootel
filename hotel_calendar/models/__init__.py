@@ -23,3 +23,4 @@ from . import inherit_product_pricelist_item
 from . import bus_hotel_calendar
 from . import virtual_room_pricelist_cached
 from . import hotel_calendar_management
+from . import res_config

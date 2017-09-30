@@ -133,7 +133,7 @@ class HotelReservation(models.Model):
         return json_rooms_prices
 
     @api.multi
-    def get_hcalendar_all_data(self, dfrom, dto, domainRooms, domainReservations, withRooms=True, withPricelist=True):
+    def get_hcalendar_all_data(self, dfrom, dto, domainRooms, domainReservations, withRooms=True, withPricelist=True, withSettings=True):
         if not dfrom or not dto:
             raise ValidationError('Input Error: No dates defined!')
 
@@ -142,12 +142,25 @@ class HotelReservation(models.Model):
 
         rooms = self.env['hotel.room'].search(domainRooms)
         json_reservations, json_reservation_tooltips = self.get_hcalendar_reservations_data(dfrom, dto, domainReservations, rooms)
-        return {
+        vals = {
             'rooms': withRooms and self._hcalendar_room_data(rooms) or [],
             'reservations': json_reservations,
             'tooltips': json_reservation_tooltips,
             'pricelist': withPricelist and self.get_hcalendar_pricelist_data(dfrom, dto) or {},
         }
+        
+        if withSettings:
+            type_move = self.env['ir.values'].get_default('hotel.config.settings', 'type_move')
+            vals.update({
+                'options': {
+                    'divide_rooms_by_capacity': self.env['ir.values'].get_default('hotel.config.settings', 'divide_rooms_by_capacity'),
+                    'eday_week': self.env['ir.values'].get_default('hotel.config.settings', 'end_day_week'),
+                    'allow_invalid_actions': type_move == 'allow_invalid',
+                    'assisted_movement': type_move == 'assisted',
+                }
+            })
+            
+        return vals
 
 #     @api.multi
 #     def get_vroom_price(self, product_id, checkin, checkout):

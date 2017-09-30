@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Calendar Settings -->
+    <record id="view_hotel_config_settings" model="ir.ui.view">
+        <field name="name">Hotel Settings</field>
+        <field name="model">hotel.config.settings</field>
+        <field name="inherit_id" ref="hotel.view_hotel_config_settings" />
+        <field name="arch" type="xml">
+        	<xpath expr="//group[@name='hotel_parity']" position="after">
+        		<group name="calendar" string="Calendar">
+				    <group>
+				    	<field name="divide_rooms_by_capacity" />
+				    	<field name="end_day_week" />
+				    	<field name="type_move" />
+				    </group>
+				</group>
+        	</xpath>
+        </field>
+    </record>
+
+</odoo>
