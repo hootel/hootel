@@ -20,6 +20,7 @@
 ##############################################################################
 from openerp import models, api, _
 from datetime import datetime, timedelta
+from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 import logging
 _logger = logging.getLogger(__name__)
@@ -80,7 +81,7 @@ class HotelReservation(models.Model):
     def get_hcalendar_reservations_data(self, dfrom, dto, domain, rooms):
         domain = domain or []
         date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
-        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT)
         date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         date_end_str = date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         room_ids = rooms.mapped('product_id.id')
@@ -106,7 +107,7 @@ class HotelReservation(models.Model):
         if pricelist_id:
             pricelist_id = int(pricelist_id)
         date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
-        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT)
         # Get Prices
         date_diff = abs((date_start - date_end).days) + 1
         json_rooms_prices = {pricelist_id: []}

@@ -913,6 +913,7 @@ var HotelCalendarView = View.extend({
             }
 
             if (withPricelist) {
+            	console.log(results['pricelist']);
               self._hcalendar.addPricelist(results['pricelist']);
             }
             if (clearReservations) {

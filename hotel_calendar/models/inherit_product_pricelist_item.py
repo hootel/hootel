@@ -100,6 +100,12 @@ class ProductPricelistItem(models.Model):
                     ], limit=1)
                     if vroom_pr_cached_id:
                         vroom_pr_cached_id.write({'price': prod_price})
+                    else:
+                        vroom_pr_cached_obj.create({
+                            'virtual_room_id': vroom.id,
+                            'date': date_start,
+                            'price': prod_price,
+                        })
         return ret_vals
 
     @api.multi
