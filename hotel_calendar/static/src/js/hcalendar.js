@@ -231,7 +231,7 @@ HotelCalendar.prototype = {
     }
   },
 
-  getReservationsByDay: function(/*String,MomentObject*/day, /*Bool*/strict, /*Int?*/nroom, /*Int?*/nbed, /*Char?*/mode) {
+  getReservationsByDay: function(/*String,MomentObject*/day, /*Bool*/noStrict, /*Int?*/nroom, /*Int?*/nbed, /*Char?*/mode) {
     var day = HotelCalendar.toMomentUTC(day);
     if (!day) {
         return false;
@@ -239,17 +239,19 @@ HotelCalendar.prototype = {
 
     var reservs = [];
     for (var r of this.reservations) {
-    	//console.log(r.endDate.format("DD-MM-YYYYY HH:mm:ss"));
-      if (((day.isBetween(r.startDate, r.endDate)
-          || (strict && day.isSame(r.startDate, 'day')))
-          || (!strict && (day.isSame(r.startDate) || day.isSame(r.endDate))))
-        && (typeof nroom === 'undefined' || r.room.number == nroom)
-        && (typeof nbed === 'undefined' || r.beds_.includes(nbed))) {
-//    	  console.log("------------");
-//    	  console.log(day.format("DD-MM-YYYY HH:mm:ss"));
-//    	  console.log(r.startDate.format("DD-MM-YYYY HH:mm:ss"));
-//    	  console.log(r.endDate.format("DD-MM-YYYY HH:mm:ss"));
-        reservs.push(r);
+      if (noStrict) {
+    	  if ((day.isBetween(r.startDate, r.endDate.clone().startOf('day')) || day.isSame(r.startDate.clone().startOf('day')))
+    	    && !day.isSame(r.endDate)
+	        && (typeof nroom === 'undefined' || r.room.number == nroom)
+	        && (typeof nbed === 'undefined' || r.beds_.includes(nbed))) {
+	        reservs.push(r);
+	      }
+      } else {
+		  if ((day.isBetween(r.startDate, r.endDate) || (day.isSame(r.startDate) || day.isSame(r.endDate)))
+	        && (typeof nroom === 'undefined' || r.room.number == nroom)
+	        && (typeof nbed === 'undefined' || r.beds_.includes(nbed))) {
+	        reservs.push(r);
+	      }
       }
     }
     
