@@ -65,7 +65,7 @@
 .hcal-table a {
 	text-decoration: none;
 }
-.hcal-table tr:hover td:not(.hcal-cell-highlight):not(.hcal-cell-current-day):not(.hcal-cell-end-week):not(.btn-hcal):not(.hcal-cell-invalid) {
+.hcal-table tr:hover td:not(.hcal-unused-zone):not(.hcal-cell-highlight):not(.hcal-cell-current-day):not(.hcal-cell-end-week):not(.btn-hcal):not(.hcal-cell-invalid) {
 	background-color: #F6F6F6;
 }
 
@@ -219,7 +219,7 @@
 	z-index:9999;
 }
 
-.hcal-reservation-readonly {
+.hcal-reservation-readonly:not(.hcal-unused-zone) {
 	border: 2px solid #99995b;
 	color: white !important;
 	font-weight: bold;
@@ -308,6 +308,11 @@ td.hcal-cell-month-day-occupied {
 
 .hcal-cell-detail-room-group-item {
 	white-space: nowrap;
+}
+
+.hcal-unused-zone {
+	border: 1px solid #444;
+  border-radius: 0px;
 }
 
 .input-price {
