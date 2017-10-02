@@ -271,7 +271,7 @@ HotelCalendar.prototype = {
       bedNum = nbed;
     }
 
-    var diff_date = this.getDateDiff_(reservation.startDate, reservation.endDate);
+    var diff_date = this.getDateDiffDays_(reservation.startDate, reservation.endDate);
     var rpersons = (reservation.room.shared || this.options.divideRoomsByCapacity)?reservation.room.capacity:1;
     var cellFound = false;
     var cellStartType = '';
@@ -335,7 +335,7 @@ HotelCalendar.prototype = {
     if (!notCheck && limits.isValid()) {
       var limitLeftDate = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`).dataset.hcalDate);
       var limitRightDate = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.right.dataset.hcalParentCell}`).dataset.hcalDate);
-      var diff_date = this.getDateDiff_(limitLeftDate, limitRightDate);
+      var diff_date = this.getDateDiffDays_(limitLeftDate, limitRightDate);
       var numBeds = +limits.right.dataset.hcalBedNum - +limits.left.dataset.hcalBedNum;
       var parentRow = this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`);
       var ndate = HotelCalendar.toMomentUTC(parentRow.dataset.hcalDate);
@@ -391,7 +391,7 @@ HotelCalendar.prototype = {
     var room = this.getRoom(parentRow.dataset.hcalRoomObjId);
     var start_date = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`).dataset.hcalDate);
     var end_date = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.right.dataset.hcalParentCell}`).dataset.hcalDate);
-    var diff_date = this.getDateDiff_(start_date, end_date);
+    var diff_date = this.getDateDiffDays_(start_date, end_date);
 
     var cells = [];
     var numBeds = +limits.right.dataset.hcalBedNum-+limits.left.dataset.hcalBedNum;
@@ -621,7 +621,7 @@ HotelCalendar.prototype = {
             var parentRow = $this.$base.querySelector(`#${this.dataset.hcalParentRow}`);
             var room = $this.getRoom(parentRow.dataset.hcalRoomObjId);
             reserv.room = room;
-            var diff_date = $this.getDateDiff_(reserv.startDate, reserv.endDate);
+            var diff_date = $this.getDateDiffDays_(reserv.startDate, reserv.endDate);
             reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
             var date_end = reserv.startDate.clone().add(diff_date, 'd');
             reserv.endDate.set({'date': date_end.date(), 'month': date_end.month(), 'year': date_end.year()});
@@ -1060,10 +1060,10 @@ HotelCalendar.prototype = {
       var limitRightDate = this.etable.querySelector(`#${limits.right.dataset.hcalParentCell}`).dataset.hcalDate;
       var limitLeftDateMoment = HotelCalendar.toMoment(limitLeftDate);
       var limitRightDateMoment = HotelCalendar.toMoment(limitRightDate);
-      var diff_date = this.getDateDiff_(limitLeftDateMoment, limitRightDateMoment);
+      var diff_date = this.getDateDiffDays_(limitLeftDateMoment, limitRightDateMoment);
       var date = limitLeftDateMoment.clone().startOf('day');
       var selector = [];
-      for (var i=1; i<=diff_date; i++) {
+      for (var i=0; i<=diff_date; i++) {
         selector.push("not([data-hcal-date='"+date.format(HotelCalendar.DATE_FORMAT_SHORT_)+"'])");
         date.add(1, 'd');
       }
@@ -1472,7 +1472,7 @@ HotelCalendar.prototype = {
   },
 
   //==== HELPER FUNCTIONS
-  getDateDiff_: function(/*MomentObj*/start, /*MomentObj*/end) {
+  getDateDiffDays_: function(/*MomentObject*/start, /*MomentObject*/end) {
 	return end.clone().startOf('day').diff(start.clone().startOf('day'), 'days');  
   },
   
@@ -1482,11 +1482,7 @@ HotelCalendar.prototype = {
 
   isLeftButtonPressed_: function(/*EventObject*/evt) {
     evt = evt || window.event;
-    if ("buttons" in evt) {
-      return evt.buttons == 1;
-    }
-    var button = evt.which || evt.button;
-    return button == 1;
+    return ("buttons" in evt)?(evt.buttons === 1):(evt.which || evt.button);
   },
 
   toAbbreviation: function(/*String*/word, /*Int*/max) {
