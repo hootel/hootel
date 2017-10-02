@@ -271,7 +271,7 @@ HotelCalendar.prototype = {
       bedNum = nbed;
     }
 
-    var diff_date = reservation.endDate.diff(reservation.startDate, 'days') + 1;
+    var diff_date = this.getDateDiff_(reservation.startDate, reservation.endDate);
     var rpersons = (reservation.room.shared || this.options.divideRoomsByCapacity)?reservation.room.capacity:1;
     var cellFound = false;
     var cellStartType = '';
@@ -335,7 +335,7 @@ HotelCalendar.prototype = {
     if (!notCheck && limits.isValid()) {
       var limitLeftDate = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`).dataset.hcalDate);
       var limitRightDate = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.right.dataset.hcalParentCell}`).dataset.hcalDate);
-      var diff_date = limitRightDate.clone().startOf('day').diff(limitLeftDate.clone().endOf('day'), 'days') + 1;
+      var diff_date = this.getDateDiff_(limitLeftDate, limitRightDate);
       var numBeds = +limits.right.dataset.hcalBedNum - +limits.left.dataset.hcalBedNum;
       var parentRow = this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`);
       var ndate = HotelCalendar.toMomentUTC(parentRow.dataset.hcalDate);
@@ -343,12 +343,12 @@ HotelCalendar.prototype = {
     	var ndate = HotelCalendar.toMoment(parentRow.dataset.hcalDate).add(i, 'd').utc;
     	var mode = false;
     	if (i === 0) {
-    		console.log("INIT: " + reservation.startDate.format("DD-MM-YYYY HH:mm:ss"));
+    	  // TODO: Ignore hours?
     	  ndate = reservation.startDate.clone();
     	}
     	if (i === diff_date) { 
-    		console.log("END: " + reservation.endDate.format("DD-MM-YYYY HH:mm:ss"));
-    		ndate = reservation.endDate.clone();
+    	  // TODO: Ignore hours?
+    	  ndate = reservation.endDate.clone();
       	}
         for (var b=0; b<=numBeds; b++) {
           var reservs = this.getReservationsByDay(ndate, false, reservation.room.number, +limits.left.dataset.hcalBedNum+b, mode);
@@ -391,7 +391,7 @@ HotelCalendar.prototype = {
     var room = this.getRoom(parentRow.dataset.hcalRoomObjId);
     var start_date = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`).dataset.hcalDate);
     var end_date = HotelCalendar.toMoment(this.etable.querySelector(`#${limits.right.dataset.hcalParentCell}`).dataset.hcalDate);
-    var diff_date = end_date.diff(start_date, 'days');
+    var diff_date = this.getDateDiff_(start_date, end_date);
 
     var cells = [];
     var numBeds = +limits.right.dataset.hcalBedNum-+limits.left.dataset.hcalBedNum;
@@ -621,7 +621,7 @@ HotelCalendar.prototype = {
             var parentRow = $this.$base.querySelector(`#${this.dataset.hcalParentRow}`);
             var room = $this.getRoom(parentRow.dataset.hcalRoomObjId);
             reserv.room = room;
-            var diff_date = reserv.endDate.diff(reserv.startDate, 'days')+1;
+            var diff_date = $this.getDateDiff_(reserv.startDate, reserv.endDate);
             reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
             var date_end = reserv.startDate.clone().add(diff_date, 'd');
             reserv.endDate.set({'date': date_end.date(), 'month': date_end.month(), 'year': date_end.year()});
@@ -1060,7 +1060,7 @@ HotelCalendar.prototype = {
       var limitRightDate = this.etable.querySelector(`#${limits.right.dataset.hcalParentCell}`).dataset.hcalDate;
       var limitLeftDateMoment = HotelCalendar.toMoment(limitLeftDate);
       var limitRightDateMoment = HotelCalendar.toMoment(limitRightDate);
-      var diff_date = limitRightDateMoment.diff(limitLeftDateMoment, 'days')+1;
+      var diff_date = this.getDateDiff_(limitLeftDateMoment, limitRightDateMoment);
       var date = limitLeftDateMoment.clone().startOf('day');
       var selector = [];
       for (var i=1; i<=diff_date; i++) {
@@ -1364,7 +1364,6 @@ HotelCalendar.prototype = {
     		continue;
     	}
 		var numBeds = itemReserv.getTotalPersons();
-	  	var date_diff = itemReserv.endDate.diff(itemReserv.startDate, 'days') + 1;
 	  	for (var e=numBeds; e<itemReserv.room.capacity; e++) {
 	  		nreservs.push(new HReservation(
 	  			--unused_id,
@@ -1473,6 +1472,10 @@ HotelCalendar.prototype = {
   },
 
   //==== HELPER FUNCTIONS
+  getDateDiff_: function(/*MomentObj*/start, /*MomentObj*/end) {
+	return end.clone().startOf('day').diff(start.clone().startOf('day'), 'days');  
+  },
+  
   sanitizeId_: function(/*String*/str) {
     return str.replace(/[\/\s\+\-]/g, '_');
   },

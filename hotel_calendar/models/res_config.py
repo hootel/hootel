@@ -39,7 +39,7 @@ class HotelConfiguration(osv.osv_memory):
         'type_move': fields.selection([
             ('normal', 'Normal'),
             ('assisted', 'Assisted'),
-            ('invalid', 'Allow Invalid')
+            ('allow_invalid', 'Allow Invalid')
         ], string='Reservation move mode', default='normal', required=True)
     }
 
