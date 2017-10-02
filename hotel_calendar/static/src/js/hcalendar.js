@@ -191,7 +191,7 @@ HotelCalendar.prototype = {
             divRes.classList.add('noselect');
             divRes.innerText = reserv.title;
             // this.updateDivReservation_(divRes, limits);
-            this.e.appendChild(divRes);
+            this.edivr.appendChild(divRes);
 
             if (reserv.readOnly) {
               divRes.classList.add('hcal-reservation-readonly');
@@ -338,7 +338,6 @@ HotelCalendar.prototype = {
       var diff_date = this.getDateDiffDays_(limitLeftDate, limitRightDate);
       var numBeds = +limits.right.dataset.hcalBedNum - +limits.left.dataset.hcalBedNum;
       var parentRow = this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`);
-      var ndate = HotelCalendar.toMomentUTC(parentRow.dataset.hcalDate);
       for (var i=0; i<=diff_date; i++) {
     	var ndate = HotelCalendar.toMoment(parentRow.dataset.hcalDate).add(i, 'd').utc;
     	var mode = false;
@@ -534,15 +533,37 @@ HotelCalendar.prototype = {
       return false;
     }
 
-    /** Main Table **/
+    /** Main Table & Calc Table **/
+    this.edivrh = document.createElement("div");
+    this.edivrh.classList.add('table-reservations-header');
+    this.e.appendChild(this.edivrh);
+    this.etableHeader = document.createElement("table");
+    this.etableHeader.classList.add('hcal-table');
+    this.etableHeader.classList.add('noselect');
+    this.edivrh.appendChild(this.etableHeader);
+    this.edivr = document.createElement("div");
+    this.edivr.classList.add('table-reservations');
+    this.e.appendChild(this.edivr);
     this.etable = document.createElement("table");
     this.etable.classList.add('hcal-table');
     this.etable.classList.add('noselect');
+    this.edivr.appendChild(this.etable);
+    
+    this.edivch = document.createElement("div");
+    this.edivch.classList.add('table-calcs-header');
+    this.e.appendChild(this.edivch);
+    this.edtableHeader = document.createElement("table");
+    this.edtableHeader.classList.add('hcal-table');
+    this.edtableHeader.classList.add('noselect');
+    this.edivch.appendChild(this.edtableHeader);
+    this.edivc = document.createElement("div");
+    this.edivc.classList.add('table-calcs');
+    this.e.appendChild(this.edivc);
     this.edtable = document.createElement("table");
     this.edtable.classList.add('hcal-table');
     this.edtable.classList.add('noselect');
-    this.e.appendChild(this.etable);
-    this.e.appendChild(this.edtable);
+    this.edivc.appendChild(this.edtable);
+
     this.updateView_();
     this.tableCreated = true;
 
@@ -705,16 +726,17 @@ HotelCalendar.prototype = {
   //==== RENDER FUNCTIONS
   create_table_reservation_days_: function() {
     var $this = this;
+    this.etableHeader.innerHTML = "";
     this.etable.innerHTML = "";
     /** TABLE HEADER **/
-    var thead = this.etable.createTHead();
+    var thead = this.etableHeader.createTHead();
     var row = thead.insertRow();
     var row_init = row;
     // Current Date
     var cell = row.insertCell();
     cell.setAttribute('rowspan', 2);
-    cell.setAttribute('colspan', 2);
-    cell.setAttribute('class', 'col-xs-1 col-lg-1');
+    cell.setAttribute('colspan', 3);
+    //cell.setAttribute('class', 'col-xs-1 col-lg-1');
     if (this.options.showPaginator) {
       cell.classList.add('hcal-cell-day-selector');
       var str_date = this.options.startDate.format(HotelCalendar.DATE_FORMAT_SHORT_);
@@ -800,6 +822,7 @@ HotelCalendar.prototype = {
       cell.classList.add('hcal-cell-room-type-group-item');
       cell.classList.add('btn-hcal');
       cell.classList.add('btn-hcal-3d');
+      cell.setAttribute('colspan', '2');
       cell = row.insertCell();
       cell.textContent = itemRoom.type;
       cell.classList.add('hcal-cell-room-type-group-item');
@@ -831,14 +854,15 @@ HotelCalendar.prototype = {
 
   create_table_detail_days_: function() {
     var $this = this;
+    this.edtableHeader.innerHTML = "";
     this.edtable.innerHTML = "";
     /** DETAIL DAYS HEADER **/
     var now = moment();
-    var thead = this.edtable.createTHead();
+    var thead = this.edtableHeader.createTHead();
     var row = thead.insertRow();
     var cell = row.insertCell();
-    cell.setAttribute('colspan', 2);
-    cell.setAttribute('class', 'col-xs-1 col-lg-1');
+    cell.setAttribute('colspan', 3);
+    //cell.setAttribute('class', 'col-xs-1 col-lg-1');
     for (var i=0; i<=this.options.days; i++) {
       var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
       var dd_local = dd.clone().local();
@@ -877,7 +901,7 @@ HotelCalendar.prototype = {
         cell.classList.add('hcal-cell-detail-room-free-type-group-item');
         cell.classList.add('btn-hcal');
         cell.classList.add('btn-hcal-flat');
-        cell.setAttribute("colspan", "2");
+        cell.setAttribute("colspan", "3");
         for (var i=0; i<=this.options.days; i++) {
           var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
           var dd_local = dd.clone().local();
@@ -908,7 +932,7 @@ HotelCalendar.prototype = {
     cell.classList.add('hcal-cell-detail-room-free-total-group-item');
     cell.classList.add('btn-hcal');
     cell.classList.add('btn-hcal-flat');
-    cell.setAttribute("colspan", "2");
+    cell.setAttribute("colspan", "3");
     for (var i=0; i<=this.options.days; i++) {
       var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
       var dd_local = dd.clone().local();
@@ -937,7 +961,7 @@ HotelCalendar.prototype = {
     cell.classList.add('hcal-cell-detail-room-perc-occup-group-item');
     cell.classList.add('btn-hcal');
     cell.classList.add('btn-hcal-flat');
-    cell.setAttribute("colspan", "2");
+    cell.setAttribute("colspan", "3");
     for (var i=0; i<=this.options.days; i++) {
       var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
       var dd_local = dd.clone().local();
@@ -973,7 +997,7 @@ HotelCalendar.prototype = {
           cell.classList.add('hcal-cell-detail-room-group-item');
           cell.classList.add('btn-hcal');
           cell.classList.add('btn-hcal-flat');
-          cell.setAttribute("colspan", "2");
+          cell.setAttribute("colspan", "3");
           for (var i=0; i<=$this.options.days; i++) {
         	var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
             var dd_local = dd.clone().local();

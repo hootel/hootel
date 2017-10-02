@@ -476,7 +476,6 @@ var HotelCalendarView = View.extend({
                 });
                 rooms.push(nroom);
             }
-            console.log(results['options']);
             self.create_calendar({
                 startDate: HotelCalendar.toMomentUTC(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT).local().startOf('day').utc(),
                 days: domains['dates'][1].diff(domains['dates'][0],'days'),

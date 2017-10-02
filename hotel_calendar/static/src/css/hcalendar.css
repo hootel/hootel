@@ -28,6 +28,36 @@
 }
 
 
+#hcalendar {
+	display: flex;
+  flex-flow: row wrap;
+  max-height: 100vh;
+}
+.table-reservations-header {
+	order: 1;
+	flex-grow: 1;
+	overflow-y: scroll;
+}
+.table-reservations {
+	order: 2;
+	flex-grow: 2;
+  overflow-y: scroll;
+  position: relative;
+  height: 180px;
+}
+.table-calcs-header {
+	order: 3;
+	flex-grow: 1;
+	overflow-y: scroll;
+}
+.table-calcs {
+	order: 4;
+	flex-grow: 2;
+  overflow-y: scroll;
+  height: 180px;
+}
+
+
 .btn-hcal { }
 .btn-hcal.hcal-cell-current-day {
  	background-color: #B3EE3A;
@@ -45,6 +75,10 @@
 .btn-hcal-flat {
 	background-color: #bdc297;
  	border: 1px solid #bdc297;
+}
+
+.table-calcs-header .hcal-table, .table-reservations-header .hcal-table {
+	height: 46px;
 }
 
 .hcal-table, .hcal-table-day {
@@ -287,6 +321,7 @@ td.hcal-cell-room-type-group-item:last-child {
 
 td.hcal-cell-header-day {
 	padding: 0;
+	vertical-align: middle;
 }
 
 td.hcal-cell-month-day-occupied {
