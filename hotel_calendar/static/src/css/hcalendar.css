@@ -31,7 +31,8 @@
 #hcalendar {
 	display: flex;
   flex-flow: row wrap;
-  max-height: 100vh;
+  max-height: 100%;
+  align-items: stretch;
 }
 .table-reservations-header {
 	order: 1;
@@ -43,7 +44,7 @@
 	flex-grow: 2;
   overflow-y: scroll;
   position: relative;
-  height: 180px;
+  max-height: 35vh;
 }
 .table-calcs-header {
 	order: 3;
@@ -54,7 +55,7 @@
 	order: 4;
 	flex-grow: 2;
   overflow-y: scroll;
-  height: 180px;
+  max-height: 22vh;
 }
 
 
