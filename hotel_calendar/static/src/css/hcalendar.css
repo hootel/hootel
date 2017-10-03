@@ -44,7 +44,7 @@
 	flex-grow: 2;
   overflow-y: scroll;
   position: relative;
-  max-height: 35vh;
+  max-height: 40vh;
 }
 .table-calcs-header {
 	order: 3;
@@ -55,7 +55,7 @@
 	order: 4;
 	flex-grow: 2;
   overflow-y: scroll;
-  max-height: 22vh;
+  max-height: 21vh;
 }
 
 
@@ -70,8 +70,8 @@
 .btn-hcal-3d {
  	color: white;
  	background-color: #307CB0;
- 	border: 1px solid black;
- 	border-color: white black black white !important;
+ 	border: 1px solid #cecece;
+ 	/*border-color: white black black white !important;*/
 }
 .btn-hcal-flat {
 	background-color: #bdc297;

@@ -342,12 +342,12 @@ HotelCalendar.prototype = {
     	var ndate = HotelCalendar.toMoment(parentRow.dataset.hcalDate).add(i, 'd').utc;
     	var mode = false;
     	if (i === 0) {
-    	  // TODO: Ignore hours?
-    	  ndate = reservation.startDate.clone();
+    	  // hours are forced because no one cares about them
+    	  ndate = reservation.startDate.clone().set({'hour': 12, 'minute': 0, 'second': 0});
     	}
     	if (i === diff_date) { 
-    	  // TODO: Ignore hours?
-    	  ndate = reservation.endDate.clone();
+    	  // hours are forced because no one cares about them
+    	  ndate = reservation.endDate.clone().set({'hour': 10, 'minute': 0, 'second': 0});
       	}
         for (var b=0; b<=numBeds; b++) {
           var reservs = this.getReservationsByDay(ndate, false, reservation.room.number, +limits.left.dataset.hcalBedNum+b, mode);
