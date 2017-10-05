@@ -67,6 +67,7 @@ var HotelCalendarView = View.extend({
     searchview_hidden: true,
 
     // Custom Options
+    _view_options: {},
     _model: null,
     _hcalendar: null,
     _reserv_tooltips: {},
@@ -444,7 +445,7 @@ var HotelCalendarView = View.extend({
         });
     },
 
-    generate_hotel_calendar: function(){
+    generate_hotel_calendar: function(days){
         var self = this;
 
         /** DO MAGIC **/
@@ -476,16 +477,15 @@ var HotelCalendarView = View.extend({
                 });
                 rooms.push(nroom);
             }
-            console.log(results['options']);
+            
             self.create_calendar({
-                startDate: HotelCalendar.toMomentUTC(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT).local().startOf('day').utc(),
-                days: domains['dates'][1].diff(domains['dates'][0],'days'),
+                startDate: HotelCalendar.toMomentUTC(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT),
+                days: self._view_options['days'] + 1,
                 rooms: rooms,
-                showPaginator: false,
-                endOfWeek: parseInt(results['options']['eday_week']) || 6,
-                divideRoomsByCapacity: results['options']['divide_rooms_by_capacity'] || false,
-                allowInvalidActions: results['options']['allow_invalid_actions'] || false,
-                assistedMovement: results['options']['assisted_movement'] || false
+                endOfWeek: parseInt(self._view_options['eday_week']) || 6,
+                divideRoomsByCapacity: self._view_options['divide_rooms_by_capacity'] || false,
+                allowInvalidActions: self._view_options['allow_invalid_actions'] || false,
+                assistedMovement: self._view_options['assisted_movement'] || false
             }, results['pricelist']);
 
             var reservs = [];
@@ -508,11 +508,11 @@ var HotelCalendarView = View.extend({
                 reservs.push(nreserv);
             }
             self._hcalendar.setReservations(reservs);
-            self.assign_extra_info_();
+            self._assign_extra_info();
         });
     },
 
-    assign_extra_info_: function() {
+    _assign_extra_info: function() {
     	var self = this;
         $(this._hcalendar.etable).find('.hcal-cell-room-type-group-item.btn-hcal-3d').on("mouseenter", function(){
         	var $this = $(this);
@@ -587,11 +587,6 @@ var HotelCalendarView = View.extend({
 
     init_calendar_view: function(){
         var self = this;
-
-        /** HACKISH ODOO VIEW **/
-        //this._action_manager.main_control_panel.$el.hide();
-        $(document).find('.oe-view-manager-view-pms').css('overflow', 'initial'); // No Scroll here!
-        //this.$el.parent().parent().css('overflow', 'none');
 
         /** VIEW CONTROLS INITIALIZATION **/
         // DATE TIME PICKERS
@@ -700,8 +695,7 @@ var HotelCalendarView = View.extend({
             var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
             var date_begin = moment().startOf('day');
-            var days = moment(date_begin).daysInMonth();
-            var date_end = date_begin.clone().add(days, 'd').endOf('day');
+            var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -725,7 +719,22 @@ var HotelCalendarView = View.extend({
 //        });
 
         /** RENDER CALENDAR **/
-        this.generate_hotel_calendar();
+        this._model.call('get_hcalendar_settings', [false]).then(function(results){
+        	self._view_options = results;
+        	
+            var date_begin = moment().startOf('day');
+            self._view_options['days'] = (self._view_options['days'] !== 'month')?parseInt(self._view_options['days']):date_begin.daysInMonth();
+            var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
+            var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
+            var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
+            $dateTimePickerBegin.data("ignore_onchange", true);
+            $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+            $dateTimePickerEnd.data("ignore_onchange", true);
+            $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+            self._last_dates = self.generate_domains()['dates'];
+            
+        	self.generate_hotel_calendar();
+        });
 
         /** DATABASE QUERIES **/
         // Get Types
@@ -797,16 +806,13 @@ var HotelCalendarView = View.extend({
 
         var hardmode = isStartDate || date_begin.isAfter(date_end);
         if (date_begin && date_end && this._hcalendar) {
-            var days = hardmode?date_begin.clone().local().daysInMonth():date_end.diff(date_begin,'days');
             if (hardmode) {
-                var ndate_end = date_begin.clone().add(days, 'd');
+                var ndate_end = date_begin.clone().add(this._view_options['days'], 'd');
                 $dateTimePickerEnd.data("ignore_onchange", true);
                 $dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end.local());
             }
             
-            console.log(date_begin.format(L10N_DATETIME_MOMENT_FORMAT));
-            console.log(days);
-            this._hcalendar.setStartDate(date_begin.clone().local().startOf('day').utc(), days);
+            this._hcalendar.setStartDate(date_begin.clone().utc(), this._hcalendar.getDateDiffDays(date_begin, date_end));
             this.reload_hcalendar_reservations(false, true);
         }
     },
@@ -927,7 +933,7 @@ var HotelCalendarView = View.extend({
               self._hcalendar.addReservations(reservs);
             }
 
-            self.assign_extra_info_();
+            self._assign_extra_info();
         });
         this._last_dates = domains['dates'];
         this.update_buttons_counter();

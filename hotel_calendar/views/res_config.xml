@@ -13,6 +13,7 @@
 				    	<field name="divide_rooms_by_capacity" />
 				    	<field name="end_day_week" />
 				    	<field name="type_move" />
+				    	<field name="default_num_days" />
 				    </group>
 				</group>
         	</xpath>

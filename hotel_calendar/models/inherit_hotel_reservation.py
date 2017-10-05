@@ -133,17 +133,18 @@ class HotelReservation(models.Model):
         return json_rooms_prices
     
     @api.multi
-    def _get_hcalendar_settings(self):
+    def get_hcalendar_settings(self):
         type_move = self.env['ir.values'].get_default('hotel.config.settings', 'type_move')
         return {
             'divide_rooms_by_capacity': self.env['ir.values'].get_default('hotel.config.settings', 'divide_rooms_by_capacity'),
             'eday_week': self.env['ir.values'].get_default('hotel.config.settings', 'end_day_week'),
+            'days': self.env['ir.values'].get_default('hotel.config.settings', 'default_num_days') or 'month',
             'allow_invalid_actions': type_move == 'allow_invalid',
             'assisted_movement': type_move == 'assisted',
         }
 
     @api.multi
-    def get_hcalendar_all_data(self, dfrom, dto, domainRooms, domainReservations, withRooms=True, withPricelist=True, withSettings=True):
+    def get_hcalendar_all_data(self, dfrom, dto, domainRooms, domainReservations, withRooms=True, withPricelist=True):
         if not dfrom or not dto:
             raise ValidationError('Input Error: No dates defined!')
 
@@ -157,7 +158,6 @@ class HotelReservation(models.Model):
             'reservations': json_reservations,
             'tooltips': json_reservation_tooltips,
             'pricelist': withPricelist and self.get_hcalendar_pricelist_data(dfrom, dto) or {},
-            'options': withSettings and self._get_hcalendar_settings() or {},
         }
             
         return vals

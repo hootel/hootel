@@ -40,7 +40,12 @@ class HotelConfiguration(osv.osv_memory):
             ('normal', 'Normal'),
             ('assisted', 'Assisted'),
             ('allow_invalid', 'Allow Invalid')
-        ], string='Reservation move mode', default='normal', required=True)
+        ], string='Reservation move mode', default='normal', required=True),
+        'default_num_days': fields.selection([
+            ('month', '1 Month'),
+            ('15', '15 Days'),
+            ('7', '7 Days')
+        ], string='Default number of days', default='month', required=True)
     }
 
     def set_divide_rooms_by_capacity(self, cr, uid, ids, context=None):
@@ -54,3 +59,7 @@ class HotelConfiguration(osv.osv_memory):
     def set_type_move(self, cr, uid, ids, context=None):
         type_move = self.browse(cr, uid, ids, context=context).type_move
         return self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'hotel.config.settings', 'type_move', type_move)
+
+    def set_default_num_days(self, cr, uid, ids, context=None):
+        default_num_days = self.browse(cr, uid, ids, context=context).default_num_days
+        return self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'hotel.config.settings', 'default_num_days', default_num_days)
