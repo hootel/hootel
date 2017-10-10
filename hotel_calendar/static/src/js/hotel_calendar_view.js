@@ -781,10 +781,10 @@ var HotelCalendarView = View.extend({
                 var reserv = notif[1]['reservation'];
                 // Only show notifications of other users
                 if (notif[1]['userid'] != this.dataset.context.uid) {
-                  var qdict = reserv;
+                  var qdict = _.clone(reserv);
                   qdict = _.extend(qdict, {
-                    'checkin': HotelCalendar.toMomentUTC(qdict['checkin'], ODOO_DATETIME_MOMENT_FORMAT).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
-                    'checkout': HotelCalendar.toMomentUTC(qdict['checkout'], ODOO_DATETIME_MOMENT_FORMAT).local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
+                    'checkin': HotelCalendar.toMomentUTC(qdict['checkin'], ODOO_DATETIME_MOMENT_FORMAT).clone().local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
+                    'checkout': HotelCalendar.toMomentUTC(qdict['checkout'], ODOO_DATETIME_MOMENT_FORMAT).clone().local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local
                     'username': notif[1]['username'],
                     'userid': notif[1]['userid']
                   });
@@ -809,8 +809,8 @@ var HotelCalendarView = View.extend({
                       reserv['partner_name'],
                       reserv['adults'],
                       reserv['children'],
-                      HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT),
-                      HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT),
+                      HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
+                      HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
                       reserv['reserve_color'],
                       reserv['read_only'],
                       reserv['fix_days'],
