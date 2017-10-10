@@ -3,6 +3,7 @@
 #
 #    OpenERP, Open Source Management Solution
 #    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
+#                       Alexandre Díaz <dev@redneboa.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -18,48 +19,47 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp.osv import fields, osv
-from openerp import SUPERUSER_ID
+from openerp import models, fields, api
 
-# TODO: Use new api
-class HotelConfiguration(osv.osv_memory):
+
+class HotelConfiguration(models.TransientModel):
     _inherit = 'hotel.config.settings'
 
-    _columns = {
-        'divide_rooms_by_capacity': fields.boolean('Divide rooms by capacity'),
-        'end_day_week': fields.selection([
-            ('0', 'Monday'),
-            ('1', 'Tuesday'),
-            ('2', 'Wednesday'),
-            ('3', 'Thursday'),
-            ('4', 'Friday'),
-            ('5', 'Saturday'),
-            ('6', 'Sunday')
-        ], string='End day of week', default='6', required=True),
-        'type_move': fields.selection([
-            ('normal', 'Normal'),
-            ('assisted', 'Assisted'),
-            ('allow_invalid', 'Allow Invalid')
-        ], string='Reservation move mode', default='normal', required=True),
-        'default_num_days': fields.selection([
-            ('month', '1 Month'),
-            ('15', '15 Days'),
-            ('7', '7 Days')
-        ], string='Default number of days', default='month', required=True)
-    }
+    divide_rooms_by_capacity = fields.Boolean('Divide rooms by capacity')
+    end_day_week = fields.Selection([
+        ('0', 'Monday'),
+        ('1', 'Tuesday'),
+        ('2', 'Wednesday'),
+        ('3', 'Thursday'),
+        ('4', 'Friday'),
+        ('5', 'Saturday'),
+        ('6', 'Sunday')
+    ], string='End day of week', default='6', required=True)
+    type_move = fields.Selection([
+        ('normal', 'Normal'),
+        ('assisted', 'Assisted'),
+        ('allow_invalid', 'Allow Invalid')
+    ], string='Reservation move mode', default='normal', required=True)
+    default_num_days = fields.Selection([
+        ('month', '1 Month'),
+        ('21', '3 Weeks'),
+        ('14', '2 Weeks'),
+        ('7', '1 Week')
+    ], string='Default number of days', default='month', required=True)
 
-    def set_divide_rooms_by_capacity(self, cr, uid, ids, context=None):
-        divide_rooms_by_capacity = self.browse(cr, uid, ids, context=context).divide_rooms_by_capacity
-        return self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'hotel.config.settings', 'divide_rooms_by_capacity', divide_rooms_by_capacity)
-    
-    def set_end_day_week(self, cr, uid, ids, context=None):
-        end_day_week = self.browse(cr, uid, ids, context=context).end_day_week
-        return self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'hotel.config.settings', 'end_day_week', end_day_week)
 
-    def set_type_move(self, cr, uid, ids, context=None):
-        type_move = self.browse(cr, uid, ids, context=context).type_move
-        return self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'hotel.config.settings', 'type_move', type_move)
+    @api.multi
+    def set_divide_rooms_by_capacity(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'divide_rooms_by_capacity', self.divide_rooms_by_capacity)
 
-    def set_default_num_days(self, cr, uid, ids, context=None):
-        default_num_days = self.browse(cr, uid, ids, context=context).default_num_days
-        return self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'hotel.config.settings', 'default_num_days', default_num_days)
+    @api.multi
+    def set_end_day_week(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'end_day_week', self.end_day_week)
+
+    @api.multi
+    def set_type_move(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'type_move', self.type_move)
+
+    @api.multi
+    def set_default_num_days(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'default_num_days', self.default_num_days)

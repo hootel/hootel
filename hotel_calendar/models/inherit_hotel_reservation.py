@@ -3,6 +3,7 @@
 #
 #    OpenERP, Open Source Management Solution
 #    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
+#                       Alexandre Díaz <dev@redneboa.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -131,7 +132,7 @@ class HotelReservation(models.Model):
                 'title': vroom.name,
             })
         return json_rooms_prices
-    
+
     @api.multi
     def get_hcalendar_settings(self):
         type_move = self.env['ir.values'].get_default('hotel.config.settings', 'type_move')
@@ -141,6 +142,8 @@ class HotelReservation(models.Model):
             'days': self.env['ir.values'].get_default('hotel.config.settings', 'default_num_days') or 'month',
             'allow_invalid_actions': type_move == 'allow_invalid',
             'assisted_movement': type_move == 'assisted',
+            'default_arrival_hour': self.env['ir.values'].get_default('hotel.config.settings', 'default_arrival_hour'),
+            'default_departure_hour': self.env['ir.values'].get_default('hotel.config.settings', 'default_departure_hour'),
         }
 
     @api.multi
@@ -157,9 +160,9 @@ class HotelReservation(models.Model):
             'rooms': withRooms and self._hcalendar_room_data(rooms) or [],
             'reservations': json_reservations,
             'tooltips': json_reservation_tooltips,
-            'pricelist': withPricelist and self.get_hcalendar_pricelist_data(dfrom, dto) or {},
+            'pricelist': withPricelist and self.get_hcalendar_pricelist_data(dfrom, dto) or {}
         }
-            
+
         return vals
 
 #     @api.multi

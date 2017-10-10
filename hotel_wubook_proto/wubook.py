@@ -3,6 +3,7 @@
 #
 #    OpenERP, Open Source Management Solution
 #    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
+#                       Alexandre Díaz <dev@redneboa.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -831,6 +832,9 @@ class WuBook(models.TransientModel):
     # FIXME: Super big method!!! O_o
     @api.model
     def generate_reservations(self, bookings):
+        default_arrival_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_arrival_hour')
+        default_departure_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_departure_hour')
+        self.env['ir.values'].get_default('hotel.config.settings', 'default_arrival_hour'),
         def fetch_values(dfrom, dto):
             rcode, results = self.SERVER.fetch_rooms_values(self.TOKEN,
                                                             self.LCODE,
@@ -864,13 +868,13 @@ class WuBook(models.TransientModel):
                                          '', wid=book['reservation_code'])
                 continue
 
-            arr_hour = book['arrival_hour'] == "--" and '14:00' or book['arrival_hour']
+            arr_hour = book['arrival_hour'] == "--" and default_arrival_hour or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)
             checkin_dt = local.localize(datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT))
             checkin_utc_dt = checkin_dt.astimezone(pytz.utc)
             checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
-            checkout = "%s 12:00" % book['date_departure']
+            checkout = "%s %s" % (book['date_departure'], default_departure_hour)
             checkout_dt = local.localize(datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT))
             checkout_utc_dt = checkout_dt.astimezone(pytz.utc)
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)

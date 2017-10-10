@@ -29,8 +29,6 @@ var Core = require('web.core'),
     QWeb = Core.qweb,
     l10n = _t.database.parameters,
 
-    DEFAULT_ARRIVAL_HOUR = 14,
-    DEFAULT_DEPARTURE_HOUR = 12,
     ODOO_DATE_MOMENT_FORMAT = 'YYYY-MM-DD',
     ODOO_DATETIME_MOMENT_FORMAT = ODOO_DATE_MOMENT_FORMAT + ' HH:mm:ss',
     L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY", //FIXME: Time.strftime_to_moment_format(l10n.date_format);
@@ -281,16 +279,17 @@ var HotelCalendarView = View.extend({
                 startDate = tt;
             }
 
-            // If start 'today' put the current hour
+            startDate.set({'hour': self._view_options['default_arrival_hour'], 'minute': 0, 'second': 0});
+            endDate.set({'hour': self._view_options['default_departure_hour'], 'minute': 0, 'second': 0});
+
+            // Workaround moment comparation
             var now = moment(new Date()).utc();
             if (startDate.isSame(now, 'day')) {
                 startDate = now.add(30,'m'); // +30 mins
             }
 
-            startDate.set({'hour': DEFAULT_ARRIVAL_HOUR, 'minute': 0, 'second': 0});
-            endDate.set({'hour': DEFAULT_DEPARTURE_HOUR, 'minute': 0, 'second': 0});
-
             // Creater/Select Partner + Create Folio + Create Reservation + Confirm Folio? = Fucking Crazy uH :/
+            // FIXME: The process increase always the number of the reservation
             var pop = new Common.SelectCreateDialog(self, {
                 res_model: 'res.partner',
                 domain: [],
@@ -391,7 +390,7 @@ var HotelCalendarView = View.extend({
                         	if (!this.dataset.ids.length) {
                         		HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
 
-                            	});
+                            });
                         	}
                         });
                     });
