@@ -834,7 +834,7 @@ class WuBook(models.TransientModel):
     def generate_reservations(self, bookings):
         default_arrival_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_arrival_hour')
         default_departure_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_departure_hour')
-        self.env['ir.values'].get_default('hotel.config.settings', 'default_arrival_hour'),
+
         def fetch_values(dfrom, dto):
             rcode, results = self.SERVER.fetch_rooms_values(self.TOKEN,
                                                             self.LCODE,
