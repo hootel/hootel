@@ -278,8 +278,10 @@ var HotelCalendarView = View.extend({
                 startDate = tt;
             }
 
-            startDate.set({'hour': self._view_options['default_arrival_hour'], 'minute': 0, 'second': 0});
-            endDate.set({'hour': self._view_options['default_departure_hour'], 'minute': 0, 'second': 0});
+            var def_arrival_hour = self._view_options['default_arrival_hour'].split(':');
+            var def_departure_hour = self._view_options['default_departure_hour'].split(':');
+            startDate.set({'hour': def_arrival_hour[0], 'minute': def_arrival_hour[1], 'second': 0});
+            endDate.set({'hour': def_departure_hour[0], 'minute': def_departure_hour[1], 'second': 0});
 
             // Workaround moment comparation
             var now = moment(new Date()).utc();
