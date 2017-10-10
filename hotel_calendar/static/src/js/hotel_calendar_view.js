@@ -31,9 +31,8 @@ var Core = require('web.core'),
 
     ODOO_DATE_MOMENT_FORMAT = 'YYYY-MM-DD',
     ODOO_DATETIME_MOMENT_FORMAT = ODOO_DATE_MOMENT_FORMAT + ' HH:mm:ss',
-    L10N_DATE_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format),
+    L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY", //FIXME: Time.strftime_to_moment_format(l10n.date_format);
     L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format);
-
 
 /* HIDE CONTROL PANEL */
 /* FIXME: Look's like a hackish solution */

@@ -32,7 +32,7 @@ var Core = require('web.core'),
     CALENDAR_DAYS = 5,
     ODOO_DATETIME_MOMENT_FORMAT = "YYYY-MM-DD HH:mm:ss",
     ODOO_DATE_MOMENT_FORMAT = "YYYY-MM-DD",
-    L10N_DATE_MOMENT_FORMAT = Time.strftime_to_moment_format(l10n.date_format),
+    L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY", //FIXME: Time.strftime_to_moment_format(l10n.date_format);
     L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format);
 
 
