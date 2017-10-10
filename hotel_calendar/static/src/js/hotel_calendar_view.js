@@ -819,6 +819,8 @@ var HotelCalendarView = View.extend({
                     this._hcalendar.addReservations([nreserv]);
                   }
                 }
+
+                this.update_buttons_counter();
                 break;
               case 'pricelist':
                 var price = notif[1]['price'];
