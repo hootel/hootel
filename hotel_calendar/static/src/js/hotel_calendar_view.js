@@ -29,7 +29,6 @@ var Core = require('web.core'),
     QWeb = Core.qweb,
     l10n = _t.database.parameters,
 
-    PUBLIC_PRICELIST_ID = 1, // Hard-Coded public pricelist id
     DEFAULT_ARRIVAL_HOUR = 14,
     DEFAULT_DEPARTURE_HOUR = 12,
     ODOO_DATE_MOMENT_FORMAT = 'YYYY-MM-DD',
@@ -311,19 +310,19 @@ var HotelCalendarView = View.extend({
                             context: {
                             	//'default_partner_id': partner_id,
                             	'default_folio_id': folio_id,
-                                'default_checkin': startDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
-                                'default_checkout': endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
-                                'default_adults': numBeds,
-                                'default_children': 0,
-                                'default_order_id.parter_id': partner_id,
-                                'default_product_id': room.id,
-                                //'default_product_uom': room.getUserData('uom_id'),
-                                //'default_product_uom_qty': 1,
-                                //'default_state': 'draft',
-//                                          //'product_uos': 1,
-                                'default_name': `${room.number}`,
-                                //'default_reservation_lines': reservation_lines,
-                                //'default_price_unit': result['total_price']
+                              'default_checkin': startDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
+                              'default_checkout': endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
+                              'default_adults': numBeds,
+                              'default_children': 0,
+                              'default_order_id.parter_id': partner_id,
+                              'default_product_id': room.id,
+                              //'default_product_uom': room.getUserData('uom_id'),
+                              //'default_product_uom_qty': 1,
+                              //'default_state': 'draft',
+                              //'product_uos': 1,
+                              'default_name': `${room.number}`,
+                              //'default_reservation_lines': reservation_lines,
+                              //'default_price_unit': result['total_price']
                             },
                             title: _t("Create: ") + _t("Reservation"),
                             initial_view: "form",
@@ -342,11 +341,11 @@ var HotelCalendarView = View.extend({
                                 		'folio_id': folio_id,
                                 		'name': `${room.number}`,
                                 	});
-                                    return dataset.create(data, internal_options).then(function (id) {
-                                        dataset.ids.push(id);
-                                        res_id = id;
-                                        dself._record_created = true;
-                                    });
+                                  return dataset.create(data, internal_options).then(function (id) {
+                                    dataset.ids.push(id);
+                                    res_id = id;
+                                    dself._record_created = true;
+                                  });
                                 });
                                 self.mutex.def.then(function () {
                                 	var dialog = new Dialog(self, {
@@ -399,50 +398,6 @@ var HotelCalendarView = View.extend({
                 }
             }).open();
         });
-
-        this._hcalendar.addEventListener('hcalOnChangeRoomTypePrice', function(ev){
-            var qdict = {
-                'date':  ev.detail.date.clone().local().format(L10N_DATE_MOMENT_FORMAT),
-                'old_price': ev.detail.old_price,
-                'new_price': ev.detail.price
-            };
-            new Dialog(self, {
-                title: _t("Confirm Price Change"),
-                buttons: [
-                    {
-                        text: _t("Yes, change it"),
-                        classes: 'btn-primary',
-                        close: true,
-                        disabled: !ev.detail.date,
-                        click: function () {
-                            var categ_id = self._hcalendar.getRoomsByType(ev.detail.room_type)[0].getUserData('categ_id');
-                            var data = {
-                                'pricelist_id': PUBLIC_PRICELIST_ID,
-                                'applied_on': '2_product_category',
-                                'categ_id': categ_id,
-                                'compute_price': 'fixed',
-                                'date_start': ev.detail.date.format(ODOO_DATETIME_MOMENT_FORMAT),
-                                'date_end': ev.detail.date.format(ODOO_DATETIME_MOMENT_FORMAT),
-                                'fixed_price': ev.detail.price,
-                                'sequence': 0,
-                            };
-                            new Model('product.pricelist.item').call('create', [data]).fail(function(err, ev){
-                                alert(_t("[Hotel Calendar]\nERROR: Can't update price!"));
-                                self._hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
-                            });
-                        }
-                    },
-                    {
-                        text: _t("No"),
-                        close: true,
-                        click: function() {
-                            self._hcalendar.setDetailPrice(ev.detail.room_type, ev.detail.date, ev.detail.old_price);
-                        }
-                    }
-                ],
-                $content: QWeb.render('HotelCalendar.ConfirmPriceChange', qdict)
-            }).open();
-        });
     },
 
     generate_hotel_calendar: function(days){
@@ -477,7 +432,7 @@ var HotelCalendarView = View.extend({
                 });
                 rooms.push(nroom);
             }
-            
+
             self.create_calendar({
                 startDate: HotelCalendar.toMomentUTC(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT),
                 days: self._view_options['days'] + 1,
@@ -721,7 +676,7 @@ var HotelCalendarView = View.extend({
         /** RENDER CALENDAR **/
         this._model.call('get_hcalendar_settings', [false]).then(function(results){
         	self._view_options = results;
-        	
+
             var date_begin = moment().startOf('day');
             self._view_options['days'] = (self._view_options['days'] !== 'month')?parseInt(self._view_options['days']):date_begin.daysInMonth();
             var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
@@ -732,7 +687,7 @@ var HotelCalendarView = View.extend({
             $dateTimePickerEnd.data("ignore_onchange", true);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
             self._last_dates = self.generate_domains()['dates'];
-            
+
         	self.generate_hotel_calendar();
         });
 
@@ -811,7 +766,7 @@ var HotelCalendarView = View.extend({
                 $dateTimePickerEnd.data("ignore_onchange", true);
                 $dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end.local());
             }
-            
+
             this._hcalendar.setStartDate(date_begin.clone().utc(), this._hcalendar.getDateDiffDays(date_begin, date_end));
             this.reload_hcalendar_reservations(false, true);
         }
@@ -969,7 +924,7 @@ var HotelCalendarView = View.extend({
 
         var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().utc();
         var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc();
-        
+
         return {
             'rooms': domainRooms,
             'reservations': domainReservations,

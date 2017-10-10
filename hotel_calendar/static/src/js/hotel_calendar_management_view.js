@@ -9,19 +9,19 @@ odoo.define('hotel_calendar.HotelCalendarManagementView', function (require) {
  */
 
 var Core = require('web.core'),
-    Bus = require('bus.bus').bus,
+    //Bus = require('bus.bus').bus,
     //Data = require('web.data'),
     Time = require('web.time'),
     Model = require('web.DataModel'),
     View = require('web.View'),
-    Common = require('web.form_common'),
+    //Common = require('web.form_common'),
     //Pyeval = require('web.pyeval'),
     ActionManager = require('web.ActionManager'),
     Utils = require('web.utils'),
     Dialog = require('web.Dialog'),
-    Ajax = require('web.ajax'),
+    //Ajax = require('web.ajax'),
     ControlPanel = require('web.ControlPanel'),
-    Session = require('web.session'),
+    //Session = require('web.session'),
     formats = require('web.formats'),
 
     _t = Core._t,
@@ -87,7 +87,7 @@ var HotelCalendarManagementView = View.extend({
         this._model = new Model(this.dataset.model);
         this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
 
-        Bus.on("notification", this, this._on_bus_signal);
+        //Bus.on("notification", this, this._on_bus_signal);
     },
 
     view_loading: function(r) {
@@ -150,21 +150,15 @@ var HotelCalendarManagementView = View.extend({
         if (!btn_save.hasClass('need-save')) {
             return;
         }
-        btn_save.removeClass('need-save');
 
         var pricelist = this._hcalendar.getPricelist(true);
         var restrictions = this._hcalendar.getRestrictions(true);
         var availability = this._hcalendar.getAvailability(true);
-        console.log("======== DATA");
-        console.log(pricelist);
-        console.log(restrictions);
-        console.log(availability);
 
         var params = this.generate_params();
         var oparams = [false, params['prices'], params['restrictions'], pricelist, restrictions, availability];
         this._model.call('save_changes', oparams).then(function(results){
-            console.log("== SAVE RESULTS");
-            console.log(results);
+            btn_save.removeClass('need-save');
         });
     },
 
@@ -267,11 +261,6 @@ var HotelCalendarManagementView = View.extend({
     init_calendar_view: function(){
         var self = this;
 
-        /** HACKISH ODOO VIEW **/
-        //this._action_manager.main_control_panel.$el.hide();
-        $(document).find('.oe-view-manager-view-pms').css('overflow', 'initial'); // No Scroll here!
-        //this.$el.parent().parent().css('overflow', 'none');
-
         /** VIEW CONTROLS INITIALIZATION **/
         // DATE TIME PICKERS
         var l10nn = _t.database.parameters
@@ -298,20 +287,6 @@ var HotelCalendarManagementView = View.extend({
         $dateTimePickerEnd.on("dp.change", function (e) {
             self.on_change_filter_date(e, false);
         });
-        //this.$el.find('#mpms-search #cal-pag-selector').datetimepicker($.extend({}, DTPickerOptions, {
-        //  'useCurrent': true,
-        //}));
-
-        //var $dateTimePickerSelector = this.$el.find('#mpms-search #cal-pag-selector-calendar');
-        //$dateTimePickerSelector.datetimepicker($.extend({}, DTPickerOptions, {'inline':true, 'sideBySide': false}));
-        //$dateTimePickerSelector.on("dp.change", function (e) {
-        //  console.log(e);
-            /*var date_begin = moment(this.data("DateTimePicker").getDate());
-            var days = moment(date_begin).daysInMonth();
-            var date_end = date_begin.clone().add(days, 'd');
-            $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
-            $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);*/
-        //});
 
         var date_begin = moment().utc().startOf('day');
         var date_end = date_begin.clone().add(CALENDAR_DAYS, 'd').endOf('day');

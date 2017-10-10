@@ -18,47 +18,30 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp.osv import fields, osv
-from openerp import SUPERUSER_ID
+from openerp import models, fields
 
 
-class wubook_configuration(osv.osv_memory):
+class WubookConfiguration(models.TransientModel):
     _name = 'wubook.config.settings'
     _inherit = 'res.config.settings'
 
-    _columns = {
-        'wubook_user': fields.char('WuBook User'),
-        'wubook_passwd': fields.char('WuBook Password'),
-        'wubook_lcode': fields.char('WuBook lcode'),
-        'wubook_server': fields.char('WuBook Server'),
-        'wubook_pkey': fields.char('WuBook PKey'),
-    }
+    wubook_user = fields.Char('WuBook User')
+    wubook_passwd = fields.Char('WuBook Password')
+    wubook_lcode = fields.Char('WuBook lcode')
+    wubook_server = fields.Char('WuBook Server', default='https://wubook.net/xrws/')
+    wubook_pkey = fields.Char('WuBook PKey')
 
-    _defaults = {
-        'wubook_server': 'https://wubook.net/xrws/',
-    }
+    def set_wubook_user(self):
+        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_user', self.wubook_user)
 
-    def set_wubook_user(self, cr, uid, ids, context=None):
-        user = self.browse(cr, uid, ids, context=context).wubook_user
-        res = self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'wubook.config.settings', 'wubook_user', user)
-        return res
+    def set_wubook_passwd(self):
+        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_passwd', self.wubook_passwd)
 
-    def set_wubook_passwd(self, cr, uid, ids, context=None):
-        passwd = self.browse(cr, uid, ids, context=context).wubook_passwd
-        res = self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'wubook.config.settings', 'wubook_passwd', passwd)
-        return res
+    def set_wubook_lcode(self):
+        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_lcode', self.wubook_lcode)
 
-    def set_wubook_lcode(self, cr, uid, ids, context=None):
-        lcode = self.browse(cr, uid, ids, context=context).wubook_lcode
-        res = self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'wubook.config.settings', 'wubook_lcode', lcode)
-        return res
+    def set_wubook_server(self):
+        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_server', self.wubook_server)
 
-    def set_wubook_server(self, cr, uid, ids, context=None):
-        server = self.browse(cr, uid, ids, context=context).wubook_server
-        res = self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'wubook.config.settings', 'wubook_server', server)
-        return res
-
-    def set_wubook_pkey(self, cr, uid, ids, context=None):
-        pkey = self.browse(cr, uid, ids, context=context).wubook_pkey
-        res = self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'wubook.config.settings', 'wubook_pkey', pkey)
-        return res
+    def set_wubook_pkey(self):
+        return self.pool.get('ir.values').sudo().set_default('wubook.config.settings', 'wubook_pkey', self.wubook_pkey)

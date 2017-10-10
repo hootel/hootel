@@ -22,8 +22,6 @@ from openerp import models, fields, api
 from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, timedelta
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class ProductPricelist(models.Model):
@@ -31,6 +29,7 @@ class ProductPricelist(models.Model):
 
     wpid = fields.Char("WuBook Plan ID", readonly=True)
     wdaily = fields.Boolean("WuBook Daily Plan", default=True)
+
 
     @api.multi
     def get_wubook_prices(self):

@@ -22,8 +22,6 @@ from openerp import models, fields, api
 from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, timedelta
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class ReservationRestriction(models.Model):
