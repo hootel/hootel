@@ -257,14 +257,14 @@ HotelCalendarManagement.prototype = {
 
   setData: function(prices, restrictions, avail) {
     this._updateView();
-    if (typeof prices !== 'undefined') {
-      this.setPricelist(prices);
+    if (typeof prices !== 'undefined' && prices) {
+      this._setPricelist(prices);
     }
-    if (typeof restrictions !== 'undefined') {
-      this.setRestrictions(restrictions);
+    if (typeof restrictions !== 'undefined' && restrictions) {
+      this._setRestrictions(restrictions);
     }
-    if (typeof avail !== 'undefined') {
-      this.setAvailability(avail);
+    if (typeof avail !== 'undefined' && avail) {
+      this._setAvailability(avail);
     }
   },
 
@@ -370,7 +370,7 @@ HotelCalendarManagement.prototype = {
   },
 
   //==== PRICELIST
-  setPricelist: function(/*List*/pricelist) {
+  _setPricelist: function(/*List*/pricelist) {
     this._pricelist = pricelist;
     var keys = Object.keys(pricelist);
     for (var vroomId of keys) {
@@ -407,7 +407,7 @@ HotelCalendarManagement.prototype = {
   },
 
   //==== RESTRICTIONS
-  setRestrictions: function(/*List*/restrictions) {
+  _setRestrictions: function(/*List*/restrictions) {
     this._restrictions = restrictions;
     var keys = Object.keys(restrictions);
     for (var vroomId of keys) {
@@ -482,7 +482,7 @@ HotelCalendarManagement.prototype = {
   },
 
   //==== AVAILABILITY
-  setAvailability: function(/*List*/availability) {
+  _setAvailability: function(/*List*/availability) {
     this._availability = availability;
     var keys = Object.keys(availability);
     for (var vroomId of keys) {
@@ -552,7 +552,7 @@ HotelCalendarManagement.prototype = {
     return str.replace(/[\/\s\+\-]/g, '_');
   },
 
-  _isNumeric: function(/*??*/n) {
+  _isNumeric: function(/*?*/n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
   },
 
