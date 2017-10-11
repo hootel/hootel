@@ -26,6 +26,6 @@ class HotelCalendarManagement(models.TransientModel):
 
     @api.multi
     def save_changes(self, pricelist_id, restriction_id, pricelist, restrictions, availability):
-        res = super(HotelCalendarManagement, self).save_changes()
+        res = super(HotelCalendarManagement, self).save_changes(pricelist_id, restriction_id, pricelist, restrictions, availability)
         self.env['wubook'].push_changes()
         return res
