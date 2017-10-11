@@ -19,8 +19,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import wubook_installer
-from . import wubook_import_plan_prices
-from . import wubook_import_plan_restrictions
-from . import wubook_import_availability
-from . import inherit_massive_changes
+from openerp import models, api
+
+class HotelCalendarManagement(models.TransientModel):
+    _inherit = 'hotel.calendar.management'
+
+    @api.multi
+    def save_changes(self, pricelist_id, restriction_id, pricelist, restrictions, availability):
+        res = super(HotelCalendarManagement, self).save_changes()
+        self.env['wubook'].push_changes()
+        return res

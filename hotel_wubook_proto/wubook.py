@@ -1049,9 +1049,7 @@ class WuBook(models.TransientModel):
     # === ODOO -> WUBOOK
     @api.model
     def push_changes(self):
-        self.push_availability()
-        self.push_priceplans()
-        self.push_restrictions()
+        return self.push_availability() and self.push_priceplans() and self.push_restrictions()
 
     @api.model
     def push_availability(self):

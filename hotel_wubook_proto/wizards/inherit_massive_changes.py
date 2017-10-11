@@ -19,8 +19,17 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import wubook_installer
-from . import wubook_import_plan_prices
-from . import wubook_import_plan_restrictions
-from . import wubook_import_availability
-from . import inherit_massive_changes
+from openerp.exceptions import ValidationError
+from datetime import datetime, timedelta
+from openerp import models, api
+
+
+class MassiveChangesWizard(models.TransientModel):
+    _inherit = 'hotel.wizard.massive.changes'
+
+    @api.multi
+    def massive_change(self):
+        res = super(MassiveChangesWizard, self).massive_change()
+        if res:
+            self.env['wubook'].push_changes()
+        return res

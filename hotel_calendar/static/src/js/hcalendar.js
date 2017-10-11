@@ -1312,9 +1312,7 @@ HotelCalendar.prototype = {
   },
 
   _updateUnusedZones: function() {
-    if (this.options.divideRoomsByCapacity) {
-    	this._cleanAllUnusedZones();
-    }
+    this._cleanAllUnusedZones();
 
     var unused_id = 0;
     var reservs = this.getReservations();
@@ -1323,22 +1321,22 @@ HotelCalendar.prototype = {
     	if (itemReserv.unusedZone) {
     		continue;
     	}
-		var numBeds = itemReserv.getTotalPersons();
+      var numBeds = itemReserv.getTotalPersons();
 	  	for (var e=numBeds; e<itemReserv.room.capacity; e++) {
 	  		nreservs.push(new HReservation(
 	  			--unused_id,
 	  			itemReserv.room,
-	            'Unused Zone',
-	            1,
-	            0,
-	            itemReserv.startDate.clone(),
-	            itemReserv.endDate.clone(),
-	            'black',
-	            true,
-	            true,
-	            true,
-	            true,
-	            itemReserv.id
+          '',
+          1,
+          0,
+          itemReserv.startDate.clone(),
+          itemReserv.endDate.clone(),
+          '#c2c2c2',
+          true,
+          true,
+          true,
+          true,
+          itemReserv.id
 	  		));
 	  	}
     }
