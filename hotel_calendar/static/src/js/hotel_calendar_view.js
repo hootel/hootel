@@ -677,16 +677,16 @@ var HotelCalendarView = View.extend({
         this._model.call('get_hcalendar_settings', [false]).then(function(results){
         	self._view_options = results;
 
-            var date_begin = moment().startOf('day');
-            self._view_options['days'] = (self._view_options['days'] !== 'month')?parseInt(self._view_options['days']):date_begin.daysInMonth();
-            var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
-            var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
-            var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
-            $dateTimePickerBegin.data("ignore_onchange", true);
-            $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
-            $dateTimePickerEnd.data("ignore_onchange", true);
-            $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-            self._last_dates = self.generate_domains()['dates'];
+          var date_begin = moment().startOf('day');
+          self._view_options['days'] = (self._view_options['days'] !== 'month')?parseInt(self._view_options['days']):date_begin.daysInMonth();
+          var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
+          var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
+          var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
+          //$dateTimePickerBegin.data("ignore_onchange", true);
+          $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+          //$dateTimePickerEnd.data("ignore_onchange", true);
+          $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+          self._last_dates = self.generate_domains()['dates'];
 
         	self.generate_hotel_calendar();
         });
@@ -757,17 +757,17 @@ var HotelCalendarView = View.extend({
         }
 
         var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().utc();
-        var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc();
 
-        var hardmode = isStartDate || date_begin.isAfter(date_end);
-        if (date_begin && date_end && this._hcalendar) {
-            if (hardmode) {
+        if (this._hcalendar && date_begin) {
+            if (isStartDate) {
                 var ndate_end = date_begin.clone().add(this._view_options['days'], 'd');
                 $dateTimePickerEnd.data("ignore_onchange", true);
                 $dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end.local());
             }
 
-            this._hcalendar.setStartDate(date_begin.clone().utc(), this._hcalendar.getDateDiffDays(date_begin, date_end));
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc();
+
+            this._hcalendar.setStartDate(date_begin, this._hcalendar.getDateDiffDays(date_begin, date_end));
             this.reload_hcalendar_reservations(false, true);
         }
     },

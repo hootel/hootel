@@ -548,6 +548,10 @@ HotelCalendarManagement.prototype = {
   },
 
   //==== HELPER FUNCTIONS
+  getDateDiffDays: function(/*MomentObject*/start, /*MomentObject*/end) {
+	  return end.clone().startOf('day').diff(start.clone().startOf('day'), 'days');
+  },
+  
   _sanitizeId: function(/*String*/str) {
     return str.replace(/[\/\s\+\-]/g, '_');
   },

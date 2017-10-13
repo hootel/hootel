@@ -383,27 +383,27 @@ var HotelCalendarManagementView = View.extend({
             return true;
         }
 
-        var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate();
-        var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate();
-        var hardmode = isStartDate || date_begin.isAfter(date_end);
-        if (date_begin && date_end && this._hcalendar) {
-            var days = hardmode?this._hcalendar.getOptions('days'):date_end.diff(date_begin,'days');
-            if (hardmode) {
-                var ndate_end = date_begin.clone().add(days, 'd');
+        var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().utc();
+
+        if (this._hcalendar && date_begin) {
+            if (isStartDate) {
+                var ndate_end = date_begin.clone().add(CALENDAR_DAYS, 'd');
                 $dateTimePickerEnd.data("ignore_onchange", true);
-                $dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end);
+                $dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end.local());
             }
 
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc();
+
             this._check_unsaved_changes(function(){
-                self._hcalendar.setStartDate(date_begin, days);
+                self._hcalendar.setStartDate(date_begin, self._hcalendar.getDateDiffDays(date_begin, date_end));
                 self.reload_hcalendar_management();
             });
         }
     },
 
-    _on_bus_signal: function(notifications) {
+    /*_on_bus_signal: function(notifications) {
 
-    },
+    },*/
 
     reload_hcalendar_management: function() {
         var self = this;
