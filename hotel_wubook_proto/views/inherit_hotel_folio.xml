@@ -6,10 +6,8 @@
         <field name="inherit_id" ref="hotel.view_hotel_folio1_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_internal_comment']" position="before">
-                <group>
                     <field name="whas_wubook_reservations" invisible="True" />
                     <field name="wcustomer_notes" readonly="True" attrs="{'invisible':[('whas_wubook_reservations', '=', False)]}"/>
-                </group>
             </xpath>
         </field>
     </record>
