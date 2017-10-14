@@ -11,5 +11,9 @@ You can manage:
 
 Credits
 
+Darío Lodeiros
+Alexandre Díaz Cuadrado
+Jose Luis Algara
+
 This module is inspired by https://github.com/JayVora-SerpentCS/hotelmgmt_v8.
 But unfortunately it is not compatible with.
