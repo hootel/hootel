@@ -5,21 +5,30 @@
         <field name="model">hotel.reservation</field>
         <field name="inherit_id" ref="hotel.view_hotel_reservation_form" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='invoice_status']" position="after">
-                <field name="wrid" readonly="True" />
-                <field name="wchannel_id" readonly="True"  />
-                <field name="wchannel_reservation_code" readonly="True" />
-                <field name="wstatus" readonly="True" />
-                <field name="wstatus_reason" readonly="True" />
-                <field name="wis_from_channel" readonly="True" />
+           <xpath expr="//page[@name='services']" position="after">
+                <page name="wubook" string="Wubook" attrs="{'invisible': [('wrid','=','none')]}">
+                    <group colspan="4" col="4">
+                        <field name="wrid" readonly="True"/>
+                        <field name="wchannel_id" readonly="True"/>
+                        <field name="wchannel_reservation_code" readonly="True"/>
+                        <field name="wstatus" readonly="True"/>
+                        <field name="wstatus_reason" readonly="True"/>
+                    </group>
+                </page>
             </xpath>
-            <xpath expr="//field[@name='partner_id']" position="before">
-                <field name="wcustomer_notes" readonly="1"/>
+            <xpath expr="//notebook" position="before">
+                <group colspan="6" col="6">
+                    <field name="wis_from_channel" readonly="True" invisible="True"/>
+                    <field name="wcustomer_notes" readonly="1" attrs="{'invisible': [('wrid','=','none')]}" nolabel="1"/>
+                </group>
             </xpath>
 
             <!-- ALLOW ONLY-READ -->
             <xpath expr="//field[@name='adults']" position="attributes">
                 <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='virtual_room_id']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wrid','!=','none')]}</attribute>
             </xpath>
             <xpath expr="//field[@name='children']" position="attributes">
                 <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
