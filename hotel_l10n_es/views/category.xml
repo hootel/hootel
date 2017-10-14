@@ -1,0 +1,48 @@
+<?xml version="1.0"?> 
+    <openerp>      
+        <data> 
+            <act_window
+                id="action_category"
+                name="Category Codes"
+                res_model="category"
+                view_mode="tree,form"
+            /> 
+            <menuitem 
+                id="menu_category"
+                name="Category Codes"
+                parent="hotel.hotel_configuration_menu"
+                sequence="30"
+                action="action_category"
+            />
+            <record id="view_form_category" model="ir.ui.view">
+                <field name="name">Category Code Form</field>
+                <field name="model">category</field>
+                <field name="arch" type="xml">
+                    <form>
+                        <sheet>
+                            <group name="group_top">
+                                <group name="group_left">
+                                    <field name="name"/>
+                                </group>
+                                <group name="group_left">
+                                    <field name="display_name"/>
+                                </group>
+                                <group name="group_right">
+                                    <field name="tipo"/>
+                                </group>
+                            </group>
+                        </sheet>
+                    </form>
+                </field>
+            </record>
+            <record id="view_tree_category" model="ir.ui.view">
+                <field name="name">Category Codes Tree</field>
+                <field name="model">category</field>
+                <field name="arch" type="xml">
+                    <tree>
+                        <field name="display_name"/>
+                    </tree>
+                </field>
+            </record>
+        </data>
+    </openerp>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hotel_l10n_es.model_category_user,hotel.service_type.user,hotel_l10n_es.model_category,hotel.group_hotel_user,1,1,1,
+access_hotel_l10n_es.model_category_manager,hotel.service_type.manager,hotel_l10n_es.model_code_ine,hotel.group_hotel_manager,1,1,1,1

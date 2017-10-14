@@ -1,0 +1,47 @@
+<?xml version="1.0"?> 
+    <openerp>      
+        <data>
+
+            <act_window
+                id="action_police_download"
+                name="Action Police File Download"
+                res_model="police.wizard"
+                view_mode="form"
+            />
+
+            <record id="view_police_download" model="ir.ui.view">
+                <field name="name">Police File Download</field>
+                <field name="model">police.wizard</field>
+                <field name="arch" type="xml">
+                    <form>
+                        <sheet>
+                            <div>
+                            <label for="download_date" 
+                                string="Date to generate the file" class="oe_inline"/>
+                            <field name="download_date"/>  
+                            <label for="download_num" string="Number provided by the police"/>
+                            <field name="download_num" style="width:3em"/>  
+                            </div>
+                            <div>
+                            <button name="generate_file" type="object" string="Generate file"/>
+                            <field name="txt_filename" invisible="1"/>
+                            <field name="txt_binary" filename="txt_filename" readonly="1"/>
+                            </div>
+                        </sheet>
+                    </form>
+                </field>
+            </record>
+
+
+            <menuitem 
+                id="menu_police_download"
+                name="Police File Download"
+                parent="hotel.hotel_configuration_menu"
+                sequence="36"
+                action="action_police_download"
+            />
+
+
+        </data>
+
+    </openerp>

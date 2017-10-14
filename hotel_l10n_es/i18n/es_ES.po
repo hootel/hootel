@@ -1,0 +1,459 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* hotel_l10n_es
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 9.0c\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-06-20 16:08+0000\n"
+"PO-Revision-Date: 2017-06-20 18:39+0200\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: es_ES\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#. module: hotel_l10n_es
+#: model:ir.actions.act_window,name:hotel_l10n_es.action_police_download
+msgid "Action Police File Download"
+msgstr "Action Police File Download"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Address"
+msgstr "Dirección"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_seats
+msgid "Beds available"
+msgstr "Camas disponibles"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Birth date"
+msgstr "Fecha de nacimiento"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_birthdate_date_cardex
+msgid "Birthdate"
+msgstr "Fecha de nacimiento"
+
+#. module: hotel_l10n_es
+#: selection:res.partner,documenttype:0
+msgid "Carta o Doc. de Identidad"
+msgstr "Carta o Doc. de Identidad"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_category_name
+msgid "Category"
+msgstr "Categoría"
+
+#. module: hotel_l10n_es
+#: model:ir.actions.act_window,name:hotel_l10n_es.action_category
+#: model:ir.ui.menu,name:hotel_l10n_es.menu_category
+msgid "Category Codes"
+msgstr "Códigos de Categoría"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_category_id
+msgid "Category id"
+msgstr "Categoría id"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_category_tipo
+msgid "Category type"
+msgstr "Categoría tipo"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "City"
+msgstr "Ciudad"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_code
+msgid "Code"
+msgstr "Código"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.checkin_wizard_form_2
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Code in INE"
+msgstr "Código in INE"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_code_ine_cardex
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_code_ine
+msgid "Code ine"
+msgstr "Código ine"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Comment"
+msgstr "Comentario"
+
+#. module: hotel_l10n_es
+#: model:ir.model,name:hotel_l10n_es.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_download_num
+msgid "Correlative number"
+msgstr "Correlative número"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Country"
+msgstr "Country"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,help:hotel_l10n_es.field_checkin_wizard_code_ine_cardex
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_partner_code_ine
+msgid "Country or province of origin. Used for INE statistics."
+msgstr "País o estado de origen. Usado para estadísticas del INE"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_category_create_uid
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_create_uid
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_category_create_date
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_create_date
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: hotel_l10n_es
+#: selection:res.partner,documenttype:0
+msgid "DNI"
+msgstr "DNI"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_download_date
+#: model:ir.ui.view,arch_db:hotel_l10n_es.view_police_download
+msgid "Date to generate the file"
+msgstr "Fecha para generar el archivo"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_category_display_name
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_display_name
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_display_name
+msgid "Display Name"
+msgstr "nombre para mostrar"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_poldocument_cardex
+msgid "Doc. number"
+msgstr "Doc. número"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_documenttype_cardex
+msgid "Doc. type"
+msgstr "Doc. tipo"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Document"
+msgstr "documento"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_polexpedition
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Document expedition date"
+msgstr "documento expedition date"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_poldocument
+msgid "Document number"
+msgstr "documento número"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Document number (DNI: 123456789A)"
+msgstr "documento número (DNI: 123456789A)"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_documenttype
+msgid "Document type"
+msgstr "Tipo de documento"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "E-Mail"
+msgstr "E-Mail"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Ej.: name@domain.com"
+msgstr "Ej.: name@domain.com"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_eventualstaff
+msgid "Eventual Staff"
+msgstr "Eventual Staff"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_polexpedition_cardex
+msgid "Expedition date"
+msgstr "Fecha de expedición"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_firstname_cardex
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Firstname"
+msgstr "Firstname"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_gender_cardex
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Gender"
+msgstr "Sexo"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.view_police_download
+msgid "Generate file"
+msgstr "Generar archivo"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_company_category_id
+msgid "Hotel category in the Ministry of Tourism. Used for INE statistics."
+msgstr "Categoría de Hotel en el Ministerio de Turismo. Usado para estadísticas del INE."
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.alda_view_company_form
+msgid "Hotel data"
+msgstr "Datos del hotel"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_category_id
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_id
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_id
+msgid "ID"
+msgstr "ID"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "INE Code"
+msgstr "INE Código"
+
+#. module: hotel_l10n_es
+#: model:ir.actions.act_window,name:hotel_l10n_es.action_code_ine
+#: model:ir.ui.menu,name:hotel_l10n_es.menu_code_ine
+msgid "INE Codes"
+msgstr "INE Códigos"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_category___last_update
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine___last_update
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard___last_update
+msgid "Last Modified on"
+msgstr "Última Modificación en"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_category_write_uid
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_write_uid
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_write_uid
+msgid "Last Updated by"
+msgstr "Última Actualización por"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_category_write_date
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_write_date
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_write_date
+msgid "Last Updated on"
+msgstr "Última Actualización en"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_lastname_cardex
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Lastname"
+msgstr "Apellidos"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Mobile"
+msgstr "Mobile"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_company_cardex_warning
+msgid "Notice under the signature on the traveler's ticket."
+msgstr "Notice under the signature en the traveler's ticket."
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,help:hotel_l10n_es.field_police_wizard_download_num
+#: model:ir.ui.view,arch_db:hotel_l10n_es.view_police_download
+msgid "Number provided by the police"
+msgstr "Número proporcionado por la policía"
+
+#. module: hotel_l10n_es
+#: model:ir.actions.report.xml,name:hotel_l10n_es.action_report_viajero
+msgid "Parte de Viajero"
+msgstr "Parte de Viajero"
+
+#. module: hotel_l10n_es
+#: model:ir.model,name:hotel_l10n_es.model_res_partner
+msgid "Partner"
+msgstr "Partner"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Partners"
+msgstr "Partners"
+
+#. module: hotel_l10n_es
+#: selection:res.partner,documenttype:0
+msgid "Pasaporte"
+msgstr "Pasaporte"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_permanentstaff
+msgid "Permanent Staff"
+msgstr "Staff Permanente"
+
+#. module: hotel_l10n_es
+#: selection:res.partner,documenttype:0
+msgid "Permiso Residencia Español"
+msgstr "Permiso Residencia Español"
+
+#. module: hotel_l10n_es
+#: selection:res.partner,documenttype:0
+msgid "Permiso Residencia Europeo"
+msgstr "Permiso Residencia Europeo"
+
+#. module: hotel_l10n_es
+#: selection:res.partner,documenttype:0
+msgid "Permiso de Conducir"
+msgstr "Permiso de Conducir"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Phone"
+msgstr "Teléfono"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Phones"
+msgstr "Teléfonos"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_name
+msgid "Place"
+msgstr "Lugar"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.menu,name:hotel_l10n_es.menu_police_download
+msgid "Police File Download"
+msgstr "Descargar Archivo de la Policía"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_police
+msgid "Police number"
+msgstr "Número de la Policía"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_company_tourism
+msgid "Registration number in the Ministry of Tourism. Used for INE statistics."
+msgstr "Registration número in the Ministry of Tourism. Used for INE estadísticas."
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_rooms
+msgid "Rooms Available"
+msgstr "Habitacións Disponible"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Select one..."
+msgstr "Seleccione una..."
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "State"
+msgstr "Provincia"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Street..."
+msgstr "Street..."
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_category_id_cardex
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Tags"
+msgstr "Etiquetas"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.checkin_wizard_form_2
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "Tags..."
+msgstr "Etiquetas..."
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_tourism
+msgid "Tourism number"
+msgstr "Tourism number"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_txt_binary
+msgid "Txt binary"
+msgstr "Txt binary"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_txt_filename
+msgid "Txt filename"
+msgstr "Txt archivoname"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_company_eventualstaff
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_company_permanentstaff
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_company_rooms
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_company_seats
+msgid "Used for INE statistics."
+msgstr "Usado para estadísticas del INE."
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_company_police
+msgid "Used to generate the name of the file that will be given to the police."
+msgstr "Usado para generar el nombre del aarchivo que será enviado a a la policía."
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_cardex_warning
+msgid "Warning in Cardex"
+msgstr "Warning in Cardex"
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+msgid "ZIP"
+msgstr "ZIP"
+
+#. module: hotel_l10n_es
+#: model:ir.model.fields,help:hotel_l10n_es.field_checkin_wizard_documenttype_cardex
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_partner_documenttype
+msgid "blabla"
+msgstr "blabla"
+
+#. module: hotel_l10n_es
+#: model:ir.model,name:hotel_l10n_es.model_category
+msgid "category"
+msgstr "categoría"
+
+#. module: hotel_l10n_es
+#: model:ir.model,name:hotel_l10n_es.model_checkin_wizard
+msgid "checkin.wizard"
+msgstr "checkin.wizard"
+
+#. module: hotel_l10n_es
+#: model:ir.model,name:hotel_l10n_es.model_code_ine
+msgid "code_ine"
+msgstr "code_ine"
+
+#. module: hotel_l10n_es
+#: model:ir.model,name:hotel_l10n_es.model_police_wizard
+msgid "police.wizard"
+msgstr "police.wizard"

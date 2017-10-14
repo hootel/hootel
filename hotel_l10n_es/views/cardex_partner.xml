@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<openerp>
+<data>
+    <record id="partners_form_cardex" model="ir.ui.view">
+        <field name="name">Partnerns Form Cardex</field>
+        <field name="model">res.partner</field>
+        <!--<field name="priority" eval="1"/>-->
+        <field name="arch" type="xml">
+            <form string="Partners">
+                <field name="image" widget="image" class="oe_avatar" options="{&quot;preview_image&quot;: &quot;image_medium&quot;, &quot;size&quot;: [90, 90]}"/>
+                <div class="oe_title">
+                    <h1>
+                    <field name="firstname" default_focus="1" placeholder="Firstname"/>
+                    <field name="lastname" placeholder="Lastname"/>
+                    </h1>
+                </div>
+<!--                 <label for="id_numbers" string="Documents"/>
+                <field name="id_numbers"  placeholder="Identification..." context="{'form_view_ref':'odoo_pms_checkin.inherit_action_partner_id_numbers_form'}"/> -->
+                <div colspan="2">
+                    <label for="documenttype" string="Document"/>
+                    <field name="documenttype" placeholder="Select one..." required="True"/>
+                    <field name="poldocument" placeholder="Document number (DNI: 123456789A)" required="True"/>
+                    <field name="polexpedition" placeholder="Document expedition date" required="True"/>
+                </div>
+                <div colspan="2">
+                    <label for="street" string="Address"/>
+                    <field name="street" placeholder="Street..."/>
+                    <field name="street2"/>
+                    <div class="address_format">
+                        <field name="city" placeholder="City" style="width: 40%%"/>
+                        <field name="state_id" class="oe_no_button" placeholder="State" style="width: 37%%" options='{"no_open": True}' on_change="onchange_state(state_id)"/>
+                        <field name="zip" placeholder="ZIP" style="width: 20%%"/>
+                    </div>
+                    <field name="country_id" placeholder="Country" class="oe_no_button" options='{"no_open": True}'/>
+                </div>
+                <div colspan="2">
+                    <label for="email" string="E-Mail"/>
+                    <field name="email" widget="email"  placeholder="Ej.: name@domain.com" style="width: 25%%"/>
+                    <label for="birthdate_date" string="Birth date"/>
+                    <field name="birthdate_date" style="width: 25%%" required="True"/>
+                    <label for="gender" string="Gender"/>
+                    <field name="gender" style="width: 25%%" required="True"/>
+    <!--             <field name="contact_address"/>
+                <field name="display_name"/> -->
+                </div>
+                <div colspan="2">
+                    <label for="mobile" string="Phones"/>
+                    <field name="mobile" placeholder="Mobile" />
+                    <field name="phone" placeholder="Phone" />
+                </div>
+                <div colspan="2">
+                    <label for="code_ine" string="INE Code"/>
+                    <field name="code_ine" placeholder="Code in INE" options="{'no_create': True,'no_open': True}" required="True"/>
+                </div>
+                <div colspan="2">
+                    <label for="category_id" string="Tags"/>
+                    <field name="category_id" widget="many2many_tags" placeholder="Tags..."/>
+                    <label for="comment" string="Comment"/>
+                    <field name="comment" style="width: 25%%"/>
+                </div>
+            </form>
+        </field>
+    </record>
+</data>
+</openerp>

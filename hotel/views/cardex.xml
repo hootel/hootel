@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+    <openerp>
+        <data>
+
+        <!-- Action to open INE Codes list -->
+            <act_window
+                id="action_cardex"
+                name="Action cardex"
+                res_model="cardex"
+                view_mode="tree,form"
+            />
+            <act_window
+                id="action_cardex_download"
+                name="Action cardex download"
+                res_model="cardex"
+                view_mode="form"
+            />         <!-- Menu item to open INE Codes list -->
+            <menuitem
+                id="menu_cardex"
+                name="cardex"
+                parent="hotel.hotel_configuration_menu"
+                sequence="35"
+                action="action_cardex"
+            />
+
+            <record id="view_form_cardes" model="ir.ui.view">
+                <field name="name">Cardex Form</field>
+                <field name="model">cardex</field>
+                <field name="arch" type="xml">
+                    <form>
+                        <sheet>
+                            <group name="group_top">
+                                <group name="group_left">
+                                    <field name="partner_id"/>
+                                    <field name="enter_date"/>
+                                    <field name="exit_date"/>
+                                </group>
+                                <group name="group_left">
+                                    <field name="reservation_id"/>
+                                </group>
+                            </group>
+                        </sheet>
+                    </form>
+                </field>
+            </record>
+
+            <record id="view_tree_cardex" model="ir.ui.view">
+                <field name="name">Cardex Tree</field>
+                <field name="model">cardex</field>
+                <field name="arch" type="xml">
+                    <tree>
+                        <field name="partner_id" context="{'form_view_ref':'odoo_pms_checkin.partners_form_cardex'}" string="Client name"/>
+                        <field name="enter_date"/>
+                        <field name="exit_date"/>
+                        <field name="reservation_id"/>
+                        <button type="action" class="oe_stat_button" id="cardex_smart_button" icon="fa-bed" name="%(launch_checkin_wizard_add)d" context="{'partner_id': partner_id,'enter_date': enter_date,'exit_date': exit_date,'reserva_id': reservation_id, 'hidden_cardex': True, 'edit_cardex': True }"/>
+                    </tree>
+
+                </field>
+            </record>
+        </data>
+    </openerp>

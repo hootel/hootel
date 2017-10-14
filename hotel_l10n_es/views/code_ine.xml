@@ -1,0 +1,51 @@
+<?xml version="1.0"?> 
+    <openerp>      
+        <data> 
+        <!-- Action to open INE Codes list -->
+            <act_window
+                id="action_code_ine"
+                name="INE Codes"
+                res_model="code_ine"
+                view_mode="tree,form"
+            /> 
+        <!-- Menu item to open INE Codes list --> 
+            <menuitem 
+                id="menu_code_ine"
+                name="INE Codes"
+                parent="hotel.hotel_configuration_menu"
+                sequence="25"
+                action="action_code_ine"
+            />
+            <record id="view_form_code_ine" model="ir.ui.view">
+                <field name="name">INE Code Form</field>
+                <field name="model">code_ine</field>
+                <field name="arch" type="xml">
+                    <form>
+                        <sheet>
+                            <group name="group_top">
+                                <group name="group_left">
+                                    <field name="name"/>
+                                </group>
+                                <group name="group_left">
+                                    <field name="display_name"/>
+                                </group>
+                                <group name="group_right">
+                                    <field name="code"/>
+                                </group>
+                            </group>
+                        </sheet>
+                    </form>
+                </field>
+            </record>
+            <record id="view_tree_code_ine" model="ir.ui.view">
+                <field name="name">INE Codes Tree</field>
+                <field name="model">code_ine</field>
+                <field name="arch" type="xml">
+                    <tree>
+                        <field name="display_name"/>
+                        <field name="code"/>
+                    </tree>
+                </field>
+            </record>
+        </data>
+    </openerp>

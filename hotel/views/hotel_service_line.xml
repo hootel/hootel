@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+         <!--=== Hotel Service Line ==== -->
+        <!-- Form view of Service Line -->
+       <record model="ir.ui.view" id="view_hotel_service_line_form">
+            <field name="name">hotel.service.line.form</field>
+            <field name="model">hotel.service.line</field>
+            <field name="arch" type="xml">
+                <form string="Service Line">
+                    <notebook>
+                        <page string="Service Line">
+                            <group col="4" colspan="4">
+                                <field name="product_id" select="1"
+                                    domain="[('isservice','=',True)]"
+                                    context="{'partner_id':order_partner_id,'quantity':product_uom_qty,'pricelist':parent.pricelist_id,'uom':product_uom}" />
+                                <field name="ser_room_line"/>
+                                <field name="product_uom" />
+                                <field name="product_uom_qty" select="1"
+                                    context="{'partner_id':order_partner_id,'quantity':product_uom_qty,'pricelist':parent.pricelist_id,'uom':product_uom}"
+                                    />
+                                <field name="order_partner_id" invisible="1"/>
+                                <field name="folio_id" invisible="1"/>
+                            </group>
+                            <separator string="Manual Description" colspan="4" />
+                            <field name="name" colspan="4" select="2"
+                                placeholder="---Description---" />
+                            <group>
+                                <field name="price_unit" select="2" />
+                                <field name="discount" />
+                            </group>
+                            <newline />
+                            <field name="tax_id" colspan="4" />
+                            <group>
+                                <separator string="States" colspan="4" />
+                                <field name="state" select="2" />
+                                <field name="invoice_status" />
+                            </group>
+                        </page>
+                    </notebook>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</openerp>

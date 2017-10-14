@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+         <!--=== Hotel Folio ==== -->
+        <!-- Form view of hotel folio -->
+
+        <record model="ir.ui.view" id="view_hotel_folio1_form">
+            <field name="name">hotel.folio.form</field>
+            <field name="model">hotel.folio</field>
+            <field name="arch" type="xml">
+                <form string="Folio">
+                    <header>
+                        <button name="action_confirm" states="draft" string="Confirm Sale"
+                            class="btn-primary" type="object" />
+                        <button name="%(sale.action_view_sale_advance_payment_inv)d"
+                            string="Create Invoice" type="action" class="btn-primary" states="sale"
+                            attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
+                        <button name="action_cancel_draft" states="cancel" string="Set to Draft"
+                            type="object" icon="gtk-file" class="oe_highlight" />
+                        <button name="action_cancel" string="Cancel Folio" states="sale"
+                            type="object" icon="gtk-cancel" class="oe_highlight" />
+                        <button name="action_cancel" string="Cancel Folio" states="draft"
+                            icon="gtk-cancel" type="object" class="oe_highlight" />
+                        <button name="action_done" type="object" string="Set to Done"
+                            states="sale" attrs="{'invisible': [('invoice_status', '!=', 'invoiced')]}"
+                            help="If a Hotel Folio is done, you cannot modify it manually anymore. However, you will still be able to invoice or deliver. This is used to freeze the Hotel Folio." />
+                        <button name="action_pay" type="object" states="sale"
+                            string="Pay" groups="account.group_account_invoice"
+                            class="oe_highlight" attrs="{'invisible': [('invoices_amount', '&lt;=', 0)]}" />
+                        <field name="state" select="2" widget="statusbar"
+                            statusbar_visible="draft,sent,sale,done" />
+                    </header>
+
+                    <sheet>
+                        <div class=" oe_button_box">
+                            <button type="action" class="oe_stat_button"
+                                id="cardex_smart_button"
+                                icon="fa-user-plus"
+                                name="%(launch_checkin_wizard)d"
+                                attrs="{'invisible': [('cardex_pending_num','&lt;=',0)]}"
+                                context="{'reservation_id': room_lines[0], 'hidden_cardex': True, 'folio': active_id}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value"><field name="cardex_pending_num"
+                                    widget="statinfo" nolabel="1"/></span>
+                                    <span class="o_stat_text">Pending Checks</span>
+                                </div>
+                            </button>
+
+                            <button type="object" class="oe_stat_button"
+                                id="cardex_smart_button"
+                                icon="fa-bed"
+                                name="action_checks"
+                                attrs="{'invisible': [('cardex_count','&lt;=',0)]}">
+                                <div class="o_form_field o_stat_info">
+                                  <span class="o_stat_value"><field name="cardex_count"
+                                   widget="statinfo" nolabel="1"/></span>
+                                  <span class="o_stat_text">Checks</span>
+                                </div>
+                            </button>
+                            <field name="currency_id" invisible="1"/>
+
+                            <button type="object" class="oe_stat_button"
+                                id="invoices_smart_button"
+                                icon="fa-thumbs-up"
+                                name="action_invoices"
+                                attrs="{'invisible': [('invoices_paid','&lt;=',0)]}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="invoices_paid" nolabel="1"
+                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </span>
+                                    <span class="o_stat_text">Paid out</span>
+                                </div>
+                            </button>
+
+                            <button type="object" class="oe_stat_button"
+                                id="invoices_smart_button"
+                                icon="fa-money"
+                                name="action_invoices"
+                                attrs="{'invisible': [('invoices_amount','&lt;=',0)]}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="invoices_amount" nolabel="1"
+                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </span>
+                                    <span class="o_stat_text">Pending Payment</span>
+                                </div>
+                            </button>
+
+                            <button type="object" class="oe_stat_button"
+                                id="refunds_smart_button"
+                                icon="fa-undo"
+                                name="action_refunds_invoices"
+                                attrs="{'invisible': [('refund_amount','&lt;=',0)]}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="refund_amount" nolabel="1"
+                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </span>
+                                    <span class="o_stat_text">Refunds</span>
+                                </div>
+                            </button>
+
+                        </div>
+                        <h1>
+                            <field name="name" colspan="4" />
+                        </h1>
+                        <group colspan="4" col="4">
+                            <field name="date_order" />
+                            <field name="warehouse_id" string="Branch" />
+                            <field name="invoice_status" invisible="1" />
+                            <field name="hotel_invoice_id" states='progress,done,cancel'
+                                readonly="1" />
+                        </group>
+                        <group colspan="1">
+                            <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancel'))]}"/>
+                            <field name="partner_internal_comment"/>
+                        </group>
+                        <notebook colspan="4">
+                            <page string="Folio">
+                                <group colspan="4" col="4">
+                                    <field name="partner_id" string="Guest Name" required="1" />
+                                    <field name="partner_invoice_id" domain="[('parent_id','=',partner_id)]" />
+                                    <field name="pricelist_id" domain="[('type','=','sale')]" />
+                                    <field name="project_id" />
+                                    <field name="partner_shipping_id" invisible="1" domain="[('parent_id','=',partner_id)]" />
+                                </group>
+                                <separator string="Room Lines" id="room_lines_separator" colspan="4" />
+                                <field name="room_lines" colspan="4" string="Room Line"
+                                    nolabel="1" context="{'folio_id': id}">
+                                    <tree string="Room Line" colors="red:state == 'cancelled'">
+                                        <field name="product_id" string="Room No" />
+                                        <field name="checkin" />
+                                        <field name="checkout" />
+                                        <field name="adults" />
+                                        <field name="children" />
+                                        <field name="price_subtotal" />
+                                        <field name="state" />
+                                        <field name="partner_id" invisible="1"/>
+                                    </tree>
+                                </field>
+                                <separator string="Service Lines" colspan="4" />
+                                <field name="service_lines" colspan="4" string="Service Line"
+                                    nolabel="1" context="{'room_lines': room_lines}">
+                                    <tree string="Service Line">
+                                        <field name="name" />
+                                        <field name="product_id" />
+                                        <field name="product_uom_qty" />
+                                        <field name="price_unit" />
+                                        <field name="price_subtotal" />
+                                        <field name="state" />
+                                    </tree>
+                                </field>
+                                <group colspan="2" class="oe_subtotal_footer oe_right">
+                                    <field name="amount_untaxed" sum="Untaxed amount" widget='monetary' />
+                                    <field name="amount_tax" widget='monetary' />
+                                    <div class="oe_subtotal_footer_separator oe_inline">
+                                        <label for="amount_total" />
+                                        <button name="button_dummy" string="Compute" states="draft"
+                                            type="object" icon="terp-sale" class="oe_highlight" />
+                                    </div>
+                                    <field name="amount_total" nolabel="1" sum="Total amount"
+                                        widget='monetary' />
+                                </group>
+                                <div class="oe_clear" />
+                            </page>
+                            <page string="Other data">
+                                <group>
+                                    <field name="user_id" />
+                                    <field name="hotel_policy" attrs="{'readonly':[('state','not in',('draft'))]}" />
+                                    <field name="client_order_ref" />
+                                </group>
+                            </page>
+                            <page string="Invoices">
+                                <separator string="Related invoices" colspan="4" />
+                                <field name="invoice_ids" colspan="4" nolabel="1" />
+                            </page>
+                            <page string="Foreign Exchange" name="foreign exchange">
+                                <separator string="Foreign Exchange" colspan="4" />
+                                <field name="currrency_ids" colspan="4" nolabel="1">
+                                    <tree>
+                                        <field name="name" />
+                                        <field name="today_date" />
+                                        <field name="type" />
+                                        <field name="in_amount" />
+                                        <field name="input_curr" />
+                                        <field name="total" sum="Total Amount" />
+                                        <field name="out_curr" />
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Tree view of hotel folio -->
+        <record model="ir.ui.view" id="view_hotel_folio1_tree">
+            <field name="name">hotel.folio.tree</field>
+            <field name="model">hotel.folio</field>
+            <field name="arch" type="xml">
+                <tree string="Hotel Folio" colors="blue:state == 'draft';gray:state == 'done'">
+                    <field name="name" />
+                    <field name="partner_id" select="1" />
+                    <field name="date_order" select="1" />
+                    <field name="state" />
+                    <field name="amount_total" sum="Total amount" />
+                </tree>
+            </field>
+        </record>
+
+        <!-- Calendar view of hotel folio -->
+        <record model="ir.ui.view" id="hotel_folio_calendar_view">
+            <field name="name">Hotel- Folios Calendar</field>
+            <field name="model">hotel.folio</field>
+            <field name="arch" type="xml">
+                <calendar string="Folios" color="user_id">
+                    <field name="name" />
+                    <field name="partner_id" />
+                    <field name="duration" />
+                </calendar>
+            </field>
+        </record>
+
+        <!-- Search view of hotel folio -->
+        <record model="ir.ui.view" id="view_hotel_folio_search">
+            <field name="name">hotel.folio.search</field>
+            <field name="model">hotel.folio</field>
+            <field name="arch" type="xml">
+                <search string="Tables Detail">
+                    <field name="partner_id" />
+                    <field name="name" />
+<!--
+                    <filter string="Current Booking"
+                        domain="[('checkout','&gt;=',datetime.datetime.now().replace(hour=0, minute=0, second=0)),('checkin','&lt;=',datetime.datetime.now().replace(hour=23, minute=59, second=59))]"
+                        help="Current Booking" />
+-->
+                    <group expand="0" string="Group By">
+                        <filter string="Order By Month" domain="[]"
+                            context="{'group_by':'date_order'}" />
+                        <filter name="partner_id" string="Customer"
+                            icon="terp-stock_symbol-selection" context="{'group_by':'partner_id'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!--graph view of hotel folio -->
+        <record id="view_hotel_folio_graph" model="ir.ui.view">
+            <field name="name">view.hotel.folio.graph</field>
+            <field name="model">hotel.folio</field>
+            <field name="arch" type="xml">
+                <graph type="bar">
+                    <field name="date_order" type="row" />
+                    <field name="amount_total" type="measure" />
+                </graph>
+            </field>
+        </record>
+
+        <!-- Action for hotel folio -->
+        <record model="ir.actions.act_window" id="open_hotel_folio1_form_tree_all">
+            <field name="name">Hotel Folio</field>
+            <field name="res_model">hotel.folio</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
+        </record>
+
+        <menuitem id="menu_all_folio" name="Folio"
+            parent="hotel.hotel_management_menu" sequence="4" />
+        <menuitem name="Generate Folio" id="menu_open_hotel_folio1_form_tree_all"
+            action="open_hotel_folio1_form_tree_all" sequence="5" parent="menu_all_folio" />
+
+    </data>
+</openerp>

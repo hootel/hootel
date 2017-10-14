@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <!--  Inherit Company view to add 'Hotel data' -->
+        <record id="view_tree_cardex" model="ir.ui.view">
+            <field name="name">cardex_tree</field>
+            <field name="model">cardex</field>
+            <field name="inherit_id" ref="hotel.view_tree_cardex"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='reservation_id']" position="after">
+                    <button type="action" class="oe_stat_button" id="cardex_smart_button_2" icon="fa-file-pdf-o" name="%(action_report_viajero)d" context="{'partner_id': partner_id,'enter_date': enter_date,'exit_date': exit_date,'reserva_id': reservation_id, 'hidden_cardex': True, 'edit_cardex': True }"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>
