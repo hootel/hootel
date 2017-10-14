@@ -17,15 +17,18 @@
                 </page>
             </xpath>
             <xpath expr="//notebook" position="before">
-                <group colspan="2" col="2">
+                <group colspan="6" col="6">
                     <field name="wis_from_channel" readonly="True" invisible="True"/>
-                    <field name="wcustomer_notes" readonly="1" attrs="{'invisible': [('wrid','=','none')]}"/>
+                    <field name="wcustomer_notes" readonly="1" attrs="{'invisible': [('wrid','=','none')]}" nolabel="1"/>
                 </group>
             </xpath>
 
             <!-- ALLOW ONLY-READ -->
             <xpath expr="//field[@name='adults']" position="attributes">
                 <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
+            </xpath>
+            <xpath expr="//field[@name='virtual_room_id']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wrid','!=','none')]}</attribute>
             </xpath>
             <xpath expr="//field[@name='children']" position="attributes">
                 <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
