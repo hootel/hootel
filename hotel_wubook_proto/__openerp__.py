@@ -30,7 +30,6 @@
     'description': "Hotel WuBook Prototype",
     'depends': [
         'hotel',
-        'pricelist_week',
     ],
     'external_dependencies': {
         'python': ['xmlrpclib']
