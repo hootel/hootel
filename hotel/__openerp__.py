@@ -37,7 +37,6 @@
     'license': "",
     'demo': ['data/hotel_data.xml'],
     'data': [
-        'views/inherit_res_partner.xml',
         'wizard/massive_changes.xml',
         'views/res_config.xml',
         'data/menus.xml',
@@ -52,6 +51,7 @@
         'views/currency_exchange.xml',
         'views/hotel_floor.xml',
         'views/hotel_folio.xml',
+	'views/inherit_res_partner.xml',
         'views/hotel_service_type.xml',
         'views/hotel_service_line.xml',
         'views/hotel_room_type.xml',

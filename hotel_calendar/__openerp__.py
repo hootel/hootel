@@ -42,6 +42,7 @@
         'views/res_config.xml',
         'data/views.xml',
         'data/menus.xml',
+	'security/ir.model.access.csv',
     ],
     'qweb': [
         'static/src/xml/*.xml',
