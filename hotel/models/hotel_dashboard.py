@@ -19,31 +19,25 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 # ---------------------------------------------------------------------------
+from openerp import models, fields, api, _
 
-from . import currency_exchange
-#~ from . import folio_room_line
-from . import hotel_floor
-from . import hotel_folio
-from . import hotel_reservation
-from . import hotel_room
-from . import hotel_room_amenities
-from . import hotel_room_amenities_type
-from . import hotel_room_type
-from . import hotel_service_line
-from . import hotel_services
-from . import hotel_service_type
-from . import inherit_account_invoice
-from . import inherit_product_category
-from . import inherit_product_product
-from . import inherit_res_company
-from . import virtual_room
-from . import inherit_account_payment
-from . import hotel_virtual_room_restriction
-from . import hotel_virtual_room_restriction_item
-from . import hotel_reservation_line
-from . import cardex
-from . import hotel_virtual_room_availability
-from . import inherit_product_pricelist
-from . import res_config
-from . import inherit_res_partner
-from . import hotel_dashboard
+class HotelDashboard(models.Model):
+    _name = "hotel.dashboard"
+
+    def _get_count(self):
+        quotations_count = self.env['sale.order'].search(
+            [('sate', '=', 'draft')])
+        orders_count = self.env['sale.order'].search(
+            [('sate', '=', 'sales_order')])
+        orders_done_count = self.env['sale.order'].search(
+            [('sate', '=', 'done')])
+
+        self.orders_count = len(orders_count)
+        self.quotations_count = len(quotations_count)
+        self.orders_done_count = len(orders_done_count)
+
+    color = fields.Integer(string='Color Index')
+    name = fields.Char(string="Name")
+    reservations_count = fields.Integer(compute = '_get_count')
+    folios_count = fields.Integer(compute= '_get_count')
+    next_arrivals_count = fields.Integer(compute= '_get_count')

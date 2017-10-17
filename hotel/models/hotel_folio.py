@@ -245,7 +245,6 @@ class HotelFolio(models.Model):
         self.invoices_amount = self.amount_total - total_paid
         self.invoices_paid = total_paid
 
-
  #TODO: SUSTITUIR POR METODO EN account_payment
     @api.multi
     def _compute_invoices_refund(self):
@@ -257,6 +256,8 @@ class HotelFolio(models.Model):
             if inv.type == 'out_refund':
                 total_inv += inv.amount_total
         self.refund_amount = total_inv
+        for res in self.room_lines:
+            res._compute_color()
 
     @api.multi
     def action_pay(self):
@@ -313,7 +314,8 @@ class HotelFolio(models.Model):
         'view_mode': 'tree,form',
         'res_model': 'cardex',
         'type': 'ir.actions.act_window',
-        'domain': [('reservation_id','in', rooms)]
+        'domain': [('reservation_id','in', rooms)],
+        'target':'new'
         }
 
     @api.multi

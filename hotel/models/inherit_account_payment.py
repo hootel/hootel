@@ -43,7 +43,6 @@ class AccountPayment(models.Model):
     @api.multi
     @api.depends('state')
     def _compute_folio_amount(self):
-        _logger.info("DEPENEEEDNDEDEEDDDDDSSSSS")
         for payment in self:
             amount_pending = 0
             total_amount = 0
@@ -59,7 +58,6 @@ class AccountPayment(models.Model):
             else:
                 return
             # We must pay only one folio
-            _logger.info(fol.ids)
             if len(fol) == 0:
                 return
             elif len(fol) > 1:
@@ -76,9 +74,9 @@ class AccountPayment(models.Model):
                 paid = total_folio - amount_pending
                 fol.write({'invoices_amount': amount_pending})
                 fol.write({'invoices_paid': paid})
-                _logger.info("PAGADO:")
-                _logger.info(fol.name)
                 payment.amount_total_folio = total_folio
+                for res in fol.room_lines:
+                    res._compute_color()
 
 
 

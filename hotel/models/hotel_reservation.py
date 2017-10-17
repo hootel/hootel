@@ -77,12 +77,16 @@ def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
 
 COLOR_TYPES = {
     'pre-reservation': '#A4A4A4',
-    'reservation': '#0000FF',
-    'stay': '#FF00BF',
-    'checkout': '#01DF01',
+    'reservation': '#4E9DC4',
+    'reservation-pay': '#66CCFF',
+    'stay': '#b40606',
+    'stay-pay': '#54d12b',
+    'checkout': '#FF0000',
+    'checkout-pay': '#66FF33',
     'dontsell': '#000000',
-    'staff': '#FF4000',
+    'staff': '#FF9933',
     'to-assign': '#DFFF00',
+    'payment-pending': '#f70f0f',
 }
 
 class HotelReservation(models.Model):
@@ -185,7 +189,7 @@ class HotelReservation(models.Model):
 #            return False
 
 
-    @api.depends('state', 'reservation_type')
+    @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
     def _compute_color(self):
         now_str = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         for rec in self:
@@ -199,6 +203,13 @@ class HotelReservation(models.Model):
                                 rec.checkout,
                                 DEFAULT_SERVER_DATETIME_FORMAT))
             difference_checkout = relativedelta(now_date, checkout_date)
+            _logger.info('DENTRO DE LA RESERVA')
+            _logger.info(rec.name)
+            _logger.info(rec.id)
+            _logger.info(rec.reservation_type)
+            _logger.info(rec.state)
+            _logger.info(rec.folio_id.invoices_amount)
+            _logger.info(rec.reserve_color)
             if rec.reservation_type == 'staff':
                 rec.reserve_color = COLOR_TYPES.get('staff')
             elif rec.reservation_type == 'out':
@@ -208,13 +219,27 @@ class HotelReservation(models.Model):
             elif rec.state == 'draft':
                 rec.reserve_color = COLOR_TYPES.get('pre-reservation')
             elif rec.state == 'confirm':
-                rec.reserve_color = COLOR_TYPES.get('reservation')
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = COLOR_TYPES.get('reservation-pay')
+                else:
+                    rec.reserve_color = COLOR_TYPES.get('reservation')
             elif rec.state == 'booking' and difference_checkout.days == 0:
-                rec.reserve_color = COLOR_TYPES.get('checkout')
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = COLOR_TYPES.get('checkout-pay')
+                else:
+                    rec.reserve_color = COLOR_TYPES.get('checkout')
             elif rec.state == 'booking':
-                rec.reserve_color = COLOR_TYPES.get('stay')
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = COLOR_TYPES.get('stay-pay')
+                else:
+                    rec.reserve_color = COLOR_TYPES.get('stay')
             else:
-                rec.reserve_color = "#FFFFFF"
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = '#FFFFFF'
+                else:
+                    rec.reserve_color = COLOR_TYPES.get('payment-pending')
+            _logger.info(rec.reserve_color)
+            return rec.reserve_color
 
     #~ @api.depends('checkin', 'checkout','room_type_id','virtual_room_id')
     #~ def domain_rooms_ids(self):

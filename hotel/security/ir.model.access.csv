@@ -35,3 +35,11 @@ access_currency_exchange_user,hotel.currency_exchange.user,model_currency_exchan
 access_currency_exchange_manager,hotel.currency_exchange.manager,model_currency_exchange,hotel.group_hotel_manager,1,1,1,1
 access_hotel_model_cardex_user,hotel.currency_exchange.user,hotel.model_cardex,hotel.group_hotel_user,1,1,1,0
 access_hotel_model_cardex_manager,hotel.currency_exchange.manager,hotel.model_cardex,hotel.group_hotel_manager,1,1,1,1
+access_hotel_virtual_room_manager,hotel.virtual.room.manager,hotel.model_hotel_virtual_room,hotel.group_hotel_manager,1,1,1,1
+access_hotel_virtual_room_user,hotel.virtual.room.user,hotel.model_hotel_virtual_room,hotel.group_hotel_user,1,1,1,0
+access_hotel_restrictions_manager,hotel.restriction.manager,hotel.model_hotel_virtual_room_restriction,hotel.group_hotel_manager,1,1,1,1
+access_hotel_restrictions_user,hotel.restriction.user,hotel.model_hotel_virtual_room_restriction,hotel.group_hotel_user,1,1,1,0
+access_hotel_restrictions_item_manager,hotel.restriction.item.manager,hotel.model_hotel_virtual_room_restriction_item,hotel.group_hotel_manager,1,1,1,1
+access_hotel_restrictions_item_user,hotel.restriction.item.user,hotel.model_hotel_virtual_room_restriction_item,hotel.group_hotel_user,1,1,1,0
+access_hotel_virtual_room_availabity_manager,hotel.availability.manager,hotel.model_hotel_virtual_room_availabity,hotel.group_hotel_manager,1,1,1,1
+access_hotel_virtual_room_availabity_user,hotel.availability.user,hotel.model_hotel_virtual_room_availabity,hotel.group_hotel_user,1,1,1,0

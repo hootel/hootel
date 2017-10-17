@@ -538,6 +538,19 @@ var HotelCalendarView = View.extend({
             	$ninfo.hide();
             }
        });
+       // Charges Button
+       domain = [['invoices_amount','>',0 ],['room_lines.checkout','<=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)]];
+       HotelFolioObj.call('search_count', [domain]).then(function(count){
+        	var $ninfo = self.$el.find('#pms-menu #btn_action_paydue div.ninfo');
+        	var $badge_charges = self.$el.find('#pms-menu #btn_action_paydue .badge');
+        	if (count > 0) {
+        		$badge_charges.text(count);
+        		$badge_charges.parent().show();
+        		$ninfo.show();
+            } else {
+            	$ninfo.hide();
+            }
+       });
     },
 
     init_calendar_view: function(){
@@ -668,6 +681,9 @@ var HotelCalendarView = View.extend({
         });
         this.$el.find("#btn_action_paydue").on('click', function(ev){
             self.call_action('hotel_calendar.hotel_reservation_action_paydue');
+        });
+	this.$el.find("#btn_action_paydue").on('click', function(ev){
+            self.call_action('hotel.open_hotel_folio1_form_tree_all');
         });
 //        this.$el.find("#btn_action_refresh").on('click', function(ev){
 //            window.location.reload();

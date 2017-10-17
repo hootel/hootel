@@ -22,11 +22,12 @@
 
 {
     'name': 'Hotel Management',
-    'version': '0.01',
-    'author': 'Darío Lodeiros, Alexandre Díaz Cuadrado, Jose Luis Algara, Serpent Consulting Services Pvt. Ltd., OpenERP SA,\
+    'version': '0.07',
+    'author': 'Serpent Consulting Services Pvt. Ltd., OpenERP SA,\
     Odoo Community Association (OCA)',
     'images': [],
     'category': 'Generic Modules/Hotel Management',
+    'website': 'http://www.serpentcs.com',
     'depends': [
         'product_uos',
         'sale_stock',
@@ -36,7 +37,8 @@
     'license': "",
     'demo': ['data/hotel_data.xml'],
     'data': [
-	'wizard/massive_changes.xml',
+        'views/inherit_res_partner.xml',
+        'wizard/massive_changes.xml',
         'views/res_config.xml',
         'data/menus.xml',
         'security/hotel_security.xml',
@@ -65,6 +67,7 @@
         'views/cardex.xml',
         'views/virtual_room_availability.xml',
         'data/cron_jobs.xml',
+        'views/hotel_dashboard.xml',
     ],
     'css': ['static/src/css/room_kanban.css'],
     'auto_install': False,

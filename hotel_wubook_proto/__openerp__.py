@@ -53,6 +53,7 @@
         'views/wubook_issue.xml',
         'data/menus.xml',
         'data/sequences.xml',
+        'security/ir.model.access.csv',
         # 'views/res_config.xml'
     ],
     'test': [

@@ -74,6 +74,12 @@ class HotelServiceLine(models.Model):
             return self._context['checkout']
         return time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
+    @api.model
+    def _default_ser_room_line(self):
+        _logger.info("CREANDO LINEA DE SERVICIO")
+        _logger.info(self._context)
+        return self.env['hotel.reservation'].search([('id','in',self._context['room_lines'])], limit=1)
+
     _name = 'hotel.service.line'
     _description = 'hotel Service line'
 
@@ -85,7 +91,10 @@ class HotelServiceLine(models.Model):
                                        default=_service_checkin)
     ser_checkout = fields.Datetime('To Date', required=True,
                                         default=_service_checkout)
-    ser_room_line = fields.Many2one('hotel.reservation','Room')
+    ser_room_line = fields.Many2one('hotel.reservation','Room', default=_default_ser_room_line)
+
+
+
 
     @api.model
     def create(self, vals, check=True):
