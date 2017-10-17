@@ -51,4 +51,4 @@ class WubookConfiguration(models.TransientModel):
 
     @api.multi
     def set_wubook_pkey(self):
-        return self.pool.get('ir.values').sudo().set_default('wubook.config.settings', 'wubook_pkey', self.wubook_pkey)
+        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_pkey', self.wubook_pkey)
