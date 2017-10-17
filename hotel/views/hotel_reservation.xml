@@ -116,11 +116,30 @@
             <field name="arch" type="xml">
                 <search string="Reservation Detail">
                     <field name="partner_id" />
+                    <field name="folio_id" />
 <!--
                     <filter string="Current Booking"
                         domain="[('checkout','&gt;=',datetime.datetime.now().replace(hour=0, minute=0, second=0)),('checkin','&lt;=',datetime.datetime.now().replace(hour=23, minute=59, second=59))]"
                         help="Current Booking" />
 -->
+		     <filter string="Still to be paid"
+                        domain="[('folio_id.invoices_amount','&gt;',0)]"
+                         />
+		    <filter string="Checkins"
+                        domain="[('state','in',['booking'])]"
+                        help="Current Booking" />
+		    <filter string="Staff"
+                        domain="[('reservation_type','in',['staff'])]"
+                        />
+		    <filter string="Out of Service"
+                        domain="[('reservation_type','in',['dontsell'])]"
+                        />
+		    <filter string="To Assign"
+                        domain="[('to_assign','=',True)]"
+                        />
+		    <filter string="Late Payment"
+                        domain="[('folio_id.invoices_amount','&gt;',0),('state','in',['done'])]"
+                        />
                     <group expand="0" string="Group By">
                         <!--<filter string="Order By Month" domain="[]"
                             context="{'group_by':'date_order'}" />-->
