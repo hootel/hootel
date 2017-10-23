@@ -10,6 +10,7 @@
                 <xpath expr="//group[@name='account_grp']" position="before">
                     <group>
                         <group name="aldahotels_grp" string="Hotel data">
+                            <field name="property_name" />
                             <field name="tourism" />
                             <field name="category_id" widget="selection"/>
                             <field name="rooms" />

@@ -4,6 +4,7 @@ from openerp import models, fields, api
 class Inherit_res_company(models.Model):
     _inherit = 'res.company'
 
+    property_name = fields.Char('Property name', help='Name of the Hotel/Property.')
     tourism = fields.Char('Tourism number', help='Registration number in the Ministry of Tourism. Used for INE statistics.')
     rooms = fields.Integer('Rooms Available',default=0, help='Used for INE statistics.')
     seats = fields.Integer('Beds available',default=0, help='Used for INE statistics.')
