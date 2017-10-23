@@ -21,3 +21,4 @@
 
 from . import policewizard
 from . import inherit_checkinwizard
+from . import inewizard
