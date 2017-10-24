@@ -1,0 +1,46 @@
+<?xml version="1.0"?> 
+    <openerp>      
+        <data>
+
+            <act_window
+                id="action_ine_download"
+                name="Action INE File Download"
+                res_model="ine.wizard"
+                view_mode="form"
+            />
+
+            <record id="view_ine_download" model="ir.ui.view">
+                <field name="name">INE File Download</field>
+                <field name="model">ine.wizard</field>
+                <field name="arch" type="xml">
+                    <form>
+                        <sheet>
+                            <group> 
+                                <div>
+                                    <label for="ine_month" string="Select Month and Year"
+                                           style="font-weight: bold !important;margin-right:107px;margin-left: 0px;"/> 
+                                    <field name="ine_month" style="width:110px"/>
+                                    <field name="ine_year" style="width:110px;margin-left: 34px;"/>
+                                </div>  
+                            </group>
+                            <div>
+                            <button name="generate_file" type="object" string="Generate file"/>
+                            <field name="txt_filename" invisible="1"/>
+                            <field name="txt_binary" filename="txt_filename" readonly="1"/>
+                            </div>
+                        </sheet>
+                    </form>
+                </field>
+            </record>
+
+            <menuitem 
+                id="menu_ine_download"
+                name="INE File Download"
+                parent="hotel.hotel_configuration_menu"
+                sequence="37"
+                action="action_ine_download"
+            />
+
+        </data>
+
+    </openerp>

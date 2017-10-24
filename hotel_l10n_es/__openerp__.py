@@ -42,6 +42,7 @@
         'report/report_parte_viajero.xml',
         'views/report_viajero.xml',
         'wizard/policewizard.xml',
+        'wizard/inewizard.xml',
         'wizard/inherit_checkinwizard.xml',
         'views/cardex_partner.xml',
         'views/category.xml',
