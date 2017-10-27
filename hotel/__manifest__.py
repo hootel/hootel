@@ -29,10 +29,8 @@
     'category': 'Generic Modules/Hotel Management',
     'website': 'http://www.serpentcs.com',
     'depends': [
-        'product_uos',
         'sale_stock',
         'report',
-        'warning',
     ],
     'license': "",
     'demo': ['data/hotel_data.xml'],

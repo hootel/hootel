@@ -28,7 +28,7 @@
             <field name="model">hotel.room.type</field>
             <field name="arch" type="xml">
                 <tree string=" Hotel Room Type">
-                    <field name="complete_name" />
+                    <field name="name" />
                 </tree>
             </field>
         </record>

@@ -28,7 +28,7 @@
             <field name="model">hotel.service.type</field>
             <field name="arch" type="xml">
                 <tree string="Service Type">
-                    <field name="complete_name" />
+                    <field name="name" />
                 </tree>
             </field>
         </record>

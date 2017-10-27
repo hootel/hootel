@@ -21,12 +21,8 @@
                             <page string="Information">
                                 <group colspan="4" col="4">
                                     <field name="type" select="2" string="Amenity Type" />
-                                    <field name="product_manager" select="2" string="Amenity manager" />
-                                    <field name="state" select="2" />
                                     <field name="categ_id" select="1"
                                         domain="[('isamenitytype','=',True)]" />
-                                    <field name="uom_id" />
-                                    <field name="uom_po_id" />
                                 </group>
                                 <newline />
                                 <separator colspan='4' string="Supplier Taxes" />
@@ -45,8 +41,6 @@
                                     <field name="sale_ok" select="2" />
                                     <field name="standard_price" />
                                     <field name="rental" select="2" />
-                                    <field name="uos_id" />
-                                    <field name="uos_coeff" />
                                 </group>
                                 <newline />
                                 <group>

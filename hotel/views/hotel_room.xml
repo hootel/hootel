@@ -10,9 +10,6 @@
             <field name="model">hotel.room</field>
             <field name="arch" type="xml">
                 <form string="Hotel Room">
-                    <header>
-                        <field name="state" string="Room Status" widget='statusbar' />
-                    </header>
                     <sheet>
                         <div class="oe_title">
                             <label for="name" string="Name" />
@@ -29,7 +26,6 @@
                                 <group colspan="4" col="4">
                                     <field name="floor_id" string="Ubication" />
                                     <field name="categ_id" select="1" domain="[('isroomtype','=',True)]" string="Room Type" />
-                                    <field name="product_manager" select="2" string="Room Manager" />
                                     <field name="capacity" />
                     <field name="shared_room" help="It allows several reservations on the same room simultaneously based on the capacity of people"/>
                                     <field name="uom_id" invisible="1" />
@@ -69,7 +65,6 @@
                     <field name="name" />
                     <field name="categ_id" select="1" />
                     <field name="list_price" string="Room rate" />
-                    <field name="state" string="Status" />
                     <newline />
                     <!--<filter name="available" string="Available"
                         domain="[('status','=', 'available')]" help="Available Rooms" />-->
