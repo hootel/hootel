@@ -42,7 +42,8 @@
         'views/res_config.xml',
         'data/views.xml',
         'data/menus.xml',
-	'security/ir.model.access.csv',
+	    'security/ir.model.access.csv',
+        'data/records.xml',
     ],
     'qweb': [
         'static/src/xml/*.xml',

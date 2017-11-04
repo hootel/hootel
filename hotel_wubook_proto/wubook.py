@@ -58,10 +58,12 @@ class WuBook(models.TransientModel):
         self.TOKEN = False
 
     @api.model
-    def initialize(self):
-        return (
-            self.push_activation()
-            and self.import_rooms()[0]
+    def initialize(self, activate):
+        res = True
+        if activate:
+            if not self.push_activation():
+                return False
+        return (self.import_rooms()[0]
             and self.import_channels_info()[0]
             and self.import_pricing_plans()[0]
             and self.import_restriction_plans()[0])
@@ -92,6 +94,14 @@ class WuBook(models.TransientModel):
 
         return rcode_a == 0 and rcode_ua == 0
 
+    def is_valid_account(self):
+        user = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_user')
+        passwd = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_passwd')
+        lcode = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_lcode')
+        pkey = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_pkey')
+        server_addr = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_server')
+        return (user and passwd and pkey and server_addr and lcode)
+
     # === NETWORK
     def init_connection_(self):
         user = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_user')
@@ -100,7 +110,7 @@ class WuBook(models.TransientModel):
         pkey = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_pkey')
         server_addr = self.env['ir.values'].get_default('wubook.config.settings', 'wubook_server')
 
-        if not user or not passwd or not pkey or not server_addr:
+        if not user or not passwd or not pkey or not server_addr or not self.LCODE:
             self.create_wubook_issue('wubook', "Can't connect with WuBook! Perhaps account not configured...", "")
             return False
 

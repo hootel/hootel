@@ -73,7 +73,7 @@ class HotelVirtualRoom(models.Model):
     @api.model
     def create(self, vals):
         vroom = super(HotelVirtualRoom, self).create(vals)
-        if self._context.get('wubook_action', True):
+        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             shortcode = self.env['ir.sequence'].next_by_code('hotel.virtual.room')[:4]
             wrid = self.env['wubook'].create_room(
                 shortcode,
@@ -92,7 +92,7 @@ class HotelVirtualRoom(models.Model):
 
     @api.multi
     def write(self, vals):
-        if self._context.get('wubook_action', True):
+        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             for record in self:
                 if record.wrid != 'none':
                     wres = self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
@@ -107,7 +107,7 @@ class HotelVirtualRoom(models.Model):
 
     @api.multi
     def unlink(self):
-        if self._context.get('wubook_action', True):
+        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             for record in self:
                 if record.wrid != 'none':
                     wres = self.env['wubook'].delete_room(record.wrid)

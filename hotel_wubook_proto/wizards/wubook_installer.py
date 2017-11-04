@@ -19,11 +19,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
-import logging
-_logger = logging.getLogger(__name__)
-
+from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 class WuBookInstaller(models.TransientModel):
     _name = 'wubook.installer'
@@ -36,22 +34,78 @@ class WuBookInstaller(models.TransientModel):
                                 default='https://wubook.net/xrws/',
                                 required=True)
     wubook_pkey = fields.Char('PKey', required=True)
+    activate_push = fields.Boolean('Active Push Notifications', default=True)
 
-    @api.cr_uid_ids_context
-    def execute(self, cr, uid, ids, context=None):
-        records = self.browse(cr, uid, ids, context=context)
-        records.execute_simple()
-        return super(WuBookInstaller, self).execute(cr, uid, ids,
-                                                    context=context)
+    @api.multi
+    def execute(self):
+        super(WuBookInstaller, self).execute()
+        return self.execute_simple()
 
     @api.multi
     def execute_simple(self):
+        activate_push = True
         for rec in self:
-            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_user', rec.wubook_user)
-            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_passwd', rec.wubook_passwd)
-            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_lcode', rec.wubook_lcode)
-            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_server', rec.wubook_server)
-            self.env['ir.values'].set_default('wubook.config.settings', 'wubook_pkey', rec.wubook_pkey)
-        wres = self.env['wubook'].initialize()
+            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_user', rec.wubook_user)
+            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_passwd', rec.wubook_passwd)
+            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_lcode', rec.wubook_lcode)
+            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_server', rec.wubook_server)
+            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_pkey', rec.wubook_pkey)
+            activate_push = rec.activate_push
+        wres = self.env['wubook'].initialize(activate_push)
         if not wres:
             raise ValidationError("Can't finish installation!")
+
+        return {
+            'name':_("Configure Hotel Parity"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'wubook.installer.parity',
+            'view_id': self.env.ref('hotel_wubook_proto.view_wubook_configuration_installer_parity').id,
+            'view_type': 'form',
+            'view_mode': 'form',
+            'target': 'new'
+        }
+
+
+class WuBookInstallerParity(models.TransientModel):
+    _name = 'wubook.installer.parity'
+    _inherit = 'res.config.installer'
+
+    parity_pricelist_id = fields.Many2one('product.pricelist', 'Product Pricelist')
+    parity_restrictions_id = fields.Many2one('hotel.virtual.room.restriction', 'Restrictions')
+    import_data = fields.Boolean('Import Data From WuBook', default=False)
+    date_start = fields.Date('Date Start')
+    date_end = fields.Date('Date End')
+
+    @api.multi
+    def execute(self):
+        self.execute_simple()
+        return super(WuBookInstallerParity, self).execute()
+
+    @api.multi
+    def execute_simple(self):
+        wubookObj = self.env['wubook']
+        irValuesObj = self.env['ir.values']
+        for rec in self:
+            irValuesObj.sudo().set_default('hotel.config.settings', 'parity_pricelist_id', rec.parity_pricelist_id.id)
+            irValuesObj.sudo().set_default('hotel.config.settings', 'parity_restrictions_id', rec.parity_restrictions_id.id)
+            import_data = rec.import_data
+            if rec.import_data:
+                date_start_dt = fields.Datetime.from_string(rec.date_start)
+                date_end_dt = fields.Datetime.from_string(rec.date_end)
+                # Availability
+                wresAvail = wubookObj.fetch_rooms_values(date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                                                         date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                # Pricelist
+                wresPrices = wubookObj.fetch_plan_prices(rec.parity_pricelist_id.wpid,
+                                                         date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                                                         date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                # Restrictions
+                wresRestr = wubookObj.fetch_rplan_restrictions(date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                                                               date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                                                               rec.parity_restrictions_id.wpid)
+
+                if not wresAvail or not wresPrices or not wresRestr:
+                    raise ValidationError("Errors importing data from WuBook")
+
+                # Reservations
+                wubookObj.fetch_new_bookings()

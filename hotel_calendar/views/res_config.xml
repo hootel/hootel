@@ -11,9 +11,9 @@
         		<group name="calendar" string="Calendar">
 				    <group>
 				    	<field name="divide_rooms_by_capacity" />
-				    	<field name="end_day_week" />
-				    	<field name="type_move" />
-				    	<field name="default_num_days" />
+				    	<field name="end_day_week" required="True" />
+				    	<field name="type_move" required="True" />
+				    	<field name="default_num_days" required="True" />
 				    </group>
 				</group>
         	</xpath>

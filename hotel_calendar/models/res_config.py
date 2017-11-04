@@ -34,18 +34,18 @@ class HotelConfiguration(models.TransientModel):
         ('4', 'Friday'),
         ('5', 'Saturday'),
         ('6', 'Sunday')
-    ], string='End day of week', default='6', required=True)
+    ], string='End day of week', default='6')
     type_move = fields.Selection([
         ('normal', 'Normal'),
         ('assisted', 'Assisted'),
         ('allow_invalid', 'Allow Invalid')
-    ], string='Reservation move mode', default='normal', required=True)
+    ], string='Reservation move mode', default='normal')
     default_num_days = fields.Selection([
         ('month', '1 Month'),
         ('21', '3 Weeks'),
         ('14', '2 Weeks'),
         ('7', '1 Week')
-    ], string='Default number of days', default='month', required=True)
+    ], string='Default number of days', default='month')
 
 
     @api.multi

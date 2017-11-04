@@ -30,7 +30,7 @@ class ProductPricelistItem(models.Model):
 
     @api.model
     def create(self, vals):
-        if self._context.get('wubook_action', True):
+        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             pricelist_id = self.env['product.pricelist'].browse(vals.get('pricelist_id'))
             vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', vals.get('product_tmpl_id')),
                                                            ('wrid', '!=', False)])
@@ -40,7 +40,7 @@ class ProductPricelistItem(models.Model):
 
     @api.multi
     def write(self, vals):
-        if self._context.get('wubook_action', True):
+        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             for record in self:
                 pricelist_id = vals.get('pricelist_id') and self.env['product.pricelist'].browse(vals.get('pricelist_id')) or record.pricelist_id
                 product_tmpl_id = vals.get('product_tmpl_id') or record.product_tmpl_id.id

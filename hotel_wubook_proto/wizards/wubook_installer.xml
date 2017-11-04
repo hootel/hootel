@@ -10,7 +10,7 @@
 			</xpath>
 			<xpath expr="//footer[1]" position="replace">
 				<footer>
-					<button name="action_next" type="object" string="Finish Installation" class="oe_highlight"/>
+					<button name="action_next" type="object" string="Continue" class="oe_highlight"/>
 				</footer>
 			</xpath>
 			<xpath expr="//form/separator[1]" position="replace">
@@ -27,6 +27,45 @@
 				<group>
 					<field name="wubook_lcode" />
 					<field name="wubook_pkey" />
+				</group>
+				<group>
+					<field name="activate_push" />
+				</group>
+			</xpath>
+		</field>
+	</record>
+
+	<record id="view_wubook_configuration_installer_parity" model="ir.ui.view">
+		<field name="name">wubook.installer.parity.form</field>
+		<field name="model">wubook.installer.parity</field>
+		<field name="inherit_id" ref="base.res_config_installer"/>
+		<field name="arch" type="xml">
+			<xpath expr="//form[1]" position="attributes">
+				<attribute name="string">WuBook Configuration Parity</attribute>
+			</xpath>
+			<xpath expr="//footer[1]" position="replace">
+				<footer>
+					<button name="action_next" type="object" string="Finish Installation" class="oe_highlight"/>
+				</footer>
+			</xpath>
+			<xpath expr="//form/separator[1]" position="replace">
+				<p class="oe_grey">
+					These models are used as masters
+				</p>
+				<group>
+					<field name="parity_pricelist_id" domain="[('wpid', '!=', False),('wpid', '!=', '')]" required="True" />
+					<field name="parity_restrictions_id" domain="[('wpid', '!=', False),('wpid', '!=', '')]" required="True" />
+				</group>
+				<group>
+					<field name="import_data" />
+				</group>
+				<group attrs="{'invisible':[('import_data', '=', False)]}">
+					<group>
+						<field name="date_start" required="1" />
+					</group>
+					<group>
+						<field name="date_end" required="1" />
+					</group>
 				</group>
 			</xpath>
 		</field>
@@ -47,5 +86,5 @@
 		<field name="sequence">3</field>
 		<field name="type">automatic</field>
 	</record>
-       
+
 </odoo>

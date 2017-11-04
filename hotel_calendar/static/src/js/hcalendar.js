@@ -751,7 +751,7 @@ HotelCalendar.prototype = {
         cell.classList.add('hcal-cell-start-month');
         cur_month = dd_local.format('MMMM');
         months[cur_month] = {};
-        months[cur_month].year = dd.format('YYYY');
+        months[cur_month].year = dd_local.format('YYYY');
         months[cur_month].colspan = 0;
       }
       if (dd_local.isSame(now, 'day')) {

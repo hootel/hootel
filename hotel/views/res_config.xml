@@ -14,14 +14,14 @@
                 <div id="main">
 				    <group name="hotel_parity" string="Hotel Parity">
 				    	<group>
-				    		<field name="parity_pricelist_id" />
-				    		<field name="parity_restrictions_id" />
+				    		<field name="parity_pricelist_id" required="True" />
+				    		<field name="parity_restrictions_id" required="True" />
 				    	</group>
 				    </group>
                     <group name="default_hours" string="Hotel Default Hours">
 				    	<group>
-				    		<field name="default_arrival_hour" />
-				    		<field name="default_departure_hour" />
+				    		<field name="default_arrival_hour" required="True" />
+				    		<field name="default_departure_hour" required="True" />
 				    	</group>
 				    </group>
 			    </div>

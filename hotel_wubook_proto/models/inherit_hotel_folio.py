@@ -25,7 +25,7 @@ from openerp import models, fields, api
 class HotelFolio(models.Model):
     _inherit = 'hotel.folio'
 
-    @api.depends('whas_wubook_reservations', 'room_lines')
+    @api.depends('room_lines')
     def _has_wubook_reservations(self):
         if any(self.room_lines):
             for room in self.room_lines:

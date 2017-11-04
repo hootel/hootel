@@ -28,10 +28,10 @@ class HotelConfiguration(models.TransientModel):
     _name = 'hotel.config.settings'
     _inherit = 'res.config.settings'
 
-    parity_pricelist_id = fields.Many2one('product.pricelist', 'Product Pricelist', required=True)
-    parity_restrictions_id = fields.Many2one('hotel.virtual.room.restriction', 'Restrictions', required=True)
-    default_arrival_hour = fields.Char('Default Arrival Hour (GMT)', help="HH:mm Format", default="14:00", required=True)
-    default_departure_hour = fields.Char('Default Departure Hour (GMT)', help="HH:mm Format", default="12:00", required=True)
+    parity_pricelist_id = fields.Many2one('product.pricelist', 'Product Pricelist')
+    parity_restrictions_id = fields.Many2one('hotel.virtual.room.restriction', 'Restrictions')
+    default_arrival_hour = fields.Char('Default Arrival Hour (GMT)', help="HH:mm Format", default="14:00")
+    default_departure_hour = fields.Char('Default Departure Hour (GMT)', help="HH:mm Format", default="12:00")
 
 
     @api.multi

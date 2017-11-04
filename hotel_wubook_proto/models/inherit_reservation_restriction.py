@@ -64,7 +64,7 @@ class ReservationRestriction(models.Model):
 
     @api.model
     def create(self, vals):
-        if self._context.get('wubook_action', True):
+        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             wpid = self.env['wubook'].create_rplan(vals['name'])
             if not wpid:
                 raise ValidationError("Can't create rplan on WuBook")
@@ -94,7 +94,7 @@ class ReservationRestriction(models.Model):
     @api.multi
     def write(self, vals):
         nname = vals.get('name')
-        if self._context.get('wubook_action', True) and nname:
+        if self._context.get('wubook_action', True) and nname and self.env['wubook'].is_valid_account():
             for record in self:
                 wres = self.env['wubook'].rename_rplan(vals.get('wpid', record.wpid),
                                                        nname)
@@ -105,7 +105,7 @@ class ReservationRestriction(models.Model):
 
     @api.multi
     def unlink(self):
-        if self._context.get('wubook_action', True):
+        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             for record in self:
                 wres = self.env['wubook'].delete_rplan(record.wpid)
                 if not wres:
@@ -115,3 +115,17 @@ class ReservationRestriction(models.Model):
     @api.multi
     def import_restriction_plans(self):
         return self.env['wubook'].import_restriction_plans()
+
+    @api.multi
+    @api.depends('name')
+    def name_get(self):
+        roomRestrictionObj = self.env['hotel.virtual.room.restriction']
+        org_names = super(ReservationRestriction, self).name_get()
+        names = []
+        for name in org_names:
+            restriction_id = roomRestrictionObj.browse(name[0])
+            if restriction_id.wpid != False:
+                names.append((name[0], '%s (WuBook)' % name[1]))
+            else:
+                names.append((name[0], name[1]))
+        return names

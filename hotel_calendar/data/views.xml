@@ -21,7 +21,7 @@
 			<field name="model">hotel.calendar.management</field>
 			<field name="type">form</field>
 			<field name="arch" type="xml">
-					<div id="hcalendar_management"> </div>
+				<div id="hcalendar_management"> </div>
 			</field>
 		</record>
 

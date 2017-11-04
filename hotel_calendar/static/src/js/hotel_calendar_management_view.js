@@ -14,6 +14,7 @@ var Core = require('web.core'),
     Time = require('web.time'),
     Model = require('web.DataModel'),
     View = require('web.View'),
+    Widgets = require('web_calendar.widgets'),
     //Common = require('web.form_common'),
     //Pyeval = require('web.pyeval'),
     ActionManager = require('web.ActionManager'),
@@ -60,9 +61,13 @@ var HotelCalendarManagementView = View.extend({
     template: "hotel_calendar.HotelCalendarManagementView",
     display_name: _lt('Hotel Calendar Management'),
     icon: 'fa fa-map-marker',
-    view_type: "mpms",
+    //view_type: "mpms",
     searchable: false,
     searchview_hidden: true,
+    quick_create_instance: Widgets.QuickCreate,
+    defaults: _.extend({}, View.prototype.defaults, {
+        confirm_on_delete: true,
+    }),
 
     // Custom Options
     _model: null,
@@ -73,14 +78,12 @@ var HotelCalendarManagementView = View.extend({
     _restriction_id: null,
 
     /** VIEW METHODS **/
-    init: function(parent, dataset, view_id, options) {
-        this._super(parent);
-        this.ready = $.Deferred();
-        this.set_default_options(options);
+    init: function(parent, dataset, fields_view, options) {
+        this._super.apply(this, arguments);
+        console.log(this.fields_view);
+        this.shown = $.Deferred();
         this.dataset = dataset;
         this.model = dataset.model;
-        this.fields_view = {};
-        this.view_id = view_id;
         this.view_type = 'mpms';
         this.selected_filters = [];
         this.mutex = new Utils.Mutex();
@@ -88,34 +91,18 @@ var HotelCalendarManagementView = View.extend({
         this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
 
         //Bus.on("notification", this, this._on_bus_signal);
+        console.log(this.fields_view);
     },
 
-    view_loading: function(r) {
-        return this.load_custom_view(r);
+    start: function () {
+        this.shown.done(this._do_show_init.bind(this));
+        return this._super();
     },
 
-    load_custom_view: function(fv) {
-        /* xml view calendar options */
-        //var attrs = fv.arch.attrs,
-        var self = this;
-
-        var edit_check = new Model(this.dataset.model)
-              .call("check_access_rights", ["write", false])
-              .then(function (write_right) {
-                self.write_right = write_right;
-              }),
-            init = new Model(this.dataset.model)
-              .call("check_access_rights", ["create", false])
-              .then(function (create_right) {
-                self.create_right = create_right;
-                self.init_calendar_view().then(function() {
-                  //$(window).trigger('resize');
-                  self.trigger('hotel_calendar_management_view_loaded', fv);
-                  self.ready.resolve();
-                });
-              });
-        this.fields_view = fv;
-        return $.when(edit_check, init);
+    _do_show_init: function () {
+        this.init_calendar_view().then(function() {
+            $(window).trigger('resize');
+        });
     },
 
     do_show: function() {
@@ -124,6 +111,7 @@ var HotelCalendarManagementView = View.extend({
             $widget.show();
         }
         this.do_push_state({});
+        this.shown.resolve();
         return this._super();
     },
     do_hide: function () {
@@ -132,12 +120,6 @@ var HotelCalendarManagementView = View.extend({
             $widget.hide();
         }
         return this._super();
-    },
-    is_action_enabled: function(action) {
-        if (action === 'create' && !this.options.creatable) {
-            return false;
-        }
-        return this._super(action);
     },
 
     destroy: function () {
@@ -367,6 +349,7 @@ var HotelCalendarManagementView = View.extend({
         /** RENDER CALENDAR **/
         this.generate_hotel_calendar();
 
+        console.log("LLEGA!");
         return $.when();
     },
 

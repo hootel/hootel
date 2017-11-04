@@ -91,7 +91,7 @@ class ProductPricelist(models.Model):
 
     @api.model
     def create(self, vals):
-        if self._context.get('wubook_action', True):
+        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             wpid = self.env['wubook'].create_plan(vals['name'],
                                                   vals.get('wdaily') and 1 or 0)
             if not wpid:
@@ -107,7 +107,7 @@ class ProductPricelist(models.Model):
     @api.multi
     def write(self, vals):
         nname = vals.get('name')
-        if self._context.get('wubook_action', True) and nname:
+        if self._context.get('wubook_action', True) and nname and self.env['wubook'].is_valid_account():
             for record in self:
                 wres = self.env['wubook'].update_plan_name(vals.get('wpid', record.wpid),
                                                            nname)
@@ -123,7 +123,7 @@ class ProductPricelist(models.Model):
 
     @api.multi
     def unlink(self):
-        if self._context.get('wubook_action', True):
+        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             for record in self:
                 wres = self.env['wubook'].delete_plan(record.wpid)
                 if not wres:
@@ -133,3 +133,17 @@ class ProductPricelist(models.Model):
     @api.multi
     def import_price_plans(self):
         return self.env['wubook'].import_pricing_plans()
+
+    @api.multi
+    @api.depends('name')
+    def name_get(self):
+        pricelistObj = self.env['product.pricelist']
+        org_names = super(ProductPricelist, self).name_get()
+        names = []
+        for name in org_names:
+            priclist_id = pricelistObj.browse(name[0])
+            if priclist_id.wpid != False:
+                names.append((name[0], '%s (WuBook)' % name[1]))
+            else:
+                names.append((name[0], name[1]))
+        return names

@@ -71,14 +71,11 @@ var HotelCalendarView = View.extend({
     _last_dates: [false, false],
 
     /** VIEW METHODS **/
-    init: function(parent, dataset, view_id, options) {
-        this._super(parent);
-        this.ready = $.Deferred();
-        this.set_default_options(options);
+    init: function(parent, dataset, fields_view, options) {
+        this._super.apply(this, arguments);
+        this.shown = $.Deferred();
         this.dataset = dataset;
         this.model = dataset.model;
-        this.fields_view = {};
-        this.view_id = view_id;
         this.view_type = 'pms';
         this.selected_filters = [];
         this.mutex = new Utils.Mutex();
@@ -88,54 +85,33 @@ var HotelCalendarView = View.extend({
         Bus.on("notification", this, this._on_bus_signal);
     },
 
-    view_loading: function(r) {
-        return this.load_custom_view(r);
+    start: function () {
+        this.shown.done(this._do_show_init.bind(this));
+        return this._super();
     },
 
-    load_custom_view: function(fv) {
-        /* xml view calendar options */
-        //var attrs = fv.arch.attrs,
-        var self = this;
-
-        var edit_check = new Model(this.dataset.model)
-              .call("check_access_rights", ["write", false])
-              .then(function (write_right) {
-                self.write_right = write_right;
-              }),
-            init = new Model(this.dataset.model)
-              .call("check_access_rights", ["create", false])
-              .then(function (create_right) {
-                self.create_right = create_right;
-                self.init_calendar_view().then(function() {
-                  //$(window).trigger('resize');
-                  self.trigger('hotel_calendar_view_loaded', fv);
-                  self.ready.resolve();
-                });
-              });
-        this.fields_view = fv;
-        return $.when(edit_check, init);
+    _do_show_init: function () {
+        this.init_calendar_view().then(function() {
+            $(window).trigger('resize');
+        });
     },
 
     do_show: function() {
-        var $widget = this.$el.find("#hcal_widget");
+        var $widget = this.$el.find("#hcal_management_widget");
         if ($widget) {
             $widget.show();
         }
         this.do_push_state({});
+        this.shown.resolve();
         return this._super();
     },
+
     do_hide: function () {
         var $widget = this.$el.find("#hcal_widget");
         if ($widget) {
             $widget.hide();
         }
         return this._super();
-    },
-    is_action_enabled: function(action) {
-        if (action === 'create' && !this.options.creatable) {
-            return false;
-        }
-        return this._super(action);
     },
 
     destroy: function () {
@@ -382,10 +358,12 @@ var HotelCalendarView = View.extend({
                                 return self.dataset.read_ids(ids, fields, options);
                             }
                         }).open();
-                        popCreate.view_form.on('on_button_cancel', popCreate, function(){
-                        	HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
+                        popCreate.opened().then(function () {
+                          popCreate.view_form.on('on_button_cancel', popCreate, function(){
+                          	HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
 
-                        	});
+                          	});
+                          });
                         });
                         popCreate.on('closed', popCreate, function(){
                         	if (!this.dataset.ids.length) {
@@ -682,7 +660,7 @@ var HotelCalendarView = View.extend({
         this.$el.find("#btn_action_paydue").on('click', function(ev){
             self.call_action('hotel_calendar.hotel_reservation_action_paydue');
         });
-	this.$el.find("#btn_action_paydue").on('click', function(ev){
+	      this.$el.find("#btn_action_paydue").on('click', function(ev){
             self.call_action('hotel.open_hotel_folio1_form_tree_all');
         });
 //        this.$el.find("#btn_action_refresh").on('click', function(ev){

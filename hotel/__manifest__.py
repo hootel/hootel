@@ -24,7 +24,10 @@
     'name': 'Hotel Management',
     'version': '0.07',
     'author': 'Serpent Consulting Services Pvt. Ltd., OpenERP SA,\
-    Odoo Community Association (OCA)',
+    Odoo Community Association (OCA),\
+    Dario Lodeiros,\
+    Jose Luis,\
+    Alexandre Díaz Cuadrado',
     'images': [],
     'category': 'Generic Modules/Hotel Management',
     'website': 'http://www.serpentcs.com',
@@ -49,7 +52,7 @@
         'views/currency_exchange.xml',
         'views/hotel_floor.xml',
         'views/hotel_folio.xml',
-	'views/inherit_res_partner.xml',
+	    'views/inherit_res_partner.xml',
         'views/hotel_service_type.xml',
         'views/hotel_service_line.xml',
         'views/hotel_room_type.xml',
@@ -66,6 +69,7 @@
         'views/virtual_room_availability.xml',
         'data/cron_jobs.xml',
         'views/hotel_dashboard.xml',
+        'data/records.xml',
     ],
     'css': ['static/src/css/room_kanban.css'],
     'auto_install': False,
