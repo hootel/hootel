@@ -213,7 +213,8 @@ class HotelReservation(models.Model):
             reservation_id.reserve_color,
             reservation_id.product_id.name,
             reservation_id.partner_id.mobile or reservation_id.partner_id.phone or _('Undefined'),
-            reservation_id.state)
+            reservation_id.state,
+            reservation_id.splitted)
         return reservation_id
 
     @api.multi
@@ -229,6 +230,7 @@ class HotelReservation(models.Model):
             folio_id = vals.get('folio_id') and self.env['hotel.folio'].browse(vals.get('folio_id')) or record.folio_id
             color = vals.get('reserve_color') or record.reserve_color
             state = vals.get('state') or record.state
+            splitted = vals.get('splitted') or record.splitted
 
             self.env['bus.hotel.calendar'].send_reservation_notification(
                 'write',
@@ -245,7 +247,8 @@ class HotelReservation(models.Model):
                 color,
                 product_id.name,
                 partner_id.mobile or partner_id.phone or _('Undefined'),
-                state)
+                state,
+                splitted)
         return ret_vals
 
     @api.multi
@@ -266,5 +269,6 @@ class HotelReservation(models.Model):
                 record.reserve_color,
                 record.product_id.name,
                 record.partner_id.mobile or record.partner_id.phone or _('Undefined'),
-                record.state)
+                record.state,
+                record.splitted)
         return super(HotelReservation, self).unlink()

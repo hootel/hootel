@@ -230,8 +230,8 @@ HotelCalendar.prototype = {
       var sdate = r.startDate.clone().set({'hour': 12, 'minute': 0, 'second': 0});
       var edate = r.endDate.clone().set({'hour': 10, 'minute': 0, 'second': 0});
       if (noStrict) {
-    	  if ((day.isBetween(sdate, edate) || day.isSame(sdate))
-    	    && !day.isSame(edate)
+    	  if ((day.isBetween(sdate, edate, 'day') || day.isSame(sdate, 'day'))
+    	    && !day.isSame(edate, 'day')
 	        && (typeof nroom === 'undefined' || r.room.number == nroom)
 	        && (typeof nbed === 'undefined' || r.beds_.includes(nbed))) {
 	           reservs.push(r);

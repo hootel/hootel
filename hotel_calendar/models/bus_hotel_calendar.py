@@ -32,7 +32,7 @@ class BusHotelCalendar(models.TransientModel):
                                            reserv_id, partner_name, adults,
                                            children, checkin, checkout,
                                            folio_id, color, room_name,
-                                           partner_phone, state):
+                                           partner_phone, state, fix_days):
         user_id = self.env['res.users'].browse(self.env.uid)
         return {
             'type': 'reservation',
@@ -54,7 +54,7 @@ class BusHotelCalendar(models.TransientModel):
                 'room_name': room_name,
                 'state': state,
                 'only_read': False,
-                'fix_days': False,
+                'fix_days': fix_days,
                 'fix_rooms': False,
             },
             'tooltip': [
@@ -83,14 +83,14 @@ class BusHotelCalendar(models.TransientModel):
     def send_reservation_notification(self, action, ntype, title, product_id,
                                       reserv_id, partner_name, adults, children,
                                       checkin, checkout, folio_id, color,
-                                      room_name, partner_phone, state):
+                                      room_name, partner_phone, state, fix_days):
         notif = self._generate_reservation_notification(action, ntype, title,
                                                         product_id, reserv_id,
                                                         partner_name, adults,
                                                         children, checkin,
                                                         checkout, folio_id,
                                                         color, room_name,
-                                                        partner_phone, state)
+                                                        partner_phone, state, fix_days)
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', 'public'), notif)
 
     @api.model

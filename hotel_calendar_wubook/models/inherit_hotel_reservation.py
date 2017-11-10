@@ -34,15 +34,15 @@ class HotelReservation(models.Model):
                                            reserv_id, partner_name, adults,
                                            children, checkin, checkout,
                                            folio_id, color, room_name,
-                                           partner_phone, state):
+                                           partner_phone, state, fix_days):
         vals = super(HotelReservation, self)._generate_reservation_notification(action, ntype, title, product_id,
                                                                                 reserv_id, partner_name, adults,
                                                                                 children, checkin, checkout,
                                                                                 folio_id, color, room_name,
-                                                                                partner_phone, state)
+                                                                                partner_phone, state, fix_days)
         reserv = self.env['hotel.reservation'].browse(vals['reserv_id'])
         vals['reservation'].update({
-            'fix_days': reserv.wrid != 'none',
+            'fix_days': reserv.wrid != 'none' or fix_days,
             'wchannel': reserv.wchannel_id and reserv.wchannel_id.name or False,
         })
         return vals
