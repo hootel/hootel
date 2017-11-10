@@ -399,7 +399,7 @@ class HotelFolio(models.Model):
         folio_rooms = []
         rooms = self[0].room_lines.filtered(lambda r: r.state != 'cancelled')
         for room in rooms:
-            if room.product_id.id in folio_rooms:
+            if not room.splitted and room.product_id.id in folio_rooms:
                 raise ValidationError(_('You Cannot Take Same Room Twice'))
             folio_rooms.append(room.product_id.id)
 

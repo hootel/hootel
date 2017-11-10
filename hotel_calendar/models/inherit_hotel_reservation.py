@@ -46,7 +46,7 @@ class HotelReservation(models.Model):
                 reserv.folio_id.id,
                 reserv.reserve_color,
                 False,  # Read-Only
-                False,   # Fix Days
+                reserv.splitted,   # Fix Days
                 False))  # Fix Rooms
             json_reservation_tooltips.update({
                 reserv.id: (
@@ -136,6 +136,7 @@ class HotelReservation(models.Model):
     @api.multi
     def get_hcalendar_settings(self):
         type_move = self.env['ir.values'].get_default('hotel.config.settings', 'type_move')
+        user_id = self.env['res.users'].browse(self.env.uid)
         return {
             'divide_rooms_by_capacity': self.env['ir.values'].get_default('hotel.config.settings', 'divide_rooms_by_capacity'),
             'eday_week': self.env['ir.values'].get_default('hotel.config.settings', 'end_day_week'),
@@ -144,6 +145,7 @@ class HotelReservation(models.Model):
             'assisted_movement': type_move == 'assisted',
             'default_arrival_hour': self.env['ir.values'].get_default('hotel.config.settings', 'default_arrival_hour'),
             'default_departure_hour': self.env['ir.values'].get_default('hotel.config.settings', 'default_departure_hour'),
+            'show_notifications': user_id.pms_show_notifications,
         }
 
     @api.multi

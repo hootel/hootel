@@ -97,7 +97,13 @@ class HotelReservation(models.Model):
         @param self: object pointer
         @param default: dict of default values to be set
         '''
-        return self.env['sale.order.line'].copy(default=default)
+        default = default or {}
+        default.update({
+            'checkin': self.checkin,
+            'checkout': self.checkout,
+        })
+        #return self.env['sale.order.line'].copy(default=default)
+        return super(HotelReservation, self).copy(default=default)
 
     @api.multi
     def _amount_line(self, field_name, arg):
@@ -326,6 +332,8 @@ class HotelReservation(models.Model):
     check_rooms = fields.Boolean('Check Rooms')
     is_checkin = fields.Boolean()
     is_checkout = fields.Boolean()
+    splitted = fields.Boolean('Splitted', default=False)
+    parent_reservation = fields.Many2one('hotel.reservation', 'Parent Reservation')
 
 
     def _compute_cardex_count(self):
@@ -388,10 +396,32 @@ class HotelReservation(models.Model):
                 folio = self.env['hotel.folio'].browse(self.folio_id.id)
                 folio.checkins_reservations = folio.room_lines.search_count([('folio_id','=',folio.id),('is_checkin','=',True)])
 
+            if record.splitted:
+                master_reservation = record.parent_reservation or record
+                splitted_reservs = self.env['hotel.reservation'].search([
+                    ('splitted', '=', True),
+                    '|',('parent_reservation', '=', master_reservation.id),('id', '=', master_reservation.id),
+                    ('folio_id', '=', record.folio_id.id),
+                    ('id', '!=', record.id),
+                    ('state', '!=', 'cancelled')
+                ])
+                splitted_reservs.action_cancel()
+
     @api.multi
     def draft(self):
         for record in self:
             record.write({'state': 'draft','to_assign':False})
+
+            if record.splitted:
+                master_reservation = record.parent_reservation or record
+                splitted_reservs = self.env['hotel.reservation'].search([
+                    ('splitted', '=', True),
+                    '|',('parent_reservation', '=', master_reservation.id),('id', '=', master_reservation.id),
+                    ('folio_id', '=', record.folio_id.id),
+                    ('id', '!=', record.id),
+                    ('state', '!=', 'draft')
+                ])
+                splitted_reservs.draft()
 
     @api.multi
     def action_reservation_checkout(self):
@@ -402,6 +432,66 @@ class HotelReservation(models.Model):
                 record.is_checkout = False
                 folio = self.env['hotel.folio'].browse(self.folio_id.id)
                 folio.checkouts_reservations = folio.room_lines.search_count([('folio_id','=',folio.id),('is_checkout','=',True)])
+
+    @api.multi
+    def unify(self):
+        self.ensure_one()
+        if not self.splitted or self.state == 'cancelled' or self.state == 'confirm':
+            raise ValidationError("This reservation can't be unified")
+
+        master_reservation = self.parent_reservation or self
+
+        splitted_reservs = self.env['hotel.reservation'].search([
+            ('splitted', '=', True),
+            ('parent_reservation', '=', master_reservation.id),
+            ('folio_id', '=', self.folio_id.id),
+        ])
+
+        rooms_products = splitted_reservs.mapped('product_id.id')
+        if len(rooms_products) > 1 or (len(rooms_products) == 1 and master_reservation.product_id.id != rooms_products[0]):
+            raise ValidationError("This reservation can't be unified: They all need to be in the same room")
+
+        # Search checkout
+        last_checkout = splitted_reservs[0].checkout
+        for reserv in splitted_reservs:
+            if last_checkout > reserv.checkout:
+                last_checkout = reserv.checkout
+
+        # Agrupate reservation lines
+        reservation_lines = splitted_reservs.mapped('reservation_lines')
+        reservation_lines.sorted(key=lambda r: r.date)
+        rlines = []
+        for rline in reservation_lines:
+            rlines.append((0, False, {
+                'date': rline.date,
+                'price': rline.price,
+            }))
+        # Unify
+        splitted_reservs.unlink()
+        master_reservation.write({
+            'reservation_lines': rlines,
+            'checkout': last_checkout,
+            'splitted': False,
+        })
+
+        import wdb
+        wdb.set_trace()
+
+        return True
+
+    @api.multi
+    def generate_copy_values(self, checkin=False, checkout=False):
+        self.ensure_one()
+        return {
+            'name': self.name,
+            'adults': self.adults,
+            'children': self.children,
+            'checkin': checkin or self.checkin,
+            'checkout': checkout or self.checkout,
+            'folio_id': self.folio_id.id,
+            'product_id': self.product_id.id,
+            'parent_reservation': self.parent_reservation.id,
+        }
 
 
     @api.model
@@ -601,6 +691,18 @@ class HotelReservation(models.Model):
                 folio.checkins_reservations = folio.room_lines.search_count([('folio_id','=',folio.id),('is_checkin','=',True)])
             #~ line = r.order_line_id
             #~ line.button_confirm()
+
+            if r.splitted:
+                master_reservation = r.parent_reservation or r
+                splitted_reservs = self.env['hotel.reservation'].search([
+                    ('splitted', '=', True),
+                    '|',('parent_reservation', '=', master_reservation.id),('id', '=', master_reservation.id),
+                    ('folio_id', '=', r.folio_id.id),
+                    ('id', '!=', r.id),
+                    ('state', '!=', 'confirm')
+                ])
+                _logger.info(splitted_reservs)
+                splitted_reservs.confirm()
         return True
 
 
@@ -646,5 +748,3 @@ class HotelReservation(models.Model):
                reservation with room those already reserved in this \
                reservation period: %s' % occupied_name
            raise ValidationError(warning_msg)
-
-

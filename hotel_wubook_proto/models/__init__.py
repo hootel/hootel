@@ -29,5 +29,6 @@ from . import inherit_virtual_room_availability
 from . import inherit_hotel_reservation
 from . import inherit_hotel_folio
 from . import inherit_hotel_calendar_management
+from . import inherit_res_partner
 from . import wubook_channel_info
 from . import wubook_issue

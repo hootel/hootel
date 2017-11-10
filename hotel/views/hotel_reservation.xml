@@ -10,11 +10,14 @@
             <field name="arch" type="xml">
                 <form string="Reservation" >
                     <header>
+                        <field name="splitted" invisible="True" />
                         <!--<button name="send_reservation_mail" type="object" string="Send Reservation Email" states="confirm" class="oe_highlight"/>-->
                         <button name="confirm" string="Confirm" states="draft" class="oe_highlight" type="object"/>
                         <button name="action_cancel" string="Cancel Reservation" states="draft,confirm,done" class="oe_highlight" type="object"/>
                         <button name="action_reservation_checkout" string="Done" states="booking,cancelled" class="oe_highlight" type="object"/>
                         <button name="draft" string="Set to Draft" states="cancel" class="oe_highlight" type="object"/>
+                        <button name="%(action_hotel_split_reservation)d" string="Split" type="action" class="oe_highlight" icon="cut" states="draft" />
+                        <button name="unify" string="Unify" type="object" class="oe_highlight" icon="compress" states="draft" attrs="{'invisible':['|',['splitted', '=', False]]}" />
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>

@@ -65,10 +65,10 @@ class HotelReservation(models.Model):
     @api.model
     def create(self, vals):
         if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
-            rooms_avail = self.get_availability(vals['checkin'],
-                                                vals['checkout'],
-                                                vals['product_id'],
-                                                dbchanged=False)
+            rooms_avail = self.env['hotel.reservation'].get_availability(vals['checkin'],
+                                                                         vals['checkout'],
+                                                                         vals['product_id'],
+                                                                         dbchanged=False)
             _logger.info("DISPONIBILIDAD CREATE")
             _logger.info(rooms_avail)
             if any(rooms_avail):

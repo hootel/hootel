@@ -39,6 +39,7 @@
     'demo': ['data/hotel_data.xml'],
     'data': [
         'wizard/massive_changes.xml',
+        'wizard/split_reservation.xml',
         'views/res_config.xml',
         'data/menus.xml',
         'security/hotel_security.xml',

@@ -216,7 +216,7 @@ HotelCalendar.prototype = {
 
   getReservationsByDay: function(/*String,MomentObject*/day, /*Bool*/noStrict, /*Int?*/nroom, /*Int?*/nbed, /*HReservation?*/ignoreThis) {
     var oday = day;
-	var day = HotelCalendar.toMomentUTC(day);
+	  var day = HotelCalendar.toMomentUTC(day);
     if (!day) {
     	//console.log(oday);
         return false;
@@ -226,18 +226,21 @@ HotelCalendar.prototype = {
 
     var reservs = [];
     for (var r of stored_reservs) {
+      // Forced hours
+      var sdate = r.startDate.clone().set({'hour': 12, 'minute': 0, 'second': 0});
+      var edate = r.endDate.clone().set({'hour': 10, 'minute': 0, 'second': 0});
       if (noStrict) {
-    	  if ((day.isBetween(r.startDate, r.endDate.clone().startOf('day')) || day.isSame(r.startDate.clone().startOf('day')))
-    	    && !day.isSame(r.endDate)
+    	  if ((day.isBetween(sdate, edate) || day.isSame(sdate))
+    	    && !day.isSame(edate)
 	        && (typeof nroom === 'undefined' || r.room.number == nroom)
 	        && (typeof nbed === 'undefined' || r.beds_.includes(nbed))) {
-	        reservs.push(r);
+	           reservs.push(r);
 	      }
       } else {
-		  if ((day.isBetween(r.startDate, r.endDate) || (day.isSame(r.startDate) || day.isSame(r.endDate)))
+		     if ((day.isBetween(sdate, edate) || (day.isSame(sdate) || day.isSame(edate)))
 	        && (typeof nroom === 'undefined' || r.room.number == nroom)
 	        && (typeof nbed === 'undefined' || r.beds_.includes(nbed))) {
-	        reservs.push(r);
+	           reservs.push(r);
 	      }
       }
     }
@@ -326,20 +329,20 @@ HotelCalendar.prototype = {
       var numBeds = +limits.right.dataset.hcalBedNum - +limits.left.dataset.hcalBedNum;
       var parentRow = this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`);
       for (var i=0; i<=diff_date; i++) {
-    	var ndate = HotelCalendar.toMoment(parentRow.dataset.hcalDate).add(i, 'd').utc();
-    	if (i === 0) {
-    	  // hours are forced because no one cares about them
-    	  ndate = reservation.startDate.clone().set({'hour': 12, 'minute': 0, 'second': 0});
-    	}
-    	if (i === diff_date) {
-    	  // hours are forced because no one cares about them
-    	  ndate = reservation.endDate.clone().set({'hour': 10, 'minute': 0, 'second': 0});
+    	  var ndate = HotelCalendar.toMoment(parentRow.dataset.hcalDate).add(i, 'd').utc();
+    	  if (i === 0) {
+          // hours are forced because no one cares about them
+    	    ndate = reservation.startDate.clone().set({'hour': 12, 'minute': 0, 'second': 0});
+    	  }
+    	  else if (i === diff_date) {
+    	    // hours are forced because no one cares about them
+    	    ndate = reservation.endDate.clone().set({'hour': 10, 'minute': 0, 'second': 0});
       	}
         for (var b=0; b<=numBeds; b++) {
           var reservs = this.getReservationsByDay(ndate, false, reservation.room.number, +limits.left.dataset.hcalBedNum+b, reservation);
           reservs = _.reject(reservs, function(item){ return item===reservation; });
           if (reservs.length) {
-              return this.getReservationCellLimits(reservation, nbed?nbed+1:1); // Recursive: Search best place
+            return this.getReservationCellLimits(reservation, nbed?nbed+1:1); // Recursive: Search best place
           }
         }
       }

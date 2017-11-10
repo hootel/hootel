@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+    <record id="view_users_form" model="ir.ui.view">
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form" />
+				<field name="arch" type="xml">
+					<xpath expr="//page/group/group[@name='preferences']" position="before">
+						<group string="Calendar (PMS)" name="calendar">
+							<field name="pms_show_notifications" />
+						</group>
+					</xpath>
+        </field>
+    </record>
+
+	</data>
+</openerp>

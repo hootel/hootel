@@ -1,0 +1,47 @@
+<odoo>
+
+	<record id="view_hotel_node_slave_installer" model="ir.ui.view">
+		<field name="name">hotel.node.slave.installer.form</field>
+		<field name="model">hotel.node.slave.installer</field>
+		<field name="inherit_id" ref="base.res_config_installer"/>
+		<field name="arch" type="xml">
+			<xpath expr="//form[1]" position="attributes">
+				<attribute name="string">Master Server Connection</attribute>
+			</xpath>
+			<xpath expr="//footer[1]" position="replace">
+				<footer>
+					<button name="action_next" type="object" string="Continue" class="oe_highlight"/>
+				</footer>
+			</xpath>
+			<xpath expr="//form/separator[1]" position="replace">
+				<p class="oe_grey">
+					Configure Master Server Connection
+				</p>
+				<group>
+					<field name="node_master_address" />
+				</group>
+				<group>
+					<field name="node_master_user" />
+					<field name="node_master_passwd" password="True" />
+				</group>
+			</xpath>
+		</field>
+	</record>
+
+	<record id="action_node_slave_installer" model="ir.actions.act_window">
+		<field name="name">Node Slave Installer</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">hotel.node.slave.installer</field>
+		<field name="view_id" ref="view_hotel_node_slave_installer"/>
+		<field name="view_type">form</field>
+		<field name="view_mode">form</field>
+		<field name="target">new</field>
+	</record>
+
+	<record id="node_slave_installer_todo" model="ir.actions.todo">
+		<field name="action_id" ref="action_node_slave_installer"/>
+		<field name="sequence">3</field>
+		<field name="type">automatic</field>
+	</record>
+
+</odoo>

@@ -21,6 +21,7 @@
 ##############################################################################
 from . import inherit_hotel_reservation
 from . import inherit_product_pricelist_item
+from . import inherit_res_users
 from . import bus_hotel_calendar
 from . import virtual_room_pricelist_cached
 from . import hotel_calendar_management

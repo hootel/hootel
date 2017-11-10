@@ -40,6 +40,7 @@
         'views/general.xml',
         'views/actions.xml',
         'views/res_config.xml',
+        'views/inherit_res_users.xml',
         'data/views.xml',
         'data/menus.xml',
 	    'security/ir.model.access.csv',

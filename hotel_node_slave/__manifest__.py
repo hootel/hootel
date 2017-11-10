@@ -21,13 +21,13 @@
 ##############################################################################
 
 {
-    'name': 'Hotel WuBook Prototype',
+    'name': 'Hotel Node Slave',
     'version': '1.0',
     'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
     'website': 'https://www.eiqui.com',
     'category': 'eiqui/hotel',
-    'summary': "Hotel WuBook",
-    'description': "Hotel WuBook Prototype",
+    'summary': "Am I a slave? I demand my rights!",
+    'description': "Hotel Node Slave",
     'depends': [
         'hotel',
     ],
@@ -35,30 +35,15 @@
         'python': ['xmlrpclib']
     },
     'data': [
-        'data/cron_jobs.xml',
-        'wizards/wubook_installer.xml',
-        'wizards/wubook_import_plan_prices.xml',
-        'wizards/wubook_import_plan_restrictions.xml',
-        'wizards/wubook_import_availability.xml',
         'views/general.xml',
-        'views/res_config.xml',
-        'views/inherit_hotel_reservation.xml',
-        'views/inherit_hotel_virtual_room.xml',
-        'views/inherit_hotel_folio.xml',
-        'views/inherit_product_pricelist.xml',
-        'views/inherit_product_pricelist_item.xml',
-        'views/inherit_reservation_restriction.xml',
-        'views/inherit_reservation_restriction_item.xml',
-        'views/inherit_res_partner.xml',
-        'views/wubook_channel_info.xml',
-        'views/wubook_issue.xml',
-        'data/menus.xml',
-        'data/sequences.xml',
-        'security/ir.model.access.csv',
-        # 'views/res_config.xml'
+        'views/actions.xml',
+    ],
+    'qweb': [
+        'static/src/xml/*.xml',
     ],
     'test': [
     ],
+
     'installable': True,
     'auto_install': False,
     'application': False,

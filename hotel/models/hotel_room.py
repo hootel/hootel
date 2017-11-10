@@ -60,6 +60,7 @@ class HotelRoom(models.Model):
     ], 'Price Type', default='fixed', required=True)
     price_virtual_room = fields.Many2one('hotel.virtual.room', 'Price Virtual Room',
                                          help='Price will be based on selected Virtual Room')
+    sequence = fields.Integer('Sequence', default=0)
 #     price_virtual_room_domain = fields.Char(
 #         compute=_compute_price_virtual_room_domain,
 #         readonly=True,

@@ -941,6 +941,7 @@ class WuBook(models.TransientModel):
                     'zip': book['customer_zip'],
                     'street': book['customer_address'],
                     'email': book['customer_mail'],
+                    'unconfirmed': True,
                     # 'lang': lang and lang.id,
                 }
                 partner_id = res_partner_obj.create(vals)
@@ -954,71 +955,94 @@ class WuBook(models.TransientModel):
 
             reservations = []
             used_rooms = []
+            parent_reservation = False
             for vroom in vrooms:
-                free_rooms = hotel_vroom_obj.check_availability_virtual_room(checkin,
-                                                                             checkout,
-                                                                             virtual_room_id=vroom.id,
-                                                                             notthis=used_rooms)
-                if any(free_rooms):
-                    # Total Price Room
-                    reservation_lines = []
-                    tprice = 0.0
-                    for broom in book['booked_rooms']:
-                        if str(broom['room_id']) == vroom.wrid:
-                            for brday in broom['roomdays']:
-                                wndate = datetime.strptime(brday['day'], DEFAULT_WUBOOK_DATE_FORMAT)
-                                reservation_lines.append((0, False, {
-                                    'date': wndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                    'price': brday['price']
-                                }))
-                                tprice += brday['price']
-                            break
-                    # Occupancy
-                    occupancy = 0
-                    customer_room_index = 0
-                    for broom in book['rooms_occupancies']:
-                        if str(broom['id']) == vroom.wrid:
-                            if len(free_rooms) > customer_room_index:
-                                occupancy = broom['occupancy']
-                                vals = {
-                                    'checkin': checkin,
-                                    'checkout': checkout,
-                                    'adults': occupancy,
-                                    'children': 0,
-                                    'product_id': free_rooms[customer_room_index].product_id.id,
-                                    'product_uom': free_rooms[customer_room_index].product_id.product_tmpl_id.uom_id.id,
-                                    'product_uom_qty': 1,
-                                    'reservation_lines': reservation_lines,
-                                    'name': free_rooms[customer_room_index].name,
-                                    'price_unit': tprice,
-                                    'to_assign': not is_cancellation,
-                                    'wrid': str(book['reservation_code']),
-                                    'wchannel_id': wchannel_info and wchannel_info.id,
-                                    'wchannel_reservation_code': str(book['channel_reservation_code']),
-                                    'wstatus': str(book['status']),
-                                    'to_read': True,
-                                    'state': is_cancellation and 'cancelled' or 'draft',
-                                    'virtual_room_id': vroom.id,
-                                }
-                                reservations.append((0, False, vals))
-                                used_rooms.append(free_rooms[customer_room_index].id)
-                                customer_room_index = customer_room_index + 1
-                            else:
-                                if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
-                                    failed_reservations.append(book['channel_reservation_code'])
-                                self.create_wubook_issue('reservation',
-                                                         "Can't found a free room for reservation from wubook (#B)",
-                                                         '', wid=book['reservation_code'])
-                else:
-                    if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
-                        failed_reservations.append(book['channel_reservation_code'])
-                    self.create_wubook_issue('reservation',
-                                             "Can't found a free room for reservation from wubook",
-                                             '', wid=book['reservation_code'])
+                dates_checkin = [checkin_utc_dt, False]
+                dates_checkout = [checkout_utc_dt, False]
+                split_booking = False
+                while dates_checkin[0]:
+                    checkin_str = dates_checkin[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                    checkout_str = dates_checkout[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
+                    free_rooms = hotel_vroom_obj.check_availability_virtual_room(checkin_str,
+                                                                                 checkout_str,
+                                                                                 virtual_room_id=vroom.id,
+                                                                                 notthis=used_rooms)
+                    if any(free_rooms):
+                        # Total Price Room
+                        reservation_lines = []
+                        tprice = 0.0
+                        for broom in book['booked_rooms']:
+                            if str(broom['room_id']) == vroom.wrid:
+                                for brday in broom['roomdays']:
+                                    wndate = datetime.strptime(brday['day'], DEFAULT_WUBOOK_DATE_FORMAT)
+                                    reservation_lines.append((0, False, {
+                                        'date': wndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                        'price': brday['price']
+                                    }))
+                                    tprice += brday['price']
+                                break
+                        # Occupancy
+                        occupancy = 0
+                        customer_room_index = 0
+                        for broom in book['rooms_occupancies']:
+                            if str(broom['id']) == vroom.wrid:
+                                if len(free_rooms) > customer_room_index:
+                                    occupancy = broom['occupancy']
+                                    vals = {
+                                        'checkin': checkin_str,
+                                        'checkout': checkout_str,
+                                        'adults': occupancy,
+                                        'children': 0,
+                                        'product_id': free_rooms[customer_room_index].product_id.id,
+                                        'product_uom': free_rooms[customer_room_index].product_id.product_tmpl_id.uom_id.id,
+                                        'product_uom_qty': 1,
+                                        'reservation_lines': reservation_lines,
+                                        'name': free_rooms[customer_room_index].name,
+                                        'price_unit': tprice,
+                                        'to_assign': not is_cancellation,
+                                        'wrid': str(book['reservation_code']),
+                                        'wchannel_id': wchannel_info and wchannel_info.id,
+                                        'wchannel_reservation_code': str(book['channel_reservation_code']),
+                                        'wstatus': str(book['status']),
+                                        'to_read': True,
+                                        'state': is_cancellation and 'cancelled' or 'draft',
+                                        'virtual_room_id': vroom.id,
+                                        'splitted': split_booking,
+                                        'parent_reservation': parent_reservation,
+                                    }
+                                    reserv_id = hotel_reserv_obj.create(vals)
+                                    reservations.append(reserv_id)
+                                    if not parent_reservation:
+                                        parent_reservation = reserv_id
+                                    used_rooms.append(free_rooms[customer_room_index].id)
+                                    customer_room_index = customer_room_index + 1
+                                else:
+                                    if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
+                                        failed_reservations.append(book['channel_reservation_code'])
+                                    self.create_wubook_issue('reservation',
+                                                             "Can't found a free room for reservation from wubook (#B)",
+                                                             '', wid=book['reservation_code'])
+
+                        dates_checkin = [dates_checkin[1], False]
+                        dates_checkout = [dates_checkout[1], False]
+                    else:
+                        split_booking = True
+                        date_diff = (dates_checkout[0] - dates_checkin[0]).days
+                        if date_diff <= 0:
+                            if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
+                                failed_reservations.append(book['channel_reservation_code'])
+                            self.create_wubook_issue('reservation',
+                                                     "Can't found a free room for reservation from wubook",
+                                                     '', wid=book['reservation_code'])
+                        else:
+                            dates_checkin = [dates_checkin[0], dates_checkin[0] + timedelta(days=date_diff - 1)]
+                            dates_checkout = [dates_checkout[0] - timedelta(days=1), dates_checkout[0]]
+
             # Create Folio
             if not any(failed_reservations):
                 vals = {
-                    'room_lines': reservations,
+                    'room_lines': (6, False, reservations),
                     'wcustomer_notes': book['customer_notes'],
                 }
                 if folio_id:
@@ -1030,6 +1054,8 @@ class WuBook(models.TransientModel):
                     })
                     folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
                 processed_rids.append(book['reservation_code'])
+            else:
+                hotel_reserv_obj.browse(reservations).unlink()
 
             # Update Odoo availability (don't wait for wubook)
             fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),

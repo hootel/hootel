@@ -95,4 +95,4 @@ class VirtualRoom(models.Model):
             room_categories = virtual_room.room_type_ids.mapped('cat_id.id')
             rooms_linked = virtual_room.room_ids | self.env['hotel.room'].search([('categ_id.id', 'in', room_categories)])
             free_rooms = free_rooms & rooms_linked
-        return free_rooms
+        return free_rooms.sorted(key=lambda r: r.sequence)
