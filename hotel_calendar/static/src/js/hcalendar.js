@@ -1128,6 +1128,14 @@ HotelCalendar.prototype = {
     var boundsEnd = limits.right.getBoundingClientRect();
 
     divRes.style = {}; // FIXME: Reset Style. Good method?
+
+    if (reserv.splitted) {
+      //divRes.classList.add('hcal-reservation-splitted');
+      divRes.style.borderWidth = "1px 6px";
+      var magicNumber = Math.floor(Math.abs(Math.sin((reserv.getUserData('parent_reservation') || reserv.id))) * 100000);
+      var bbColor = this._intToRgb(magicNumber);
+      divRes.style.borderColor = `rgb(${bbColor[0]},${bbColor[1]},${bbColor[2]})`;
+    }
     divRes.style.backgroundColor = reserv.color;
     var rgb = this._hexToRGB(`0x${reserv.color.substr(1)}`);
     var invColor = this._getInverseColor(rgb[0]/255, rgb[1]/255, rgb[2]/255);
@@ -1335,6 +1343,7 @@ HotelCalendar.prototype = {
           itemReserv.startDate.clone(),
           itemReserv.endDate.clone(),
           '#c2c2c2',
+          false,
           true,
           true,
           true,
@@ -1568,6 +1577,10 @@ HotelCalendar.prototype = {
   },
 
   //==== COLOR FUNCTIONS (RANGE: 0.0|1.0)
+  _intToRgb: function(/*Int*/RGBint) {
+    return [(RGBint >> 16) & 255, (RGBint >> 8) & 255, RGBint & 255];
+  },
+
   _hueToRgb: function(/*Int*/v1, /*Int*/v2, /*Int*/h) {
     if (h<0.0) { h+=1; }
     if (h>1.0) { h-=1; }
@@ -1691,7 +1704,7 @@ HRoom.prototype = {
 /** RESERVATION OBJECT **/
 function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/adults,
                         /*Int?*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate,
-                        /*String?*/color, /*Boolean?*/readOnly, /*Boolean?*/fixDays, /*Boolean?*/fixRooms,
+                        /*String?*/color, /*Boolean?*/splitted, /*Boolean?*/readOnly, /*Boolean?*/fixDays, /*Boolean?*/fixRooms,
                         /*Boolean?*/unusedZone, /*Int?*/linkedId) {
   if (typeof room === 'undefined') {
     delete this;
@@ -1712,6 +1725,7 @@ function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/
   this.fixRooms = fixRooms || false;
   this.unusedZone = unusedZone || false;
   this.linkedId = linkedId || -1;
+  this.splitted = splitted || false;
 
   this.beds_ = [];
   this.userData_ = {};

@@ -138,7 +138,8 @@ var HotelCalendarView = View.extend({
             var qdict = {
                 'name': tp[0],
                 'phone': tp[1],
-                'arrival_hour': arrival_hour
+                'arrival_hour': arrival_hour,
+                'num_split': tp[3]
             };
 
             $(ev.detail.reservationDiv).tooltip({
@@ -433,11 +434,13 @@ var HotelCalendarView = View.extend({
                     HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT), // Date Start
                     HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT), // Date End
                     r[8], // Color
-                    r[9] || false, // Read Only
-                    r[10] || false, // Move Days
-                    r[11] || false // Move Rooms
+                    r[9], // Splitted
+                    r[11] || false, // Read Only
+                    r[12] || false, // Move Days
+                    r[13] || false // Move Rooms
                 );
                 nreserv.addUserData({'folio_id': r[7]});
+                nreserv.addUserData({'parent_reservation': r[10]});
                 reservs.push(nreserv);
             }
             self._hcalendar.setReservations(reservs);
@@ -806,11 +809,13 @@ var HotelCalendarView = View.extend({
                       HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
                       HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
                       reserv['reserve_color'],
+                      reserv['splitted'],
                       reserv['read_only'],
                       reserv['fix_days'],
                       reserv['fix_rooms']
                     );
                     nreserv.addUserData({'folio_id': reserv['folio_id']});
+                    nreserv.addUserData({'parent_reservation': reserv['parent_reservation']});
                     this._reserv_tooltips[reserv['reserv_id']] = notif[1]['tooltip'];
                     this._hcalendar.addReservations([nreserv]);
                   }
@@ -867,11 +872,13 @@ var HotelCalendarView = View.extend({
                     HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT), // Date Start
                     HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT), // Date End
                     r[8], // Color
-                    r[9] || false, // Read Only
-                    r[10] || false, // Move Days
-                    r[11] || false // Move Rooms
+                    r[9], // Splitted
+                    r[11] || false, // Read Only
+                    r[12] || false, // Move Days
+                    r[13] || false // Move Rooms
                 );
                 nreserv.addUserData({'folio_id': r[7]});
+                nreserv.addUserData({'parent_reservation': r[10]});
                 reservs.push(nreserv);
             }
 

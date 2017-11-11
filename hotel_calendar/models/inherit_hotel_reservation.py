@@ -45,14 +45,25 @@ class HotelReservation(models.Model):
                 reserv.checkout,
                 reserv.folio_id.id,
                 reserv.reserve_color,
+                reserv.splitted,
+                reserv.parent_reservation.id,
                 False,  # Read-Only
                 reserv.splitted,   # Fix Days
                 False))  # Fix Rooms
+            num_split = 0
+            if reserv.splitted:
+                master_reserv = reserv.parent_reservation or reserv
+                num_split = self.search_count([
+                    ('folio_id', '=', reserv.folio_id.id),
+                    '|',('parent_reservation', '=', master_reserv.id), ('id', '=', master_reserv.id),
+                    ('splitted', '=', True),
+                ])
             json_reservation_tooltips.update({
                 reserv.id: (
                     reserv.folio_id.partner_id.name,
                     reserv.folio_id.partner_id.mobile or reserv.folio_id.partner_id.phone or _('Undefined'),
-                    reserv.checkin)
+                    reserv.checkin,
+                    num_split)
             })
         return (json_reservations, json_reservation_tooltips)
 
@@ -211,6 +222,8 @@ class HotelReservation(models.Model):
             reservation_id.checkout,
             reservation_id.folio_id.id,
             reservation_id.reserve_color,
+            reservation_id.splitted,
+            reservation_id.parent_reservation.id,
             reservation_id.product_id.name,
             reservation_id.partner_id.mobile or reservation_id.partner_id.phone or _('Undefined'),
             reservation_id.state,
@@ -231,6 +244,7 @@ class HotelReservation(models.Model):
             color = vals.get('reserve_color') or record.reserve_color
             state = vals.get('state') or record.state
             splitted = vals.get('splitted') or record.splitted
+            parent_reservation = vals.get('parent_reservation') and self.env['hotel.reservation'].browse(vals.get('parent_reservation')) or record.parent_reservation
 
             self.env['bus.hotel.calendar'].send_reservation_notification(
                 'write',
@@ -245,6 +259,8 @@ class HotelReservation(models.Model):
                 checkout,
                 folio_id.id,
                 color,
+                splitted,
+                parent_reservation.id,
                 product_id.name,
                 partner_id.mobile or partner_id.phone or _('Undefined'),
                 state,
@@ -267,6 +283,8 @@ class HotelReservation(models.Model):
                 record.checkout,
                 record.folio_id.id,
                 record.reserve_color,
+                record.splitted,
+                reserv.parent_reservation.id,
                 record.product_id.name,
                 record.partner_id.mobile or record.partner_id.phone or _('Undefined'),
                 record.state,

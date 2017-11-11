@@ -212,7 +212,7 @@
 	/*background-color: #729fcf;*/
 	/*transform: skewX(-25deg);*/
 	border-radius: 5px;
-	border: 2px groove #3465a4;
+	border: 1px solid #3465a4;
 	color: white;
 	white-space: nowrap;
 	overflow: hidden;
@@ -223,6 +223,10 @@
 }
 .hcal-reservation span {
 	position: relative;
+}
+
+.hcal-reservation-splitted {
+	border-width: 1px 10px;
 }
 
 .hcal-reservation-invalid {

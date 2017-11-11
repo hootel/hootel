@@ -181,6 +181,22 @@ class HotelReservation(models.Model):
         return super(HotelReservation, self).confirm()
 
     @api.multi
+    def generate_copy_values(self, checkin=False, checkout=False):
+        self.ensure_one()
+        res = super(HotelReservation, self).generate_copy_values(checkin=checkin, checkout=checkout)
+        res.update({
+            'wrid': self.wrid,
+            'wchannel_id': self.wchannel_id,
+            'wchannel_reservation_code': self.wchannel_reservation_code,
+            'wis_from_channel': self.wis_from_channel,
+            'to_read': self.to_read,
+            'wstatus': self.wstatus,
+            'wstatus_reason': self.wstatus_reason,
+            'wcustomer_notes': self.wcustomer_notes,
+        })
+        return res
+
+    @api.multi
     def action_reservation_checkout(self):
         for record in self:
             record.mark_as_readed()
