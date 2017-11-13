@@ -845,6 +845,7 @@ class WuBook(models.TransientModel):
         default_arrival_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_arrival_hour')
         default_departure_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_departure_hour')
 
+        # Use specific method because others include connection step
         def fetch_values(dfrom, dto):
             rcode, results = self.SERVER.fetch_rooms_values(self.TOKEN,
                                                             self.LCODE,
@@ -956,10 +957,13 @@ class WuBook(models.TransientModel):
             reservations = []
             used_rooms = []
             parent_reservation = False
+            # Check reservation vrooms avail
             for vroom in vrooms:
                 dates_checkin = [checkin_utc_dt, False]
                 dates_checkout = [checkout_utc_dt, False]
                 split_booking = False
+                split_map_index = {}
+                parent_reservation = -1
                 while dates_checkin[0]:
                     checkin_str = dates_checkin[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     checkout_str = dates_checkout[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
@@ -1009,12 +1013,14 @@ class WuBook(models.TransientModel):
                                         'state': is_cancellation and 'cancelled' or 'draft',
                                         'virtual_room_id': vroom.id,
                                         'splitted': split_booking,
-                                        'parent_reservation': parent_reservation or False,
                                     }
-                                    reserv_id = hotel_reserv_obj.create(vals)
-                                    reservations.append(reserv_id)
-                                    if not parent_reservation:
-                                        parent_reservation = reserv_id
+                                    reservations.append(vals)
+                                    if split_booking:
+                                        if parent_reservation == -1:
+                                            parent_reservation = len(reservations)-1
+                                            split_map_index = { parent_reservation: [] }
+                                        else:
+                                            split_map_index[parent_reservation].append(len(reservations)-1)
                                     used_rooms.append(free_rooms[customer_room_index].id)
                                     customer_room_index = customer_room_index + 1
                                 else:
@@ -1042,7 +1048,7 @@ class WuBook(models.TransientModel):
             # Create Folio
             if not any(failed_reservations):
                 vals = {
-                    'room_lines': (6, False, reservations),
+                    'room_lines': (0, False, reservations),
                     'wcustomer_notes': book['customer_notes'],
                 }
                 if folio_id:
@@ -1054,8 +1060,21 @@ class WuBook(models.TransientModel):
                     })
                     folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
                 processed_rids.append(book['reservation_code'])
-            else:
-                hotel_reserv_obj.browse(reservations).unlink()
+
+            # Update Reservation Split parent
+            reservation_ids = hotel_reserv_obj.search([('folio_id', '=', folio_id.id)])
+            counter = 0
+            for reserv in reservation_ids:
+                master_ids = split_map_index.keys()
+                master_reserv = False
+                for mid in master_ids:
+                    child_ids = master_ids[mid]
+                    for child of child_ids:
+                        if child == counter:
+                            reserv.parent_reservation = master_reserv.id
+                        elif child == mid:
+                            master_reserv = reservs
+                counter = counter + 1
 
             # Update Odoo availability (don't wait for wubook)
             fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
