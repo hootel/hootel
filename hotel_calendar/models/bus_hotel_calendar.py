@@ -35,7 +35,7 @@ class BusHotelCalendar(models.TransientModel):
                                            room_name, partner_phone, state, fix_days):
         user_id = self.env['res.users'].browse(self.env.uid)
         master_reserv = parent_reservation or reserv_id
-        num_split = self.search_count([
+        num_split = self.env['hotel.reservation'].search_count([
             ('folio_id', '=', folio_id),
             '|',('parent_reservation', '=', master_reserv), ('id', '=', master_reserv),
             ('splitted', '=', True),

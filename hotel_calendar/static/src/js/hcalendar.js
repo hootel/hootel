@@ -11,7 +11,7 @@
  *     - underscore
  */
 
-function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/pricelist, /*HTMLObject?*/_base) {
+function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/pricelist, /*restrictions*/restrictions, /*HTMLObject?*/_base) {
   if (window === this) {
     return new HotelCalendar(querySelector, options, pricelist, _base);
   }
@@ -55,6 +55,7 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
 
   /** Internal Values **/
   this._pricelist = pricelist || [];
+  this._restrictions = restrictions || {};
   this._reservations = [];
   this.isNRerservation = true;
   this.tableCreated = false;
@@ -986,6 +987,18 @@ HotelCalendar.prototype = {
             var dd_fmrt = dd_local.format(HotelCalendar.DATE_FORMAT_SHORT_);
             cell.textContent = _.has(listitem['days'], dd_fmrt)?listitem['days'][dd_fmrt]:'...';
           }
+        }
+      }
+    }
+    // Rooms Restrictions
+    if (this._restrictions) {
+      var restrictions_keys = _.keys(this._restrictions)
+      for (var room_id of restrictions_keys) {
+        var restrictions = this._restrictions[room_id]
+        var days = _.keys(restrictions);
+        for (var day of days) {
+          var rest_day = restrictions[day];
+          console.log(rest_day);
         }
       }
     }

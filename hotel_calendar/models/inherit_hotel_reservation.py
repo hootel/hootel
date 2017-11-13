@@ -145,6 +145,42 @@ class HotelReservation(models.Model):
         return json_rooms_prices
 
     @api.multi
+    def get_hcalendar_restrictions_data(self, dfrom, dto):
+        restriction_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id')
+        if restriction_id:
+            restriction_id = int(restriction_id)
+        date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=-1)
+        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT)
+        # Get Prices
+        date_diff = abs((date_start - date_end).days) + 1
+        json_rooms_rests = {}
+        vrooms = self.env['hotel.virtual.room'].search([])
+        vroom_rest_obj = self.env['hotel.virtual.room.restriction.item']
+        for vroom in vrooms:
+            days = {}
+            for i in range(0, date_diff):
+                ndate = date_start + timedelta(days=i)
+                ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                rest_id = vroom_rest_obj.search([
+                    ('virtual_room_id', '=', vroom.id),
+                    ('date_start', '>=', ndate_str),
+                    ('date_end', '<=', ndate_str),
+                    ('applied_on', '=', '0_virtual_room')
+                ], limit=1)
+                if rest_id:
+                    days.update({
+                        ndate.strftime("%d/%m/%Y"): (
+                            rest_id.min_stay,
+                            rest_id.min_stay_arrival,
+                            rest_id.max_stay,
+                            rest_id.closed,
+                            rest_id.closed_arrival,
+                            rest_id.closed_departure)
+                    })
+            json_rooms_rests.update({vroom.id: days})
+        return json_rooms_rests
+
+    @api.multi
     def get_hcalendar_settings(self):
         type_move = self.env['ir.values'].get_default('hotel.config.settings', 'type_move')
         user_id = self.env['res.users'].browse(self.env.uid)
@@ -160,7 +196,7 @@ class HotelReservation(models.Model):
         }
 
     @api.multi
-    def get_hcalendar_all_data(self, dfrom, dto, domainRooms, domainReservations, withRooms=True, withPricelist=True):
+    def get_hcalendar_all_data(self, dfrom, dto, domainRooms, domainReservations, withRooms=True, withPricelist=True, withRestrictions=True):
         if not dfrom or not dto:
             raise ValidationError('Input Error: No dates defined!')
 
@@ -173,7 +209,8 @@ class HotelReservation(models.Model):
             'rooms': withRooms and self._hcalendar_room_data(rooms) or [],
             'reservations': json_reservations,
             'tooltips': json_reservation_tooltips,
-            'pricelist': withPricelist and self.get_hcalendar_pricelist_data(dfrom, dto) or {}
+            'pricelist': withPricelist and self.get_hcalendar_pricelist_data(dfrom, dto) or {},
+            'restrictions': withRestrictions and self.get_hcalendar_restrictions_data(dfrom, dto) or {},
         }
 
         return vals
