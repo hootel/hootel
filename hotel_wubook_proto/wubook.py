@@ -1009,7 +1009,7 @@ class WuBook(models.TransientModel):
                                         'state': is_cancellation and 'cancelled' or 'draft',
                                         'virtual_room_id': vroom.id,
                                         'splitted': split_booking,
-                                        'parent_reservation': parent_reservation,
+                                        'parent_reservation': parent_reservation or False,
                                     }
                                     reserv_id = hotel_reserv_obj.create(vals)
                                     reservations.append(reserv_id)
