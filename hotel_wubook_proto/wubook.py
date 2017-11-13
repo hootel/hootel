@@ -1063,18 +1063,18 @@ class WuBook(models.TransientModel):
 
             # Update Reservation Split parent
             reservation_ids = hotel_reserv_obj.search([('folio_id', '=', folio_id.id)])
-            counter = 0
-            for reserv in reservation_ids:
-                master_ids = split_map_index.keys()
-                master_reserv = False
-                for mid in master_ids:
+            master_ids = split_map_index.keys()
+            master_reserv = False
+            for mid in master_ids:
+                counter = 0
+                for reserv in reservation_ids:
                     child_ids = master_ids[mid]
                     for child of child_ids:
                         if child == counter:
                             reserv.parent_reservation = master_reserv.id
                         elif child == mid:
                             master_reserv = reservs
-                counter = counter + 1
+                            counter = counter + 1
 
             # Update Odoo availability (don't wait for wubook)
             fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
