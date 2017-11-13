@@ -27,4 +27,4 @@ class HotelServiceType(models.Model):
     _description = "Service Type"
 
     ser_id = fields.Many2one('product.category', 'category', required=True,
-                             delegate=True, select=True, ondelete='cascade')
+                             delegate=True, index=True, ondelete='cascade')
