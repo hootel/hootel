@@ -17,11 +17,11 @@
                             string="Create Invoice" type="action" class="btn-primary" states="sale"
                             attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
                         <button name="action_cancel_draft" states="cancel" string="Set to Draft"
-                            type="object" icon="gtk-file" class="oe_highlight" />
+                            type="object" icon="fa-undo" class="oe_highlight" />
                         <button name="action_cancel" string="Cancel Folio" states="sale"
-                            type="object" icon="gtk-cancel" class="oe_highlight" />
+                            type="object" icon="fa-minus-square" class="oe_highlight" />
                         <button name="action_cancel" string="Cancel Folio" states="draft"
-                            icon="gtk-cancel" type="object" class="oe_highlight" />
+                            icon="fa-minus-square" type="object" class="oe_highlight" />
                         <button name="action_done" type="object" string="Set to Done"
                             states="sale" attrs="{'invisible': [('invoice_status', '!=', 'invoiced')]}"
                             help="If a Hotel Folio is done, you cannot modify it manually anymore. However, you will still be able to invoice or deliver. This is used to freeze the Hotel Folio." />
@@ -146,7 +146,7 @@
                                 </field>
                                 <separator string="Service Lines" colspan="4" />
                                 <field name="service_lines" colspan="4" string="Service Line"
-                                    nolabel="1" context="{'room_lines': room_lines[0]}">
+                                    nolabel="1">
                                     <tree string="Service Line">
                                         <field name="name" />
                                         <field name="product_id" />

@@ -321,7 +321,7 @@ class HotelReservation(models.Model):
                 record.folio_id.id,
                 record.reserve_color,
                 record.splitted,
-                reserv.parent_reservation.id,
+                record.parent_reservation.id,
                 record.product_id.name,
                 record.partner_id.mobile or record.partner_id.phone or _('Undefined'),
                 record.state,

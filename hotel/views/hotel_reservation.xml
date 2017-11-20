@@ -16,8 +16,8 @@
                         <button name="action_cancel" string="Cancel Reservation" states="draft,confirm,done" class="oe_highlight" type="object"/>
                         <button name="action_reservation_checkout" string="Done" states="booking,cancelled" class="oe_highlight" type="object"/>
                         <button name="draft" string="Set to Draft" states="cancel" class="oe_highlight" type="object"/>
-                        <button name="%(action_hotel_split_reservation)d" string="Split" type="action" class="oe_highlight" icon="cut" states="draft" />
-                        <button name="unify" string="Unify" type="object" class="oe_highlight" icon="compress" states="draft" attrs="{'invisible':['|',['splitted', '=', False]]}" />
+                        <button name="%(action_hotel_split_reservation)d" string="Split" type="action" class="oe_highlight" icon="fa-cut" states="draft" />
+                        <button name="unify" string="Unify" type="object" class="oe_highlight" icon="fa-compress" states="draft" attrs="{'invisible':['|',['splitted', '=', False]]}" />
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
@@ -43,13 +43,13 @@
                                 <field name="virtual_room_id" on_change="1" />
                                 <field name="room_type_id"/>
                                 <field name="check_rooms"/>
-                            <group colspan="4" col="4">
+                            </group>
                                 <field name="product_uom_qty"
                                     invisible="1" />
                                 <field name="invoice_status" invisible="1"/>
                                 <field name="price_unit" invisible="1"/>
                                 <field name="product_uom" string="Rent(UOM)" invisible="1" />
-                            </group>
+                            
                             <separator/>
                             <notebook colspan="6" col="6">
                                 <page name="days" string="Days">
@@ -83,7 +83,6 @@
                                     </group>
                                 </page>
                             </notebook>
-                        </group>
                     </sheet>
                     <div class="oe_chatter">
                         <field name="message_follower_ids" widget="mail_followers"/>

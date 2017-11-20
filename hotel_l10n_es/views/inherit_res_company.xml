@@ -2,6 +2,7 @@
 <openerp>
     <data>
         <!--  Inherit Company view to add 'Hotel data' -->
+        <!--y
         <record id="alda_view_company_form" model="ir.ui.view">
             <field name="name">alda.config.view_company_form</field>
             <field name="model">res.company</field>
@@ -24,6 +25,6 @@
 
                 </xpath>
             </field>
-        </record>
+        </record>-->
     </data>
 </openerp>
