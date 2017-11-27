@@ -11,7 +11,7 @@ _logger=logging.getLogger(__name__)
 class Wizard(models.TransientModel):
     _name = 'police.wizard'
 
-    download_date = fields.Date('Date to generate the file',required=True)
+    download_date = fields.Date('Date',required=True)
     download_num = fields.Char('Correlative number',required=True,size=3,help='Number provided by the police')
     txt_filename = fields.Char()
     txt_binary = fields.Binary()
