@@ -1,30 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
-        <!--  Inherit Company view to add 'Hotel data' -->
-        <!--y
-        <record id="alda_view_company_form" model="ir.ui.view">
-            <field name="name">alda.config.view_company_form</field>
-            <field name="model">res.company</field>
-            <field name="inherit_id" ref="base.view_company_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//group[@name='account_grp']" position="before">
-                    <group>
-                        <group name="aldahotels_grp" string="Hotel data">
-                            <field name="property_name" />
-                            <field name="tourism" />
-                            <field name="category_id" widget="selection"/>
-                            <field name="rooms" />
-                            <field name="seats" />
-                            <field name="permanentstaff" />
-                            <field name="eventualstaff" />
-                            <field name="police" />
-                            <field name="cardex_warning" />
-                        </group>
-                    </group>
+<odoo>
 
-                </xpath>
-            </field>
-        </record>-->
-    </data>
-</openerp>
+    <!-- Hotel Settings -->
+    <record id="hotel_config_company_settings" model="ir.ui.view">
+        <field name="name">Hotel Company Settings</field>
+        <field name="model">res.company</field>
+        <field name="arch" type="xml">
+            <form string="Hotel Company Settings" class="oe_form_configuration">
+                <header>
+                    <button string="Apply" type="object" name="execute" class="oe_highlight"/>
+                    <button string="Cancel" type="object" name="cancel" class="oe_link"/>
+                </header>
+                <div id="main">
+                <group name="Hotel_data" string="Hotel data">
+                    <group>
+                        <field name="property_name" />
+                        <field name="tourism" />
+                        <field name="category_id" widget="selection"/>
+                        <field name="seats" />
+                        <field name="permanentstaff" />
+                        <field name="eventualstaff" />
+                        <field name="police" />
+                        <field name="cardex_warning" />
+                    </group>
+                </group>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="action_hotel_config_es">
+        <field name="name">Hotel Company Settings</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">res.company</field>
+        <field name="view_id" ref="hotel_config_company_settings"/>
+        <field name="view_mode">form</field>
+        <field name="target">inline</field>
+    </record>
+
+    <menuitem id="hotel_configuration_menu_es" name="Configuración"
+    sequence="10" parent="hotel.hotel_menu" action="action_hotel_config_es"
+/>
+
+</odoo>
