@@ -956,7 +956,6 @@ class WuBook(models.TransientModel):
 
             reservations = []
             used_rooms = []
-            parent_reservation = False
             # Check reservation vrooms avail
             for vroom in vrooms:
                 dates_checkin = [checkin_utc_dt, False]
@@ -973,6 +972,7 @@ class WuBook(models.TransientModel):
                                                                                  virtual_room_id=vroom.id,
                                                                                  notthis=used_rooms)
                     if any(free_rooms):
+                        num_free_rooms = len(free_rooms)
                         # Total Price Room
                         reservation_lines = []
                         tprice = 0.0
@@ -991,7 +991,7 @@ class WuBook(models.TransientModel):
                         customer_room_index = 0
                         for broom in book['rooms_occupancies']:
                             if str(broom['id']) == vroom.wrid:
-                                if len(free_rooms) > customer_room_index:
+                                if num_free_rooms > customer_room_index:
                                     occupancy = broom['occupancy']
                                     vals = {
                                         'checkin': checkin_str,
@@ -1014,7 +1014,7 @@ class WuBook(models.TransientModel):
                                         'virtual_room_id': vroom.id,
                                         'splitted': split_booking,
                                     }
-                                    reservations.append(vals)
+                                    reservations.append((0, False, vals))
                                     if split_booking:
                                         if parent_reservation == -1:
                                             parent_reservation = len(reservations)-1
@@ -1022,10 +1022,12 @@ class WuBook(models.TransientModel):
                                         else:
                                             split_map_index[parent_reservation].append(len(reservations)-1)
                                     used_rooms.append(free_rooms[customer_room_index].id)
-                                    customer_room_index = customer_room_index + 1
+                                    customer_room_index += 1
                                 else:
                                     if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
                                         failed_reservations.append(book['channel_reservation_code'])
+                                    else:
+                                        failed_reservations.append('undefined')
                                     self.create_wubook_issue('reservation',
                                                              "Can't found a free room for reservation from wubook (#B)",
                                                              '', wid=book['reservation_code'])
@@ -1038,17 +1040,21 @@ class WuBook(models.TransientModel):
                         if date_diff <= 0:
                             if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
                                 failed_reservations.append(book['channel_reservation_code'])
+                            else:
+                                failed_reservations.append('undefined')
                             self.create_wubook_issue('reservation',
                                                      "Can't found a free room for reservation from wubook",
                                                      '', wid=book['reservation_code'])
+                            dates_checkin = [False, False]
+                            dates_checkout = [False, False]
                         else:
                             dates_checkin = [dates_checkin[0], dates_checkin[0] + timedelta(days=date_diff - 1)]
                             dates_checkout = [dates_checkout[0] - timedelta(days=1), dates_checkout[0]]
 
             # Create Folio
-            if not any(failed_reservations):
+            if not any(failed_reservations) and any(reservations):
                 vals = {
-                    'room_lines': (0, False, reservations),
+                    'room_lines': reservations,
                     'wcustomer_notes': book['customer_notes'],
                 }
                 if folio_id:
@@ -1062,19 +1068,21 @@ class WuBook(models.TransientModel):
                 processed_rids.append(book['reservation_code'])
 
             # Update Reservation Split parent
-            reservation_ids = hotel_reserv_obj.search([('folio_id', '=', folio_id.id)])
-            master_ids = split_map_index.keys()
-            master_reserv = False
-            for mid in master_ids:
-                counter = 0
-                for reserv in reservation_ids:
-                    child_ids = master_ids[mid]
-                    for child of child_ids:
-                        if child == counter:
-                            reserv.parent_reservation = master_reserv.id
-                        elif child == mid:
-                            master_reserv = reservs
-                            counter = counter + 1
+            # FIXME: Ugly to read and execute
+            if folio_id:
+                reservation_ids = hotel_reserv_obj.search([('folio_id', '=', folio_id.id)])
+                master_ids = split_map_index.keys()
+                master_reserv = False
+                for mid in master_ids:
+                    counter = 0
+                    for reserv in reservation_ids:
+                        child_ids = master_ids[mid]
+                        for child in child_ids:
+                            if child == counter:
+                                reserv.parent_reservation = master_reserv.id
+                            elif child == mid:
+                                master_reserv = reservs
+                                counter = counter + 1
 
             # Update Odoo availability (don't wait for wubook)
             fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),

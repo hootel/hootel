@@ -415,11 +415,10 @@ class HotelFolio(models.Model):
             tmp_room_lines = vals.get('room_lines', [])
             vals['order_policy'] = vals.get('hotel_policy', 'manual')
             vals.update({'room_lines': []})
-            folio_id = super(HotelFolio, self).create(vals)
             for line in (tmp_room_lines):
                 line[2].update({'folio_id': folio_id})
             vals.update({'room_lines': tmp_room_lines})
-            folio_id.write(vals)
+            folio_id = super(HotelFolio, self).create(vals)
         else:
             if not vals:
                 vals = {}

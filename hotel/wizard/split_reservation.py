@@ -41,11 +41,12 @@ class SplitReservationWizard(models.TransientModel):
             date_end_dt = fields.Datetime.from_string(reservation_id.checkout)
             date_diff = abs((date_end_dt - date_start_dt).days)
             for record in self:
+                new_start_date_dt = date_start_dt + timedelta(days=date_diff - record.nights)
                 if record.nights >= date_diff or record.nights < 1:
                     raise ValidationError("Invalid Nights! Max is '%d'" % date_diff-1)
-                reservation_id.checkout = (date_start_dt + timedelta(days=date_diff - record.nights)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                reservation_id.checkout = new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                 vals = reservation_id.generate_copy_values(
-                    (date_start_dt + timedelta(days=date_diff - record.nights, minutes=1)).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                    new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                     date_end_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                 )
                 # Days Price
