@@ -25,7 +25,7 @@
     'version': '0.07',
     'author': 'Serpent Consulting Services Pvt. Ltd., OpenERP SA,\
     Odoo Community Association (OCA),\
-    Dario Lodeiros,\
+    Darío Lodeiros,\
     Jose Luis,\
     Alexandre Díaz Cuadrado',
     'images': [],
