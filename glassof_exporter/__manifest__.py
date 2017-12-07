@@ -30,7 +30,7 @@
     'description': "Glassof Exporter",
     'depends': [],
     'external_dependencies': {
-        'python': ['XlsxWriter']
+        'python': ['xlsxwriter']
     },
     'data': [],
     'qweb': [],
