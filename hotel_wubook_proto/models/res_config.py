@@ -67,28 +67,30 @@ class WubookConfiguration(models.TransientModel):
         })
 
         # Push Virtual Rooms
-        wubook_obj = self.env['wubook']
-        ir_seq_obj = self.env['ir.sequence']
-        vrooms = self.env['hotel.virtual.room'].search([])
-        for vroom in vrooms:
-            shortcode = ir_seq_obj.next_by_code('hotel.virtual.room')[:4]
-            wrid = wubook_obj.create_room(
-                shortcode,
-                vroom.name,
-                vroom.wcapacity,
-                vroom.list_price,
-                vroom.max_real_rooms
-            )
-            if wrid:
-                vroom.with_context(wubook_action=False).write({
-                    'wrid': wrid,
-                    'wscode': shortcode,
-                })
-            else:
-                vroom.with_context(wubook_action=False).write({
-                    'wrid': 'none',
-                    'wscode': '',
-                })
+        wubook_obj = self.env['wubook'].with_context({'init_connection': False})
+        if wubook_obj.init_connection():
+            ir_seq_obj = self.env['ir.sequence']
+            vrooms = self.env['hotel.virtual.room'].search([])
+            for vroom in vrooms:
+                shortcode = ir_seq_obj.next_by_code('hotel.virtual.room')[:4]
+                wrid = wubook_obj.create_room(
+                    shortcode,
+                    vroom.name,
+                    vroom.wcapacity,
+                    vroom.list_price,
+                    vroom.max_real_rooms
+                )
+                if wrid:
+                    vroom.with_context(wubook_action=False).write({
+                        'wrid': wrid,
+                        'wscode': shortcode,
+                    })
+                else:
+                    vroom.with_context(wubook_action=False).write({
+                        'wrid': 'none',
+                        'wscode': '',
+                    })
+            wubook_obj.close_connection()
 
         # Reset Folios
         folio_ids = self.env['hotel.folio'].search([])
@@ -134,3 +136,4 @@ class WubookConfiguration(models.TransientModel):
 
         # Push Changes
         self.env['wubook'].push_changes()
+        self.env['wubook'].push_activation()
