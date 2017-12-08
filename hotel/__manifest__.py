@@ -40,6 +40,7 @@
     'data': [
         'wizard/massive_changes.xml',
         'wizard/split_reservation.xml',
+        'wizard/duplicate_reservation.xml',
         'views/res_config.xml',
         'data/menus.xml',
         'security/hotel_security.xml',

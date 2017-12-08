@@ -8,10 +8,10 @@
 			<form string="Duplicate Rerservation" >
 				<!-- Common Fields -->
 				<group>
-					<field name="Num Reservations" required="1" />
+					<field name="num" required="1" />
 				</group>
 				<footer>
-					<button name="split_reservation" string="Duplicate" type="object"
+					<button name="duplicate_reservation" string="Duplicate" type="object"
 						class="oe_highlight" />
 					or
 					<button string="Cancel" class="oe_link" special="cancel" />

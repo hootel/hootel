@@ -155,7 +155,7 @@
 
         <!-- Action Menu -->
         <record model="ir.values" id="menu_open_wizard_duplicate_reservation">
-          <field name="model_id" ref="hotel.reservation" />
+          <field name="model_id" ref="model_hotel_reservation" />
           <field name="name">Duplicate Reservation</field>
           <field name="key2">client_action_multi</field>
           <field name="value" eval="'ir.actions.act_window,' + str(ref('hotel.action_hotel_duplicate_reservation'))" />
