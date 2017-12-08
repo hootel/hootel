@@ -70,7 +70,7 @@ class VirtualRoom(models.Model):
                                  required=True, delegate=True,
                                  ondelete='cascade')
     service_ids = fields.Many2many('hotel.services',string='Included Services')
-    max_real_rooms = fields.Integer('Max Room Allowed')
+    max_real_rooms = fields.Integer('Default Max Room Allowed')
     product_id = fields.Many2one(
         'product.product',
         ondelete='cascade')

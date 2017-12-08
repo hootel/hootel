@@ -25,13 +25,13 @@ from openerp import models, fields, api
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 
 
-class SplitReservationWizard(models.TransientModel):
-    _name = 'hotel.wizard.split.reservation'
+class DuplicateReservationWizard(models.TransientModel):
+    _name = 'hotel.wizard.duplicate.reservation'
 
-    nights = fields.Integer('Nights', default=1, min=1)
+    num = fields.Integer('Num. New Reservations', default=1, min=1)
 
     @api.multi
-    def split_reservation(self):
+    def duplicate_reservation(self):
         reservation_id = self.env['hotel.reservation'].browse(self.env.context.get('active_id'))
         if reservation_id:
             if reservation_id.state == 'cancelled' or reservation_id.state == 'confirm':

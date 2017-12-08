@@ -114,12 +114,15 @@ class WuBook(models.TransientModel):
             self.create_wubook_issue('wubook', "Can't connect with WuBook! Perhaps account not configured...", "")
             return False
 
-        self.SERVER = xmlrpclib.Server(server_addr)
-        res, tok = self.SERVER.acquire_token(user, passwd, pkey)
-        self.TOKEN = tok
-
-        if res != 0:
-            self.create_wubook_issue('wubook', "Can't connect with WuBook!", tok)
+        try:
+            self.SERVER = xmlrpclib.Server(server_addr)
+            res, tok = self.SERVER.acquire_token(user, passwd, pkey)
+            self.TOKEN = tok
+            if res != 0:
+                self.create_wubook_issue('wubook', "Can't connect with WuBook! Perhaps the account haven't a good configuration...", tok)
+        except:
+            self.create_wubook_issue('wubook', "Can't connect with WuBook! Please, check internet connection.", "")
+            res = -1
 
         return res == 0
 
@@ -1067,11 +1070,11 @@ class WuBook(models.TransientModel):
                     folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
                 processed_rids.append(book['reservation_code'])
 
-            # Update Reservation Split parent
+            # Update Reservation Split Parent
             # FIXME: Ugly to read and execute
-            if folio_id:
+            master_ids = split_map_index.keys()
+            if folio_id and any(master_ids):
                 reservation_ids = hotel_reserv_obj.search([('folio_id', '=', folio_id.id)])
-                master_ids = split_map_index.keys()
                 master_reserv = False
                 for mid in master_ids:
                     counter = 0
@@ -1083,6 +1086,9 @@ class WuBook(models.TransientModel):
                             elif child == mid:
                                 master_reserv = reservs
                                 counter = counter + 1
+                self.create_wubook_issue('reservation',
+                     "Reservation Splitted",
+                     '', wid=book['reservation_code'])
 
             # Update Odoo availability (don't wait for wubook)
             fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),

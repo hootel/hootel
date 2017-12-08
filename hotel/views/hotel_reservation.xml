@@ -49,7 +49,7 @@
                                 <field name="invoice_status" invisible="1"/>
                                 <field name="price_unit" invisible="1"/>
                                 <field name="product_uom" string="Rent(UOM)" invisible="1" />
-                            
+
                             <separator/>
                             <notebook colspan="6" col="6">
                                 <page name="days" string="Days">
@@ -151,6 +151,16 @@
                     </group>
                 </search>
             </field>
+        </record>
+
+        <!-- Action Menu -->
+        <record model="ir.values" id="menu_open_wizard_duplicate_reservation">
+          <field name="model_id" ref="hotel.reservation" />
+          <field name="name">Duplicate Reservation</field>
+          <field name="key2">client_action_multi</field>
+          <field name="value" eval="'ir.actions.act_window,' + str(ref('hotel.action_hotel_duplicate_reservation'))" />
+          <field name="key">action</field>
+          <field name="model">hotel.reservation</field>
         </record>
 
         <!-- Action for hotel folio -->

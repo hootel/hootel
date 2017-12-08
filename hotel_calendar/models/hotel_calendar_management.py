@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from datetime import datetime
+from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from openerp import models, api
 from openerp.exceptions import ValidationError
@@ -119,6 +119,7 @@ class HotelCalendarManagement(models.TransientModel):
                 room.name,
                 room.get_capacity(),
                 room.list_price,
+                room.max_real_rooms,
             ))
         return json_data
 
@@ -157,18 +158,89 @@ class HotelCalendarManagement(models.TransientModel):
             })
         return json_data
 
-    def _hcalendar_availability_json_data(self, avails):
+    @api.model
+    def _hcalendar_availability_json_data(self, dfrom, dto):
+        date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATE_FORMAT)
+        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATE_FORMAT)
+        vrooms = self.env['hotel.virtual.room'].search([])
         json_data = {}
-        for rec in avails:
-            if rec.virtual_room_id.id not in json_data.keys():
-                json_data.update({rec.virtual_room_id.id: []})
-            json_data[rec.virtual_room_id.id].append({
-                'id': rec.id,
-                'date': rec.date,
-                'avail': rec.avail,
-                'no_ota': rec.no_ota,
-            })
+
+        date_diff = abs((date_end - date_start).days)
+        for vroom in vrooms:
+            json_data[vroom.id] = []
+            for i in range(0, date_diff+1):
+                cur_date = date_start + timedelta(days=i)
+                cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                avail = self.env['hotel.virtual.room.availabity'].search([
+                    ('date', '=', cur_date_str),
+                    ('virtual_room_id', '=', vroom.id)
+                ])
+                if avail:
+                    json_data[vroom.id].append({
+                        'id': rec.id,
+                        'date': rec.date,
+                        'avail': rec.avail,
+                        'no_ota': rec.no_ota,
+                    })
+                else:
+                    json_data[vroom.id].append({
+                        'id': False,
+                        'date': cur_date_str,
+                        'avail': vroom.max_real_rooms,
+                        'no_ota': False,
+                    })
         return json_data
+
+    def _hcalendar_get_count_reservations_json_data(self, dfrom, dto):
+        vrooms = self.env['hotel.virtual.room'].search([])
+        date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATE_FORMAT)
+        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATE_FORMAT)
+        date_diff = abs((date_end-date_start).days)
+        hotel_vroom_obj = self.env['hotel.virtual.room']
+        hotel_room_obj = self.env['hotel.room']
+        vrooms = hotel_vroom_obj.search([])
+
+        nn = {}
+        for i in range(0, date_diff+1):
+            cur_date = date_start + timedelta(days=i)
+            cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
+            occupied_reservations = hotel_room_obj.rooms_occupied(cur_date_str, cur_date_str)
+
+            if not cur_date in nn:
+                nn.update({ cur_date_str: {} })
+            if not any(occupied_reservations):
+                for vroom in vrooms: # Recorremos habs virtuales ocupadas
+                    if not vroom.id in nn[cur_date_str]:
+                        nn[cur_date_str][vroom.id] = 0
+            else:
+                for oreserv in occupied_reservations:
+                    occupied_room = hotel_room_obj.search([('product_id', '=', oreserv.product_id.id)], limit=1)
+                    occupied_vrooms = hotel_vroom_obj.search([
+                        '|', ('room_ids', 'in', [occupied_room.id]), ('room_type_ids', 'in', [occupied_room.categ_id.id])
+                    ])
+
+                    if not cur_date_str in nn:
+                        nn.update({ cur_date_str: {} })
+                    for vroom in vrooms: # Recorremos habs virtuales ocupadas
+                        if not vroom.id in nn[cur_date_str]:
+                            nn[cur_date_str][vroom.id] = 0
+                        if vroom.id in occupied_vrooms.ids:
+                            nn[cur_date_str][vroom.id] += 1
+
+        json_data = {}
+        for date in nn:
+            for vroom in nn[date]:
+                if not vroom in json_data:
+                    json_data[vroom] = []
+                json_data[vroom].append({
+                    'date': date,
+                    'num': nn[date][vroom],
+                })
+
+        return json_data
+
+
+
 
     @api.multi
     def get_hcalendar_all_data(self, dfrom, dto, pricelist_id, restriction_id, withRooms):
@@ -186,9 +258,6 @@ class HotelCalendarManagement(models.TransientModel):
         restriction_id = int(restriction_id)
         vals.update({'restriction_id': restriction_id})
 
-        avail_ids = self.env['hotel.virtual.room.availabity'].search([
-            ('date', '>=', dfrom), ('date', '<=', dto),
-        ])
         restriction_item_ids = self.env['hotel.virtual.room.restriction.item'].search([
             ('date_start', '>=', dfrom), ('date_end', '<=', dto),
             ('restriction_id', '=', restriction_id),
@@ -205,7 +274,8 @@ class HotelCalendarManagement(models.TransientModel):
         vals.update({
             'prices': self._hcalendar_pricelist_json_data(pricelist_item_ids) or [],
             'restrictions': self._hcalendar_restriction_json_data(restriction_item_ids) or [],
-            'availability': self._hcalendar_availability_json_data(avail_ids) or [],
+            'availability': self._hcalendar_availability_json_data(dfrom, dto) or [],
+            'count_reservations': self._hcalendar_get_count_reservations_json_data(dfrom, dto) or [],
         })
 
         if withRooms:

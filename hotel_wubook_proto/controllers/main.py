@@ -73,9 +73,9 @@ class website_wubook(http.Controller):
         _logger.info("[WUBOOK] Updating values...")
         request.env['wubook'].sudo().fetch_rooms_values(dfrom, dto)
         request.env['wubook'].sudo().fetch_rplan_restrictions(dfrom, dto)
-        pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
-        if pricelist_id:
-            pricelist_id = request.env['product.pricelist'].sudo().browse(int(pricelist))
+        parity_pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+        if parity_pricelist_id:
+            pricelist_id = request.env['product.pricelist'].sudo().browse(int(parity_pricelist_id))
             if pricelist_id and pricelist_id.wpid:
                 request.env['wubook'].sudo().fetch_plan_prices(pricelist_id.wpid, dfrom, dto)
 
