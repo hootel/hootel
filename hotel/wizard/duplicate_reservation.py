@@ -40,8 +40,6 @@ class DuplicateReservationWizard(models.TransientModel):
         for record in self:
             for i in range(0, record.num)
                 new_reservation_id = reservation_id.copy()
-                hotel_reservation_obj.create({
-                    ''
-                })
+                #new_reservation_id.virtual_room_id = 
 
         return True
