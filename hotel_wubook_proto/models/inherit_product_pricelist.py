@@ -51,7 +51,7 @@ class ProductPricelist(models.Model):
             if not min_date or not max_date:
                 return prices
             days_diff = abs((max_date - min_date).days)
-            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', 'none')])
+            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', ''), ('wrid', '!=', False)])
             for vroom in vrooms:
                 prices.update({vroom.wrid: []})
                 for i in range(0, days_diff or 1):
@@ -63,7 +63,7 @@ class ProductPricelist(models.Model):
                         uom=vroom.product_id.product_tmpl_id.uom_id.id)
                     prices[vroom.wrid].append(product_id.price)
         else:
-            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', 'none')])
+            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', ''), ('wrid', '!=', False)])
             for item in self.item_ids:
                 if not item.date_start or not item.date_end:
                     continue
@@ -109,10 +109,11 @@ class ProductPricelist(models.Model):
         nname = vals.get('name')
         if self._context.get('wubook_action', True) and nname and self.env['wubook'].is_valid_account():
             for record in self:
-                wres = self.env['wubook'].update_plan_name(vals.get('wpid', record.wpid),
-                                                           nname)
-                if not wres:
-                    raise ValidationError("Can't update plan name on WuBook")
+                if record.wpid and record.wpid != '':
+                    wres = self.env['wubook'].update_plan_name(vals.get('wpid', record.wpid),
+                                                               nname)
+                    if not wres:
+                        raise ValidationError("Can't update plan name on WuBook")
         updated = super(ProductPricelist, self).write(vals)
 #         if updated and self._context.get('wubook_action', True):
 #             pricelist = self.browse(self.id)
@@ -125,9 +126,10 @@ class ProductPricelist(models.Model):
     def unlink(self):
         if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             for record in self:
-                wres = self.env['wubook'].delete_plan(record.wpid)
-                if not wres:
-                    raise ValidationError("Can't delete plan on WuBook")
+                if record.wpid and record.wpid != '':
+                    wres = self.env['wubook'].delete_plan(record.wpid)
+                    if not wres:
+                        raise ValidationError("Can't delete plan on WuBook")
         return super(ProductPricelist, self).unlink()
 
     @api.multi

@@ -29,7 +29,7 @@ class HotelFolio(models.Model):
     def _has_wubook_reservations(self):
         if any(self.room_lines):
             for room in self.room_lines:
-                if room.wrid != 'none':
+                if room.wrid and room.wrid != '':
                     self.whas_wubook_reservations = True
                     return
         self.whas_wubook_reservations = False

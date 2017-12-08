@@ -87,9 +87,23 @@ class WubookConfiguration(models.TransientModel):
                     })
                 else:
                     vroom.with_context(wubook_action=False).write({
-                        'wrid': 'none',
+                        'wrid': '',
                         'wscode': '',
                     })
+            # Create Parity Restrictions
+            restriction_ids = self.env['hotel.virtual.room.restriction'].search([])
+            for restriction in restriction_ids:
+                wpid = wubook_obj.create_rplan(restriction.name)
+                restriction.write({
+                    'wpid': wpid or ''
+                })
+            # Create Parity Pricelist
+            pricelist_ids = self.env['product.pricelist'].search([])
+            for pricelist in pricelist_ids:
+                wpid = wubook_obj.create_plan(pricelist.name, pricelist.wdaily)
+                pricelist.write({
+                    'wpid': wpid or ''
+                })
             wubook_obj.close_connection()
 
         # Reset Folios
@@ -100,11 +114,11 @@ class WubookConfiguration(models.TransientModel):
         })
 
         # Reset Reservations
-        reservation_ids = self.env['hotel.reservation'].search([('wrid', '!=', 'none')])
+        reservation_ids = self.env['hotel.reservation'].search([('wrid', '!=', ''), ('wrid', '!=', False)])
         reservation_ids.with_context(wubook_action=False).write({
-            'wrid': 'none',
+            'wrid': '',
             'wchannel_id': False,
-            'wchannel_reservation_code': 'none',
+            'wchannel_reservation_code': '',
             'wis_from_channel': False,
             'wstatus': 0
         })
