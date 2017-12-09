@@ -474,9 +474,6 @@ class HotelReservation(models.Model):
             'splitted': False,
         })
 
-        import wdb
-        wdb.set_trace()
-
         return True
 
     @api.multi

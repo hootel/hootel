@@ -19,42 +19,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp.exceptions import ValidationError
+from openerp import models, api
 
-{
-    'name': 'Hotel Calendar',
-    'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
-    'website': 'https://www.eiqui.com',
-    'category': 'eiqui/hotel',
-    'summary': "Hotel Calendar",
-    'description': "Hotel Calendar",
-    'depends': [
-        'bus',
-        'web',
-        'hotel',
-    ],
-    'external_dependencies': {
-        'python': []
-    },
-    'data': [
-        'views/general.xml',
-        'views/actions.xml',
-        'views/res_config.xml',
-        'views/inherit_res_users.xml',
-        'views/virtual_room_pricelist_cached.xml',
-        'data/views.xml',
-        'data/menus.xml',
-	    'security/ir.model.access.csv',
-        'data/records.xml',
-    ],
-    'qweb': [
-        'static/src/xml/*.xml',
-    ],
-    'test': [
-    ],
 
-    'installable': True,
-    'auto_install': False,
-    'application': True,
-    'license': 'AGPL-3',
-}
+class MassiveChangesWizard(models.TransientModel):
+    _inherit = 'hotel.wizard.duplicate.reservation'
+
+    @api.multi
+    def duplicate_reservation(self):
+        reservation_id = self.env['hotel.reservation'].browse(self.env.context.get('active_id'))
+        if reservation_id and reservation_id.wis_from_channel:
+            raise ValidationError("Can't duplicate a reservation from channel")
+        return super(MassiveChangesWizard, self).duplicate_reservation()

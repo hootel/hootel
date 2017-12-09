@@ -71,7 +71,7 @@ class WuBook(models.TransientModel):
             and self_context.import_pricing_plans()[0]
             and self_context.import_restriction_plans()[0])
 
-        self.close_connection()
+        self_context.close_connection()
         return res
 
     @api.model
@@ -635,7 +635,8 @@ class WuBook(models.TransientModel):
 
     # === RESTRICTION PLANS
     @api.model
-    def import_restriction_plans(self, init_connection=True):
+    def import_restriction_plans(self):
+        init_connection = self._context.get('init_connection', True)
         if init_connection:
             if not self.init_connection():
                 return (False, 0)

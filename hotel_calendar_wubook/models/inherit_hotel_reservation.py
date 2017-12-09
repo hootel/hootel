@@ -67,6 +67,6 @@ class HotelReservation(models.Model):
                 reserv.splitted,
                 reserv.parent_reservation.id,
                 False,  # Read-Only
-                (resev.wrid and reserv.wrid != '') or reserv.splitted,  # Fix Days
+                (reserv.wrid and reserv.wrid != '') or reserv.splitted,  # Fix Days
                 False))   # Fix Rooms
         return (json_reservations, vals[1])
