@@ -2,8 +2,8 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Alda Hotels <informatica@aldahotels.com>
-#                       Jose Luis Algara <osotranquilo@gmail.com>
+#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
+#                       Alexandre Díaz <dev@redneboa.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,6 +19,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-from . import models
-from . import wizard 
+from . import wizard

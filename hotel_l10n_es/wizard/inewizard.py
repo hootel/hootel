@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+##############################################################################
+#
+#    OpenERP, Open Source Management Solution
+#    Copyright (C) 2017 Alda Hotels <informatica@aldahotels.com>
+#                       Jose Luis Algara <osotranquilo@gmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+##############################################################################
 
 from openerp import models, fields, api
 import base64  
@@ -275,7 +295,7 @@ class Wizard(models.TransientModel):
 
             xmlstr = '<?xml version="1.0" encoding="ISO-8859-1"?>'
             xmlstr += ET.tostring(encuesta)            
-            file=base64.encodestring( xmlstr )
+            #file=base64.encodestring( xmlstr )
             return self.write({
                  'txt_filename': 'INE_'+str(self.ine_month)+'_'+str(self.ine_year) +'.'+ 'xml',
                  'adr_screen' : 'ADR en el mes de la encuesta: '+str(round(month_adr_sum/month_adr_rooms,2))+'€',

@@ -20,5 +20,27 @@
 #
 ##############################################################################
 
-from . import models
-from . import wizard 
+{
+    'name': 'Hotel Revenue Exporter',
+    'version': '1.0',
+    'author': "Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>",
+    'website': 'https://www.aldahotels.com',
+    'category': 'hotel/revenue',
+    'summary': "Revenue system and export Odoo Data to xls",
+    'description': "Revenue Exporter",
+    'depends': ['hotel'],
+    'external_dependencies': {
+        'python': ['xlsxwriter']
+    },
+    'data': [
+        'wizard/revenue_wizard.xml',
+    ],
+    'qweb': [],
+    'test': [
+    ],
+
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+    'license': 'AGPL-3',
+}
