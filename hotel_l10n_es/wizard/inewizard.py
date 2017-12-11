@@ -295,7 +295,7 @@ class Wizard(models.TransientModel):
 
             xmlstr = '<?xml version="1.0" encoding="ISO-8859-1"?>'
             xmlstr += ET.tostring(encuesta)            
-            file=base64.encodestring( xmlstr )
+            #file=base64.encodestring( xmlstr )
             return self.write({
                  'txt_filename': 'INE_'+str(self.ine_month)+'_'+str(self.ine_year) +'.'+ 'xml',
                  'adr_screen' : 'ADR en el mes de la encuesta: '+str(round(month_adr_sum/month_adr_rooms,2))+'€',
