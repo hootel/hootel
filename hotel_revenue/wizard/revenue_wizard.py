@@ -23,6 +23,7 @@ from openerp.http import request
 from openerp import models, fields, api
 from openerp.addons.web.controllers.main import serialize_exception,content_disposition
 import xlsxwriter
+from cStringIO import StringIO
 import base64  
 
 
@@ -31,18 +32,20 @@ class Wizard(models.TransientModel):
     _name = 'revenue.exporter.wizard'
 
     room_type = fields.Char()
-    date_1 = fields.Char()
-    date_2 = fields.Char()
-    period_1 = fields.Char()
-    period_2 = fields.Char()
+    date_1 = fields.Date()
+    date_2 = fields.Date()
+    period_1 = fields.Date()
+    period_2 = fields.Date()
     txt_filename = fields.Char()
     txt_binary = fields.Binary()
 
-    @api.model
-    def export(self, filename=False):
+    @api.one
+    def export(self):
 
+        file_data = StringIO()
+        workbook = xlsxwriter.Workbook(file_data)
         # Create a workbook and add a worksheet.
-        workbook = xlsxwriter.Workbook('/tmp/export.xlsx')
+        #workbook = xlsxwriter.Workbook('/tmp/export.xlsx')
         worksheet = workbook.add_worksheet()
 
         # Some data we want to write to the worksheet.
@@ -65,21 +68,27 @@ class Wizard(models.TransientModel):
 
         # Write a total using a formula.
         worksheet.write(row, 0, 'Total')
-        worksheet.write(row, 1, '=SUM(B1:B4)')
+        worksheet.write(row, 1, '=SUMA(B1:B4)')
 
         # Write file in tmp
         workbook.close()
 
         # Debug Stop -------------------
-        import wdb; wdb.set_trace()
+        #import wdb; wdb.set_trace()
         # Debug Stop -------------------
 
+        content ="hola"
+        content += """
+"""
 
+
+        file_data.seek(0)
+        #return (file_data.read(), 'xlsx')
         return self.write({
-             'txt_filename': 'export.xlsx',
-             'txt_binary': base64.encodestring('/tmp/export.xlsx')
-             })
-
+            'txt_filename': 'revenue.'+ fields.Date.today() +'.xlsx',
+            'txt_binary': base64.encodestring(file_data.read())
+            #'txt_binary': base64.encodestring("file_data.read()")
+            })
 
 
             
