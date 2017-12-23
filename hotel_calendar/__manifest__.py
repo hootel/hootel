@@ -32,6 +32,7 @@
         'bus',
         'web',
         'hotel',
+        'web_widget_color',
     ],
     'external_dependencies': {
         'python': []

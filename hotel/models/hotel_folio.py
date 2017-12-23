@@ -219,7 +219,7 @@ class HotelFolio(models.Model):
     checkouts_reservations = fields.Integer('checkouts reservations')
     partner_internal_comment = fields.Text(string='Internal Partner Notes',related='partner_id.comment')
     cancelled_reason = fields.Text('Cause of cancelled')
-
+    prepaid_warning_days = fields.Integer('Prepaid Warning Days',help='Margin in days to create a notice if a payment advance has not been recorded')
 
     @api.model
     def daily_plan(self):
@@ -255,9 +255,7 @@ class HotelFolio(models.Model):
         for inv in self.invoice_ids:
             if inv.type == 'out_refund':
                 total_inv += inv.amount_total
-        self.refund_amount = total_inv
-        for res in self.room_lines:
-            res._compute_color()
+        self.refund_amount = total_inv        
 
     @api.multi
     def action_pay(self):

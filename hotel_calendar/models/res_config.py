@@ -46,7 +46,65 @@ class HotelConfiguration(models.TransientModel):
         ('14', '2 Weeks'),
         ('7', '1 Week')
     ], string='Default number of days', default='month')
-
+    color_pre_reservation = fields.Char('Pre-reservation', default='#A4A4A4')
+    color_reservation = fields.Char('Confirmed Reservation ', default='#4E9DC4')
+    color_reservation_pay = fields.Char('Paid Reservation', default='#66CCFF')
+    color_stay = fields.Char('Checkin', default='#b40606')
+    color_stay_pay = fields.Char('Paid Checkin', default='#54d12b')
+    color_checkout = fields.Char('Checkout', default='#FF0000')
+    color_checkout_pay = fields.Char('Paid Checkout', default='#66FF33')
+    color_dontsell = fields.Char('Dont Sell', default='#000000')
+    color_staff = fields.Char('Staff', default='#FF9933')
+    color_to_assign = fields.Char('Ota Reservation to Assign', default='#DFFF00')
+    color_payment_pending = fields.Char('Payment Pending', default='#f70f0f')
+    
+    @api.multi
+    def set_color_pre_reservation(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_pre_reservation', self.color_pre_reservation)
+    
+    @api.multi
+    def set_color_reservation(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_reservation', self.color_reservation)
+    
+    @api.multi
+    def set_color_reservation_pay(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_reservation_pay', self.color_reservation_pay)
+    
+    @api.multi
+    def set_color_stay(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_color_stay', self.color_stay)
+    
+    @api.multi
+    def set_color_stay_pay(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_stay_pay', self.color_stay_pay)
+    
+    @api.multi
+    def set_color_checkout(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_checkout', self.color_checkout)
+                
+    @api.multi
+    def set_color_checkout_pay(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_checkout_pay', self.color_checkout_pay)
+        
+    @api.multi
+    def set_color_dontsell(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_dontsell', self.color_dontsell)
+    
+    @api.multi
+    def set_color_staff(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_staff', self.color_staff)
+        
+    @api.multi
+    def set_to_assign(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_to_assign', self.color_to_assign)
+    
+    @api.multi
+    def set_color_payment_pending(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_payment_pending', self.color_payment_pending)    
+    
+    @api.multi
+    def set_default_arrival_hour(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'default_arrival_hour', self.default_arrival_hour)
 
     @api.multi
     def set_divide_rooms_by_capacity(self):

@@ -162,7 +162,7 @@
                                     <div class="oe_subtotal_footer_separator oe_inline">
                                         <label for="amount_total" />
                                         <button name="button_dummy" string="Compute" states="draft"
-                                            type="object" icon="terp-sale" class="oe_highlight" />
+                                            type="object" class="oe_highlight" />
                                     </div>
                                     <field name="amount_total" nolabel="1" sum="Total amount"
                                         widget='monetary' />

@@ -26,3 +26,5 @@ from . import bus_hotel_calendar
 from . import virtual_room_pricelist_cached
 from . import hotel_calendar_management
 from . import res_config
+from . import inherit_account_payment
+from . import inherit_hotel_folio

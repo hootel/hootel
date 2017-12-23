@@ -11,20 +11,22 @@
                     <button string="Apply" type="object" name="execute" class="oe_highlight"/>
                     <button string="Cancel" type="object" name="cancel" class="oe_link"/>
                 </header>
-                <div id="main">
-				    <group name="hotel_parity" string="Hotel Parity">
-				    	<group>
-				    		<field name="parity_pricelist_id" required="True" />
-				    		<field name="parity_restrictions_id" required="True" />
-				    	</group>
-				    </group>
-                    <group name="default_hours" string="Hotel Default Hours">
-				    	<group>
-				    		<field name="default_arrival_hour" required="True" />
-				    		<field name="default_departure_hour" required="True" />
-				    	</group>
-				    </group>
-			    </div>
+                <sheet>
+                    <div id="main">
+                        <group name="hotel_parity" string="Hotel Parity">
+                            <group>
+                                <field name="parity_pricelist_id" required="True" />
+                                <field name="parity_restrictions_id" required="True" />
+                            </group>
+                        </group>
+                        <group name="default_hours" string="Hotel Default Hours">
+                            <group>
+                                <field name="default_arrival_hour" required="True" />
+                                <field name="default_departure_hour" required="True" />
+                            </group>
+                        </group>
+                    </div>
+                </sheet>
             </form>
         </field>
     </record>

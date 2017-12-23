@@ -177,10 +177,10 @@ class HotelCalendarManagement(models.TransientModel):
                 ])
                 if avail:
                     json_data[vroom.id].append({
-                        'id': rec.id,
-                        'date': rec.date,
-                        'avail': rec.avail,
-                        'no_ota': rec.no_ota,
+                        'id': vroom.id,
+                        'date': avail.date,
+                        'avail': avail.avail,
+                        'no_ota': avail.no_ota,
                     })
                 else:
                     json_data[vroom.id].append({
