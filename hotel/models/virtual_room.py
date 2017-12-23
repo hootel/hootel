@@ -72,7 +72,7 @@ class VirtualRoom(models.Model):
     service_ids = fields.Many2many('hotel.services',string='Included Services')
     max_real_rooms = fields.Integer('Default Max Room Allowed')
     product_id = fields.Many2one(
-        'product.product',
+        'product.product', required=True,
         ondelete='cascade')
 
     @api.multi
