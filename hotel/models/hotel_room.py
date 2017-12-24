@@ -93,3 +93,9 @@ class HotelRoom(models.Model):
         occupied = res_in | res_out | res_full
         occupied = occupied.filtered(lambda r: r.state != 'cancelled')
         return occupied
+    
+    @api.multi
+    def unlink(self):
+        self.product_id.unlink()
+        return super(HotelRoom, self).unlink()
+

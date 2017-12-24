@@ -32,3 +32,7 @@ class HotelRoomAmenities(models.Model):
     rcateg_id = fields.Many2one('hotel.room.amenities.type',
                                 'Amenity Catagory')
 
+    @api.multi
+    def unlink(self):
+        self.room_categ_id.unlink()
+        return super(HotelRoomAmenities, self).unlink()

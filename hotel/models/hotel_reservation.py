@@ -75,20 +75,6 @@ def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
             pass
     return res
 
-COLOR_TYPES = {
-    'pre-reservation': '#A4A4A4',
-    'reservation': '#4E9DC4',
-    'reservation-pay': '#66CCFF',
-    'stay': '#b40606',
-    'stay-pay': '#54d12b',
-    'checkout': '#FF0000',
-    'checkout-pay': '#66FF33',
-    'dontsell': '#000000',
-    'staff': '#FF9933',
-    'to-assign': '#DFFF00',
-    'payment-pending': '#f70f0f',
-}
-
 class HotelReservation(models.Model):
 
     @api.one
@@ -220,7 +206,7 @@ class HotelReservation(models.Model):
         #~ record.write({'domain_room_ids': free_room_ids})
 
     _name = 'hotel.reservation'
-    _description = 'hotel folio1 room line'
+    _description = 'hotel reservation'
     _inherit = ['ir.needaction_mixin','mail.thread']
 
     _defaults = {
@@ -455,31 +441,6 @@ class HotelReservation(models.Model):
             record.adults = room.capacity
         return record
 
-    #~ @api.multi
-    #~ def unlink(self):
-#         """
-#         Overrides orm unlink method.
-#         @param self: The object pointer
-#         @return: True/False.
-#         """
-#         sale_line_obj = self.env['sale.order.line']
-        #~ fr_obj = self.env['folio.room.line']
-        #~ for line in self:
-            #~ if line.order_line_id:
-                #~ sale_unlink_obj = (sale_line_obj.browse
-                                   #~ ([line.order_line_id.id]))
-                #~ for rec in sale_unlink_obj:
-                    #~ room_obj = self.env['hotel.room'
-                                        #~ ].search([('name', '=', rec.name)])
-                    #~ if room_obj.id:
-                        #~ folio_arg = [('folio_id', '=', line.folio_id.id),
-                                     #~ ('room_id', '=', room_obj.id)]
-                        #~ folio_room_line_myobj = fr_obj.search(folio_arg)
-                        #~ if folio_room_line_myobj.id:
-                            #~ folio_room_line_myobj.unlink()
-                #~ sale_unlink_obj.unlink()
-        #~ return super(HotelReservation, self).unlink()
-
     @api.multi
     def uos_change(self, product_uos, product_uos_qty=0, product_id=None):
         '''
@@ -542,7 +503,7 @@ class HotelReservation(models.Model):
 #                                                               prod.taxes_id,
 #                                                               self.tax_id)
 
-    @api.onchange('checkin', 'checkout', 'product_id')
+    @api.onchange('checkin', 'checkout', 'product_id','reservation_type')
     def on_change_checkin_checkout_product_id(self):
         if not self.checkin:
             self.checkin = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
@@ -554,8 +515,6 @@ class HotelReservation(models.Model):
         # UTC -> Local
         tz = self._context.get('tz')
         chkin_dt = fields.Datetime.from_string(self.checkin)
-        import wdb
-        wdb.set_trace()
         chkout_dt = fields.Datetime.from_string(self.checkout)
         if tz:
             chkin_dt = chkin_dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(tz))
@@ -563,7 +522,10 @@ class HotelReservation(models.Model):
         days_diff = abs((chkout_dt - chkin_dt).days)
         res = self.prepare_reservation_lines(chkin_dt, days_diff)
         self.reservation_lines = res['commands']
-        self.price_unit = res['total_price']
+        if self.reservation_type in ['staff','out']:
+            self.price_unit = 0.0
+        else:
+            self.price_unit = res['total_price']
 
     @api.model
     def prepare_reservation_lines(self, datefrom, days):
@@ -694,3 +656,9 @@ class HotelReservation(models.Model):
                reservation with room those already reserved in this \
                reservation period: %s' % occupied_name
            raise ValidationError(warning_msg)
+    
+    @api.multi
+    def unlink(self):
+        self.order_line_id.unlink()
+        return super(HotelReservation, self).unlink()
+            

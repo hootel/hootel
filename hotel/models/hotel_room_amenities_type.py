@@ -28,3 +28,8 @@ class HotelRoomAmenitiesType(models.Model):
 
     cat_id = fields.Many2one('product.category', 'category', required=True,
                              delegate=True, ondelete='cascade')
+
+    @api.multi
+    def unlink(self):
+        self.cat_id.unlink()
+        return super(HotelRoomAmenitiesType, self).unlink()

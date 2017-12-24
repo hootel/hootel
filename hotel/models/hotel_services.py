@@ -29,3 +29,8 @@ class HotelServices(models.Model):
     service_id = fields.Many2one('product.product', 'Service_id',
                                  required=True, ondelete='cascade',
                                  delegate=True)
+
+    @api.multi
+    def unlink(self):
+        self.service_id.unlink()
+        return super(HotelServices, self).unlink()

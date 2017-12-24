@@ -32,3 +32,8 @@ class HotelRoomType(models.Model):
     code_type = fields.Char('Code',required=True)
 
     _sql_constraints = [('code_type_unique','unique(code_type)', 'code must be unique!')]
+
+    @api.multi
+    def unlink(self):
+        self.cat_id.unlink()
+        return super(HotelRoomType, self).unlink()
