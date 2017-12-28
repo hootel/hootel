@@ -14,12 +14,16 @@
 	        <field name="arch" type="xml">
 	            <form>
 	                <sheet>
-	                    <group string="Generar revenue XLS." colspan="1">  
-	                            <field name="room_type_id" style="width:110px;"/>
-	                            <field name="date_1" style="max-width:110px"/>
-	                            <field name="date_2" style="max-width:110px"/>
-	                            <field name="period_1" style="max-width:110px"/>
-	                            <field name="period_2" style="max-width:110px"/>
+	                    <group string="Generar revenue XLS." colspan="1">
+	                            <field name="room_type_id"
+	                             widget="many2many_tags"
+	                             options="{'no_create': True}"/> 
+<!--	                            <field name="room_type_id"
+	                             style="max-width:110px"/> -->
+ 	                            <field name="period_1" style="max-width:110px" required="True"/>
+	                            <field name="period_2" style="max-width:110px" required="True"/>
+ 	                            <field name="date_1" style="max-width:110px" required="True"/>
+ 	                            <field name="date_2" style="max-width:110px" required="True"/>
 	                    </group>
 	                    <div>
 
@@ -27,13 +31,15 @@
  	                        <field name="txt_filename" invisible="1"/>
 	                        <field name="txt_binary" filename="txt_filename" readonly="1" style="margin-left: 20px;"/>
 	                    </div>
-                         
+                        <div>
+                            <field name="txt_msg" readonly="1"/>
+                        </div>
 	                </sheet>
 	            </form>
 	        </field>
 	    </record>
 
-		<menuitem 
+		<menuitem
 			id="menu_revenue_download"
 			name="Revenue File Download"
 			parent="hotel.hotel_configuration_menu"
