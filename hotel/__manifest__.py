@@ -72,6 +72,7 @@
         'data/cron_jobs.xml',
         'views/hotel_dashboard.xml',
         'data/records.xml',
+ #       'data/email_templates.xml',
     ],
     'css': ['static/src/css/room_kanban.css'],
     'auto_install': False,

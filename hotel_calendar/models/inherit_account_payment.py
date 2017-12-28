@@ -32,19 +32,20 @@ class AccountPayment(models.Model):
     @api.depends('state')
     def _compute_folio_amount(self):
         payments = super(AccountPayment, self)._compute_folio_amount()
-        for pay in payments:
-            if pay.folio_id:
-                fol = payment.env['hotel.folio'].search([('id','=',pay.folio_id.id)])
-            else:
-                return
-            # We must pay only one folio
-            if len(fol) == 0:
-                return
-            elif len(fol) > 1:
-                raise except_orm(_('Warning'), _('This pay is related with more than one Reservation.'))
-            else:                
-                for res in fol.room_lines:
-                    res._compute_color()
+        if payments:
+            for pay in payments:
+                if pay.folio_id:
+                    fol = pay.env['hotel.folio'].search([('id','=',pay.folio_id.id)])
+                else:
+                    return
+                # We must pay only one folio
+                if len(fol) == 0:
+                    return
+                elif len(fol) > 1:
+                    raise except_orm(_('Warning'), _('This pay is related with more than one Reservation.'))
+                else:                
+                    for res in fol.room_lines:
+                        res._compute_color()
         
 
 

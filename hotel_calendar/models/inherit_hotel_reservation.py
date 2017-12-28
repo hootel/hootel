@@ -36,8 +36,7 @@ class HotelReservation(models.Model):
     def _compute_color(self):
         now_str = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         for rec in self:
-            now_date = datetime.strptime(now_str,
-                                                  DEFAULT_SERVER_DATETIME_FORMAT)
+            now_date = datetime.strptime(now_str,DEFAULT_SERVER_DATETIME_FORMAT)
             checkin_date = (datetime.strptime(
                                 rec.checkin,
                                 DEFAULT_SERVER_DATETIME_FORMAT))
@@ -74,6 +73,7 @@ class HotelReservation(models.Model):
                     rec.reserve_color = '#FFFFFF'
                 else:
                     rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_payment_pending')
+            rec.write({}) #To dispatch the calendar bus notification           
             return rec.reserve_color
 
     @api.model
@@ -312,6 +312,7 @@ class HotelReservation(models.Model):
             reservation_id.state,
             reservation_id.splitted)
         return reservation_id
+    
 
     @api.multi
     def write(self, vals):

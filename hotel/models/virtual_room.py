@@ -86,7 +86,7 @@ class VirtualRoom(models.Model):
 
     @api.model
     def check_availability_virtual_room(self, checkin, checkout, virtual_room_id=False, notthis=[]):
-        occupied = self.env['hotel.room'].rooms_occupied(checkin, checkout)
+        occupied = self.env['hotel.reservation'].occupied(checkin, checkout)
         rooms_occupied = occupied.mapped('product_id.id')
         free_rooms = self.env['hotel.room'].search([('product_id.id', 'not in', rooms_occupied),
                                                     ('id', 'not in', notthis)])

@@ -3,59 +3,76 @@
 from openerp import models, fields, api
 from openerp.exceptions import UserError
 from openerp.tools.translate import _
-import logging
-_logger=logging.getLogger(__name__)
 
 
 class Wizard(models.TransientModel):
     _name = 'checkin.wizard'
 
     def default_enter_date(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.checkin
+        if 'reservation_ids' and 'folio' in self.env.context:
+            ids = [item[1] for item in self.env.context['reservation_ids']]
+            reservations = self.env['hotel.reservation'].browse(ids)
+            for res in reservations:
+                return res.checkin
         if 'enter_date' in self.env.context:
             return self.env.context['enter_date']
         return False
 
     def default_exit_date(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.checkout
+        if 'reservation_ids' and 'folio' in self.env.context:
+            ids = [item[1] for item in self.env.context['reservation_ids']]
+            reservations = self.env['hotel.reservation'].browse(ids)
+            for res in reservations:
+                return res.checkout
         if 'exit_date' in self.env.context:
             return self.env.context['exit_date']
         return False
 
     def default_reservation_id(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation
-        if 'reserva_id' in self.env.context:
-            return self.env.context['reserva_id']
+        if 'reservation_ids' and 'folio' in self.env.context:            
+            ids = [item[1] for item in self.env.context['reservation_ids']]
+            reservations = self.env['hotel.reservation'].browse(ids)
+            if len(reservations)==1:
+                return reservations         
+            for res in reservations:
+                if res.cardex_count == 0:
+                    return res
+        elif 'reservation_id' in self.env.context:            
+            return self.env['hotel.reservation'].browse(self.env.context['reservation_id'])    
         return False
 
     def default_partner_id(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.partner_id
-        if 'partner_id' in self.env.context:
-            return self.env.context['partner_id']
+        if 'reservation_ids' and 'folio' in self.env.context:
+            ids = [item[1] for item in self.env.context['reservation_ids']]
+            reservations = self.env['hotel.reservation'].browse(ids)
+            for res in reservations:
+                if not res.partner_id in res.mapped('cardex_ids.partner_id.id'):
+                    return res.partner_id
+        if 'partner_id' and 'reservation_id' in self.env.context:
+            if not self.env.context['partner_id'] in self.env['hotel.reservation'].browse(self.env.context['reservation_id']).mapped('cardex_ids.partner_id.id'):
+                return self.env.context['partner_id']
         return False
 
     def default_cardex_ids(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.cardex_ids
+        if 'reservation_ids' and 'folio' in self.env.context:
+            ids = [item[1] for item in self.env.context['reservation_ids']]
+            reservations = self.env['hotel.reservation'].browse(ids)
+            for res in reservations:
+                return res.cardex_ids
 
     def default_count_cardex(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.cardex_count
+       if 'reservation_ids' and 'folio' in self.env.context:
+            ids = [item[1] for item in self.env.context['reservation_ids']]
+            reservations = self.env['hotel.reservation'].browse(ids)
+            for res in reservations:
+                return res.cardex_count
 
     def default_pending_cardex(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.adults + reservation.children - reservation.cardex_count
+        if 'reservation_ids' and 'folio' in self.env.context:
+            ids = [item[1] for item in self.env.context['reservation_ids']]
+            reservations = self.env['hotel.reservation'].browse(ids)
+            for res in reservations:
+                return res.adults + res.children - res.cardex_count
 
     def comp_checkin_list_visible(self):
         if 'partner_id' in self.env.context:
@@ -79,9 +96,6 @@ class Wizard(models.TransientModel):
     list_checkin_cardex = fields.Boolean(compute=comp_checkin_list_visible, default=True, store=True)
     edit_checkin_cardex = fields.Boolean(default=comp_checkin_edit, store=True)
 
-    # you can use @api.multi for collection processing like this:
-    # for ticket in self: ...something do here
-    # or you can use @api.model for processing only one object
     @api.multi
     def action_save_check(self):
         cardex_val={

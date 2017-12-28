@@ -21,6 +21,7 @@
                         </group>
                         <group name="default_hours" string="Hotel Default Hours">
                             <group>
+                                <field name="tz_hotel"/>
                                 <field name="default_arrival_hour" required="True" />
                                 <field name="default_departure_hour" required="True" />
                             </group>

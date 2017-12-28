@@ -22,7 +22,12 @@
 from openerp import models, fields, api
 from openerp.exceptions import ValidationError
 import re
+import pytz
 
+@api.model
+def _tz_get(self):
+    # put POSIX 'Etc/*' entries at the end to avoid confusing users - see bug 1086728
+    return [(tz, tz) for tz in sorted(pytz.all_timezones, key=lambda tz: tz if not tz.startswith('Etc/') else '_')]
 
 class HotelConfiguration(models.TransientModel):
     _name = 'hotel.config.settings'
@@ -32,7 +37,9 @@ class HotelConfiguration(models.TransientModel):
     parity_restrictions_id = fields.Many2one('hotel.virtual.room.restriction', 'Restrictions')
     default_arrival_hour = fields.Char('Default Arrival Hour (GMT)', help="HH:mm Format", default="14:00")
     default_departure_hour = fields.Char('Default Departure Hour (GMT)', help="HH:mm Format", default="12:00")   
-
+    tz_hotel = fields.Selection(_tz_get, string='Timezone', default=lambda self: self._context.get('tz'),
+                          help="The hotel's timezone, used to manage date and time values in reservations "
+                               "It is important to set a value for this field. ")
 
     @api.multi
     def set_parity_pricelist_id(self):
@@ -47,6 +54,10 @@ class HotelConfiguration(models.TransientModel):
         if restriction_id:
             restriction_id = int(restriction_id)
         return restriction_id
+        
+    @api.multi
+    def set_tz_hotel(self):
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'tz_hotel', self.tz_hotel)
 
     @api.multi
     def set_default_arrival_hour(self):

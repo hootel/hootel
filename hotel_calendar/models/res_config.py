@@ -72,7 +72,7 @@ class HotelConfiguration(models.TransientModel):
     
     @api.multi
     def set_color_stay(self):
-        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_color_stay', self.color_stay)
+        return self.env['ir.values'].sudo().set_default('hotel.config.settings', 'color_stay', self.color_stay)
     
     @api.multi
     def set_color_stay_pay(self):
