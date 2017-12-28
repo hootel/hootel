@@ -952,26 +952,30 @@ class WuBook(models.TransientModel):
             else:
                 self.generate_room_values(dfrom, dto, results)
 
+        # Get user timezone
         user_id = self.env['res.users'].browse(self.env.uid)
         local = pytz.timezone(user_id and user_id.tz or 'UTC')
+        # Some used references
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
         vroom_avail_obj = self.env['hotel.virtual.room.availabity']
+        # Space for store some data for construct folios
         processed_rids = []
         failed_reservations = []
         _logger.info(bookings)
-        for book in bookings:
+        for book in bookings: # This create a new folio
             is_cancellation = book['status'] in WUBOOK_STATUS_BAD
 
-            # Can't process failed reservations
+            # Can't process failed reservations (for example set a invalid new reservation and receive in the same transaction an cancellation)
             if book['channel_reservation_code'] in failed_reservations:
                 self.create_wubook_issue('reservation',
                                          "Can't process a reservation that previusly failed!",
                                          '', wid=book['reservation_code'])
                 continue
 
+            # Get dates for the reservation (localize them)
             arr_hour = book['arrival_hour'] == "--" and default_arrival_hour or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)
             checkin_dt = local.localize(datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT))
@@ -983,7 +987,7 @@ class WuBook(models.TransientModel):
             checkout_utc_dt = checkout_dt.astimezone(pytz.utc)
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
-            today = datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATETIME_FORMAT)
+            today = datetime.strftime(local.localize(fields.datetime.now()), DEFAULT_SERVER_DATETIME_FORMAT)
 
             # Search Folio. If exists.
             folio_id = False
@@ -996,6 +1000,7 @@ class WuBook(models.TransientModel):
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
 
+            # Need update reservations?
             reservs = folio_id and folio_id.room_lines or hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])
             reservs_processed = False
             if any(reservs):
@@ -1033,7 +1038,7 @@ class WuBook(models.TransientModel):
                     'city': book['customer_city'],
                     'phone': book['customer_phone'],
                     'zip': book['customer_zip'],
-                    'street': book['customer_address'],
+                    'street': book['customer_address '],
                     'email': book['customer_mail'],
                     'unconfirmed': True,
                     # 'lang': lang and lang.id,
@@ -1050,13 +1055,13 @@ class WuBook(models.TransientModel):
             reservations = []
             used_rooms = []
             # Check reservation vrooms avail
-            for vroom in vrooms:
+            for vroom in vrooms: # This create new reservation
                 dates_checkin = [checkin_utc_dt, False]
                 dates_checkout = [checkout_utc_dt, False]
                 split_booking = False
                 split_map_index = {}
                 parent_reservation = -1
-                while dates_checkin[0]:
+                while dates_checkin[0]: # This perhaps create splitted reservations
                     checkin_str = dates_checkin[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     checkout_str = dates_checkout[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
@@ -1107,15 +1112,20 @@ class WuBook(models.TransientModel):
                                         'virtual_room_id': vroom.id,
                                         'splitted': split_booking,
                                     }
-                                    reservations.append((0, False, vals))
-                                    if split_booking:
-                                        if parent_reservation == -1:
-                                            parent_reservation = len(reservations)-1
-                                            split_map_index = { parent_reservation: [] }
-                                        else:
-                                            split_map_index[parent_reservation].append(len(reservations)-1)
-                                    used_rooms.append(free_rooms[customer_room_index].id)
-                                    customer_room_index += 1
+                                    nrev = hotel_reserv_obj.create(vals)
+                                    if not nrev:
+                                        failed_reservations.append(book['channel_reservation_code'])
+                                    else:
+                                        reserv_ids.append(nrev)
+                                        reservations.append((0, False, vals))
+                                        if reserv_ids[0]:
+                                            if parent_reservation == -1:
+                                                parent_reservation = len(reservations)-1
+                                                split_map_index = { parent_reservation: [] }
+                                            else:
+                                                split_map_index[parent_reservation].append(len(reservations)-1)
+                                        used_rooms.append(free_rooms[customer_room_index].id)
+                                        customer_room_index += 1
                                 else:
                                     if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
                                         failed_reservations.append(book['channel_reservation_code'])

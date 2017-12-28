@@ -430,7 +430,7 @@ HotelCalendarManagement.prototype = {
           if (input) {
             input.dataset.orgValue = inputIds[i+1];
             input.value = inputIds[i+1];
-            if (i < 2) { // Only min and min arrival
+            if (i < 4) { // Only min and min arrival
               input.style.backgroundColor = (input.value >= room.capacity)?'yellow':'white';
             }
             else {
@@ -602,7 +602,14 @@ HotelCalendarManagement.prototype = {
     }
     else if (name === 'min_stay' || name === 'min_stay_arrival' || name === 'max_stay' ||
               name === 'price' || name === 'avail') {
-      elm.style.backgroundColor = this._isNumeric(value)?'white':'red';
+      if (!this._isNumeric(value)) {
+        elm.style.backgroundColor = 'red';
+      } else if (elm.dataset.orgValue !== elm.value) {
+        elm.style.backgroundColor = '#eee';
+        elm.style.border = "1px solid gray";
+      } else {
+          elm.style.backgroundColor = 'white';
+      }
     }
     else if (elm.tagName.toLowerCase() === 'button') {
       value = Boolean(!(elm.dataset.state === 'true'));
