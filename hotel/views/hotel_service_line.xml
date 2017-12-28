@@ -14,9 +14,10 @@
                             <group col="4" colspan="4">
                                 <field name="product_id" select="1"
                                     domain="[('isservice','=',True)]"
+                                    options="{'create': False, 'create_edit': False}"
                                     context="{'partner_id':order_partner_id,'quantity':product_uom_qty,'pricelist':parent.pricelist_id,'uom':product_uom}" />
-                                <field name="ser_room_line"/>
-                                <field name="product_uom" />
+                                <field name="ser_room_line" options="{'create': False, 'create_edit': False}"/>
+                                <field name="product_uom" options="{'create': False, 'create_edit': False}"/>
                                 <field name="product_uom_qty" select="1"
                                     context="{'partner_id':order_partner_id,'quantity':product_uom_qty,'pricelist':parent.pricelist_id,'uom':product_uom}"
                                     />

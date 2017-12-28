@@ -11,6 +11,7 @@
  *     - underscore
  */
 
+
 function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/pricelist, /*restrictions*/restrictions, /*HTMLObject?*/_base) {
   if (window === this) {
     return new HotelCalendar(querySelector, options, pricelist, _base);

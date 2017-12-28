@@ -954,8 +954,7 @@ class WuBook(models.TransientModel):
 
         # Get user timezone
         user_id = self.env['res.users'].browse(self.env.uid)
-        local = pytz.timezone(user_id and user_id.tz or 'UTC')
-        # Some used references
+        local = pytz.timezone(self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel'))
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
@@ -978,16 +977,16 @@ class WuBook(models.TransientModel):
             # Get dates for the reservation (localize them)
             arr_hour = book['arrival_hour'] == "--" and default_arrival_hour or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)
-            checkin_dt = local.localize(datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT))
+            checkin_dt = datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT)
             checkin_utc_dt = checkin_dt.astimezone(pytz.utc)
             checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             checkout = "%s %s" % (book['date_departure'], default_departure_hour)
-            checkout_dt = local.localize(datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT))
+            checkout_dt = datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT)
             checkout_utc_dt = checkout_dt.astimezone(pytz.utc)
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
-            today = datetime.strftime(local.localize(fields.datetime.now()), DEFAULT_SERVER_DATETIME_FORMAT)
+            today = datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATETIME_FORMAT)#COMPROBAR TZ
 
             # Search Folio. If exists.
             folio_id = False

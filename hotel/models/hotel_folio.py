@@ -31,60 +31,6 @@ import pytz
 import logging
 _logger = logging.getLogger(__name__)
 
-
-def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
-                              ignore_unparsable_time=True, context=None):
-    """
-    Convert a source timeStamp string into a destination timeStamp string,
-    attempting to apply the
-    correct offset if both the server and local timeZone are recognized,or no
-    offset at all if they aren't or if tz_offset is false (i.e. assuming they
-    are both in the same TZ).
-
-    @param src_tstamp_str: the STR value containing the timeStamp.
-    @param src_format: the format to use when parsing the local timeStamp.
-    @param dst_format: the format to use when formatting the resulting
-     timeStamp.
-    @param server_to_client: specify timeZone offset direction (server=src
-                             and client=dest if True, or client=src and
-                             server=dest if False)
-    @param ignore_unparsable_time: if True, return False if src_tstamp_str
-                                   cannot be parsed using src_format or
-                                   formatted using dst_format.
-
-    @return: destination formatted timestamp, expressed in the destination
-             timezone if possible and if tz_offset is true, or src_tstamp_str
-             if timezone offset could not be determined.
-    """
-    if not src_tstamp_str:
-        return False
-    res = src_tstamp_str
-    if src_format and dst_format:
-        try:
-            # dt_value needs to be a datetime.datetime object\
-            # (so notime.struct_time or mx.DateTime.DateTime here!)
-            dt_value = datetime.datetime.strptime(src_tstamp_str, src_format)
-            if context.get('tz', False):
-                try:
-                    import pytz
-                    src_tz = pytz.timezone(context['tz'])
-                    dst_tz = pytz.timezone('UTC')
-                    src_dt = src_tz.localize(dt_value, is_dst=True)
-                    dt_value = src_dt.astimezone(dst_tz)
-                except Exception:
-                    pass
-            res = dt_value.strftime(dst_format)
-        except Exception:
-            # Normal ways to end up here are if strptime or strftime failed
-            if not ignore_unparsable_time:
-                return False
-            pass
-    return res
-
-
-
-
-
 class HotelFolio(models.Model):
 
     @api.multi
@@ -113,41 +59,14 @@ class HotelFolio(models.Model):
         """
         return self.search_count([('state', '=', 'draft')])
 
-    #~ @api.model
-    #~ def _get_checkin(self):
-        #~ if self._context.get('tz'):
-            #~ to_zone = self._context.get('tz')
-        #~ else:
-            #~ to_zone = 'UTC'
-        #~ return _offset_format_timestamp1(time.strftime("%Y-%m-%d 12:00:00"),
-                                         #~ '%Y-%m-%d %H:%M:%S',
-                                         #~ '%Y-%m-%d %H:%M:%S',
-                                         #~ ignore_unparsable_time=True,
-                                         #~ context={'tz': to_zone})
-
-    #~ @api.model
-    #~ def _get_checkout(self):
-        #~ if self._context.get('tz'):
-            #~ to_zone = self._context.get('tz')
-        #~ else:
-            #~ to_zone = 'UTC'
-        #~ tm_delta = datetime.timedelta(days=1)
-        #~ return datetime.datetime.strptime(_offset_format_timestamp1
-                                          #~ (time.strftime("%Y-%m-%d 12:00:00"),
-                                           #~ '%Y-%m-%d %H:%M:%S',
-                                           #~ '%Y-%m-%d %H:%M:%S',
-                                           #~ ignore_unparsable_time=True,
-                                           #~ context={'tz': to_zone}),
-                                          #~ '%Y-%m-%d %H:%M:%S') + tm_delta
-
     @api.multi
     def copy(self, default=None):
         '''
         @param self: object pointer
         @param default: dict of default values to be set
         '''
-        return self.env['sale.order'].copy(default=default)
-
+        return super(HotelFolio, self).copy(default=default)
+        
     @api.multi
     def _invoiced(self, name, arg):
         '''
@@ -176,12 +95,6 @@ class HotelFolio(models.Model):
                        default='New')
     order_id = fields.Many2one('sale.order', 'Order', delegate=True,
                                required=True, ondelete='cascade')
-    #~ checkin = fields.Datetime('Check In', required=True, readonly=True,
-                                   #~ states={'draft': [('readonly', False)]},
-                                   #~ default=_get_checkin)
-    #~ checkout = fields.Datetime('Check Out', required=True, readonly=True,
-                                    #~ states={'draft': [('readonly', False)]},
-                                    #~ default=_get_checkout)
     room_lines = fields.One2many('hotel.reservation', 'folio_id',
                                  readonly=False,
                                  states={'done': [('readonly', True)]},
@@ -209,21 +122,21 @@ class HotelFolio(models.Model):
                                     readonly=True)
     hotel_invoice_id = fields.Many2one('account.invoice', 'Invoice')
     invoices_amount = fields.Monetary(compute='compute_invoices_amount',store=True)
-    refund_amount = fields.Monetary(compute='_compute_invoices_refund')
+    refund_amount = fields.Monetary(compute='compute_invoices_amount',store=True)
     invoices_paid = fields.Monetary(compute='compute_invoices_amount',store=True)
-    booking_pending = fields.Integer ('Booking pending', compute='_compute_booking_pending')
+    booking_pending = fields.Integer ('Booking pending', compute='_compute_cardex_count')
     cardex_count = fields.Integer('Cardex counter', compute='_compute_cardex_count')
-    cardex_pending = fields.Boolean('Cardex Pending', compute='_compute_cardex_pending')
-    cardex_pending_num = fields.Integer('Cardex Pending', compute='_compute_cardex_pending')
+    cardex_pending = fields.Boolean('Cardex Pending', compute='_compute_cardex_count')
+    cardex_pending_num = fields.Integer('Cardex Pending', compute='_compute_cardex_count')
     checkins_reservations = fields.Integer('checkins reservations')
     checkouts_reservations = fields.Integer('checkouts reservations')
     partner_internal_comment = fields.Text(string='Internal Partner Notes',related='partner_id.comment')
     cancelled_reason = fields.Text('Cause of cancelled')
-
+    prepaid_warning_days = fields.Integer('Prepaid Warning Days',help='Margin in days to create a notice if a payment advance has not been recorded')
 
     @api.model
     def daily_plan(self):
-        self._cr.execute("update hotel_folio set checkins_reservations = 0, checkouts_reservations = 0 where checkins_reservations >0  or checkouts_reservations > 0")
+        self._cr.execute("update hotel_folio set checkins_reservations = 0, checkouts_reservations = 0 where checkins_reservations > 0  or checkouts_reservations > 0")
         folios_in = self.env['hotel.folio'].search([('room_lines.is_checkin','=',True)])
         folios_out = self.env['hotel.folio'].search([('room_lines.is_checkout','=',True)])
         for fol in folios_in:
@@ -240,24 +153,17 @@ class HotelFolio(models.Model):
         self.ensure_one()
         amount_pending = 0
         total_paid = 0
+        total_inv_refund = 0
         payments = self.env['account.payment'].search(['|',('invoice_ids','in',self.invoice_ids.ids),('folio_id','=',self.id)])
         total_paid = sum(pay.amount for pay in payments)
         self.invoices_amount = self.amount_total - total_paid
         self.invoices_paid = total_paid
-
- #TODO: SUSTITUIR POR METODO EN account_payment
-    @api.multi
-    def _compute_invoices_refund(self):
-        self.ensure_one()
-        inv_pending = 0
-        total_inv = 0
-        total_folio = self.amount_total
         for inv in self.invoice_ids:
             if inv.type == 'out_refund':
-                total_inv += inv.amount_total
-        self.refund_amount = total_inv
-        for res in self.room_lines:
-            res._compute_color()
+                total_inv_refund += inv.amount_total
+        self.refund_amount = total_inv_refund
+
+    
 
     @api.multi
     def action_pay(self):
@@ -272,7 +178,7 @@ class HotelFolio(models.Model):
         'res_model': 'account.payment',
         'type': 'ir.actions.act_window',
         'view_id': view_id,
-        'context': {'default_folio_id': self.id,'default_amount':amount,'default_payment_type':'inbound','default_partner_type':'customer','default_partner_id':partner},
+        'context': {'default_folio_id': self.id,'default_amount':amount,'default_payment_type':'inbound','default_partner_type':'customer','default_partner_id':partner,'default_communication':self.name},
         'target': 'new'
         }
 
@@ -339,23 +245,21 @@ class HotelFolio(models.Model):
 
     @api.multi
     def _compute_cardex_count(self):
-        num_cardex = 0
-        for reser in self.room_lines:
-            if reser.state != 'cancelled':
-                num_cardex += len(reser.cardex_ids)
-        self.cardex_count = num_cardex
-
-    @api.multi
-    def _compute_cardex_pending(self):
-        pending = 0
-        for reser in self.room_lines:
-            if reser.state != 'cancelled':
-                pending += reser.adults + reser.children - len(reser.cardex_ids)
-        if pending <= 0:
-            self.cardex_pending = False
-        else:
-            self.cardex_pending = True
-        self.cardex_pending_num = pending
+        for fol in self:
+            num_cardex = 0
+            for reser in fol.room_lines:
+                if reser.state != 'cancelled':
+                    num_cardex += len(reser.cardex_ids)
+            self.cardex_count = num_cardex
+            pending = 0
+            for reser in fol.room_lines:
+                if reser.state != 'cancelled':
+                    pending += reser.adults + reser.children - len(reser.cardex_ids)
+            if pending <= 0:
+                self.cardex_pending = False
+            else:
+                self.cardex_pending = True
+            self.cardex_pending_num = pending    
 
 
     @api.multi
@@ -370,8 +274,7 @@ class HotelFolio(models.Model):
         for rec in self:
             if rec.partner_id.id and len(rec.room_lines) != 0:
                 context.update({'folioid': rec.id, 'guest': rec.partner_id.id,
-                                'room_no': rec.room_lines[0].product_id.name,
-                                'hotel': rec.warehouse_id.id})
+                                'room_no': rec.room_lines[0].product_id.name})
                 self.env.args = cr, uid, misc.frozendict(context)
             else:
                 raise except_orm(_('Warning'), _('Please Reserve Any Room.'))
@@ -427,77 +330,6 @@ class HotelFolio(models.Model):
 
         return folio_id
 
-    #~ @api.multi
-    #~ def write(self, vals):
-        """
-        Overrides orm write method.
-        @param self: The object pointer
-        @param vals: dictionary of fields value.
-        """
-        #~ folio_room_line_obj = self.env['folio.room.line']
-#        reservation_line_obj = self.env['hotel.room.reservation.line']
-        #~ product_obj = self.env['product.product']
-        #~ h_room_obj = self.env['hotel.room']
-        #~ room_lst1 = []
-        #~ for rec in self:
-            #~ for res in rec.room_lines:
-                #~ room_lst1.append(res.product_id.id)
-        #~ folio_write = super(HotelFolio, self).write(vals)
-        #~ room_lst = []
-        #~ for folio_obj in self:
-            #~ for folio_rec in folio_obj.room_lines:
-                #~ room_lst.append(folio_rec.product_id.id)
-            #~ new_rooms = set(room_lst).difference(set(room_lst1))
-            #~ if len(list(new_rooms)) != 0:
-                #~ room_list = product_obj.browse(list(new_rooms))
-                #~ for rm in room_list:
-                    #~ room_obj = h_room_obj.search([('name', '=', rm.name)])
-                    #~ vals = {'room_id': room_obj.id,
-                            #~ 'checkin': folio_obj.checkin,
-                            #~ 'checkout': folio_obj.checkout,
-                            #~ 'folio_id': folio_obj.id,
-                            #~ }
-                    #~ folio_room_line_obj.create(vals)
-            #~ if len(list(new_rooms)) == 0:
-                #~ room_list_obj = product_obj.browse(room_lst1)
-                #~ for rom in room_list_obj:
-                    #~ room_obj = h_room_obj.search([('name', '=', rom.name)])
-                    #~ room_vals = {'room_id': room_obj.id,
-                                 #~ 'checkin': folio_obj.checkin,
-                                 #~ 'checkout': folio_obj.checkout,
-                                 #~ 'folio_id': folio_obj.id,
-                                 #~ }
-                    #~ folio_romline_rec = (folio_room_line_obj.search
-                                         #~ ([('folio_id', '=', folio_obj.id)]))
-                    #~ folio_romline_rec.write(room_vals)
-#            if folio_obj.reservation_id:
-#                for reservation in folio_obj.reservation_id:
-#                    reservation_obj = (reservation_line_obj.search
-#                                       ([('reservation_id', '=',
-#                                          reservation.id)]))
-#                    if len(reservation_obj) == 1:
-#                        for line_id in reservation.reservation_line:
-#                            line_id = line_id.reserve
-#                            for room_id in line_id:
-#                                vals = {'room_id': room_id.id,
-#                                        'checkin': folio_obj.checkin,
-#                                        'checkout': folio_obj.checkout,
-#                                        'state': 'assigned',
-#                                        'reservation_id': reservation.id,
-#                                        }
-#                                reservation_obj.write(vals)
-        #~ return folio_write
-
-    @api.onchange('warehouse_id')
-    def onchange_warehouse_id(self):
-        '''
-        When you change warehouse it will update the warehouse of
-        the hotel folio as well
-        ----------------------------------------------------------
-        @param self: object pointer
-        '''
-        return self.order_id._onchange_warehouse_id()
-
     @api.onchange('partner_id')
     def onchange_partner_id(self):
         '''
@@ -520,18 +352,19 @@ class HotelFolio(models.Model):
                 self.pricelist_id = partner_rec.property_product_pricelist.id
             for line in self.room_lines:
                 _logger.info(line.id)
-                tz = self._context.get('tz')
+                tz = pytz.timezone(self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel'))
                 chkin_dt = fields.Datetime.from_string(line.checkin)
                 chkout_dt = fields.Datetime.from_string(line.checkout)
-                if tz:
-                    chkin_dt = chkin_dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(tz))
-                    chkout_dt = chkout_dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(tz))
+                chkin_dt = chkin_dt.replace(tzinfo=pytz.utc).astimezone(tz)
+                chkout_dt = chkout_dt.replace(tzinfo=pytz.utc).astimezone(tz)
                 days_diff = abs((chkout_dt - chkin_dt).days)
                 res = line.prepare_reservation_lines(chkin_dt, days_diff)
                 line.reservation_lines = res['commands']
                 line.price_unit = res['total_price']
         self.currency_id = self.env.ref('base.main_company').currency_id
-        #WARNING MESSAGES IN PARTNER FOR FOLIOS
+        """
+        Warning messajes saved in partner form to folios
+        """
         if not self.partner_id:
             return
         warning = {}
@@ -621,79 +454,30 @@ class HotelFolio(models.Model):
         '''
         @param self: object pointer
         '''
-        order_ids = [folio.order_id.id for folio in self]
-        sale_obj = self.env['sale.order'].browse(order_ids)
-        rv = sale_obj.action_cancel()
-        for res in self.room_lines:
-            res.action_cancel()
+        if not self.order_id:
+            raise ValidationError(_('Order id is not available'))
         for sale in self:
-            for pick in sale.picking_ids:
-                workflow.trg_validate(self._uid, 'stock.picking', pick.id,
-                                      'button_cancel', self._cr)
             for invoice in sale.invoice_ids:
-                workflow.trg_validate(self._uid, 'account.invoice',
-                                      invoice.id, 'invoice_cancel',
-                                      self._cr)
-                sale.write({'state': 'cancel'})
-        return rv
+                invoice.state = 'cancel'
+        self.room_lines.action_cancel()
+        return self.order_id.action_cancel()
+
 
     @api.multi
     def action_confirm(self):
         for order in self.order_id:
             order.state = 'sale'
             order.order_line._action_procurement_create()
-            for room in self.room_lines:
-                room.confirm()
             if not order.project_id:
                 for line in order.order_line:
                     if line.product_id.invoice_policy == 'cost':
                         order._create_analytic_account()
                         break
+        self.room_lines.confirm()    
         if self.env['ir.values'].get_default('sale.config.settings',
                                              'auto_done_setting'):
             self.order_id.action_done()
-
-    @api.multi
-    def test_state(self, mode):
-        '''
-        @param self: object pointer
-        @param mode: state of workflow
-        '''
-        write_done_ids = []
-        write_cancel_ids = []
-        if write_done_ids:
-            test_obj = self.env['sale.order.line'].browse(write_done_ids)
-            test_obj.write({'state': 'done'})
-        if write_cancel_ids:
-            test_obj = self.env['sale.order.line'].browse(write_cancel_ids)
-            test_obj.write({'state': 'cancel'})
-
-    @api.multi
-    def action_ship_create(self):
-        '''
-        @param self: object pointer
-        '''
-        for folio in self:
-            folio.order_id.action_ship_create()
-        return True
-
-    @api.multi
-    def action_ship_end(self):
-        '''
-        @param self: object pointer
-        '''
-        for order in self:
-            order.write({'shipped': True})
-
-    @api.multi
-    def has_stockable_products(self):
-        '''
-        @param self: object pointer
-        '''
-        for folio in self:
-            folio.order_id.has_stockable_products()
-        return True
-
+        
     @api.multi
     def action_cancel_draft(self):
         '''
@@ -713,3 +497,76 @@ class HotelFolio(models.Model):
         sale_line_obj.write({'invoiced': False, 'state': 'draft',
                              'invoice_lines': [(6, 0, [])]})
         return True
+        
+    @api.multi
+    def send_reservation_mail(self):
+        '''
+        This function opens a window to compose an email,
+        template message loaded by default.
+        @param self: object pointer
+        '''
+        self.ensure_one()
+        ir_model_data = self.env['ir.model.data']
+        try:
+            template_id = (ir_model_data.get_object_reference
+                           ('hotel_reservation',
+                            'mail_template_hotel_reservation')[1])
+        except ValueError:
+            template_id = False
+        try:
+            compose_form_id = (ir_model_data.get_object_reference
+                               ('mail',
+                                'email_compose_message_wizard_form')[1])
+        except ValueError:
+            compose_form_id = False
+        ctx = dict()
+        ctx.update({
+            'default_model': 'hotel.reservation',
+            'default_res_id': self._ids[0],
+            'default_use_template': bool(template_id),
+            'default_template_id': template_id,
+            'default_composition_mode': 'comment',
+            'force_send': True,
+            'mark_so_as_sent': True
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'mail.compose.message',
+            'views': [(compose_form_id, 'form')],
+            'view_id': compose_form_id,
+            'target': 'new',
+            'context': ctx,
+            'force_send': True
+        }
+
+    @api.model
+    def reservation_reminder_24hrs(self):
+        """
+        This method is for scheduler
+        every 1day scheduler will call this method to
+        find all tomorrow's reservations.
+        ----------------------------------------------
+        @param self: The object pointer
+        @return: send a mail
+        """
+        now_str = time.strftime(dt)
+        now_date = datetime.strptime(now_str, dt)
+        ir_model_data = self.env['ir.model.data']
+        template_id = (ir_model_data.get_object_reference
+                       ('hotel_reservation',
+                        'mail_template_reservation_reminder_24hrs')[1])
+        template_rec = self.env['mail.template'].browse(template_id)
+        for reserv_rec in self.search([]):
+            checkin_date = (datetime.strptime(reserv_rec.checkin, dt))
+            difference = relativedelta(now_date, checkin_date)
+            if(difference.days == -1 and reserv_rec.partner_id.email and
+               reserv_rec.state == 'confirm'):
+                template_rec.send_mail(reserv_rec.id, force_send=True)
+        return True
+    
+    @api.multi
+    def unlink(self):
+        self.order_id.unlink()
+        return super(HotelFolio, self).unlink()

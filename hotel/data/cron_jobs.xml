@@ -3,7 +3,7 @@
 
     <data noupdate="1">
 
-          <record id="daily_plan_checkin_out" model="ir.cron">
+        <record id="daily_plan_checkin_out" model="ir.cron">
             <field name="name">Daily Plan</field>
             <field name="active" eval="True" />
             <field name="user_id" ref="base.user_root" />
@@ -15,7 +15,19 @@
             <field name="model" eval="'hotel.reservation'" />
             <field name="function" eval="'daily_plan'" />
             <field name="args" eval="" />
-          </record>
+        </record>
+          
+          <!-- Scheduler For To Inform Guest About Reservation Before 24 Hours -->
+        <record model="ir.cron" id="Guest_reservation_reminder_24hrs">
+            <field name="name">Inform Guest About Reservation Before 24 Hours</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False" />
+            <field name="model" eval="'hotel.reservation'" />
+            <field name="function" eval="'reservation_reminder_24hrs'" />
+            <field name="args" eval="'()'" />
+        </record>
 
     </data>
 

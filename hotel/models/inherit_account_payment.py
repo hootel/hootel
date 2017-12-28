@@ -43,6 +43,7 @@ class AccountPayment(models.Model):
     @api.multi
     @api.depends('state')
     def _compute_folio_amount(self):
+        res = []
         for payment in self:
             amount_pending = 0
             total_amount = 0
@@ -75,8 +76,8 @@ class AccountPayment(models.Model):
                 fol.write({'invoices_amount': amount_pending})
                 fol.write({'invoices_paid': paid})
                 payment.amount_total_folio = total_folio
-                for res in fol.room_lines:
-                    res._compute_color()
+                res += payment
+            return res
 
 
 

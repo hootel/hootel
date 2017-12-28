@@ -177,10 +177,10 @@ class HotelCalendarManagement(models.TransientModel):
                 ])
                 if avail:
                     json_data[vroom.id].append({
-                        'id': rec.id,
-                        'date': rec.date,
-                        'avail': rec.avail,
-                        'no_ota': rec.no_ota,
+                        'id': vroom.id,
+                        'date': avail.date,
+                        'avail': avail.avail,
+                        'no_ota': avail.no_ota,
                     })
                 else:
                     json_data[vroom.id].append({
@@ -198,13 +198,14 @@ class HotelCalendarManagement(models.TransientModel):
         date_diff = abs((date_end-date_start).days)
         hotel_vroom_obj = self.env['hotel.virtual.room']
         hotel_room_obj = self.env['hotel.room']
+        hotel_reservation_obj = self.env['hotel.reservation']
         vrooms = hotel_vroom_obj.search([])
 
         nn = {}
         for i in range(0, date_diff+1):
             cur_date = date_start + timedelta(days=i)
             cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
-            occupied_reservations = hotel_room_obj.rooms_occupied(cur_date_str, cur_date_str)
+            occupied_reservations = hotel_reservation_obj.occupied(cur_date_str, cur_date_str)
 
             if not cur_date in nn:
                 nn.update({ cur_date_str: {} })

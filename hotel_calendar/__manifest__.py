@@ -32,6 +32,7 @@
         'bus',
         'web',
         'hotel',
+        'web_widget_color',
     ],
     'external_dependencies': {
         'python': []
@@ -54,7 +55,6 @@
     ],
 
     'installable': True,
-    'auto_install': False,
-    'application': True,
+    'auto_install': False,    
     'license': 'AGPL-3',
 }

@@ -10,7 +10,7 @@
             <menuitem 
                 id="menu_category"
                 name="Category Codes"
-                parent="hotel.hotel_configuration_menu"
+                parent="hotel.configuration_others"
                 sequence="30"
                 action="action_category"
             />

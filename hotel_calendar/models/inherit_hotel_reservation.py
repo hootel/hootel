@@ -19,16 +19,62 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, api, _
+from openerp import models, fields, api, _
 from datetime import datetime, timedelta
 from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
-import logging
-_logger = logging.getLogger(__name__)
+from dateutil.relativedelta import relativedelta
+import time
 
 
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
+    
+    reserve_color = fields.Char(compute='_compute_color',string='Color', store=True)
+    
+    @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
+    def _compute_color(self):
+        now_str = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        for rec in self:
+            now_date = datetime.strptime(now_str,DEFAULT_SERVER_DATETIME_FORMAT)
+            checkin_date = (datetime.strptime(
+                                rec.checkin,
+                                DEFAULT_SERVER_DATETIME_FORMAT))
+            difference_checkin = relativedelta(now_date, checkin_date)
+            checkout_date = (datetime.strptime(
+                                rec.checkout,
+                                DEFAULT_SERVER_DATETIME_FORMAT))
+            difference_checkout = relativedelta(now_date, checkout_date)
+            if rec.reservation_type == 'staff':
+                rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_staff')
+            elif rec.reservation_type == 'out':
+                rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_dontsell')
+            elif rec.to_assign == True:
+                rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_to_assign')
+            elif rec.state == 'draft':
+                rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_pre_reservation')
+            elif rec.state == 'confirm':
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_reservation_pay')
+                else:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_reservation')
+            elif rec.state == 'booking' and difference_checkout.days == 0:
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_checkout_pay')
+                else:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_checkout')
+            elif rec.state == 'booking':
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_stay_pay')
+                else:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_stay')
+            else:
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = '#FFFFFF'
+                else:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_payment_pending')
+            rec.write({}) #To dispatch the calendar bus notification           
+            return rec.reserve_color
 
     @api.model
     def _hcalendar_reservation_data(self, reservations):
@@ -266,6 +312,7 @@ class HotelReservation(models.Model):
             reservation_id.state,
             reservation_id.splitted)
         return reservation_id
+    
 
     @api.multi
     def write(self, vals):
