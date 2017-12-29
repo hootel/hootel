@@ -9,9 +9,6 @@
         <field name="view_mode">form</field>
         <field name="target">inline</field>
     </record>
-        <menuitem id="configuration_others" name="Configuration"
-            parent="hotel.hotel_configuration_menu" sequence="10" />
-
         <menuitem id="hotel_menu" name="Hotel"             
             sequence="25" parent="base.menu_administration" />
 
@@ -23,6 +20,9 @@
 
         <menuitem id="hotel_configuration_menu" name="Configuration"
             sequence="20" parent="hotel_management_menu" />
+            
+        <menuitem id="configuration_others" name="Configuration"
+            parent="hotel.hotel_configuration_menu" sequence="10" />
 
         <menuitem id="hotel_massive_change" parent="hotel.configuration_others"
             sequence="10" action="action_hotel_massive_change" name="Massive Changes"/>
