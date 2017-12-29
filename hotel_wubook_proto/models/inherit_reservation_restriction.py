@@ -28,7 +28,7 @@ from datetime import datetime, timedelta
 class ReservationRestriction(models.Model):
     _inherit = 'hotel.virtual.room.restriction'
 
-    wpid = fields.Char("WuBook Plan ID", readonly=True)
+    wpid = fields.Char("WuBook Restriction Plan ID", readonly=True)
     wdaily = fields.Boolean("Plan Daily", default=True, readonly=True)
 
     @api.multi
@@ -49,7 +49,7 @@ class ReservationRestriction(models.Model):
         if not min_date or not max_date:
             return prices
         days_diff = abs((max_date - min_date).days)
-        vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', 'none')])
+        vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', ''), ('wrid', '!=', False)])
         for vroom in vrooms:
             prices.update({vroom.wrid: []})
             for i in range(0, days_diff or 1):
@@ -96,10 +96,11 @@ class ReservationRestriction(models.Model):
         nname = vals.get('name')
         if self._context.get('wubook_action', True) and nname and self.env['wubook'].is_valid_account():
             for record in self:
-                wres = self.env['wubook'].rename_rplan(vals.get('wpid', record.wpid),
-                                                       nname)
-                if not wres:
-                    raise ValidationError("Can't rname rplan on WuBook")
+                if record.wpid and record.wpid != '':
+                    wres = self.env['wubook'].rename_rplan(vals.get('wpid', record.wpid),
+                                                           nname)
+                    if not wres:
+                        raise ValidationError("Can't rname rplan on WuBook")
         updated = super(ReservationRestriction, self).write(vals)
         return updated
 
@@ -107,9 +108,10 @@ class ReservationRestriction(models.Model):
     def unlink(self):
         if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             for record in self:
-                wres = self.env['wubook'].delete_rplan(record.wpid)
-                if not wres:
-                    raise ValidationError("Can't delete rplan on WuBook")
+                if record.wpid and record.wpid != '':
+                    wres = self.env['wubook'].delete_rplan(record.wpid)
+                    if not wres:
+                        raise ValidationError("Can't delete rplan on WuBook")
         return super(ReservationRestriction, self).unlink()
 
     @api.multi

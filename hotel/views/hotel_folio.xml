@@ -25,9 +25,6 @@
                         <button name="action_done" type="object" string="Set to Done"
                             states="sale" attrs="{'invisible': [('invoice_status', '!=', 'invoiced')]}"
                             help="If a Hotel Folio is done, you cannot modify it manually anymore. However, you will still be able to invoice or deliver. This is used to freeze the Hotel Folio." />
-                        <!--<button name="action_pay" type="object" states="sale"
-                            string="Pay" groups="account.group_account_invoice"
-                            class="oe_highlight" attrs="{'invisible': [('invoices_amount', '&lt;=', 0)]}" />-->
                         <field name="state" select="2" widget="statusbar"
                             statusbar_visible="draft,sent,sale,done" />
                     </header>
@@ -39,7 +36,7 @@
                                 icon="fa-user-plus"
                                 name="%(launch_checkin_wizard)d"
                                 attrs="{'invisible': [('cardex_pending_num','&lt;=',0)]}"
-                                context="{'reservation_id': room_lines[0], 'hidden_cardex': True, 'folio': active_id}">
+                                context="{'reservation_ids': room_lines, 'hidden_cardex': True, 'folio': active_id}">
                                 <div class="o_form_field o_stat_info">
                                     <span class="o_stat_value"><field name="cardex_pending_num"
                                     widget="statinfo" nolabel="1"/></span>
@@ -75,7 +72,7 @@
                             </button>
 
                             <button type="object" class="oe_stat_button"
-                                id="invoices_smart_button"
+                                id="payment_smart_button"
                                 icon="fa-money"
                                 name="action_pay"
                                 attrs="{'invisible': [('invoices_amount','&lt;=',0)]}">
@@ -141,12 +138,21 @@
                                         <field name="children" />
                                         <field name="price_subtotal" />
                                         <field name="state" />
+                                        <field name="cardex_ids" invisible ="1"/>
+                                        <button type="action" class="oe_stat_button" 
+                                        id="cardex_smart_button" icon="fa-user-plus" 
+                                        name="%(launch_checkin_wizard_add)d" 
+                                        context="{'partner_id': partner_id,'enter_date': checkin,
+                                            'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
+                                        attrs="{'invisible':[('state','not in',('confirm','booking')),
+                                                ('cardex_ids','!=',False)]}"
+                                        />
                                         <field name="partner_id" invisible="1"/>
                                     </tree>
                                 </field>
-                                <separator string="Service Lines" colspan="4" />
+                                <separator string="Service Lines" colspan="4"/>
                                 <field name="service_lines" colspan="4" string="Service Line"
-                                    nolabel="1">
+                                    nolabel="1" context="{'room_lines':room_lines,'folio_id': id}">
                                     <tree string="Service Line">
                                         <field name="name" />
                                         <field name="product_id" />
@@ -162,7 +168,7 @@
                                     <div class="oe_subtotal_footer_separator oe_inline">
                                         <label for="amount_total" />
                                         <button name="button_dummy" string="Compute" states="draft"
-                                            type="object" icon="terp-sale" class="oe_highlight" />
+                                            type="object" class="oe_highlight" />
                                     </div>
                                     <field name="amount_total" nolabel="1" sum="Total amount"
                                         widget='monetary' />
@@ -214,6 +220,7 @@
                     <field name="partner_id" select="1" />
                     <field name="date_order" select="1" />
                     <field name="state" />
+                    <field name="room_lines" widget="manymany_tags"/>
                     <field name="amount_total" sum="Total amount" />
                 </tree>
             </field>

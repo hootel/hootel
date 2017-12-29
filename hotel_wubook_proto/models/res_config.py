@@ -20,6 +20,8 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class WubookConfiguration(models.TransientModel):
@@ -52,3 +54,100 @@ class WubookConfiguration(models.TransientModel):
     @api.multi
     def set_wubook_pkey(self):
         return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_pkey', self.wubook_pkey)
+
+    # Dangerus method: Usefull for cloned instances with new wubook account
+    @api.multi
+    def resync(self):
+        self.ensure_one()
+
+        # Reset Issues
+        issue_ids = self.env['wubook.issue'].search([])
+        issue_ids.write({
+            'to_read': False
+        })
+
+        # Push Virtual Rooms
+        wubook_obj = self.env['wubook'].with_context({'init_connection': False})
+        if wubook_obj.init_connection():
+            ir_seq_obj = self.env['ir.sequence']
+            vrooms = self.env['hotel.virtual.room'].search([])
+            for vroom in vrooms:
+                shortcode = ir_seq_obj.next_by_code('hotel.virtual.room')[:4]
+                wrid = wubook_obj.create_room(
+                    shortcode,
+                    vroom.name,
+                    vroom.wcapacity,
+                    vroom.list_price,
+                    vroom.max_real_rooms
+                )
+                if wrid:
+                    vroom.with_context(wubook_action=False).write({
+                        'wrid': wrid,
+                        'wscode': shortcode,
+                    })
+                else:
+                    vroom.with_context(wubook_action=False).write({
+                        'wrid': '',
+                        'wscode': '',
+                    })
+            # Create Parity Restrictions
+            restriction_ids = self.env['hotel.virtual.room.restriction'].search([])
+            for restriction in restriction_ids:
+                wpid = wubook_obj.create_rplan(restriction.name)
+                restriction.write({
+                    'wpid': wpid or ''
+                })
+            # Create Parity Pricelist
+            pricelist_ids = self.env['product.pricelist'].search([])
+            for pricelist in pricelist_ids:
+                wpid = wubook_obj.create_plan(pricelist.name, pricelist.wdaily)
+                pricelist.write({
+                    'wpid': wpid or ''
+                })
+            wubook_obj.close_connection()
+
+        # Reset Folios
+        folio_ids = self.env['hotel.folio'].search([])
+        folio_ids.with_context(wubook_action=False).write({
+            'wseed': '',
+            'whas_wubook_reservations': False,
+        })
+
+        # Reset Reservations
+        reservation_ids = self.env['hotel.reservation'].search([('wrid', '!=', ''), ('wrid', '!=', False)])
+        reservation_ids.with_context(wubook_action=False).write({
+            'wrid': '',
+            'wchannel_id': False,
+            'wchannel_reservation_code': '',
+            'wis_from_channel': False,
+            'wstatus': 0
+        })
+
+        # Get Parity Models
+        pricelist_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
+        restriction_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id'))
+
+        # Put to push restrictions
+        restriction_item_ids = self.env['hotel.virtual.room.restriction.item'].search([
+            ('restriction_id', '=', restriction_id),
+            ('applied_on', '=', '0_virtual_room'),
+            ('wpushed', '=', True),
+        ])
+        restriction_item_ids.with_context(wubook_action=False).write({'wpushed': False})
+
+        # Put to push pricelists
+        pricelist_item_ids = self.env['product.pricelist.item'].search([
+            ('pricelist_id', '=', pricelist_id),
+            ('applied_on', '=', '1_product'),
+            ('compute_price', '=', 'fixed'),
+            ('wpushed', '=', True),
+        ])
+        pricelist_item_ids.with_context(wubook_action=False).write({'wpushed': False})
+
+        # Put to push availability
+        availabity_ids = self.env['hotel.virtual.room.availabity'].search([('wpushed', '=', True)])
+        availabity_ids.with_context(wubook_action=False).write({'wpushed': False})
+
+        # Push Changes
+        self.env['wubook'].push_changes()
+        self.env['wubook'].push_activation()

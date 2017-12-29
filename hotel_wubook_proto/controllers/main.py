@@ -71,12 +71,15 @@ class website_wubook(http.Controller):
             raise ValidationError("Error! lcode doesn't match!")
 
         _logger.info("[WUBOOK] Updating values...")
-        request.env['wubook'].sudo().fetch_rooms_values(dfrom, dto)
-        request.env['wubook'].sudo().fetch_rplan_restrictions(dfrom, dto)
-        pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
-        if pricelist_id:
-            pricelist_id = request.env['product.pricelist'].sudo().browse(int(pricelist))
-            if pricelist_id and pricelist_id.wpid:
-                request.env['wubook'].sudo().fetch_plan_prices(pricelist_id.wpid, dfrom, dto)
+        wubook_obj = request.env['wubook'].sudo().with_context({'init_connection': False})
+        if wubook_obj.init_connection():
+            wubook_obj.fetch_rooms_values(dfrom, dto)
+            wubook_obj.fetch_rplan_restrictions(dfrom, dto)
+            parity_pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+            if parity_pricelist_id:
+                pricelist_id = request.env['product.pricelist'].sudo().browse(int(parity_pricelist_id))
+                if pricelist_id and pricelist_id.wpid:
+                    wubook_obj.fetch_plan_prices(pricelist_id.wpid, dfrom, dto)
+            wubook_obj.close_connection()
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])

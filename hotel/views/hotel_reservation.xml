@@ -29,7 +29,7 @@
                              <group colspan="4" col="4">
                                 <field name="product_id"
                                     select="1" domain="[('isroom','=',True)]"
-                                    string="Room No" />
+                                    string="Room No" options="{'create': False, 'create_edit': False}"/>
                                 <field name="folio_id" readonly="1"/>
                                 <field name="checkin"/>
                                 <field name="adults"/>
@@ -40,8 +40,8 @@
                                 <field name="pricelist_id" invisible="1"/>
                             </group>
                             <group colspan="6" col="6">
-                                <field name="virtual_room_id" on_change="1" />
-                                <field name="room_type_id"/>
+                                <field name="virtual_room_id" on_change="1" options="{'create': False, 'create_edit': False}"/>
+                                <field name="room_type_id" options="{'create': False, 'create_edit': False}"/>
                                 <field name="check_rooms"/>
                             </group>
                                 <field name="product_uom_qty"
@@ -49,7 +49,7 @@
                                 <field name="invoice_status" invisible="1"/>
                                 <field name="price_unit" invisible="1"/>
                                 <field name="product_uom" string="Rent(UOM)" invisible="1" />
-                            
+
                             <separator/>
                             <notebook colspan="6" col="6">
                                 <page name="days" string="Days">
@@ -106,7 +106,17 @@
                     <field name="adults"/>
                     <field name="children"/>
                     <field name="state" />
+                    <field name="cardex_ids" invisible ="1"/>
                     <field name="to_assign" invisible="True"/>
+                    <button type="action" class="oe_stat_button" 
+                    id="cardex_smart_button" icon="fa-user-plus" 
+                    name="%(launch_checkin_wizard_add)d" 
+                    context="{'partner_id': partner_id,'enter_date': checkin,
+                        'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
+                    attrs="{'invisible':[('state','not in',('confirm','booking')),
+                            ('cardex_ids','!=',False)]}"
+                    />
+
                 </tree>
             </field>
         </record>
@@ -151,6 +161,16 @@
                     </group>
                 </search>
             </field>
+        </record>
+
+        <!-- Action Menu -->
+        <record model="ir.values" id="menu_open_wizard_duplicate_reservation">
+          <field name="model_id" ref="model_hotel_reservation" />
+          <field name="name">Duplicate Reservation</field>
+          <field name="key2">client_action_multi</field>
+          <field name="value" eval="'ir.actions.act_window,' + str(ref('hotel.action_hotel_duplicate_reservation'))" />
+          <field name="key">action</field>
+          <field name="model">hotel.reservation</field>
         </record>
 
         <!-- Action for hotel folio -->

@@ -229,9 +229,10 @@ HotelCalendarManagement.prototype = {
     telm.setAttribute('id', this._sanitizeId(`RESERVED_ROOMS_${roomId}_${dateShortStr}`));
     telm.setAttribute('name', 'reserved_rooms');
     telm.setAttribute('type', 'edit');
-    telm.setAttribute('title', 'Reserved Rooms');
+    telm.setAttribute('title', 'Free Rooms');
     telm.setAttribute('readonly', 'readonly');
     telm.setAttribute('disabled', 'disabled');
+    telm.style.backgroundColor = 'lightgray';
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     cell.appendChild(telm);
 
@@ -255,7 +256,7 @@ HotelCalendarManagement.prototype = {
     return table;
   },
 
-  setData: function(prices, restrictions, avail) {
+  setData: function(prices, restrictions, avail, free_rooms) {
     this._updateView();
     if (typeof prices !== 'undefined' && prices) {
       this._setPricelist(prices);
@@ -265,6 +266,9 @@ HotelCalendarManagement.prototype = {
     }
     if (typeof avail !== 'undefined' && avail) {
       this._setAvailability(avail);
+    }
+    if (typeof free_rooms !== 'undefined' && free_rooms) {
+      this._setFreeRooms(free_rooms);
     }
   },
 
@@ -426,7 +430,7 @@ HotelCalendarManagement.prototype = {
           if (input) {
             input.dataset.orgValue = inputIds[i+1];
             input.value = inputIds[i+1];
-            if (i < 2) { // Only min and min arrival
+            if (i < 4) { // Only min and min arrival
               input.style.backgroundColor = (input.value >= room.capacity)?'yellow':'white';
             }
             else {
@@ -479,6 +483,29 @@ HotelCalendarManagement.prototype = {
       }
     }
     return data;
+  },
+
+  //==== FREE Rooms
+  _setFreeRooms: function(/*List*/free_rooms) {
+    this._free_rooms = free_rooms;
+    var keys = Object.keys(free_rooms);
+    for (var vroomId of keys) {
+      for (var fnroom of free_rooms[vroomId]) {
+        var dd = HotelCalendarManagement.toMoment(fnroom.date, this.options.dateFormatShort);
+        var inputIds = [
+          `RESERVED_ROOMS_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, fnroom.num,
+        ];
+
+        for (var i=0; i<inputIds.length; i+=2) {
+          var inputId = this._sanitizeId(inputIds[i]);
+          var input = this.etable.querySelector(`#${inputId}`);
+          if (input) {
+            input.dataset.orgValue = inputIds[i+1];
+            input.value = inputIds[i+1];
+          }
+        }
+      }
+    }
   },
 
   //==== AVAILABILITY
@@ -551,7 +578,7 @@ HotelCalendarManagement.prototype = {
   getDateDiffDays: function(/*MomentObject*/start, /*MomentObject*/end) {
 	  return end.clone().startOf('day').diff(start.clone().startOf('day'), 'days');
   },
-  
+
   _sanitizeId: function(/*String*/str) {
     return str.replace(/[\/\s\+\-]/g, '_');
   },
@@ -575,7 +602,14 @@ HotelCalendarManagement.prototype = {
     }
     else if (name === 'min_stay' || name === 'min_stay_arrival' || name === 'max_stay' ||
               name === 'price' || name === 'avail') {
-      elm.style.backgroundColor = this._isNumeric(value)?'white':'red';
+      if (!this._isNumeric(value)) {
+        elm.style.backgroundColor = 'red';
+      } else if (elm.dataset.orgValue !== elm.value) {
+        elm.style.backgroundColor = '#eee';
+        elm.style.border = "1px solid gray";
+      } else {
+          elm.style.backgroundColor = 'white';
+      }
     }
     else if (elm.tagName.toLowerCase() === 'button') {
       value = Boolean(!(elm.dataset.state === 'true'));

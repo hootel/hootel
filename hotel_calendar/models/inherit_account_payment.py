@@ -19,20 +19,37 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 # ---------------------------------------------------------------------------
+from openerp.exceptions import except_orm, UserError, ValidationError
 from openerp import models, fields, api, _
 
-class HotelRoomAmenities(models.Model):
 
-    _name = 'hotel.room.amenities'
-    _description = 'Room amenities'
 
-    room_categ_id = fields.Many2one('product.product', 'Product Category',
-                                    required=True, delegate=True,
-                                    ondelete='cascade')
-    rcateg_id = fields.Many2one('hotel.room.amenities.type',
-                                'Amenity Catagory')
+class AccountPayment(models.Model):
+
+    _inherit = 'account.payment'    
 
     @api.multi
-    def unlink(self):
-        self.room_categ_id.unlink()
-        return super(HotelRoomAmenities, self).unlink()
+    @api.depends('state')
+    def _compute_folio_amount(self):
+        payments = super(AccountPayment, self)._compute_folio_amount()
+        if payments:
+            for pay in payments:
+                if pay.folio_id:
+                    fol = pay.env['hotel.folio'].search([('id','=',pay.folio_id.id)])
+                else:
+                    return
+                # We must pay only one folio
+                if len(fol) == 0:
+                    return
+                elif len(fol) > 1:
+                    raise except_orm(_('Warning'), _('This pay is related with more than one Reservation.'))
+                else:                
+                    for res in fol.room_lines:
+                        res._compute_color()
+        
+
+
+
+
+
+

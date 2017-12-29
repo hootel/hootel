@@ -73,10 +73,10 @@
 	color: yellow;
 	background: orange;
 }
-#btn_save_changes {
+#btn_save_changes, #btn_massive_changes {
 	height: 56px;
 }
-#btn_save_changes i {
+#btn_save_changes i, #btn_massive_changes i {
 	top: 22%;
 }
 

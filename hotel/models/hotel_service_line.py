@@ -76,10 +76,11 @@ class HotelServiceLine(models.Model):
 
     @api.model
     def _default_ser_room_line(self):
-        _logger.info("CREANDO LINEA DE SERVICIO")
-        _logger.info(self._context)
-        return self.env['hotel.reservation'].search([('id','in',self._context['room_lines'])], limit=1)
-
+        if 'room_lines' in self.env.context and self.env.context['room_lines']:
+            ids = [item[1] for item in self.env.context['room_lines']]
+            return self.env['hotel.reservation'].search([('id','in',ids)], limit=1)
+        return False
+    
     _name = 'hotel.service.line'
     _description = 'hotel Service line'
 
@@ -107,9 +108,6 @@ class HotelServiceLine(models.Model):
         if 'folio_id' in vals:
             folio = self.env['hotel.folio'].browse(vals['folio_id'])
             vals.update({'order_id': folio.order_id.id})
-        if 'ser_room_line' in vals:
-            room_line = self.env['hotel.reservation'].browse(vals['ser_room_line'])
-            vals.update({'order_id': room_line.folio_id.order_id.id,'folio_id': room_line.folio_id.id})
         return super(HotelServiceLine, self).create(vals)
 
     #~ @api.multi
@@ -243,3 +241,9 @@ class HotelServiceLine(models.Model):
         sale_line_obj = self.env['sale.order.line'
                                  ].browse(self.service_line_id.id)
         return sale_line_obj.copy_data(default=default)
+        
+    @api.multi
+    def unlink(self):
+        self.service_line_id.unlink()
+        return super(HotelServiceLine, self).unlink()
+

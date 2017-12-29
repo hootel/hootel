@@ -94,7 +94,7 @@ class HotelVirtualRoom(models.Model):
     def write(self, vals):
         if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             for record in self:
-                if record.wrid != 'none':
+                if record.wrid and record.wrid != '':
                     wres = self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
                                                           vals.get('name', record.name),
                                                           vals.get('wcapacity', record.wcapacity),
@@ -109,7 +109,7 @@ class HotelVirtualRoom(models.Model):
     def unlink(self):
         if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
             for record in self:
-                if record.wrid != 'none':
+                if record.wrid and record.wrid != '':
                     wres = self.env['wubook'].delete_room(record.wrid)
                     if not wres:
                         raise ValidationError("Can't delete room on WuBook")

@@ -9,11 +9,11 @@
     					<tbody>
     						<tr>
 									<td class="col-xs-1 col-lg-1">
-										<button class="btn col-xs-12 col-lg-12" id="btn_save_changes">
+										<button class="btn col-xs-12 col-lg-12" id="btn_save_changes" title="Save Changes">
 												<i class="fa fa-save fa-stack-2x"> </i> &amp;nbsp;
 										</button>
 									</td>
-    							<td class="col-xs-4 col-lg-4">
+    							<td class="col-xs-4 col-lg-3">
 										<div class="col-xs-12 col-lg-12 nopadding">
 											<div class="col-xs-3 col-lg-3 nopadding text-right filter-title">
 					    						<strong style="line-height:2em">PRICELIST:</strong>
@@ -68,6 +68,11 @@
 					    				<button id="cal-pag-next-plus" class="btn"><i class="fa fa-3x fa-angle-double-right"></i></button>
 					    			</div>
     							</td>
+                  <td class="col-xs-1 col-lg-1">
+                    <button class="btn btn-default col-xs-12 col-lg-12" id="btn_massive_changes" title="Launch Massive Changes">
+                        <i class="fa fa-bolt fa-stack-2x"> </i> &amp;nbsp;
+                    </button>
+                  </td>
     						</tr>
     					</tbody>
     				</table>

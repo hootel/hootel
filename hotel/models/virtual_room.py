@@ -70,9 +70,9 @@ class VirtualRoom(models.Model):
                                  required=True, delegate=True,
                                  ondelete='cascade')
     service_ids = fields.Many2many('hotel.services',string='Included Services')
-    max_real_rooms = fields.Integer('Max Room Allowed')
+    max_real_rooms = fields.Integer('Default Max Room Allowed')
     product_id = fields.Many2one(
-        'product.product',
+        'product.product', required=True,
         ondelete='cascade')
 
     @api.multi
@@ -86,7 +86,7 @@ class VirtualRoom(models.Model):
 
     @api.model
     def check_availability_virtual_room(self, checkin, checkout, virtual_room_id=False, notthis=[]):
-        occupied = self.env['hotel.room'].rooms_occupied(checkin, checkout)
+        occupied = self.env['hotel.reservation'].occupied(checkin, checkout)
         rooms_occupied = occupied.mapped('product_id.id')
         free_rooms = self.env['hotel.room'].search([('product_id.id', 'not in', rooms_occupied),
                                                     ('id', 'not in', notthis)])
@@ -96,3 +96,9 @@ class VirtualRoom(models.Model):
             rooms_linked = virtual_room.room_ids | self.env['hotel.room'].search([('categ_id.id', 'in', room_categories)])
             free_rooms = free_rooms & rooms_linked
         return free_rooms.sorted(key=lambda r: r.sequence)
+        
+    @api.multi
+    def unlink(self):
+        self.product_id.unlink()
+        return super(VirtualRoom, self).unlink()
+

@@ -172,7 +172,6 @@ var HotelCalendarManagementView = View.extend({
         this._hcalendar.addEventListener('hcmOnInputChanged', function(ev){
             var btn_save = self.$el.find('#btn_save_changes');
             btn_save.addClass('need-save');
-            console.log(ev.detail);
         });
     },
 
@@ -232,7 +231,7 @@ var HotelCalendarManagementView = View.extend({
                 dateFormatLong: ODOO_DATETIME_MOMENT_FORMAT,
                 dateFormatShort: ODOO_DATE_MOMENT_FORMAT
             });
-            self._hcalendar.setData(results['prices'], results['restrictions'], results['availability']);
+            self._hcalendar.setData(results['prices'], results['restrictions'], results['availability'], results['count_reservations']);
         });
     },
 
@@ -270,22 +269,20 @@ var HotelCalendarManagementView = View.extend({
             self.on_change_filter_date(e, false);
         });
 
-        var date_begin = moment().utc().startOf('day');
+        var date_begin = moment().startOf('day');
         var date_end = date_begin.clone().add(CALENDAR_DAYS, 'd').endOf('day');
         $dateTimePickerBegin.data("ignore_onchange", true);
         $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
-        $dateTimePickerEnd.data("ignore_onchange", true);
         $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-        this._last_dates = [date_begin.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
-                            date_end.utc().format(ODOO_DATETIME_MOMENT_FORMAT)];
+        this._last_dates = this.generate_params()['dates'];
 
         // View Events
         this.$el.find("#mpms-search #cal-pag-prev-plus").on('click', function(ev){
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(15, 'd').startOf('day');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(15, 'd').endOf('day');
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(15, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(15, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -296,8 +293,8 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(1, 'd').startOf('day');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(1, 'd').endOf('day');
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(1, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(1, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -308,8 +305,8 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(15, 'd').startOf('day');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(15, 'd').endOf('day');
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(15, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(15, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -320,8 +317,8 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(1, 'd').startOf('day');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(1, 'd').endOf('day');
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(1, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(1, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -332,8 +329,8 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = moment().utc().startOf('day');
-            var date_end = date_begin.clone().add(self._hcalendar.getOptions('days'), 'd').endOf('day');
+            var date_begin = moment().startOf('day');
+            var date_end = date_begin.clone().add(CALENDAR_DAYS, 'd').endOf('day');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -346,10 +343,14 @@ var HotelCalendarManagementView = View.extend({
             self.save_changes();
         });
 
+        // Launch Massive Changes
+        this.$el.find("#btn_massive_changes").on('click', function(ev){
+          self.call_action("hotel.action_hotel_massive_change");
+        });
+
         /** RENDER CALENDAR **/
         this.generate_hotel_calendar();
 
-        console.log("LLEGA!");
         return $.when();
     },
 
@@ -366,7 +367,7 @@ var HotelCalendarManagementView = View.extend({
             return true;
         }
 
-        var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().utc();
+        var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone();
 
         if (this._hcalendar && date_begin) {
             if (isStartDate) {
@@ -375,7 +376,7 @@ var HotelCalendarManagementView = View.extend({
                 $dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end.local());
             }
 
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc();
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone();
 
             this._check_unsaved_changes(function(){
                 self._hcalendar.setStartDate(date_begin, self._hcalendar.getDateDiffDays(date_begin, date_end));
@@ -393,7 +394,7 @@ var HotelCalendarManagementView = View.extend({
         var params = this.generate_params();
         var oparams = [false, params['dates'][0], params['dates'][1], params['prices'], params['restrictions'], false];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
-            self._hcalendar.setData(results['prices'], results['restrictions'], results['availability']);
+            self._hcalendar.setData(results['prices'], results['restrictions'], results['availability'], results['count_reservations']);
         });
         this._last_dates = params['dates'];
     },
@@ -406,8 +407,8 @@ var HotelCalendarManagementView = View.extend({
         var $dateTimePickerBegin = this.$el.find('#mpms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#mpms-search #date_end');
 
-        var date_begin = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).startOf('day').utc().format(ODOO_DATE_MOMENT_FORMAT);
-        var date_end = moment($dateTimePickerEnd.data("DateTimePicker").getDate()).endOf('day').utc().format(ODOO_DATE_MOMENT_FORMAT);
+        var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().utc().format(ODOO_DATE_MOMENT_FORMAT);
+        var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc().format(ODOO_DATE_MOMENT_FORMAT);
 
         return {
             'dates': [date_begin, date_end],

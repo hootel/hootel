@@ -42,7 +42,7 @@ class HotelReservation(models.Model):
                                                                                 room_name, partner_phone, state, fix_days)
         reserv = self.env['hotel.reservation'].browse(vals['reserv_id'])
         vals['reservation'].update({
-            'fix_days': reserv.wrid != 'none' or fix_days,
+            'fix_days': (reserv.wrid and reserv.wrid != '') or fix_days,
             'wchannel': reserv.wchannel_id and reserv.wchannel_id.name or False,
         })
         return vals
@@ -67,6 +67,6 @@ class HotelReservation(models.Model):
                 reserv.splitted,
                 reserv.parent_reservation.id,
                 False,  # Read-Only
-                reserv.wrid != 'none' or reserv.splitted,  # Fix Days
+                (reserv.wrid and reserv.wrid != '') or reserv.splitted,  # Fix Days
                 False))   # Fix Rooms
         return (json_reservations, vals[1])

@@ -61,10 +61,10 @@
 				</group>
 				<group attrs="{'invisible':[('import_data', '=', False)]}">
 					<group>
-						<field name="date_start" required="1" />
+						<field name="date_start" attrs="{'required':[('import_data', '=', True)]}" />
 					</group>
 					<group>
-						<field name="date_end" required="1" />
+						<field name="date_end" attrs="{'required':[('import_data', '=', True)]}" />
 					</group>
 				</group>
 			</xpath>

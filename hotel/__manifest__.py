@@ -25,7 +25,7 @@
     'version': '0.07',
     'author': 'Serpent Consulting Services Pvt. Ltd., OpenERP SA,\
     Odoo Community Association (OCA),\
-    Dario Lodeiros,\
+    Darío Lodeiros,\
     Jose Luis,\
     Alexandre Díaz Cuadrado',
     'images': [],
@@ -40,6 +40,7 @@
     'data': [
         'wizard/massive_changes.xml',
         'wizard/split_reservation.xml',
+        'wizard/duplicate_reservation.xml',
         'views/res_config.xml',
         'data/menus.xml',
         'security/hotel_security.xml',
@@ -71,6 +72,7 @@
         'data/cron_jobs.xml',
         'views/hotel_dashboard.xml',
         'data/records.xml',
+ #       'data/email_templates.xml',
     ],
     'css': ['static/src/css/room_kanban.css'],
     'auto_install': False,

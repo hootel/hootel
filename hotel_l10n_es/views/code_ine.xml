@@ -12,7 +12,7 @@
             <menuitem 
                 id="menu_code_ine"
                 name="INE Codes"
-                parent="hotel.hotel_configuration_menu"
+                parent="hotel.configuration_others"
                 sequence="25"
                 action="action_code_ine"
             />

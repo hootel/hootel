@@ -200,6 +200,8 @@ var HotelCalendarView = View.extend({
                             new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
                                 self._hcalendar.swapReservation(newReservation, oldReservation);
                             });
+                            // Workarround for dispatch room lines regeneration
+                            new Model('hotel.reservation').call('on_change_checkin_checkout_product_id', [[newReservation.id], false]);
                         }
                     },
                     {

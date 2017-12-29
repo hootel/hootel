@@ -19,33 +19,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp.exceptions import ValidationError
+from openerp import models, api
 
 
-class HotelFolio(models.Model):
-    _inherit = 'hotel.folio'
-
-    @api.depends('room_lines')
-    def _has_wubook_reservations(self):
-        if any(self.room_lines):
-            for room in self.room_lines:
-                if room.wrid and room.wrid != '':
-                    self.whas_wubook_reservations = True
-                    return
-        self.whas_wubook_reservations = False
-
-    wseed = fields.Char("WuBook Session Seed", readonly=True)
-    wcustomer_notes = fields.Text("WuBook Customer Notes", readonly=True)
-    whas_wubook_reservations = fields.Boolean(compute=_has_wubook_reservations,
-                                              store=False)
+class MassiveChangesWizard(models.TransientModel):
+    _inherit = 'hotel.wizard.duplicate.reservation'
 
     @api.multi
-    def import_reservations(self):
-        return self.env['wubook'].fetch_new_bookings()
-
-    @api.multi
-    def action_confirm(self):
-        for rec in self:
-            for room in rec.room_lines:
-                room.to_read = False
-        return super(HotelFolio, self).action_confirm()
+    def duplicate_reservation(self):
+        reservation_id = self.env['hotel.reservation'].browse(self.env.context.get('active_id'))
+        if reservation_id and reservation_id.wis_from_channel:
+            raise ValidationError("Can't duplicate a reservation from channel")
+        return super(MassiveChangesWizard, self).duplicate_reservation()

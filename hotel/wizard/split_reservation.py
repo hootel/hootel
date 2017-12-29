@@ -39,19 +39,22 @@ class SplitReservationWizard(models.TransientModel):
 
             date_start_dt = fields.Datetime.from_string(reservation_id.checkin)
             date_end_dt = fields.Datetime.from_string(reservation_id.checkout)
-            date_diff = abs((date_end_dt - date_start_dt).days)
+            date_diff = abs((date_end_dt - date_start_dt).days) + 1
             for record in self:
+                new_start_date_dt = date_start_dt + timedelta(days=date_diff - record.nights, minutes=1) # FIXME: Add 1 minutes for workaround date constrains
                 if record.nights >= date_diff or record.nights < 1:
                     raise ValidationError("Invalid Nights! Max is '%d'" % date_diff-1)
-                reservation_id.checkout = (date_start_dt + timedelta(days=date_diff - record.nights)).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                reservation_id.checkout = new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                import wdb
+                wdb.set_trace()
                 vals = reservation_id.generate_copy_values(
-                    (date_start_dt + timedelta(days=date_diff - record.nights, minutes=1)).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                    new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                     date_end_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                 )
                 # Days Price
                 reservation_lines = [[],[]]
                 tprice = [0.0, 0.0]
-                div_dt = fields.Datetime.from_string(fields.Datetime.from_string(reservation_id.checkout).strftime(DEFAULT_SERVER_DATE_FORMAT))
+                div_dt = fields.Datetime.from_string(fields.Datetime.from_string(reservation_id.checkout).strftime(DEFAULT_SERVER_DATE_FORMAT)) # Ignore hours
                 for rline in reservation_id.reservation_lines:
                     rline_dt = fields.Datetime.from_string(rline.date)
                     if rline_dt >= div_dt:

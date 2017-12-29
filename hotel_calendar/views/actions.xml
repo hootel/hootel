@@ -24,5 +24,12 @@
                <field name="code">action = env["hotel.folio"].action_folios_amount()</field>
         </record>
 
+        <record model="ir.actions.act_window" id="hotel_virtual_room_pricelist_cached_action_form_tree">
+            <field name="name">Virtual Room Pircelist Cached</field>
+            <field name="res_model">virtual.room.pricelist.cached</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
     </data>
  </openerp>

@@ -30,63 +30,6 @@ _logger=logging.getLogger(__name__)
 class Wizard(models.TransientModel):
     _inherit = 'checkin.wizard'
 
-    def default_enter_date(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.checkin
-        if 'enter_date' in self.env.context:
-            return self.env.context['enter_date']
-        return False
-
-    def default_exit_date(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.checkout
-        if 'exit_date' in self.env.context:
-            return self.env.context['exit_date']
-        return False
-
-    def default_reservation_id(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation
-        if 'reserva_id' in self.env.context:
-            return self.env.context['reserva_id']
-        return False
-
-    def default_partner_id(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.partner_id
-        if 'partner_id' in self.env.context:
-            return self.env.context['partner_id']
-        return False
-
-    def default_cardex_ids(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.cardex_ids
-
-    def default_count_cardex(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.cardex_count
-
-    def default_pending_cardex(self):
-        if 'reservation_id' in self.env.context:
-            reservation = self.env['hotel.reservation'].search([('id','=',self.env.context['reservation_id'])])
-            return reservation.adults + reservation.children - reservation.cardex_count
-
-    def comp_checkin_list_visible(self):
-        if 'partner_id' in self.env.context:
-            self.list_checkin_cardex = False
-        return
-
-    def comp_checkin_edit(self):
-        if 'edit_cardex' in self.env.context:
-            return True
-        return False
-
     documenttype_cardex = fields.Selection([
         ('D', 'DNI'),
         ('P', 'Pasaporte'),
@@ -115,10 +58,7 @@ class Wizard(models.TransientModel):
 
     @api.multi
     def pdf_viajero(self, cardex_id):
-        _logger.info('---TTTTTT Imprimir el PDF del Viajero TTTTTTTT----')
-        _logger.info(cardex_id)
         cardex = self.env['cardex'].search([('id', '=', cardex_id)])
-        _logger.info(cardex)
 #         data['cardex'] = cardex_id
 #         datas = {
 #              'ids': cardex_ids,
