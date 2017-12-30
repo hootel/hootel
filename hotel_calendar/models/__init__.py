@@ -19,11 +19,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import inherit_hotel_reservation
-from . import inherit_product_pricelist_item
-from . import inherit_res_users
+from . import inherited_hotel_reservation
+from . import inherited_product_pricelist_item
+from . import inherited_res_users
 from . import bus_hotel_calendar
 from . import virtual_room_pricelist_cached
 from . import hotel_calendar_management
 from . import res_config
-from . import inherit_account_payment
+from . import inherited_account_payment

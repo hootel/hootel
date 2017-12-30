@@ -40,9 +40,9 @@
     'data': [
         'views/general.xml',
         'views/actions.xml',
-        'views/res_config.xml',
-        'views/inherit_res_users.xml',
-        'views/virtual_room_pricelist_cached.xml',
+        'views/res_config_views.xml',
+        'views/inherited_res_users_views.xml',
+        'views/virtual_room_pricelist_cached_views.xml',
         'data/views.xml',
         'data/menus.xml',
 	    'security/ir.model.access.csv',
@@ -55,6 +55,6 @@
     ],
 
     'installable': True,
-    'auto_install': False,    
+    'auto_install': False,
     'license': 'AGPL-3',
 }

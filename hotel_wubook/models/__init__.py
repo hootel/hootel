@@ -19,4 +19,4 @@
 #
 ##############################################################################
 from . import res_config
-from . import inherit_res_partner
+from . import inherited_res_partner

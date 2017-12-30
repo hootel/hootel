@@ -32,9 +32,9 @@ class HotelCalendarManagement(models.TransientModel):
     @api.multi
     def save_changes(self, pricelist_id, restriction_id, pricelist, restrictions, availability):
         # Save Pricelist
-        for k_price in pricelist.keys():
+        for k_price, v_price in pricelist.iteritems():
             room_id = self.env['hotel.virtual.room'].browse([int(k_price)])
-            for price in pricelist[k_price]:
+            for price in v_price:
                 price_id = self.env['product.pricelist.item'].search([
                     ('date_start', '>=', price['date']), ('date_end', '<=', price['date']),
                     ('pricelist_id', '=', int(pricelist_id)),
@@ -58,8 +58,8 @@ class HotelCalendarManagement(models.TransientModel):
                     })
 
         # Save Restrictions
-        for k_res in restrictions.keys():
-            for restriction in restrictions[k_res]:
+        for k_res, v_res in restrictions.iteritems():
+            for restriction in v_res:
                 res_id = self.env['hotel.virtual.room.restriction.item'].search([
                     ('date_start', '>=', restriction['date']), ('date_end', '<=', restriction['date']),
                     ('restriction_id', '=', int(restriction_id)),
@@ -91,8 +91,8 @@ class HotelCalendarManagement(models.TransientModel):
                     })
 
         # Save Availability
-        for k_avail in availability.keys():
-            for avail in availability[k_avail]:
+        for k_avail, v_avail in availability.iteritems():
+            for avail in v_avail:
                 avail_id = self.env['hotel.virtual.room.availabity'].search([
                     ('date', '=', avail['date']),
                     ('virtual_room_id', '=', int(k_avail)),
@@ -130,10 +130,8 @@ class HotelCalendarManagement(models.TransientModel):
             if not virtual_room_id:
                 continue
 
-            if virtual_room_id.id not in json_data.keys():
-                json_data.update({virtual_room_id.id: []})
             # TODO: date_end - date_start loop
-            json_data[virtual_room_id.id].append({
+            json_data.setdefault(virtual_room_id.id, []).append({
                 'id': rec.id,
                 'price': rec.fixed_price,
                 'date': rec.date_start,
@@ -143,10 +141,8 @@ class HotelCalendarManagement(models.TransientModel):
     def _hcalendar_restriction_json_data(self, restrictions):
         json_data = {}
         for rec in restrictions:
-            if rec.virtual_room_id.id not in json_data.keys():
-                json_data.update({rec.virtual_room_id.id: []})
             # TODO: date_end - date_start loop
-            json_data[rec.virtual_room_id.id].append({
+            json_data.setdefault(rec.virtual_room_id.id, []).append({
                 'id': rec.id,
                 'date': rec.date_start,
                 'min_stay': rec.min_stay,

@@ -779,11 +779,11 @@ class WuBook(models.TransientModel):
     def generate_room_values(self, dfrom, dto, values):
         virtual_room_avail_obj = self.env['hotel.virtual.room.availabity']
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
-        for rid in values.keys():
-            vroom = hotel_virtual_room_obj.search([('wrid', '=', rid)], limit=1)
+        for k_rid, v_rid in values.iteritems():
+            vroom = hotel_virtual_room_obj.search([('wrid', '=', k_rid)], limit=1)
             if vroom:
                 date_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
-                for day_vals in values[rid]:
+                for day_vals in v_rid:
                     date_str = date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
                     vroom_avail = virtual_room_avail_obj.search([('virtual_room_id', '=', vroom.id),
                                                                  ('date', '=', date_str)], limit=1)
@@ -832,13 +832,13 @@ class WuBook(models.TransientModel):
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
         reserv_restriction_obj = self.env['hotel.virtual.room.restriction']
         reserv_restriction_item_obj = self.env['hotel.virtual.room.restriction.item']
-        for rpid in plan_restrictions.keys():
-            restriction_id = reserv_restriction_obj.search([('wpid', '=', rpid)], limit=1)
+        for k_rpid, v_rpid in plan_restrictions.iteritems():
+            restriction_id = reserv_restriction_obj.search([('wpid', '=', k_rpid)], limit=1)
             if restriction_id:
-                for rid in plan_restrictions[rpid].keys():
-                    vroom = hotel_virtual_room_obj.search([('wrid', '=', rid)], limit=1)
+                for k_rid, v_rid in v_rpid.iteritems():
+                    vroom = hotel_virtual_room_obj.search([('wrid', '=', k_rid)], limit=1)
                     if vroom:
-                        for item in plan_restrictions[rpid][rid]:
+                        for item in v_rid.iteritems():
                             date_dt = datetime.strptime(item['date'], DEFAULT_WUBOOK_DATE_FORMAT)
                             restriction_item = reserv_restriction_item_obj.search([
                                 ('restriction_id', '=', restriction_id.id),
@@ -880,8 +880,8 @@ class WuBook(models.TransientModel):
             days_diff = abs((dto_dt - dfrom_dt).days) + 1
             for i in range(0, days_diff):
                 ndate_dt = dfrom_dt + timedelta(days=i)
-                for rid in plan_prices.keys():
-                    vroom = hotel_virtual_room_obj.search([('wrid', '=', rid)], limit=1)
+                for k_rid, v_rid in plan_prices.iteritems():
+                    vroom = hotel_virtual_room_obj.search([('wrid', '=', k_rid)], limit=1)
                     if vroom:
                         pricelist_item = self.env['product.pricelist.item'].search([
                             ('pricelist_id', '=', pricelist.id),
@@ -892,7 +892,7 @@ class WuBook(models.TransientModel):
                             ('product_tmpl_id', '=', vroom.product_id.product_tmpl_id.id)
                         ], limit=1)
                         vals = {
-                            'fixed_price': plan_prices[rid][i],
+                            'fixed_price': plan_prices[k_rid][i],
                             'wpushed': True,
                         }
                         if pricelist_item:
@@ -1171,15 +1171,13 @@ class WuBook(models.TransientModel):
 
             # Update Reservation Split Parent
             # FIXME: Ugly to read and execute
-            master_ids = split_map_index.keys()
-            if folio_id and any(master_ids):
+            if folio_id and any(split_map_index):
                 reservation_ids = hotel_reserv_obj.search([('folio_id', '=', folio_id.id)])
                 master_reserv = False
-                for mid in master_ids:
+                for k_mid, v_mid in split_map_index.iteritems():
                     counter = 0
                     for reserv in reservation_ids:
-                        child_ids = master_ids[mid]
-                        for child in child_ids:
+                        for child in v_mid.iteritems():
                             if child == counter:
                                 reserv.parent_reservation = master_reserv.id
                             elif child == mid:
@@ -1198,17 +1196,17 @@ class WuBook(models.TransientModel):
     def generate_wubook_channel_info(self, channels):
         channel_info_obj = self.env['wubook.channel.info']
         count = 0
-        for cid in channels.keys():
+        for k_cid, v_cid in channels.iteritems():
             vals = {
-                'name': channels[cid]['name'],
-                'ical': channels[cid]['ical'] == 1,
+                'name': v_cid['name'],
+                'ical': v_cid['ical'] == 1,
             }
-            channel_info = channel_info_obj.search([('wid', '=', cid)], limit=1)
+            channel_info = channel_info_obj.search([('wid', '=', k_cid)], limit=1)
             if channel_info:
                 channel_info.write(vals)
             else:
                 vals.update({
-                    'wid': cid
+                    'wid': k_cid
                 })
                 channel_info_obj.create(vals)
             count = count + 1
@@ -1275,11 +1273,10 @@ class WuBook(models.TransientModel):
                                     'date': (date_start + timedelta(days=i)).strftime(DEFAULT_SERVER_DATE_FORMAT),
                                 })
                             prices[pr.wpid][vroom.wrid].append(prod.price)
-            _logger.info(prices)
-            plan_keys = prices.keys()
-            for pk in plan_keys:
-                if any(prices[pk]):
-                    self.update_plan_prices(pk, date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT), prices[pk])
+            _logger.info(plan_keys)
+            for k_pk, v_pk in plan_keys.iteritems():
+                if any(v_pk):
+                    self.update_plan_prices(k_pk, date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT), v_pk)
 
             for pli in unpushed:
                 pli.with_context({'wubook_action': False}).write({'wpushed': True})
@@ -1316,12 +1313,11 @@ class WuBook(models.TransientModel):
                             'closed_departure': (restr and restr.closed_departure) and 1 or 0,
                         })
             _logger.info(restrictions)
-            plan_keys = restrictions.keys()
-            for pk in plan_keys:
-                if any(restrictions[pk]):
-                    self.update_rplan_values(pk,
+            for k_res, v_res in restrictions.iteritems():
+                if any(v_res):
+                    self.update_rplan_values(k_res,
                                              date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                             restrictions[pk])
+                                             v_res)
             for rpi in unpushed:
                 rpi.with_context({'wubook_action': False}).write({'wpushed': True})
         return True
