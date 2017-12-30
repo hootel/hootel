@@ -20,7 +20,7 @@
 #
 ##############################################################################
 from datetime import datetime, timedelta
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 from openerp import models, api
 from openerp.exceptions import ValidationError
 import logging
