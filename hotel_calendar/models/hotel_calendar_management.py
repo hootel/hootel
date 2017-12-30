@@ -200,7 +200,7 @@ class HotelCalendarManagement(models.TransientModel):
         nn = {}
         for i in range(0, date_diff+1):
             cur_date = date_start + timedelta(days=i)
-            cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
+            cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
             occupied_reservations = hotel_reservation_obj.occupied(cur_date_str, cur_date_str)
 
             if not cur_date in nn:
