@@ -81,7 +81,7 @@
 				<!-- Priclist Fields -->
 				<group attrs="{'invisible':[('section', '!=', '2')]}">
 					<field name="pricelist_id" attrs="{'required':[('section', '=', '2')]}"/>
-					<field name="price" widget="monetary" attrs="{'required':[('section', '=', '2')]}"/>
+					<field name="price" attrs="{'required':[('section', '=', '2')]}"/>
 				</group>
 				<footer>
 					<button name="massive_change" string="Massive Change" type="object"

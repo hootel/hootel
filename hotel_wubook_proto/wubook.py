@@ -838,7 +838,7 @@ class WuBook(models.TransientModel):
                 for k_rid, v_rid in v_rpid.iteritems():
                     vroom = hotel_virtual_room_obj.search([('wrid', '=', k_rid)], limit=1)
                     if vroom:
-                        for item in v_rid.iteritems():
+                        for item in v_rid:
                             date_dt = datetime.strptime(item['date'], DEFAULT_WUBOOK_DATE_FORMAT)
                             restriction_item = reserv_restriction_item_obj.search([
                                 ('restriction_id', '=', restriction_id.id),
