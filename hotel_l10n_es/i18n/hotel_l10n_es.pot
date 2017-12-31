@@ -1,21 +1,19 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hotel_l10n_es
+#	* hotel_l10n_es
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 9.0c\n"
+"Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-31 12:33+0100\n"
-"PO-Revision-Date: 2017-12-31 12:40+0100\n"
+"POT-Creation-Date: 2017-12-31 11:33+0000\n"
+"PO-Revision-Date: 2017-12-31 11:33+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
-"Language: es_ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.1\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_year:0
@@ -34,125 +32,124 @@ msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.actions.act_window,name:hotel_l10n_es.action_ine_download
-#| msgid "Action Police File Download"
 msgid "Action INE File Download"
-msgstr "Action INE File Download"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.actions.act_window,name:hotel_l10n_es.action_police_download
 msgid "Action Police File Download"
-msgstr "Action Police File Download"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Address"
-msgstr "Dirección"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_adr_screen
 msgid "Adr screen"
-msgstr "Pantalla Adr"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "April"
-msgstr "Abril"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "August"
-msgstr "Agosto"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_seats
 msgid "Beds available"
-msgstr "Camas disponibles"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Birth date"
-msgstr "Fecha de nacimiento"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_birthdate_date_cardex
 msgid "Birthdate"
-msgstr "Fecha de nacimiento"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:res.partner,documenttype:0
 msgid "Carta o Doc. de Identidad"
-msgstr "Carta o Doc. de Identidad"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_name
 msgid "Category"
-msgstr "Categoría"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.actions.act_window,name:hotel_l10n_es.action_category
 #: model:ir.ui.menu,name:hotel_l10n_es.menu_category
 msgid "Category Codes"
-msgstr "Códigos de Categoría"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_category_id
 msgid "Category id"
-msgstr "Categoría id"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_tipo
 msgid "Category type"
-msgstr "Categoría tipo"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "City"
-msgstr "Ciudad"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_code
 msgid "Code"
-msgstr "Código"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.checkin_wizard_form_2
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Code in INE"
-msgstr "Código in INE"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_code_ine_cardex
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_code_ine
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_users_code_ine
 msgid "Code ine"
-msgstr "Código ine"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Comment"
-msgstr "Comentario"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_res_company
 msgid "Companies"
-msgstr "Compañías"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_download_num
 msgid "Correlative number"
-msgstr "Número Correlativo"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Country"
-msgstr "Country"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_checkin_wizard_code_ine_cardex
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_partner_code_ine
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_users_code_ine
 msgid "Country or province of origin. Used for INE statistics."
-msgstr "País o estado de origen. Usado para estadísticas del INE"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_create_uid
@@ -160,7 +157,7 @@ msgstr "País o estado de origen. Usado para estadísticas del INE"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_create_uid
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_create_uid
 msgid "Created by"
-msgstr "Creado por"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_create_date
@@ -168,23 +165,22 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_create_date
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_create_date
 msgid "Created on"
-msgstr "Creado en"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:res.partner,documenttype:0
 msgid "DNI"
-msgstr "DNI"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_download_date
-#, fuzzy
 msgid "Date"
-msgstr "Fecha"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "December"
-msgstr "Diciembre"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_display_name
@@ -192,116 +188,113 @@ msgstr "Diciembre"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_display_name
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_display_name
 msgid "Display Name"
-msgstr "Nombre para mostrar"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_poldocument_cardex
 msgid "Doc. number"
-msgstr "Doc. número"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_documenttype_cardex
 msgid "Doc. type"
-msgstr "Doc. tipo"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Document"
-msgstr "Documento"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_polexpedition
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_users_polexpedition
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Document expedition date"
-msgstr "Documento Fecha de Expedición"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_poldocument
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_users_poldocument
 msgid "Document number"
-msgstr "Número documento"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Document number (DNI: 123456789A)"
-msgstr "Número documento (DNI: 123456789A)"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_documenttype
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_users_documenttype
 msgid "Document type"
-msgstr "Tipo de documento"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "E-Mail"
-msgstr "E-Mail"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Ej.: name@domain.com"
-msgstr "Ej.: name@domain.com"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_eventualstaff
 msgid "Eventual Staff"
-msgstr "Eventual Staff"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_polexpedition_cardex
 msgid "Expedition date"
-msgstr "Fecha de expedición"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "February"
-msgstr "Febrero"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_firstname_cardex
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Firstname"
-msgstr "Firstname"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_gender_cardex
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Gender"
-msgstr "Sexo"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.view_ine_download
 msgid "Generar estadistica para el I.N.E."
-msgstr "Generar estadistica para el I.N.E."
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.view_police_download
 msgid "Generar fichero diario para la Policía"
-msgstr "Generar fichero diario para la Policía"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.view_police_download
 msgid "Generate Police file"
-msgstr "Generar Archivo CNP"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.view_ine_download
 msgid "Generate file"
-msgstr "Generar archivo"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.alda_view_company_form
-#, fuzzy
 msgid "Hotel Settings"
-msgstr "Configuración del Hotel"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_category_id
 msgid "Hotel category in the Ministry of Tourism. Used for INE statistics."
 msgstr ""
-"Categoría de Hotel en el Ministerio de Turismo. Usado para estadísticas del "
-"INE."
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_id
@@ -309,43 +302,43 @@ msgstr ""
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_id
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_id
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "INE Code"
-msgstr "INE Código"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.actions.act_window,name:hotel_l10n_es.action_code_ine
 #: model:ir.ui.menu,name:hotel_l10n_es.menu_code_ine
 msgid "INE Codes"
-msgstr "INE Códigos"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.menu,name:hotel_l10n_es.menu_ine_download
 msgid "INE File Download"
-msgstr "Descargar Archivo INE"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.alda_view_company_form
 msgid "INE and Police data"
-msgstr "Datos INE y CNP"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "January"
-msgstr "Enero"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "July"
-msgstr "Julio"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "June"
-msgstr "Junio"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category___last_update
@@ -353,7 +346,7 @@ msgstr "Junio"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard___last_update
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard___last_update
 msgid "Last Modified on"
-msgstr "Última Modificación en"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_write_uid
@@ -361,7 +354,7 @@ msgstr "Última Modificación en"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_write_uid
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_write_uid
 msgid "Last Updated by"
-msgstr "Última Actualización por"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_write_date
@@ -369,135 +362,133 @@ msgstr "Última Actualización por"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_write_date
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_write_date
 msgid "Last Updated on"
-msgstr "Última Actualización en"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_lastname_cardex
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Lastname"
-msgstr "Apellidos"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "March"
-msgstr "Marzo"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "May"
-msgstr "Mayo"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Mobile"
-msgstr "Mobile"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_ine_month
 msgid "Month"
-msgstr "Mes"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_property_name
 msgid "Name of the Hotel/Property."
-msgstr "Nombre del Hotel/Propiedad."
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_cardex_warning
 msgid "Notice under the signature on the traveler's ticket."
-msgstr "Notice under the signature en the traveler's ticket."
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "November"
-msgstr "Noviembre"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_police_wizard_download_num
 msgid "Number provided by the police"
-msgstr "Número proporcionado por la policía"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "October"
-msgstr "Octubre"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.actions.report.xml,name:hotel_l10n_es.action_report_viajero
 msgid "Parte de Viajero"
-msgstr "Parte de Viajero"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_res_partner
 msgid "Partner"
-msgstr "Partner"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Partners"
-msgstr "Partners"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:res.partner,documenttype:0
 msgid "Pasaporte"
-msgstr "Pasaporte"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_permanentstaff
 msgid "Permanent Staff"
-msgstr "Staff Permanente"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:res.partner,documenttype:0
 msgid "Permiso Residencia Español"
-msgstr "Permiso Residencia Español"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:res.partner,documenttype:0
 msgid "Permiso Residencia Europeo"
-msgstr "Permiso Residencia Europeo"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:res.partner,documenttype:0
 msgid "Permiso de Conducir"
-msgstr "Permiso de Conducir"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Phone"
-msgstr "Teléfono"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Phones"
-msgstr "Teléfonos"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_name
 msgid "Place"
-msgstr "Lugar"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.menu,name:hotel_l10n_es.menu_police_download
 msgid "Police File Download"
-msgstr "Descargar Archivo de la Policía"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_police
 msgid "Police number"
-msgstr "Número de la Policía"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_property_name
 msgid "Property name"
-msgstr "Nombre Propiedad"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_tourism
-msgid ""
-"Registration number in the Ministry of Tourism. Used for INE statistics."
+msgid "Registration number in the Ministry of Tourism. Used for INE statistics."
 msgstr ""
-"Registration número in the Ministry of Tourism. Used for INE estadísticas."
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_rev_screen
@@ -507,61 +498,61 @@ msgstr ""
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_rooms
 msgid "Rooms Available"
-msgstr "Habitacións Disponible"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.checkin_wizard_form_2
 msgid "Save Checkin and Print"
-msgstr "Guardar Checkin"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Select one..."
-msgstr "Seleccione una..."
+msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "September"
-msgstr "Septiembre"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "State"
-msgstr "Provincia"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Street..."
-msgstr "Street..."
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_category_id_cardex
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Tags"
-msgstr "Etiquetas"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.checkin_wizard_form_2
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Tags..."
-msgstr "Etiquetas..."
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_tourism
 msgid "Tourism number"
-msgstr "Tourism number"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_txt_binary
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_txt_binary
 msgid "Txt binary"
-msgstr "Txt binary"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_txt_filename
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_txt_filename
 msgid "Txt filename"
-msgstr "Txt archivoname"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_eventualstaff
@@ -569,66 +560,57 @@ msgstr "Txt archivoname"
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_rooms
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_seats
 msgid "Used for INE statistics."
-msgstr "Usado para estadísticas del INE."
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_police
-msgid ""
-"Used to generate the name of the file that will be given to the police. 10 "
-"Caracters"
+msgid "Used to generate the name of the file that will be given to the police. 10 Caracters"
 msgstr ""
-"Usado para generar el nombre del archivo que será enviado a a la policía. "
-"10 Caracteres"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_cardex_warning
 msgid "Warning in Cardex"
-msgstr "Warning in Cardex"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_ine_year
 msgid "Year"
-msgstr "Año"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "ZIP"
-msgstr "ZIP"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_checkin_wizard_documenttype_cardex
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_partner_documenttype
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_users_documenttype
 msgid "blabla"
-msgstr "blabla"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_category
 msgid "category"
-msgstr "categoría"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_checkin_wizard
 msgid "checkin.wizard"
-msgstr "checkin.wizard"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_code_ine
 msgid "code_ine"
-msgstr "code_ine"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_ine_wizard
 msgid "ine.wizard"
-msgstr "ine.wizard"
+msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_police_wizard
 msgid "police.wizard"
-msgstr "police.wizard"
+msgstr ""
 
-#~ msgid "Date to generate the file"
-#~ msgstr "Fecha para generar el archivo"
-
-#~ msgid "Hotel data"
-#~ msgstr "Datos del hotel"
