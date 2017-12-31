@@ -1058,8 +1058,7 @@ class WuBook(models.TransientModel):
                 dates_checkin = [checkin_utc_dt, False]
                 dates_checkout = [checkout_utc_dt, False]
                 split_booking = False
-                split_map_index = {}
-                parent_reservation = -1
+                split_booking_parent = False
                 while dates_checkin[0]: # This perhaps create splitted reservations
                     checkin_str = dates_checkin[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     checkout_str = dates_checkout[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
@@ -1110,19 +1109,15 @@ class WuBook(models.TransientModel):
                                         'state': is_cancellation and 'cancelled' or 'draft',
                                         'virtual_room_id': vroom.id,
                                         'splitted': split_booking,
+                                        'parent_reservation': split_booking_parent and split_booking_parent.id or False,
                                     }
                                     nrev = hotel_reserv_obj.create(vals)
                                     if not nrev:
                                         failed_reservations.append(book['channel_reservation_code'])
                                     else:
-                                        reserv_ids.append(nrev)
-                                        reservations.append((0, False, vals))
-                                        if reserv_ids[0]:
-                                            if parent_reservation == -1:
-                                                parent_reservation = len(reservations)-1
-                                                split_map_index = { parent_reservation: [] }
-                                            else:
-                                                split_map_index[parent_reservation].append(len(reservations)-1)
+                                        if split_booking and not split_booking_parent:
+                                            split_booking_parent = nrev
+                                        reservations.append(nrev.id)
                                         used_rooms.append(free_rooms[customer_room_index].id)
                                         customer_room_index += 1
                                 else:
@@ -1152,11 +1147,15 @@ class WuBook(models.TransientModel):
                         else:
                             dates_checkin = [dates_checkin[0], dates_checkin[0] + timedelta(days=date_diff - 1)]
                             dates_checkout = [dates_checkout[0] - timedelta(days=1), dates_checkout[0]]
+            if split_booking:
+                self.create_wubook_issue('reservation',
+                     "Reservation Splitted",
+                     '', wid=book['reservation_code'])
 
             # Create Folio
             if not any(failed_reservations) and any(reservations):
                 vals = {
-                    'room_lines': reservations,
+                    'room_lines': [(0, False, reservations)],
                     'wcustomer_notes': book['customer_notes'],
                 }
                 if folio_id:
@@ -1168,24 +1167,6 @@ class WuBook(models.TransientModel):
                     })
                     folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
                 processed_rids.append(book['reservation_code'])
-
-            # Update Reservation Split Parent
-            # FIXME: Ugly to read and execute
-            if folio_id and any(split_map_index):
-                reservation_ids = hotel_reserv_obj.search([('folio_id', '=', folio_id.id)])
-                master_reserv = False
-                for k_mid, v_mid in split_map_index.iteritems():
-                    counter = 0
-                    for reserv in reservation_ids:
-                        for child in v_mid.iteritems():
-                            if child == counter:
-                                reserv.parent_reservation = master_reserv.id
-                            elif child == mid:
-                                master_reserv = reservs
-                                counter = counter + 1
-                self.create_wubook_issue('reservation',
-                     "Reservation Splitted",
-                     '', wid=book['reservation_code'])
 
             # Update Odoo availability (don't wait for wubook)
             fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
