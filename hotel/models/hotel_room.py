@@ -47,8 +47,8 @@ class HotelRoom(models.Model):
                                       string='Room Amenities',
                                       help='List of room amenities. ')
     capacity = fields.Integer('Capacity')
-    shared_room = fields.Boolean('Shared Room')
-    to_be_cleaned = fields.Boolean('To be Cleaned')
+    shared_room = fields.Boolean('Shared Room', default=False)
+    to_be_cleaned = fields.Boolean('To be Cleaned', default=False)
     virtual_rooms = fields.Many2many('hotel.virtual.room', string='Virtual Rooms')
     sale_price_type = fields.Selection([
         ('fixed', 'Fixed Price'),
@@ -70,9 +70,8 @@ class HotelRoom(models.Model):
                 'price_virtual_room': ['|', ('room_ids.id', '=', self._origin.id), ('room_type_ids.cat_id.id', '=', self.categ_id.id)]
             }
         }
-    
+
     @api.multi
     def unlink(self):
         self.product_id.unlink()
         return super(HotelRoom, self).unlink()
-

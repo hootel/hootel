@@ -94,7 +94,7 @@ class MassiveChangesWizard(models.TransientModel):
             date_start_dt = fields.Datetime.from_string(record.date_start)
             date_end_dt = fields.Datetime.from_string(record.date_end)
             diff_days = abs((date_end_dt-date_start_dt).days)+1
-            wedays = [record.dmo, record.dtu, record.dwe, record.dth, record.dfr, record.dsa, record.dsu]
+            wedays = (record.dmo, record.dtu, record.dwe, record.dth, record.dfr, record.dsa, record.dsu)
             vrooms = record.applied_on == '1' and record.virtual_room_ids or hotel_vroom_obj.search([])
 
             for i in range(0, diff_days):
