@@ -128,7 +128,7 @@ class HotelReservation(models.Model):
         if 'folio_id' in self._context:
             folio = self.env['hotel.folio'].search([('id','=',self._context['folio_id'])])
         if folio and folio.room_lines:
-            return folio.room_lines[0].checkout
+                        return folio.room_lines[0].checkout
         else:
             from_zone = self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel')
             tm_delta = timedelta(days=1)
@@ -253,16 +253,28 @@ class HotelReservation(models.Model):
     @api.model
     def checkin_is_today(self):
         self.ensure_one()
-        today = date.today().strftime(DEFAULT_SERVER_DATE_FORMAT)
-        if self.checkin == today:
+        tz_hotel = pytz.timezone(self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel'))
+        checkin_utc_dt = datetime.strptime(self.checkin, DEFAULT_SERVER_DATETIME_FORMAT)
+        checkin_dt = checkin_utc_dt.replace(tzinfo=pytz.utc).astimezone(tz_hotel)
+
+        date_str = checkin_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+        today = fields.datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+
+        if date_str == today:
             return True
         return False
 
     @api.model
     def checkout_is_today(self):
         self.ensure_one()
-        today = date.today().strftime(DEFAULT_SERVER_DATE_FORMAT)
-        if self.checkout == today:
+        tz_hotel = pytz.timezone(self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel'))
+        checkout_utc_dt = datetime.strptime(self.checkout, DEFAULT_SERVER_DATETIME_FORMAT)
+        checkout_dt = checkout_utc_dt.replace(tzinfo=pytz.utc).astimezone(tz_hotel)
+
+        date_str = checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+        today = fields.datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+
+        if date_str == today:
             return True
         return False
 
@@ -428,6 +440,17 @@ class HotelReservation(models.Model):
         days_diff = abs((chkout_dt.replace(hour=0, minute=0, second=0)  - chkin_dt.replace(hour=0, minute=0, second=0)).days-1)
         res = self.prepare_reservation_lines(chkin_dt, days_diff)
         self.reservation_lines = res['commands']
+        
+        if self.state == 'confirm' and self.checkin_is_today() :
+                self.is_checkin = True
+                folio = self.env['hotel.folio'].browse(self.folio_id.id)
+                folio.checkins_reservations = folio.room_lines.search_count([('folio_id','=',folio.id),('is_checkin','=',True)])
+        
+        if self.state == 'booking' and self.checkout_is_today():
+                self.is_checkout = False
+                folio = self.env['hotel.folio'].browse(self.folio_id.id)
+                folio.checkouts_reservations = folio.room_lines.search_count([('folio_id','=',folio.id),('is_checkout','=',True)])
+                
         if self.reservation_type in ['staff','out']:
             self.price_unit = 0.0
         else:
@@ -443,7 +466,7 @@ class HotelReservation(models.Model):
     def prepare_reservation_lines(self, datefrom, days):
         total_price = 0.0
         cmds = [(5, False, False)]
-
+    
         room = self.env['hotel.room'].search([('product_id', '=', self.product_id.id)])
         product_id = room.sale_price_type == 'vroom' and room.price_virtual_room.product_id or self.product_id
         for i in range(0, days + 1):
@@ -571,7 +594,7 @@ class HotelReservation(models.Model):
     def occupied(self, checkin, checkout):
         """
         Return a RESERVATIONS array between in and out parameters
-        IMPORTANT: This function should receive the dates in UTC time zone
+        IMPORTANT: This function should receive the dates in UTC datetime zone, as String format
         """
         tz_hotel = pytz.timezone(self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel'))
         checkin_utc_dt = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
