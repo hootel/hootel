@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-12-30 11:37+0100\n"
-"PO-Revision-Date: 2017-12-31 13:39+0100\n"
+"PO-Revision-Date: 2017-12-31 18:47+0100\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3612,7 +3612,7 @@ msgstr ""
 #. module: hotel
 #: model:ir.model.fields,field_description:hotel.field_hotel_wizard_massive_changes_dsu
 msgid "Sunday"
-msgstr "Lunes"
+msgstr "Domingo"
 
 #. module: hotel
 #: model:ir.ui.view,arch_db:hotel.view_hotel_services_form

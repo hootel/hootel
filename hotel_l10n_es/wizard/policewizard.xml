@@ -32,7 +32,7 @@
             <menuitem 
                 id="menu_police_download"
                 name="Police File Download"
-                parent="hotel.hotel_configuration_menu"
+                parent="hotel.hotel_reports_menu"
                 sequence="36"
                 action="action_police_download"
             />

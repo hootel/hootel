@@ -133,6 +133,7 @@ class HotelFolio(models.Model):
     partner_internal_comment = fields.Text(string='Internal Partner Notes',related='partner_id.comment')
     cancelled_reason = fields.Text('Cause of cancelled')
     prepaid_warning_days = fields.Integer('Prepaid Warning Days',help='Margin in days to create a notice if a payment advance has not been recorded')
+    color = fields.Char(string='Color')
 
     @api.model
     def daily_plan(self):
@@ -251,16 +252,16 @@ class HotelFolio(models.Model):
             for reser in fol.room_lines:
                 if reser.state != 'cancelled':
                     num_cardex += len(reser.cardex_ids)
-            self.cardex_count = num_cardex
+            fol.cardex_count = num_cardex
             pending = 0
             for reser in fol.room_lines:
                 if reser.state != 'cancelled':
                     pending += reser.adults + reser.children - len(reser.cardex_ids)
             if pending <= 0:
-                self.cardex_pending = False
+                fol.cardex_pending = False
             else:
-                self.cardex_pending = True
-            self.cardex_pending_num = pending
+                fol.cardex_pending = True
+            fol.cardex_pending_num = pending
 
 
     @api.multi
