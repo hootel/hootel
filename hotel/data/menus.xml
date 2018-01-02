@@ -19,10 +19,14 @@
         sequence="8" web_icon="hotel,static/description/icon.png" />
 
         <menuitem id="hotel_configuration_menu" name="Configuration"
-            sequence="20" parent="hotel_management_menu" />
+            sequence="20" parent="hotel_management_menu"/>
+            
+         <menuitem id="hotel_reports_menu" name="Reports"
+            sequence="15" parent="hotel_management_menu"/>
             
         <menuitem id="configuration_others" name="Configuration"
-            parent="hotel.hotel_configuration_menu" sequence="10" />
+            parent="hotel.hotel_configuration_menu" sequence="10"
+             groups="hotel.group_hotel_manager" />
 
         <menuitem id="hotel_massive_change" parent="hotel.configuration_others"
             sequence="10" action="action_hotel_massive_change" name="Massive Changes"/>

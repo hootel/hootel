@@ -76,6 +76,52 @@ def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
     return res
 
 class HotelReservation(models.Model):
+        
+    @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
+    def _compute_color(self):
+        now_str = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        for rec in self:
+            now_date = datetime.strptime(now_str,DEFAULT_SERVER_DATETIME_FORMAT)
+            checkin_date = (datetime.strptime(
+                                rec.checkin,
+                                DEFAULT_SERVER_DATETIME_FORMAT))
+            difference_checkin = relativedelta(now_date, checkin_date)
+            checkout_date = (datetime.strptime(
+                                rec.checkout,
+                                DEFAULT_SERVER_DATETIME_FORMAT))
+            difference_checkout = relativedelta(now_date, checkout_date)
+            if rec.reservation_type == 'staff':
+                rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_staff')
+            elif rec.reservation_type == 'out':
+                rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_dontsell')
+            elif rec.to_assign == True:
+                rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_to_assign')
+            elif rec.state == 'draft':
+                rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_pre_reservation')
+            elif rec.state == 'confirm':
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_reservation_pay')
+                else:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_reservation')
+            elif rec.state == 'booking' and difference_checkout.days == 0:
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_checkout_pay')
+                else:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_checkout')
+            elif rec.state == 'booking':
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_stay_pay')
+                else:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_stay')
+            else:
+                if rec.folio_id.invoices_amount == 0:
+                    rec.reserve_color = '#FFFFFF'
+                else:
+                    rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_payment_pending')
+            rec.write({}) #To dispatch the calendar bus notification  
+            rec.folio_id.color = rec.reserve_color         
+            return rec.reserve_color
+
 
     @api.multi
     def copy(self, default=None):
@@ -213,6 +259,7 @@ class HotelReservation(models.Model):
                                         readonly=True,
                                         states={'draft': [('readonly', False)],
                                                 'sent': [('readonly', False)]})
+    reserve_color = fields.Char(compute='_compute_color',string='Color', store=True)
     service_line_ids = fields.One2many('hotel.service.line','ser_room_line')
     pricelist_id = fields.Many2one('product.pricelist',related='folio_id.pricelist_id',readonly="1")
     cardex_ids = fields.One2many('cardex', 'reservation_id')

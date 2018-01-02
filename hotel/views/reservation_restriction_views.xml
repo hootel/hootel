@@ -56,6 +56,6 @@
   <!-- MENUS -->
   <menuitem name="Restrictions" id="reservation_restriction_menu"
     action="reservation_restriction_action" sequence="22"
-    parent="hotel.hotel_configuration_menu"/>
+    parent="hotel.configuration_others"/>
 
  </odoo>
