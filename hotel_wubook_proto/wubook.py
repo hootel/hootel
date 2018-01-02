@@ -1254,8 +1254,8 @@ class WuBook(models.TransientModel):
                                     'date': (date_start + timedelta(days=i)).strftime(DEFAULT_SERVER_DATE_FORMAT),
                                 })
                             prices[pr.wpid][vroom.wrid].append(prod.price)
-            _logger.info(plan_keys)
-            for k_pk, v_pk in plan_keys.iteritems():
+            _logger.info(prices)
+            for k_pk, v_pk in prices.iteritems():
                 if any(v_pk):
                     self.update_plan_prices(k_pk, date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT), v_pk)
 
