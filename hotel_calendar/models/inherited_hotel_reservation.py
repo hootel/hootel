@@ -29,7 +29,7 @@ import time
 
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
-    
+
     @api.model
     def _hcalendar_reservation_data(self, reservations):
         json_reservations = []
@@ -73,12 +73,14 @@ class HotelReservation(models.Model):
         if pricelist_id:
             pricelist_id = int(pricelist_id)
         json_rooms = []
+        room_type_obj = self.env['hotel.room.type']
+        vroom_obj = self.env['hotel.virtual.room']
         for room in rooms:
-            room_type = self.env['hotel.room.type'].search([('cat_id', '=', room.categ_id.id)], limit=1)
-            vrooms = self.env['hotel.virtual.room'].search(['|', ('room_ids', 'in', room.id), ('room_type_ids.id', '=', room.categ_id.id)])
+            room_type = room_type_obj.search([('cat_id', '=', room.categ_id.id)], limit=1)
+            vrooms = vroom_obj.search(['|', ('room_ids', 'in', room.id), ('room_type_ids.id', '=', room.categ_id.id)])
             json_rooms.append((
                 room.product_id.id,
-                room.name,
+                _(room.name),
                 room.capacity,
                 room.categ_id.id,
                 room_type.code_type,
@@ -266,7 +268,7 @@ class HotelReservation(models.Model):
             reservation_id.state,
             reservation_id.splitted)
         return reservation_id
-    
+
 
     @api.multi
     def write(self, vals):
