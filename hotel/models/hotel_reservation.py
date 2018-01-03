@@ -76,7 +76,7 @@ def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
     return res
 
 class HotelReservation(models.Model):
-        
+
     @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
     def _compute_color(self):
         now_str = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
@@ -118,8 +118,8 @@ class HotelReservation(models.Model):
                     rec.reserve_color = '#FFFFFF'
                 else:
                     rec.reserve_color = self.env['ir.values'].get_default('hotel.config.settings', 'color_payment_pending')
-            rec.write({}) #To dispatch the calendar bus notification  
-            rec.folio_id.color = rec.reserve_color         
+            rec.write({}) #To dispatch the calendar bus notification
+            rec.folio_id.color = rec.reserve_color
             return rec.reserve_color
 
 
@@ -129,7 +129,7 @@ class HotelReservation(models.Model):
         @param self: object pointer
         @param default: dict of default values to be set
         '''
-        
+
         return super(HotelReservation, self).copy(default=default)
 
     @api.multi
@@ -185,7 +185,7 @@ class HotelReservation(models.Model):
                                        ignore_unparsable_time=True,
                                        context={'tz': from_zone}),
                                       '%Y-%m-%d %H:%M') + tm_delta
-                                      
+
     @api.model
     def name_search(self,name='', args=None, operator='ilike', limit=100):
         if args is None:
@@ -283,7 +283,7 @@ class HotelReservation(models.Model):
                 res.cardex_pending = True
 
     @api.model
-    def daily_plan(self):   
+    def daily_plan(self):
         today = date.today().strftime(DEFAULT_SERVER_DATE_FORMAT)
         yesterday = (date.today() - timedelta(days=1)).strftime(DEFAULT_SERVER_DATE_FORMAT)
         reservations = self.env['hotel.reservation'].search([('reservation_lines.date','in',[today,yesterday]),('state','in',['confirm','booking'])])
@@ -475,7 +475,7 @@ class HotelReservation(models.Model):
         chkin_dt = chkin_utc_dt.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(tz))
         if self.checkin >= self.checkout:
             dpt_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_departure_hour')
-            checkout_str = (chkin_dt + timedelta(days=1)).strftime(DEFAULT_SERVER_DATE_FORMAT) 
+            checkout_str = (chkin_dt + timedelta(days=1)).strftime(DEFAULT_SERVER_DATE_FORMAT)
             checkout_str = "%s %s" % (checkout_str, dpt_hour)
             self.checkout= _offset_format_timestamp1(checkout_str,
                                              '%Y-%m-%d %H:%M',
@@ -487,17 +487,17 @@ class HotelReservation(models.Model):
         days_diff = abs((chkout_dt.replace(hour=0, minute=0, second=0)  - chkin_dt.replace(hour=0, minute=0, second=0)).days-1)
         res = self.prepare_reservation_lines(chkin_dt, days_diff)
         self.reservation_lines = res['commands']
-        
+
         if self.state == 'confirm' and self.checkin_is_today() :
                 self.is_checkin = True
                 folio = self.env['hotel.folio'].browse(self.folio_id.id)
                 folio.checkins_reservations = folio.room_lines.search_count([('folio_id','=',folio.id),('is_checkin','=',True)])
-        
+
         if self.state == 'booking' and self.checkout_is_today():
                 self.is_checkout = False
                 folio = self.env['hotel.folio'].browse(self.folio_id.id)
                 folio.checkouts_reservations = folio.room_lines.search_count([('folio_id','=',folio.id),('is_checkout','=',True)])
-                
+
         if self.reservation_type in ['staff','out']:
             self.price_unit = 0.0
         else:
@@ -513,9 +513,12 @@ class HotelReservation(models.Model):
     def prepare_reservation_lines(self, datefrom, days):
         total_price = 0.0
         cmds = [(5, False, False)]
-    
+
         room = self.env['hotel.room'].search([('product_id', '=', self.product_id.id)])
         product_id = room.sale_price_type == 'vroom' and room.price_virtual_room.product_id or self.product_id
+        pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+        if pricelist_id:
+            pricelist_id = int(pricelist_id)
         for i in range(0, days + 1):
             ndate = datefrom + timedelta(days=i)
             ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
@@ -524,7 +527,7 @@ class HotelReservation(models.Model):
                 partner=self.partner_id.id,
                 quantity=1,
                 date=ndate_str,
-                pricelist=self.partner_id.property_product_pricelist.id,
+                pricelist=pricelist_id,
                 uom=self.product_uom.id)
             line_price = prod.price
             cmds.append((0, False, {
@@ -549,7 +552,7 @@ class HotelReservation(models.Model):
         '''
         self.ensure_one()
         now_utc_dt = fields.datetime.now()
-        if not self.checkin:				
+        if not self.checkin:
             self.checkin = now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         if not self.checkout:
             now_utc_dt = self.checkin.strptime(DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(days=1)
@@ -631,12 +634,12 @@ class HotelReservation(models.Model):
                reservation with room those already reserved in this \
                reservation period: %s' % occupied_name
            raise ValidationError(warning_msg)
-    
+
     @api.multi
     def unlink(self):
         self.order_line_id.unlink()
         return super(HotelReservation, self).unlink()
-        
+
     @api.model
     def occupied(self, checkin, checkout):
         """
@@ -648,9 +651,8 @@ class HotelReservation(models.Model):
         checkin_dt = checkin_utc_dt.replace(tzinfo=pytz.utc).astimezone(tz_hotel)
         checkout_utc_dt = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
         checkout_dt = checkout_utc_dt.replace(tzinfo=pytz.utc).astimezone(tz_hotel)
-        
+
         dates_str = [(checkin_dt + timedelta(days=x)).strftime(DEFAULT_SERVER_DATE_FORMAT) for x in range((checkout_dt-checkin_dt).days)]
         reservations = self.env['hotel.reservation'].search([('reservation_lines.date','in',dates_str),('state','!=','cancelled')])
-        
+
         return reservations
-            

@@ -80,7 +80,7 @@ class HotelReservation(models.Model):
             vrooms = vroom_obj.search(['|', ('room_ids', 'in', room.id), ('room_type_ids.id', '=', room.categ_id.id)])
             json_rooms.append((
                 room.product_id.id,
-                _(room.name),
+                room.name,
                 room.capacity,
                 room.categ_id.id,
                 room_type.code_type,
