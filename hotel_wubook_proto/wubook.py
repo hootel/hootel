@@ -1037,7 +1037,7 @@ class WuBook(models.TransientModel):
                     'city': book['customer_city'],
                     'phone': book['customer_phone'],
                     'zip': book['customer_zip'],
-                    'street': book['customer_address '],
+                    'street': book['customer_address'],
                     'email': book['customer_mail'],
                     'unconfirmed': True,
                     # 'lang': lang and lang.id,
@@ -1109,17 +1109,13 @@ class WuBook(models.TransientModel):
                                         'state': is_cancellation and 'cancelled' or 'draft',
                                         'virtual_room_id': vroom.id,
                                         'splitted': split_booking,
-                                        'parent_reservation': split_booking_parent and split_booking_parent.id or False,
+                                        'parent_reservation': split_booking_parent,
                                     }
-                                    nrev = hotel_reserv_obj.create(vals)
-                                    if not nrev:
-                                        failed_reservations.append(book['channel_reservation_code'])
-                                    else:
-                                        if split_booking and not split_booking_parent:
-                                            split_booking_parent = nrev
-                                        reservations.append(nrev.id)
-                                        used_rooms.append(free_rooms[customer_room_index].id)
-                                        customer_room_index += 1
+                                    reservations.append((0, False, vals))
+                                    if split_booking and not split_booking_parent:
+                                        split_booking_parent = len(reservations)
+                                    used_rooms.append(free_rooms[customer_room_index].id)
+                                    customer_room_index += 1
                                 else:
                                     if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
                                         failed_reservations.append(book['channel_reservation_code'])
@@ -1140,22 +1136,24 @@ class WuBook(models.TransientModel):
                             else:
                                 failed_reservations.append('undefined')
                             self.create_wubook_issue('reservation',
-                                                     "Can't found a free room for reservation from wubook",
+                                                     "Can't found free rooms for reservation from wubook",
                                                      '', wid=book['reservation_code'])
                             dates_checkin = [False, False]
                             dates_checkout = [False, False]
+                            split_booking = False
                         else:
                             dates_checkin = [dates_checkin[0], dates_checkin[0] + timedelta(days=date_diff - 1)]
                             dates_checkout = [dates_checkout[0] - timedelta(days=1), dates_checkout[0]]
-            if split_booking:
-                self.create_wubook_issue('reservation',
-                     "Reservation Splitted",
-                     '', wid=book['reservation_code'])
+                            split_booking = True
+                if split_booking:
+                    self.create_wubook_issue('reservation',
+                         "Reservation Splitted",
+                         '', wid=book['reservation_code'])
 
             # Create Folio
             if not any(failed_reservations) and any(reservations):
                 vals = {
-                    'room_lines': [(0, False, reservations)],
+                    'room_lines': reservations,
                     'wcustomer_notes': book['customer_notes'],
                 }
                 if folio_id:

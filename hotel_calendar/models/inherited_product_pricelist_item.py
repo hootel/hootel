@@ -71,6 +71,10 @@ class ProductPricelistItem(models.Model):
         if pricelist_parity_id:
             pricelist_parity_id = int(pricelist_parity_id)
         ret_vals = super(ProductPricelistItem, self).write(vals)
+
+        vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
+        bus_calendar_obj = self.env['bus.hotel.calendar']
+        vroom_obj = self.env['hotel.virtual.room']
         if vals.get('fixed_price'):
             for record in self:
                 pricelist_id = vals.get('pricelist_id') or record.pricelist_id.id
@@ -79,7 +83,7 @@ class ProductPricelistItem(models.Model):
                 date_start = vals.get('date_start') or record.date_start
                 product_tmpl_id = vals.get('product_tmpl_id') or record.product_tmpl_id.id
                 fixed_price = vals.get('fixed_price') or record.fixed_price
-                vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', product_tmpl_id)], limit=1)
+                vroom = vroom_obj.search([('product_id.product_tmpl_id', '=', product_tmpl_id)], limit=1)
 
                 if vroom and date_start:
                     prod = vroom.product_id.with_context(
@@ -88,13 +92,12 @@ class ProductPricelistItem(models.Model):
                         pricelist=pricelist_id)
                     prod_price = prod.price
 
-                    self.env['bus.hotel.calendar'].send_pricelist_notification(
+                    bus_calendar_obj.send_pricelist_notification(
                         pricelist_id,
                         date_start,
                         vroom.id,
                         prod_price)
 
-                    vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
                     vroom_pr_cached_id = vroom_pr_cached_obj.search([
                         ('virtual_room_id', '=', vroom.id),
                         ('date', '=', date_start),
