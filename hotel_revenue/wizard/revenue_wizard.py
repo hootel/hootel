@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Alda Hotels <informatica@aldahotels.com>
+#    Copyright (C) 2018 Alda Hotels <informatica@aldahotels.com>
 #                       Jose Luis Algara <osotranquilo@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,6 @@ from cStringIO import StringIO
 from random import randint
 import xlsxwriter
 import base64
-
 
 def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
                               ignore_unparsable_time=True, context=None):
@@ -84,9 +83,6 @@ def _offset_format_timestamp1(src_tstamp_str, src_format, dst_format,
             pass
     return res
 
-
-
-
 class Wizard(models.TransientModel):
     _name = 'revenue.exporter.wizard'
 
@@ -114,11 +110,10 @@ class Wizard(models.TransientModel):
             self.date_1 = datetime.strptime(self.date_2,'%Y-%m-%d') + timedelta(days=-1)
             return {'warning': {'title': _('Error'), 'message': _('The date of the end of the PickUp can not be before the first PickUp date.'),},}
 
-
     #room_type_id = fields.Many2many('hotel.room.type',string='Room Type') #tomany
     room_type_id = fields.Many2many('hotel.room',string='Room Type') #tomany
-    period_1 = fields.Date('Start period',default=fields.Date.today())
-    period_2 = fields.Date('End period',default=date.today() + relativedelta(months=3))
+    period_1 = fields.Date('Start period',default=date(date.today().year,1,1))
+    period_2 = fields.Date('End period',default=date(date.today().year,12,31))
     date_1 = fields.Date('PickUp start date',default=fields.Date.today())
     date_2 = fields.Date('PickUp end date',default=date.today() + timedelta(days=1))
     txt_filename = fields.Char()
@@ -231,10 +226,6 @@ class Wizard(models.TransientModel):
                     if line.reservation_id.state <> "cancelled":
                         revenuxls += line.price
                         roomxls += 1
-                        #worksheet.write_datetime(row, col+24+i, datetime.strptime(line.reservation_id.create_date,'%Y-%m-%d %H:%M:%S'), date_format_xls)
-                        #worksheet.write_number(row, col+16+i, line.price, nume_format_xls)
-                        #worksheet.write(row, col+8+i, line.reservation_id.state)
-                        #i +=1
                     else:
                         # esta cancelada
                         cancexls +=1
@@ -256,16 +247,6 @@ class Wizard(models.TransientModel):
                 if roomxls > 0:
                     worksheet.write_number(row, col+8, (revenuxls/roomxls), nume_e_format_xls)
 
-
-                # Debug Stop -------------------
-                #import wdb; wdb.set_trace()
-                # Debug Stop -------------------
-
-                    #worksheet.write(row, col+6, line.reservation_id.product_id.categ_id.display_name)
-                    #worksheet.write(row, col+9, line.reservation_id.product_id.categ_id.id)
-                    #worksheet.write(row, col+10, self.room_type_id.cat_id.id)
-
-                    #worksheet.write(row, col+11, tipos_seleccionados(self.room_type_id.cat_id))
                 date_d += delta
                 row += 1
 
@@ -305,8 +286,6 @@ class Wizard(models.TransientModel):
             worksheet.write_formula(row+2, col+1, '=SUM(B3:B'+str(row)+')')
             '''
 
-
-
             # Write file in tmp seek and insert in txt_binary
             workbook.close()
 
@@ -319,37 +298,31 @@ class Wizard(models.TransientModel):
         return self.write({
                 'txt_msg': _('¡¡¡ Pickup date must be within the period.!!!'),
                 })
-
-def habitacionesdisponibles(self,dia=date.today()):
-
-
-    #if tipo <> 0:
-    #    lines = self.env['hotel.room'].search([('product_id','=',tipo)])
-    #else:
-    habit = []
-    for a in self.room_type_id:
-        habit.append(a.product_id.id)
-    if len(habit) == 0:
-        lines = self.env['hotel.room'].search([()])
-    else:
-        lines = self.env['hotel.room'].search([('product_id.id', 'in', habit)])
-    # Debug Stop -------------------
-    import wdb; wdb.set_trace()
-    # Debug Stop -------------------
-    #lines1 = self.env['hotel.room'].search([])
-
-    lines_otras = self.env['hotel.reservation.line'].search(['&',
-        ('date', '=', dia),
-        ('reservation_id.reservation_type', '<>','normal')])
-
-
-
-    return len(lines)-len(lines_otras)
-
-def tipos_seleccionados(tipos):
-
-    return ("55")
-
+#
+# def habitacionesdisponibles(self,dia=date.today()):
+#
+#
+#     #if tipo <> 0:
+#     #    lines = self.env['hotel.room'].search([('product_id','=',tipo)])
+#     #else:
+#     habit = []
+#     for a in self.room_type_id:
+#         habit.append(a.product_id.id)
+#     if len(habit) == 0:
+#         lines = self.env['hotel.room'].search([()])
+#     else:
+#         lines = self.env['hotel.room'].search([('product_id.id', 'in', habit)])
+#     # Debug Stop -------------------
+#     import wdb; wdb.set_trace()
+#     # Debug Stop -------------------
+#     #lines1 = self.env['hotel.room'].search([])
+#
+#     lines_otras = self.env['hotel.reservation.line'].search(['&',
+#         ('date', '=', dia),
+#         ('reservation_id.reservation_type', '<>','normal')])
+#
+#     return len(lines)-len(lines_otras)
+#
 
             # Debug Stop -------------------
             #    import wdb; wdb.set_trace()
