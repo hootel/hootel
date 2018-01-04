@@ -66,7 +66,7 @@ class HotelFolio(models.Model):
         @param default: dict of default values to be set
         '''
         return super(HotelFolio, self).copy(default=default)
-        
+
     @api.multi
     def _invoiced(self, name, arg):
         '''
@@ -133,6 +133,7 @@ class HotelFolio(models.Model):
     partner_internal_comment = fields.Text(string='Internal Partner Notes',related='partner_id.comment')
     cancelled_reason = fields.Text('Cause of cancelled')
     prepaid_warning_days = fields.Integer('Prepaid Warning Days',help='Margin in days to create a notice if a payment advance has not been recorded')
+    color = fields.Char(string='Color')
 
     @api.model
     def daily_plan(self):
@@ -150,20 +151,21 @@ class HotelFolio(models.Model):
     @api.depends('amount_total','room_lines','service_lines')
     @api.multi
     def compute_invoices_amount(self):
-        self.ensure_one()
-        amount_pending = 0
-        total_paid = 0
-        total_inv_refund = 0
-        payments = self.env['account.payment'].search(['|',('invoice_ids','in',self.invoice_ids.ids),('folio_id','=',self.id)])
-        total_paid = sum(pay.amount for pay in payments)
-        self.invoices_amount = self.amount_total - total_paid
-        self.invoices_paid = total_paid
-        for inv in self.invoice_ids:
-            if inv.type == 'out_refund':
-                total_inv_refund += inv.amount_total
-        self.refund_amount = total_inv_refund
+        acc_pay_obj = self.env['account.payment']
+        for record in self:
+            amount_pending = 0
+            total_paid = 0
+            total_inv_refund = 0
+            payments = acc_pay_obj.search(['|',('invoice_ids','in',record.invoice_ids.ids),('folio_id','=',record.id)])
+            total_paid = sum(pay.amount for pay in payments)
+            record.invoices_amount = record.amount_total - total_paid
+            record.invoices_paid = total_paid
+            for inv in record.invoice_ids:
+                if inv.type == 'out_refund':
+                    total_inv_refund += inv.amount_total
+            record.refund_amount = total_inv_refund
 
-    
+
 
     @api.multi
     def action_pay(self):
@@ -250,16 +252,16 @@ class HotelFolio(models.Model):
             for reser in fol.room_lines:
                 if reser.state != 'cancelled':
                     num_cardex += len(reser.cardex_ids)
-            self.cardex_count = num_cardex
+            fol.cardex_count = num_cardex
             pending = 0
             for reser in fol.room_lines:
                 if reser.state != 'cancelled':
                     pending += reser.adults + reser.children - len(reser.cardex_ids)
             if pending <= 0:
-                self.cardex_pending = False
+                fol.cardex_pending = False
             else:
-                self.cardex_pending = True
-            self.cardex_pending_num = pending    
+                fol.cardex_pending = True
+            fol.cardex_pending_num = pending
 
 
     @api.multi
@@ -473,11 +475,11 @@ class HotelFolio(models.Model):
                     if line.product_id.invoice_policy == 'cost':
                         order._create_analytic_account()
                         break
-        self.room_lines.confirm()    
+        self.room_lines.confirm()
         if self.env['ir.values'].get_default('sale.config.settings',
                                              'auto_done_setting'):
             self.order_id.action_done()
-        
+
     @api.multi
     def action_cancel_draft(self):
         '''
@@ -497,7 +499,7 @@ class HotelFolio(models.Model):
         sale_line_obj.write({'invoiced': False, 'state': 'draft',
                              'invoice_lines': [(6, 0, [])]})
         return True
-        
+
     @api.multi
     def send_reservation_mail(self):
         '''
@@ -565,7 +567,7 @@ class HotelFolio(models.Model):
                reserv_rec.state == 'confirm'):
                 template_rec.send_mail(reserv_rec.id, force_send=True)
         return True
-    
+
     @api.multi
     def unlink(self):
         self.order_id.unlink()

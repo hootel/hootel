@@ -94,7 +94,7 @@ class MassiveChangesWizard(models.TransientModel):
             date_start_dt = fields.Datetime.from_string(record.date_start)
             date_end_dt = fields.Datetime.from_string(record.date_end)
             diff_days = abs((date_end_dt-date_start_dt).days)+1
-            wedays = [record.dmo, record.dtu, record.dwe, record.dth, record.dfr, record.dsa, record.dsu]
+            wedays = (record.dmo, record.dtu, record.dwe, record.dth, record.dfr, record.dsa, record.dsu)
             vrooms = record.applied_on == '1' and record.virtual_room_ids or hotel_vroom_obj.search([])
 
             for i in range(0, diff_days):
@@ -103,23 +103,24 @@ class MassiveChangesWizard(models.TransientModel):
                     continue
                 if record.section == '0':
                     domain = [('date', '=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))]
-                    if record.applied_on == '1':
-                        domain.append(('virtual_room_id', 'in', record.virtual_room_ids.ids))
-                    vrooms = hotel_vroom_avail_obj.search(domain)
+
                     vals = {}
                     if record.change_avail:
                         vals.update({'avail': record.avail})
                     if record.change_no_ota:
                         vals.update({'no_ota': record.no_ota})
-                    if any(vals) and any(vrooms):
-                        vrooms.write(vals)
-                    else:
+
+                    if any(vals):
                         for vroom_id in vrooms.ids:
-                            vals.update({
-                                'date': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                'virtual_room_id': vroom_id
-                            })
-                            hotel_vroom_avail_obj.create(vals)
+                            vrooms_avail = hotel_vroom_avail_obj.search(domain+[('virtual_room_id', '=', vroom_id)])
+                            if vrooms_avail:
+                                vrooms_avail.write(vals)
+                            else:
+                                vals.update({
+                                    'date': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'virtual_room_id': vroom_id
+                                })
+                                hotel_vroom_avail_obj.create(vals)
                 elif record.section == '1':
                     domain = [
                         ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
@@ -127,9 +128,7 @@ class MassiveChangesWizard(models.TransientModel):
                         ('restriction_id', '=', record.restriction_id.id),
                         ('applied_on', '=', '0_virtual_room'),
                     ]
-                    if record.applied_on == '1':
-                        domain.append(('virtual_room_id', 'in', record.virtual_room_ids.ids))
-                    rresctriction_item_ids = hotel_vroom_restriction_item_obj.search(domain)
+
                     vals = {}
                     if record.change_min_stay:
                         vals.update({'min_stay': record.min_stay})
@@ -143,18 +142,21 @@ class MassiveChangesWizard(models.TransientModel):
                         vals.update({'closed_departure': record.closed_departure})
                     if record.change_closed_arrival:
                         vals.update({'closed_arrival': record.closed_arrival})
-                    if any(vals) and any(rresctriction_item_ids):
-                        rresctriction_item_ids.write(vals)
-                    else:
+
+                    if any(vals):
                         for vroom_id in vrooms.ids:
-                            vals.update({
-                                'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                'restriction_id': record.restriction_id.id,
-                                'virtual_room_id': vroom_id,
-                                'applied_on': '0_virtual_room',
-                            })
-                            hotel_vroom_restriction_item_obj.create(vals)
+                            rresctriction_item_ids = hotel_vroom_restriction_item_obj.search(domain+[('virtual_room_id', '=', vroom_id)])
+                            if rresctriction_item_ids:
+                                rresctriction_item_ids.write(vals)
+                            else:
+                                vals.update({
+                                    'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'restriction_id': record.restriction_id.id,
+                                    'virtual_room_id': vroom_id,
+                                    'applied_on': '0_virtual_room',
+                                })
+                                hotel_vroom_restriction_item_obj.create(vals)
                 elif record.section == '2':
                     price = 0.0
                     operation = 'a'
@@ -180,37 +182,34 @@ class MassiveChangesWizard(models.TransientModel):
                         ('compute_price', '=', 'fixed'),
                         ('applied_on', '=', '1_product'),
                     ]
-                    if record.applied_on == '1':
-                        product_tmpl_ids = record.virtual_room_ids.mapped('product_id.product_tmpl_id')
-                        domain.append(('product_tmpl_id', '=', product_tmpl_ids))
-                    pricelist_item_ids = product_pricelist_item_obj.search(domain)
 
-                    if any(pricelist_item_ids):
-                        if operation != 'n':
-                            for pli in pricelist_item_ids:
-                                pli_price = pli.fixed_price
-                                if operation == 'a':
-                                    pli.write({'fixed_price': pli_price + price})
-                                elif operation == 'ap':
-                                    pli.write({'fixed_price': pli_price + price * pli_price * 0.01})
-                                elif operation == 's':
-                                    pli.write({'fixed_price': pli_price - price})
-                                elif operation == 'sp':
-                                    pli.write({'fixed_price': pli_price - price * pli_price * 0.01})
-                                elif operation == 'np':
-                                    pli.write({'fixed_price': price * pli_price * 0.01})
+                    product_tmpl_ids = vrooms.mapped('product_id.product_tmpl_id')
+                    for vroom_id in vrooms:
+                        pricelist_item_ids = product_pricelist_item_obj.search(domain+[('product_tmpl_id', '=', vroom_id.product_id.product_tmpl_id.id)])
+                        if any(pricelist_item_ids):
+                            if operation != 'n':
+                                for pli in pricelist_item_ids:
+                                    pli_price = pli.fixed_price
+                                    if operation == 'a':
+                                        pli.write({'fixed_price': pli_price + price})
+                                    elif operation == 'ap':
+                                        pli.write({'fixed_price': pli_price + price * pli_price * 0.01})
+                                    elif operation == 's':
+                                        pli.write({'fixed_price': pli_price - price})
+                                    elif operation == 'sp':
+                                        pli.write({'fixed_price': pli_price - price * pli_price * 0.01})
+                                    elif operation == 'np':
+                                        pli.write({'fixed_price': price * pli_price * 0.01})
+                            else:
+                                pricelist_item_ids.write({'fixed_price': price})
                         else:
-                            pricelist_item_ids.write({'fixed_price': price})
-                    else:
-                        product_tmpl_ids = vrooms.mapped('product_id.product_tmpl_id')
-                        for product_tmpl_id in product_tmpl_ids.ids:
                             product_pricelist_item_obj.create({
                                 'pricelist_id': record.pricelist_id.id,
                                 'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                                 'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                                 'compute_price': 'fixed',
                                 'applied_on': '1_product',
-                                'product_tmpl_id': product_tmpl_id,
+                                'product_tmpl_id': vroom_id.product_id.product_tmpl_id.id,
                                 'fixed_price': price,
                             })
         return True

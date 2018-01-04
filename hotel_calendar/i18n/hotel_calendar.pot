@@ -1,0 +1,750 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* hotel_calendar
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-31 11:06+0000\n"
+"PO-Revision-Date: 2017-12-31 11:06+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:13
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:73
+#, python-format
+msgid "&nbsp;"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,default_num_days:0
+msgid "1 Month"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,default_num_days:0
+msgid "1 Week"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,default_num_days:0
+msgid "2 Weeks"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,default_num_days:0
+msgid "3 Weeks"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:53
+#, python-format
+msgid "AMENITIES:"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,type_move:0
+msgid "Allow Invalid"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:25
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:34
+#, python-format
+msgid "Are you sure you want to make this changes?"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:42
+#, python-format
+msgid "Arrival Hour:"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,type_move:0
+msgid "Assisted"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:53
+#, python-format
+msgid "Belongs to the Virtual Rooms:"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:16
+#, python-format
+msgid "CHARGES"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:12
+#, python-format
+msgid "CHECK-IN"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:8
+#, python-format
+msgid "CHECK-OUT"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:22
+#, python-format
+msgid "CONTROL"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.ui.view,arch_db:hotel_calendar.view_users_form
+msgid "Calendar (PMS)"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.ui.view,arch_db:hotel_calendar.view_hotel_config_settings
+msgid "Calendar colors"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:77
+#, python-format
+msgid "Check-In:"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:78
+#, python-format
+msgid "Check-Out:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_stay
+msgid "Checkin"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:11
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:19
+#, python-format
+msgid "Checkin:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_checkout
+msgid "Checkout"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:12
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:20
+#, python-format
+msgid "Checkout:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_reservation_reserve_color
+msgid "Color"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:331
+#, python-format
+msgid "Confirm Folio"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:187
+#, python-format
+msgid "Confirm Reservation Changes"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_reservation
+msgid "Confirmed Reservation "
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:306
+#, python-format
+msgid "Create: "
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_create_uid
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_create_uid
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_create_date
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_create_date
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_create_date
+msgid "Created on"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:32
+#, python-format
+msgid "Current Price:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_date
+msgid "Date"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_default_num_days
+msgid "Default number of days"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_display_name
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_display_name
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_divide_rooms_by_capacity
+msgid "Divide rooms by capacity"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:69
+#, python-format
+msgid "Do you want to confirm this folio?"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:86
+#, python-format
+msgid "Do you want to save these changes?"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_dontsell
+msgid "Dont Sell"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_end_day_week
+msgid "End day of week"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:39
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:82
+#, python-format
+msgid "FROM"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,end_day_week:0
+msgid "Friday"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:85
+#, python-format
+msgid "Have unsaved changes!"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:59
+#: model:ir.actions.act_window,name:hotel_calendar.action_hotel_calendar
+#: model:ir.ui.menu,name:hotel_calendar.hotel_calendar_menu
+#, python-format
+msgid "Hotel Calendar"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_management_view.js:62
+#: model:ir.actions.act_window,name:hotel_calendar.action_hotel_calendar_management
+#: model:ir.ui.menu,name:hotel_calendar.hotel_calendar_management_menu
+#, python-format
+msgid "Hotel Calendar Management"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.actions.act_window,name:hotel_calendar.hotel_reservation_action_checkin
+msgid "Hotel folio checkin"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.actions.act_window,name:hotel_calendar.hotel_reservation_action_checkout
+msgid "Hotel folio checkout"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_id
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_id
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_id
+msgid "ID"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:19
+#, python-format
+msgid "LIST"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:45
+#, python-format
+msgid "LOCATION:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar___last_update
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management___last_update
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached___last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_write_uid
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_write_uid
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_write_date
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_write_date
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:72
+#, python-format
+msgid "Launch Massive Changes"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:79
+#, python-format
+msgid "Made by:"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,end_day_week:0
+msgid "Monday"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:75
+#, python-format
+msgid "Name:"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:33
+#, python-format
+msgid "New Price:"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:64
+#, python-format
+msgid "Nights:"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_management_view.js:442
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:208
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:346
+#, python-format
+msgid "No"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,type_move:0
+msgid "Normal"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:158
+#, python-format
+msgid "Open: "
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_to_assign
+msgid "Ota Reservation to Assign"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:19
+#, python-format
+msgid "PRICELIST:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_stay_pay
+msgid "Paid Checkin"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_checkout_pay
+msgid "Paid Checkout"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_reservation_pay
+msgid "Paid Reservation"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.actions.server,name:hotel_calendar.hotel_reservation_action_paydue
+msgid "Paydue"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_payment_pending
+msgid "Payment Pending"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_account_payment
+msgid "Payments"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:41
+#, python-format
+msgid "Phone:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_pre_reservation
+msgid "Pre-reservation"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_price
+msgid "Price"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:51
+#, python-format
+msgid "Price From:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_product_pricelist_item
+msgid "Pricelist item"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:27
+#, python-format
+msgid "RESTRICTIONS:"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:306
+#, python-format
+msgid "Reservation"
+msgstr ""
+
+#. module: hotel_calendar
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:336
+#, python-format
+msgid "Reservation Cancelled"
+msgstr ""
+
+#. module: hotel_calendar
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:336
+#, python-format
+msgid "Reservation Changed"
+msgstr ""
+
+#. module: hotel_calendar
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:298
+#, python-format
+msgid "Reservation Created"
+msgstr ""
+
+#. module: hotel_calendar
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:360
+#, python-format
+msgid "Reservation Deleted"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_type_move
+msgid "Reservation move mode"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:17
+#, python-format
+msgid "Reserve changed:"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:9
+#, python-format
+msgid "Reserve unchanged:"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:13
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:21
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:76
+#, python-format
+msgid "Room:"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:37
+#, python-format
+msgid "SEGMENTATION:"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,end_day_week:0
+msgid "Saturday"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:12
+#, python-format
+msgid "Save Changes"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:276
+#, python-format
+msgid "Select Partner"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_res_users_pms_show_notifications
+msgid "Show Notifications"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:44
+#, python-format
+msgid "Splitted:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_staff
+msgid "Staff"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,end_day_week:0
+msgid "Sunday"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:48
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:91
+#, python-format
+msgid "TO"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:5
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:31
+#, python-format
+msgid "The following changes will be made..."
+msgstr ""
+
+#. module: hotel_calendar
+#: code:addons/hotel_calendar/models/inherited_account_payment.py:45
+#, python-format
+msgid "This pay is related with more than one Reservation."
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:6
+#, python-format
+msgid "This reservation belongs to a folio with more reservations!"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,end_day_week:0
+msgid "Thursday"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,end_day_week:0
+msgid "Tuesday"
+msgstr ""
+
+#. module: hotel_calendar
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:110
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:311
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:349
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:373
+#, python-format
+msgid "Undefined"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_management_view.js:430
+#, python-format
+msgid "Unsaved Changes!"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_res_users
+msgid "Users"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:61
+#, python-format
+msgid "VIRTUAL TYPE:"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.ui.menu,name:hotel_calendar.hotel_virtual_room_pricelist_cached
+msgid "VRoom Pricelist Cached"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_virtual_room_id
+msgid "Virtual Room"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.actions.act_window,name:hotel_calendar.hotel_virtual_room_pricelist_cached_action_form_tree
+#: model:ir.ui.view,arch_db:hotel_calendar.view_hotel_virtual_room_pricelist_cached_form
+#: model:ir.ui.view,arch_db:hotel_calendar.view_hotel_virtual_room_pricelist_cached_tree
+msgid "Virtual Room Pircelist Cached"
+msgstr ""
+
+#. module: hotel_calendar
+#: code:addons/hotel_calendar/models/inherited_account_payment.py:45
+#, python-format
+msgid "Warning"
+msgstr ""
+
+#. module: hotel_calendar
+#: selection:hotel.config.settings,end_day_week:0
+msgid "Wednesday"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:190
+#, python-format
+msgid "Yes, change it"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:334
+#, python-format
+msgid "Yes, confirm it"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_management_view.js:433
+#, python-format
+msgid "Yes, save it"
+msgstr ""
+
+#. module: hotel_calendar
+#. openerp-web
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:341
+#, python-format
+msgid "[Hotel Calendar]\n"
+"ERROR: Can't confirm folio!"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_bus_hotel_calendar
+msgid "bus.hotel.calendar"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.ui.view,arch_db:hotel_calendar.view_hotel_config_settings
+msgid "calendar"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_hotel_reservation
+msgid "hotel reservation"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_hotel_calendar_management
+msgid "hotel.calendar.management"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_hotel_config_settings
+msgid "hotel.config.settings"
+msgstr ""
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_virtual_room_pricelist_cached
+msgid "virtual.room.pricelist.cached"
+msgstr ""
+

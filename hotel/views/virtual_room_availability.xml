@@ -53,6 +53,6 @@
   <!-- MENUS -->
   <menuitem name="Availability" id="virtual_room_availability_menu"
     action="virtual_room_availability_action" sequence="22"
-    parent="hotel.hotel_configuration_menu"/>
+    parent="hotel.configuration_others"/>
 
  </odoo>

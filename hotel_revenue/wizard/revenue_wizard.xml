@@ -40,9 +40,10 @@
 		<menuitem
 			id="menu_revenue_download"
 			name="Revenue File Download"
-			parent="hotel.hotel_configuration_menu"
+			parent="hotel.hotel_reports_menu"
 			sequence="38"
 			action="action_revenue_download"
+            groups="hotel.group_hotel_manager"
 		/>
 
     </data>

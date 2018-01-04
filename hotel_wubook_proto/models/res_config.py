@@ -20,6 +20,8 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+from datetime import datetime, timedelta
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -59,6 +61,9 @@ class WubookConfiguration(models.TransientModel):
     @api.multi
     def resync(self):
         self.ensure_one()
+
+        now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0)
+        now_utc_str = now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
 
         # Reset Issues
         issue_ids = self.env['wubook.issue'].search([])
@@ -110,7 +115,6 @@ class WubookConfiguration(models.TransientModel):
         folio_ids = self.env['hotel.folio'].search([])
         folio_ids.with_context(wubook_action=False).write({
             'wseed': '',
-            'whas_wubook_reservations': False,
         })
 
         # Reset Reservations
@@ -132,6 +136,7 @@ class WubookConfiguration(models.TransientModel):
             ('restriction_id', '=', restriction_id),
             ('applied_on', '=', '0_virtual_room'),
             ('wpushed', '=', True),
+            ('date_start', '>=', now_utc_str),
         ])
         restriction_item_ids.with_context(wubook_action=False).write({'wpushed': False})
 
@@ -141,11 +146,15 @@ class WubookConfiguration(models.TransientModel):
             ('applied_on', '=', '1_product'),
             ('compute_price', '=', 'fixed'),
             ('wpushed', '=', True),
+            ('date_start', '>=', now_utc_str),
         ])
         pricelist_item_ids.with_context(wubook_action=False).write({'wpushed': False})
 
         # Put to push availability
-        availabity_ids = self.env['hotel.virtual.room.availabity'].search([('wpushed', '=', True)])
+        availabity_ids = self.env['hotel.virtual.room.availabity'].search([
+            ('wpushed', '=', True),
+            ('date', '>=', now_utc_str),
+        ])
         availabity_ids.with_context(wubook_action=False).write({'wpushed': False})
 
         # Push Changes

@@ -44,8 +44,7 @@
                                     <t t-call="JournalBodySalePurchase"/>
                                 </div>                       
                                 <t t-call="JournalBodyGraph"/>                                
-                            </div>
-                            <div class="container o_kanban_card_manage_pane o_invisible">
+                            </div><div class="container o_kanban_card_manage_pane o_invisible">
                                 <t t-call="JournalManage"/>
                             </div>
                         </div>

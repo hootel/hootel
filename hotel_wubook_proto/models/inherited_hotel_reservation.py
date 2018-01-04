@@ -225,7 +225,7 @@ class HotelReservation(models.Model):
                 rdays = []
                 for i in range(0, date_diff):
                     ndate_dt = date_start + timedelta(days=i)
-                    ndate_str = ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                    ndate_str = ndate_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     avail = len(hotel_vroom_obj.check_availability_virtual_room(ndate_str,
                                                                                 ndate_str,
                                                                                 virtual_room_id=vroom.id))

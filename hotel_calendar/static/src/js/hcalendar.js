@@ -1091,7 +1091,8 @@ HotelCalendar.prototype = {
           c.classList.add('hcal-cell-highlight');
           if (this._pricelist) {
         	var parentRow = this.$base.querySelector(`#${c.dataset.hcalParentRow}`);
-            var date_cell = HotelCalendar.toMoment(this.etable.querySelector(`#${c.dataset.hcalParentCell}`).dataset.hcalDate);
+            // FIXME: Normalize data calendar (gmt) vs extra info (utc)
+            var date_cell = HotelCalendar.toMoment(this.etable.querySelector(`#${c.dataset.hcalParentCell}`).dataset.hcalDate+" 00:00:00").utc();
             var room_price = this.getRoomPrice(parentRow.dataset.hcalRoomObjId, date_cell);
             var room = this.getRoom(parentRow.dataset.hcalRoomObjId);
             if (c === cells[0] || !date_cell.isSame(limitRightDate, 'day')) {

@@ -35,8 +35,8 @@
         'python': ['xmlrpclib']
     },
     'data': [
-        'views/inherit_res_partner.xml',
-        'views/res_config.xml'
+        'views/inherited_res_partner_views.xml',
+        'views/res_config_views.xml'
     ],
     'test': [
     ],

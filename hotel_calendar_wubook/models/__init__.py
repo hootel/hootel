@@ -19,6 +19,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import inherit_hotel_reservation
-from . import inherit_bus_hotel_calendar
-from . import inherit_wubook_issue
+from . import inherited_hotel_reservation
+from . import inherited_bus_hotel_calendar
+from . import inherited_wubook_issue

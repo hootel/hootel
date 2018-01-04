@@ -22,4 +22,4 @@
 from . import controllers
 from . import models
 from . import wubook
-from . import wizards
+from . import wizard

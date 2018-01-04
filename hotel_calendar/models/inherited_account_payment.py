@@ -26,7 +26,7 @@ from openerp import models, fields, api, _
 
 class AccountPayment(models.Model):
 
-    _inherit = 'account.payment'    
+    _inherit = 'account.payment'
 
     @api.multi
     @api.depends('state')
@@ -43,13 +43,5 @@ class AccountPayment(models.Model):
                     return
                 elif len(fol) > 1:
                     raise except_orm(_('Warning'), _('This pay is related with more than one Reservation.'))
-                else:                
-                    for res in fol.room_lines:
-                        res._compute_color()
-        
-
-
-
-
-
-
+                else:
+                    fol.room_lines._compute_color()

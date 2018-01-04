@@ -39,7 +39,7 @@
             <menuitem 
                 id="menu_ine_download"
                 name="INE File Download"
-                parent="hotel.hotel_configuration_menu"
+                parent="hotel.hotel_reports_menu"
                 sequence="37"
                 action="action_ine_download"
             />
