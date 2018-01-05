@@ -234,7 +234,7 @@ class HotelReservation(models.Model):
                     vroom_avail_id = virtual_room_avail_obj.search([
                         ('virtual_room_id', '=', vroom.id),
                         ('date', '=', ndate_str)], limit=1)
-                    max_avail = vroom.max_real_rooms
+                    max_avail = vroom.total_rooms_count
                     if vroom_avail_id:
                         max_avail = vroom_avail_id.avail
                     avail = min(avail, max_avail)
