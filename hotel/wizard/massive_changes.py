@@ -122,7 +122,7 @@ class MassiveChangesWizard(models.TransientModel):
                             else:
                                 vals.update({
                                     'date': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                    'virtual_room_id': vroom_id.id
+                                    'virtual_room_id': vroom.id
                                 })
                                 hotel_vroom_avail_obj.create(vals)
                 elif record.section == '1':
