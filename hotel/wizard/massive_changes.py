@@ -22,7 +22,7 @@
 from openerp.exceptions import ValidationError
 from datetime import datetime, timedelta
 from openerp import models, fields, api
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 
 
 class MassiveChangesWizard(models.TransientModel):
@@ -91,8 +91,8 @@ class MassiveChangesWizard(models.TransientModel):
         hotel_vroom_restriction_item_obj = self.env['hotel.virtual.room.restriction.item']
         product_pricelist_item_obj = self.env['product.pricelist.item']
         for record in self:
-            date_start_dt = fields.Datetime.from_string(record.date_start)
-            date_end_dt = fields.Datetime.from_string(record.date_end)
+            date_start_dt = fields.Datetime.from_string(record.date_start).replace(hour=0, minute=0, second=0, microsecond=0)
+            date_end_dt = fields.Datetime.from_string(record.date_end).replace(hour=0, minute=0, second=0, microsecond=0)
             diff_days = abs((date_end_dt-date_start_dt).days)+1
             wedays = (record.dmo, record.dtu, record.dwe, record.dth, record.dfr, record.dsa, record.dsu)
             vrooms = record.applied_on == '1' and record.virtual_room_ids or hotel_vroom_obj.search([])
@@ -105,20 +105,24 @@ class MassiveChangesWizard(models.TransientModel):
                     domain = [('date', '=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))]
 
                     vals = {}
-                    if record.change_avail:
-                        vals.update({'avail': record.avail})
                     if record.change_no_ota:
                         vals.update({'no_ota': record.no_ota})
 
-                    if any(vals):
-                        for vroom_id in vrooms.ids:
-                            vrooms_avail = hotel_vroom_avail_obj.search(domain+[('virtual_room_id', '=', vroom_id)])
+                    if any(vals) or record.change_avail:
+                        for vroom in vrooms:
+                            if record.change_avail:
+                                cavail = len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                                                                                             ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                                                                                             virtual_room_id=vroom.id))
+                                vals.update({'avail': min(cavail, vroom.total_rooms_count, record.avail)})
+
+                            vrooms_avail = hotel_vroom_avail_obj.search(domain+[('virtual_room_id', '=', vroom.id)])
                             if vrooms_avail:
                                 vrooms_avail.write(vals)
                             else:
                                 vals.update({
                                     'date': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                    'virtual_room_id': vroom_id
+                                    'virtual_room_id': vroom_id.id
                                 })
                                 hotel_vroom_avail_obj.create(vals)
                 elif record.section == '1':
