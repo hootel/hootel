@@ -96,9 +96,9 @@ class VirtualRoom(models.Model):
             rooms_linked = virtual_room.room_ids | self.env['hotel.room'].search([('categ_id.id', 'in', room_categories)])
             free_rooms = free_rooms & rooms_linked
         return free_rooms.sorted(key=lambda r: r.sequence)
-        
+
     @api.multi
     def unlink(self):
-        self.product_id.unlink()
+        for record in self:
+            record.product_id.unlink()
         return super(VirtualRoom, self).unlink()
-

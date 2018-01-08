@@ -117,32 +117,39 @@ class ProductPricelistItem(models.Model):
         pricelist_parity_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
         if pricelist_parity_id:
             pricelist_parity_id = int(pricelist_parity_id)
+        # Construct dictionary with relevant info of removed records
         unlink_vals = {}
         for record in self:
-            if not record.pricelist_id == pricelist_parity_id:
+            if not record.pricelist_id == pricelist_parity_id: # Check parity pricelist
                 continue
+            vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', record.product_tmpl_id.id)], limit=1)
             unlink_vals.update({
                 'pricelist_id': record.pricelist_id,
                 'date': record.date_start,
-                'product_tmpl_id': record.product_tmpl_id.id
+                'vroom': vroom
             })
+        # Do Normal Stuff
         res = super(ProductPricelistItem, self).unlink()
+        # Do extra operations
+        vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
+        bus_calendar_obj = self.env['bus.hotel.calendar']
         for vals in unlink_vals:
             pricelist_id = vals.pricelist_id
             date_start = vals.date_start
-            vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', vals.product_tmpl_id.id)], limit=1)
+            vroom = vals.vroom
             prod = vroom.product_id.with_context(
                 quantity=1,
                 date=date_start,
                 pricelist=pricelist_id)
 
-            self.env['bus.hotel.calendar'].send_pricelist_notification(
+            # Send Notification to update calendar pricelist
+            bus_calendar_obj.send_pricelist_notification(
                 pricelist_id,
                 date_start,
                 vroom.id,
                 prod.price)
 
-            vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
+            # Remove records from cache model
             vroom_pr_cached_id = vroom_pr_cached_obj.search([
                 ('virtual_room_id', '=', vroom.id),
                 ('date', '=', date_start),
