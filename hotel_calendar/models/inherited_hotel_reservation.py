@@ -98,21 +98,23 @@ class HotelReservation(models.Model):
         date_end = datetime.strptime(dto, DEFAULT_SERVER_DATETIME_FORMAT)
         date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         date_end_str = date_end.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-        room_ids = rooms.mapped('product_id.id')
-        domain.insert(0, ('product_id', 'in', room_ids))
+        room_product_ids = rooms.mapped('product_id.id')
+        domain.insert(0, ('product_id', 'in', room_product_ids))
         domain.insert(0, ('state', 'in', ['draft',
                                           'confirm',
                                           'booking',
                                           'done',
                                           False]))
         reservations_raw = self.env['hotel.reservation'].search(domain, order="checkin DESC, checkout ASC, adults DESC, children DESC")
-        reservations_ld = self.env['hotel.reservation'].search([
-            ('checkin', '>=', date_start_str),
-            ('checkout', '<=', date_end_str)])
+        reservations_ll = self.env['hotel.reservation'].search([
+            ('checkin', '<=', date_end_str),
+            ('checkout', '>=', date_start_str)
+        ])
         reservations_lr = self.env['hotel.reservation'].search([
-            ('checkout', '>=', date_start_str),
-            ('checkin', '<=', date_end_str)])
-        reservations = (reservations_ld | reservations_lr) & reservations_raw
+            ('checkin', '>=', date_start_str),
+            ('checkout', '<=', date_end_str)
+        ])
+        reservations = (reservations_ll | reservations_lr) & reservations_raw
         return self._hcalendar_reservation_data(reservations)
 
     @api.multi

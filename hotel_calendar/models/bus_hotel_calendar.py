@@ -79,7 +79,7 @@ class BusHotelCalendar(models.TransientModel):
         return {
             'type': 'pricelist',
             'price': {
-                pricelist: [{
+                'pricelist': [{
                     'days': {
                         date_dt.strftime("%d/%m/%Y"): price,    # European Format
                     },

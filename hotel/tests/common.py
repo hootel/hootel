@@ -4,17 +4,46 @@ from datetime import timedelta
 from odoo import api, fields
 from odoo.tests import common
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from odoo.addons.mail.tests.common import TestMail
 
 
-# TODO: Para test de seguridad (permisos) heredar de TestMail para tener acceso a usuarios con distintos niveles de acceso
-class TestHotel(common.SavepointCase):
+# TestMail crea recursos utiles para nuestros test... por ejemplo, usuarios con distintos tipos de nivel, etc...
+class TestHotel(TestMail):
+
     @classmethod
     def setUpClass(cls):
         super(TestHotel, cls).setUpClass()
 
+        # Hotel Time-Zone
+        cls.tz_hotel = cls.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel')
+
         # Parity models
         cls.parity_pricelist_id = int(cls.env['ir.values'].get_default('hotel.config.settings', 'parity_pricelist_id'))
         cls.parity_restriction_id = int(cls.env['ir.values'].get_default('hotel.config.settings', 'parity_restrictions_id'))
+
+        # User Groups
+        user_group_hotel_manager = cls.env.ref('hotel.group_hotel_manager')
+        user_group_hotel_user = cls.env.ref('hotel.group_hotel_user')
+        user_group_employee = cls.env.ref('base.group_user')
+        user_group_public = cls.env.ref('base.group_public')
+
+        # Create Test Users
+        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        cls.user_hotel_manager = Users.create({
+            'name': 'Jeff Hotel Manager',
+            'login': 'hoteljeff',
+            'email': 'mynameisjeff@example.com',
+            'signature': '--\nJeff',
+            'notify_email': 'always',
+            'groups_id': [(6, 0, [user_group_hotel_manager.id, user_group_employee.id])]})
+        cls.user_hotel_user = Users.create({
+            'name': 'Juancho Hotel User',
+            'login': 'juancho',
+            'email': 'juancho@example.com',
+            'signature': '--\nJuancho',
+            'notify_email': 'always',
+            'groups_id': [(6, 0, [user_group_hotel_user.id, user_group_public.id])]})
+
 
         # Create Tests Records
         RoomTypes = cls.env['hotel.room.type']
@@ -61,11 +90,9 @@ class TestHotel(common.SavepointCase):
 
         cls.hotel_vroom_budget.write({
             'room_ids': [(6, False, [cls.hotel_room_simple_100.id, cls.hotel_room_simple_101.id])],
-            'max_real_rooms': 2,
         })
         cls.hotel_vroom_special.write({
             'room_ids': [(6, False, [cls.hotel_room_double_200.id])],
-            'max_real_rooms': 1,
         })
 
         # Create a week of fresh data
@@ -79,8 +106,8 @@ class TestHotel(common.SavepointCase):
             cls.hotel_vroom_special.id: cls.hotel_vroom_special.product_id.product_tmpl_id.id,
         }
         cls.prices_tmp = {
-            cls.hotel_vroom_budget.id: (10, 50, 50, 80, 50, 10, 20),
-            cls.hotel_vroom_special.id: (5, 15, 15, 35, 35, 10, 10),
+            cls.hotel_vroom_budget.id: (10.0, 80.0, 80.0, 95.0, 90.0, 80.0, 20.0),
+            cls.hotel_vroom_special.id: (5.0, 15.0, 15.0, 35.0, 35.0, 10.0, 10.0),
         }
         vroom_avail_obj = cls.env['hotel.virtual.room.availabity']
         vroom_rest_item_obj = cls.env['hotel.virtual.room.restriction.item']
@@ -109,4 +136,3 @@ class TestHotel(common.SavepointCase):
                     'product_tmpl_id': product_tmpl_ids[k_vr],
                     'fixed_price': cls.prices_tmp[k_vr][i],
                 })
-        # FIXME: Igual mejor mover esta clase al modulo de 'hotel' y herederar

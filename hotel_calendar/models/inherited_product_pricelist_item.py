@@ -118,12 +118,12 @@ class ProductPricelistItem(models.Model):
         if pricelist_parity_id:
             pricelist_parity_id = int(pricelist_parity_id)
         # Construct dictionary with relevant info of removed records
-        unlink_vals = {}
+        unlink_vals = []
         for record in self:
-            if not record.pricelist_id == pricelist_parity_id: # Check parity pricelist
+            if record.pricelist_id.id != pricelist_parity_id: # Check parity pricelist
                 continue
             vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', record.product_tmpl_id.id)], limit=1)
-            unlink_vals.update({
+            unlink_vals.append({
                 'pricelist_id': record.pricelist_id,
                 'date': record.date_start,
                 'vroom': vroom
@@ -134,9 +134,9 @@ class ProductPricelistItem(models.Model):
         vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
         bus_calendar_obj = self.env['bus.hotel.calendar']
         for vals in unlink_vals:
-            pricelist_id = vals.pricelist_id
-            date_start = vals.date_start
-            vroom = vals.vroom
+            pricelist_id = vals['pricelist_id']
+            date_start = vals['date']
+            vroom = vals['vroom']
             prod = vroom.product_id.with_context(
                 quantity=1,
                 date=date_start,

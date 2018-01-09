@@ -509,8 +509,9 @@ class HotelReservation(models.Model):
             if room.price_virtual_room:
                 self.virtual_room_id = room.price_virtual_room.id
 
-    @api.model
+    @api.multi
     def prepare_reservation_lines(self, datefrom, days):
+        self.ensure_one()
         total_price = 0.0
         cmds = [(5, False, False)]
 
