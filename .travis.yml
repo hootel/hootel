@@ -34,8 +34,8 @@ install:
   - git clone https://github.com/OCA/maintainer-quality-tools.git ${HOME}/maintainer-quality-tools --depth=1
   - export PATH=${HOME}/maintainer-quality-tools/travis:${PATH}
   - travis_install_nightly
-  - git clone -b ${VERSION} https://github.com/OCA/web.git ${HOME}/dependencies --depth=1
-  - git clone -b ${VERSION} https://github.com/OCA/partner-contact.git ${HOME}/dependencies --depth=1
+  - git clone -b ${VERSION} https://github.com/OCA/web.git ${HOME}/dependencies/web --depth=1
+  - git clone -b ${VERSION} https://github.com/OCA/partner-contact.git ${HOME}/dependencies/partner-contact --depth=1
 
 script:
   - travis_wait travis_run_tests
