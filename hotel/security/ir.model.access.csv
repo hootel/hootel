@@ -43,3 +43,5 @@ access_hotel_restrictions_item_manager,hotel.restriction.item.manager,hotel.mode
 access_hotel_restrictions_item_user,hotel.restriction.item.user,hotel.model_hotel_virtual_room_restriction_item,hotel.group_hotel_user,1,1,1,0
 access_hotel_virtual_room_availabity_manager,hotel.availability.manager,hotel.model_hotel_virtual_room_availabity,hotel.group_hotel_manager,1,1,1,1
 access_hotel_virtual_room_availabity_user,hotel.availability.user,hotel.model_hotel_virtual_room_availabity,hotel.group_hotel_user,1,1,1,0
+access_hotel_dashboard_manager,hotel.dashboard.manager,hotel.model_hotel_dashboard,hotel.group_hotel_manager,1,1,1,1
+access_hotel_dasjboard_user,hotel.dashboard.user,hotel.model_hotel_dashboard,hotel.group_hotel_user,1,1,1,0
