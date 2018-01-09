@@ -52,31 +52,31 @@ class TestReservationsCalendar(TestHotel):
                     if vroom_pr['room'] == vroom.id: # Only Check Test Cases
                         self.assertEqual(vroom.list_price, vroom_pr['days'][sorted_dates[k_price+1]], "Hotel Calendar Pricelist doesn't match after remove!")
 
-    def test_calendar_reservations(self):
-        now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-        adv_utc_dt = now_utc_dt + timedelta(days=15)
-
-        # CREATE COMPLETE RESERVATION (3 Nigths)
-        reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
-        reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
-        folio, reservation = self.create_reservation(
-            self.user_hotel_manager,
-            self.partner_2,
-            reserv_start_utc_dt,
-            reserv_end_utc_dt,
-            self.hotel_room_double_200,
-            "Reservation Test #1")
-
-        hcal_data = self.env['hotel.reservation'].sudo(self.user_hotel_manager).get_hcalendar_all_data(
-            now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            [], [])
-        self.assertTrue(any(hcal_data['reservations']), "Hotel Calendar don't receive any reservation, more than 1 expected...")
-
-        # TODO: Perhaps not the best way to do this test... :/
-        hasReservationTest = False
-        for reserv in hcal_data['reservations']:
-            if reserv[1] == reservation.id:
-                hasReservationTest = True
-                break
-        self.assertTrue(hasReservationTest, "Hotel Calendar can't found test reservation!")
+    # def test_calendar_reservations(self):
+    #     now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    #     adv_utc_dt = now_utc_dt + timedelta(days=15)
+    #
+    #     # CREATE COMPLETE RESERVATION (3 Nigths)
+    #     reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
+    #     reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
+    #     folio, reservation = self.create_reservation(
+    #         self.user_hotel_manager,
+    #         self.partner_2,
+    #         reserv_start_utc_dt,
+    #         reserv_end_utc_dt,
+    #         self.hotel_room_double_200,
+    #         "Reservation Test #1")
+    #
+    #     hcal_data = self.env['hotel.reservation'].sudo(self.user_hotel_manager).get_hcalendar_all_data(
+    #         now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+    #         adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+    #         [], [])
+    #     self.assertTrue(any(hcal_data['reservations']), "Hotel Calendar don't receive any reservation, more than 1 expected...")
+    #
+    #     # TODO: Perhaps not the best way to do this test... :/
+    #     hasReservationTest = False
+    #     for reserv in hcal_data['reservations']:
+    #         if reserv[1] == reservation.id:
+    #             hasReservationTest = True
+    #             break
+    #     self.assertTrue(hasReservationTest, "Hotel Calendar can't found test reservation!")

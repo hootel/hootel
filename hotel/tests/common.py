@@ -26,7 +26,6 @@ class TestHotel(TestMail):
             'checkin': checkin.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'checkout': checkout.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'folio_id': folio.id,
-            'state': 'draft',
             'product_id': room.product_id.id,
         })
         self.assertTrue(reservation, "Hotel Calendar can't create a new reservation!")
