@@ -3,19 +3,53 @@
 from datetime import timedelta
 from odoo import api, fields
 from odoo.tests import common
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.addons.mail.tests.common import TestMail
+import pytz
 
 
 # TestMail crea recursos utiles para nuestros test... por ejemplo, usuarios con distintos tipos de nivel, etc...
 class TestHotel(TestMail):
+
+    def create_reservation(self, creator, partner, checkin, checkout, room, resname, adults=1, children=0):
+        # Create Folio
+        folio = self.env['hotel.folio'].sudo(creator).create({
+            'partner_id': partner.id,
+        })
+        self.assertTrue(folio, "Hotel Calendar can't create folio for new reservation!")
+
+        # Create Reservation (Special Room)
+        reservation = self.env['hotel.reservation'].sudo(creator).create({
+            'name': resname,
+            'adults': adults,
+            'children': children,
+            'checkin': checkin.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            'checkout': checkout.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            'folio_id': folio.id,
+            'product_id': room.product_id.id,
+        })
+        self.assertTrue(reservation, "Hotel Calendar can't create a new reservation!")
+
+        # Create Reservation Lines + Update Reservation Price
+        # Used replace for flag datetime object as UTC (required for time-zone conversions)
+        reserv_start_dt = checkin.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.tz_hotel))
+        reserv_end_dt = checkout.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.tz_hotel))
+        days_diff = abs((reserv_end_dt - reserv_start_dt).days-1)
+        res = reservation.sudo(creator).prepare_reservation_lines(reserv_start_dt, days_diff)
+        reservation.sudo(creator).write({
+            'reservation_lines': res['commands'],
+            'price_unit': res['total_price'],
+        })
+
+        return (folio, reservation)
+
 
     @classmethod
     def setUpClass(cls):
         super(TestHotel, cls).setUpClass()
 
         # Hotel Time-Zone
-        cls.tz_hotel = cls.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel')
+        cls.tz_hotel = cls.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel') or 'UTC'
 
         # Parity models
         cls.parity_pricelist_id = int(cls.env['ir.values'].get_default('hotel.config.settings', 'parity_pricelist_id'))
@@ -26,6 +60,7 @@ class TestHotel(TestMail):
         user_group_hotel_user = cls.env.ref('hotel.group_hotel_user')
         user_group_employee = cls.env.ref('base.group_user')
         user_group_public = cls.env.ref('base.group_public')
+        user_group_account_invoice = cls.env.ref('account.group_account_invoice')
 
         # Create Test Users
         Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
@@ -35,7 +70,7 @@ class TestHotel(TestMail):
             'email': 'mynameisjeff@example.com',
             'signature': '--\nJeff',
             'notify_email': 'always',
-            'groups_id': [(6, 0, [user_group_hotel_manager.id, user_group_employee.id])]})
+            'groups_id': [(6, 0, [user_group_hotel_manager.id, user_group_employee.id, user_group_account_invoice.id])]})
         cls.user_hotel_user = Users.create({
             'name': 'Juancho Hotel User',
             'login': 'juancho',

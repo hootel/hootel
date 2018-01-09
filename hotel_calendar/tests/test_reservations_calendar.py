@@ -3,13 +3,13 @@
 import datetime
 from datetime import timedelta
 from odoo import fields
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
-from .common import TestHotelCalendar
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.addons.hotel.tests.common import TestHotel
 import logging
 _logger = logging.getLogger(__name__)
 
 
-class TestReservationsCalendar(TestHotelCalendar):
+class TestReservationsCalendar(TestHotel):
 
     def test_calendar_pricelist(self):
         now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -56,6 +56,17 @@ class TestReservationsCalendar(TestHotelCalendar):
         now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         adv_utc_dt = now_utc_dt + timedelta(days=15)
 
+        # CREATE COMPLETE RESERVATION (3 Nigths)
+        reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
+        reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
+        folio, reservation = self.create_reservation(
+            self.user_hotel_manager,
+            self.partner_2,
+            reserv_start_utc_dt,
+            reserv_end_utc_dt,
+            self.hotel_room_double_200,
+            "Reservation Test #1")
+
         hcal_data = self.env['hotel.reservation'].sudo(self.user_hotel_manager).get_hcalendar_all_data(
             now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
@@ -65,7 +76,7 @@ class TestReservationsCalendar(TestHotelCalendar):
         # TODO: Perhaps not the best way to do this test... :/
         hasReservationTest = False
         for reserv in hcal_data['reservations']:
-            if reserv[1] == self.reservation_1.id:
+            if reserv[1] == reservation.id:
                 hasReservationTest = True
                 break
         self.assertTrue(hasReservationTest, "Hotel Calendar can't found test reservation!")
