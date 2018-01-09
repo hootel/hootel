@@ -21,7 +21,7 @@
 ##############################################################################
 from openerp.http import request
 from openerp.addons.web.controllers.main import serialize_exception,
-                                                content_disposition
+    content_disposition
 from odoo import api, fields, models
 
 
@@ -36,5 +36,5 @@ class GlassofExporterWizard(models.TransientModel):
         if not filecontent:
             return request.not_found()
         return request.make_response(filecontent,
-                    [('Content-Type', 'application/octet-stream'),
-                    ('Content-Disposition', content_disposition(self.FILENAME))])
+            [('Content-Type', 'application/octet-stream'),
+            ('Content-Disposition', content_disposition(self.FILENAME))])

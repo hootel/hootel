@@ -1,4 +1,5 @@
-# ALDA PROJECT MODULES [![Build Status](https://travis-ci.org/eiqui-dev/alda.svg?branch=10.0)](https://travis-ci.org/eiqui-dev/alda)
+# ALDA PROJECT MODULES [![Build Status](https://travis-ci.org/eiqui-dev/alda.svg?branch=10.0)](https://travis-ci.org/eiqui-dev/alda) [![codecov](https://codecov.io/gh/eiqui-dev/alda/branch/10.0/graph/badge.svg)](https://codecov.io/gh/eiqui-dev/alda)
+
 
 UNDER DEVELOPMENT: **NOT USE IN PRODUCTION**
 
