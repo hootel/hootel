@@ -293,7 +293,7 @@ var HotelCalendarView = View.extend({
                               'default_checkout': endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
                               'default_adults': numBeds,
                               'default_children': 0,
-                              'default_order_id.parter_id': partner_id,
+                              //'default_order_id.partern_id': partner_id,
                               'default_product_id': room.id,
                               //'default_product_uom': room.getUserData('uom_id'),
                               //'default_product_uom_qty': 1,
