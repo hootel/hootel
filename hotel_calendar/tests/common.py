@@ -6,6 +6,7 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from datetime import timedelta
 import pytz
 
+
 class TestHotelCalendar(TestHotel):
 
     @classmethod
@@ -14,7 +15,7 @@ class TestHotelCalendar(TestHotel):
 
         now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
-        ## CREATE COMPLETE RESERVATION (3 Nigths)
+        # CREATE COMPLETE RESERVATION (3 Nigths)
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
 
@@ -32,7 +33,6 @@ class TestHotelCalendar(TestHotel):
             'checkout': reserv_end_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             'folio_id': cls.folio_1.id,
             'product_id': cls.hotel_room_double_200.product_id.id,
-            'splitted': False,
         })
 
         # Create Reservation Lines + Update Reservation Price
