@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
     <openerp>
         <data>
-
-
            <record id="checkin_wizard_form_2" model="ir.ui.view">
             <field name="name">wizard.form2</field>
             <field name="model">checkin.wizard</field>
@@ -26,7 +24,7 @@
                     <group>
                         <field name="code_ine_cardex" placeholder="Code in INE" options="{'no_create': True,'no_open': True}" colspan="2" required="True"/>
                         <newline/>
-                        <field name="category_id_cardex" widget="many2many_tags" placeholder="Tags..." colspan="2"/>
+                        <field name="category_id_cardex" widget="many2many_tags" placeholder="Tags..." colspan="2" options="{'no_create': True,'no_open': True}"/>
                     </group>
                 </xpath>
                 <xpath expr="//footer">
@@ -34,8 +32,5 @@
                 </xpath>
             </field>
         </record>
-
-
         </data>
-
     </openerp>
