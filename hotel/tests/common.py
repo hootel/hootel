@@ -150,13 +150,17 @@ class TestHotel(TestMail):
             cls.hotel_vroom_budget.id: (1, 2, 2, 1, 1, 2, 2),
             cls.hotel_vroom_special.id: (1, 1, 1, 1, 1, 1, 1),
         }
-        product_tmpl_ids = {
-            cls.hotel_vroom_budget.id: cls.hotel_vroom_budget.product_id.product_tmpl_id.id,
-            cls.hotel_vroom_special.id: cls.hotel_vroom_special.product_id.product_tmpl_id.id,
-        }
         cls.prices_tmp = {
             cls.hotel_vroom_budget.id: (10.0, 80.0, 80.0, 95.0, 90.0, 80.0, 20.0),
             cls.hotel_vroom_special.id: (5.0, 15.0, 15.0, 35.0, 35.0, 10.0, 10.0),
+        }
+        cls.restrictions_min_stay_tmp = {
+            cls.hotel_vroom_budget.id: (0, 1, 2, 1, 1, 0, 0),
+            cls.hotel_vroom_special.id: (3, 1, 0, 2, 0, 1, 4),
+        }
+        product_tmpl_ids = {
+            cls.hotel_vroom_budget.id: cls.hotel_vroom_budget.product_id.product_tmpl_id.id,
+            cls.hotel_vroom_special.id: cls.hotel_vroom_special.product_id.product_tmpl_id.id,
         }
         vroom_avail_obj = cls.env['hotel.virtual.room.availabity']
         vroom_rest_item_obj = cls.env['hotel.virtual.room.restriction.item']
@@ -175,6 +179,7 @@ class TestHotel(TestMail):
                     'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                     'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                     'applied_on': '0_virtual_room',
+                    'min_stay': cls.restrictions_min_stay_tmp[k_vr][i],
                 })
                 pricelist_item_obj.create({
                     'pricelist_id': cls.parity_pricelist_id,
