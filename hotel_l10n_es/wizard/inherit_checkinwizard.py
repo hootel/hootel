@@ -36,9 +36,10 @@ class Wizard(models.TransientModel):
         ('I', 'Carta o Doc. de Identidad'),
         ('N', 'Permiso Residencia Español'),
         ('X', 'Permiso Residencia Europeo')],
-        help='blabla',
+        help=_('Select a valid document type'),
         required=True,
-        string='Doc. type',
+        default='D',
+        string=_('Doc. type'),
         related='partner_id.documenttype')
     poldocument_cardex = fields.Char('Doc. number', required=True, related='partner_id.poldocument')
     polexpedition_cardex = fields.Date('Expedition date', required=True, related='partner_id.polexpedition')
@@ -50,7 +51,7 @@ class Wizard(models.TransientModel):
     lastname_cardex = fields.Char('Lastname', required=True, related='partner_id.lastname')
     mobile_cardex = fields.Char('Mobile', related='partner_id.mobile', store=True)
     code_ine_cardex = fields.Many2one('code_ine',
-            help='Country or province of origin. Used for INE statistics.',
+            help=_('Country or province of origin. Used for INE statistics.'),
             required=True,
             related='partner_id.code_ine')
     category_id_cardex = fields.Many2many('res.partner.category', 'id', related='partner_id.category_id', required=True)

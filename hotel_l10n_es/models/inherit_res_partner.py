@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from odoo.osv.expression import get_unaccent_wrapper
 import logging
 _logger=logging.getLogger(__name__)
@@ -112,19 +112,23 @@ class ResPartner(models.Model):
         ('I', 'Carta o Doc. de Identidad'),
         ('N', 'Permiso Residencia Español'),
         ('X', 'Permiso Residencia Europeo')],
-        help='blabla',
-        string='Document type')
+        help=_('Select a valid document type'),
+        default='D',
+        string=_('Doc. type'),
+        )
     poldocument = fields.Char('Document number')
     polexpedition = fields.Date('Document expedition date')
     birthdate_date = fields.Date("Birthdate")
     gender = fields.Selection([('male', 'Male'),
-                               ('female', 'Female')])
+                               ('female', 'Female')],
+                               default='male',
+                               )
     code_ine = fields.Many2one('code_ine',
-            help='Country or province of origin. Used for INE statistics.')
-            
+            help=_('Country or province of origin. Used for INE statistics.'))
+
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
-        result = super(ResPartner,self).name_search(name, args=None, operator='ilike', limit=100)        
+        result = super(ResPartner,self).name_search(name, args=None, operator='ilike', limit=100)
         if args is None:
             args = []
         if name and operator in ('=', 'ilike', '=ilike', 'like', '=like'):
@@ -148,7 +152,7 @@ class ResPartner(models.Model):
                       {where} ({poldocument} {operator} {percent}
                            OR {mobile} {operator} {percent})
                      ORDER BY {display_name} {operator} {percent} desc,
-                              {display_name}                              
+                              {display_name}
                     """.format(where=where_str,
                                operator=operator,
                                poldocument=unaccent('poldocument'),
@@ -165,5 +169,3 @@ class ResPartner(models.Model):
             if partner_ids:
                 result += self.browse(partner_ids).name_get()
         return result
-            
-            
