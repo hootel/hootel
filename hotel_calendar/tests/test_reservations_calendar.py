@@ -4,12 +4,13 @@ import datetime
 from datetime import timedelta
 from odoo import fields
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
-from odoo.addons.hotel.tests.common import TestHotel
+from openerp.exceptions import ValidationError
+from .common import TestHotelCalendar
 import logging
 _logger = logging.getLogger(__name__)
 
 
-class TestReservationsCalendar(TestHotel):
+class TestReservationsCalendar(TestHotelCalendar):
 
     def test_calendar_pricelist(self):
         now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -56,6 +57,19 @@ class TestReservationsCalendar(TestHotel):
         now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         adv_utc_dt = now_utc_dt + timedelta(days=15)
 
+        def is_reservation_listed(reservation_id):
+            hcal_data = self.env['hotel.reservation'].sudo(self.user_hotel_manager).get_hcalendar_all_data(
+                now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                [], [])
+            # TODO: Perhaps not the best way to do this test... :/
+            hasReservationTest = False
+            for reserv in hcal_data['reservations']:
+                if reserv[1] == reservation_id:
+                    hasReservationTest = True
+                    break
+            return hasReservationTest
+
         # CREATE COMPLETE RESERVATION (3 Nigths)
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
@@ -67,16 +81,49 @@ class TestReservationsCalendar(TestHotel):
             self.hotel_room_double_200,
             "Reservation Test #1")
 
-        hcal_data = self.env['hotel.reservation'].sudo(self.user_hotel_manager).get_hcalendar_all_data(
-            now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            [], [])
-        self.assertTrue(any(hcal_data['reservations']), "Hotel Calendar don't receive any reservation, more than 1 expected...")
+        # CHECK SUCCESSFULL CREATION
+        self.assertTrue(is_reservation_listed(reservation.id), "Hotel Calendar can't found test reservation!")
 
-        # TODO: Perhaps not the best way to do this test... :/
-        hasReservationTest = False
-        for reserv in hcal_data['reservations']:
-            if reserv[1] == reservation.id:
-                hasReservationTest = True
-                break
-        self.assertTrue(hasReservationTest, "Hotel Calendar can't found test reservation!")
+        # CONFIRM FOLIO
+        folio.sudo(self.user_hotel_manager).action_confirm()
+        self.assertTrue(is_reservation_listed(reservation.id), "Hotel Calendar can't found test reservation!")
+
+        # CANCEL FOLIO
+        folio.sudo(self.user_hotel_manager).action_cancel()
+        self.assertFalse(is_reservation_listed(reservation.id), "Hotel Calendar can't found test reservation!")
+
+        # REMOVE FOLIO
+        folio.sudo().unlink()   # FIXME: Can't use: self.user_hotel_manager ?¿?!???
+        self.assertFalse(is_reservation_listed(reservation.id), "Hotel Calendar can't found test reservation!")
+
+    def test_invalid_input_calendar_data(self):
+        now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        adv_utc_dt = now_utc_dt + timedelta(days=15)
+
+        with self.assertRaises(ValidationError):
+            hcal_data = self.env['hotel.reservation'].sudo(self.user_hotel_manager).get_hcalendar_all_data(
+                False,
+                adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                [], [])
+        with self.assertRaises(ValidationError):
+            hcal_data = self.env['hotel.reservation'].sudo(self.user_hotel_manager).get_hcalendar_all_data(
+                now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                False,
+                [], [])
+        with self.assertRaises(ValidationError):
+            hcal_data = self.env['hotel.reservation'].sudo(self.user_hotel_manager).get_hcalendar_all_data(
+                False,
+                False,
+                [], [])
+
+    def test_calendar_settings(self):
+        hcal_options = self.env['hotel.reservation'].sudo(self.user_hotel_manager).get_hcalendar_settings()
+
+        self.assertEqual(hcal_options['divide_rooms_by_capacity'], True, "Hotel Calendar Invalid Options!")
+        self.assertEqual(hcal_options['eday_week'], 6, "Hotel Calendar Invalid Options!")
+        self.assertEqual(hcal_options['days'], 'month', "Hotel Calendar Invalid Options!")
+        self.assertEqual(hcal_options['allow_invalid_actions'], False, "Hotel Calendar Invalid Options!")
+        self.assertEqual(hcal_options['assisted_movement'], False, "Hotel Calendar Invalid Options!")
+        self.assertEqual(hcal_options['default_arrival_hour'], '14:00', "Hotel Calendar Invalid Options!")
+        self.assertEqual(hcal_options['default_departure_hour'], '12:00', "Hotel Calendar Invalid Options!")
+        self.assertEqual(hcal_options['show_notifications'], True, "Hotel Calendar Invalid Options!")
