@@ -6,6 +6,8 @@ from odoo.tests import common
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.addons.mail.tests.common import TestMail
 import pytz
+import logging
+_logger = logging.getLogger(__name__)
 
 
 # TestMail crea recursos utiles para nuestros test... por ejemplo, usuarios con distintos tipos de nivel, etc...
@@ -48,12 +50,24 @@ class TestHotel(TestMail):
     def setUpClass(cls):
         super(TestHotel, cls).setUpClass()
 
-        # Hotel Time-Zone
-        cls.tz_hotel = cls.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel') or 'UTC'
+        # Restriction Plan
+        cls.restriction_1 = cls.env['hotel.virtual.room.restriction'].create({
+            'name': 'Restriction Test #1',
+            'active': True
+        })
 
-        # Parity models
-        cls.parity_pricelist_id = int(cls.env['ir.values'].get_default('hotel.config.settings', 'parity_pricelist_id'))
-        cls.parity_restriction_id = int(cls.env['ir.values'].get_default('hotel.config.settings', 'parity_restrictions_id'))
+        # Pricelist
+        cls.pricelist_1 = cls.env['product.pricelist'].create({
+            'name': 'Pricelist Test #1',
+        })
+
+        # Minimal Hotel Configuration
+        cls.tz_hotel = 'Europe/Madrid'
+        cls.parity_pricelist_id = cls.pricelist_1.id
+        cls.parity_restriction_id = cls.restriction_1.id
+        cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'tz_hotel', cls.tz_hotel)
+        cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'parity_pricelist_id', cls.parity_pricelist_id)
+        cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'parity_restrictions_id', cls.parity_restriction_id)
 
         # User Groups
         user_group_hotel_manager = cls.env.ref('hotel.group_hotel_manager')
