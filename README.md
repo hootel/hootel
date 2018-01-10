@@ -16,6 +16,7 @@ UNDER DEVELOPMENT: **NOT USE IN PRODUCTION**
   - hotel_wubook_prototype: Current implementation of Wubook Connector... sync data with wubook.net account.
   - hotel_node_slave: Configure a node as a slave to serve and get information from a master one
   - glassof_exporter: Export Odoo data to Glassof xls format
+  - hotel_revenue: Export Odoo data for Revenue in xls format
 
 **HOW WORKS?**
   - The idea is... the hotel sell 'virtual rooms' and the customer is assigned to one 'normal room'.
