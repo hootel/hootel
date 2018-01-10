@@ -36,7 +36,7 @@
                 <div class="container-fluid">
                     <div class="row cabezera">
                         <div class="col-md-12 text-center">
-                            <img src='/alda_pms/static/src/img/logo_alda_bn.png' 
+                            <img src='/hotel_l10n_es/static/src/img/logo_alda_bn.png'
                             style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
                             <p style="font-size:1.16em;">PARTE DE ENTRADA DE VIAJEROS</p>
                             <p class="numerocheck">Nº parte: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
@@ -61,7 +61,7 @@
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                     Tipo</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> 
+                                    <strong>
                                         <t t-esc="dict(partner.fields_get(allfields=['documenttype'])['documenttype']['selection'])[partner.documenttype]"/>
                                     </strong></td>
                               </tr>
@@ -133,7 +133,7 @@
                               </tr>
                             </table><br/>
                         </div>
-                    </div>                    
+                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <p class="text-center">
@@ -143,7 +143,7 @@
                             </div><br/>
                             <p class="text-center">Firma del viajero</p>
                             <p class="text-center" style="font-size:0.65em;"><t t-esc="company.cardex_warning"/></p>
-                            <p class="text-center" style="font-size:0.6em;">La recogida y tratamiento se hará de acuerdo con la Ley Orgánica 15/1999, de 13 de dic. de protección de datos de carácter personal y al amparo de lo dispuesto en el art. 12.1 de la Ley Orgánica 1/1992, de 21 de febrero, sobre protección de la seguridad ciudadana.</p>                            
+                            <p class="text-center" style="font-size:0.6em;">La recogida y tratamiento se hará de acuerdo con la Ley Orgánica 15/1999, de 13 de dic. de protección de datos de carácter personal y al amparo de lo dispuesto en el art. 12.1 de la Ley Orgánica 1/1992, de 21 de febrero, sobre protección de la seguridad ciudadana.</p>
                         </div>
                     </div>
                 </div>
@@ -154,7 +154,7 @@
                 <div class="container-fluid">
                     <div class="row cabezera">
                         <div class="col-md-12 text-center">
-                            <img src='/alda_pms/static/src/img/logo_alda_bn.png' 
+                            <img src='/hotel_l10n_es/static/src/img/logo_alda_bn.png'
                             style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
                             <p style="font-size:1.16em;">PARTE DE ENTRADA DE VIAJEROS</p>
                             <p class="numerocheck">Nº parte: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
@@ -179,7 +179,7 @@
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                     Tipo</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> 
+                                    <strong>
                                         <t t-esc="dict(partner.fields_get(allfields=['documenttype'])['documenttype']['selection'])[partner.documenttype]"/>
                                     </strong></td>
                               </tr>
@@ -251,7 +251,7 @@
                               </tr>
                             </table><br/>
                         </div>
-                    </div>                    
+                    </div>
                     <div class="row">
                         <div class="col-md-12">
                             <p class="text-center">
@@ -260,7 +260,7 @@
                             <p class="text-center">
                                 <strong>COPIA PARA EL USUARIO</strong></p>
                             <p class="text-center" style="font-size:0.65em;"><t t-esc="company.cardex_warning"/></p>
-                            <p class="text-center" style="font-size:0.6em;">La recogida y tratamiento se hará de acuerdo con la Ley Orgánica 15/1999, de 13 de dic. de protección de datos de carácter personal y al amparo de lo dispuesto en el art. 12.1 de la Ley Orgánica 1/1992, de 21 de febrero, sobre protección de la seguridad ciudadana.</p>                           
+                            <p class="text-center" style="font-size:0.6em;">La recogida y tratamiento se hará de acuerdo con la Ley Orgánica 15/1999, de 13 de dic. de protección de datos de carácter personal y al amparo de lo dispuesto en el art. 12.1 de la Ley Orgánica 1/1992, de 21 de febrero, sobre protección de la seguridad ciudadana.</p>
                         </div>
                     </div>
                 </div>
