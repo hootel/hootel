@@ -32,7 +32,7 @@ class website_wubook(http.Controller):
                 auth="public", methods=['POST'], website=True, csrf=False)
     def wubook_push_reservations(self, security_token, **kwargs):
         # Check Security Token
-        hotel_security_token = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
+        hotel_security_token = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_push_security_token')
         if security_token != hotel_security_token:
             raise ValidationError('Invalid Security Token!')
 
@@ -63,7 +63,7 @@ class website_wubook(http.Controller):
                 auth="public", methods=['POST'], website=True, csrf=False)
     def wubook_push_rooms(self, security_token, **kwargs):
         # Check Security Token
-        hotel_security_token = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
+        hotel_security_token = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_push_security_token')
         if security_token != hotel_security_token:
             raise ValidationError('Invalid Security Token!')
 
