@@ -64,10 +64,10 @@ class TestHotel(TestMail):
         # Minimal Hotel Configuration
         cls.tz_hotel = 'Europe/Madrid'
         cls.parity_pricelist_id = cls.pricelist_1.id
-        cls.parity_restriction_id = cls.restriction_1.id
+        cls.parity_restrictions_id = cls.restriction_1.id
         cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'tz_hotel', cls.tz_hotel)
         cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'parity_pricelist_id', cls.parity_pricelist_id)
-        cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'parity_restrictions_id', cls.parity_restriction_id)
+        cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'parity_restrictions_id', cls.parity_restrictions_id)
 
         # User Groups
         user_group_hotel_manager = cls.env.ref('hotel.group_hotel_manager')
@@ -175,7 +175,7 @@ class TestHotel(TestMail):
                 })
                 vroom_rest_item_obj.create({
                     'virtual_room_id': k_vr,
-                    'restriction_id': cls.parity_restriction_id,
+                    'restriction_id': cls.parity_restrictions_id,
                     'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                     'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                     'applied_on': '0_virtual_room',

@@ -35,6 +35,7 @@ class HotelCalendarManagement(models.TransientModel):
         product_pricelist_item_obj = self.env['product.pricelist.item']
         vroom_restriction_item_obj = self.env['hotel.virtual.room.restriction.item']
         vroom_avail_obj = self.env['hotel.virtual.room.availabity']
+
         # Save Pricelist
         for k_price, v_price in pricelist.iteritems():
             room_id = vroom_obj.browse([int(k_price)])
@@ -209,8 +210,10 @@ class HotelCalendarManagement(models.TransientModel):
         nn = {}
         for i in range(0, date_diff+1):
             cur_date = date_start + timedelta(days=i)
-            cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-            occupied_reservations = hotel_reservation_obj.occupied(cur_date_str, cur_date_str)
+            cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
+            occupied_reservations = hotel_reservation_obj.occupied(
+                '%s 00:00:00' % cur_date_str,
+                '%s 00:00:00' % cur_date_str)
 
             if not cur_date in nn:
                 nn.update({ cur_date_str: {} })
