@@ -28,9 +28,14 @@ _logger = logging.getLogger(__name__)
 
 class website_wubook(http.Controller):
     # Called when created a reservation in wubook
-    @http.route(['/wubook/push/reservations'], type='http', cors="*",
+    @http.route(['/wubook/push/reservations/<string:security_token>'], type='http', cors="*",
                 auth="public", methods=['POST'], website=True, csrf=False)
-    def wubook_push_reservations(self, **kwargs):
+    def wubook_push_reservations(self, security_token, **kwargs):
+        # Check Security Token
+        hotel_security_token = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
+        if security_token != hotel_security_token:
+            raise ValidationError('Invalid Security Token!')
+
         rcode = kwargs.get('rcode')
         lcode = kwargs.get('lcode')
 
@@ -54,9 +59,14 @@ class website_wubook(http.Controller):
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
 
     # Called when modify room values (Delay: ~5mins)
-    @http.route(['/wubook/push/rooms'], type='http', cors="*",
+    @http.route(['/wubook/push/rooms/<string:security_token>'], type='http', cors="*",
                 auth="public", methods=['POST'], website=True, csrf=False)
-    def wubook_push_rooms(self, **kwargs):
+    def wubook_push_rooms(self, security_token, **kwargs):
+        # Check Security Token
+        hotel_security_token = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
+        if security_token != hotel_security_token:
+            raise ValidationError('Invalid Security Token!')
+
         lcode = kwargs.get('lcode')
         dfrom = kwargs.get('dfrom')
         dto = kwargs.get('dto')

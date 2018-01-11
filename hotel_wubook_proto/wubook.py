@@ -397,10 +397,6 @@ class WuBook(models.TransientModel):
         processed_rids = []
         if rcode == 0:
             processed_rids, errors = self.generate_reservations(results)
-            if any(processed_rids):
-                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
-                                                           self.LCODE,
-                                                           processed_rids)
         if init_connection:
             self.close_connection()
 
@@ -424,12 +420,6 @@ class WuBook(models.TransientModel):
         processed_rids = []
         if rcode == 0:
             processed_rids, errors = self.generate_reservations(results)
-            if any(processed_rids):
-                _logger.info("[WuBook] PROCESSED Reservations:")
-                _logger.info(processed_rids)
-                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
-                                                           lcode,
-                                                           processed_rids)
         if init_connection:
             self.close_connection()
 
@@ -1146,7 +1136,8 @@ class WuBook(models.TransientModel):
                             dates_checkout = [dates_checkout[0] - timedelta(days=1), dates_checkout[0]]
                             split_booking = True
                 if split_booking:
-                    self.create_wubook_issue('reservation',
+                    self.create_wubook_issue(
+                        'reservation',
                          "Reservation Splitted",
                          '', wid=book['reservation_code'])
 
@@ -1166,9 +1157,21 @@ class WuBook(models.TransientModel):
                     folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
                 processed_rids.append(book['reservation_code'])
 
-            # Update Odoo availability (don't wait for wubook)
-            fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                         checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+            if any(processed_rids):
+                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
+                                                           self.LCODE,
+                                                           processed_rids)
+
+                if rcode != 0:
+                    self.create_wubook_issue(
+                        'wubook',
+                         "Problem trying mark bookings (%s)" % str(processed_rids),
+                         '')
+
+                # Update Odoo availability (don't wait for wubook)
+                fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                             checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+
         return (processed_rids, any(failed_reservations))
 
     @api.model
@@ -1258,15 +1261,15 @@ class WuBook(models.TransientModel):
                 if any(v_pk):
                     self.update_plan_prices(k_pk, date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT), v_pk)
 
-            for pli in unpushed:
-                pli.with_context({'wubook_action': False}).write({'wpushed': True})
+            unpushed.with_context({'wubook_action': False}).write({'wpushed': True})
         return True
 
     @api.model
     def push_restrictions(self):
-        unpushed = self.env['hotel.virtual.room.restriction.item'].search([('wpushed', '=', False),
-                                                                    ('date_start', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))],
-                                                                   order="date_start ASC")
+        unpushed = self.env['hotel.virtual.room.restriction.item'].search([
+            ('wpushed', '=', False),
+            ('date_start', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))],
+            order="date_start ASC")
         if any(unpushed):
             date_start = datetime.strptime(unpushed[0].date_start, DEFAULT_SERVER_DATE_FORMAT)
             date_end = datetime.strptime(unpushed[-1].date_start, DEFAULT_SERVER_DATE_FORMAT)
@@ -1298,6 +1301,5 @@ class WuBook(models.TransientModel):
                     self.update_rplan_values(k_res,
                                              date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                                              v_res)
-            for rpi in unpushed:
-                rpi.with_context({'wubook_action': False}).write({'wpushed': True})
+            unpushed.with_context({'wubook_action': False}).write({'wpushed': True})
         return True

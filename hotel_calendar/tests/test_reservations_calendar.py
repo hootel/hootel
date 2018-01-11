@@ -88,6 +88,25 @@ class TestReservationsCalendar(TestHotelCalendar):
         folio.sudo(self.user_hotel_manager).action_confirm()
         self.assertTrue(is_reservation_listed(reservation.id), "Hotel Calendar can't found test reservation!")
 
+        # CALENDAR LIMITS
+        now_utc_dt_tmp = now_utc_dt
+        adv_utc_dt_tmp = adv_utc_dt
+        now_utc_dt = reserv_end_utc_dt + timedelta(days=2)  # Start after reservation end
+        adv_utc_dt = now_utc_dt + timedelta(days=15)
+        self.assertFalse(is_reservation_listed(reservation.id), "Hotel Calendar found test reservation but expected not found it!")
+
+        adv_utc_dt = reserv_start_utc_dt - timedelta(days=1)  # Ends before reservation start
+        now_utc_dt = adv_utc_dt - timedelta(days=15)
+        self.assertFalse(is_reservation_listed(reservation.id), "Hotel Calendar found test reservation but expected not found it!")
+        now_utc_dt = now_utc_dt_tmp
+        adv_utc_dt = adv_utc_dt_tmp
+
+        now_utc_dt = reserv_end_utc_dt - timedelta(days=1)  # Start in the middle of the reservation days
+        adv_utc_dt = now_utc_dt + timedelta(days=15)
+        self.assertTrue(is_reservation_listed(reservation.id), "Hotel Calendar can't found test reservation!")
+        now_utc_dt = now_utc_dt_tmp
+        adv_utc_dt = adv_utc_dt_tmp
+
         # CANCEL FOLIO
         folio.sudo(self.user_hotel_manager).action_cancel()
         self.assertFalse(is_reservation_listed(reservation.id), "Hotel Calendar can't found test reservation!")

@@ -22,6 +22,9 @@
 from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
+import os
+import binascii
+
 
 class WuBookInstaller(models.TransientModel):
     _name = 'wubook.installer'
@@ -51,6 +54,7 @@ class WuBookInstaller(models.TransientModel):
             self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_server', rec.wubook_server)
             self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_pkey', rec.wubook_pkey)
             activate_push = rec.activate_push
+        self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_push_security_token', binascii.hexlify(os.urandom(16)).decode())
         wres = self.env['wubook'].initialize(activate_push)
         if not wres:
             raise ValidationError("Can't finish installation!")

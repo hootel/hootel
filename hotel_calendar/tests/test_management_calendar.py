@@ -123,6 +123,7 @@ class TestManagementCalendar(TestHotelCalendar):
 
     def test_save_changes(self):
         _logger.info("IMPLEMENT ME")
+        ## CREAR UN SISTEMA PARA GENERAR UN HASH QUE SE USARA EN LAS NOTIFICACIONES PUSH DE WUBOOK PARA AUMENTAR LA SEGURIDAD
 
     def test_calendar_reservations(self):
         _logger.info("IMPLEMENT ME")
