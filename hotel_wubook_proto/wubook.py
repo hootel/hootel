@@ -78,6 +78,7 @@ class WuBook(models.TransientModel):
     def push_activation(self):
         errors = []
         base_url = self.env['ir.config_parameter'].get_param('web.base.url').replace("http://", "https://")
+        hotel_security_token = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_push_security_token')
 
         init_connection = self._context.get('init_connection', True)
         if init_connection:
@@ -85,11 +86,11 @@ class WuBook(models.TransientModel):
                 return False
         rcode_a, results_a = self.SERVER.push_activation(self.TOKEN,
                                                          self.LCODE,
-                                                         urljoin(base_url, "/wubook/push/reservations"),
+                                                         urljoin(base_url, "/wubook/push/reservations/%s" % hotel_security_token),
                                                          1)
         rcode_ua, results_ua = self.SERVER.push_update_activation(self.TOKEN,
                                                                   self.LCODE,
-                                                                  urljoin(base_url, "/wubook/push/rooms"))
+                                                                  urljoin(base_url, "/wubook/push/rooms/%s" % hotel_security_token))
         if init_connection:
             self.close_connection()
 
