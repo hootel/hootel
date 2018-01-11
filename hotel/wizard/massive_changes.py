@@ -111,7 +111,6 @@ class MassiveChangesWizard(models.TransientModel):
                     if any(vals) or record.change_avail:
                         for vroom in vrooms:
                             if record.change_avail:
-                                # FIXME: Cambiar metodo para buscar disponibilidad real no como ahora que mira la de wubook.
                                 cavail = len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                                                                                              ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                                                                                              virtual_room_id=vroom.id))
