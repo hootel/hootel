@@ -26,7 +26,7 @@
     'author': 'Serpent Consulting Services Pvt. Ltd., OpenERP SA,\
     Odoo Community Association (OCA),\
     Darío Lodeiros,\
-    Jose Luis,\
+    Jose Luis Algara,\
     Alexandre Díaz Cuadrado',
     'images': [],
     'category': 'Generic Modules/Hotel Management',

@@ -18,8 +18,8 @@
             <menuitem
                 id="menu_cardex"
                 name="Cardex"
-                parent="hotel.configuration_others"
-                sequence="35"
+                parent="hotel.hotel_reports_menu"
+                sequence="25"
                 action="action_cardex"
             />
 
