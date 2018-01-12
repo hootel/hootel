@@ -1462,7 +1462,7 @@ HotelCalendar.prototype = {
   },
 
   _sanitizeId: function(/*String*/str) {
-    return str.replace(/[\/\s\+\-]/g, '_');
+    return str.replace(/[^a-zA-Z0-9\.\-_:]/g, '_');
   },
 
   _isLeftButtonPressed: function(/*EventObject*/evt) {

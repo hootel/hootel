@@ -448,6 +448,7 @@ class HotelReservation(models.Model):
         if record.adults == 0:
             room = self.env['hotel.room'].search([('product_id','=',record.product_id.id)])
             record.adults = room.capacity
+        # TODO: Actualizar disponibilidad
         return record
 
     @api.multi
