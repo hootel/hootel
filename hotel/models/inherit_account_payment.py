@@ -30,11 +30,12 @@ import time
 import logging
 _logger = logging.getLogger(__name__)
 
+
 class AccountPayment(models.Model):
 
     _inherit = 'account.payment'
 
-    folio_id = fields.Many2one('hotel.folio',string='Folio')
+    folio_id = fields.Many2one('hotel.folio', string='Folio')
     amount_total_folio = fields.Float(
         compute="_compute_folio_amount", store=True,
         string="Total amount in folio",
@@ -49,26 +50,35 @@ class AccountPayment(models.Model):
             total_amount = 0
             if payment.invoice_ids:
                 _logger.info(payment.partner_id.id)
-                folios = self.env['hotel.folio'].search([('partner_id','=',payment.partner_id.id)])
+                folios = self.env['hotel.folio'].search([
+                    ('partner_id', '=', payment.partner_id.id)
+                ])
                 for line in folios:
                     for inv in line.invoice_ids:
                         if inv.id in payment.invoice_ids.ids:
-                            fol = self.env['hotel.folio'].search([('id','=',line.id)])
+                            fol = self.env['hotel.folio'].search([
+                                ('id', '=', line.id)
+                            ])
             elif payment.folio_id:
-                fol = payment.env['hotel.folio'].search([('id','=',payment.folio_id.id)])
+                fol = payment.env['hotel.folio'].search([
+                    ('id', '=', payment.folio_id.id)
+                ])
             else:
                 return
             # We must pay only one folio
             if len(fol) == 0:
                 return
             elif len(fol) > 1:
-                raise except_orm(_('Warning'), _('This pay is related with more than one Reservation.'))
+                raise except_orm(_('Warning'), _('This pay is related with \
+                                                more than one Reservation.'))
             else:
                 total_folio = fol.amount_total
-                payments = payment.env['account.payment'].search(
-                    ['|',('folio_id','=',fol.id),('invoice_ids','in',fol.invoice_ids.ids),
-                    ('payment_type','=','inbound'),
-                    ('state','=','posted')])
+                payments = payment.env['account.payment'].search([
+                    '|', ('folio_id', '=', fol.id),
+                    ('invoice_ids', 'in', fol.invoice_ids.ids),
+                    ('payment_type', '=', 'inbound'),
+                    ('state', '=', 'posted')
+                ])
                 total_amount = sum(pay.amount for pay in payments)
                 if total_amount < total_folio:
                     amount_pending = total_folio - total_amount
@@ -78,9 +88,3 @@ class AccountPayment(models.Model):
                 payment.amount_total_folio = total_folio
                 res += payment
             return res
-
-
-
-
-
-

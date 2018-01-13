@@ -21,6 +21,7 @@
 # ---------------------------------------------------------------------------
 from openerp import models, fields, api, _
 
+
 class ProductProduct(models.Model):
 
     _inherit = "product.product"
@@ -28,5 +29,3 @@ class ProductProduct(models.Model):
     isroom = fields.Boolean('Is Room')
     iscategid = fields.Boolean('Is categ id')
     isservice = fields.Boolean('Is Service id')
-
-

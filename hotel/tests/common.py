@@ -37,7 +37,7 @@ class TestHotel(TestMail):
         reserv_start_dt = checkin.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.tz_hotel))
         reserv_end_dt = checkout.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.tz_hotel))
         days_diff = abs((reserv_end_dt - reserv_start_dt).days-1)
-        res = reservation.sudo(creator).prepare_reservation_lines(reserv_start_dt, days_diff)
+        res = reservation.sudo(creator).prepare_reservation_lines(checkin.strftime(DEFAULT_SERVER_DATETIME_FORMAT), days_diff)
         reservation.sudo(creator).write({
             'reservation_lines': res['commands'],
             'price_unit': res['total_price'],

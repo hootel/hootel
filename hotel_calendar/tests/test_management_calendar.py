@@ -208,7 +208,7 @@ class TestManagementCalendar(TestHotelCalendar):
     def test_calendar_reservations(self):
         now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         adv_utc_dt = now_utc_dt + timedelta(days=15)
-        vrooms = (self.hotel_vroom_special,)
+        vrooms = (self.hotel_vroom_budget,)
 
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
@@ -217,7 +217,7 @@ class TestManagementCalendar(TestHotelCalendar):
             self.partner_2,
             reserv_start_utc_dt,
             reserv_end_utc_dt,
-            self.hotel_room_double_200,
+            self.hotel_room_simple_100,
             "Reservation Test #1")
 
         hcal_data = self.env['hotel.calendar.management'].sudo(self.user_hotel_manager).get_hcalendar_all_data(
@@ -235,7 +235,13 @@ class TestManagementCalendar(TestHotelCalendar):
                     for k_info, v_info in enumerate(v_pr):
                         ndate = datetime.strptime(v_info['date'], DEFAULT_SERVER_DATE_FORMAT).replace(tzinfo=pytz.timezone(self.tz_hotel))
                         if ndate >= reserv_start_dt and ndate <= reserv_end_dt:
-                            self.assertEqual(v_info['num'], vroom.total_rooms_count-1, "Hotel Calendar Management Availability doesn't match!")
+                            self.assertEqual(v_info['num'], 1, "Hotel Calendar Management Availability doesn't match!")
+            for k_pr, v_pr in hcal_data['availability'].iteritems():
+                if k_pr == vroom.id: # Only Check Test Cases
+                    for k_info, v_info in enumerate(v_pr):
+                        ndate = datetime.strptime(v_info['date'], DEFAULT_SERVER_DATE_FORMAT).replace(tzinfo=pytz.timezone(self.tz_hotel))
+                        if ndate >= reserv_start_dt and ndate <= reserv_end_dt:
+                            self.assertEqual(v_info['avail'], vroom.total_rooms_count-1, "Hotel Calendar Management Availability doesn't match!")
 
     def test_invalid_input_calendar_data(self):
         now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)

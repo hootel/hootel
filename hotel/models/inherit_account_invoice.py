@@ -36,18 +36,18 @@ class AccountInvoice(models.Model):
             vals.update({'origin': context['invoice_origin']})
         return super(AccountInvoice, self).create(vals)
 
-    #~ @api.one
-    #~ @api.depends(
-        #~ 'amount_total',
-        #~ 'invoice_line_ids.price_subtotal',
-        #~ 'move_id.line_ids.amount_residual',
-        #~ 'move_id.line_ids.currency_id')
-    #~ def change_sale_amount(self):
-        #~ _logger.info("DEPENDDDSSSSS")
-        #~ for inv in self:
-            #~ folios = self.env['hotel.folio'].search([('id','in',sale_ids)])
-            #~ _logger.info("FOLIOS CAMBIADOS DESDE LA FACTURA:")
-            #~ _logger.info(folios)
+    # ~ @api.one
+    # ~ @api.depends(
+    #     ~ 'amount_total',
+    #     ~ 'invoice_line_ids.price_subtotal',
+    #     ~ 'move_id.line_ids.amount_residual',
+    #     ~ 'move_id.line_ids.currency_id')
+    # ~ def change_sale_amount(self):
+    #     ~ _logger.info("DEPENDDDSSSSS")
+    #     ~ for inv in self:
+    #         ~ folios = self.env['hotel.folio'].search([('id','in',sale_ids)])
+    #         ~ _logger.info("FOLIOS CAMBIADOS DESDE LA FACTURA:")
+    #         ~ _logger.info(folios)
 
     sale_ids = fields.Many2many(
             'sale.order', 'sale_order_invoice_rel', 'invoice_id',
@@ -55,17 +55,16 @@ class AccountInvoice(models.Model):
             help="This is the list of sale orders related to this invoice.")
 
 
-    #~ @api.multi
-    #~ def confirm_paid(self):
-        #~ '''
-        #~ This method change pos orders states to done when folio invoice
-        #~ is in done.
-        #~ ----------------------------------------------------------
-        #~ @param self: object pointer
-        #~ '''
-        #~ pos_order_obj = self.env['pos.order']
-        #~ res = super(AccountInvoice, self).confirm_paid()
-        #~ pos_odr_rec = pos_order_obj.search([('invoice_id', 'in', self._ids)])
-        #~ pos_odr_rec and pos_odr_rec.write({'state': 'done'})
-        #~ return res
-
+    # ~ @api.multi
+    # ~ def confirm_paid(self):
+    #     ~ '''
+    #     ~ This method change pos orders states to done when folio invoice
+    #     ~ is in done.
+    #     ~ ----------------------------------------------------------
+    #     ~ @param self: object pointer
+    #     ~ '''
+    #     ~ pos_order_obj = self.env['pos.order']
+    #     ~ res = super(AccountInvoice, self).confirm_paid()
+    #     ~ pos_odr_rec = pos_order_obj.search([('invoice_id', 'in', self._ids)])
+    #     ~ pos_odr_rec and pos_odr_rec.write({'state': 'done'})
+    #     ~ return res

@@ -64,10 +64,10 @@ class HotelReservation(models.Model):
     @api.model
     def create(self, vals):
         if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
-            rooms_avail = self.env['hotel.reservation'].get_availability(vals['checkin'],
-                                                                         vals['checkout'],
-                                                                         vals['product_id'],
-                                                                         dbchanged=False)
+            rooms_avail = self.env['hotel.reservation'].get_wubook_availability(vals['checkin'],
+                                                                                vals['checkout'],
+                                                                                vals['product_id'],
+                                                                                dbchanged=False)
             _logger.info("DISPONIBILIDAD CREATE")
             _logger.info(rooms_avail)
             if any(rooms_avail):
@@ -101,13 +101,15 @@ class HotelReservation(models.Model):
                     old_rooms_avail = []
                     new_rooms_avail = []
                     if older_vals['checkin'] and older_vals['checkout'] and older_vals['product_id']:
-                        old_rooms_avail = self.get_availability(older_vals['checkin'],
-                                                                older_vals['checkout'],
-                                                                older_vals['product_id'])
+                        old_rooms_avail = self.get_wubook_availability(
+                            older_vals['checkin'],
+                            older_vals['checkout'],
+                            older_vals['product_id'])
                     if new_vals['checkin'] and new_vals['checkout'] and new_vals['product_id']:
-                        new_rooms_avail = self.get_availability(new_vals['checkin'],
-                                                                new_vals['checkout'],
-                                                                new_vals['product_id'])
+                        new_rooms_avail = self.get_wubook_availability(
+                            new_vals['checkin'],
+                            new_vals['checkout'],
+                            new_vals['product_id'])
                     # Merge Old & New Dicts (Updating Old Dict)
                     for newitem in new_rooms_avail:
                         found = False
@@ -140,9 +142,9 @@ class HotelReservation(models.Model):
             checkout = self.checkout
             product_id = self.product_id.id
             res = super(HotelReservation, self).unlink()
-            rooms_avail = self.get_availability(checkin,
-                                                checkout,
-                                                product_id)
+            rooms_avail = self.get_wubook_availability(checkin,
+                                                       checkout,
+                                                       product_id)
             _logger.info("DISPONIBILIDAD UNLINK")
             _logger.info(rooms_avail)
             if any(rooms_avail):
@@ -163,9 +165,9 @@ class HotelReservation(models.Model):
                                                                      'Cancelled by %s' % partner_id.name)
                         if not wres:
                             raise ValidationError("Can't cancel reservation on WuBook")
-                    rooms_avail = self.get_availability(record.checkin,
-                                                        record.checkout,
-                                                        record.product_id.id)
+                    rooms_avail = self.get_wubook_availability(record.checkin,
+                                                               record.checkout,
+                                                               record.product_id.id)
                     _logger.info("DISPONIBILIDAD CANCEL")
                     _logger.info(rooms_avail)
                     if any(rooms_avail):
@@ -210,7 +212,7 @@ class HotelReservation(models.Model):
             record.write({'to_read': False})
 
     @api.model
-    def get_availability(self, checkin, checkout, product_id, dbchanged=True):
+    def get_wubook_availability(self, checkin, checkout, product_id, dbchanged=True):
         date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
         date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
         date_diff = abs((date_start - date_end).days)

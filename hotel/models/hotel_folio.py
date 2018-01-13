@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-# --------------------------------------------------------------------------
+##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2012-Today Serpent Consulting Services PVT. LTD.
-#    (<http://www.serpentcs.com>)
+#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
+#                       Dario Lodeiros <>
+#                       Alexandre Díaz <dev@redneboa.es>
+#                       SerpentCS
+#
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,20 +19,25 @@
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# ---------------------------------------------------------------------------
+##############################################################################
 from openerp.exceptions import except_orm, UserError, ValidationError
-from openerp.tools import misc, DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
+from openerp.tools import (
+    misc,
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DEFAULT_SERVER_DATE_FORMAT)
 from openerp import models, fields, api, _
 from openerp import workflow
 from decimal import Decimal
 from dateutil.relativedelta import relativedelta
+from odoo.addons.hotel import date_utils
 import datetime
 import time
 import pytz
 import logging
 _logger = logging.getLogger(__name__)
+
 
 class HotelFolio(models.Model):
 
@@ -89,7 +97,7 @@ class HotelFolio(models.Model):
     _description = 'hotel folio new'
     _rec_name = 'order_id'
     _order = 'id'
-    _inherit = ['ir.needaction_mixin','mail.thread']
+    _inherit = ['ir.needaction_mixin', 'mail.thread']
 
     name = fields.Char('Folio Number', readonly=True, index=True,
                        default='New')
@@ -121,34 +129,56 @@ class HotelFolio(models.Model):
     currrency_ids = fields.One2many('currency.exchange', 'folio_no',
                                     readonly=True)
     hotel_invoice_id = fields.Many2one('account.invoice', 'Invoice')
-    invoices_amount = fields.Monetary(compute='compute_invoices_amount',store=True)
-    refund_amount = fields.Monetary(compute='compute_invoices_amount',store=True)
-    invoices_paid = fields.Monetary(compute='compute_invoices_amount',store=True)
-    booking_pending = fields.Integer ('Booking pending', compute='_compute_cardex_count')
-    cardex_count = fields.Integer('Cardex counter', compute='_compute_cardex_count')
-    cardex_pending = fields.Boolean('Cardex Pending', compute='_compute_cardex_count')
-    cardex_pending_num = fields.Integer('Cardex Pending', compute='_compute_cardex_count')
+    invoices_amount = fields.Monetary(compute='compute_invoices_amount',
+                                      store=True)
+    refund_amount = fields.Monetary(compute='compute_invoices_amount',
+                                    store=True)
+    invoices_paid = fields.Monetary(compute='compute_invoices_amount',
+                                    store=True)
+    booking_pending = fields.Integer('Booking pending',
+                                     compute='_compute_cardex_count')
+    cardex_count = fields.Integer('Cardex counter',
+                                  compute='_compute_cardex_count')
+    cardex_pending = fields.Boolean('Cardex Pending',
+                                    compute='_compute_cardex_count')
+    cardex_pending_num = fields.Integer('Cardex Pending',
+                                        compute='_compute_cardex_count')
     checkins_reservations = fields.Integer('checkins reservations')
     checkouts_reservations = fields.Integer('checkouts reservations')
-    partner_internal_comment = fields.Text(string='Internal Partner Notes',related='partner_id.comment')
+    partner_internal_comment = fields.Text(string='Internal Partner Notes',
+                                           related='partner_id.comment')
     cancelled_reason = fields.Text('Cause of cancelled')
-    prepaid_warning_days = fields.Integer('Prepaid Warning Days',help='Margin in days to create a notice if a payment advance has not been recorded')
+    prepaid_warning_days = fields.Integer(
+        'Prepaid Warning Days',
+        help='Margin in days to create a notice if a payment \
+                advance has not been recorded')
     color = fields.Char(string='Color')
 
     @api.model
     def daily_plan(self):
-        self._cr.execute("update hotel_folio set checkins_reservations = 0, checkouts_reservations = 0 where checkins_reservations > 0  or checkouts_reservations > 0")
-        folios_in = self.env['hotel.folio'].search([('room_lines.is_checkin','=',True)])
-        folios_out = self.env['hotel.folio'].search([('room_lines.is_checkout','=',True)])
+        self._cr.execute("update hotel_folio set checkins_reservations = 0, \
+            checkouts_reservations = 0 where checkins_reservations > 0  \
+            or checkouts_reservations > 0")
+        folios_in = self.env['hotel.folio'].search([
+            ('room_lines.is_checkin', '=', True)
+        ])
+        folios_out = self.env['hotel.folio'].search([
+            ('room_lines.is_checkout', '=', True)
+        ])
         for fol in folios_in:
-            count_checkin = fol.room_lines.search_count([('is_checkin','=',True),('folio_id.id','=',fol.id)])
+            count_checkin = fol.room_lines.search_count([
+                ('is_checkin', '=', True), ('folio_id.id', '=', fol.id)
+            ])
             fol.write({'checkins_reservations': count_checkin})
         for fol in folios_out:
-            count_checkout = fol.room_lines.search_count([('is_checkout','=',True),('folio_id.id','=',fol.id)])
+            count_checkout = fol.room_lines.search_count([
+                ('is_checkout', '=', True),
+                ('folio_id.id', '=', fol.id)
+            ])
             fol.write({'checkouts_reservations': count_checkout})
         return True
 
-    @api.depends('amount_total','room_lines','service_lines')
+    @api.depends('amount_total', 'room_lines', 'service_lines')
     @api.multi
     def compute_invoices_amount(self):
         acc_pay_obj = self.env['account.payment']
@@ -156,7 +186,11 @@ class HotelFolio(models.Model):
             amount_pending = 0
             total_paid = 0
             total_inv_refund = 0
-            payments = acc_pay_obj.search(['|',('invoice_ids','in',record.invoice_ids.ids),('folio_id','=',record.id)])
+            payments = acc_pay_obj.search([
+                '|',
+                ('invoice_ids', 'in', record.invoice_ids.ids),
+                ('folio_id', '=', record.id)
+            ])
             total_paid = sum(pay.amount for pay in payments)
             record.invoices_amount = record.amount_total - total_paid
             record.invoices_paid = total_paid
@@ -165,8 +199,6 @@ class HotelFolio(models.Model):
                     total_inv_refund += inv.amount_total
             record.refund_amount = total_inv_refund
 
-
-
     @api.multi
     def action_pay(self):
         self.ensure_one()
@@ -174,14 +206,21 @@ class HotelFolio(models.Model):
         amount = self.invoices_amount
         view_id = self.env.ref('hotel.view_account_payment_folio_form').id
         return{
-        'name': _('Register Payment'),
-        'view_type': 'form',
-        'view_mode': 'form',
-        'res_model': 'account.payment',
-        'type': 'ir.actions.act_window',
-        'view_id': view_id,
-        'context': {'default_folio_id': self.id,'default_amount':amount,'default_payment_type':'inbound','default_partner_type':'customer','default_partner_id':partner,'default_communication':self.name},
-        'target': 'new'
+            'name': _('Register Payment'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'account.payment',
+            'type': 'ir.actions.act_window',
+            'view_id': view_id,
+            'context': {
+                'default_folio_id': self.id,
+                'default_amount': amount,
+                'default_payment_type': 'inbound',
+                'default_partner_type': 'customer',
+                'default_partner_id': partner,
+                'default_communication': self.name,
+            },
+            'target': 'new',
         }
 
     @api.multi
@@ -189,13 +228,13 @@ class HotelFolio(models.Model):
         self.ensure_one()
         invoices = self.mapped('invoice_ids.id')
         return{
-        'name': _('Invoices'),
-        'view_type': 'form',
-        'view_mode': 'tree,form',
-        'res_model': 'account.invoice',
-        'target':'new',
-        'type': 'ir.actions.act_window',
-        'domain': [('id','in', invoices),('type','!=','out_refund')]
+            'name': _('Invoices'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'account.invoice',
+            'target': 'new',
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', invoices), ('type', '!=', 'out_refund')],
         }
 
     @api.multi
@@ -203,47 +242,49 @@ class HotelFolio(models.Model):
         self.ensure_one()
         invoices = self.mapped('invoice_ids.id')
         return{
-        'name': _('Invoices'),
-        'view_type': 'form',
-        'view_mode': 'tree,form',
-        'res_model': 'account.invoice',
-        'type': 'ir.actions.act_window',
-        'domain': [('id','in', invoices),('type','=','out_refund')]
+            'name': _('Invoices'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'account.invoice',
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', invoices), ('type', '=', 'out_refund')],
         }
-
 
     @api.multi
     def action_checks(self):
         self.ensure_one()
         rooms = self.mapped('room_lines.id')
         return {
-        'name': _('Cardexs'),
-        'view_type': 'form',
-        'view_mode': 'tree,form',
-        'res_model': 'cardex',
-        'type': 'ir.actions.act_window',
-        'domain': [('reservation_id','in', rooms)],
-        'target':'new'
+            'name': _('Cardexs'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'cardex',
+            'type': 'ir.actions.act_window',
+            'domain': [('reservation_id', 'in', rooms)],
+            'target': 'new',
         }
 
     @api.multi
     def action_folios_amount(self):
+        now_utc_dt = fields.datetime.now().replace(hour=0,
+                                                   minute=0,
+                                                   second=0,
+                                                   microsecond=0)
+        now_utc_str = now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         reservations = self.env['hotel.reservation'].search([
-                    ('checkout','<=',datetime.datetime.now().replace(hour=00, minute=00, second=00).strftime(DEFAULT_SERVER_DATETIME_FORMAT))
-                     ])
+            ('checkout', '<=', now_utc_str)
+        ])
         folio_ids = reservations.mapped('folio_id.id')
-        folios = self.env['hotel.folio'].search([('id','in',folio_ids)])
+        folios = self.env['hotel.folio'].search([('id', 'in', folio_ids)])
         folios = folios.filtered(lambda r: r.invoices_amount > 0)
         return {
-        'name': _('Pending'),
-        'view_type': 'form',
-        'view_mode': 'tree,form',
-        'res_model': 'hotel.folio',
-        'type': 'ir.actions.act_window',
-        'domain': [('id','in', folios.ids)]
+            'name': _('Pending'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'hotel.folio',
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', folios.ids)]
         }
-
-
 
     @api.multi
     def _compute_cardex_count(self):
@@ -256,13 +297,13 @@ class HotelFolio(models.Model):
             pending = 0
             for reser in fol.room_lines:
                 if reser.state != 'cancelled':
-                    pending += reser.adults + reser.children - len(reser.cardex_ids)
+                    pending += (reser.adults + reser.children) \
+                                    - len(reser.cardex_ids)
             if pending <= 0:
                 fol.cardex_pending = False
             else:
                 fol.cardex_pending = True
             fol.cardex_pending_num = pending
-
 
     @api.multi
     def go_to_currency_exchange(self):
@@ -354,13 +395,10 @@ class HotelFolio(models.Model):
                 self.pricelist_id = partner_rec.property_product_pricelist.id
             for line in self.room_lines:
                 _logger.info(line.id)
-                tz = pytz.timezone(self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel'))
-                chkin_dt = fields.Datetime.from_string(line.checkin)
-                chkout_dt = fields.Datetime.from_string(line.checkout)
-                chkin_dt = chkin_dt.replace(tzinfo=pytz.utc).astimezone(tz)
-                chkout_dt = chkout_dt.replace(tzinfo=pytz.utc).astimezone(tz)
-                days_diff = abs((chkout_dt - chkin_dt).days)
-                res = line.prepare_reservation_lines(chkin_dt, days_diff)
+                days_diff = date_utils.date_diff(line.checkin,
+                                                 line.checkout,
+                                                 hours=False)
+                res = line.prepare_reservation_lines(line.checkin, days_diff)
                 line.reservation_lines = res['commands']
                 line.price_unit = res['total_price']
         self.currency_id = self.env.ref('base.main_company').currency_id
@@ -380,16 +418,22 @@ class HotelFolio(models.Model):
 
         if partner.sale_warn != 'no-message':
             # Block if partner only has warning but parent company is blocked
-            if partner.sale_warn != 'block' and partner.parent_id and partner.parent_id.sale_warn == 'block':
+            if partner.sale_warn != 'block' and partner.parent_id \
+                    and partner.parent_id.sale_warn == 'block':
                 partner = partner.parent_id
-            title =  _("Warning for %s") % partner.name
+            title = _("Warning for %s") % partner.name
             message = partner.sale_warn_msg
             warning = {
                     'title': title,
                     'message': message,
             }
             if self.partner_id.sale_warn == 'block':
-                self.update({'partner_id': False, 'partner_invoice_id': False, 'partner_shipping_id': False, 'pricelist_id': False})
+                self.update({
+                    'partner_id': False,
+                    'partner_invoice_id': False,
+                    'partner_shipping_id': False,
+                    'pricelist_id': False
+                })
                 return {'warning': warning}
 
         if warning:
@@ -410,7 +454,6 @@ class HotelFolio(models.Model):
         for line in self.room_lines:
             if line.state == "booking":
                 line.action_reservation_checkout()
-
 
     @api.multi
     def action_invoice_create(self, grouped=False, states=None):
@@ -463,7 +506,6 @@ class HotelFolio(models.Model):
                 invoice.state = 'cancel'
         self.room_lines.action_cancel()
         return self.order_id.action_cancel()
-
 
     @api.multi
     def action_confirm(self):

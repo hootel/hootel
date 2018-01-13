@@ -21,6 +21,7 @@
 # ---------------------------------------------------------------------------
 from openerp import models, fields, api, _
 
+
 class HotelRoomAmenitiesType(models.Model):
 
     _name = 'hotel.room.amenities.type'

@@ -27,10 +27,12 @@ class HotelVirtualRoomAvailability(models.Model):
     _inherit = 'mail.thread'
     _name = 'hotel.virtual.room.availabity'
 
-    virtual_room_id = fields.Many2one('hotel.virtual.room', 'Virtual Room', required=True, track_visibility='always')
+    virtual_room_id = fields.Many2one('hotel.virtual.room', 'Virtual Room',
+                                      required=True, track_visibility='always')
     avail = fields.Integer('Avail', default=0, track_visibility='always')
     no_ota = fields.Boolean('No OTA', default=False, track_visibility='always')
-    booked = fields.Boolean('Booked', default=False, readonly=True, track_visibility='always')
+    booked = fields.Boolean('Booked', default=False, readonly=True,
+                            track_visibility='always')
     date = fields.Date('Date', required=True, track_visibility='always')
 
     @api.constrains('avail')
@@ -40,6 +42,10 @@ class HotelVirtualRoomAvailability(models.Model):
 
     @api.constrains('date', 'virtual_room_id')
     def _check_date_virtual_room_id(self):
-        count = self.search_count([('date', '=', self.date), ('virtual_room_id', '=', self.virtual_room_id.id)])
+        count = self.search_count([
+            ('date', '=', self.date),
+            ('virtual_room_id', '=', self.virtual_room_id.id)
+        ])
         if count > 1:
-            raise ValidationError("can't assign the same date to more than one virtual room")
+            raise ValidationError("can't assign the same date to more than \
+                                    one virtual room")

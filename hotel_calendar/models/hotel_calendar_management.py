@@ -248,9 +248,6 @@ class HotelCalendarManagement(models.TransientModel):
 
         return json_data
 
-
-
-
     @api.multi
     def get_hcalendar_all_data(self, dfrom, dto, pricelist_id, restriction_id, withRooms):
         if not dfrom or not dto:

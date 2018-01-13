@@ -27,7 +27,8 @@ class ProductPricelist(models.Model):
     @api.multi
     @api.depends('name')
     def name_get(self):
-        pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+        pricelist_id = self.env['ir.values'].sudo().get_default(
+            'hotel.config.settings', 'parity_pricelist_id')
         if pricelist_id:
             pricelist_id = int(pricelist_id)
         org_names = super(ProductPricelist, self).name_get()

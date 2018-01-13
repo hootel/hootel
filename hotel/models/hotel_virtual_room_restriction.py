@@ -26,16 +26,19 @@ class VirtualRoomRestriction(models.Model):
     _name = 'hotel.virtual.room.restriction'
 
     name = fields.Char('Restriction Plan Name', required=True)
-    item_ids = fields.One2many('hotel.virtual.room.restriction.item', 'restriction_id',
-                               string='Restriction Items', copy=True)
+    item_ids = fields.One2many('hotel.virtual.room.restriction.item',
+                               'restriction_id', string='Restriction Items',
+                               copy=True)
     active = fields.Boolean('Active',
-                            help='If unchecked, it will allow you to hide the restriction plan without removing it.', default=True)
-
+                            help='If unchecked, it will allow you to hide the \
+                                    restriction plan without removing it.',
+                            default=True)
 
     @api.multi
     @api.depends('name')
     def name_get(self):
-        restriction_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id')
+        restriction_id = self.env['ir.values'].sudo().get_default(
+            'hotel.config.settings', 'parity_restrictions_id')
         if restriction_id:
             restriction_id = int(restriction_id)
         names = []

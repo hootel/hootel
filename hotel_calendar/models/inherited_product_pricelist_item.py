@@ -78,7 +78,7 @@ class ProductPricelistItem(models.Model):
         if vals.get('fixed_price'):
             for record in self:
                 pricelist_id = vals.get('pricelist_id') or record.pricelist_id.id
-                if not pricelist_id == pricelist_parity_id:
+                if pricelist_id != pricelist_parity_id:
                     continue
                 date_start = vals.get('date_start') or record.date_start
                 product_tmpl_id = vals.get('product_tmpl_id') or record.product_tmpl_id.id
@@ -124,7 +124,7 @@ class ProductPricelistItem(models.Model):
                 continue
             vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', record.product_tmpl_id.id)], limit=1)
             unlink_vals.append({
-                'pricelist_id': record.pricelist_id,
+                'pricelist_id': record.pricelist_id.id,
                 'date': record.date_start,
                 'vroom': vroom
             })

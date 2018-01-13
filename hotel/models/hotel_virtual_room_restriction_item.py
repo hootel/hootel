@@ -23,12 +23,15 @@ from openerp import models, fields, api
 from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime
+from odoo.addons.hotel import date_utils
 
 
 class HotelVirtualRoomRestrictionItem(models.Model):
     _name = 'hotel.virtual.room.restriction.item'
 
-    restriction_id = fields.Many2one('hotel.virtual.room.restriction', 'Restriction Plan', ondelete='cascade', index=True)
+    restriction_id = fields.Many2one('hotel.virtual.room.restriction',
+                                     'Restriction Plan', ondelete='cascade',
+                                     index=True)
     virtual_room_id = fields.Many2one('hotel.virtual.room', 'Virtual Room')
     date_start = fields.Date('From')
     date_end = fields.Date("To")
@@ -59,8 +62,8 @@ class HotelVirtualRoomRestrictionItem(models.Model):
             self.date_start = False
             self.date_end = False
         elif self.date_start and self.date_end:
-            date_start_dt = datetime.strptime(self.date_start, DEFAULT_SERVER_DATE_FORMAT)
-            date_end_dt = datetime.strptime(self.date_end, DEFAULT_SERVER_DATE_FORMAT)
+            date_start_dt = date_utils.get_datetime(self.date_start)
+            date_end_dt = date_utils.get_datetime(self.date_end)
             if date_end_dt < date_start_dt:
                 raise ValidationError("Invalid Dates")
 

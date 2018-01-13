@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-# --------------------------------------------------------------------------
+##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2012-Today Serpent Consulting Services PVT. LTD.
-#    (<http://www.serpentcs.com>)
+#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
+#                       Dario Lodeiros <>
+#                       SerpentCS
+#
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,10 +18,9 @@
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# ---------------------------------------------------------------------------
-#import json
+##############################################################################
 from openerp import models, fields, api, _
 
 
@@ -49,13 +50,16 @@ class HotelRoom(models.Model):
     capacity = fields.Integer('Capacity')
     shared_room = fields.Boolean('Shared Room', default=False)
     to_be_cleaned = fields.Boolean('To be Cleaned', default=False)
-    virtual_rooms = fields.Many2many('hotel.virtual.room', string='Virtual Rooms')
+    virtual_rooms = fields.Many2many('hotel.virtual.room',
+                                     string='Virtual Rooms')
     sale_price_type = fields.Selection([
         ('fixed', 'Fixed Price'),
         ('vroom', 'Virtual Room'),
     ], 'Price Type', default='fixed', required=True)
-    price_virtual_room = fields.Many2one('hotel.virtual.room', 'Price Virtual Room',
-                                         help='Price will be based on selected Virtual Room')
+    price_virtual_room = fields.Many2one(
+        'hotel.virtual.room',
+        'Price Virtual Room',
+        help='Price will be based on selected Virtual Room')
     sequence = fields.Integer('Sequence', default=0)
 #     price_virtual_room_domain = fields.Char(
 #         compute=_compute_price_virtual_room_domain,
@@ -67,7 +71,10 @@ class HotelRoom(models.Model):
     def price_virtual_room_domain(self):
         return {
             'domain': {
-                'price_virtual_room': ['|', ('room_ids.id', '=', self._origin.id), ('room_type_ids.cat_id.id', '=', self.categ_id.id)]
+                'price_virtual_room': [
+                    '|', ('room_ids.id', '=', self._origin.id),
+                         ('room_type_ids.cat_id.id', '=', self.categ_id.id)
+                ]
             }
         }
 

@@ -21,10 +21,12 @@
 # ---------------------------------------------------------------------------
 from openerp import models, fields, api, _
 from openerp.tools import misc, DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.addons.hotel import date_utils
 import time
 import datetime
 import logging
 _logger = logging.getLogger(__name__)
+
 
 class HotelServiceLine(models.Model):
 
@@ -78,9 +80,10 @@ class HotelServiceLine(models.Model):
     def _default_ser_room_line(self):
         if 'room_lines' in self.env.context and self.env.context['room_lines']:
             ids = [item[1] for item in self.env.context['room_lines']]
-            return self.env['hotel.reservation'].search([('id','in',ids)], limit=1)
+            return self.env['hotel.reservation'].search([('id', 'in', ids)],
+                                                        limit=1)
         return False
-    
+
     _name = 'hotel.service.line'
     _description = 'hotel Service line'
 
@@ -110,19 +113,19 @@ class HotelServiceLine(models.Model):
             vals.update({'order_id': folio.order_id.id})
         return super(HotelServiceLine, self).create(vals)
 
-    #~ @api.multi
-    #~ def unlink(self):
-        #~ """
-        #~ Overrides orm unlink method.
-        #~ @param self: The object pointer
-        #~ @return: True/False.
-        #~ """
-        #~ s_line_obj = self.env['sale.order.line']
-        #~ for line in self:
-            #~ if line.service_line_id:
-                #~ sale_unlink_obj = s_line_obj.browse([line.service_line_id.id])
-                #~ sale_unlink_obj.unlink()
-        #~ return super(HotelServiceLine, self).unlink()
+    # ~ @api.multi
+    # ~ def unlink(self):
+    #     ~ """
+    #     ~ Overrides orm unlink method.
+    #     ~ @param self: The object pointer
+    #     ~ @return: True/False.
+    #     ~ """
+    #     ~ s_line_obj = self.env['sale.order.line']
+    #     ~ for line in self:
+    #         ~ if line.service_line_id:
+    #             ~ sale_unlink_obj = s_line_obj.browse([line.service_line_id.id])
+    #             ~ sale_unlink_obj.unlink()
+    #     ~ return super(HotelServiceLine, self).unlink()
 
     @api.onchange('product_id')
     def product_id_change(self):
@@ -149,44 +152,44 @@ class HotelServiceLine(models.Model):
                                                               prod.taxes_id,
                                                               self.tax_id)
 
-        #~ _logger.info(self._context)
-        #~ if 'folio_id' in self._context:
-            #~ _logger.info(self._context)
-            #~ domain_rooms = []
-            #~ rooms_lines = self.env['hotel.reservation'].search([('folio_id','=',folio_id)])
-            #~ room_ids = room_lines.mapped('id')
-            #~ domain_rooms.append(('id','in',room_ids))
-            #~ return {'domain': {'ser_room_line': domain_rooms}}
-
-    #~ @api.onchange('folio_id')
-    #~ def folio_id_change(self):
-        #~ self.ensure_one()
-        #~ _logger.info(self.mapped('folio_id.room_lines'))
-        #~ rooms = self.mapped('folio_id.room_lines.id')
-        #~ return {'domain': {'ser_room_line': rooms}}
+    #     ~ _logger.info(self._context)
+    #     ~ if 'folio_id' in self._context:
+    #         ~ _logger.info(self._context)
+    #         ~ domain_rooms = []
+    #         ~ rooms_lines = self.env['hotel.reservation'].search([('folio_id','=',folio_id)])
+    #         ~ room_ids = room_lines.mapped('id')
+    #         ~ domain_rooms.append(('id','in',room_ids))
+    #         ~ return {'domain': {'ser_room_line': domain_rooms}}
+    #
+    # ~ @api.onchange('folio_id')
+    # ~ def folio_id_change(self):
+    #     ~ self.ensure_one()
+    #     ~ _logger.info(self.mapped('folio_id.room_lines'))
+    #     ~ rooms = self.mapped('folio_id.room_lines.id')
+    #     ~ return {'domain': {'ser_room_line': rooms}}
 
     @api.onchange('product_uom')
     def product_uom_change(self):
         '''
         @param self: object pointer
         '''
-        #~ if not self.product_uom:
-            #~ self.price_unit = 0.0
-            #~ return
-        #~ self.price_unit = self.product_id.lst_price
-        #~ if self.folio_id.partner_id:
-            #~ prod = self.product_id.with_context(
-                #~ lang=self.folio_id.partner_id.lang,
-                #~ partner=self.folio_id.partner_id.id,
-                #~ quantity=1,
-                #~ date_order=self.folio_id.date_order,
-                #~ pricelist=self.folio_id.pricelist_id.id,
-                #~ uom=self.product_uom.id
-            #~ )
-            #~ tax_obj = self.env['account.tax']
-            #~ self.price_unit = tax_obj._fix_tax_included_price(prod.price,
-                                                              #~ prod.taxes_id,
-                                                              #~ self.tax_id)
+        # ~ if not self.product_uom:
+        #     ~ self.price_unit = 0.0
+        #     ~ return
+        # ~ self.price_unit = self.product_id.lst_price
+        # ~ if self.folio_id.partner_id:
+        #     ~ prod = self.product_id.with_context(
+        #         ~ lang=self.folio_id.partner_id.lang,
+        #         ~ partner=self.folio_id.partner_id.id,
+        #         ~ quantity=1,
+        #         ~ date_order=self.folio_id.date_order,
+        #         ~ pricelist=self.folio_id.pricelist_id.id,
+        #         ~ uom=self.product_uom.id
+        #     ~ )
+        #     ~ tax_obj = self.env['account.tax']
+        #     ~ self.price_unit = tax_obj._fix_tax_included_price(prod.price,
+        #                                                       ~ prod.taxes_id,
+        #                                                       ~ self.tax_id)
 
     @api.onchange('ser_checkin', 'ser_checkout')
     def on_change_checkout(self):
@@ -196,21 +199,21 @@ class HotelServiceLine(models.Model):
         -----------------------------------------------------------------
         @param self: object pointer
         '''
+        now_utc_dt = fields.datetime.now()
         if not self.ser_checkin:
-            time_a = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-            self.ser_checkin = time_a
+            self.ser_checkin = now_utc_dt.strftime(
+                DEFAULT_SERVER_DATETIME_FORMAT)
         if not self.ser_checkout:
-            self.ser_checkout = time_a
-        if self.ser_checkout < self.ser_checkin:
+            self.ser_checkout = now_utc_dt.strftime(
+                DEFAULT_SERVER_DATETIME_FORMAT)
+        chkin_utc_dt = date_utils.get_datetime(self.ser_checkin)
+        chkout_utc_dt = date_utils.get_datetime(self.ser_checkout)
+        if chkout_utc_dt < chkin_utc_dt:
             raise UserError('Checkout must be greater or equal checkin date')
         if self.ser_checkin and self.ser_checkout:
-            date_a = time.strptime(self.ser_checkout,
-                                   DEFAULT_SERVER_DATETIME_FORMAT)[:5]
-            date_b = time.strptime(self.ser_checkin,
-                                   DEFAULT_SERVER_DATETIME_FORMAT)[:5]
-            diffDate = datetime.datetime(*date_a) - datetime.datetime(*date_b)
-            qty = diffDate.days + 1
-            self.product_uom_qty = qty
+            diffDate = date_utils.date_diff(self.ser_checkin,
+                                            self.ser_checkout, hours=False)
+            self.product_uom_qty = diffDate.days + 1
 
     @api.multi
     def button_confirm(self):
@@ -241,9 +244,8 @@ class HotelServiceLine(models.Model):
         sale_line_obj = self.env['sale.order.line'
                                  ].browse(self.service_line_id.id)
         return sale_line_obj.copy_data(default=default)
-        
+
     @api.multi
     def unlink(self):
         self.service_line_id.unlink()
         return super(HotelServiceLine, self).unlink()
-

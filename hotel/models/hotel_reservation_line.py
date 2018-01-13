@@ -19,8 +19,6 @@
 #
 ##############################################################################
 from openerp import models, fields, api, _
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class HotelReservationLine(models.Model):

@@ -23,6 +23,7 @@ from openerp import models, fields, api, _
 from decimal import Decimal
 import urllib2
 
+
 class CurrencyExchangeRate(models.Model):
 
     _name = "currency.exchange"

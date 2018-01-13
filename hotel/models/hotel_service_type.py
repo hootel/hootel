@@ -21,6 +21,7 @@
 # ---------------------------------------------------------------------------
 from openerp import models, fields, api, _
 
+
 class HotelServiceType(models.Model):
 
     _name = "hotel.service.type"
@@ -28,6 +29,7 @@ class HotelServiceType(models.Model):
 
     ser_id = fields.Many2one('product.category', 'category', required=True,
                              delegate=True, index=True, ondelete='cascade')
+
     @api.multi
     def unlink(self):
         self.ser_id.unlink()
