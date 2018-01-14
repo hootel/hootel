@@ -21,7 +21,7 @@
 ##############################################################################
 
 from openerp import models, fields, api
-import base64  
+import base64
 import datetime
 import calendar
 import xml.etree.cElementTree as ET
@@ -52,8 +52,8 @@ class Wizard(models.TransientModel):
     txt_filename = fields.Char()
     txt_binary = fields.Binary()
     ine_month = fields.Selection([(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
-                          (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'), 
-                          (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December'), ], 
+                          (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+                          (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December'), ],
                           string='Month', default=get_month())
     ine_year = fields.Selection(get_years(), default=get_year(), string='Year')
     adr_screen = fields.Char()
@@ -67,7 +67,7 @@ class Wizard(models.TransientModel):
         m_f_d_search = datetime.date(self.ine_year,self.ine_month,1)
         m_e_d_search = m_f_d_search + datetime.timedelta(days=last_day)
         last_day +=1
-        
+
         # Seleccionamos los que tienen Entrada en el mes + salida en el mes + entrada antes y salida despues. Ordenandolos.
         lines = self.env['cardex'].search(['|','|','&',('exit_date','>=',m_f_d_search),('exit_date','<=',m_e_d_search),'&',('enter_date','>=',m_f_d_search),('enter_date','<=',m_e_d_search),'&',('enter_date','<=',m_f_d_search),('exit_date','>=',m_e_d_search)] , order="enter_date" )
         lines = lines.sorted(key=lambda r: str(r.partner_id.code_ine)+r.enter_date)
@@ -263,7 +263,7 @@ class Wizard(models.TransientModel):
                 month_adr_sum += movimientos[xx][4]
                 month_adr_rooms += movimientos[xx][5]
                 month_revpar_staff_rooms += movimientos[xx][6]
-               
+
             precios = ET.SubElement(encuesta, "PRECIOS")
             ET.SubElement(precios,"REVPAR_MENSUAL").text = str(round(month_adr_sum/month_revpar_staff_rooms,2))
             ET.SubElement(precios,"ADR_MENSUAL").text = str(round(month_adr_sum/month_adr_rooms,2))
@@ -285,7 +285,7 @@ class Wizard(models.TransientModel):
             ET.SubElement(precios,"PCTN_HABITACIONES_OCUPADAS_INTERNET").text = '0'
             ET.SubElement(precios,"ADR_OTROS").text = '0'
             ET.SubElement(precios,"PCTN_HABITACIONES_OCUPADAS_OTROS").text = '0'
-           
+
             personal = ET.SubElement(encuesta, "PERSONAL_OCUPADO")
             ET.SubElement(personal,"PERSONAL_NO_REMUNERADO").text = '0'
             ET.SubElement(personal,"PERSONAL_REMUNERADO_FIJO").text = str(compan.permanentstaff)
@@ -294,7 +294,7 @@ class Wizard(models.TransientModel):
             tree = ET.ElementTree(encuesta)
 
             xmlstr = '<?xml version="1.0" encoding="ISO-8859-1"?>'
-            xmlstr += ET.tostring(encuesta)            
+            xmlstr += ET.tostring(encuesta)
             #file=base64.encodestring( xmlstr )
             return self.write({
                  'txt_filename': 'INE_'+str(self.ine_month)+'_'+str(self.ine_year) +'.'+ 'xml',
@@ -305,4 +305,4 @@ class Wizard(models.TransientModel):
         else:
             return self.write({
                  'rev_screen': 'No hay datos en este mes'
-                 })   
+                 })

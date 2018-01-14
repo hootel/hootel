@@ -28,11 +28,13 @@ _logger = logging.getLogger(__name__)
 
 class website_wubook(http.Controller):
     # Called when created a reservation in wubook
-    @http.route(['/wubook/push/reservations/<string:security_token>'], type='http', cors="*",
-                auth="public", methods=['POST'], website=True, csrf=False)
+    @http.route(['/wubook/push/reservations/<string:security_token>'],
+                type='http', cors="*", auth="public", methods=['POST'],
+                website=True, csrf=False)
     def wubook_push_reservations(self, security_token, **kwargs):
         # Check Security Token
-        hotel_security_token = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_push_security_token')
+        hotel_security_token = request.env['ir.values'].sudo().get_default(
+                        'wubook.config.settings', 'wubook_push_security_token')
         if security_token != hotel_security_token:
             raise ValidationError('Invalid Security Token!')
 
@@ -45,10 +47,12 @@ class website_wubook(http.Controller):
 
         # WuBook Check
         if rcode == '2000' and lcode == '1000':
-            return request.make_response('200 OK', [('Content-Type', 'text/plain')])
+            return request.make_response(
+                                    '200 OK', [('Content-Type', 'text/plain')])
 
         # Poor Security Check
-        wlcode = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
+        wlcode = request.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_lcode')
         if lcode != wlcode:
             raise ValidationError("Error! lcode doesn't match!")
 
@@ -56,14 +60,17 @@ class website_wubook(http.Controller):
         # Create Reservation
         request.env['wubook'].sudo().fetch_booking(lcode, rcode)
 
-        return request.make_response('200 OK', [('Content-Type', 'text/plain')])
+        return request.make_response(
+                                    '200 OK', [('Content-Type', 'text/plain')])
 
     # Called when modify room values (Delay: ~5mins)
-    @http.route(['/wubook/push/rooms/<string:security_token>'], type='http', cors="*",
-                auth="public", methods=['POST'], website=True, csrf=False)
+    @http.route(['/wubook/push/rooms/<string:security_token>'], type='http',
+                cors="*", auth="public", methods=['POST'], website=True,
+                csrf=False)
     def wubook_push_rooms(self, security_token, **kwargs):
         # Check Security Token
-        hotel_security_token = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_push_security_token')
+        hotel_security_token = request.env['ir.values'].sudo().get_default(
+                        'wubook.config.settings', 'wubook_push_security_token')
         if security_token != hotel_security_token:
             raise ValidationError('Invalid Security Token!')
 
@@ -76,20 +83,26 @@ class website_wubook(http.Controller):
             raise ValidationError('Invalid Input Parameters!')
 
         # Poor Security Check
-        wlcode = request.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
+        wlcode = request.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_lcode')
         if lcode != wlcode:
             raise ValidationError("Error! lcode doesn't match!")
 
         _logger.info("[WUBOOK] Updating values...")
-        wubook_obj = request.env['wubook'].sudo().with_context({'init_connection': False})
+        wubook_obj = request.env['wubook'].sudo().with_context({
+            'init_connection': False
+        })
         if wubook_obj.init_connection():
             wubook_obj.fetch_rooms_values(dfrom, dto)
             wubook_obj.fetch_rplan_restrictions(dfrom, dto)
-            parity_pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+            parity_pricelist_id = self.env['ir.values'].sudo().get_default(
+                                'hotel.config.settings', 'parity_pricelist_id')
             if parity_pricelist_id:
-                pricelist_id = request.env['product.pricelist'].sudo().browse(int(parity_pricelist_id))
+                pricelist_id = request.env['product.pricelist'].sudo().browse(
+                                                    int(parity_pricelist_id))
                 if pricelist_id and pricelist_id.wpid:
                     wubook_obj.fetch_plan_prices(pricelist_id.wpid, dfrom, dto)
             wubook_obj.close_connection()
 
-        return request.make_response('200 OK', [('Content-Type', 'text/plain')])
+        return request.make_response(
+                                    '200 OK', [('Content-Type', 'text/plain')])

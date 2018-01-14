@@ -19,15 +19,15 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
 from openerp import models, fields, api
+
 
 class category_tourism(models.Model):
     _name = 'category'
 
     name = fields.Char('Category', required=True)
     tipo = fields.Char('Category type', required=True)
-   
+
     @api.multi
     def name_get(self):
         data = []

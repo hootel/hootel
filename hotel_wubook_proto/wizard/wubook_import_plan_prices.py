@@ -21,6 +21,7 @@
 ##############################################################################
 from openerp.exceptions import ValidationError
 from openerp import models, fields, api
+from odoo.addons.hotel import date_utils
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 
@@ -32,14 +33,17 @@ class ImportPlanPricesWizard(models.TransientModel):
 
     @api.multi
     def import_plan_prices(self):
-        pricelist_id = self.env['product.pricelist'].browse(self.env.context.get('active_id'))
+        pricelist_id = self.env['product.pricelist'].browse(
+                                            self.env.context.get('active_id'))
         if pricelist_id:
             for record in self:
-                date_start_dt = fields.Datetime.from_string(record.date_start)
-                date_end_dt = fields.Datetime.from_string(record.date_end)
-                wres = self.env['wubook'].fetch_plan_prices(pricelist_id.wpid,
-                                                            date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                            date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                date_start_dt = date_utils.get_datetime(record.date_start)
+                date_end_dt = date_utils.get_datetime(record.date_end)
+                wres = self.env['wubook'].fetch_plan_prices(
+                    pricelist_id.wpid,
+                    date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
                 if not wres:
-                    raise ValidationError("Can't fetch plan prices from WuBook")
+                    raise ValidationError("Can't fetch plan prices \
+                                                                from WuBook")
         return True

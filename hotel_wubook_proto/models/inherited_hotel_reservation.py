@@ -22,10 +22,18 @@
 from datetime import datetime, timedelta
 from openerp import models, fields, api
 from openerp.exceptions import UserError, ValidationError
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
-from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT, WUBOOK_STATUS_CONFIRMED, \
-    WUBOOK_STATUS_WAITING, WUBOOK_STATUS_REFUSED, WUBOOK_STATUS_ACCEPTED, \
-    WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_CANCELLED_PENALTY
+from openerp.tools import (
+    DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT)
+from ..wubook import (
+    DEFAULT_WUBOOK_DATE_FORMAT,
+    WUBOOK_STATUS_CONFIRMED,
+    WUBOOK_STATUS_WAITING,
+    WUBOOK_STATUS_REFUSED,
+    WUBOOK_STATUS_ACCEPTED,
+    WUBOOK_STATUS_CANCELLED,
+    WUBOOK_STATUS_CANCELLED_PENALTY)
+from odoo.addons.hotel import date_utils
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -36,13 +44,15 @@ class HotelReservation(models.Model):
     @api.depends('wrid', 'wchannel_id')
     def _is_from_channel(self):
         for record in self:
-            record.wis_from_channel = (record.wrid and record.wrid != '' and record.wchannel_id)
+            record.wis_from_channel = (record.wrid and record.wrid != ''
+                                       and record.wchannel_id)
 
     wrid = fields.Char("WuBook Reservation ID", readonly=True)
     wchannel_id = fields.Many2one('wubook.channel.info',
                                   string='WuBook Channel ID',
                                   readonly=True)
-    wchannel_reservation_code = fields.Char("WuBook Channel Reservation Code", readonly=True)
+    wchannel_reservation_code = fields.Char("WuBook Channel Reservation Code",
+                                            readonly=True)
     wis_from_channel = fields.Boolean('WuBooK Is From Channel',
                                       compute=_is_from_channel, store=False,
                                       readonly=True)
@@ -63,17 +73,21 @@ class HotelReservation(models.Model):
 
     @api.model
     def create(self, vals):
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
-            rooms_avail = self.env['hotel.reservation'].get_wubook_availability(vals['checkin'],
-                                                                                vals['checkout'],
-                                                                                vals['product_id'],
-                                                                                dbchanged=False)
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
+            reserv_obj = self.env['hotel.reservation']
+            rooms_avail = reserv_obj.get_wubook_availability(
+                vals['checkin'],
+                vals['checkout'],
+                vals['product_id'],
+                dbchanged=False)
             _logger.info("DISPONIBILIDAD CREATE")
             _logger.info(rooms_avail)
             if any(rooms_avail):
                 wres = self.env['wubook'].update_availability(rooms_avail)
                 if not wres:
-                    raise ValidationError("Can't update availability on WuBook")
+                    raise ValidationError("Can't update availability \
+                                                                    on WuBook")
         res = super(HotelReservation, self).create(vals)
         return res
 
@@ -85,7 +99,8 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         res = super(HotelReservation, self).write(vals)
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
             for record in self:
                 older_vals = {
                     'checkin': record.checkin,
@@ -97,15 +112,18 @@ class HotelReservation(models.Model):
                     'checkout': vals.get('checkout'),
                     'product_id': vals.get('product_id'),
                 }
-                if new_vals['checkin'] or new_vals['checkout'] or new_vals['product_id']:
+                if new_vals['checkin'] or new_vals['checkout'] or \
+                        new_vals['product_id']:
                     old_rooms_avail = []
                     new_rooms_avail = []
-                    if older_vals['checkin'] and older_vals['checkout'] and older_vals['product_id']:
+                    if older_vals['checkin'] and older_vals['checkout'] and \
+                            older_vals['product_id']:
                         old_rooms_avail = self.get_wubook_availability(
                             older_vals['checkin'],
                             older_vals['checkout'],
                             older_vals['product_id'])
-                    if new_vals['checkin'] and new_vals['checkout'] and new_vals['product_id']:
+                    if new_vals['checkin'] and new_vals['checkout'] and \
+                            new_vals['product_id']:
                         new_rooms_avail = self.get_wubook_availability(
                             new_vals['checkin'],
                             new_vals['checkout'],
@@ -130,14 +148,17 @@ class HotelReservation(models.Model):
                     if any(old_rooms_avail):
                         _logger.info("DISPONIBILIDAD WRITE")
                         _logger.info(old_rooms_avail)
-                        wres = self.env['wubook'].update_availability(old_rooms_avail)
+                        wres = self.env['wubook'].update_availability(
+                                                            old_rooms_avail)
                         if not wres:
-                            raise ValidationError("Can't update availability on WuBook")
+                            raise ValidationError("Can't update availability \
+                                                                    on WuBook")
         return res
 
     @api.multi
     def unlink(self):
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
             checkin = self.checkin
             checkout = self.checkout
             product_id = self.product_id.id
@@ -150,30 +171,39 @@ class HotelReservation(models.Model):
             if any(rooms_avail):
                 wres = self.env['wubook'].update_availability(rooms_avail)
                 if not wres:
-                    raise ValidationError("Can't update availability on WuBook")
+                    raise ValidationError("Can't update availability \
+                                                                    on WuBook")
         return res
 
     @api.multi
     def action_cancel(self):
         res = super(HotelReservation, self).action_cancel()
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
             partner_id = self.env['res.users'].browse(self.env.uid).partner_id
             for record in self:
-                    if self.wrid and self.wrid != '' and not self.wchannel_id and \
-                            self.wstatus in ['1', '2', '4']:     # Only can cancel reservations created directly in wubook
-                        wres = self.env['wubook'].cancel_reservation(record.wrid,
-                                                                     'Cancelled by %s' % partner_id.name)
+                    # Only can cancel reservations created directly in wubook
+                    if self.wrid and self.wrid != '' and \
+                            not self.wchannel_id and \
+                            self.wstatus in ['1', '2', '4']:
+                        wres = self.env['wubook'].cancel_reservation(
+                            record.wrid,
+                            'Cancelled by %s' % partner_id.name)
                         if not wres:
-                            raise ValidationError("Can't cancel reservation on WuBook")
-                    rooms_avail = self.get_wubook_availability(record.checkin,
-                                                               record.checkout,
-                                                               record.product_id.id)
+                            raise ValidationError("Can't cancel reservation \
+                                                                    on WuBook")
+                    rooms_avail = self.get_wubook_availability(
+                        record.checkin,
+                        record.checkout,
+                        record.product_id.id)
                     _logger.info("DISPONIBILIDAD CANCEL")
                     _logger.info(rooms_avail)
                     if any(rooms_avail):
-                        wres = self.env['wubook'].update_availability(rooms_avail)
+                        wres = self.env['wubook'].update_availability(
+                                                                rooms_avail)
                         if not wres:
-                            raise ValidationError("Can't update availability on WuBook")
+                            raise ValidationError("Can't update availability \
+                                                                    on WuBook")
         return res
 
     @api.multi
@@ -184,7 +214,8 @@ class HotelReservation(models.Model):
     @api.multi
     def generate_copy_values(self, checkin=False, checkout=False):
         self.ensure_one()
-        res = super(HotelReservation, self).generate_copy_values(checkin=checkin, checkout=checkout)
+        res = super(HotelReservation, self).generate_copy_values(
+                                            checkin=checkin, checkout=checkout)
         res.update({
             'wrid': self.wrid,
             'wchannel_id': self.wchannel_id,
@@ -212,25 +243,29 @@ class HotelReservation(models.Model):
             record.write({'to_read': False})
 
     @api.model
-    def get_wubook_availability(self, checkin, checkout, product_id, dbchanged=True):
-        date_start = datetime.strptime(checkin, DEFAULT_SERVER_DATETIME_FORMAT)
-        date_end = datetime.strptime(checkout, DEFAULT_SERVER_DATETIME_FORMAT)
-        date_diff = abs((date_start - date_end).days)
+    def get_wubook_availability(self, checkin, checkout, product_id,
+                                dbchanged=True):
+        date_start = date_utils.get_datetime(checkin)
+        date_diff = date_utils.date_diff(checkin, checkout, hours=False) + 1
 
-        hotel_vroom_obj = self.env['hotel.virtual.room']
+        vroom_obj = self.env['hotel.virtual.room']
         virtual_room_avail_obj = self.env['hotel.virtual.room.availabity']
 
         rooms_avail = []
-        vrooms = hotel_vroom_obj.search([('room_ids.product_id', '=', product_id)])
+        vrooms = vroom_obj.search([
+            ('room_ids.product_id', '=', product_id)
+        ])
         for vroom in vrooms:
             if vroom.wrid and vroom.wrid != '':
                 rdays = []
                 for i in range(0, date_diff):
                     ndate_dt = date_start + timedelta(days=i)
-                    ndate_str = ndate_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-                    avail = len(hotel_vroom_obj.check_availability_virtual_room(ndate_str,
-                                                                                ndate_str,
-                                                                                virtual_room_id=vroom.id))
+                    ndate_str = ndate_dt.strftime(
+                                                DEFAULT_SERVER_DATETIME_FORMAT)
+                    avail = len(vroom_obj.check_availability_virtual_room(
+                        ndate_str,
+                        ndate_str,
+                        virtual_room_id=vroom.id))
                     if not dbchanged:
                         avail = avail - 1
                     vroom_avail_id = virtual_room_avail_obj.search([

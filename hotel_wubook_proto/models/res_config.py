@@ -34,34 +34,42 @@ class WubookConfiguration(models.TransientModel):
     wubook_user = fields.Char('WuBook User')
     wubook_passwd = fields.Char('WuBook Password')
     wubook_lcode = fields.Char('WuBook lcode')
-    wubook_server = fields.Char('WuBook Server', default='https://wubook.net/xrws/')
+    wubook_server = fields.Char('WuBook Server',
+                                default='https://wubook.net/xrws/')
     wubook_pkey = fields.Char('WuBook PKey')
-    wubook_push_security_token = fields.Char('WuBook Push Notification Security Token')
-
+    wubook_push_security_token = fields.Char('WuBook Push Notification \
+                                                            Security Token')
 
     @api.multi
     def set_wubook_user(self):
-        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_user', self.wubook_user)
+        return self.env['ir.values'].sudo().set_default(
+                    'wubook.config.settings', 'wubook_user', self.wubook_user)
 
     @api.multi
     def set_wubook_passwd(self):
-        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_passwd', self.wubook_passwd)
+        return self.env['ir.values'].sudo().set_default(
+                'wubook.config.settings', 'wubook_passwd', self.wubook_passwd)
 
     @api.multi
     def set_wubook_lcode(self):
-        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_lcode', self.wubook_lcode)
+        return self.env['ir.values'].sudo().set_default(
+                'wubook.config.settings', 'wubook_lcode', self.wubook_lcode)
 
     @api.multi
     def set_wubook_server(self):
-        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_server', self.wubook_server)
+        return self.env['ir.values'].sudo().set_default(
+                'wubook.config.settings', 'wubook_server', self.wubook_server)
 
     @api.multi
     def set_wubook_pkey(self):
-        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_pkey', self.wubook_pkey)
+        return self.env['ir.values'].sudo().set_default(
+                'wubook.config.settings', 'wubook_pkey', self.wubook_pkey)
 
     @api.multi
     def set_wubook_push_security_token(self):
-        return self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_push_security_token', self.wubook_push_security_token)
+        return self.env['ir.values'].sudo().set_default(
+                'wubook.config.settings',
+                'wubook_push_security_token', self.wubook_push_security_token)
 
     # Dangerus method: Usefull for cloned instances with new wubook account
     @api.multi
@@ -78,7 +86,9 @@ class WubookConfiguration(models.TransientModel):
         })
 
         # Push Virtual Rooms
-        wubook_obj = self.env['wubook'].with_context({'init_connection': False})
+        wubook_obj = self.env['wubook'].with_context({
+            'init_connection': False
+        })
         if wubook_obj.init_connection():
             ir_seq_obj = self.env['ir.sequence']
             vrooms = self.env['hotel.virtual.room'].search([])
@@ -102,7 +112,8 @@ class WubookConfiguration(models.TransientModel):
                         'wscode': '',
                     })
             # Create Restrictions
-            restriction_ids = self.env['hotel.virtual.room.restriction'].search([])
+            vroom_rest_obj = self.env['hotel.virtual.room.restriction']
+            restriction_ids = vroom_rest_obj.search([])
             for restriction in restriction_ids:
                 wpid = wubook_obj.create_rplan(restriction.name)
                 restriction.write({
@@ -124,7 +135,10 @@ class WubookConfiguration(models.TransientModel):
         })
 
         # Reset Reservations
-        reservation_ids = self.env['hotel.reservation'].search([('wrid', '!=', ''), ('wrid', '!=', False)])
+        reservation_ids = self.env['hotel.reservation'].search([
+            ('wrid', '!=', ''),
+            ('wrid', '!=', False)
+        ])
         reservation_ids.with_context(wubook_action=False).write({
             'wrid': '',
             'wchannel_id': False,
@@ -134,25 +148,32 @@ class WubookConfiguration(models.TransientModel):
         })
 
         # Get Parity Models
-        pricelist_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id'))
-        restriction_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id'))
+        pricelist_id = int(self.env['ir.values'].sudo().get_default(
+                            'hotel.config.settings', 'parity_pricelist_id'))
+        restriction_id = int(self.env['ir.values'].sudo().get_default(
+                            'hotel.config.settings', 'parity_restrictions_id'))
 
+        vroom_restr_it_obj = self.env['hotel.virtual.room.restriction.item']
         # Secure Wubook Input
-        restriction_item_ids = self.env['hotel.virtual.room.restriction.item'].search([
+        restriction_item_ids = vroom_restr_it_obj.search([
             ('applied_on', '=', '0_virtual_room'),
             ('date_start', '<', now_utc_str),
         ])
         if any(restriction_item_ids):
-            restriction_item_ids.with_context(wubook_action=False).write({'wpushed': True})
+            restriction_item_ids.with_context(wubook_action=False).write({
+                'wpushed': True
+            })
         # Put to push restrictions
-        restriction_item_ids = self.env['hotel.virtual.room.restriction.item'].search([
+        restriction_item_ids = vroom_restr_it_obj.search([
             ('restriction_id', '=', restriction_id),
             ('applied_on', '=', '0_virtual_room'),
             ('wpushed', '=', True),
             ('date_start', '>=', now_utc_str),
         ])
         if any(restriction_item_ids):
-            restriction_item_ids.with_context(wubook_action=False).write({'wpushed': False})
+            restriction_item_ids.with_context(wubook_action=False).write({
+                'wpushed': False
+            })
 
         # Secure Wubook Input
         pricelist_item_ids = self.env['product.pricelist.item'].search([
@@ -161,7 +182,9 @@ class WubookConfiguration(models.TransientModel):
             ('date_start', '<', now_utc_str),
         ])
         if any(ricelist_item_ids):
-            pricelist_item_ids.with_context(wubook_action=False).write({'wpushed': True})
+            pricelist_item_ids.with_context(wubook_action=False).write({
+                'wpushed': True
+            })
         # Put to push pricelists
         pricelist_item_ids = self.env['product.pricelist.item'].search([
             ('pricelist_id', '=', pricelist_id),
@@ -171,21 +194,27 @@ class WubookConfiguration(models.TransientModel):
             ('date_start', '>=', now_utc_str),
         ])
         if any(pricelist_item_ids):
-            pricelist_item_ids.with_context(wubook_action=False).write({'wpushed': False})
+            pricelist_item_ids.with_context(wubook_action=False).write({
+                'wpushed': False
+            })
 
         # Secure Wubook Input
         availabity_ids = self.env['hotel.virtual.room.availabity'].search([
             ('date', '<', now_utc_str),
         ])
         if any(availabity_ids):
-            availabity_ids.with_context(wubook_action=False).write({'wpushed': True})
+            availabity_ids.with_context(wubook_action=False).write({
+                'wpushed': True
+            })
         # Put to push availability
         availabity_ids = self.env['hotel.virtual.room.availabity'].search([
             ('wpushed', '=', True),
             ('date', '>=', now_utc_str),
         ])
         if any(availabity_ids):
-            availabity_ids.with_context(wubook_action=False).write({'wpushed': False})
+            availabity_ids.with_context(wubook_action=False).write({
+                'wpushed': False
+            })
 
         # Push Changes
         self.env['wubook'].push_changes()

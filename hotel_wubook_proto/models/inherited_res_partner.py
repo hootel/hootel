@@ -22,7 +22,8 @@ from openerp import models, fields, api
 
 
 class ResPartner(models.Model):
-    _inherit='res.partner'
+
+    _inherit = 'res.partner'
 
     unconfirmed = fields.Boolean('Unconfirmed', default=False)
 
@@ -31,16 +32,23 @@ class ResPartner(models.Model):
         res = False
         new_vat = vals.get('vat')
         if new_vat:
-            org_partner_id = self.env['res.partner'].search([('vat', '=', new_vat),('unconfirmed', '=', False)], limit=1)
+            org_partner_id = self.env['res.partner'].search([
+                ('vat', '=', new_vat),
+                ('unconfirmed', '=', False)
+            ], limit=1)
             if org_partner_id:
                 res = super(ResPartner, self).write(vals)
                 for record in self:
-                    # replace all folios partners with the first 'confirmed' partner with the same vat
+                    # replace all folios partners with the
+                    # first 'confirmed' partner with the same vat
                     if record.unconfirmed:
-                        folio_ids = self.env['hotel.folio'].search([('partner_id', '=', record.id)])
+                        folio_ids = self.env['hotel.folio'].search([
+                            ('partner_id', '=', record.id)
+                        ])
                         if folio_ids:
                             folio_ids.write({'partner_id': org_partner_id.id})
-                        record.unlink() # DANGER: self-delete... perhaps best invisible?
+                        # DANGER: self-delete... perhaps best invisible?
+                        record.unlink()
                 # return {
                 #     'type': 'ir.actions.act_window',
                 #     'res_model': 'res.partner',

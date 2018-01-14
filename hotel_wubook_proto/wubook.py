@@ -25,7 +25,9 @@ from datetime import datetime, timedelta
 from urlparse import urljoin
 from openerp import models, api, fields
 from openerp.exceptions import UserError, ValidationError
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools import (
+    DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT)
 from openerp.addons.payment.models.payment_acquirer import _partner_split_name
 import logging
 _logger = logging.getLogger(__name__)
@@ -42,8 +44,16 @@ WUBOOK_STATUS_ACCEPTED = 4
 WUBOOK_STATUS_CANCELLED = 5
 WUBOOK_STATUS_CANCELLED_PENALTY = 6
 
-WUBOOK_STATUS_GOOD = [WUBOOK_STATUS_CONFIRMED, WUBOOK_STATUS_WAITING, WUBOOK_STATUS_ACCEPTED]
-WUBOOK_STATUS_BAD = [WUBOOK_STATUS_REFUSED, WUBOOK_STATUS_CANCELLED, WUBOOK_STATUS_CANCELLED_PENALTY]
+WUBOOK_STATUS_GOOD = [
+    WUBOOK_STATUS_CONFIRMED,
+    WUBOOK_STATUS_WAITING,
+    WUBOOK_STATUS_ACCEPTED,
+]
+WUBOOK_STATUS_BAD = [
+    WUBOOK_STATUS_REFUSED,
+    WUBOOK_STATUS_CANCELLED,
+    WUBOOK_STATUS_CANCELLED_PENALTY,
+]
 
 
 # WUBOOK
@@ -67,9 +77,9 @@ class WuBook(models.TransientModel):
                 return False
 
         res = (self_context.import_rooms()[0]
-            and self_context.import_channels_info()[0]
-            and self_context.import_pricing_plans()[0]
-            and self_context.import_restriction_plans()[0])
+               and self_context.import_channels_info()[0]
+               and self_context.import_pricing_plans()[0]
+               and self_context.import_restriction_plans()[0])
 
         self_context.close_connection()
         return res
@@ -77,7 +87,8 @@ class WuBook(models.TransientModel):
     @api.model
     def push_activation(self):
         errors = []
-        base_url = self.env['ir.config_parameter'].get_param('web.base.url').replace("http://", "https://")
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        base_url = base_url.replace("http://", "https://")
         hotel_security_token = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_push_security_token')
 
         init_connection = self._context.get('init_connection', True)

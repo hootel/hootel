@@ -28,7 +28,8 @@ class MassiveChangesWizard(models.TransientModel):
 
     @api.multi
     def duplicate_reservation(self):
-        reservation_id = self.env['hotel.reservation'].browse(self.env.context.get('active_id'))
+        reservation_id = self.env['hotel.reservation'].browse(
+                                            self.env.context.get('active_id'))
         if reservation_id and reservation_id.wis_from_channel:
             raise ValidationError("Can't duplicate a reservation from channel")
         return super(MassiveChangesWizard, self).duplicate_reservation()

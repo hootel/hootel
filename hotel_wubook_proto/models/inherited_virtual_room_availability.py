@@ -29,6 +29,7 @@ class VirtualRoomAvailability(models.Model):
 
     @api.multi
     def write(self, vals):
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
             vals.update({'wpushed': False})
         return super(VirtualRoomAvailability, self).write(vals)

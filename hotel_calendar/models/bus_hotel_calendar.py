@@ -29,12 +29,12 @@ class BusHotelCalendar(models.TransientModel):
 
     # FIXME: Too many parameters... perhaps best use kargs?
     @api.model
-    def _generate_reservation_notification(self, action, ntype, title,
-                                           product_id, reserv_id, partner_name,
-                                           adults, children, checkin, checkout,
-                                           folio_id, color, splitted,
-                                           parent_reservation, room_name,
-                                           partner_phone, state, fix_days):
+    def _generate_reservation_notif(self, action, ntype, title,
+                                    product_id, reserv_id, partner_name,
+                                    adults, children, checkin, checkout,
+                                    folio_id, color, splitted,
+                                    parent_reservation, room_name,
+                                    partner_phone, state, fix_days):
         user_id = self.env['res.users'].browse(self.env.uid)
         master_reserv = parent_reservation or reserv_id
         num_split = self.env['hotel.reservation'].search_count([
@@ -99,16 +99,15 @@ class BusHotelCalendar(models.TransientModel):
                                       color, splitted, parent_reservation,
                                       room_name, partner_phone, state,
                                       fix_days):
-        notif = self._generate_reservation_notification(action, ntype, title,
-                                                        product_id, reserv_id,
-                                                        partner_name, adults,
-                                                        children, checkin,
-                                                        checkout, folio_id,
-                                                        color, splitted,
-                                                        parent_reservation,
-                                                        room_name,
-                                                        partner_phone, state,
-                                                        fix_days)
+        notif = self._generate_reservation_notif(action, ntype, title,
+                                                 product_id, reserv_id,
+                                                 partner_name, adults,
+                                                 children, checkin,
+                                                 checkout, folio_id,
+                                                 color, splitted,
+                                                 parent_reservation,
+                                                 room_name, partner_phone,
+                                                 state, fix_days)
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
                                      'public'), notif)
 

@@ -21,7 +21,9 @@
 ##############################################################################
 from openerp import models, fields, api, _
 from datetime import datetime, timedelta
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools import (
+    DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT)
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -30,26 +32,29 @@ class HotelReservation(models.Model):
     _inherit = "hotel.reservation"
 
     @api.model
-    def _generate_reservation_notification(self, action, ntype, title, product_id,
-                                           reserv_id, partner_name, adults,
-                                           children, checkin, checkout,
-                                           folio_id, color, splitted, parent_reservation,
-                                           room_name, partner_phone, state, fix_days):
-        vals = super(HotelReservation, self)._generate_reservation_notification(action, ntype, title, product_id,
-                                                                                reserv_id, partner_name, adults,
-                                                                                children, checkin, checkout,
-                                                                                folio_id, color, splitted, parent_reservation,
-                                                                                room_name, partner_phone, state, fix_days)
+    def _generate_reservation_notif(self, action, ntype, title,
+                                    product_id, reserv_id, partner_name,
+                                    adults, children, checkin, checkout,
+                                    folio_id, color, splitted,
+                                    parent_reservation, room_name,
+                                    partner_phone, state, fix_days):
+        vals = super(HotelReservation, self)._generate_reservation_notif(
+            action, ntype, title, product_id,
+            reserv_id, partner_name, adults,
+            children, checkin, checkout,
+            folio_id, color, splitted, parent_reservation,
+            room_name, partner_phone, state, fix_days)
         reserv = self.env['hotel.reservation'].browse(vals['reserv_id'])
         vals['reservation'].update({
             'fix_days': (reserv.wrid and reserv.wrid != '') or fix_days,
-            'wchannel': reserv.wchannel_id and reserv.wchannel_id.name or False,
+            'wchannel': (reserv.wchannel_id and reserv.wchannel_id.name),
         })
         return vals
 
     @api.multi
     def _hcalendar_reservation_data(self, reservations):
-        vals = super(HotelReservation, self)._hcalendar_reservation_data(reservations)
+        vals = super(HotelReservation, self)._hcalendar_reservation_data(
+                                                                reservations)
         hotel_reservation_obj = self.env['hotel.reservation']
         json_reservations = []
         for reserv_vals in vals[0]:
@@ -66,7 +71,10 @@ class HotelReservation(models.Model):
                 reserv.reserve_color,
                 reserv.splitted,
                 reserv.parent_reservation.id,
-                False,  # Read-Only
-                (reserv.wrid and reserv.wrid != '') or reserv.splitted,  # Fix Days
-                False))   # Fix Rooms
+                # Read-Only
+                False,
+                # Fix Days
+                (reserv.wrid and reserv.wrid != '') or reserv.splitted,
+                # Fix Rooms
+                False))
         return (json_reservations, vals[1])

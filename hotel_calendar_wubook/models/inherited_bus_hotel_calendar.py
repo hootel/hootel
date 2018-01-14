@@ -49,4 +49,5 @@ class BusHotelCalendar(models.TransientModel):
                                 message):
         notif = self._generate_issue_notification(ntype, title, issue_id,
                                                   section, message)
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', 'public'), notif)
+        self.env['bus.bus'].sendone(
+                    (self._cr.dbname, 'hotel.reservation', 'public'), notif)

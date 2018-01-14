@@ -22,6 +22,7 @@
 from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
+from odoo.addonds.hotel import date_utils
 import os
 import binascii
 
@@ -48,19 +49,32 @@ class WuBookInstaller(models.TransientModel):
     def execute_simple(self):
         activate_push = True
         for rec in self:
-            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_user', rec.wubook_user)
-            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_passwd', rec.wubook_passwd)
-            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_lcode', rec.wubook_lcode)
-            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_server', rec.wubook_server)
-            self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_pkey', rec.wubook_pkey)
+            self.env['ir.values'].sudo().set_default('wubook.config.settings',
+                                                     'wubook_user',
+                                                     rec.wubook_user)
+            self.env['ir.values'].sudo().set_default('wubook.config.settings',
+                                                     'wubook_passwd',
+                                                     rec.wubook_passwd)
+            self.env['ir.values'].sudo().set_default('wubook.config.settings',
+                                                     'wubook_lcode',
+                                                     rec.wubook_lcode)
+            self.env['ir.values'].sudo().set_default('wubook.config.settings',
+                                                     'wubook_server',
+                                                     rec.wubook_server)
+            self.env['ir.values'].sudo().set_default('wubook.config.settings',
+                                                     'wubook_pkey',
+                                                     rec.wubook_pkey)
             activate_push = rec.activate_push
-        self.env['ir.values'].sudo().set_default('wubook.config.settings', 'wubook_push_security_token', binascii.hexlify(os.urandom(16)).decode())
+        self.env['ir.values'].sudo().set_default(
+            'wubook.config.settings',
+            'wubook_push_security_token',
+            binascii.hexlify(os.urandom(16)).decode())
         wres = self.env['wubook'].initialize(activate_push)
         if not wres:
             raise ValidationError("Can't finish installation!")
 
         return {
-            'name':_("Configure Hotel Parity"),
+            'name': _("Configure Hotel Parity"),
             'type': 'ir.actions.act_window',
             'res_model': 'wubook.installer.parity',
             'view_id': self.env.ref('hotel_wubook_proto.view_wubook_configuration_installer_parity').id,
@@ -74,8 +88,10 @@ class WuBookInstallerParity(models.TransientModel):
     _name = 'wubook.installer.parity'
     _inherit = 'res.config.installer'
 
-    parity_pricelist_id = fields.Many2one('product.pricelist', 'Product Pricelist')
-    parity_restrictions_id = fields.Many2one('hotel.virtual.room.restriction', 'Restrictions')
+    parity_pricelist_id = fields.Many2one('product.pricelist',
+                                          'Product Pricelist')
+    parity_restrictions_id = fields.Many2one('hotel.virtual.room.restriction',
+                                             'Restrictions')
     import_data = fields.Boolean('Import Data From WuBook', default=False)
     date_start = fields.Date('Date Start')
     date_end = fields.Date('Date End')
@@ -90,23 +106,30 @@ class WuBookInstallerParity(models.TransientModel):
         wubookObj = self.env['wubook']
         irValuesObj = self.env['ir.values']
         for rec in self:
-            irValuesObj.sudo().set_default('hotel.config.settings', 'parity_pricelist_id', rec.parity_pricelist_id.id)
-            irValuesObj.sudo().set_default('hotel.config.settings', 'parity_restrictions_id', rec.parity_restrictions_id.id)
+            irValuesObj.sudo().set_default('hotel.config.settings',
+                                           'parity_pricelist_id',
+                                           rec.parity_pricelist_id.id)
+            irValuesObj.sudo().set_default('hotel.config.settings',
+                                           'parity_restrictions_id',
+                                           rec.parity_restrictions_id.id)
             import_data = rec.import_data
             if rec.import_data:
-                date_start_dt = fields.Datetime.from_string(rec.date_start)
-                date_end_dt = fields.Datetime.from_string(rec.date_end)
+                date_start_dt = date_utils.get_datetime(rec.date_start)
+                date_end_dt = date_utils.get_datetime(rec.date_end)
                 # Availability
-                wresAvail = wubookObj.fetch_rooms_values(date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                         date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                wresAvail = wubookObj.fetch_rooms_values(
+                    date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
                 # Pricelist
-                wresPrices = wubookObj.fetch_plan_prices(rec.parity_pricelist_id.wpid,
-                                                         date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                         date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                wresPrices = wubookObj.fetch_plan_prices(
+                    rec.parity_pricelist_id.wpid,
+                    date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
                 # Restrictions
-                wresRestr = wubookObj.fetch_rplan_restrictions(date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                               date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                               rec.parity_restrictions_id.wpid)
+                wresRestr = wubookObj.fetch_rplan_restrictions(
+                    date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    rec.parity_restrictions_id.wpid)
 
                 if not wresAvail or not wresPrices or not wresRestr:
                     raise ValidationError("Errors importing data from WuBook")

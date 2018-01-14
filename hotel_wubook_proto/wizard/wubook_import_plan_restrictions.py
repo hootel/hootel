@@ -21,6 +21,7 @@
 ##############################################################################
 from openerp.exceptions import ValidationError
 from openerp import models, fields, api
+from odoo.addons.hotel import date_utils
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 
@@ -32,14 +33,17 @@ class ImportPlanRestrictionsWizard(models.TransientModel):
 
     @api.multi
     def import_plan_restrictions(self):
-        restriction_id = self.env['hotel.virtual.room.restriction'].browse(self.env.context.get('active_id'))
+        restriction_id = self.env['hotel.virtual.room.restriction'].browse(
+                                            self.env.context.get('active_id'))
         if restriction_id:
             for record in self:
-                date_start_dt = fields.Datetime.from_string(record.date_start)
-                date_end_dt = fields.Datetime.from_string(record.date_end)
-                wres = self.env['wubook'].fetch_rplan_restrictions(date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                                   date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                                                   restriction_id.wpid)
+                date_start_dt = date_utils.get_datetime(record.date_start)
+                date_end_dt = date_utils.get_datetime(record.date_end)
+                wres = self.env['wubook'].fetch_rplan_restrictions(
+                    date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    restriction_id.wpid)
                 if not wres:
-                    raise ValidationError("Can't fetch restrictions from WuBook")
+                    raise ValidationError("Can't fetch restrictions \
+                                                                from WuBook")
         return True

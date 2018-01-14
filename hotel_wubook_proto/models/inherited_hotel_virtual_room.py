@@ -47,11 +47,13 @@ class HotelVirtualRoom(models.Model):
     def _check_wscode(self):
         for record in self:
             if len(record.wscode) > 4:  # Wubook scode max. length
-                raise ValidationError(_("SCODE Can't be longer than 4 characters"))
+                raise ValidationError(_("SCODE Can't be longer than 4 \
+                                                                characters"))
 
     @api.multi
     def get_restrictions(self, date):
-        restriction_plan_id = int(self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id'))
+        restriction_plan_id = int(self.env['ir.values'].sudo().get_default(
+                            'hotel.config.settings', 'parity_restrictions_id'))
         self.ensure_one()
         restriction = self.env['hotel.virtual.room.restriction.item'].search([
             ('date_start', '=', date),
@@ -62,7 +64,8 @@ class HotelVirtualRoom(models.Model):
         if restriction:
             return restriction
         else:
-            global_restr = self.env['hotel.virtual.room.restriction.item'].search([
+            vroom_rest_it_obj = self.env['hotel.virtual.room.restriction.item']
+            global_restr = vroom_rest_it_obj.search([
                 ('applied_on', '=', '1_global'),
                 ('restriction_id', '=', restriction_plan_id)
             ], limit=1)
@@ -73,8 +76,10 @@ class HotelVirtualRoom(models.Model):
     @api.model
     def create(self, vals):
         vroom = super(HotelVirtualRoom, self).create(vals)
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
-            shortcode = self.env['ir.sequence'].next_by_code('hotel.virtual.room')[:4]
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
+            seq_obj = self.env['ir.sequence']
+            shortcode = seq_obj.next_by_code('hotel.virtual.room')[:4]
             wrid = self.env['wubook'].create_room(
                 shortcode,
                 vroom.name,
@@ -92,22 +97,26 @@ class HotelVirtualRoom(models.Model):
 
     @api.multi
     def write(self, vals):
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
+            wubook_obj = self.env['wubook']
             for record in self:
                 if record.wrid and record.wrid != '':
-                    wres = self.env['wubook'].modify_room(vals.get('wrid', record.wrid),
-                                                          vals.get('name', record.name),
-                                                          vals.get('wcapacity', record.wcapacity),
-                                                          vals.get('list_price', record.list_price),
-                                                          vals.get('max_real_rooms', record.max_real_rooms),
-                                                          vals.get('wscode', record.wscode))
+                    wres = wubook_obj.modify_room(
+                        vals.get('wrid', record.wrid),
+                        vals.get('name', record.name),
+                        vals.get('wcapacity', record.wcapacity),
+                        vals.get('list_price', record.list_price),
+                        vals.get('max_real_rooms', record.max_real_rooms),
+                        vals.get('wscode', record.wscode))
                     if not wres:
                         raise ValidationError("Can't modify room on WuBook")
         return super(HotelVirtualRoom, self).write(vals)
 
     @api.multi
     def unlink(self):
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
             for record in self:
                 if record.wrid and record.wrid != '':
                     wres = self.env['wubook'].delete_room(record.wrid)

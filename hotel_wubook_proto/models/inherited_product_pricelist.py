@@ -31,7 +31,6 @@ class ProductPricelist(models.Model):
     wpid = fields.Char("WuBook Plan ID", readonly=True)
     wdaily = fields.Boolean("WuBook Daily Plan", default=True)
 
-
     @api.multi
     def get_wubook_prices(self):
         self.ensure_one()
@@ -51,7 +50,10 @@ class ProductPricelist(models.Model):
             if not min_date or not max_date:
                 return prices
             days_diff = abs((max_date - min_date).days)
-            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', ''), ('wrid', '!=', False)])
+            vrooms = self.env['hotel.virtual.room'].search([
+                ('wrid', '!=', ''),
+                ('wrid', '!=', False)
+            ])
             for vroom in vrooms:
                 prices.update({vroom.wrid: []})
                 for i in range(0, days_diff or 1):
@@ -63,7 +65,10 @@ class ProductPricelist(models.Model):
                         uom=vroom.product_id.product_tmpl_id.uom_id.id)
                     prices[vroom.wrid].append(product_id.price)
         else:
-            vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', ''), ('wrid', '!=', False)])
+            vrooms = self.env['hotel.virtual.room'].search([
+                ('wrid', '!=', ''),
+                ('wrid', '!=', False)
+            ])
             for item in self.item_ids:
                 if not item.date_start or not item.date_end:
                     continue
@@ -91,40 +96,37 @@ class ProductPricelist(models.Model):
 
     @api.model
     def create(self, vals):
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
             wpid = self.env['wubook'].create_plan(vals['name'],
-                                                  vals.get('wdaily') and 1 or 0)
+                                                  vals.get('wdaily') and
+                                                  1 or 0)
             if not wpid:
                 raise ValidationError("Can't create plan on WuBook")
             vals.update({'wpid': wpid})
         pricelist = super(ProductPricelist, self).create(vals)
-#         if self._context.get('wubook_action', True):
-#             prices = pricelist.get_wubook_prices()
-#             if any(prices):
-#                 self.env['wubook'].update_plan_periods(pricelist.wpid, prices)
         return pricelist
 
     @api.multi
     def write(self, vals):
         nname = vals.get('name')
-        if self._context.get('wubook_action', True) and nname and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and nname and \
+                self.env['wubook'].is_valid_account():
             for record in self:
                 if record.wpid and record.wpid != '':
-                    wres = self.env['wubook'].update_plan_name(vals.get('wpid', record.wpid),
-                                                               nname)
+                    wres = self.env['wubook'].update_plan_name(
+                        vals.get('wpid', record.wpid),
+                        nname)
                     if not wres:
-                        raise ValidationError("Can't update plan name on WuBook")
+                        raise ValidationError("Can't update plan name \
+                                                                    on WuBook")
         updated = super(ProductPricelist, self).write(vals)
-#         if updated and self._context.get('wubook_action', True):
-#             pricelist = self.browse(self.id)
-#             prices = self.get_wubook_prices()
-#             if any(prices):
-#                 self.env['wubook'].update_plan_periods(pricelist.wpid, prices)
         return updated
 
     @api.multi
     def unlink(self):
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
             for record in self:
                 if record.wpid and record.wpid != '':
                     wres = self.env['wubook'].delete_plan(record.wpid)
@@ -144,7 +146,7 @@ class ProductPricelist(models.Model):
         names = []
         for name in org_names:
             priclist_id = pricelistObj.browse(name[0])
-            if priclist_id.wpid != False:
+            if priclist_id.wpid:
                 names.append((name[0], '%s (WuBook)' % name[1]))
             else:
                 names.append((name[0], name[1]))

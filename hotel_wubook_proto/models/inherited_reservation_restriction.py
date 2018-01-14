@@ -49,7 +49,10 @@ class ReservationRestriction(models.Model):
         if not min_date or not max_date:
             return prices
         days_diff = abs((max_date - min_date).days)
-        vrooms = self.env['hotel.virtual.room'].search([('wrid', '!=', ''), ('wrid', '!=', False)])
+        vrooms = self.env['hotel.virtual.room'].search([
+            ('wrid', '!=', ''),
+            ('wrid', '!=', False)
+        ])
         for vroom in vrooms:
             prices.update({vroom.wrid: []})
             for i in range(0, days_diff or 1):
@@ -64,7 +67,8 @@ class ReservationRestriction(models.Model):
 
     @api.model
     def create(self, vals):
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
             wpid = self.env['wubook'].create_rplan(vals['name'])
             if not wpid:
                 raise ValidationError("Can't create rplan on WuBook")
@@ -78,7 +82,8 @@ class ReservationRestriction(models.Model):
 
         if rules:
             # Basic Rules
-            self.env['hotel.virtual.room.restriction.item'].with_context({'wubook_action': False}).create({
+            vroom_rest_it_obj = self.env['hotel.virtual.room.restriction.item']
+            vroom_rest_it_obj.with_context({'wubook_action': False}).create({
                 'closed_arrival': rules['closed_arrival'],
                 'closed': rules['closed'],
                 'min_stay': rules['min_stay'],
@@ -94,11 +99,13 @@ class ReservationRestriction(models.Model):
     @api.multi
     def write(self, vals):
         nname = vals.get('name')
-        if self._context.get('wubook_action', True) and nname and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and nname and \
+                self.env['wubook'].is_valid_account():
             for record in self:
                 if record.wpid and record.wpid != '':
-                    wres = self.env['wubook'].rename_rplan(vals.get('wpid', record.wpid),
-                                                           nname)
+                    wres = self.env['wubook'].rename_rplan(
+                        vals.get('wpid', record.wpid),
+                        nname)
                     if not wres:
                         raise ValidationError("Can't rname rplan on WuBook")
         updated = super(ReservationRestriction, self).write(vals)
@@ -106,7 +113,8 @@ class ReservationRestriction(models.Model):
 
     @api.multi
     def unlink(self):
-        if self._context.get('wubook_action', True) and self.env['wubook'].is_valid_account():
+        if self._context.get('wubook_action', True) and \
+                self.env['wubook'].is_valid_account():
             for record in self:
                 if record.wpid and record.wpid != '':
                     wres = self.env['wubook'].delete_rplan(record.wpid)
@@ -126,7 +134,7 @@ class ReservationRestriction(models.Model):
         names = []
         for name in org_names:
             restriction_id = roomRestrictionObj.browse(name[0])
-            if restriction_id.wpid != False:
+            if restriction_id.wpid:
                 names.append((name[0], '%s (WuBook)' % name[1]))
             else:
                 names.append((name[0], name[1]))
