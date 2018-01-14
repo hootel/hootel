@@ -478,8 +478,8 @@ class HotelReservation(models.Model):
                     vroom_avail.write(vals)
                 else:
                     vals.update({
-                        ('virtual_room_id', '=', item['id']),
-                        ('date', '=', rec['date'])
+                        'virtual_room_id': item['id'],
+                        'date': rec['date'],
                     })
                     hotel_vroom_avail_obj.create(vals)
 
@@ -557,7 +557,8 @@ class HotelReservation(models.Model):
     def get_availability(self, checkin, checkout, product_id, dbchanged=True):
         date_start = date_utils.get_datetime(checkin)
         date_end = date_utils.get_datetime(checkout)
-        date_diff = date_utils.date_diff(date_start, date_end, hours=False) + 1
+        # Not count end day of the reservation
+        date_diff = date_utils.date_diff(date_start, date_end, hours=False)
 
         hotel_vroom_obj = self.env['hotel.virtual.room']
         virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
@@ -654,8 +655,12 @@ class HotelReservation(models.Model):
             now_utc_dt = self.checkin.strptime(DEFAULT_SERVER_DATETIME_FORMAT)\
                 + timedelta(days=1)
             self.checkout = now_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-        occupied = self.env['hotel.reservation'].occupied(self.checkin,
-                                                          self.checkout)
+        checkout_dt = date_utils.get_datetime(self.checkout)
+        # Reservation end day count as free day. Not check it
+        checkout_dt -= timedelta(days=1)
+        occupied = self.env['hotel.reservation'].occupied(
+            self.checkin,
+            checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
         rooms_occupied = occupied.mapped('product_id.id')
         domain_rooms = [
             ('isroom', '=', True),
@@ -729,11 +734,16 @@ class HotelReservation(models.Model):
         Checkout date should be greater than the checkin date.
         3.-Check the reservation dates are not occuped
         """
-        if self.checkin >= self.checkout:
+        chkin_utc_dt = date_utils.get_datetime(self.checkin)
+        chkout_utc_dt = date_utils.get_datetime(self.checkout)
+        if chkin_utc_dt >= chkout_utc_dt:
                 raise ValidationError(_('Room line Check In Date Should be \
                 less than the Check Out Date!'))
-        occupied = self.env['hotel.reservation'].occupied(self.checkin,
-                                                          self.checkout)
+        # Reservation end day count as free day. Not check it
+        chkout_utc_dt -= timedelta(days=1)
+        occupied = self.env['hotel.reservation'].occupied(
+            self.checkin,
+            chkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
         occupied = occupied.filtered(
             lambda r: r.product_id.id == self.product_id.id
             and r.id != self.id)
@@ -760,6 +770,7 @@ class HotelReservation(models.Model):
             'hotel.config.settings', 'tz_hotel'))
         checkin_utc_dt = date_utils.get_datetime(str_checkin_utc)
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt, tz_hotel)
+        checkin_utc_dt -= timedelta(days=1)
         days_diff = date_utils.date_diff(str_checkin_utc, str_checkout_utc,
                                          hours=False) + 1
         dates_list = date_utils.generate_dates_list(checkin_dt, days_diff,
