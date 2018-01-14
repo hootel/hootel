@@ -25,7 +25,7 @@ from openerp.exceptions import ValidationError
 
 class HotelVirtualRoomAvailability(models.Model):
     _inherit = 'mail.thread'
-    _name = 'hotel.virtual.room.availabity'
+    _name = 'hotel.virtual.room.availability'
 
     virtual_room_id = fields.Many2one('hotel.virtual.room', 'Virtual Room',
                                       required=True, track_visibility='always')

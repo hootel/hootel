@@ -89,7 +89,8 @@ class WuBook(models.TransientModel):
         errors = []
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         base_url = base_url.replace("http://", "https://")
-        hotel_security_token = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_push_security_token')
+        hotel_security_token = self.env['ir.values'].sudo().get_default(
+                        'wubook.config.settings', 'wubook_push_security_token')
 
         init_connection = self._context.get('init_connection', True)
         if init_connection:
@@ -779,7 +780,7 @@ class WuBook(models.TransientModel):
     # === WUBOOK -> ODOO
     @api.model
     def generate_room_values(self, dfrom, dto, values):
-        virtual_room_avail_obj = self.env['hotel.virtual.room.availabity']
+        virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
         for k_rid, v_rid in values.iteritems():
             vroom = hotel_virtual_room_obj.search([('wrid', '=', k_rid)], limit=1)
@@ -961,7 +962,7 @@ class WuBook(models.TransientModel):
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
         hotel_vroom_obj = self.env['hotel.virtual.room']
-        vroom_avail_obj = self.env['hotel.virtual.room.availabity']
+        vroom_avail_obj = self.env['hotel.virtual.room.availability']
         # Space for store some data for construct folios
         processed_rids = []
         failed_reservations = []
@@ -1213,7 +1214,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def push_availability(self):
-        vroom_avail_ids = self.env['hotel.virtual.room.availabity'].search([
+        vroom_avail_ids = self.env['hotel.virtual.room.availability'].search([
             ('wpushed', '=', False),
             ('date', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))
         ])

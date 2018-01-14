@@ -23,7 +23,7 @@ from openerp import models, fields, api
 
 
 class VirtualRoomAvailability(models.Model):
-    _inherit = 'hotel.virtual.room.availabity'
+    _inherit = 'hotel.virtual.room.availability'
 
     wpushed = fields.Boolean("WuBook Pushed", readonly=True, default=False)
 

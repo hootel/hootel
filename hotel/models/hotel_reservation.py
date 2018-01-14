@@ -464,7 +464,7 @@ class HotelReservation(models.Model):
             record.checkin,
             record.checkout,
             record.product_id.id, dbchanged=False)
-        hotel_vroom_avail_obj = self.env['hotel.virtual.room.availabity']
+        hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
         for item in cavail:
             for rec in item['days']:
                 vroom_avail = hotel_vroom_avail_obj.search([
@@ -560,7 +560,7 @@ class HotelReservation(models.Model):
         date_diff = date_utils.date_diff(date_start, date_end, hours=False) + 1
 
         hotel_vroom_obj = self.env['hotel.virtual.room']
-        virtual_room_avail_obj = self.env['hotel.virtual.room.availabity']
+        virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
 
         rooms_avail = []
         vrooms = hotel_vroom_obj.search([

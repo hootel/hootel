@@ -160,7 +160,7 @@ class TestManagementCalendar(TestHotelCalendar):
                                                             doesn't match!")
 
         # REMOVE RESTRICTIONS
-        vroom_avail_obj = self.env['hotel.virtual.room.availabity'].sudo(
+        vroom_avail_obj = self.env['hotel.virtual.room.availability'].sudo(
                                                     self.user_hotel_manager)
         avail_ids = vroom_avail_obj.search([
             ('virtual_room_id', 'in', (self.hotel_vroom_budget.id,

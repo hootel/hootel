@@ -199,7 +199,7 @@ class WubookConfiguration(models.TransientModel):
             })
 
         # Secure Wubook Input
-        availabity_ids = self.env['hotel.virtual.room.availabity'].search([
+        availabity_ids = self.env['hotel.virtual.room.availability'].search([
             ('date', '<', now_utc_str),
         ])
         if any(availabity_ids):
@@ -207,7 +207,7 @@ class WubookConfiguration(models.TransientModel):
                 'wpushed': True
             })
         # Put to push availability
-        availabity_ids = self.env['hotel.virtual.room.availabity'].search([
+        availabity_ids = self.env['hotel.virtual.room.availability'].search([
             ('wpushed', '=', True),
             ('date', '>=', now_utc_str),
         ])

@@ -98,7 +98,7 @@ class MassiveChangesWizard(models.TransientModel):
     @api.multi
     def massive_change(self):
         hotel_vroom_obj = self.env['hotel.virtual.room']
-        hotel_vroom_avail_obj = self.env['hotel.virtual.room.availabity']
+        hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
         hotel_vroom_re_it_obj = self.env['hotel.virtual.room.restriction.item']
         product_pricelist_item_obj = self.env['product.pricelist.item']
         for record in self:

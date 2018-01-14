@@ -177,7 +177,7 @@ ListView.include({
     	this.$buttons.find('.oe_wubook_import_restriction_plans').on('click', import_restriction_plans.bind(this));
 			this.$buttons.append("<button class='oe_button oe_wubook_push_restriction_plans' style='background-color:red; color:white;' type='button'>"+_t('Push to WuBook')+"</button>");
 			this.$buttons.find('.oe_wubook_push_restriction_plans').on('click', push_restriction_plans.bind(this));
-		} else if (this.dataset.model === 'hotel.virtual.room.availabity') {
+		} else if (this.dataset.model === 'hotel.virtual.room.availability') {
     	this.$buttons.append("<button class='oe_button oe_wubook_import_availability oe_highlight' type='button'>"+_t('Fetch from WuBook')+"</button>");
     	this.$buttons.find('.oe_wubook_import_availability').on('click', import_availability.bind(this));
 			this.$buttons.append("<button class='oe_button oe_wubook_push_availability' style='background-color:red; color:white;' type='button'>"+_t('Push to WuBook')+"</button>");
