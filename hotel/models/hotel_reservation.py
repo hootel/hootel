@@ -584,7 +584,9 @@ class HotelReservation(models.Model):
                 max_avail = vroom.total_rooms_count
                 if vroom_avail_id:
                     max_avail = vroom_avail_id.avail
-                avail = min(avail, max_avail)
+                # Can be less than zero because 'avail' can not equal
+                # with the real 'avail' (ex. Online Limits)
+                avail = max(min(avail, max_avail), 0)
                 rdays.append({
                     'date': ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                     'avail': avail,

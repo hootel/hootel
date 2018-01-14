@@ -23,7 +23,7 @@
 import datetime
 from datetime import timedelta
 from odoo import fields
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from openerp.exceptions import ValidationError
 from .common import TestHotel
 from odoo.addons.hotel import date_utils
@@ -32,7 +32,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class TestHotelBase(TestHotel):
+class TestHotelReservations(TestHotel):
 
     def test_create_reservation(self):
         now_utc_dt = date_utils.now()

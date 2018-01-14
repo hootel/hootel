@@ -37,12 +37,17 @@ _logger = logging.getLogger(__name__)
 # por ejemplo, usuarios con distintos tipos de nivel, etc...
 class TestHotel(TestMail):
 
-    def create_reservation(self, creator, partner, checkin, checkout, room,
-                           resname, adults=1, children=0):
+    def create_folio(self, creator, partner):
         # Create Folio
         folio = self.env['hotel.folio'].sudo(creator).create({
             'partner_id': partner.id,
         })
+        return folio
+
+    def create_reservation(self, creator, partner, checkin, checkout, room,
+                           resname, adults=1, children=0):
+        # Create Folio
+        folio = self.create_folio(creator, partner)
         self.assertTrue(
             folio,
             "Hotel Calendar can't create folio for new reservation!")

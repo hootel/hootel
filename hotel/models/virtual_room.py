@@ -103,7 +103,6 @@ class VirtualRoom(models.Model):
     @api.model
     def check_availability_virtual_room(self, checkin, checkout,
                                         virtual_room_id=False, notthis=[]):
-        # End day of reservations is count as a free day
         occupied = self.env['hotel.reservation'].occupied(checkin, checkout)
         rooms_occupied = occupied.mapped('product_id.id')
         free_rooms = self.env['hotel.room'].search([
