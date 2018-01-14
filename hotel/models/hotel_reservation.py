@@ -513,7 +513,7 @@ class HotelReservation(models.Model):
         if chkin_utc_dt >= chkout_utc_dt:
             dpt_hour = self.env['ir.values'].get_default(
                 'hotel.config.settings', 'default_departure_hour')
-            checkout_str = (chkin_dt + timedelta(days=1)).strftime(
+            checkout_str = (chkin_utc_dt + timedelta(days=1)).strftime(
                                                     DEFAULT_SERVER_DATE_FORMAT)
             checkout_str = "%s %s:00" % (checkout_str, dpt_hour)
             checkout_dt = date_utils.get_datetime(checkout_str, tz=tz)
