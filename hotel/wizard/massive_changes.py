@@ -22,7 +22,10 @@
 from openerp.exceptions import ValidationError
 from datetime import datetime, timedelta
 from openerp import models, fields, api
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools import (
+    DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT)
+from odoo.addons.hotel import date_utils
 
 
 class MassiveChangesWizard(models.TransientModel):
@@ -47,7 +50,8 @@ class MassiveChangesWizard(models.TransientModel):
         ('0', 'Global'),
         ('1', 'Virtual Room'),
     ], string='Applied On', default='0')
-    virtual_room_ids = fields.Many2many('hotel.virtual.room', string="Virtual Rooms")
+    virtual_room_ids = fields.Many2many('hotel.virtual.room',
+                                        string="Virtual Rooms")
 
     # Availability fields
     change_avail = fields.Boolean(default=False)
@@ -56,7 +60,8 @@ class MassiveChangesWizard(models.TransientModel):
     no_ota = fields.Boolean('No OTA', default=False)
 
     # Restriction fields
-    restriction_id = fields.Many2one('hotel.virtual.room.restriction', 'Restriction Plan')
+    restriction_id = fields.Many2one('hotel.virtual.room.restriction',
+                                     'Restriction Plan')
     change_min_stay = fields.Boolean(default=False)
     min_stay = fields.Integer("Min. Stay")
     change_min_stay_arrival = fields.Boolean(default=False)
@@ -72,7 +77,11 @@ class MassiveChangesWizard(models.TransientModel):
 
     # Pricelist fields
     pricelist_id = fields.Many2one('product.pricelist', 'Pricelist')
-    price = fields.Char('Price', help="Can use '+','-' or '%'...\nExamples:\n ⚫ +12.3 \t> Increase the price in 12.3\n ⚫ -1.45% \t> Substract 1.45%\n ⚫ 45 \t\t> Sets the price to 45" )
+    price = fields.Char('Price', help="Can use '+','-' \
+                                        or '%'...\nExamples:\n ⚫ +12.3 \
+                                        \t> Increase the price in 12.3\n \
+                                        ⚫ -1.45% \t> Substract 1.45%\n ⚫ 45 \
+                                        \t\t> Sets the price to 45")
 
     @api.multi
     def is_valid_date(self, chkdate):
@@ -80,29 +89,37 @@ class MassiveChangesWizard(models.TransientModel):
         date_start_dt = fields.Datetime.from_string(self.date_start)
         date_end_dt = fields.Datetime.from_string(self.date_end)
         wday = chkdate.timetuple()[6]
-        wedays = [self.dmo, self.dtu, self.dwe, self.dth, self.dfr, self.dsa, self.dsu]
-        return (chkdate >= self.date_start and chkdate <= self.date_end and wedays[wday])
+        wedays = (self.dmo, self.dtu, self.dwe, self.dth, self.dfr, self.dsa,
+                  self.dsu)
+        return (chkdate >= self.date_start and chkdate <= self.date_end
+                and wedays[wday])
 
     # FIXME: Method too long!
     @api.multi
     def massive_change(self):
         hotel_vroom_obj = self.env['hotel.virtual.room']
         hotel_vroom_avail_obj = self.env['hotel.virtual.room.availabity']
-        hotel_vroom_restriction_item_obj = self.env['hotel.virtual.room.restriction.item']
+        hotel_vroom_re_it_obj = self.env['hotel.virtual.room.restriction.item']
         product_pricelist_item_obj = self.env['product.pricelist.item']
         for record in self:
-            date_start_dt = fields.Datetime.from_string(record.date_start).replace(hour=0, minute=0, second=0, microsecond=0)
-            date_end_dt = fields.Datetime.from_string(record.date_end).replace(hour=0, minute=0, second=0, microsecond=0)
-            diff_days = abs((date_end_dt-date_start_dt).days)+1
-            wedays = (record.dmo, record.dtu, record.dwe, record.dth, record.dfr, record.dsa, record.dsu)
-            vrooms = record.applied_on == '1' and record.virtual_room_ids or hotel_vroom_obj.search([])
+            date_start_dt = date_utils.get_datetime(record.date_start,
+                                                    hours=False)
+            # Use min '1' for same date
+            diff_days = date_utils.date_diff(record.date_start,
+                                             record.date_end,
+                                             hours=False) + 1
+            wedays = (record.dmo, record.dtu, record.dwe, record.dth,
+                      record.dfr, record.dsa, record.dsu)
+            vrooms = record.applied_on == '1' and record.virtual_room_ids \
+                or hotel_vroom_obj.search([])
 
             for i in range(0, diff_days):
                 ndate = date_start_dt + timedelta(days=i)
+                ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
                 if not wedays[ndate.timetuple()[6]]:
                     continue
                 if record.section == '0':
-                    domain = [('date', '=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))]
+                    domain = [('date', '=', ndate_str)]
 
                     vals = {}
                     if record.change_no_ota:
@@ -114,21 +131,30 @@ class MassiveChangesWizard(models.TransientModel):
                                 cavail = len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                                                                                              ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                                                                                              virtual_room_id=vroom.id))
-                                vals.update({'avail': min(cavail, vroom.total_rooms_count, record.avail)})
+                                vals.update({
+                                    'avail': min(cavail,
+                                                 vroom.total_rooms_count,
+                                                 record.avail),
+                                })
 
-                            vrooms_avail = hotel_vroom_avail_obj.search(domain+[('virtual_room_id', '=', vroom.id)])
+                            vrooms_avail = hotel_vroom_avail_obj.search(
+                                domain+[('virtual_room_id', '=', vroom.id)]
+                            )
                             if vrooms_avail:
                                 vrooms_avail.write(vals)
                             else:
                                 vals.update({
-                                    'date': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'date': ndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
                                     'virtual_room_id': vroom.id
                                 })
                                 hotel_vroom_avail_obj.create(vals)
                 elif record.section == '1':
                     domain = [
-                        ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                        ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                        ('date_start', '>=', ndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
+                        ('date_end', '<=', ndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
                         ('restriction_id', '=', record.restriction_id.id),
                         ('applied_on', '=', '0_virtual_room'),
                     ]
@@ -137,30 +163,35 @@ class MassiveChangesWizard(models.TransientModel):
                     if record.change_min_stay:
                         vals.update({'min_stay': record.min_stay})
                     if record.change_min_stay_arrival:
-                        vals.update({'min_stay_arrival': record.min_stay_arrival})
+                        vals.update({
+                            'min_stay_arrival': record.min_stay_arrival})
                     if record.change_max_stay:
                         vals.update({'max_stay': record.max_stay})
                     if record.change_closed:
                         vals.update({'closed': record.closed})
                     if record.change_closed_departure:
-                        vals.update({'closed_departure': record.closed_departure})
+                        vals.update({
+                            'closed_departure': record.closed_departure})
                     if record.change_closed_arrival:
                         vals.update({'closed_arrival': record.closed_arrival})
 
                     if any(vals):
                         for vroom_id in vrooms.ids:
-                            rresctriction_item_ids = hotel_vroom_restriction_item_obj.search(domain+[('virtual_room_id', '=', vroom_id)])
-                            if rresctriction_item_ids:
-                                rresctriction_item_ids.write(vals)
+                            rrest_item_ids = hotel_vroom_re_it_obj.search(
+                                domain+[('virtual_room_id', '=', vroom_id)])
+                            if rrest_item_ids:
+                                rrest_item_ids.write(vals)
                             else:
                                 vals.update({
-                                    'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                    'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'date_start': ndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
+                                    'date_end': ndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
                                     'restriction_id': record.restriction_id.id,
                                     'virtual_room_id': vroom_id,
                                     'applied_on': '0_virtual_room',
                                 })
-                                hotel_vroom_restriction_item_obj.create(vals)
+                                hotel_vroom_re_it_obj.create(vals)
                 elif record.section == '2':
                     price = 0.0
                     operation = 'a'
@@ -181,25 +212,32 @@ class MassiveChangesWizard(models.TransientModel):
 
                     domain = [
                         ('pricelist_id', '=', record.pricelist_id.id),
-                        ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                        ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                        ('date_start', '>=', ndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
+                        ('date_end', '<=', ndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
                         ('compute_price', '=', 'fixed'),
                         ('applied_on', '=', '1_product'),
                     ]
 
-                    product_tmpl_ids = vrooms.mapped('product_id.product_tmpl_id')
+                    product_tmpl_ids = vrooms.mapped(
+                                                'product_id.product_tmpl_id')
                     for vroom_id in vrooms:
-                        pricelist_item_ids = product_pricelist_item_obj.search(domain+[('product_tmpl_id', '=', vroom_id.product_id.product_tmpl_id.id)])
+                        prod_tmpl_id = vroom_id.product_id.product_tmpl_id
+                        pricelist_item_ids = product_pricelist_item_obj.search(
+                            domain+[('product_tmpl_id', '=', prod_tmpl_id.id)])
                         if any(pricelist_item_ids):
                             if operation != 'n':
                                 for pli in pricelist_item_ids:
                                     pli_price = pli.fixed_price
                                     if operation == 'a':
-                                        pli.write({'fixed_price': pli_price + price})
+                                        pli.write({
+                                            'fixed_price': pli_price + price})
                                     elif operation == 'ap':
                                         pli.write({'fixed_price': pli_price + price * pli_price * 0.01})
                                     elif operation == 's':
-                                        pli.write({'fixed_price': pli_price - price})
+                                        pli.write({
+                                            'fixed_price': pli_price - price})
                                     elif operation == 'sp':
                                         pli.write({'fixed_price': pli_price - price * pli_price * 0.01})
                                     elif operation == 'np':
@@ -209,11 +247,13 @@ class MassiveChangesWizard(models.TransientModel):
                         else:
                             product_pricelist_item_obj.create({
                                 'pricelist_id': record.pricelist_id.id,
-                                'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'date_start': ndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
+                                'date_end': ndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
                                 'compute_price': 'fixed',
                                 'applied_on': '1_product',
-                                'product_tmpl_id': vroom_id.product_id.product_tmpl_id.id,
+                                'product_tmpl_id': prod_tmpl_id.id,
                                 'fixed_price': price,
                             })
         return True

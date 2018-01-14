@@ -27,17 +27,20 @@ from openerp import models, api
 class BusHotelCalendar(models.TransientModel):
     _name = 'bus.hotel.calendar'
 
+    # FIXME: Too many parameters... perhaps best use kargs?
     @api.model
-    def _generate_reservation_notification(self, action, ntype, title, product_id,
-                                           reserv_id, partner_name, adults,
-                                           children, checkin, checkout,
-                                           folio_id, color, splitted, parent_reservation,
-                                           room_name, partner_phone, state, fix_days):
+    def _generate_reservation_notification(self, action, ntype, title,
+                                           product_id, reserv_id, partner_name,
+                                           adults, children, checkin, checkout,
+                                           folio_id, color, splitted,
+                                           parent_reservation, room_name,
+                                           partner_phone, state, fix_days):
         user_id = self.env['res.users'].browse(self.env.uid)
         master_reserv = parent_reservation or reserv_id
         num_split = self.env['hotel.reservation'].search_count([
             ('folio_id', '=', folio_id),
-            '|',('parent_reservation', '=', master_reserv), ('id', '=', master_reserv),
+            '|', ('parent_reservation', '=', master_reserv),
+                 ('id', '=', master_reserv),
             ('splitted', '=', True),
         ])
         return {
@@ -81,29 +84,37 @@ class BusHotelCalendar(models.TransientModel):
             'price': {
                 'pricelist': [{
                     'days': {
-                        date_dt.strftime("%d/%m/%Y"): price,    # European Format
+                        date_dt.strftime("%d/%m/%Y"): price,
                     },
                     'room': vroom,
                 }],
             },
         }
 
+    # FIXME: Too many parameters... perhaps best use kargs?
     @api.model
     def send_reservation_notification(self, action, ntype, title, product_id,
-                                      reserv_id, partner_name, adults, children,
-                                      checkin, checkout, folio_id, color, splitted,
-                                      parent_reservation, room_name, partner_phone,
-                                      state, fix_days):
+                                      reserv_id, partner_name, adults,
+                                      children, checkin, checkout, folio_id,
+                                      color, splitted, parent_reservation,
+                                      room_name, partner_phone, state,
+                                      fix_days):
         notif = self._generate_reservation_notification(action, ntype, title,
                                                         product_id, reserv_id,
                                                         partner_name, adults,
                                                         children, checkin,
                                                         checkout, folio_id,
-                                                        color, splitted, parent_reservation,
-                                                        room_name, partner_phone, state, fix_days)
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', 'public'), notif)
+                                                        color, splitted,
+                                                        parent_reservation,
+                                                        room_name,
+                                                        partner_phone, state,
+                                                        fix_days)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
+                                     'public'), notif)
 
     @api.model
     def send_pricelist_notification(self, pricelist, date, vroom, price):
-        notif = self._generate_pricelist_notification(pricelist, date, vroom, price)
-        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation', 'public'), notif)
+        notif = self._generate_pricelist_notification(pricelist, date, vroom,
+                                                      price)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
+                                     'public'), notif)

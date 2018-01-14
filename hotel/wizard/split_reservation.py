@@ -22,7 +22,10 @@
 from openerp.exceptions import ValidationError
 from datetime import datetime, timedelta
 from openerp import models, fields, api
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
+from openerp.tools import (
+    DEFAULT_SERVER_DATETIME_FORMAT,
+    DEFAULT_SERVER_DATE_FORMAT)
+from odoo.addons.hotel import date_utils
 
 
 class SplitReservationWizard(models.TransientModel):
@@ -32,29 +35,35 @@ class SplitReservationWizard(models.TransientModel):
 
     @api.multi
     def split_reservation(self):
-        reservation_id = self.env['hotel.reservation'].browse(self.env.context.get('active_id'))
+        reservation_id = self.env['hotel.reservation'].browse(
+                                            self.env.context.get('active_id'))
         if reservation_id:
-            if reservation_id.state == 'cancelled' or reservation_id.state == 'confirm':
+            if reservation_id.state == 'cancelled' \
+                    or reservation_id.state == 'confirm':
                 raise ValidationError("This reservation can't be splitted")
 
-            date_start_dt = fields.Datetime.from_string(reservation_id.checkin)
-            date_end_dt = fields.Datetime.from_string(reservation_id.checkout)
-            date_diff = abs((date_end_dt - date_start_dt).days) + 1
+            date_start_dt = date_utils.get_datetime(reservation_id.checkin)
+            date_end_dt = date_utils.get_datetime(reservation_id.checkout)
+            date_diff = date_utils.date_diff(date_start_dt, date_end_dt,
+                                             hours=False) + 1
             for record in self:
-                new_start_date_dt = date_start_dt + timedelta(days=date_diff - record.nights, minutes=1) # FIXME: Add 1 minutes for workaround date constrains
+                new_start_date_dt = date_start_dt + \
+                                    timedelta(days=date_diff - record.nights)
                 if record.nights >= date_diff or record.nights < 1:
-                    raise ValidationError("Invalid Nights! Max is '%d'" % date_diff-1)
-                reservation_id.checkout = new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-                import wdb
-                wdb.set_trace()
+                    raise ValidationError("Invalid Nights! Max is \
+                                            '%d'" % date_diff-1)
+                reservation_id.checkout = new_start_date_dt.strftime(
+                                            DEFAULT_SERVER_DATETIME_FORMAT)
+
                 vals = reservation_id.generate_copy_values(
                     new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                     date_end_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                 )
                 # Days Price
-                reservation_lines = [[],[]]
+                reservation_lines = [[], []]
                 tprice = [0.0, 0.0]
-                div_dt = fields.Datetime.from_string(fields.Datetime.from_string(reservation_id.checkout).strftime(DEFAULT_SERVER_DATE_FORMAT)) # Ignore hours
+                div_dt = date_utils.get_datetime(reservation_id.checkout,
+                                                 hours=False)
                 for rline in reservation_id.reservation_lines:
                     rline_dt = fields.Datetime.from_string(rline.date)
                     if rline_dt >= div_dt:
@@ -80,7 +89,8 @@ class SplitReservationWizard(models.TransientModel):
                 })
                 reservation_copy = self.env['hotel.reservation'].create(vals)
                 if not reservation_copy:
-                    raise ValidationError("Unexpected error copying record. Can't split reservation!")
+                    raise ValidationError("Unexpected error copying record. \
+                                            Can't split reservation!")
             return {
                 'type': 'ir.actions.act_window',
                 'res_model': 'hotel.folio',

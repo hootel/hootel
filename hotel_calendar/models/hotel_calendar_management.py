@@ -20,32 +20,39 @@
 #
 ##############################################################################
 from datetime import datetime, timedelta
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools import (
+    DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT)
 from openerp import models, api
 from openerp.exceptions import ValidationError
+from odoo.addons.hotel import date_utils
 import logging
 _logger = logging.getLogger(__name__)
+
 
 class HotelCalendarManagement(models.TransientModel):
     _name = 'hotel.calendar.management'
 
     @api.multi
-    def save_changes(self, pricelist_id, restriction_id, pricelist, restrictions, availability):
+    def save_changes(self, pricelist_id, restriction_id, pricelist,
+                     restrictions, availability):
         vroom_obj = self.env['hotel.virtual.room']
         product_pricelist_item_obj = self.env['product.pricelist.item']
-        vroom_restriction_item_obj = self.env['hotel.virtual.room.restriction.item']
+        vroom_rest_item_obj = self.env['hotel.virtual.room.restriction.item']
         vroom_avail_obj = self.env['hotel.virtual.room.availabity']
 
         # Save Pricelist
         for k_price, v_price in pricelist.iteritems():
-            room_id = vroom_obj.browse([int(k_price)])
+            vroom_id = vroom_obj.browse([int(k_price)])
+            vroom_prod_tmpl_id = vroom_id.product_id.product_tmpl_id
             for price in v_price:
                 price_id = product_pricelist_item_obj.search([
-                    ('date_start', '>=', price['date']), ('date_end', '<=', price['date']),
+                    ('date_start', '>=', price['date']),
+                    ('date_end', '<=', price['date']),
                     ('pricelist_id', '=', int(pricelist_id)),
                     ('applied_on', '=', '1_product'),
                     ('compute_price', '=', 'fixed'),
-                    ('product_tmpl_id', '=', room_id.product_id.product_tmpl_id.id),
+                    ('product_tmpl_id', '=', vroom_prod_tmpl_id.id),
                 ], limit=1)
                 if not price_id:
                     product_pricelist_item_obj.create({
@@ -55,7 +62,7 @@ class HotelCalendarManagement(models.TransientModel):
                         'applied_on': '1_product',
                         'compute_price': 'fixed',
                         'fixed_price': price['price'],
-                        'product_tmpl_id': room_id.product_id.product_tmpl_id.id,
+                        'product_tmpl_id': vroom_prod_tmpl_id.id,
                     })
                 else:
                     price_id.write({
@@ -65,14 +72,15 @@ class HotelCalendarManagement(models.TransientModel):
         # Save Restrictions
         for k_res, v_res in restrictions.iteritems():
             for restriction in v_res:
-                res_id = vroom_restriction_item_obj.search([
-                    ('date_start', '>=', restriction['date']), ('date_end', '<=', restriction['date']),
+                res_id = vroom_rest_item_obj.search([
+                    ('date_start', '>=', restriction['date']),
+                    ('date_end', '<=', restriction['date']),
                     ('restriction_id', '=', int(restriction_id)),
                     ('applied_on', '=', '0_virtual_room'),
                     ('virtual_room_id', '=', int(k_res)),
                 ], limit=1)
                 if not res_id:
-                    vroom_restriction_item_obj.create({
+                    vroom_rest_item_obj.create({
                         'date_start': restriction['date'],
                         'date_end': restriction['date'],
                         'restriction_id': int(restriction_id),
@@ -99,10 +107,10 @@ class HotelCalendarManagement(models.TransientModel):
         for k_avail, v_avail in availability.iteritems():
             vroom_id = vroom_obj.browse(int(k_avail))
             for avail in v_avail:
-                cavail = len(vroom_obj.check_availability_virtual_room('%s 00:00:00' % avail['date'],
-                                                                       '%s 00:00:00' % avail['date'],
-                                                                        virtual_room_id=vroom_id.id))
-                ravail = min(cavail, vroom_id.total_rooms_count, avail['avail'])
+                cavail = len(vroom_obj.check_availability_virtual_room(
+                    avail['date'], avail['date'], virtual_room_id=vroom_id.id))
+                ravail = min(cavail, vroom_id.total_rooms_count,
+                             avail['avail'])
                 avail_id = vroom_avail_obj.search([
                     ('date', '=', avail['date']),
                     ('virtual_room_id', '=', vroom_id.id),
@@ -135,8 +143,11 @@ class HotelCalendarManagement(models.TransientModel):
 
     def _hcalendar_pricelist_json_data(self, prices):
         json_data = {}
+        vroom_obj = self.env['hotel.virtual.room']
         for rec in prices:
-            virtual_room_id = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', rec.product_tmpl_id.id)], limit=1)
+            virtual_room_id = vroom_obj.search([
+                ('product_id.product_tmpl_id', '=', rec.product_tmpl_id.id)
+            ], limit=1)
             if not virtual_room_id:
                 continue
 
@@ -166,15 +177,14 @@ class HotelCalendarManagement(models.TransientModel):
 
     @api.model
     def _hcalendar_availability_json_data(self, dfrom, dto):
-        date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATE_FORMAT)
-        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATE_FORMAT)
+        date_start = date_utils.get_datetime(dfrom, hours=False)
+        date_diff = date_utils.date_diff(dfrom, dto, hours=False) + 1
         vrooms = self.env['hotel.virtual.room'].search([])
         json_data = {}
 
-        date_diff = abs((date_end - date_start).days)
         for vroom in vrooms:
             json_data[vroom.id] = []
-            for i in range(0, date_diff+1):
+            for i in range(0, date_diff):
                 cur_date = date_start + timedelta(days=i)
                 cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
                 avail = self.env['hotel.virtual.room.availabity'].search([
@@ -199,39 +209,42 @@ class HotelCalendarManagement(models.TransientModel):
 
     def _hcalendar_get_count_reservations_json_data(self, dfrom, dto):
         vrooms = self.env['hotel.virtual.room'].search([])
-        date_start = datetime.strptime(dfrom, DEFAULT_SERVER_DATE_FORMAT)
-        date_end = datetime.strptime(dto, DEFAULT_SERVER_DATE_FORMAT)
-        date_diff = abs((date_end-date_start).days)
+        date_start = date_utils.get_datetime(dfrom, hours=False)
+        date_diff = date_utils.date_diff(dfrom, dto, hours=False) + 1
         hotel_vroom_obj = self.env['hotel.virtual.room']
         hotel_room_obj = self.env['hotel.room']
         hotel_reservation_obj = self.env['hotel.reservation']
         vrooms = hotel_vroom_obj.search([])
 
         nn = {}
-        for i in range(0, date_diff+1):
+        for i in range(0, date_diff):
             cur_date = date_start + timedelta(days=i)
             cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
             occupied_reservations = hotel_reservation_obj.occupied(
                 '%s 00:00:00' % cur_date_str,
                 '%s 00:00:00' % cur_date_str)
 
-            if not cur_date in nn:
-                nn.update({ cur_date_str: {} })
+            if cur_date not in nn:
+                nn.update({cur_date_str: {}})
             if not any(occupied_reservations):
-                for vroom in vrooms: # Recorremos habs virtuales ocupadas
-                    if not vroom.id in nn[cur_date_str]:
+                for vroom in vrooms:    # Recorremos habs virtuales ocupadas
+                    if vroom.id not in nn[cur_date_str]:
                         nn[cur_date_str][vroom.id] = 0
             else:
                 for oreserv in occupied_reservations:
-                    occupied_room = hotel_room_obj.search([('product_id', '=', oreserv.product_id.id)], limit=1)
+                    occupied_room = hotel_room_obj.search([
+                        ('product_id', '=', oreserv.product_id.id)
+                    ], limit=1)
                     occupied_vrooms = hotel_vroom_obj.search([
-                        '|', ('room_ids', 'in', [occupied_room.id]), ('room_type_ids', 'in', [occupied_room.categ_id.id])
+                        '|', ('room_ids', 'in', [occupied_room.id]),
+                             ('room_type_ids', 'in', [
+                                                    occupied_room.categ_id.id])
                     ])
 
-                    if not cur_date_str in nn:
-                        nn.update({ cur_date_str: {} })
-                    for vroom in vrooms: # Recorremos habs virtuales ocupadas
-                        if not vroom.id in nn[cur_date_str]:
+                    if cur_date_str not in nn:
+                        nn.update({cur_date_str: {}})
+                    for vroom in vrooms:    # Recorremos habs. virt. ocupadas
+                        if vroom.id not in nn[cur_date_str]:
                             nn[cur_date_str][vroom.id] = 0
                         if vroom.id in occupied_vrooms.ids:
                             nn[cur_date_str][vroom.id] += 1
@@ -239,7 +252,7 @@ class HotelCalendarManagement(models.TransientModel):
         json_data = {}
         for date in nn:
             for vroom in nn[date]:
-                if not vroom in json_data:
+                if vroom not in json_data:
                     json_data[vroom] = []
                 json_data[vroom].append({
                     'date': date,
@@ -249,22 +262,25 @@ class HotelCalendarManagement(models.TransientModel):
         return json_data
 
     @api.multi
-    def get_hcalendar_all_data(self, dfrom, dto, pricelist_id, restriction_id, withRooms):
+    def get_hcalendar_all_data(self, dfrom, dto, pricelist_id, restriction_id,
+                               withRooms):
         if not dfrom or not dto:
             raise ValidationError('Input Error: No dates defined!')
         vals = {}
         if not pricelist_id:
-            pricelist_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_pricelist_id')
+            pricelist_id = self.env['ir.values'].sudo().get_default(
+                            'hotel.config.settings', 'parity_pricelist_id')
         if not restriction_id:
-            restriction_id = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'parity_restrictions_id')
+            restriction_id = self.env['ir.values'].sudo().get_default(
+                            'hotel.config.settings', 'parity_restrictions_id')
 
-        # FIXME: For some reason need force int type...
         pricelist_id = int(pricelist_id)
         vals.update({'pricelist_id': pricelist_id})
         restriction_id = int(restriction_id)
         vals.update({'restriction_id': restriction_id})
 
-        restriction_item_ids = self.env['hotel.virtual.room.restriction.item'].search([
+        vroom_rest_it_obj = self.env['hotel.virtual.room.restriction.item']
+        restriction_item_ids = vroom_rest_it_obj.search([
             ('date_start', '>=', dfrom), ('date_end', '<=', dto),
             ('restriction_id', '=', restriction_id),
             ('applied_on', '=', '0_virtual_room'),
@@ -277,15 +293,20 @@ class HotelCalendarManagement(models.TransientModel):
             ('compute_price', '=', 'fixed'),
         ])
 
+        json_prices = self._hcalendar_pricelist_json_data(pricelist_item_ids)
+        json_rest = self._hcalendar_restriction_json_data(restriction_item_ids)
+        json_avails = self._hcalendar_availability_json_data(dfrom, dto)
+        json_rc = self._hcalendar_get_count_reservations_json_data(dfrom, dto)
         vals.update({
-            'prices': self._hcalendar_pricelist_json_data(pricelist_item_ids) or [],
-            'restrictions': self._hcalendar_restriction_json_data(restriction_item_ids) or [],
-            'availability': self._hcalendar_availability_json_data(dfrom, dto) or [],
-            'count_reservations': self._hcalendar_get_count_reservations_json_data(dfrom, dto) or [],
+            'prices': json_prices or [],
+            'restrictions': json_rest or [],
+            'availability': json_avails or [],
+            'count_reservations': json_rc or [],
         })
 
         if withRooms:
             room_ids = self.env['hotel.virtual.room'].search([])
-            vals.update({'rooms': self._hcalendar_room_json_data(room_ids) or []})
+            json_rooms = self._hcalendar_room_json_data(room_ids)
+            vals.update({'rooms': json_rooms or []})
 
         return vals

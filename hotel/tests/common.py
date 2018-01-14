@@ -1,24 +1,51 @@
 # -*- coding: utf-8 -*-
-# Created by Alexandre Díaz <dev@redneboa.es>
+##############################################################################
+#
+#    OpenERP, Open Source Management Solution
+#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
+#                       Alexandre Díaz <dev@redneboa.es>
+#
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+##############################################################################
 from datetime import timedelta
 from odoo import api, fields
 from odoo.tests import common
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools import (
+    DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT)
 from odoo.addons.mail.tests.common import TestMail
+from odoo.addons.hotel import date_utils
 import pytz
 import logging
 _logger = logging.getLogger(__name__)
 
 
-# TestMail crea recursos utiles para nuestros test... por ejemplo, usuarios con distintos tipos de nivel, etc...
+# TestMail crea recursos utiles para nuestros test...
+# por ejemplo, usuarios con distintos tipos de nivel, etc...
 class TestHotel(TestMail):
 
-    def create_reservation(self, creator, partner, checkin, checkout, room, resname, adults=1, children=0):
+    def create_reservation(self, creator, partner, checkin, checkout, room,
+                           resname, adults=1, children=0):
         # Create Folio
         folio = self.env['hotel.folio'].sudo(creator).create({
             'partner_id': partner.id,
         })
-        self.assertTrue(folio, "Hotel Calendar can't create folio for new reservation!")
+        self.assertTrue(
+            folio,
+            "Hotel Calendar can't create folio for new reservation!")
 
         # Create Reservation (Special Room)
         reservation = self.env['hotel.reservation'].sudo(creator).create({
@@ -30,21 +57,20 @@ class TestHotel(TestMail):
             'folio_id': folio.id,
             'product_id': room.product_id.id,
         })
-        self.assertTrue(reservation, "Hotel Calendar can't create a new reservation!")
+        self.assertTrue(
+            reservation,
+            "Hotel Calendar can't create a new reservation!")
 
         # Create Reservation Lines + Update Reservation Price
-        # Used replace for flag datetime object as UTC (required for time-zone conversions)
-        reserv_start_dt = checkin.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.tz_hotel))
-        reserv_end_dt = checkout.replace(tzinfo=pytz.utc).astimezone(pytz.timezone(self.tz_hotel))
-        days_diff = abs((reserv_end_dt - reserv_start_dt).days-1)
-        res = reservation.sudo(creator).prepare_reservation_lines(checkin.strftime(DEFAULT_SERVER_DATETIME_FORMAT), days_diff)
+        days_diff = date_utils.date_diff(checkin, checkout, hours=False) + 1
+        res = reservation.sudo(creator).prepare_reservation_lines(
+            checkin.strftime(DEFAULT_SERVER_DATETIME_FORMAT), days_diff)
         reservation.sudo(creator).write({
             'reservation_lines': res['commands'],
             'price_unit': res['total_price'],
         })
 
         return (folio, reservation)
-
 
     @classmethod
     def setUpClass(cls):
@@ -65,34 +91,46 @@ class TestHotel(TestMail):
         cls.tz_hotel = 'Europe/Madrid'
         cls.parity_pricelist_id = cls.pricelist_1.id
         cls.parity_restrictions_id = cls.restriction_1.id
-        cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'tz_hotel', cls.tz_hotel)
-        cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'parity_pricelist_id', cls.parity_pricelist_id)
-        cls.env['ir.values'].sudo().set_default('hotel.config.settings', 'parity_restrictions_id', cls.parity_restrictions_id)
+        cls.env['ir.values'].sudo().set_default('hotel.config.settings',
+                                                'tz_hotel', cls.tz_hotel)
+        cls.env['ir.values'].sudo().set_default('hotel.config.settings',
+                                                'parity_pricelist_id',
+                                                cls.parity_pricelist_id)
+        cls.env['ir.values'].sudo().set_default('hotel.config.settings',
+                                                'parity_restrictions_id',
+                                                cls.parity_restrictions_id)
 
         # User Groups
         user_group_hotel_manager = cls.env.ref('hotel.group_hotel_manager')
         user_group_hotel_user = cls.env.ref('hotel.group_hotel_user')
         user_group_employee = cls.env.ref('base.group_user')
         user_group_public = cls.env.ref('base.group_public')
-        user_group_account_invoice = cls.env.ref('account.group_account_invoice')
+        user_group_account_inv = cls.env.ref('account.group_account_invoice')
 
         # Create Test Users
-        Users = cls.env['res.users'].with_context({'no_reset_password': True, 'mail_create_nosubscribe': True})
+        Users = cls.env['res.users'].with_context({
+            'no_reset_password': True,
+            'mail_create_nosubscribe': True
+        })
         cls.user_hotel_manager = Users.create({
             'name': 'Jeff Hotel Manager',
             'login': 'hoteljeff',
             'email': 'mynameisjeff@example.com',
             'signature': '--\nJeff',
             'notify_email': 'always',
-            'groups_id': [(6, 0, [user_group_hotel_manager.id, user_group_employee.id, user_group_account_invoice.id])]})
+            'groups_id': [(6, 0, [user_group_hotel_manager.id,
+                                  user_group_employee.id,
+                                  user_group_account_inv.id])]
+        })
         cls.user_hotel_user = Users.create({
             'name': 'Juancho Hotel User',
             'login': 'juancho',
             'email': 'juancho@example.com',
             'signature': '--\nJuancho',
             'notify_email': 'always',
-            'groups_id': [(6, 0, [user_group_hotel_user.id, user_group_public.id])]})
-
+            'groups_id': [(6, 0, [user_group_hotel_user.id,
+                                  user_group_public.id])]
+        })
 
         # Create Tests Records
         RoomTypes = cls.env['hotel.room.type']
@@ -138,29 +176,34 @@ class TestHotel(TestMail):
         })
 
         cls.hotel_vroom_budget.write({
-            'room_ids': [(6, False, [cls.hotel_room_simple_100.id, cls.hotel_room_simple_101.id])],
+            'room_ids': [(6, False, [cls.hotel_room_simple_100.id,
+                                     cls.hotel_room_simple_101.id])],
         })
         cls.hotel_vroom_special.write({
             'room_ids': [(6, False, [cls.hotel_room_double_200.id])],
         })
 
         # Create a week of fresh data
-        now_utc_dt = fields.datetime.now()
+        now_utc_dt = date_utils.now()
         cls.avails_tmp = {
             cls.hotel_vroom_budget.id: (1, 2, 2, 1, 1, 2, 2),
             cls.hotel_vroom_special.id: (1, 1, 1, 1, 1, 1, 1),
         }
         cls.prices_tmp = {
-            cls.hotel_vroom_budget.id: (10.0, 80.0, 80.0, 95.0, 90.0, 80.0, 20.0),
-            cls.hotel_vroom_special.id: (5.0, 15.0, 15.0, 35.0, 35.0, 10.0, 10.0),
+            cls.hotel_vroom_budget.id: (10.0, 80.0, 80.0, 95.0, 90.0, 80.0,
+                                        20.0),
+            cls.hotel_vroom_special.id: (5.0, 15.0, 15.0, 35.0, 35.0, 10.0,
+                                         10.0),
         }
         cls.restrictions_min_stay_tmp = {
             cls.hotel_vroom_budget.id: (0, 1, 2, 1, 1, 0, 0),
             cls.hotel_vroom_special.id: (3, 1, 0, 2, 0, 1, 4),
         }
+        budget_product_id = cls.hotel_vroom_budget.product_id
+        special_product_id = cls.hotel_vroom_special.product_id
         product_tmpl_ids = {
-            cls.hotel_vroom_budget.id: cls.hotel_vroom_budget.product_id.product_tmpl_id.id,
-            cls.hotel_vroom_special.id: cls.hotel_vroom_special.product_id.product_tmpl_id.id,
+            cls.hotel_vroom_budget.id: budget_product_id.product_tmpl_id.id,
+            cls.hotel_vroom_special.id: special_product_id.product_tmpl_id.id,
         }
         vroom_avail_obj = cls.env['hotel.virtual.room.availabity']
         vroom_rest_item_obj = cls.env['hotel.virtual.room.restriction.item']

@@ -266,10 +266,7 @@ class HotelFolio(models.Model):
 
     @api.multi
     def action_folios_amount(self):
-        now_utc_dt = fields.datetime.now().replace(hour=0,
-                                                   minute=0,
-                                                   second=0,
-                                                   microsecond=0)
+        now_utc_dt = date_utils.now()
         now_utc_str = now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         reservations = self.env['hotel.reservation'].search([
             ('checkout', '<=', now_utc_str)
@@ -397,7 +394,7 @@ class HotelFolio(models.Model):
                 _logger.info(line.id)
                 days_diff = date_utils.date_diff(line.checkin,
                                                  line.checkout,
-                                                 hours=False)
+                                                 hours=False) + 1
                 res = line.prepare_reservation_lines(line.checkin, days_diff)
                 line.reservation_lines = res['commands']
                 line.price_unit = res['total_price']

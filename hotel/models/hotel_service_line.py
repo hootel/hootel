@@ -199,7 +199,7 @@ class HotelServiceLine(models.Model):
         -----------------------------------------------------------------
         @param self: object pointer
         '''
-        now_utc_dt = fields.datetime.now()
+        now_utc_dt = date_utils.now()
         if not self.ser_checkin:
             self.ser_checkin = now_utc_dt.strftime(
                 DEFAULT_SERVER_DATETIME_FORMAT)
@@ -212,8 +212,8 @@ class HotelServiceLine(models.Model):
             raise UserError('Checkout must be greater or equal checkin date')
         if self.ser_checkin and self.ser_checkout:
             diffDate = date_utils.date_diff(self.ser_checkin,
-                                            self.ser_checkout, hours=False)
-            self.product_uom_qty = diffDate.days + 1
+                                            self.ser_checkout, hours=False) + 1
+            self.product_uom_qty = diffDate + 1
 
     @api.multi
     def button_confirm(self):

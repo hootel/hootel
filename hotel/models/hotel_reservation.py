@@ -274,14 +274,19 @@ class HotelReservation(models.Model):
 
     @api.model
     def daily_plan(self):
-        date_today_str = fields.datetime.now().replace(
-            hour=0, minute=0, second=0, microsecond=0).strftime(
-                                                    DEFAULT_SERVER_DATE_FORMAT)
-        date_yesterday_str = (today - timedelta(days=1)).strftime(
-                                                    DEFAULT_SERVER_DATE_FORMAT)
+        today_utc_dt = date_utils.now()
+        yesterday_utc_dt = today - timedelta(days=1)
+        hotel_tz = self.env['ir.values'].get_default('hotel.config.settings',
+                                                     'tz_hotel')
+        today_dt = date_utils.dt_as_timezone(today_utc_dt, hotel_tz)
+        yesterday_dt = date_utils.dt_as_timezone(yesterday_utc_dt, hotel_tz)
+
+        today_str = today_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+        yesterday_str = yesterday_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+
         reservations = self.env['hotel.reservation'].search([
-            ('reservation_lines.date', 'in', [date_today_str,
-                                              date_yesterday_str]),
+            ('reservation_lines.date', 'in', [today_str,
+                                              yesterday_str]),
             ('state', 'in', ['confirm', 'booking'])
         ])
         self._cr.execute("update hotel_reservation set is_checkin = False, \
@@ -304,14 +309,14 @@ class HotelReservation(models.Model):
     @api.model
     def checkin_is_today(self):
         self.ensure_one()
-        date_now_str = fields.datetime.now().strftime(
+        date_now_str = date_utils.now().strftime(
             DEFAULT_SERVER_DATE_FORMAT)
         return date_utils.date_compare(self.checkin, date_now_str, hours=False)
 
     @api.model
     def checkout_is_today(self):
         self.ensure_one()
-        date_now_str = fields.datetime.now().strftime(
+        date_now_str = date_utils.now().strftime(
             DEFAULT_SERVER_DATE_FORMAT)
         return date_utils.date_compare(self.checkout, date_now_str,
                                        hours=False)
@@ -517,7 +522,7 @@ class HotelReservation(models.Model):
                                                 DEFAULT_SERVER_DATETIME_FORMAT)
 
         days_diff = date_utils.date_diff(self.checkin, self.checkout,
-                                         hours=False)
+                                         hours=False) + 1
         res = self.prepare_reservation_lines(self.checkin, days_diff)
         self.reservation_lines = res['commands']
 
@@ -552,7 +557,7 @@ class HotelReservation(models.Model):
     def get_availability(self, checkin, checkout, product_id, dbchanged=True):
         date_start = date_utils.get_datetime(checkin)
         date_end = date_utils.get_datetime(checkout)
-        date_diff = date_utils.date_diff(date_start, date_end, hours=False)
+        date_diff = date_utils.date_diff(date_start, date_end, hours=False) + 1
 
         hotel_vroom_obj = self.env['hotel.virtual.room']
         virtual_room_avail_obj = self.env['hotel.virtual.room.availabity']
@@ -642,7 +647,7 @@ class HotelReservation(models.Model):
         @param self: object pointer
         '''
         self.ensure_one()
-        now_utc_dt = fields.datetime.now()
+        now_utc_dt = date_utils.now()
         if not self.checkin:
             self.checkin = now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         if not self.checkout:
@@ -755,8 +760,8 @@ class HotelReservation(models.Model):
             'hotel.config.settings', 'tz_hotel'))
         checkin_utc_dt = date_utils.get_datetime(str_checkin_utc)
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt, tz_hotel)
-        days_diff = max(date_utils.date_diff(str_checkin_utc, str_checkout_utc,
-                                             hours=False), 1)   # Same Date?
+        days_diff = date_utils.date_diff(str_checkin_utc, str_checkout_utc,
+                                         hours=False) + 1
         dates_list = date_utils.generate_dates_list(checkin_dt, days_diff,
                                                     tz=tz_hotel)
         reservations = self.env['hotel.reservation'].search([

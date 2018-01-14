@@ -23,7 +23,6 @@ from openerp.exceptions import except_orm, UserError, ValidationError
 from openerp import models, fields, api, _
 
 
-
 class AccountPayment(models.Model):
 
     _inherit = 'account.payment'
@@ -35,13 +34,16 @@ class AccountPayment(models.Model):
         if payments:
             for pay in payments:
                 if pay.folio_id:
-                    fol = pay.env['hotel.folio'].search([('id','=',pay.folio_id.id)])
+                    fol = pay.env['hotel.folio'].search([
+                        ('id', '=', pay.folio_id.id)
+                    ])
                 else:
                     return
                 # We must pay only one folio
                 if len(fol) == 0:
                     return
                 elif len(fol) > 1:
-                    raise except_orm(_('Warning'), _('This pay is related with more than one Reservation.'))
+                    raise except_orm(_('Warning'), _('This pay is related \
+                                            with more than one Reservation.'))
                 else:
                     fol.room_lines._compute_color()

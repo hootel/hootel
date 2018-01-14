@@ -24,6 +24,7 @@ import pytz
 from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT,
     DEFAULT_SERVER_DATE_FORMAT)
+from openerp import fields
 from openerp.exceptions import ValidationError
 
 
@@ -41,7 +42,7 @@ def _generate_datetime(str_date, dtformat, tz=False):
 
 # Try generate a 'datetime' object from 'str_date' string
 # using all odoo formats
-def get_datetime(str_date, tz=False):
+def get_datetime(str_date, hours=True, end_day=False, tz=False):
     date_dt = _generate_datetime(
         str_date,
         DEFAULT_SERVER_DATETIME_FORMAT,
@@ -51,19 +52,41 @@ def get_datetime(str_date, tz=False):
             str_date,
             DEFAULT_SERVER_DATE_FORMAT,
             tz=tz)
+
+    if date_dt:
+        if end_day:
+            date_dt = date_dt.replace(hour=23, minute=59, second=59,
+                                      microsecond=999999)
+        elif not hours:
+            date_dt = date_dt.replace(hour=0, minute=0, second=0,
+                                      microsecond=0)
+
     return date_dt
 
 
 # Compare two dates
-def date_compare(str_date_a, str_date_b, hours=True, tz=False):
-    date_dt_a = get_datetime(str_date_a, tz=tz)
-    date_dt_b = get_datetime(str_date_b, tz=tz)
+def date_compare(str_date_a, str_date_b, hours=True):
+    date_dt_a = get_datetime(str_date_a)
+    date_dt_b = get_datetime(str_date_b)
 
     if not hours:
-        date_dt_a.replace(hour=0, minute=0, second=0, microsecond=0)
-        date_dt_b.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_dt_a = date_dt_a.replace(hour=0, minute=0, second=0,
+                                      microsecond=0)
+        date_dt_b = date_dt_b.replace(hour=0, minute=0, second=0,
+                                      microsecond=0)
 
     return date_dt_a == date_dt_b
+
+
+# Get now 'datetime' object
+def now(hours=False):
+    now_utc_dt = fields.datetime.now().replace(tzinfo=pytz.utc)
+
+    if not hours:
+        now_utc_dt = now_utc_dt.replace(hour=0, minute=0, second=0,
+                                        microsecond=0)
+
+    return now_utc_dt
 
 
 # Get the difference in days between 'str_date_start' and 'str_date_end'
@@ -81,8 +104,10 @@ def date_diff(date_start, date_end, hours=True, tz=False):
         raise ValidationError("Invalid date. Can't compare it!")
 
     if not hours:
-        date_start_dt.replace(hour=0, minute=0, second=0, microsecond=0)
-        date_end_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        date_start_dt = date_start_dt.replace(hour=0, minute=0, second=0,
+                                              microsecond=0)
+        date_end_dt = date_end_dt.replace(hour=0, minute=0, second=0,
+                                          microsecond=0)
 
     return abs((date_end_dt - date_start_dt).days)
 
@@ -115,8 +140,10 @@ def date_in(str_date, str_start_date, str_end_date, hours=True, tz=False):
         raise ValidationError("Invalid date. Can't compare it!")
 
     if not hours:
-        date_start_dt.replace(hour=0, minute=0, second=0, microsecond=0)
-        date_end_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
+        date_start_dt = date_start_dt.replace(hour=0, minute=0, second=0,
+                                              microsecond=0)
+        date_end_dt = date_end_dt.replace(hour=23, minute=59, second=59,
+                                          microsecond=999999)
 
     res = -2
     if date_dt >= date_start_dt and date_dt <= date_end_dt:
@@ -149,9 +176,10 @@ def range_dates_in(str_start_date_a,
         raise ValidationError("Invalid date. Can't compare it!")
 
     if not hours:
-        date_start_dt_b.replace(hour=0, minute=0, second=0, microsecond=0)
-        date_end_dt_b.replace(hour=23, minute=59, second=59,
-                              microsecond=999999)
+        date_start_dt_b = date_start_dt_b.replace(hour=0, minute=0, second=0,
+                                                  microsecond=0)
+        date_end_dt_b = date_end_dt_b.replace(hour=23, minute=59, second=59,
+                                              microsecond=999999)
 
     res = -2
     if date_start_dt_a >= date_start_dt_b and date_end_dt_a <= date_end_dt_b:

@@ -26,6 +26,7 @@ from openerp.http import request
 class Controller(BusController):
     def _poll(self, dbname, channels, last, options):
         if request.session.uid:
-            registry, cr, uid, context = request.registry, request.cr, request.session.uid, request.context
+            registry, cr, uid, context = request.registry, request.cr, \
+                                         request.session.uid, request.context
             channels.append((request.db, 'hotel.reservation', 'public'))
         return super(Controller, self)._poll(dbname, channels, last, options)

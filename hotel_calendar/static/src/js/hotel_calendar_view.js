@@ -427,6 +427,7 @@ var HotelCalendarView = View.extend({
             }, results['pricelist'], results['restrictions']);
 
             var reservs = [];
+            console.log(results['reservations']);
             for (var r of results['reservations']) {
                 var room = self._hcalendar.getRoom(r[0]);
                 var nreserv = new HReservation(

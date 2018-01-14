@@ -22,6 +22,7 @@
 from openerp import models, fields, api
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from odoo.addons.hotel import date_utils
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -67,7 +68,7 @@ class WubookConfiguration(models.TransientModel):
     def resync(self):
         self.ensure_one()
 
-        now_utc_dt = fields.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        now_utc_dt = date_utils.now()
         now_utc_str = now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
 
         # Reset Issues
