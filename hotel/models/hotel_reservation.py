@@ -613,7 +613,7 @@ class HotelReservation(models.Model):
             'hotel.config.settings', 'parity_pricelist_id')
         if pricelist_id:
             pricelist_id = int(pricelist_id)
-        for i in range(0, days + 1):
+        for i in range(0, days-1):
             ndate = start_date_dt + timedelta(days=i)
             ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
             prod = product_id.with_context(
