@@ -139,7 +139,7 @@ class HotelReservation(models.Model):
         else:
             tz_hotel = self.env['ir.values'].get_default(
                 'hotel.config.settings', 'tz_hotel')
-            now_utc_dt = field.datetime.now()
+            now_utc_dt = date_utils.now()
             ndate = "%s %s:00" % \
                 (now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                  default_arrival_hour)
@@ -161,7 +161,7 @@ class HotelReservation(models.Model):
         else:
             tz_hotel = self.env['ir.values'].get_default(
                 'hotel.config.settings', 'tz_hotel')
-            now_utc_dt = field.datetime.now() + timedelta(days=1)
+            now_utc_dt = date_utils.now() + timedelta(days=1)
             ndate = "%s %s:00" % \
                 (now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                  default_departure_hour)
