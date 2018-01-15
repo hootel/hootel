@@ -69,7 +69,7 @@ class WuBookInstaller(models.TransientModel):
             'wubook.config.settings',
             'wubook_push_security_token',
             binascii.hexlify(os.urandom(16)).decode())
-        self.cr.commit()    # FIXME: Need do this
+        self.env.cr.commit()    # FIXME: Need do this
         wres = self.env['wubook'].initialize(activate_push)
         if not wres:
             raise ValidationError("Can't finish installation!")
