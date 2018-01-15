@@ -39,6 +39,9 @@ class TestWubook(TestHotelWubook):
         checkin_utc_dt = now_utc_dt + timedelta(days=3)
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
                                                self.tz_hotel)
+        checkout_utc_dt = checkin_utc_dt + timedelta(days=2)
+        date_diff = date_utils.date_diff(checkin_utc_dt, checkout_utc_dt,
+                                         hours=False) + 1
 
         wbooks = [self.create_wubook_booking(
             self.user_hotel_manager,
@@ -46,9 +49,40 @@ class TestWubook(TestHotelWubook):
             self.partner_2,
             {
                 self.hotel_vroom_budget.wrid: {
-                    'occupancy': [1],
-                    'dayprices': [15.0, 15.0]
+                    'occupancy': [1],   # 1 Reservation Line
+                    'dayprices': [15.0, 15.0]   # 2 Days
                 }
             }
         )]
-        self.env['wubook'].generate_reservations(wbooks)
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].generate_reservations(wbooks)
+
+        # Check Creation
+        self.assertTrue(any(processed_rids), "Reservation not found")
+        nreserv = self.env['hotel.reservation'].search([
+            ('wrid', '=', processed_rids[0])
+        ], limit=0)
+        self.assertTrue(nreserv, "Reservation not found")
+        nfolio = self.env['hotel.folio'].search([
+            ('id', '=', nreserv.folio_id.id)
+        ], limit=1)
+        self.assertTrue(nfolio, "Folio not found")
+
+        # Check Dates
+        self.assertEqual(
+            nreserv.checkin,
+            checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            "Invalid Checkin Reservation Date")
+        self.assertEqual(
+            nreserv.checkout,
+            checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            "Invalid Checkout Reservation Date")
+        # Check Price
+        self.assertEqual(nreserv.price_unit, 30.0, "Invalid Reservation Price")
+        # Check Reservation Lines
+        self.assertTrue(any(nreserv.reservation_lines),
+                        "Reservation lines snot found")
+        dates_arr = date_utils.generate_dates_list(checkin_dt, date_diff-1)
+        for k_line, v_line in enumerate(nreserv.reservation_lines):
+            self.assertEqual(dates_arr[k_line], v_line['date'],
+                             "Invalid Reservation Lines Dates")

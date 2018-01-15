@@ -22,6 +22,7 @@
 from datetime import datetime
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from openerp import models, api
+from odoo.addons.hotel_calendar.controllers.bus import HOTEL_BUS_CHANNEL_ID
 
 
 class BusHotelCalendar(models.TransientModel):
@@ -50,4 +51,5 @@ class BusHotelCalendar(models.TransientModel):
         notif = self._generate_issue_notification(ntype, title, issue_id,
                                                   section, message)
         self.env['bus.bus'].sendone(
-                    (self._cr.dbname, 'hotel.reservation', 'public'), notif)
+                    (self._cr.dbname, 'hotel.reservation',
+                     HOTEL_BUS_CHANNEL_ID), notif)

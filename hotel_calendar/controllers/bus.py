@@ -22,11 +22,14 @@
 from openerp.addons.bus.controllers.main import BusController
 from openerp.http import request
 
+HOTEL_BUS_CHANNEL_ID = 15705
+
 
 class Controller(BusController):
     def _poll(self, dbname, channels, last, options):
         if request.session.uid:
             registry, cr, uid, context = request.registry, request.cr, \
                                          request.session.uid, request.context
-            channels.append((request.db, 'hotel.reservation', 0))
+            channels.append((request.db, 'hotel.reservation',
+                             HOTEL_BUS_CHANNEL_ID))
         return super(Controller, self)._poll(dbname, channels, last, options)
