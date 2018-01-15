@@ -1083,9 +1083,10 @@ class WuBook(models.TransientModel):
                 while dates_checkin[0]: # This perhaps create splitted reservations
                     checkin_str = dates_checkin[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     checkout_str = dates_checkout[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-
+                    rcheckout_dt = dates_checkout[0] - timedelta(days=1)
+                    rcheckout_str = rcheckout_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     free_rooms = hotel_vroom_obj.check_availability_virtual_room(checkin_str,
-                                                                                 checkout_str,
+                                                                                 rcheckout_str,
                                                                                  virtual_room_id=vroom.id,
                                                                                  notthis=used_rooms)
                     if any(free_rooms):
@@ -1174,19 +1175,26 @@ class WuBook(models.TransientModel):
 
             # Create Folio
             if not any(failed_reservations) and any(reservations):
-                vals = {
-                    'room_lines': reservations,
-                    'wcustomer_notes': book['customer_notes'],
-                }
-                if folio_id:
-                    folio_id.with_context({'wubook_action': False}).write(vals)
-                else:
-                    vals.update({
-                        'partner_id': partner_id.id,
-                        'wseed': book['sessionSeed']
-                    })
-                    folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
-                processed_rids.append(book['reservation_code'])
+                try:
+                    vals = {
+                        'room_lines': reservations,
+                        'wcustomer_notes': book['customer_notes'],
+                    }
+                    if folio_id:
+                        folio_id.with_context({'wubook_action': False}).write(vals)
+                    else:
+                        vals.update({
+                            'partner_id': partner_id.id,
+                            'wseed': book['sessionSeed']
+                        })
+                        folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
+                    processed_rids.append(book['reservation_code'])
+                except Exception:
+                    self.create_wubook_issue(
+                        'reservation',
+                        'Exception catched trying import booking',
+                        '', wid=book['reservation_code'])
+                    failed_reservations.append(book['channel_reservation_code'])
 
         return (processed_rids, any(failed_reservations),
                 checkin_utc_dt, checkout_utc_dt)

@@ -34,7 +34,7 @@ _logger = logging.getLogger(__name__)
 
 class TestWubook(TestHotelWubook):
 
-    def test_create_reservation(self):
+    def test_simple_booking(self):
         now_utc_dt = date_utils.now()
         checkin_utc_dt = now_utc_dt + timedelta(days=3)
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
@@ -59,14 +59,17 @@ class TestWubook(TestHotelWubook):
 
         # Check Creation
         self.assertTrue(any(processed_rids), "Reservation not found")
+        self.assertFalse(errors, "Reservation errors")
         nreserv = self.env['hotel.reservation'].search([
-            ('wrid', '=', processed_rids[0])
-        ], limit=0)
+            ('wrid', 'in', processed_rids)
+        ])
         self.assertTrue(nreserv, "Reservation not found")
+        self.assertEqual(nreserv.state, 'draft', "Invalid reservation state")
         nfolio = self.env['hotel.folio'].search([
             ('id', '=', nreserv.folio_id.id)
         ], limit=1)
         self.assertTrue(nfolio, "Folio not found")
+        self.assertEqual(nfolio.state, 'draft', "Invalid folio state")
 
         # Check Dates
         self.assertEqual(
@@ -86,3 +89,195 @@ class TestWubook(TestHotelWubook):
         for k_line, v_line in enumerate(nreserv.reservation_lines):
             self.assertEqual(dates_arr[k_line], v_line['date'],
                              "Invalid Reservation Lines Dates")
+
+    def test_complex_booking(self):
+        now_utc_dt = date_utils.now()
+        checkin_utc_dt = now_utc_dt + timedelta(days=3)
+        checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
+                                               self.tz_hotel)
+        checkout_utc_dt = checkin_utc_dt + timedelta(days=2)
+        date_diff = date_utils.date_diff(checkin_utc_dt, checkout_utc_dt,
+                                         hours=False) + 1
+
+        wbooks = [self.create_wubook_booking(
+            self.user_hotel_manager,
+            checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            self.partner_2,
+            {
+                self.hotel_vroom_budget.wrid: {
+                    'occupancy': [1, 1],   # 2 Reservation Line
+                    'dayprices': [15.0, 15.0]   # 2 Days
+                }
+            }
+        )]
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].generate_reservations(wbooks)
+
+        # Check Creation
+        self.assertTrue(any(processed_rids), "Reservation not found")
+        self.assertFalse(errors, "Reservation errors")
+        nreservs = self.env['hotel.reservation'].search([
+            ('wrid', 'in', processed_rids)
+        ])
+        self.assertEqual(len(nreservs), 2, "Reservations not found")
+
+        for nreserv in nreservs:
+            self.assertEqual(nreserv.state, 'draft',
+                             "Invalid reservation state")
+
+            # Check Dates
+            self.assertEqual(
+                nreserv.checkin,
+                checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                "Invalid Checkin Reservation Date")
+            self.assertEqual(
+                nreserv.checkout,
+                checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                "Invalid Checkout Reservation Date")
+            # Check Price
+            self.assertEqual(nreserv.price_unit, 30.0,
+                             "Invalid Reservation Price")
+            # Check Reservation Lines
+            self.assertTrue(any(nreserv.reservation_lines),
+                            "Reservation lines snot found")
+            dates_arr = date_utils.generate_dates_list(checkin_dt, date_diff-1)
+            for k_line, v_line in enumerate(nreserv.reservation_lines):
+                self.assertEqual(dates_arr[k_line], v_line['date'],
+                                 "Invalid Reservation Lines Dates")
+
+    def test_complex_bookings(self):
+        now_utc_dt = date_utils.now()
+        checkin_utc_dt = now_utc_dt + timedelta(days=3)
+        checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
+                                               self.tz_hotel)
+        checkout_utc_dt = checkin_utc_dt + timedelta(days=2)
+        date_diff = date_utils.date_diff(checkin_utc_dt, checkout_utc_dt,
+                                         hours=False) + 1
+
+        wbooks = [
+            self.create_wubook_booking(
+                self.user_hotel_manager,
+                checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                self.partner_2,
+                {
+                    self.hotel_vroom_special.wrid: {
+                        'occupancy': [2],   # 2 Reservation Line
+                        'dayprices': [15.0, 15.0]   # 2 Days
+                    }
+                }
+            ),
+            self.create_wubook_booking(
+                self.user_hotel_manager,
+                (checkin_dt - timedelta(days=3)).strftime(
+                                            DEFAULT_SERVER_DATETIME_FORMAT),
+                self.partner_2,
+                {
+                    self.hotel_vroom_special.wrid: {
+                        'occupancy': [2],   # 2 Reservation Line
+                        'dayprices': [15.0, 15.0]   # 2 Days
+                    }
+                }
+            ),
+            self.create_wubook_booking(
+                self.user_hotel_manager,
+                (checkin_dt + timedelta(days=3)).strftime(
+                                            DEFAULT_SERVER_DATETIME_FORMAT),
+                self.partner_2,
+                {
+                    self.hotel_vroom_special.wrid: {
+                        'occupancy': [2],   # 2 Reservation Line
+                        'dayprices': [15.0, 15.0]   # 2 Days
+                    }
+                }
+            )
+        ]
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].generate_reservations(wbooks)
+        self.assertEqual(len(processed_rids), 3, "Reservation not found")
+        self.assertFalse(errors, "Reservation errors")
+
+    def test_invalid_booking(self):
+        now_utc_dt = date_utils.now()
+        checkin_utc_dt = now_utc_dt + timedelta(days=3)
+        checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
+                                               self.tz_hotel)
+        checkout_utc_dt = checkin_utc_dt + timedelta(days=2)
+        date_diff = date_utils.date_diff(checkin_utc_dt, checkout_utc_dt,
+                                         hours=False) + 1
+
+        # Invalid Occupancy
+        wbooks = [self.create_wubook_booking(
+            self.user_hotel_manager,
+            checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            self.partner_2,
+            {
+                self.hotel_vroom_budget.wrid: {
+                    'occupancy': [3],
+                    'dayprices': [15.0, 15.0]
+                }
+            }
+        )]
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].generate_reservations(wbooks)
+        self.assertTrue(errors, "Invalid reservation created")
+        self.assertFalse(any(processed_rids), "Invalid reservation created")
+
+        # No Real Rooms Avail
+        wbooks = [self.create_wubook_booking(
+            self.user_hotel_manager,
+            checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            self.partner_2,
+            {
+                self.hotel_vroom_special.wrid: {
+                    'occupancy': [2, 1],
+                    'dayprices': [15.0, 15.0]
+                }
+            }
+        )]
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].generate_reservations(wbooks)
+        self.assertTrue(errors, "Invalid reservation created")
+        self.assertFalse(any(processed_rids), "Invalid reservation created")
+
+        # No Real Rooms Avail
+        wbooks = [
+            self.create_wubook_booking(
+                self.user_hotel_manager,
+                checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                self.partner_2,
+                {
+                    self.hotel_vroom_special.wrid: {
+                        'occupancy': [2],   # 2 Reservation Line
+                        'dayprices': [15.0, 15.0]   # 2 Days
+                    }
+                }
+            ),
+            self.create_wubook_booking(
+                self.user_hotel_manager,
+                (checkin_dt - timedelta(days=2)).strftime(
+                                            DEFAULT_SERVER_DATETIME_FORMAT),
+                self.partner_2,
+                {
+                    self.hotel_vroom_special.wrid: {
+                        'occupancy': [2],   # 2 Reservation Line
+                        'dayprices': [15.0, 15.0]   # 2 Days
+                    }
+                }
+            ),
+            self.create_wubook_booking(
+                self.user_hotel_manager,
+                (checkin_dt + timedelta(days=2)).strftime(
+                                            DEFAULT_SERVER_DATETIME_FORMAT),
+                self.partner_2,
+                {
+                    self.hotel_vroom_special.wrid: {
+                        'occupancy': [2],   # 2 Reservation Line
+                        'dayprices': [15.0, 15.0]   # 2 Days
+                    }
+                }
+            ),
+        ]
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].generate_reservations(wbooks)
+        self.assertEqual(len(processed_rids), 1, "Invalid Reservation created")
+        self.assertTrue(errors, "Invalid Reservation created")

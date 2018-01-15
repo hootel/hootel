@@ -453,10 +453,18 @@ class HotelReservation(models.Model):
             vals.update({'order_id': folio.order_id.id})
 
         record = super(HotelReservation, self).create(vals)
+
+        # Check Capacity
+        room = self.env['hotel.room'].search([
+            ('product_id', '=', record.product_id.id)
+        ])
+
+        persons = vals['adults'] + vals['children']
+        if persons > room.capacity:
+            raise ValidationError(
+                "Reservation persons can't be higher than room capacity")
+
         if record.adults == 0:
-            room = self.env['hotel.room'].search([
-                ('product_id', '=', record.product_id.id)
-            ])
             record.adults = room.capacity
 
         # Update Availability
