@@ -61,21 +61,21 @@
 
 .btn-hcal { }
 .btn-hcal.hcal-cell-current-day {
- 	background-color: #B3EE3A;
- 	color: #475f17;
+ 	background-color: #7c7bad66;
+ 	color: #654a37;
 }
 .btn-hcal.hcal-cell-end-week {
 	background-color: #0D5A8F;
 }
 .btn-hcal-3d {
  	color: white;
- 	background-color: #307CB0;
- 	border: 1px solid #cecece;
+ 	background-color: #7c7bad;
+ 	border: 1px solid #cfcfdd;
  	/*border-color: white black black white !important;*/
 }
 .btn-hcal-flat {
-	background-color: #bdc297;
- 	border: 1px solid #bdc297;
+	background-color: #cfcfdd;
+ 	border: 1px solid #cfcfdd;
 }
 
 .table-calcs-header .hcal-table, .table-reservations-header .hcal-table {
@@ -105,8 +105,8 @@
 }
 
 .hcal-table tr:hover td.hcal-cell-room-type-group-item {
-  background-color: #9bcd9b;
-	color: black;
+  background-color: #7c7bad80;
+	color: white;
 }
 
 .hcal-table-day {
