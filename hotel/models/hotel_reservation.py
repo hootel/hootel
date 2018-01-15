@@ -776,8 +776,8 @@ class HotelReservation(models.Model):
         IMPORTANT: This function should receive the dates in UTC datetime zone,
                     as String format
         """
-        tz_hotel = pytz.timezone(self.env['ir.values'].get_default(
-            'hotel.config.settings', 'tz_hotel'))
+        tz_hotel = self.env['ir.values'].sudo().get_default(
+                                        'hotel.config.settings', 'tz_hotel')
         checkin_utc_dt = date_utils.get_datetime(str_checkin_utc)
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt, tz_hotel)
         checkin_utc_dt -= timedelta(days=1)
