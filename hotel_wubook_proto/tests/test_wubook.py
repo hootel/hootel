@@ -40,14 +40,15 @@ class TestWubook(TestHotelWubook):
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
                                                self.tz_hotel)
 
-        self.create_wubook_reservation(
+        wbooks = [self.create_wubook_booking(
             self.user_hotel_manager,
             checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
             self.partner_2,
             {
-                self.hotel_vroom_budget: {
+                self.hotel_vroom_budget.wrid: {
                     'occupancy': [1],
                     'dayprices': [15.0, 15.0]
                 }
             }
-        )
+        )]
+        self.env['wubook'].generate_reservations(wbooks)

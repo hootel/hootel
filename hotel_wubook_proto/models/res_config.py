@@ -23,6 +23,8 @@ from openerp import models, fields, api
 from datetime import datetime, timedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from odoo.addons.hotel import date_utils
+import os
+import binascii
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -215,6 +217,12 @@ class WubookConfiguration(models.TransientModel):
             availabity_ids.with_context(wubook_action=False).write({
                 'wpushed': False
             })
+
+        # Generate Security Token
+        self.env['ir.values'].sudo().set_default(
+            'wubook.config.settings',
+            'wubook_push_security_token',
+            binascii.hexlify(os.urandom(16)).decode())
 
         # Push Changes
         self.env['wubook'].push_changes()

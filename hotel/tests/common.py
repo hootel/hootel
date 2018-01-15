@@ -37,6 +37,10 @@ _logger = logging.getLogger(__name__)
 # por ejemplo, usuarios con distintos tipos de nivel, etc...
 class TestHotel(TestMail):
 
+    @classmethod
+    def _init_mock_hotel(cls):
+        return True
+
     def create_folio(self, creator, partner):
         # Create Folio
         folio = self.env['hotel.folio'].sudo(creator).create({
@@ -80,6 +84,8 @@ class TestHotel(TestMail):
     @classmethod
     def setUpClass(cls):
         super(TestHotel, cls).setUpClass()
+
+        cls._init_mock_hotel()
 
         # Restriction Plan
         cls.restriction_1 = cls.env['hotel.virtual.room.restriction'].create({
