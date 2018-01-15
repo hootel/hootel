@@ -275,7 +275,7 @@ class HotelReservation(models.Model):
     @api.model
     def daily_plan(self):
         today_utc_dt = date_utils.now()
-        yesterday_utc_dt = today - timedelta(days=1)
+        yesterday_utc_dt = today_utc_dt - timedelta(days=1)
         hotel_tz = self.env['ir.values'].get_default('hotel.config.settings',
                                                      'tz_hotel')
         today_dt = date_utils.dt_as_timezone(today_utc_dt, hotel_tz)
