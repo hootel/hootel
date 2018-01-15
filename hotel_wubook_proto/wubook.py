@@ -412,11 +412,11 @@ class WuBook(models.TransientModel):
             processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
                 self.generate_reservations(results)
             if any(processed_rids):
-                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
+                rcodeb, resultsb = self.SERVER.mark_bookings(self.TOKEN,
                                                            self.LCODE,
                                                            processed_rids)
 
-                if rcode != 0:
+                if rcodeb != 0:
                     self.create_wubook_issue(
                         'wubook',
                          "Problem trying mark bookings (%s)" % str(processed_rids),
