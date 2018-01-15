@@ -28,5 +28,5 @@ class Controller(BusController):
         if request.session.uid:
             registry, cr, uid, context = request.registry, request.cr, \
                                          request.session.uid, request.context
-            channels.append((request.db, 'hotel.reservation', 'public'))
+            channels.append((request.db, 'hotel.reservation', 0))
         return super(Controller, self)._poll(dbname, channels, last, options)
