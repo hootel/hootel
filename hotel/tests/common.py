@@ -166,18 +166,21 @@ class TestHotel(TestMail):
             'sale_price_type': 'vroom',
             'price_virtual_room': cls.hotel_vroom_budget.id,
             'categ_id': cls.hotel_room_type_simple.cat_id.id,
+            'capacity': 1,
         })
         cls.hotel_room_simple_101 = Rooms.create({
             'name': '101',
             'sale_price_type': 'vroom',
             'price_virtual_room': cls.hotel_vroom_budget.id,
             'categ_id': cls.hotel_room_type_simple.cat_id.id,
+            'capacity': 1,
         })
         cls.hotel_room_double_200 = Rooms.create({
             'name': '200',
             'sale_price_type': 'vroom',
             'price_virtual_room': cls.hotel_vroom_special.id,
             'categ_id': cls.hotel_room_type_double.cat_id.id,
+            'capacity': 2,
         })
 
         cls.hotel_vroom_budget.write({

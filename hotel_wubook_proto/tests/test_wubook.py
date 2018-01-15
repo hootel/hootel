@@ -35,4 +35,19 @@ _logger = logging.getLogger(__name__)
 class TestWubook(TestHotelWubook):
 
     def test_create_reservation(self):
-        _logger.info("IMPLEMENT ME!")
+        now_utc_dt = date_utils.now()
+        checkin_utc_dt = now_utc_dt + timedelta(days=3)
+        checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
+                                               self.tz_hotel)
+
+        self.create_wubook_reservation(
+            self.user_hotel_manager,
+            checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            self.partner_2,
+            {
+                self.hotel_vroom_budget: {
+                    'occupancy': [1],
+                    'dayprices': [15.0, 15.0]
+                }
+            }
+        )

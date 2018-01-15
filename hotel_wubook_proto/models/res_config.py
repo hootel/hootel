@@ -181,7 +181,7 @@ class WubookConfiguration(models.TransientModel):
             ('compute_price', '=', 'fixed'),
             ('date_start', '<', now_utc_str),
         ])
-        if any(ricelist_item_ids):
+        if any(pricelist_item_ids):
             pricelist_item_ids.with_context(wubook_action=False).write({
                 'wpushed': True
             })

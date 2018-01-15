@@ -21,6 +21,7 @@
 #
 ##############################################################################
 from odoo import api
+from odoo.addons.hotel import date_utils
 from odoo.addons.hotel.tests.common import TestHotel
 from odoo.addons.hotel_wubook_proto.wubook import (
     DEFAULT_WUBOOK_DATE_FORMAT,
@@ -30,16 +31,15 @@ from random import randint
 
 class TestHotelWubook(TestHotel):
 
-    # rooms = {
+    # rinfo = {
     #     '1992': {
     #         'occupancy': [2, 2],
     #         'dayprices': [12, 12, 34, 333],
-    #         'occupation': [2, 2, 2, 2, 2],
     #     }
     # }
 
-    def create_wubook_reservation(self, creator, checkin, rcode,
-                                  rinfo, partner, channel=1, notes=''):
+    def create_wubook_reservation(self, creator, checkin, rinfo, partner,
+                                  channel=0, notes=''):
         rcode = randint(100000, 999999)
         crcode = randint(100000, 999999)
         brate = randint(100000, 999999)
@@ -194,6 +194,24 @@ class TestHotelWubook(TestHotel):
         cls.env['wubook']._patch_method('rename_rplan', wubook_ommit)
         cls.env['wubook']._patch_method('delete_rplan', wubook_ommit)
         cls.env['wubook']._patch_method('import_channels_info', wubook_ommit)
+
+        # Update Test Virtual Rooms
+        cls.hotel_vroom_budget.write({
+            'wcapcity': 1,
+            'wrid': 3000,
+            'wscode': 'T001',
+        })
+        cls.hotel_vroom_special.write({
+            'wcapcity': 2,
+            'wrid': 3001,
+            'wscode': 'T002',
+        })
+
+        # Create Some Wubook Info
+        cls.wubook_channel_test = self.env['wubook.channel.info'].create({
+            'wid': 1,
+            'name': 'Channel Test'
+        })
 
     @classmethod
     def tearDownClass(cls):

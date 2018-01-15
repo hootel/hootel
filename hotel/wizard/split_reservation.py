@@ -65,7 +65,7 @@ class SplitReservationWizard(models.TransientModel):
                 div_dt = date_utils.get_datetime(reservation_id.checkout,
                                                  hours=False)
                 for rline in reservation_id.reservation_lines:
-                    rline_dt = fields.Datetime.from_string(rline.date)
+                    rline_dt = date_utils.get_datetime(rline.date)
                     if rline_dt >= div_dt:
                         reservation_lines[1].append((0, False, {
                             'date': rline.date,
