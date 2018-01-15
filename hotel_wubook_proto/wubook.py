@@ -975,7 +975,8 @@ class WuBook(models.TransientModel):
 
         # Get user timezone
         user_id = self.env['res.users'].browse(self.env.uid)
-        local = pytz.timezone(self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel'))
+        tz_hotel = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'tz_hotel')
+        local = pytz.timezone(tz_hotel and str(tz_hotel) or 'UTC')
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
