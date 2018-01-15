@@ -226,5 +226,7 @@ class WubookConfiguration(models.TransientModel):
         self.env.cr.commit()    # FIXME: Need do this
 
         # Push Changes
-        self.env['wubook'].push_changes()
-        self.env['wubook'].push_activation()
+        if wubook_obj.init_connection():
+            wubook_obj.push_activation()
+            wubook_obj.push_changes()
+            wubook_obj.close_connection()
