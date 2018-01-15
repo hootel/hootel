@@ -46,9 +46,6 @@ class TestHotelReservations(TestHotel):
             self.hotel_room_double_200,
             "Reservation Test #1")
 
-        self.assertTrue(folio, "Hotel can't create test folio")
-        self.assertTrue(reservation, "Hotel can't create test reservation")
-
         reserv_start_dt = date_utils.dt_as_timezone(reserv_start_utc_dt,
                                                     self.tz_hotel)
         reserv_end_dt = date_utils.dt_as_timezone(reserv_end_utc_dt -
@@ -78,8 +75,6 @@ class TestHotelReservations(TestHotel):
             reserv_end_utc_dt,
             self.hotel_room_double_200,
             "Reservation Test #1")
-        self.assertTrue(folio, "Hotel can't create test folio")
-        self.assertTrue(reservation, "Hotel can't create test reservation")
 
         reserv_start_utc_dt = reserv_end_utc_dt
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
@@ -90,8 +85,6 @@ class TestHotelReservations(TestHotel):
             reserv_end_utc_dt,
             self.hotel_room_double_200,
             "Reservation Test #2")
-        self.assertTrue(folio, "Hotel can't create test folio")
-        self.assertTrue(reservation, "Hotel can't create test reservation")
 
         reserv_end_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_start_utc_dt = reserv_end_utc_dt - timedelta(days=1)
@@ -102,8 +95,6 @@ class TestHotelReservations(TestHotel):
             reserv_end_utc_dt,
             self.hotel_room_double_200,
             "Reservation Test #3")
-        self.assertTrue(folio, "Hotel can't create test folio")
-        self.assertTrue(reservation, "Hotel can't create test reservation")
 
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
@@ -113,9 +104,7 @@ class TestHotelReservations(TestHotel):
             reserv_start_utc_dt,
             reserv_end_utc_dt,
             self.hotel_room_simple_100,
-            "Reservation Test #1")
-        self.assertTrue(folio, "Hotel can't create test folio")
-        self.assertTrue(reservation, "Hotel can't create test reservation")
+            "Reservation Test #4")
 
     def test_create_invalid_reservations(self):
         now_utc_dt = date_utils.now()
@@ -129,8 +118,6 @@ class TestHotelReservations(TestHotel):
             org_reserv_end_utc_dt,
             self.hotel_room_double_200,
             "Original Reservation Test #1")
-        self.assertTrue(folio, "Hotel can't create test folio")
-        self.assertTrue(reservation, "Hotel can't create test reservation")
 
         # Same Dates
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
@@ -215,3 +202,13 @@ class TestHotelReservations(TestHotel):
                 reserv_end_utc_dt,
                 self.hotel_room_double_200,
                 "Invalid Reservation Test #7")
+
+        # Checkin > Checkout
+        with self.assertRaises(ValidationError):
+            folio, reservation = self.create_reservation(
+                self.user_hotel_manager,
+                self.partner_2,
+                org_reserv_end_utc_dt,
+                org_reserv_start_utc_dt,
+                self.hotel_room_simple_100,
+                "Invalid Reservation Test #8")

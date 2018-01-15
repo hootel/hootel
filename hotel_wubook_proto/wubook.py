@@ -409,7 +409,23 @@ class WuBook(models.TransientModel):
         errors = False
         processed_rids = []
         if rcode == 0:
-            processed_rids, errors = self.generate_reservations(results)
+            processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+                self.generate_reservations(results)
+            if any(processed_rids):
+                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
+                                                           self.LCODE,
+                                                           processed_rids)
+
+                if rcode != 0:
+                    self.create_wubook_issue(
+                        'wubook',
+                         "Problem trying mark bookings (%s)" % str(processed_rids),
+                         '')
+
+                # Update Odoo availability (don't wait for wubook)
+                self.with_context({'init_connection': False}).fetch_rooms_values(
+                    checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         if init_connection:
             self.close_connection()
 
@@ -432,7 +448,23 @@ class WuBook(models.TransientModel):
         errors = False
         processed_rids = []
         if rcode == 0:
-            processed_rids, errors = self.generate_reservations(results)
+            processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+                self.generate_reservations(results)
+            if any(processed_rids):
+                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
+                                                           self.LCODE,
+                                                           processed_rids)
+
+                if rcode != 0:
+                    self.create_wubook_issue(
+                        'wubook',
+                         "Problem trying mark bookings (%s)" % str(processed_rids),
+                         '')
+
+                # Update Odoo availability (don't wait for wubook)
+                self.with_context({'init_connection': False}).fetch_rooms_values(
+                    checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         if init_connection:
             self.close_connection()
 
@@ -941,20 +973,6 @@ class WuBook(models.TransientModel):
         default_arrival_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_arrival_hour')
         default_departure_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_departure_hour')
 
-        # Use specific method because others include connection step
-        def fetch_values(dfrom, dto):
-            rcode, results = self.SERVER.fetch_rooms_values(self.TOKEN,
-                                                            self.LCODE,
-                                                            dfrom,
-                                                            dto,
-                                                            False)
-            if rcode != 0:
-                self.create_wubook_issue('room',
-                                         "Can't fetch rooms values from WuBook",
-                                         results, dfrom=dfrom, dto=dto)
-            else:
-                self.generate_room_values(dfrom, dto, results)
-
         # Get user timezone
         user_id = self.env['res.users'].browse(self.env.uid)
         local = pytz.timezone(self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel'))
@@ -1170,22 +1188,8 @@ class WuBook(models.TransientModel):
                     folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
                 processed_rids.append(book['reservation_code'])
 
-            if any(processed_rids):
-                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
-                                                           self.LCODE,
-                                                           processed_rids)
-
-                if rcode != 0:
-                    self.create_wubook_issue(
-                        'wubook',
-                         "Problem trying mark bookings (%s)" % str(processed_rids),
-                         '')
-
-                # Update Odoo availability (don't wait for wubook)
-                fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                             checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
-
-        return (processed_rids, any(failed_reservations))
+        return (processed_rids, any(failed_reservations),
+                checkin_utc_dt, checkout_utc_dt)
 
     @api.model
     def generate_wubook_channel_info(self, channels):

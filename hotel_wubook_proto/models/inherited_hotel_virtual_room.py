@@ -35,12 +35,12 @@ class HotelVirtualRoom(models.Model):
 
     wscode = fields.Char("WuBook Short Code", readonly=True)
     wrid = fields.Char("WuBook Room ID", readonly=True)
-    wcapacity = fields.Integer("WuBook Capacity", default=0, required=True)
+    wcapacity = fields.Integer("WuBook Capacity", default=1)
 
     @api.constrains('wcapacity')
     def _check_wcapacity(self):
-        if self.wcapacity == 0:
-            raise ValidationError("wcapacity can't be zero")
+        if self.wcapacity < 1:
+            raise ValidationError("wcapacity can't be less than one")
 
     @api.multi
     @api.constrains('wscode')
