@@ -35,6 +35,9 @@ class website_wubook(http.Controller):
         # Check Security Token
         hotel_security_token = request.env['ir.values'].sudo().get_default(
                         'wubook.config.settings', 'wubook_push_security_token')
+        _logger.info("=== PUSH RR")
+        _logger.info(security_token)
+        _logger.info(hotel_security_token)
         if security_token != hotel_security_token:
             raise ValidationError('Invalid Security Token!')
 
@@ -71,6 +74,9 @@ class website_wubook(http.Controller):
         # Check Security Token
         hotel_security_token = request.env['ir.values'].sudo().get_default(
                         'wubook.config.settings', 'wubook_push_security_token')
+        _logger.info("=== PUSH RO")
+        _logger.info(security_token)
+        _logger.info(hotel_security_token)
         if security_token != hotel_security_token:
             raise ValidationError('Invalid Security Token!')
 
