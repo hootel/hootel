@@ -21,6 +21,7 @@
         h3, #cabezera, td {font-family:kiro, Verdana, Geneva, sans-serif;}
         h3 {font-size:1.15em;}
         .numerocheck {font-size:0.9em;}
+        .container-fluid, row, col-md-12 {padding-left: 0 !important; padding-right: 0 !important;}
     </style>
     <t>
         .titulo {font-size:0.93em;}
@@ -31,15 +32,15 @@
         <t t-foreach='o.partner_id' t-as='partner'>
         <t t-foreach='o.reservation_id' t-as='reservation'>
             <t t-set="company" t-value="res_company"></t>
-
-            <div class="page" style="font-size:xx-small;">
-                <div class="container-fluid">
-                    <div class="row cabezera">
-                        <div class="col-md-12 text-center">
+            <div class="page" style="font-size:xx-small; padding-left: 0 !important; padding-right: 0 !important;">
+                <div class="container-fluid" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                    <div class="row cabezera" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <img src='/hotel_l10n_es/static/src/img/logo_alda_bn.png'
                             style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
                             <p style="font-size:1.16em;">PARTE DE ENTRADA DE VIAJEROS</p>
                             <p class="numerocheck">Nº parte: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
+                            <p> Importe total Ficha de Reserva: <span t-field="o.reservation_id.folio_id.amount_total"/></p>
                             <p><strong>CIF: <t t-esc="company.vat"/></strong><br/>
                             <strong><t t-esc="company.display_name"/></strong><br/>
                             <strong><t t-esc="company.street"/> <t t-esc="company.street2"/></strong><br/>
@@ -48,8 +49,8 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-12 text-center">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <table width="100%" border="1" style="border-style: double;">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -74,8 +75,8 @@
                             </table><br/>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12 text-center">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <table width="100%" border="1" style="border-style: double;">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -92,8 +93,8 @@
                             </table><br/>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12 text-center">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <table width="100%" border="1" style="border-style: double;">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -116,8 +117,8 @@
                             </table><br/>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12 text-center">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <table width="100%">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -134,8 +135,8 @@
                             </table><br/>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <p class="text-center">
                                 <t t-esc="company.city"/>, <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%A, %d de %B de %Y')"/>
                             </p>
@@ -150,10 +151,10 @@
             </div>
 
 
-            <div class="page" style="font-size:xx-small;">
-                <div class="container-fluid">
-                    <div class="row cabezera">
-                        <div class="col-md-12 text-center">
+            <div class="page" style="font-size:xx-small; padding-left: 0 !important; padding-right: 0 !important;">
+                <div class="container-fluid" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                    <div class="row cabezera" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <img src='/hotel_l10n_es/static/src/img/logo_alda_bn.png'
                             style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
                             <p style="font-size:1.16em;">PARTE DE ENTRADA DE VIAJEROS</p>
@@ -166,8 +167,8 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-12 text-center">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <table width="100%" border="1" style="border-style: double;">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -192,8 +193,8 @@
                             </table><br/>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12 text-center">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <table width="100%" border="1" style="border-style: double;">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -210,8 +211,8 @@
                             </table><br/>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12 text-center">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <table width="100%" border="1" style="border-style: double;">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -234,8 +235,8 @@
                             </table><br/>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12 text-center">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <table width="100%">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -252,8 +253,8 @@
                             </table><br/>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-12">
+                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                        <div class="col-md-12" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <p class="text-center">
                                 <t t-esc="company.city"/>, <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%A, %d de %B de %Y')"/>
                             </p><br/>
