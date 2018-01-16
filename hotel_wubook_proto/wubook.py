@@ -421,15 +421,14 @@ class WuBook(models.TransientModel):
                         'wubook',
                          "Problem trying mark bookings (%s)" % str(processed_rids),
                          '')
-
-                # Update Odoo availability (don't wait for wubook)
-                if checkin_utc_dt and checkout_utc_dt:
-                    self._context.set('init_connection', False)
-                    self.fetch_rooms_values(
-                        checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                        checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         if init_connection:
             self.close_connection()
+
+        # Update Odoo availability (don't wait for wubook)
+        if rcode == 0 and heckin_utc_dt and checkout_utc_dt:
+            self.fetch_rooms_values(
+                checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
 
         if rcode != 0:
             self.create_wubook_issue('reservation',
@@ -463,14 +462,14 @@ class WuBook(models.TransientModel):
                          "Problem trying mark bookings (%s)" % str(processed_rids),
                          '')
 
-                # Update Odoo availability (don't wait for wubook)
-                if checkin_utc_dt and checkout_utc_dt:
-                    self._context.set('init_connection', False)
-                    self.fetch_rooms_values(
-                        checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                        checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         if init_connection:
             self.close_connection()
+
+        # Update Odoo availability (don't wait for wubook)
+        if rcode == 0 and heckin_utc_dt and checkout_utc_dt:
+            self.fetch_rooms_values(
+                checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
 
         if rcode != 0:
             self.create_wubook_issue('reservation',
