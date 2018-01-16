@@ -1005,12 +1005,12 @@ class WuBook(models.TransientModel):
             arr_hour = book['arrival_hour'] == "--" and default_arrival_hour or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)
             checkin_dt = datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkin_utc_dt = checkin_dt.replace(tzinfo=pytz.utc).astimezone(pytz.utc)
+            checkin_utc_dt = checkin_dt.replace(tzinfo=local).astimezone(pytz.utc)
             checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             checkout = "%s %s" % (book['date_departure'], default_departure_hour)
             checkout_dt = datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkout_utc_dt = checkout_dt.replace(tzinfo=pytz.utc).astimezone(pytz.utc)
+            checkout_utc_dt = checkout_dt.replace(tzinfo=local).astimezone(pytz.utc)
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             today = datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATETIME_FORMAT)#COMPROBAR TZ
