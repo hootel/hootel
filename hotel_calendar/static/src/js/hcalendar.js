@@ -1423,7 +1423,7 @@ HotelCalendar.prototype = {
             this._pricelist[k][pr_fk].title = pr_item.title;
           }
         } else {
-          if !(k in this._pricelist) {
+          if (!(k in this._pricelist)) {
             this._pricelist[k] = [];
           }
           this._pricelist[k].push({
