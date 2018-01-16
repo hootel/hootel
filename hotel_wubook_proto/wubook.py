@@ -1075,6 +1075,14 @@ class WuBook(models.TransientModel):
             vrooms_ids = book['rooms'].split(',')
             vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])
 
+            if not any(vrooms):
+                self.create_wubook_issue('reservation',
+                                         "Can't found the any virtual room associated to '%s' in this hotel" % book['rooms'],
+                                         '', wid=book['reservation_code'])
+                failed_reservations.append(book['channel_reservation_code'])
+                continue
+
+
             reservations = []
             used_rooms = []
             # Check reservation vrooms avail
