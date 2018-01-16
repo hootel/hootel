@@ -425,7 +425,7 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         # Update Odoo availability (don't wait for wubook)
-        if rcode == 0 and heckin_utc_dt and checkout_utc_dt:
+        if rcode == 0 and checkin_utc_dt and checkout_utc_dt:
             self.fetch_rooms_values(
                 checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                 checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
@@ -466,7 +466,7 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         # Update Odoo availability (don't wait for wubook)
-        if rcode == 0 and heckin_utc_dt and checkout_utc_dt:
+        if rcode == 0 and checkin_utc_dt and checkout_utc_dt:
             self.fetch_rooms_values(
                 checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                 checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
