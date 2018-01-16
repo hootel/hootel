@@ -987,6 +987,8 @@ class WuBook(models.TransientModel):
         # Space for store some data for construct folios
         processed_rids = []
         failed_reservations = []
+        checkin_utc_dt = False
+        checkout_utc_dt = False
         _logger.info(bookings)
         for book in bookings: # This create a new folio
             is_cancellation = book['status'] in WUBOOK_STATUS_BAD
@@ -1077,7 +1079,7 @@ class WuBook(models.TransientModel):
 
             if not any(vrooms):
                 self.create_wubook_issue('reservation',
-                                         "Can't found the any virtual room associated to '%s' in this hotel" % book['rooms'],
+                                         "Can't found any virtual room associated to '%s' in this hotel" % book['rooms'],
                                          '', wid=book['reservation_code'])
                 failed_reservations.append(book['channel_reservation_code'])
                 continue
