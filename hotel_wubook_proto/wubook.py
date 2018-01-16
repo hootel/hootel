@@ -423,10 +423,11 @@ class WuBook(models.TransientModel):
                          '')
 
                 # Update Odoo availability (don't wait for wubook)
-                self_context = self.with_context({'init_connection': False})
-                self_context.fetch_rooms_values(
-                    checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                    checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                if checkin_utc_dt and checkout_utc_dt:
+                    self._context.set('init_connection', False)
+                    self.fetch_rooms_values(
+                        checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         if init_connection:
             self.close_connection()
 
@@ -463,10 +464,11 @@ class WuBook(models.TransientModel):
                          '')
 
                 # Update Odoo availability (don't wait for wubook)
-                self_context = self.with_context({'init_connection': False})
-                self_context.fetch_rooms_values(
-                    checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                    checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                if checkin_utc_dt and checkout_utc_dt:
+                    self._context.set('init_connection', False)
+                    self.fetch_rooms_values(
+                        checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         if init_connection:
             self.close_connection()
 
