@@ -96,13 +96,16 @@ class WuBook(models.TransientModel):
         if init_connection:
             if not self.init_connection():
                 return False
-        rcode_a, results_a = self.SERVER.push_activation(self.TOKEN,
-                                                         self.LCODE,
-                                                         urljoin(base_url, "/wubook/push/reservations/%s" % hotel_security_token),
-                                                         1)
-        rcode_ua, results_ua = self.SERVER.push_update_activation(self.TOKEN,
-                                                                  self.LCODE,
-                                                                  urljoin(base_url, "/wubook/push/rooms/%s" % hotel_security_token))
+        rcode_a, results_a = self.SERVER.push_activation(
+            self.TOKEN,
+            self.LCODE,
+            urljoin(base_url,
+                    "/wubook/push/reservations/%s" % hotel_security_token),
+            1)
+        rcode_ua, results_ua = self.SERVER.push_update_activation(
+            self.TOKEN,
+            self.LCODE,
+            urljoin(base_url, "/wubook/push/rooms/%s" % hotel_security_token))
         if init_connection:
             self.close_connection()
 
@@ -117,23 +120,37 @@ class WuBook(models.TransientModel):
         return rcode_a == 0 and rcode_ua == 0
 
     def is_valid_account(self):
-        user = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_user')
-        passwd = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_passwd')
-        lcode = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
-        pkey = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_pkey')
-        server_addr = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_server')
+        user = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_user')
+        passwd = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_passwd')
+        lcode = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_lcode')
+        pkey = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_pkey')
+        server_addr = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_server')
         return (user and passwd and pkey and server_addr and lcode)
 
     # === NETWORK
     def init_connection(self):
-        user = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_user')
-        passwd = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_passwd')
-        self.LCODE = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_lcode')
-        pkey = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_pkey')
-        server_addr = self.env['ir.values'].sudo().get_default('wubook.config.settings', 'wubook_server')
+        user = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_user')
+        passwd = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_passwd')
+        self.LCODE = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_lcode')
+        pkey = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_pkey')
+        server_addr = self.env['ir.values'].sudo().get_default(
+                                    'wubook.config.settings', 'wubook_server')
 
-        if not user or not passwd or not pkey or not server_addr or not self.LCODE:
-            self.create_wubook_issue('wubook', "Can't connect with WuBook! Perhaps account not configured...", "")
+        if not user or not passwd or not pkey or not server_addr or \
+                not self.LCODE:
+            self.create_wubook_issue(
+                'wubook',
+                "Can't connect with WuBook! Perhaps account not configured...",
+                "")
             return False
 
         try:
@@ -141,9 +158,17 @@ class WuBook(models.TransientModel):
             res, tok = self.SERVER.acquire_token(user, passwd, pkey)
             self.TOKEN = tok
             if res != 0:
-                self.create_wubook_issue('wubook', "Can't connect with WuBook! Perhaps the account haven't a good configuration...", tok)
-        except:
-            self.create_wubook_issue('wubook', "Can't connect with WuBook! Please, check internet connection.", "")
+                self.create_wubook_issue(
+                    'wubook',
+                    "Can't connect with WuBook! Perhaps the account haven't \
+                        a good configuration...",
+                    tok)
+        except Exception:
+            self.create_wubook_issue(
+                'wubook',
+                "Can't connect with WuBook! Please, check internet \
+                    connection.",
+                "")
             res = -1
 
         return res == 0
@@ -155,14 +180,19 @@ class WuBook(models.TransientModel):
 
     # === HELPER FUNCTIONS
     @api.model
-    def create_wubook_issue(self, section, message, wmessage, wid=False, dfrom=False, dto=False):
+    def create_wubook_issue(self, section, message, wmessage, wid=False,
+                            dfrom=False, dto=False):
         self.env['wubook.issue'].create({
             'section': section,
             'message': message,
             'wid': wid,
             'wmessage': wmessage,
-            'date_start': dfrom and datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT).strftime(DEFAULT_SERVER_DATE_FORMAT),
-            'date_end': dto and datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT).strftime(DEFAULT_SERVER_DATE_FORMAT),
+            'date_start': dfrom and datetime.strptime(
+                    dfrom, DEFAULT_WUBOOK_DATE_FORMAT).strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
+            'date_end': dto and datetime.strptime(
+                    dto, DEFAULT_WUBOOK_DATE_FORMAT).strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
         })
 
     # === ROOMS
@@ -188,7 +218,8 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('room', "Can't create room in WuBook", results)
+            self.create_wubook_issue(
+                                'room', "Can't create room in WuBook", results)
             return False
 
         return results
@@ -271,10 +302,11 @@ class WuBook(models.TransientModel):
                 if vroom:
                     vroom.with_context({'wubook_action': False}).write(vals)
                 else:
-                    vroom_obj.with_context({'wubook_action': False}).create(vals)
+                    vroom_obj.with_context({'wubook_action': False}).create(
+                                                                        vals)
         else:
-            self.create_wubook_issue('room', "Can't import rooms from WuBook",
-                                     results)
+            self.create_wubook_issue(
+                            'room', "Can't import rooms from WuBook", results)
 
         return (rcode == 0, count)
 
@@ -314,9 +346,10 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('room',
-                                     "Can't update rooms availability in WuBook",
-                                     results)
+            self.create_wubook_issue(
+                'room',
+                "Can't update rooms availability in WuBook",
+                results)
 
         return rcode == 0
 
@@ -331,9 +364,10 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('wubook',
-                                     "Can't call 'corporate_fetch' from WuBook",
-                                     results)
+            self.create_wubook_issue(
+                'wubook',
+                "Can't call 'corporate_fetch' from WuBook",
+                results)
 
         return rcode == 0
 
@@ -344,7 +378,9 @@ class WuBook(models.TransientModel):
         if init_connection:
             if not self.init_connection():
                 return False
-        vroom = self.env['hotel.virtual.room'].search([('product_id', '=', reserv.product_id.id)], limit=1)
+        vroom = self.env['hotel.virtual.room'].search([
+            ('product_id', '=', reserv.product_id.id)
+        ], limit=1)
         customer = {
             'lname': _partner_split_name(reserv.partner_id.name)[1],
             'fname': _partner_split_name(reserv.partner_id.name)[0],
@@ -354,15 +390,16 @@ class WuBook(models.TransientModel):
             'street': reserv.partner_id.street,
             'country': reserv.partner_id.country_id.code,
             'arrival_hour': datetime.strptime(reserv.checkin, "%H:%M:%S"),
-            'notes': ''     # TODO: Falta poner el cajetin de observaciones en folio o reserva..
+            'notes': ''     # TODO:
         }
-        rcode, results = self.SERVER.new_reservation(self.TOKEN,
-                                                     self.LCODE,
-                                                     reserv.checkin,
-                                                     reserv.checkout,
-                                                     {vroom.wrid: [reserv.adults+reserv.children, 'nb']},
-                                                     customer,
-                                                     reserv.adults+reserv.children)
+        rcode, results = self.SERVER.new_reservation(
+            self.TOKEN,
+            self.LCODE,
+            reserv.checkin,
+            reserv.checkout,
+            {vroom.wrid: [reserv.adults+reserv.children, 'nb']},
+            customer,
+            reserv.adults+reserv.children)
         if init_connection:
             self.close_connection()
 
@@ -412,15 +449,17 @@ class WuBook(models.TransientModel):
             processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
                 self.generate_reservations(results)
             if any(processed_rids):
+                uniq_rids = list(set(processed_rids))
                 rcodeb, resultsb = self.SERVER.mark_bookings(self.TOKEN,
-                                                           self.LCODE,
-                                                           processed_rids)
+                                                             self.LCODE,
+                                                             uniq_rids)
 
                 if rcodeb != 0:
                     self.create_wubook_issue(
                         'wubook',
-                         "Problem trying mark bookings (%s)" % str(processed_rids),
-                         '')
+                        "Problem trying mark bookings (%s)" %
+                        str(processed_rids),
+                        '')
         if init_connection:
             self.close_connection()
 
@@ -452,15 +491,17 @@ class WuBook(models.TransientModel):
             processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
                 self.generate_reservations(results)
             if any(processed_rids):
+                uniq_rids = list(set(processed_rids))
                 rcode, results = self.SERVER.mark_bookings(self.TOKEN,
                                                            self.LCODE,
-                                                           processed_rids)
+                                                           uniq_rids)
 
                 if rcode != 0:
                     self.create_wubook_issue(
                         'wubook',
-                         "Problem trying mark bookings (%s)" % str(processed_rids),
-                         '')
+                        "Problem trying mark bookings (%s)" %
+                        str(processed_rids),
+                        '')
 
         if init_connection:
             self.close_connection()
@@ -491,9 +532,10 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('reservation',
-                                     "Can't mark as readed a reservation in wubook",
-                                     results, wid=wrid)
+            self.create_wubook_issue(
+                'reservation',
+                "Can't mark as readed a reservation in wubook",
+                results, wid=wrid)
 
         return rcode == 0
 
@@ -512,8 +554,8 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't add pricing plan to wubook",
-                                     results)
+            self.create_wubook_issue(
+                        'plan', "Can't add pricing plan to wubook", results)
             return False
 
         return results
@@ -552,9 +594,10 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('plan',
-                                     "Can't update pricing plan name in wubook",
-                                     results, wid=pid)
+            self.create_wubook_issue(
+                'plan',
+                "Can't update pricing plan name in wubook",
+                results, wid=pid)
 
         return rcode == 0
 
@@ -573,8 +616,10 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't update pricing plan in wubook",
-                                     results, wid=pid, dfrom=dfrom)
+            self.create_wubook_issue(
+                'plan',
+                "Can't update pricing plan in wubook",
+                results, wid=pid, dfrom=dfrom)
 
         return rcode == 0
 
@@ -594,9 +639,10 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('plan',
-                                     "Can't update pricing plan period in wubook",
-                                     results, wid=pid)
+            self.create_wubook_issue(
+                'plan',
+                "Can't update pricing plan period in wubook",
+                results, wid=pid)
 
         return rcode == 0
 
@@ -613,8 +659,10 @@ class WuBook(models.TransientModel):
 
         count = 0
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't get pricing plans from wubook",
-                                     results)
+            self.create_wubook_issue(
+                'plan',
+                "Can't get pricing plans from wubook",
+                results)
         else:
             count = self.generate_pricelists(results)
 
@@ -636,8 +684,10 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('plan', "Can't fetch plan prices from wubook",
-                                     results, wid=pid, dfrom=dfrom, dto=dto)
+            self.create_wubook_issue(
+                'plan',
+                "Can't fetch plan prices from wubook",
+                results, wid=pid, dfrom=dfrom, dto=dto)
         else:
             self.generate_pricelist_items(pid, dfrom, dto, results)
 
@@ -646,7 +696,9 @@ class WuBook(models.TransientModel):
     @api.model
     def fetch_all_plan_prices(self, dfrom, dto, rooms=[]):
         no_errors = True
-        plan_wpids = self.env['product.pricelist'].search([('wpid', '!=', False), ('wpid', '!=', '')]).mapped('wpid')
+        plan_wpids = self.env['product.pricelist'].search([
+            ('wpid', '!=', False), ('wpid', '!=', '')
+        ]).mapped('wpid')
         if any(plan_wpids):
             init_connection = self._context.get('init_connection', True)
             if init_connection:
@@ -660,9 +712,10 @@ class WuBook(models.TransientModel):
                                                                dto,
                                                                rooms)
                 if rcode != 0:
-                    self.create_wubook_issue('plan',
-                                             "Can't fetch all plan prices from wubook!",
-                                             results, wid=wpid, dfrom=dfrom, dto=dto)
+                    self.create_wubook_issue(
+                        'plan',
+                        "Can't fetch all plan prices from wubook!",
+                        results, wid=wpid, dfrom=dfrom, dto=dto)
                     no_errors = False
                 else:
                     self.generate_pricelist_items(wpid, dfrom, dto, results)
@@ -685,9 +738,10 @@ class WuBook(models.TransientModel):
 
         count = 0
         if rcode != 0:
-            self.create_wubook_issue('rplan',
-                                     "Can't fetch restriction plans from wubook",
-                                     results)
+            self.create_wubook_issue(
+                'rplan',
+                "Can't fetch restriction plans from wubook",
+                results)
         else:
             count = self.generate_restrictions(results)
 
@@ -708,9 +762,10 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('rplan',
-                                     "Can't fetch plan restrictions from wubook",
-                                     results, wid=rpid, dfrom=dfrom, dto=dto)
+            self.create_wubook_issue(
+                'rplan',
+                "Can't fetch plan restrictions from wubook",
+                results, wid=rpid, dfrom=dfrom, dto=dto)
         elif any(results):
             self.generate_restriction_items(dfrom, dto, results)
 
@@ -731,9 +786,10 @@ class WuBook(models.TransientModel):
             self.close_connection()
 
         if rcode != 0:
-            self.create_wubook_issue('rplan',
-                                     "Can't update plan restrictions on wubook",
-                                     results, wid=rpid, dfrom=dfrom)
+            self.create_wubook_issue(
+                'rplan',
+                "Can't update plan restrictions on wubook",
+                results, wid=rpid, dfrom=dfrom)
 
         return rcode == 0
 
@@ -818,45 +874,54 @@ class WuBook(models.TransientModel):
         virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
         for k_rid, v_rid in values.iteritems():
-            vroom = hotel_virtual_room_obj.search([('wrid', '=', k_rid)], limit=1)
+            vroom = hotel_virtual_room_obj.search([
+                ('wrid', '=', k_rid)
+            ], limit=1)
             if vroom:
                 date_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
                 for day_vals in v_rid:
                     date_str = date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
-                    vroom_avail = virtual_room_avail_obj.search([('virtual_room_id', '=', vroom.id),
-                                                                 ('date', '=', date_str)], limit=1)
+                    vroom_avail = virtual_room_avail_obj.search([
+                        ('virtual_room_id', '=', vroom.id),
+                        ('date', '=', date_str)
+                    ], limit=1)
                     vals = {
                         'no_ota': day_vals.get('no_ota'),
                         'booked': day_vals.get('booked'),
-                        'avail': 0 if not day_vals.get('avail') else day_vals['avail'],
+                        'avail': 0 if not day_vals.get('avail') else
+                        day_vals['avail'],
                         'wpushed': True,
                     }
                     if vroom_avail:
-                        vroom_avail.with_context({'wubook_action': False}).write(vals)
+                        vroom_avail.with_context({
+                                        'wubook_action': False}).write(vals)
                     else:
                         vals.update({
                             'virtual_room_id': vroom.id,
                             'date': date_str,
                         })
-                        virtual_room_avail_obj.with_context({'wubook_action': False}).create(vals)
+                        virtual_room_avail_obj.with_context({
+                                        'wubook_action': False}).create(vals)
                     date_dt = date_dt + timedelta(days=1)
 
         return True
 
     @api.model
     def generate_restrictions(self, restriction_plans):
-        reservation_restriction_obj = self.env['hotel.virtual.room.restriction']
+        restriction_obj = self.env['hotel.virtual.room.restriction']
         count = 0
         for plan in restriction_plans:
             vals = {
                 'name': plan['name'],
             }
-            plan_id = reservation_restriction_obj.search([('wpid', '=', str(plan['id']))], limit=1)
+            plan_id = restriction_obj.search([
+                ('wpid', '=', str(plan['id']))
+            ], limit=1)
             if not plan_id:
                 vals.update({
                     'wpid': str(plan['id']),
                 })
-                reservation_restriction_obj.with_context({
+                restriction_obj.with_context({
                     'wubook_action': False,
                     'rules': plan.get('rules'),
                 }).create(vals)
@@ -869,19 +934,26 @@ class WuBook(models.TransientModel):
     def generate_restriction_items(self, dfrom, dto, plan_restrictions):
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
         reserv_restriction_obj = self.env['hotel.virtual.room.restriction']
-        reserv_restriction_item_obj = self.env['hotel.virtual.room.restriction.item']
+        restriction_item_obj = self.env['hotel.virtual.room.restriction.item']
         for k_rpid, v_rpid in plan_restrictions.iteritems():
-            restriction_id = reserv_restriction_obj.search([('wpid', '=', k_rpid)], limit=1)
+            restriction_id = reserv_restriction_obj.search([
+                ('wpid', '=', k_rpid)
+            ], limit=1)
             if restriction_id:
                 for k_rid, v_rid in v_rpid.iteritems():
-                    vroom = hotel_virtual_room_obj.search([('wrid', '=', k_rid)], limit=1)
+                    vroom = hotel_virtual_room_obj.search([
+                        ('wrid', '=', k_rid)
+                    ], limit=1)
                     if vroom:
                         for item in v_rid:
-                            date_dt = datetime.strptime(item['date'], DEFAULT_WUBOOK_DATE_FORMAT)
-                            restriction_item = reserv_restriction_item_obj.search([
+                            date_dt = datetime.strptime(
+                                    item['date'], DEFAULT_WUBOOK_DATE_FORMAT)
+                            restriction_item = restriction_item_obj.search([
                                 ('restriction_id', '=', restriction_id.id),
-                                ('date_start', '=', date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                                ('date_end', '=', date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                                ('date_start', '=', date_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
+                                ('date_end', '=', date_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
                                 ('applied_on', '=', '0_virtual_room'),
                                 ('virtual_room_id', '=', vroom.id)
                             ], limit=1)
@@ -895,36 +967,47 @@ class WuBook(models.TransientModel):
                                 'wpushed': True,
                             }
                             if restriction_item:
-                                restriction_item.with_context({'wubook_action': False}).write(vals)
+                                restriction_item.with_context({
+                                        'wubook_action': False}).write(vals)
                             else:
                                 vals.update({
                                     'restriction_id': restriction_id.id,
-                                    'date_start': date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                    'date_end': date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'date_start': date_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
+                                    'date_end': date_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
                                     'applied_on': '0_virtual_room',
                                     'virtual_room_id': vroom.id
                                 })
-                                self.env['hotel.virtual.room.restriction.item'].with_context({'wubook_action': False}).create(vals)
+                                restriction_item_obj.with_context({
+                                        'wubook_action': False}).create(vals)
 
         return True
 
     @api.model
     def generate_pricelist_items(self, pid, dfrom, dto, plan_prices):
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
-        pricelist = self.env['product.pricelist'].search([('wpid', '=', pid)], limit=1)
+        pricelist = self.env['product.pricelist'].search([
+            ('wpid', '=', pid)
+        ], limit=1)
         if pricelist:
+            pricelist_item_obj = self.env['product.pricelist.item']
             dfrom_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
             dto_dt = datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT)
             days_diff = abs((dto_dt - dfrom_dt).days) + 1
             for i in range(0, days_diff):
                 ndate_dt = dfrom_dt + timedelta(days=i)
                 for k_rid, v_rid in plan_prices.iteritems():
-                    vroom = hotel_virtual_room_obj.search([('wrid', '=', k_rid)], limit=1)
+                    vroom = hotel_virtual_room_obj.search([
+                        ('wrid', '=', k_rid)
+                    ], limit=1)
                     if vroom:
-                        pricelist_item = self.env['product.pricelist.item'].search([
+                        pricelist_item = pricelist_item_obj.search([
                             ('pricelist_id', '=', pricelist.id),
-                            ('date_start', '=', ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                            ('date_end', '=', ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                            ('date_start', '=', ndate_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
+                            ('date_end', '=', ndate_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
                             ('compute_price', '=', 'fixed'),
                             ('applied_on', '=', '1_product'),
                             ('product_tmpl_id', '=', vroom.product_id.product_tmpl_id.id)
@@ -934,17 +1017,21 @@ class WuBook(models.TransientModel):
                             'wpushed': True,
                         }
                         if pricelist_item:
-                            pricelist_item.with_context({'wubook_action': False}).write(vals)
+                            pricelist_item.with_context({
+                                        'wubook_action': False}).write(vals)
                         else:
                             vals.update({
                                 'pricelist_id': pricelist.id,
-                                'date_start': ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                                'date_end': ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                'date_start': ndate_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
+                                'date_end': ndate_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
                                 'compute_price': 'fixed',
                                 'applied_on': '1_product',
                                 'product_tmpl_id': vroom.product_id.product_tmpl_id.id
                             })
-                            self.env['product.pricelist.item'].with_context({'wubook_action': False}).create(vals)
+                            pricelist_item_obj.with_context({
+                                        'wubook_action': False}).create(vals)
         return True
 
     @api.model
@@ -959,12 +1046,15 @@ class WuBook(models.TransientModel):
                 'name': plan['name'],
                 'wdaily': plan['daily'] == 1,
             }
-            plan_id = product_listprice_obj.search([('wpid', '=', str(plan['id']))], limit=1)
+            plan_id = product_listprice_obj.search([
+                ('wpid', '=', str(plan['id']))
+            ], limit=1)
             if not plan_id:
                 vals.update({
                     'wpid': str(plan['id']),
                 })
-                product_listprice_obj.with_context({'wubook_action': False}).create(vals)
+                product_listprice_obj.with_context({
+                                        'wubook_action': False}).create(vals)
             else:
                 plan_id.with_context({'wubook_action': False}).write(vals)
             count = count + 1
@@ -973,12 +1063,15 @@ class WuBook(models.TransientModel):
     # FIXME: Super big method!!! O_o
     @api.model
     def generate_reservations(self, bookings):
-        default_arrival_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_arrival_hour')
-        default_departure_hour = self.env['ir.values'].get_default('hotel.config.settings', 'default_departure_hour')
+        default_arrival_hour = self.env['ir.values'].get_default(
+                            'hotel.config.settings', 'default_arrival_hour')
+        default_departure_hour = self.env['ir.values'].get_default(
+                            'hotel.config.settings', 'default_departure_hour')
 
         # Get user timezone
         user_id = self.env['res.users'].browse(self.env.uid)
-        tz_hotel = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'tz_hotel')
+        tz_hotel = self.env['ir.values'].sudo().get_default(
+                                        'hotel.config.settings', 'tz_hotel')
         local = pytz.timezone(tz_hotel and str(tz_hotel) or 'UTC')
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
@@ -991,43 +1084,59 @@ class WuBook(models.TransientModel):
         checkin_utc_dt = False
         checkout_utc_dt = False
         _logger.info(bookings)
-        for book in bookings: # This create a new folio
+        for book in bookings:   # This create a new folio
             is_cancellation = book['status'] in WUBOOK_STATUS_BAD
 
-            # Can't process failed reservations (for example set a invalid new reservation and receive in the same transaction an cancellation)
+            # Can't process failed reservations
+            #  (for example set a invalid new reservation and receive in
+            # the same transaction an cancellation)
             if book['channel_reservation_code'] in failed_reservations:
-                self.create_wubook_issue('reservation',
-                                         "Can't process a reservation that previusly failed!",
-                                         '', wid=book['reservation_code'])
+                self.create_wubook_issue(
+                    'reservation',
+                    "Can't process a reservation that previusly failed!",
+                    '', wid=book['reservation_code'])
                 continue
 
             # Get dates for the reservation (localize them)
-            arr_hour = book['arrival_hour'] == "--" and default_arrival_hour or book['arrival_hour']
+            arr_hour = book['arrival_hour'] == "--" and \
+                default_arrival_hour or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)
-            checkin_dt = datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkin_utc_dt = checkin_dt.replace(tzinfo=local).astimezone(pytz.utc)
+            checkin_dt = datetime.strptime(checkin,
+                                           DEFAULT_WUBOOK_DATETIME_FORMAT)
+            checkin_utc_dt = checkin_dt.replace(tzinfo=local).astimezone(
+                                                                    pytz.utc)
             checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
-            checkout = "%s %s" % (book['date_departure'], default_departure_hour)
-            checkout_dt = datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkout_utc_dt = checkout_dt.replace(tzinfo=local).astimezone(pytz.utc)
+            checkout = "%s %s" % (book['date_departure'],
+                                  default_departure_hour)
+            checkout_dt = datetime.strptime(checkout,
+                                            DEFAULT_WUBOOK_DATETIME_FORMAT)
+            checkout_utc_dt = checkout_dt.replace(tzinfo=local).astimezone(
+                                                                    pytz.utc)
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-
-            today = datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATETIME_FORMAT)#COMPROBAR TZ
 
             # Search Folio. If exists.
             folio_id = False
-            if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
-                reserv_folio = hotel_reserv_obj.search([('wchannel_reservation_code', '=', str(book['channel_reservation_code']))], limit=1)
+            if book['channel_reservation_code'] and \
+                    book['channel_reservation_code'] != '':
+                reserv_folio = hotel_reserv_obj.search([
+                    ('wchannel_reservation_code', '=',
+                     str(book['channel_reservation_code']))
+                ], limit=1)
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
             else:
-                reserv_folio = hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))], limit=1)
+                reserv_folio = hotel_reserv_obj.search([
+                    ('wrid', '=', str(book['reservation_code']))
+                ], limit=1)
                 if reserv_folio:
                     folio_id = reserv_folio.folio_id
 
             # Need update reservations?
-            reservs = folio_id and folio_id.room_lines or hotel_reserv_obj.search([('wrid', '=', str(book['reservation_code']))])
+            sreservs = hotel_reserv_obj.search([
+                ('wrid', '=', str(book['reservation_code']))
+            ])
+            reservs = folio_id and folio_id.room_lines or sreservs
             reservs_processed = False
             if any(reservs):
                 folio_id = reservs[0].folio_id
@@ -1040,26 +1149,29 @@ class WuBook(models.TransientModel):
                         })
                         reservs_processed = True
                         if is_cancellation:
-                            reserv.with_context({'wubook_action': False}).action_cancel()
+                            reserv.with_context({
+                                    'wubook_action': False}).action_cancel()
 
             # Do Nothing if already processed 'wrid'
             if reservs_processed:
                 processed_rids.append(book['reservation_code'])
-                # Update Odoo availability (don't wait for wubook)
-                fetch_values(checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                             checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
                 continue
 
             # Search Customer
-            country_id = self.env['res.country'].search([('code', '=', book['customer_country'])], limit=1)
+            country_id = self.env['res.country'].search([
+                ('code', '=', book['customer_country'])
+            ], limit=1)
             customer_mail = book.get('customer_mail', False)
             partner_id = False
             if customer_mail:
-                partner_id = res_partner_obj.search([('email', '=', customer_mail)], limit=1)
+                partner_id = res_partner_obj.search([
+                    ('email', '=', customer_mail)
+                ], limit=1)
             if not partner_id:
                 # lang = self.env['res.lang'].search([('code', '=', book['customer_language_iso'])], limit=1)
                 vals = {
-                    'name': "%s %s" % (book['customer_name'], book['customer_surname']),
+                    'name': "%s %s" %
+                    (book['customer_name'], book['customer_surname']),
                     'country_id': country_id and country_id.id,
                     'city': book['customer_city'],
                     'phone': book['customer_phone'],
@@ -1079,30 +1191,37 @@ class WuBook(models.TransientModel):
             vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])
 
             if not any(vrooms):
-                self.create_wubook_issue('reservation',
-                                         "Can't found any virtual room associated to '%s' in this hotel" % book['rooms'],
-                                         '', wid=book['reservation_code'])
+                self.create_wubook_issue(
+                    'reservation',
+                    "Can't found any virtual room associated to '%s' \
+                                            in this hotel" % book['rooms'],
+                    '', wid=book['reservation_code'])
                 failed_reservations.append(book['channel_reservation_code'])
                 continue
-
 
             reservations = []
             used_rooms = []
             # Check reservation vrooms avail
-            for vroom in vrooms: # This create new reservation
+            for vroom in vrooms:    # This create new reservation
                 dates_checkin = [checkin_utc_dt, False]
                 dates_checkout = [checkout_utc_dt, False]
                 split_booking = False
                 split_booking_parent = False
-                while dates_checkin[0]: # This perhaps create splitted reservations
-                    checkin_str = dates_checkin[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-                    checkout_str = dates_checkout[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+                # This perhaps create splitted reservations
+                while dates_checkin[0]:
+                    checkin_str = dates_checkin[0].strftime(
+                                                DEFAULT_SERVER_DATETIME_FORMAT)
+                    checkout_str = dates_checkout[0].strftime(
+                                                DEFAULT_SERVER_DATETIME_FORMAT)
                     rcheckout_dt = dates_checkout[0] - timedelta(days=1)
-                    rcheckout_str = rcheckout_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-                    free_rooms = hotel_vroom_obj.check_availability_virtual_room(checkin_str,
-                                                                                 rcheckout_str,
-                                                                                 virtual_room_id=vroom.id,
-                                                                                 notthis=used_rooms)
+                    rcheckout_str = rcheckout_dt.strftime(
+                                                DEFAULT_SERVER_DATETIME_FORMAT)
+                    free_rooms = hotel_vroom_obj.\
+                        check_availability_virtual_room(
+                            checkin_str,
+                            rcheckout_str,
+                            virtual_room_id=vroom.id,
+                            notthis=used_rooms)
                     if any(free_rooms):
                         num_free_rooms = len(free_rooms)
                         # Total Price Room
@@ -1111,9 +1230,12 @@ class WuBook(models.TransientModel):
                         for broom in book['booked_rooms']:
                             if str(broom['room_id']) == vroom.wrid:
                                 for brday in broom['roomdays']:
-                                    wndate = datetime.strptime(brday['day'], DEFAULT_WUBOOK_DATE_FORMAT)
+                                    wndate = datetime.strptime(
+                                        brday['day'],
+                                        DEFAULT_WUBOOK_DATE_FORMAT)
                                     reservation_lines.append((0, False, {
-                                        'date': wndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                        'date': wndate.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT),
                                         'price': brday['price']
                                     }))
                                     tprice += brday['price']
@@ -1154,12 +1276,15 @@ class WuBook(models.TransientModel):
                                     customer_room_index += 1
                                 else:
                                     if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
-                                        failed_reservations.append(book['channel_reservation_code'])
+                                        failed_reservations.append(
+                                            book['channel_reservation_code'])
                                     else:
                                         failed_reservations.append('undefined')
-                                    self.create_wubook_issue('reservation',
-                                                             "Can't found a free room for reservation from wubook (#B)",
-                                                             '', wid=book['reservation_code'])
+                                    self.create_wubook_issue(
+                                        'reservation',
+                                        "Can't found a free room for \
+                                                reservation from wubook (#B)",
+                                        '', wid=book['reservation_code'])
 
                         dates_checkin = [dates_checkin[1], False]
                         dates_checkout = [dates_checkout[1], False]
@@ -1167,25 +1292,35 @@ class WuBook(models.TransientModel):
                         split_booking = True
                         date_diff = (dates_checkout[0] - dates_checkin[0]).days
                         if date_diff <= 0:
-                            if book['channel_reservation_code'] and book['channel_reservation_code'] != '':
-                                failed_reservations.append(book['channel_reservation_code'])
+                            if book['channel_reservation_code'] and \
+                                    book['channel_reservation_code'] != '':
+                                failed_reservations.append(
+                                            book['channel_reservation_code'])
                             else:
                                 failed_reservations.append('undefined')
-                            self.create_wubook_issue('reservation',
-                                                     "Can't found free rooms for reservation from wubook",
-                                                     '', wid=book['reservation_code'])
+                            self.create_wubook_issue(
+                                'reservation',
+                                "Can't found free rooms for \
+                                                    reservation from wubook",
+                                '', wid=book['reservation_code'])
                             dates_checkin = [False, False]
                             dates_checkout = [False, False]
                             split_booking = False
                         else:
-                            dates_checkin = [dates_checkin[0], dates_checkin[0] + timedelta(days=date_diff - 1)]
-                            dates_checkout = [dates_checkout[0] - timedelta(days=1), dates_checkout[0]]
+                            dates_checkin = [
+                                dates_checkin[0],
+                                dates_checkin[0] + timedelta(days=date_diff-1)
+                            ]
+                            dates_checkout = [
+                                dates_checkout[0] - timedelta(days=1),
+                                dates_checkout[0]
+                            ]
                             split_booking = True
                 if split_booking:
                     self.create_wubook_issue(
                         'reservation',
-                         "Reservation Splitted",
-                         '', wid=book['reservation_code'])
+                        "Reservation Splitted",
+                        '', wid=book['reservation_code'])
 
             # Create Folio
             if not any(failed_reservations) and any(reservations):
@@ -1195,20 +1330,23 @@ class WuBook(models.TransientModel):
                         'wcustomer_notes': book['customer_notes'],
                     }
                     if folio_id:
-                        folio_id.with_context({'wubook_action': False}).write(vals)
+                        folio_id.with_context({
+                                        'wubook_action': False}).write(vals)
                     else:
                         vals.update({
                             'partner_id': partner_id.id,
                             'wseed': book['sessionSeed']
                         })
-                        folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
+                        folio_id = hotel_folio_obj.with_context({
+                                        'wubook_action': False}).create(vals)
                     processed_rids.append(book['reservation_code'])
                 except Exception:
                     self.create_wubook_issue(
                         'reservation',
                         'Exception catched trying import booking',
                         '', wid=book['reservation_code'])
-                    failed_reservations.append(book['channel_reservation_code'])
+                    failed_reservations.append(
+                                            book['channel_reservation_code'])
 
         return (processed_rids, any(failed_reservations),
                 checkin_utc_dt, checkout_utc_dt)
@@ -1222,7 +1360,9 @@ class WuBook(models.TransientModel):
                 'name': v_cid['name'],
                 'ical': v_cid['ical'] == 1,
             }
-            channel_info = channel_info_obj.search([('wid', '=', k_cid)], limit=1)
+            channel_info = channel_info_obj.search([
+                ('wid', '=', k_cid)
+            ], limit=1)
             if channel_info:
                 channel_info.write(vals)
             else:
@@ -1236,23 +1376,28 @@ class WuBook(models.TransientModel):
     # === ODOO -> WUBOOK
     @api.model
     def push_changes(self):
-        return self.push_availability() and self.push_priceplans() and self.push_restrictions()
+        return self.push_availability() and self.push_priceplans() and \
+                self.push_restrictions()
 
     @api.model
     def push_availability(self):
         vroom_avail_ids = self.env['hotel.virtual.room.availability'].search([
             ('wpushed', '=', False),
-            ('date', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))
+            ('date', '>=', datetime.strftime(fields.datetime.now(),
+                                             DEFAULT_SERVER_DATE_FORMAT))
         ])
 
         vrooms = vroom_avail_ids.mapped('virtual_room_id')
         avails = []
         for vroom in vrooms:
-            vroom_avails = vroom_avail_ids.filtered(lambda x: x.virtual_room_id.id == vroom.id)
+            vroom_avails = vroom_avail_ids.filtered(
+                                    lambda x: x.virtual_room_id.id == vroom.id)
             days = []
             for vroom_avail in vroom_avails:
-                vroom_avail.with_context({'wubook_action': False}).write({'wpushed': True})
-                date_dt = datetime.strptime(vroom_avail.date, DEFAULT_SERVER_DATE_FORMAT)
+                vroom_avail.with_context({
+                            'wubook_action': False}).write({'wpushed': True})
+                date_dt = datetime.strptime(vroom_avail.date,
+                                            DEFAULT_SERVER_DATE_FORMAT)
                 days.append({
                     'date': date_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                     'avail': vroom_avail.avail,
@@ -1267,65 +1412,86 @@ class WuBook(models.TransientModel):
 
     @api.model
     def push_priceplans(self):
-        unpushed = self.env['product.pricelist.item'].search([('wpushed', '=', False),
-                                                              ('date_start', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))],
-                                                             order="date_start ASC")
+        unpushed = self.env['product.pricelist.item'].search([
+            ('wpushed', '=', False),
+            ('date_start', '>=', datetime.strftime(fields.datetime.now(),
+                                                   DEFAULT_SERVER_DATE_FORMAT))
+        ], order="date_start ASC")
         if any(unpushed):
-            date_start = datetime.strptime(unpushed[0].date_start, DEFAULT_SERVER_DATE_FORMAT)
-            date_end = datetime.strptime(unpushed[-1].date_start, DEFAULT_SERVER_DATE_FORMAT)
+            date_start = datetime.strptime(unpushed[0].date_start,
+                                           DEFAULT_SERVER_DATE_FORMAT)
+            date_end = datetime.strptime(unpushed[-1].date_start,
+                                         DEFAULT_SERVER_DATE_FORMAT)
             days_diff = abs((date_end-date_start).days) + 1
 
             prices = {}
-            pricelist_ids = self.env['product.pricelist'].search([('wpid', '!=', False),
-                                                                  ('active', '=', True)])
+            pricelist_ids = self.env['product.pricelist'].search([
+                ('wpid', '!=', False),
+                ('active', '=', True)
+            ])
             for pr in pricelist_ids:
                 prices.update({pr.wpid: {}})
                 unpushed_pl = self.env['product.pricelist.item'].search(
                     [('wpushed', '=', False), ('pricelist_id', '=', pr.id)])
                 product_tmpl_ids = unpushed_pl.mapped('product_tmpl_id')
                 for pt_id in product_tmpl_ids:
-                    vroom = self.env['hotel.virtual.room'].search([('product_id.product_tmpl_id', '=', pt_id.id)], limit=1)
+                    vroom = self.env['hotel.virtual.room'].search([
+                        ('product_id.product_tmpl_id', '=', pt_id.id)
+                    ], limit=1)
                     if vroom:
                         prices[pr.wpid].update({vroom.wrid: []})
                         for i in range(0, days_diff):
                             prod = vroom.product_id.with_context({
                                     'quantity': 1,
                                     'pricelist': pr.id,
-                                    'date': (date_start + timedelta(days=i)).strftime(DEFAULT_SERVER_DATE_FORMAT),
+                                    'date': (date_start + timedelta(days=i)).
+                                    strftime(DEFAULT_SERVER_DATE_FORMAT),
                                 })
                             prices[pr.wpid][vroom.wrid].append(prod.price)
 
             _logger.info(prices)
             for k_pk, v_pk in prices.iteritems():
                 if any(v_pk):
-                    self.update_plan_prices(k_pk, date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT), v_pk)
+                    self.update_plan_prices(k_pk, date_start.strftime(
+                                            DEFAULT_WUBOOK_DATE_FORMAT), v_pk)
 
-            unpushed.with_context({'wubook_action': False}).write({'wpushed': True})
+            unpushed.with_context({
+                            'wubook_action': False}).write({'wpushed': True})
         return True
 
     @api.model
     def push_restrictions(self):
         unpushed = self.env['hotel.virtual.room.restriction.item'].search([
             ('wpushed', '=', False),
-            ('date_start', '>=', datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATE_FORMAT))],
-            order="date_start ASC")
+            ('date_start', '>=', datetime.strftime(fields.datetime.now(),
+                                                   DEFAULT_SERVER_DATE_FORMAT))
+        ], order="date_start ASC")
         if any(unpushed):
-            date_start = datetime.strptime(unpushed[0].date_start, DEFAULT_SERVER_DATE_FORMAT)
-            date_end = datetime.strptime(unpushed[-1].date_start, DEFAULT_SERVER_DATE_FORMAT)
+            date_start = datetime.strptime(unpushed[0].date_start,
+                                           DEFAULT_SERVER_DATE_FORMAT)
+            date_end = datetime.strptime(unpushed[-1].date_start,
+                                         DEFAULT_SERVER_DATE_FORMAT)
             days_diff = abs((date_end-date_start).days) + 1
 
             restrictions = {}
-            restriction_plan_ids = self.env['hotel.virtual.room.restriction'].search([('wpid', '!=', False),
-                                                                               ('active', '=', True)])
+            vroom_rest_obj = self.env['hotel.virtual.room.restriction']
+            rest_item_obj = self.env['hotel.virtual.room.restriction.item']
+            restriction_plan_ids = vroom_rest_obj.search([
+                ('wpid', '!=', False),
+                ('active', '=', True)
+            ])
             for rp in restriction_plan_ids:
                 restrictions.update({rp.wpid: {}})
-                unpushed_rp = self.env['hotel.virtual.room.restriction.item'].search(
-                    [('wpushed', '=', False), ('restriction_id', '=', rp.id)])
+                unpushed_rp = rest_item_obj.search([
+                    ('wpushed', '=', False),
+                    ('restriction_id', '=', rp.id)
+                ])
                 virtual_room_ids = unpushed_rp.mapped('virtual_room_id')
                 for vroom in virtual_room_ids:
                     restrictions[rp.wpid].update({vroom.wrid: []})
                     for i in range(0, days_diff):
-                        restr = vroom.get_restrictions(date_start.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                        restr = vroom.get_restrictions(
+                            date_start.strftime(DEFAULT_SERVER_DATE_FORMAT))
                         restrictions[rp.wpid][vroom.wrid].append({
                             'min_stay': restr and restr.min_stay or 0,
                             'min_stay_arrival': restr and restr.min_stay_arrival or 0,
@@ -1337,8 +1503,10 @@ class WuBook(models.TransientModel):
             _logger.info(restrictions)
             for k_res, v_res in restrictions.iteritems():
                 if any(v_res):
-                    self.update_rplan_values(k_res,
-                                             date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                                             v_res)
-            unpushed.with_context({'wubook_action': False}).write({'wpushed': True})
+                    self.update_rplan_values(
+                        k_res,
+                        date_start.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        v_res)
+            unpushed.with_context({
+                            'wubook_action': False}).write({'wpushed': True})
         return True

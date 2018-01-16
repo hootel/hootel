@@ -27,7 +27,8 @@ from odoo.addons.hotel.tests.common import TestHotel
 from odoo.addons.hotel_wubook_proto.wubook import (
     DEFAULT_WUBOOK_DATE_FORMAT,
     DEFAULT_WUBOOK_TIME_FORMAT,
-    WUBOOK_STATUS_CONFIRMED)
+    WUBOOK_STATUS_CONFIRMED,
+    WUBOOK_STATUS_CANCELLED)
 from random import randint
 
 
@@ -197,6 +198,10 @@ class TestHotelWubook(TestHotel):
             'cc_info': 1,
             'customer_language_iso': 'es'
         }
+
+    def cancel_booking(self, wbooking):
+        wbooking['status'] = WUBOOK_STATUS_CANCELLED
+        return wbooking
 
     @classmethod
     def setUpClass(cls):

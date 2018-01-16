@@ -235,7 +235,8 @@ class HotelReservation(models.Model):
             if record.state == 'cancelled':
                 return
             else:
-                return super(HotelReservation, record).action_reservation_checkout()
+                return super(HotelReservation, record).\
+                                                action_reservation_checkout()
 
     @api.multi
     def mark_as_readed(self):
@@ -287,4 +288,5 @@ class HotelReservation(models.Model):
     @api.onchange('checkin', 'checkout', 'product_id')
     def on_change_checkin_checkout_product_id(self):
         if not self.wis_from_channel:
-            return super(HotelReservation, self).on_change_checkin_checkout_product_id()
+            return super(HotelReservation, self).\
+                                        on_change_checkin_checkout_product_id()

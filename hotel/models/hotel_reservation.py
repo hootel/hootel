@@ -467,29 +467,29 @@ class HotelReservation(models.Model):
         if record.adults == 0:
             record.adults = room.capacity
 
-        # Update Availability
-        cavail = self.env['hotel.reservation'].get_availability(
-            record.checkin,
-            record.checkout,
-            record.product_id.id, dbchanged=False)
-        hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
-        for item in cavail:
-            for rec in item['days']:
-                vroom_avail = hotel_vroom_avail_obj.search([
-                    ('virtual_room_id', '=', item['id']),
-                    ('date', '=', rec['date'])
-                ])
-                vals = {
-                    'avail': rec['avail']
-                }
-                if vroom_avail:
-                    vroom_avail.write(vals)
-                else:
-                    vals.update({
-                        'virtual_room_id': item['id'],
-                        'date': rec['date'],
-                    })
-                    hotel_vroom_avail_obj.create(vals)
+        # Update Availability (Removed because wubook-proto do it)
+        # cavail = self.env['hotel.reservation'].get_availability(
+        #     record.checkin,
+        #     record.checkout,
+        #     record.product_id.id, dbchanged=False)
+        # hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
+        # for item in cavail:
+        #     for rec in item['days']:
+        #         vroom_avail = hotel_vroom_avail_obj.search([
+        #             ('virtual_room_id', '=', item['id']),
+        #             ('date', '=', rec['date'])
+        #         ])
+        #         vals = {
+        #             'avail': rec['avail']
+        #         }
+        #         if vroom_avail:
+        #             vroom_avail.write(vals)
+        #         else:
+        #             vals.update({
+        #                 'virtual_room_id': item['id'],
+        #                 'date': rec['date'],
+        #             })
+        #             hotel_vroom_avail_obj.create(vals)
 
         return record
 

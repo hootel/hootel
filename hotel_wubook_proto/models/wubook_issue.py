@@ -61,8 +61,8 @@ class WuBookIssue(models.Model):
         if any(reserv_ids):
             res = self.env['wubook'].mark_bookings(reserv_ids)
             if not res:
-                raise ValidationError("Can't mark reservation as readed \
-                                                                in WuBook!")
+                raise ValidationError(
+                                "Can't mark reservation as readed in WuBook!")
 
     @api.model
     def _needaction_domain_get(self):

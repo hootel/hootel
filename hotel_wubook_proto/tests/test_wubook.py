@@ -196,6 +196,68 @@ class TestWubook(TestHotelWubook):
         self.assertEqual(len(processed_rids), 3, "Reservation not found")
         self.assertFalse(errors, "Reservation errors")
 
+    def test_cancel_booking(self):
+        now_utc_dt = date_utils.now()
+        checkin_utc_dt = now_utc_dt + timedelta(days=3)
+        checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
+                                               self.tz_hotel)
+        checkout_utc_dt = checkin_utc_dt + timedelta(days=2)
+        date_diff = date_utils.date_diff(checkin_utc_dt, checkout_utc_dt,
+                                         hours=False) + 1
+
+        def check_state(wrids, state):
+            reservs = self.env['hotel.reservation'].search([
+                ('wrid', 'in', wrids)
+            ])
+            for reserv in reservs:
+                self.assertEqual(
+                        reserv.state, state, "Reservation state invalid")
+
+        # Create Reservation
+        nbook = self.create_wubook_booking(
+            self.user_hotel_manager,
+            checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            self.partner_2,
+            {
+                self.hotel_vroom_special.wrid: {
+                    'occupancy': [2],   # 2 Reservation Line
+                    'dayprices': [15.0, 15.0]   # 2 Days
+                }
+            })
+        wbooks = [nbook]
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].generate_reservations(wbooks)
+        self.assertEqual(len(processed_rids), 1, "Reservation not found")
+        self.assertFalse(errors, "Reservation errors")
+
+        # Cancel It
+        wbooks = [self.cancel_booking(nbook)]
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].generate_reservations(wbooks)
+        self.assertEqual(len(processed_rids), 1, "Reservation not found")
+        self.assertFalse(errors, "Reservation errors")
+        check_state(processed_rids, 'cancelled')
+
+        # Create Reservation and Cancel It
+        nbook = self.create_wubook_booking(
+            self.user_hotel_manager,
+            checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            self.partner_2,
+            {
+                self.hotel_vroom_special.wrid: {
+                    'occupancy': [2],   # 2 Reservation Line
+                    'dayprices': [15.0, 15.0]   # 2 Days
+                }
+            })
+        cbook = self.cancel_booking(nbook)
+        wbooks = [nbook, cbook]
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].generate_reservations(wbooks)
+        _logger.info(processed_rids)
+        self.assertEqual(len(processed_rids), 2, "Reservation not found")
+        self.assertFalse(errors, "Reservation errors")
+        check_state(processed_rids, 'cancelled')
+
     def test_invalid_booking(self):
         now_utc_dt = date_utils.now()
         checkin_utc_dt = now_utc_dt + timedelta(days=3)
