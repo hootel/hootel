@@ -223,8 +223,10 @@ class WubookConfiguration(models.TransientModel):
             'wubook.config.settings',
             'wubook_push_security_token',
             binascii.hexlify(os.urandom(16)).decode())
-        self.cr.commit()    # FIXME: Need do this
+        self.env.cr.commit()    # FIXME: Need do this
 
         # Push Changes
-        self.env['wubook'].push_changes()
-        self.env['wubook'].push_activation()
+        if wubook_obj.init_connection():
+            wubook_obj.push_activation()
+            wubook_obj.push_changes()
+            wubook_obj.close_connection()

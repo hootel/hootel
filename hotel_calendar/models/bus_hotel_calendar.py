@@ -110,7 +110,7 @@ class BusHotelCalendar(models.TransientModel):
                                                  room_name, partner_phone,
                                                  state, fix_days)
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
-                                     'public'), notif)
+                                     HOTEL_BUS_CHANNEL_ID), notif)
 
     @api.model
     def send_pricelist_notification(self, pricelist, date, vroom, price):

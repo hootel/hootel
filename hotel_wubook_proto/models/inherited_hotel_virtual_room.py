@@ -45,10 +45,8 @@ class HotelVirtualRoom(models.Model):
     @api.multi
     @api.constrains('wscode')
     def _check_wscode(self):
-        for record in self:
-            if len(record.wscode) > 4:  # Wubook scode max. length
-                raise ValidationError(_("SCODE Can't be longer than 4 \
-                                                                characters"))
+        if len(self.wscode) > 4:  # Wubook scode max. length
+            raise ValidationError(_("SCODE Can't be longer than 4 characters"))
 
     @api.multi
     def get_restrictions(self, date):

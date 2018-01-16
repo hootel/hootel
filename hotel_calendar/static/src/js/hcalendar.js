@@ -1423,6 +1423,9 @@ HotelCalendar.prototype = {
             this._pricelist[k][pr_fk].title = pr_item.title;
           }
         } else {
+          if (!(k in this._pricelist)) {
+            this._pricelist[k] = [];
+          }
           this._pricelist[k].push({
             'room': pr_item.room,
             'days': pr_item.days,

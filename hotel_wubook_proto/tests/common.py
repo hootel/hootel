@@ -81,15 +81,8 @@ class TestHotelWubook(TestHotel):
         cls.env['wubook']._patch_method('delete_rplan', wubook_ommit)
         cls.env['wubook']._patch_method('import_channels_info', wubook_ommit)
 
-    # rinfo = {
-    #     '1992': {
-    #         'occupancy': [2, 2],
-    #         'dayprices': [12, 12, 34, 333],
-    #     }
-    # }
-
     def create_wubook_booking(self, creator, checkin, partner, rinfo,
-                                  channel=0, notes=''):
+                              channel=0, notes=''):
         rcode = randint(100000, 999999)
         crcode = randint(100000, 999999)
         brate = randint(100000, 999999)
@@ -211,12 +204,12 @@ class TestHotelWubook(TestHotel):
 
         # Update Test Virtual Rooms
         cls.hotel_vroom_budget.write({
-            'wcapcity': 1,
+            'wcapacity': 1,
             'wrid': 3000,
             'wscode': 'T001',
         })
         cls.hotel_vroom_special.write({
-            'wcapcity': 2,
+            'wcapacity': 2,
             'wrid': 3001,
             'wscode': 'T002',
         })

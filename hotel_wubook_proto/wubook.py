@@ -412,22 +412,23 @@ class WuBook(models.TransientModel):
             processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
                 self.generate_reservations(results)
             if any(processed_rids):
-                rcode, results = self.SERVER.mark_bookings(self.TOKEN,
+                rcodeb, resultsb = self.SERVER.mark_bookings(self.TOKEN,
                                                            self.LCODE,
                                                            processed_rids)
 
-                if rcode != 0:
+                if rcodeb != 0:
                     self.create_wubook_issue(
                         'wubook',
                          "Problem trying mark bookings (%s)" % str(processed_rids),
                          '')
-
-                # Update Odoo availability (don't wait for wubook)
-                self.with_context({'init_connection': False}).fetch_rooms_values(
-                    checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                    checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         if init_connection:
             self.close_connection()
+
+        # Update Odoo availability (don't wait for wubook)
+        if rcode == 0 and checkin_utc_dt and checkout_utc_dt:
+            self.fetch_rooms_values(
+                checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
 
         if rcode != 0:
             self.create_wubook_issue('reservation',
@@ -461,12 +462,14 @@ class WuBook(models.TransientModel):
                          "Problem trying mark bookings (%s)" % str(processed_rids),
                          '')
 
-                # Update Odoo availability (don't wait for wubook)
-                self.with_context({'init_connection': False}).fetch_rooms_values(
-                    checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                    checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
         if init_connection:
             self.close_connection()
+
+        # Update Odoo availability (don't wait for wubook)
+        if rcode == 0 and checkin_utc_dt and checkout_utc_dt:
+            self.fetch_rooms_values(
+                checkin_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                checkout_utc_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
 
         if rcode != 0:
             self.create_wubook_issue('reservation',
@@ -975,7 +978,8 @@ class WuBook(models.TransientModel):
 
         # Get user timezone
         user_id = self.env['res.users'].browse(self.env.uid)
-        local = pytz.timezone(self.env['ir.values'].get_default('hotel.config.settings', 'tz_hotel'))
+        tz_hotel = self.env['ir.values'].sudo().get_default('hotel.config.settings', 'tz_hotel')
+        local = pytz.timezone(tz_hotel and str(tz_hotel) or 'UTC')
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
@@ -984,6 +988,8 @@ class WuBook(models.TransientModel):
         # Space for store some data for construct folios
         processed_rids = []
         failed_reservations = []
+        checkin_utc_dt = False
+        checkout_utc_dt = False
         _logger.info(bookings)
         for book in bookings: # This create a new folio
             is_cancellation = book['status'] in WUBOOK_STATUS_BAD
@@ -999,12 +1005,12 @@ class WuBook(models.TransientModel):
             arr_hour = book['arrival_hour'] == "--" and default_arrival_hour or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)
             checkin_dt = datetime.strptime(checkin, DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkin_utc_dt = checkin_dt.replace(tzinfo=pytz.utc).astimezone(pytz.utc)
+            checkin_utc_dt = checkin_dt.replace(tzinfo=local).astimezone(pytz.utc)
             checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             checkout = "%s %s" % (book['date_departure'], default_departure_hour)
             checkout_dt = datetime.strptime(checkout, DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkout_utc_dt = checkout_dt.replace(tzinfo=pytz.utc).astimezone(pytz.utc)
+            checkout_utc_dt = checkout_dt.replace(tzinfo=local).astimezone(pytz.utc)
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             today = datetime.strftime(fields.datetime.now(), DEFAULT_SERVER_DATETIME_FORMAT)#COMPROBAR TZ
@@ -1072,6 +1078,14 @@ class WuBook(models.TransientModel):
             vrooms_ids = book['rooms'].split(',')
             vrooms = hotel_vroom_obj.search([('wrid', 'in', vrooms_ids)])
 
+            if not any(vrooms):
+                self.create_wubook_issue('reservation',
+                                         "Can't found any virtual room associated to '%s' in this hotel" % book['rooms'],
+                                         '', wid=book['reservation_code'])
+                failed_reservations.append(book['channel_reservation_code'])
+                continue
+
+
             reservations = []
             used_rooms = []
             # Check reservation vrooms avail
@@ -1083,9 +1097,10 @@ class WuBook(models.TransientModel):
                 while dates_checkin[0]: # This perhaps create splitted reservations
                     checkin_str = dates_checkin[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     checkout_str = dates_checkout[0].strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-
+                    rcheckout_dt = dates_checkout[0] - timedelta(days=1)
+                    rcheckout_str = rcheckout_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
                     free_rooms = hotel_vroom_obj.check_availability_virtual_room(checkin_str,
-                                                                                 checkout_str,
+                                                                                 rcheckout_str,
                                                                                  virtual_room_id=vroom.id,
                                                                                  notthis=used_rooms)
                     if any(free_rooms):
@@ -1174,19 +1189,26 @@ class WuBook(models.TransientModel):
 
             # Create Folio
             if not any(failed_reservations) and any(reservations):
-                vals = {
-                    'room_lines': reservations,
-                    'wcustomer_notes': book['customer_notes'],
-                }
-                if folio_id:
-                    folio_id.with_context({'wubook_action': False}).write(vals)
-                else:
-                    vals.update({
-                        'partner_id': partner_id.id,
-                        'wseed': book['sessionSeed']
-                    })
-                    folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
-                processed_rids.append(book['reservation_code'])
+                try:
+                    vals = {
+                        'room_lines': reservations,
+                        'wcustomer_notes': book['customer_notes'],
+                    }
+                    if folio_id:
+                        folio_id.with_context({'wubook_action': False}).write(vals)
+                    else:
+                        vals.update({
+                            'partner_id': partner_id.id,
+                            'wseed': book['sessionSeed']
+                        })
+                        folio_id = hotel_folio_obj.with_context({'wubook_action': False}).create(vals)
+                    processed_rids.append(book['reservation_code'])
+                except Exception:
+                    self.create_wubook_issue(
+                        'reservation',
+                        'Exception catched trying import booking',
+                        '', wid=book['reservation_code'])
+                    failed_reservations.append(book['channel_reservation_code'])
 
         return (processed_rids, any(failed_reservations),
                 checkin_utc_dt, checkout_utc_dt)

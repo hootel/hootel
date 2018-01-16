@@ -275,7 +275,7 @@ class HotelReservation(models.Model):
     @api.model
     def daily_plan(self):
         today_utc_dt = date_utils.now()
-        yesterday_utc_dt = today - timedelta(days=1)
+        yesterday_utc_dt = today_utc_dt - timedelta(days=1)
         hotel_tz = self.env['ir.values'].get_default('hotel.config.settings',
                                                      'tz_hotel')
         today_dt = date_utils.dt_as_timezone(today_utc_dt, hotel_tz)
@@ -453,10 +453,18 @@ class HotelReservation(models.Model):
             vals.update({'order_id': folio.order_id.id})
 
         record = super(HotelReservation, self).create(vals)
+
+        # Check Capacity
+        room = self.env['hotel.room'].search([
+            ('product_id', '=', record.product_id.id)
+        ])
+
+        persons = vals['adults'] + vals['children']
+        if persons > room.capacity:
+            raise ValidationError(
+                "Reservation persons can't be higher than room capacity")
+
         if record.adults == 0:
-            room = self.env['hotel.room'].search([
-                ('product_id', '=', record.product_id.id)
-            ])
             record.adults = room.capacity
 
         # Update Availability
@@ -768,8 +776,8 @@ class HotelReservation(models.Model):
         IMPORTANT: This function should receive the dates in UTC datetime zone,
                     as String format
         """
-        tz_hotel = pytz.timezone(self.env['ir.values'].get_default(
-            'hotel.config.settings', 'tz_hotel'))
+        tz_hotel = self.env['ir.values'].sudo().get_default(
+                                        'hotel.config.settings', 'tz_hotel')
         checkin_utc_dt = date_utils.get_datetime(str_checkin_utc)
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt, tz_hotel)
         checkin_utc_dt -= timedelta(days=1)
