@@ -180,6 +180,7 @@ class TestHotel(TestMail):
             'price_virtual_room': cls.hotel_vroom_budget.id,
             'categ_id': cls.hotel_room_type_simple.cat_id.id,
             'capacity': 1,
+            'sequence': 1,
         })
         cls.hotel_room_double_200 = Rooms.create({
             'name': '200',

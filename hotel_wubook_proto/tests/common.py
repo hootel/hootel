@@ -30,6 +30,8 @@ from odoo.addons.hotel_wubook_proto.wubook import (
     WUBOOK_STATUS_CONFIRMED,
     WUBOOK_STATUS_CANCELLED)
 from random import randint
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class TestHotelWubook(TestHotel):
@@ -46,6 +48,14 @@ class TestHotelWubook(TestHotel):
         def wubook_is_valid_account(self):
             return False
 
+        @api.model
+        def wubook_create_wubook_issue(self, section, message, wmessage,
+                                       wid=False, dfrom=False, dto=False):
+            _logger.info("ISSUE CREATED:\n\t- %s\n\t--- %s" %
+                         (section, message))
+
+        cls.env['wubook']._patch_method('create_wubook_issue',
+                                        wubook_create_wubook_issue)
         cls.env['wubook']._patch_method('is_valid_account',
                                         wubook_is_valid_account)
         cls.env['wubook']._patch_method('initialize', wubook_ommit)
@@ -99,7 +109,7 @@ class TestHotelWubook(TestHotel):
         numdays = 0
         for k_room, v_room in rinfo.iteritems():
             numdays = max(len(v_room['dayprices']), numdays)
-        checkout_utc_dt = checkin_utc_dt + timedelta(days=numdays+1)
+        checkout_utc_dt = checkin_utc_dt + timedelta(days=numdays)
         checkout_dt = date_utils.dt_as_timezone(checkout_utc_dt, self.tz_hotel)
         date_diff = date_utils.date_diff(checkin_utc_dt, checkout_utc_dt,
                                          hours=False)
@@ -228,6 +238,8 @@ class TestHotelWubook(TestHotel):
     @classmethod
     def tearDownClass(cls):
         # Remove mocks
+        cls.env['wubook']._revert_method('create_wubook_issue')
+        cls.env['wubook']._revert_method('is_valid_account')
         cls.env['wubook']._revert_method('initialize')
         cls.env['wubook']._revert_method('push_activation')
         cls.env['wubook']._revert_method('init_connection')

@@ -132,9 +132,18 @@ def generate_dates_list(cdate,
 #   -1  'str_date' is before 'str_start_date'
 #   1   'str_date' is after 'str_end_date'
 def date_in(str_date, str_start_date, str_end_date, hours=True, tz=False):
-    date_dt = get_datetime(str_date, tz=tz)
-    date_start_dt = get_datetime(str_date_start, tz=tz)
-    date_end_dt = get_datetime(str_date_end, tz=tz)
+    if not isinstance(str_date, datetime):
+        date_dt = get_datetime(str_date, tz=tz)
+    else:
+        date_dt = str_date
+    if not isinstance(str_start_date, datetime):
+        date_start_dt = get_datetime(str_date_start, tz=tz)
+    else:
+        date_start_dt = str_start_date
+    if not isinstance(str_end_date, datetime):
+        date_end_dt = get_datetime(str_end_date, tz=tz)
+    else:
+        date_end_dt = str_end_date
 
     if not date_start_dt or not date_end_dt or not date_dt:
         raise ValidationError("Invalid date. Can't compare it!")
@@ -142,8 +151,8 @@ def date_in(str_date, str_start_date, str_end_date, hours=True, tz=False):
     if not hours:
         date_start_dt = date_start_dt.replace(hour=0, minute=0, second=0,
                                               microsecond=0)
-        date_end_dt = date_end_dt.replace(hour=23, minute=59, second=59,
-                                          microsecond=999999)
+        date_end_dt = date_end_dt.replace(hour=0, minute=0, second=0,
+                                          microsecond=0)
 
     res = -2
     if date_dt >= date_start_dt and date_dt <= date_end_dt:
