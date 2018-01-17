@@ -28,12 +28,12 @@ class HotelVirtualRoomAvailability(models.Model):
     _name = 'hotel.virtual.room.availability'
 
     virtual_room_id = fields.Many2one('hotel.virtual.room', 'Virtual Room',
-                                      track_visibility='always')
+                                      required=True, track_visibility='always')
     avail = fields.Integer('Avail', default=0, track_visibility='always')
     no_ota = fields.Boolean('No OTA', default=False, track_visibility='always')
     booked = fields.Boolean('Booked', default=False, readonly=True,
                             track_visibility='always')
-    date = fields.Date('Date', track_visibility='always')
+    date = fields.Date('Date', required=True, track_visibility='always')
 
     @api.constrains('avail')
     def _check_avail(self):

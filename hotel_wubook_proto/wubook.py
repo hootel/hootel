@@ -320,7 +320,7 @@ class WuBook(models.TransientModel):
         # Sanitize Dates
         now = fields.datetime.now().strftime(DEFAULT_WUBOOK_DATE_FORMAT)
         now_dt = datetime.strptime(now, DEFAULT_WUBOOK_DATE_FORMAT)
-        dfrom_dt = datetime.strptime(dfrom, DEFAULT_SERVER_DATE_FORMAT)
+        dfrom_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
         dto_dt = datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT)
         if dfrom_dt < now_dt:
             dfrom = now
