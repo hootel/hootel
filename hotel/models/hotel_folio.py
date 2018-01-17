@@ -488,7 +488,7 @@ class HotelFolio(models.Model):
         for sale in self:
             for line in sale.order_line:
                 line.write({'invoiced': 'invoiced'})
-        sale.write({'state': 'invoice_except'})
+            sale.write({'state': 'invoice_except'})
         return res
 
     @api.multi
@@ -496,28 +496,30 @@ class HotelFolio(models.Model):
         '''
         @param self: object pointer
         '''
-        if not self.order_id:
-            raise ValidationError(_('Order id is not available'))
         for sale in self:
+            if not sale.order_id:
+                raise ValidationError(_('Order id is not available'))
             for invoice in sale.invoice_ids:
                 invoice.state = 'cancel'
-        self.room_lines.action_cancel()
-        return self.order_id.action_cancel()
+            sale.room_lines.action_cancel()
+            sale.order_id.action_cancel()
 
     @api.multi
     def action_confirm(self):
-        for order in self.order_id:
-            order.state = 'sale'
-            order.order_line._action_procurement_create()
-            if not order.project_id:
-                for line in order.order_line:
-                    if line.product_id.invoice_policy == 'cost':
-                        order._create_analytic_account()
-                        break
-        self.room_lines.confirm()
-        if self.env['ir.values'].get_default('sale.config.settings',
-                                             'auto_done_setting'):
-            self.order_id.action_done()
+        auto_done = self.env['ir.values'].get_default('sale.config.settings',
+                                                      'auto_done_setting')
+        for sale in self:
+            for order in sale.order_id:
+                order.state = 'sale'
+                order.order_line._action_procurement_create()
+                if not order.project_id:
+                    for line in order.order_line:
+                        if line.product_id.invoice_policy == 'cost':
+                            order._create_analytic_account()
+                            break
+            sale.room_lines.confirm()
+            if auto_done:
+                sale.order_id.action_done()
 
     @api.multi
     def action_cancel_draft(self):
