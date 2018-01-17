@@ -494,6 +494,22 @@ class HotelReservation(models.Model):
         return record
 
     @api.multi
+    def write(self, vals):
+        res = super(HotelReservation, self).write(vals)
+
+        if 'checkin' in vals or 'checkout' in vals:
+            checkin = vals.get('checkin', self.checkin)
+            checkout = vals.get('checkout', self.checkout)
+            days_diff = date_utils.date_diff(
+                                        checkin, checkout, hours=False) + 1
+            rlines = self.prepare_reservation_lines(self.checkin, days_diff)
+            self.reservation_lines = rlines['commands']
+            if self.reservation_type not in ['staff', 'out']:
+                self.price_unit = rlines['total_price']
+
+        return res
+
+    @api.multi
     def uos_change(self, product_uos, product_uos_qty=0, product_id=None):
         '''
         @param self: object pointer
@@ -529,11 +545,6 @@ class HotelReservation(models.Model):
             self.checkout = checkout_utc_dt.strftime(
                                                 DEFAULT_SERVER_DATETIME_FORMAT)
 
-        days_diff = date_utils.date_diff(self.checkin, self.checkout,
-                                         hours=False) + 1
-        res = self.prepare_reservation_lines(self.checkin, days_diff)
-        self.reservation_lines = res['commands']
-
         if self.state == 'confirm' and self.checkin_is_today():
                 self.is_checkin = True
                 folio = self.env['hotel.folio'].browse(self.folio_id.id)
@@ -550,8 +561,7 @@ class HotelReservation(models.Model):
 
         if self.reservation_type in ['staff', 'out']:
             self.price_unit = 0.0
-        else:
-            self.price_unit = res['total_price']
+
         if self.product_id:
             room = self.env['hotel.room'].search([
                 ('product_id', '=', self.product_id.id)
