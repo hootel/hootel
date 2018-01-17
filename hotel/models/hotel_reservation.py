@@ -559,8 +559,15 @@ class HotelReservation(models.Model):
                     ('folio_id', '=', folio.id), ('is_checkout', '=', True)
                 ])
 
+        days_diff = date_utils.date_diff(
+                                self.checkin, self.checkout, hours=False) + 1
+        rlines = self.prepare_reservation_lines(self.checkin, days_diff)
+        self.reservation_lines = rlines['commands']
+
         if self.reservation_type in ['staff', 'out']:
             self.price_unit = 0.0
+        else:
+            self.price_unit = rlines['total_price']
 
         if self.product_id:
             room = self.env['hotel.room'].search([
