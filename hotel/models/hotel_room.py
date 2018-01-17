@@ -80,5 +80,6 @@ class HotelRoom(models.Model):
 
     @api.multi
     def unlink(self):
-        self.product_id.unlink()
+        for record in self:
+            record.product_id.unlink()
         return super(HotelRoom, self).unlink()
