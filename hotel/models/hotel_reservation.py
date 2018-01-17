@@ -759,7 +759,7 @@ class HotelReservation(models.Model):
             and r.id != self.id)
         occupied_name = ','.join(str(x.folio_id.name) for x in occupied)
         if occupied:
-            warning_msg = 'You tried to confirm \
+            warning_msg = 'You tried to change/confirm \
                reservation with room those already reserved in this \
                reservation period: %s' % occupied_name
             raise ValidationError(warning_msg)
@@ -780,7 +780,6 @@ class HotelReservation(models.Model):
                                         'hotel.config.settings', 'tz_hotel')
         checkin_utc_dt = date_utils.get_datetime(str_checkin_utc)
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt, tz_hotel)
-        checkin_utc_dt -= timedelta(days=1)
         days_diff = date_utils.date_diff(str_checkin_utc, str_checkout_utc,
                                          hours=False) + 1
         dates_list = date_utils.generate_dates_list(checkin_dt, days_diff,
