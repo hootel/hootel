@@ -46,16 +46,11 @@ class TestHotel(TestMail):
         folio = self.env['hotel.folio'].sudo(creator).create({
             'partner_id': partner.id,
         })
+        self.assertTrue(folio, "Can't create folio")
         return folio
 
-    def create_reservation(self, creator, partner, checkin, checkout, room,
+    def create_reservation(self, creator, folio, checkin, checkout, room,
                            resname, adults=1, children=0):
-        # Create Folio
-        folio = self.create_folio(creator, partner)
-        self.assertTrue(
-            folio,
-            "Hotel Calendar can't create folio for new reservation!")
-
         # Create Reservation (Special Room)
         reservation = self.env['hotel.reservation'].sudo(creator).create({
             'name': resname,
@@ -79,7 +74,7 @@ class TestHotel(TestMail):
             'price_unit': res['total_price'],
         })
 
-        return (folio, reservation)
+        return reservation
 
     @classmethod
     def setUpClass(cls):

@@ -38,9 +38,10 @@ class TestHotelReservations(TestHotel):
         now_utc_dt = date_utils.now()
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
-        folio, reservation = self.create_reservation(
+        folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation = self.create_reservation(
             self.user_hotel_manager,
-            self.partner_2,
+            folio,
             reserv_start_utc_dt,
             reserv_end_utc_dt,
             self.hotel_room_double_200,
@@ -68,9 +69,10 @@ class TestHotelReservations(TestHotel):
         now_utc_dt = date_utils.now()
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
-        folio, reservation = self.create_reservation(
+        folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation = self.create_reservation(
             self.user_hotel_manager,
-            self.partner_2,
+            folio,
             reserv_start_utc_dt,
             reserv_end_utc_dt,
             self.hotel_room_double_200,
@@ -78,9 +80,10 @@ class TestHotelReservations(TestHotel):
 
         reserv_start_utc_dt = reserv_end_utc_dt
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
-        folio, reservation = self.create_reservation(
+        folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation = self.create_reservation(
             self.user_hotel_manager,
-            self.partner_2,
+            folio,
             reserv_start_utc_dt,
             reserv_end_utc_dt,
             self.hotel_room_double_200,
@@ -88,9 +91,10 @@ class TestHotelReservations(TestHotel):
 
         reserv_end_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_start_utc_dt = reserv_end_utc_dt - timedelta(days=1)
-        folio, reservation = self.create_reservation(
+        folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation = self.create_reservation(
             self.user_hotel_manager,
-            self.partner_2,
+            folio,
             reserv_start_utc_dt,
             reserv_end_utc_dt,
             self.hotel_room_double_200,
@@ -98,9 +102,10 @@ class TestHotelReservations(TestHotel):
 
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
-        folio, reservation = self.create_reservation(
+        folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation = self.create_reservation(
             self.user_hotel_manager,
-            self.partner_2,
+            folio,
             reserv_start_utc_dt,
             reserv_end_utc_dt,
             self.hotel_room_simple_100,
@@ -111,9 +116,10 @@ class TestHotelReservations(TestHotel):
 
         org_reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         org_reserv_end_utc_dt = org_reserv_start_utc_dt + timedelta(days=6)
-        folio, reservation = self.create_reservation(
+        folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation = self.create_reservation(
             self.user_hotel_manager,
-            self.partner_2,
+            folio,
             org_reserv_start_utc_dt,
             org_reserv_end_utc_dt,
             self.hotel_room_double_200,
@@ -123,9 +129,10 @@ class TestHotelReservations(TestHotel):
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=6)
         with self.assertRaises(ValidationError):
-            folio, reservation = self.create_reservation(
+            folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+            reservation = self.create_reservation(
                 self.user_hotel_manager,
-                self.partner_2,
+                folio,
                 reserv_start_utc_dt,
                 reserv_end_utc_dt,
                 self.hotel_room_double_200,
@@ -135,9 +142,10 @@ class TestHotelReservations(TestHotel):
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
         with self.assertRaises(ValidationError):
-            folio, reservation = self.create_reservation(
+            folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+            reservation = self.create_reservation(
                 self.user_hotel_manager,
-                self.partner_2,
+                folio,
                 reserv_start_utc_dt,
                 reserv_end_utc_dt,
                 self.hotel_room_double_200,
@@ -147,9 +155,10 @@ class TestHotelReservations(TestHotel):
         reserv_start_utc_dt = now_utc_dt + timedelta(days=4)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
         with self.assertRaises(ValidationError):
-            folio, reservation = self.create_reservation(
+            folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+            reservation = self.create_reservation(
                 self.user_hotel_manager,
-                self.partner_2,
+                folio,
                 reserv_start_utc_dt,
                 reserv_end_utc_dt,
                 self.hotel_room_double_200,
@@ -159,9 +168,10 @@ class TestHotelReservations(TestHotel):
         reserv_start_utc_dt = now_utc_dt + timedelta(days=2)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
         with self.assertRaises(ValidationError):
-            folio, reservation = self.create_reservation(
+            folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+            reservation = self.create_reservation(
                 self.user_hotel_manager,
-                self.partner_2,
+                folio,
                 reserv_start_utc_dt,
                 reserv_end_utc_dt,
                 self.hotel_room_double_200,
@@ -171,9 +181,10 @@ class TestHotelReservations(TestHotel):
         reserv_start_utc_dt = org_reserv_end_utc_dt - timedelta(days=2)
         reserv_end_utc_dt = org_reserv_end_utc_dt
         with self.assertRaises(ValidationError):
-            folio, reservation = self.create_reservation(
+            folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+            reservation = self.create_reservation(
                 self.user_hotel_manager,
-                self.partner_2,
+                folio,
                 reserv_start_utc_dt,
                 reserv_end_utc_dt,
                 self.hotel_room_double_200,
@@ -183,9 +194,10 @@ class TestHotelReservations(TestHotel):
         reserv_start_utc_dt = org_reserv_end_utc_dt - timedelta(days=2)
         reserv_end_utc_dt = org_reserv_end_utc_dt + timedelta(days=3)
         with self.assertRaises(ValidationError):
-            folio, reservation = self.create_reservation(
+            folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+            reservation = self.create_reservation(
                 self.user_hotel_manager,
-                self.partner_2,
+                folio,
                 reserv_start_utc_dt,
                 reserv_end_utc_dt,
                 self.hotel_room_double_200,
@@ -195,9 +207,10 @@ class TestHotelReservations(TestHotel):
         reserv_start_utc_dt = org_reserv_start_utc_dt - timedelta(days=2)
         reserv_end_utc_dt = org_reserv_end_utc_dt + timedelta(days=2)
         with self.assertRaises(ValidationError):
-            folio, reservation = self.create_reservation(
+            folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+            reservation = self.create_reservation(
                 self.user_hotel_manager,
-                self.partner_2,
+                folio,
                 reserv_start_utc_dt,
                 reserv_end_utc_dt,
                 self.hotel_room_double_200,
@@ -205,10 +218,38 @@ class TestHotelReservations(TestHotel):
 
         # Checkin > Checkout
         with self.assertRaises(ValidationError):
-            folio, reservation = self.create_reservation(
+            folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+            reservation = self.create_reservation(
                 self.user_hotel_manager,
-                self.partner_2,
+                folio,
                 org_reserv_end_utc_dt,
                 org_reserv_start_utc_dt,
                 self.hotel_room_simple_100,
                 "Invalid Reservation Test #8")
+
+    def test_cancel_folio(self):
+        now_utc_dt = date_utils.now()
+
+        org_reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
+        org_reserv_end_utc_dt = org_reserv_start_utc_dt + timedelta(days=6)
+        folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation_a = self.create_reservation(
+            self.user_hotel_manager,
+            folio,
+            org_reserv_start_utc_dt,
+            org_reserv_end_utc_dt,
+            self.hotel_room_double_200,
+            "Reservation Test #1")
+        reservation_b = self.create_reservation(
+            self.user_hotel_manager,
+            folio,
+            org_reserv_start_utc_dt,
+            org_reserv_end_utc_dt,
+            self.hotel_room_simple_100,
+            "Reservation Test #2")
+        self.assertEqual(len(folio.room_lines), 2, 'Invalid room lines count')
+        folio.action_cancel()
+        self.assertEqual(folio.state, 'cancel', 'Invalid folio state')
+        for rline in folio.room_lines:
+            self.assertEqual(rline.state, 'cancelled',
+                             'Invalid reservation state')

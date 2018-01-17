@@ -308,9 +308,10 @@ class TestManagementCalendar(TestHotelCalendar):
 
         reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
         reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
-        folio, reservation = self.create_reservation(
+        folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation = self.create_reservation(
             self.user_hotel_manager,
-            self.partner_2,
+            folio,
             reserv_start_utc_dt,
             reserv_end_utc_dt,
             self.hotel_room_simple_100,
