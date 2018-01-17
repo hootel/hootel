@@ -98,7 +98,6 @@ class HotelReservation(models.Model):
 
     @api.multi
     def write(self, vals):
-        res = super(HotelReservation, self).write(vals)
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
             for record in self:
@@ -153,7 +152,7 @@ class HotelReservation(models.Model):
                         if not wres:
                             raise ValidationError("Can't update availability \
                                                                     on WuBook")
-        return res
+        return super(HotelReservation, self).write(vals)
 
     @api.multi
     def unlink(self):

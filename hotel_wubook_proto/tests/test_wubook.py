@@ -281,7 +281,7 @@ class TestWubook(TestHotelWubook):
         )
         book_b = self.create_wubook_booking(
             self.user_hotel_manager,
-            (checkin_dt + timedelta(days=3)).strftime(
+            (checkin_dt + timedelta(days=2)).strftime(
                                         DEFAULT_SERVER_DATETIME_FORMAT),
             self.partner_2,
             {
@@ -291,6 +291,7 @@ class TestWubook(TestHotelWubook):
                 }
             }
         )
+        _logger.info("--JUJUJU")
         wbooks = [book_a, book_b]
         processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
             self.env['wubook'].sudo().generate_reservations(wbooks)

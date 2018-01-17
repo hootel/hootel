@@ -1225,13 +1225,13 @@ class WuBook(models.TransientModel):
                                                 DEFAULT_SERVER_DATETIME_FORMAT)
                     checkout_str = dates_checkout[0].strftime(
                                                 DEFAULT_SERVER_DATETIME_FORMAT)
-                    # rcheckout_dt = dates_checkout[0] - timedelta(days=1)
-                    # rcheckout_str = rcheckout_dt.strftime(
-                    #                             DEFAULT_SERVER_DATETIME_FORMAT)
+                    rcheckout_dt = dates_checkout[0] - timedelta(days=1)
+                    rcheckout_str = rcheckout_dt.strftime(
+                                                DEFAULT_SERVER_DATETIME_FORMAT)
                     free_rooms = hotel_vroom_obj.\
                         check_availability_virtual_room(
                             checkin_str,
-                            checkout_str,
+                            rcheckout_str,
                             virtual_room_id=vroom.id,
                             notthis=used_rooms)
                     if any(free_rooms):
