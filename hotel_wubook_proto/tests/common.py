@@ -41,12 +41,8 @@ class TestHotelWubook(TestHotel):
         super(TestHotelWubook, cls)._init_mock_hotel()
 
         @api.multi
-        def wubook_ommit(self, **kwargs):
+        def wubook_ommit(self, *args, **kwargs):
             return True
-
-        @api.multi
-        def wubook_is_valid_account(self):
-            return False
 
         @api.model
         def wubook_create_wubook_issue(self, section, message, wmessage,
@@ -56,8 +52,7 @@ class TestHotelWubook(TestHotel):
 
         cls.env['wubook']._patch_method('create_wubook_issue',
                                         wubook_create_wubook_issue)
-        cls.env['wubook']._patch_method('is_valid_account',
-                                        wubook_is_valid_account)
+        cls.env['wubook']._patch_method('is_valid_account', wubook_ommit)
         cls.env['wubook']._patch_method('initialize', wubook_ommit)
         cls.env['wubook']._patch_method('push_activation', wubook_ommit)
         cls.env['wubook']._patch_method('init_connection', wubook_ommit)

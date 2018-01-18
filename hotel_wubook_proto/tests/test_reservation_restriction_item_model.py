@@ -20,5 +20,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import test_reservation
-from . import test_folio
+from .common import TestHotelWubook
+
+
+class TestReservationRestrictionItem(TestHotelWubook):
+
+    def test_write(self):
+        rest_item_obj = self.env['hotel.virtual.room.restriction.item']
+        restriction = rest_item_obj.search([], limit=1)
+        self.assertTrue(restriction, "Can't found restriction for test")
+        restriction.write({
+            'min_stay': 3,
+        })
+        self.assertEqual(restriction.min_stay, 3, "Invalid Max Avail")

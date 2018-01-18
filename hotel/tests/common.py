@@ -112,6 +112,9 @@ class TestHotel(TestMail):
         user_group_employee = cls.env.ref('base.group_user')
         user_group_public = cls.env.ref('base.group_public')
         user_group_account_inv = cls.env.ref('account.group_account_invoice')
+        user_group_sale_manager = cls.env.ref('sales_team.group_sale_manager')
+        user_group_base_partner_manager = cls.env.ref(
+                                                'base.group_partner_manager')
 
         # Create Test Users
         Users = cls.env['res.users'].with_context({
@@ -126,7 +129,9 @@ class TestHotel(TestMail):
             'notify_email': 'always',
             'groups_id': [(6, 0, [user_group_hotel_manager.id,
                                   user_group_employee.id,
-                                  user_group_account_inv.id])]
+                                  user_group_account_inv.id,
+                                  user_group_sale_manager.id,
+                                  user_group_base_partner_manager.id])]
         })
         cls.user_hotel_user = Users.create({
             'name': 'Juancho Hotel User',

@@ -21,3 +21,9 @@
 #
 ##############################################################################
 from . import test_wubook
+from . import test_virtual_room_availability_model
+from . import test_wubook_issue_model
+from . import test_reservation_restriction_item_model
+from . import test_reservation_restriction_model
+from . import test_res_partner_model
+from . import test_product_pricelist_item_model

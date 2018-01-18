@@ -48,7 +48,8 @@ class ResPartner(models.Model):
                         if folio_ids:
                             folio_ids.write({'partner_id': org_partner_id.id})
                         # DANGER: self-delete... perhaps best invisible?
-                        record.unlink()
+                        # record.unlink()  This cause mistakes
+                        record.write({'active': False})
                 # return {
                 #     'type': 'ir.actions.act_window',
                 #     'res_model': 'res.partner',
