@@ -21,7 +21,7 @@
 ##############################################################################
 
 from openerp import models, fields, api
-import base64  
+import base64
 import datetime
 
 import logging
@@ -41,9 +41,9 @@ class Wizard(models.TransientModel):
         compa = self.env.user.company_id
         compapolice = 'NoValid'
         if compa.police <> False:
-            compapolice = compa.police      
+            compapolice = compa.police
         lines = self.env['cardex'].search([('enter_date','=',self.download_date)])
-        content = "1|"+compapolice+"|"
+        content = "1|"+compapolice+"|"+compa.property_name.upper()[0:40]+"|"
         content += datetime.datetime.now().strftime("%Y%m%d|%H%M")
         content += "|"+str(len(lines))+ """
 """
@@ -62,11 +62,11 @@ class Wizard(models.TransientModel):
                 content += apellidos[0].upper() + "|"
                 content += apellidos[1].upper() + "|"
             else:
-                content += apellidos[0].upper() + "||"
+                content += "|"+apellidos[0].upper() + "|"
 
             content += line.partner_id.gender.upper()[0] + "|"
             content += datetime.datetime.strptime(line.partner_id.birthdate_date, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
-            content += line.partner_id.code_ine.name.upper() + "|"
+            content += line.partner_id.code_ine.name.upper()[0:21] + "|"
             content += datetime.datetime.strptime(line.enter_date, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
 
             content += """
@@ -74,5 +74,6 @@ class Wizard(models.TransientModel):
 
         return self.write({
             'txt_filename': compapolice +'.'+ self.download_num,
-            'txt_binary': base64.encodestring(content)
+            #'txt_binary': base64.encodestring(content)
+            'txt_binary': base64.encodestring(content.encode("iso-8859-1"))
             })
