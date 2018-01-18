@@ -28,7 +28,7 @@ from . import test_reservation_restriction_model
 from . import test_res_partner_model
 from . import test_product_pricelist_item_model
 from . import test_wubook_channel_info_model
-from . import test_product_pricelist_item_model
+from . import test_product_pricelist_model
 from . import test_hotel_calendar_management_model
 from . import test_hotel_folio_model
 from . import test_hotel_virtual_room_model
