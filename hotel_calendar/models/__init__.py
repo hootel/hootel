@@ -27,3 +27,4 @@ from . import virtual_room_pricelist_cached
 from . import hotel_calendar_management
 from . import res_config
 from . import inherited_account_payment
+from . import inherited_hotel_virtual_room

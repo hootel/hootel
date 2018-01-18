@@ -32,7 +32,8 @@ class HotelVirtualRoomRestrictionItem(models.Model):
     restriction_id = fields.Many2one('hotel.virtual.room.restriction',
                                      'Restriction Plan', ondelete='cascade',
                                      index=True)
-    virtual_room_id = fields.Many2one('hotel.virtual.room', 'Virtual Room')
+    virtual_room_id = fields.Many2one('hotel.virtual.room', 'Virtual Room',
+                                      required=True, ondelete='cascade')
     date_start = fields.Date('From')
     date_end = fields.Date("To")
     applied_on = fields.Selection([

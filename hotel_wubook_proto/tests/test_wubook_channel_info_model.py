@@ -21,25 +21,18 @@
 #
 ##############################################################################
 from datetime import timedelta
-from openerp.tools import (
-    DEFAULT_SERVER_DATETIME_FORMAT,
-    DEFAULT_SERVER_DATE_FORMAT)
 from odoo.addons.hotel import date_utils
 from .common import TestHotelWubook
 
 
-class TestReservationRestrictionItem(TestHotelWubook):
+class TestWubookChannelInfo(TestHotelWubook):
 
-    def test_write(self):
+    def test_import_channels_info(self):
         now_utc_dt = date_utils.now()
         day_utc_dt = now_utc_dt + timedelta(days=20)
-        day_utc_str = day_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
-        rest_item_obj = self.env['hotel.virtual.room.restriction.item']
-        restriction = rest_item_obj.search([], limit=1)
-        self.assertTrue(restriction, "Can't found restriction for test")
-        restriction.write({
-            'min_stay': 3,
-            'date_start': day_utc_str
+        info_channel = self.env['wubook.channel.info'].create({
+            'wid': 1234,
+            'name': 'Test Channel',
         })
-        self.assertEqual(restriction.min_stay, 3, "Invalid Max Avail")
-        self.assertEqual(restriction.date_start, day_utc_str, "Invalid Date")
+        self.assertTrue(info_channel, "Can't create test channel info")
+        info_channel.import_channels_info()

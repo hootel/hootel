@@ -294,12 +294,12 @@ class HotelReservation(models.Model):
                             is_checkout = True")
         checkins_res = reservations.filtered(lambda x: (
             x.state == 'confirm'
-            and date_utils.date_compare(x.checkin, date_today_str, hours=False)
+            and date_utils.date_compare(x.checkin, today_str, hours=False)
             and x.reservation_type == 'normal'))
         checkins_res.write({'is_checkin': True})
         checkouts_res = reservations.filtered(lambda x: (
             x.state == 'booking'
-            and date_utils.date_compare(x.checkout, date_today_str,
+            and date_utils.date_compare(x.checkout, today_str,
                                         hours=False)
             and x.reservation_type == 'normal'))
         checkouts_res.write({'is_checkout': True})
