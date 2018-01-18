@@ -5,8 +5,6 @@
     <style type="text/css">
         .titulo {font-size:0.93em;}
         .titulo2 {font-size:1.93em;}
-
-
         .page {margin: 0 auto; font-family:kiro, Verdana, Geneva, sans-serif;}
         img {max-width:100%;}
         .cabezera{width:100%; margin:0 auto;}
@@ -40,7 +38,7 @@
                             style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
                             <p style="font-size:1.16em;">PARTE DE ENTRADA DE VIAJEROS</p>
                             <p class="numerocheck">Nº parte: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
-                            <p> Importe total Ficha de Reserva: <span t-field="o.reservation_id.folio_id.amount_total"/></p>
+                            <p style="font-size:0.65em;"> Importe total (Ficha de Reserva): <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong></p>
                             <p><strong>CIF: <t t-esc="company.vat"/></strong><br/>
                             <strong><t t-esc="company.display_name"/></strong><br/>
                             <strong><t t-esc="company.street"/> <t t-esc="company.street2"/></strong><br/>
@@ -150,7 +148,6 @@
                 </div>
             </div>
 
-
             <div class="page" style="font-size:xx-small; padding-left: 0 !important; padding-right: 0 !important;">
                 <div class="container-fluid" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                     <div class="row cabezera" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
@@ -159,6 +156,7 @@
                             style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
                             <p style="font-size:1.16em;">PARTE DE ENTRADA DE VIAJEROS</p>
                             <p class="numerocheck">Nº parte: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
+                            <p style="font-size:0.65em;"> Importe total (Ficha de Reserva): <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong></p>
                             <p><strong>CIF: <t t-esc="company.vat"/></strong><br/>
                             <strong><t t-esc="company.display_name"/></strong><br/>
                             <strong><t t-esc="company.street"/> <t t-esc="company.street2"/></strong><br/>
