@@ -26,6 +26,8 @@ from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT,
     DEFAULT_SERVER_DATE_FORMAT)
 from odoo.addons.hotel import date_utils
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class SplitReservationWizard(models.TransientModel):
@@ -45,15 +47,13 @@ class SplitReservationWizard(models.TransientModel):
             date_start_dt = date_utils.get_datetime(reservation_id.checkin)
             date_end_dt = date_utils.get_datetime(reservation_id.checkout)
             date_diff = date_utils.date_diff(date_start_dt, date_end_dt,
-                                             hours=False) + 1
+                                             hours=False)
             for record in self:
                 new_start_date_dt = date_start_dt + \
-                                    timedelta(days=date_diff - record.nights)
+                                    timedelta(days=date_diff-record.nights)
                 if record.nights >= date_diff or record.nights < 1:
                     raise ValidationError("Invalid Nights! Max is \
-                                            '%d'" % date_diff-1)
-                reservation_id.checkout = new_start_date_dt.strftime(
-                                            DEFAULT_SERVER_DATETIME_FORMAT)
+                                            '%d'" % (date_diff-1))
 
                 vals = reservation_id.generate_copy_values(
                     new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
@@ -62,40 +62,50 @@ class SplitReservationWizard(models.TransientModel):
                 # Days Price
                 reservation_lines = [[], []]
                 tprice = [0.0, 0.0]
-                div_dt = date_utils.get_datetime(reservation_id.checkout,
-                                                 hours=False)
+                div_dt = date_utils.dt_no_hours(new_start_date_dt)
                 for rline in reservation_id.reservation_lines:
-                    rline_dt = date_utils.get_datetime(rline.date)
+                    rline_dt = date_utils.get_datetime(rline.date, hours=False)
+                    _logger.info("----AAAAAA")
+                    _logger.info(rline_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
+                    _logger.info(div_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
                     if rline_dt >= div_dt:
                         reservation_lines[1].append((0, False, {
                             'date': rline.date,
                             'price': rline.price
                         }))
+                        _logger.info("PASA AAA")
+                        _logger.info(reservation_lines[1])
                         tprice[1] += rline.price
                         reservation_lines[0].append((2, rline.id, False))
                     else:
                         tprice[0] += rline.price
 
                 reservation_id.write({
+                    'checkout': new_start_date_dt.strftime(
+                                            DEFAULT_SERVER_DATETIME_FORMAT),
                     'price_unit': tprice[0],
                     'reservation_lines': reservation_lines[0],
                     'splitted': True,
                 })
+                parent_res = reservation_id.parent_reservation or \
+                    reservation_id
+                _logger.info("PASA BBB")
+                _logger.info(reservation_lines[1])
                 vals.update({
                     'splitted': True,
                     'price_unit': tprice[1],
                     'reservation_lines': reservation_lines[1],
-                    'parent_reservation': reservation_id.id,
+                    'parent_reservation': parent_res.id,
                 })
                 reservation_copy = self.env['hotel.reservation'].create(vals)
                 if not reservation_copy:
                     raise ValidationError("Unexpected error copying record. \
                                             Can't split reservation!")
-            return {
-                'type': 'ir.actions.act_window',
-                'res_model': 'hotel.folio',
-                'views': [[False, "form"]],
-                'target': 'current',
-                'res_id': reservation_id.folio_id.id,
-            }
+            # return {
+            #     'type': 'ir.actions.act_window',
+            #     'res_model': 'hotel.folio',
+            #     'views': [[False, "form"]],
+            #     'target': 'new',
+            #     'res_id': reservation_id.folio_id.id,
+            # }
         return True

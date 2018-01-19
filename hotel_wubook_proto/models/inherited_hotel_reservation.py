@@ -156,21 +156,28 @@ class HotelReservation(models.Model):
 
     @api.multi
     def unlink(self):
+        vals = {}
+        for record in self:
+            vals.update({
+                'checkin': record.checkin,
+                'checkout': record.checkout,
+                'product_id': record.product_id.id,
+            })
+        res = super(HotelReservation, self).unlink()
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
-            checkin = self.checkin
-            checkout = self.checkout
-            product_id = self.product_id.id
-            res = super(HotelReservation, self).unlink()
-            rooms_avail = self.get_wubook_availability(checkin,
-                                                       checkout,
-                                                       product_id)
-            _logger.info("DISPONIBILIDAD UNLINK")
-            _logger.info(rooms_avail)
-            if any(rooms_avail):
-                wres = self.env['wubook'].update_availability(rooms_avail)
-                if not wres:
-                    raise ValidationError("Can't update availability \
+            vals = {}
+            for record in vals:
+                rooms_avail = self.get_wubook_availability(
+                    record['checkin'],
+                    record['checkout'],
+                    record['product_id'])
+                _logger.info("DISPONIBILIDAD UNLINK")
+                _logger.info(rooms_avail)
+                if any(rooms_avail):
+                    wres = self.env['wubook'].update_availability(rooms_avail)
+                    if not wres:
+                        raise ValidationError("Can't update availability \
                                                                     on WuBook")
         return res
 

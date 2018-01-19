@@ -380,13 +380,27 @@ class HotelReservation(models.Model):
                 ])
 
     @api.multi
+    def open_master(self):
+        self.ensure_one()
+        if not self.parent_reservation:
+            raise ValidationError("This is the parent reservation")
+
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'hotel.reservation',
+            'views': [[False, "form"]],
+            'target': 'new',
+            'res_id': self.parent_reservation.id,
+        }
+
+    @api.multi
     def unify(self):
         self.ensure_one()
-        if not self.splitted or self.state == 'cancelled' \
-                or self.state == 'confirm':
+        if not self.splitted:
             raise ValidationError("This reservation can't be unified")
 
         master_reservation = self.parent_reservation or self
+        self_is_master = (master_reservation == self)
 
         splitted_reservs = self.env['hotel.reservation'].search([
             ('splitted', '=', True),
@@ -416,6 +430,7 @@ class HotelReservation(models.Model):
                 'date': rline.date,
                 'price': rline.price,
             }))
+
         # Unify
         splitted_reservs.unlink()
         master_reservation.write({
@@ -424,6 +439,8 @@ class HotelReservation(models.Model):
             'splitted': False,
         })
 
+        if not self_is_master:
+            return {'type': 'ir.actions.act_window_close'}
         return True
 
     @api.multi
@@ -438,6 +455,7 @@ class HotelReservation(models.Model):
             'folio_id': self.folio_id.id,
             'product_id': self.product_id.id,
             'parent_reservation': self.parent_reservation.id,
+            'state': self.state,
         }
 
     @api.model
@@ -783,7 +801,8 @@ class HotelReservation(models.Model):
 
     @api.multi
     def unlink(self):
-        self.order_line_id.unlink()
+        for record in self:
+            record.order_line_id.unlink()
         return super(HotelReservation, self).unlink()
 
     @api.model

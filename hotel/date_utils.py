@@ -55,11 +55,9 @@ def get_datetime(str_date, hours=True, end_day=False, tz=False):
 
     if date_dt:
         if end_day:
-            date_dt = date_dt.replace(hour=23, minute=59, second=59,
-                                      microsecond=999999)
+            date_dt = dt_no_hours(date_dt, end_day=True)
         elif not hours:
-            date_dt = date_dt.replace(hour=0, minute=0, second=0,
-                                      microsecond=0)
+            date_dt = dt_no_hours(date_dt)
 
     return date_dt
 
@@ -70,12 +68,20 @@ def date_compare(str_date_a, str_date_b, hours=True):
     date_dt_b = get_datetime(str_date_b)
 
     if not hours:
-        date_dt_a = date_dt_a.replace(hour=0, minute=0, second=0,
-                                      microsecond=0)
-        date_dt_b = date_dt_b.replace(hour=0, minute=0, second=0,
-                                      microsecond=0)
+        date_dt_a = dt_no_hours(date_dt_a)
+        date_dt_b = dt_no_hours(date_dt_b)
 
     return date_dt_a == date_dt_b
+
+
+# Set hours to zero
+def dt_no_hours(new_start_date_dt, end_day=False):
+    if not end_day:
+        return new_start_date_dt.replace(hour=0, minute=0, second=0,
+                                         microsecond=0)
+    else:
+        return new_start_date_dt.replace(hour=23, minute=59, second=59,
+                                         microsecond=999999)
 
 
 # Get now 'datetime' object
@@ -104,10 +110,8 @@ def date_diff(date_start, date_end, hours=True, tz=False):
         raise ValidationError("Invalid date. Can't compare it!")
 
     if not hours:
-        date_start_dt = date_start_dt.replace(hour=0, minute=0, second=0,
-                                              microsecond=0)
-        date_end_dt = date_end_dt.replace(hour=0, minute=0, second=0,
-                                          microsecond=0)
+        date_start_dt = dt_no_hours(date_start_dt)
+        date_end_dt = dt_no_hours(date_end_dt)
 
     return abs((date_end_dt - date_start_dt).days)
 
@@ -149,10 +153,8 @@ def date_in(str_date, str_start_date, str_end_date, hours=True, tz=False):
         raise ValidationError("Invalid date. Can't compare it!")
 
     if not hours:
-        date_start_dt = date_start_dt.replace(hour=0, minute=0, second=0,
-                                              microsecond=0)
-        date_end_dt = date_end_dt.replace(hour=0, minute=0, second=0,
-                                          microsecond=0)
+        date_start_dt = dt_no_hours(date_start_dt)
+        date_end_dt = dt_no_hours(date_end_dt)
 
     res = -2
     if date_dt >= date_start_dt and date_dt <= date_end_dt:
@@ -185,10 +187,8 @@ def range_dates_in(str_start_date_a,
         raise ValidationError("Invalid date. Can't compare it!")
 
     if not hours:
-        date_start_dt_b = date_start_dt_b.replace(hour=0, minute=0, second=0,
-                                                  microsecond=0)
-        date_end_dt_b = date_end_dt_b.replace(hour=23, minute=59, second=59,
-                                              microsecond=999999)
+        date_start_dt_b = dt_no_hours(date_start_dt_b)
+        date_end_dt_b = dt_no_hours(date_end_dt_b)
 
     res = -2
     if date_start_dt_a >= date_start_dt_b and date_end_dt_a <= date_end_dt_b:
