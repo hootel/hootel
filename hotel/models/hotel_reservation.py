@@ -219,7 +219,8 @@ class HotelReservation(models.Model):
         ('staff', 'Staff'),
         ('out', 'Out of Service')], 'Reservation Type',
         default=lambda *a: 'normal')
-    cancelled_reason = fields.Text('Cause of cancelled')
+    cancelled_reason = fields.Selection([('late', 'Late'), ('intime', 'In time'),
+                              ('noshow', 'No Show')],'Cause of cancelled')
     out_service_description = fields.Text('Cause of out of service')
     order_line_id = fields.Many2one('sale.order.line', string='Order Line',
                                     required=True, delegate=True,
@@ -458,7 +459,6 @@ class HotelReservation(models.Model):
         room = self.env['hotel.room'].search([
             ('product_id', '=', record.product_id.id)
         ])
-
         persons = vals['adults'] + vals['children']
         if persons > room.capacity:
             raise ValidationError(
@@ -466,6 +466,10 @@ class HotelReservation(models.Model):
 
         if record.adults == 0:
             record.adults = room.capacity
+        if record.state == 'draft' and record.folio_id.state == 'sale':
+            record.state = 'confirm'
+            record.reserve_color = record._compute_color()
+            
 
         # Update Availability (Removed because wubook-proto do it)
         # cavail = self.env['hotel.reservation'].get_availability(
@@ -519,6 +523,18 @@ class HotelReservation(models.Model):
             line.uos_change(product_uos, product_uos_qty=0,
                             product_id=None)
         return True
+
+    @api.onchange('adults','children', 'product_id')
+    def check_capacity(self):
+        if self.product_id:
+            room = self.env['hotel.room'].search([
+                ('product_id', '=', self.product_id.id)
+            ])
+            persons = self.adults + self.children
+            if room.capacity < persons:
+                self.adults = room.capacity
+                self.children = 0
+                raise UserError('%s people do not fit in this room! ;)' % (persons))
 
     @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type')
     def on_change_checkin_checkout_product_id(self):

@@ -16,7 +16,7 @@
                         <button name="action_cancel" string="Cancel Reservation" states="draft,confirm,done" class="oe_highlight" type="object"/>
                         <button name="action_reservation_checkout" string="Done" states="booking,cancelled" class="oe_highlight" type="object"/>
                         <button name="draft" string="Set to Draft" states="cancel" class="oe_highlight" type="object"/>
-                        <button name="%(action_hotel_split_reservation)d" string="Split" type="action" class="oe_highlight" icon="fa-cut" states="draft" />
+                        <button name="%(action_hotel_split_reservation)d" string="Split" type="action" class="oe_highlight" icon="fa-cut" state="draft,confirm"/>
                         <button name="unify" string="Unify" type="object" class="oe_highlight" icon="fa-compress" states="draft" attrs="{'invisible':['|',['splitted', '=', False]]}" />
                         <field name="state" widget="statusbar"/>
                     </header>
@@ -44,12 +44,18 @@
                                 <field name="room_type_id" options="{'create': False, 'create_edit': False}"/>
                                 <field name="check_rooms"/>
                             </group>
+                            <group>
                                 <field name="product_uom_qty"
                                     invisible="1" />
                                 <field name="invoice_status" invisible="1"/>
-                                <field name="price_unit" invisible="1"/>
+                                <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>
+                                <field name="price_unit"/>
+                                <label for="discount" groups="sale.group_discount_per_so_line"/>
+                                <div name="discount" groups="sale.group_discount_per_so_line">
+                                    <field name="discount" class="oe_inline"/> %
+                                </div>
                                 <field name="product_uom" string="Rent(UOM)" invisible="1" />
-
+                            </group>
                             <separator/>
                             <notebook colspan="6" col="6">
                                 <page name="days" string="Days">
@@ -77,8 +83,7 @@
                                 </page>
                                 <page name="others" string="Others">
                                     <group colspan="4" col="4">
-                                        <field name="reservation_type" attrs="{'readonly':[('state','not in',('draft'))]}"/>
-                                        <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>
+                                        <field name="reservation_type" attrs="{'readonly':[('state','not in',('draft'))]}"/>                                        
                                         <field name="out_service_description" attrs="{'invisible':[('reservation_type','not in',('out'))]}"/>
                                     </group>
                                 </page>
@@ -103,6 +108,9 @@
                     <field name="folio_id"/>
                     <field name="checkin"/>
                     <field name="checkout"/>
+                    <field name="price_unit" />
+                    <field name="discount" groups="sale.group_discount_per_so_line"/>
+                    <field name="price_subtotal" />
                     <field name="adults"/>
                     <field name="children"/>
                     <field name="state" />
