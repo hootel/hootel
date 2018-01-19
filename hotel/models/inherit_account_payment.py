@@ -45,20 +45,22 @@ class AccountPayment(models.Model):
     @api.depends('state')
     def _compute_folio_amount(self):
         res = []
+        fol = ()
         for payment in self:
             amount_pending = 0
             total_amount = 0
-            if payment.invoice_ids:
-                _logger.info(payment.partner_id.id)
+            if payment.invoice_ids and not payment.folio_id:
+############# It's necesary becouse invoice_ids in folio (sale_order) is compute (can't search)
                 folios = self.env['hotel.folio'].search([
                     ('partner_id', '=', payment.partner_id.id)
                 ])
-                for line in folios:
-                    for inv in line.invoice_ids:
+                for rec in folios:
+                    for inv in rec.invoice_ids:
                         if inv.id in payment.invoice_ids.ids:
                             fol = self.env['hotel.folio'].search([
-                                ('id', '=', line.id)
+                                ('id', '=', rec.id)
                             ])
+#############                            
             elif payment.folio_id:
                 fol = payment.env['hotel.folio'].search([
                     ('id', '=', payment.folio_id.id)
@@ -72,6 +74,7 @@ class AccountPayment(models.Model):
                 raise except_orm(_('Warning'), _('This pay is related with \
                                                 more than one Reservation.'))
             else:
+                payment.write({'folio_id': fol.id})
                 total_folio = fol.amount_total
                 payments = payment.env['account.payment'].search([
                     '|', ('folio_id', '=', fol.id),

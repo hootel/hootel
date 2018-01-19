@@ -60,7 +60,7 @@
                             <button type="object" class="oe_stat_button"
                                 id="invoices_smart_button"
                                 icon="fa-thumbs-up"
-                                name="action_invoices"
+                                name="action_payments"
                                 attrs="{'invisible': [('invoices_paid','&lt;=',0)]}">
                                 <div class="o_form_field o_stat_info">
                                     <span class="o_stat_value">
@@ -136,16 +136,16 @@
                                         <field name="checkout" />
                                         <field name="adults" />
                                         <field name="children" />
+                                        <field name="price_unit" />
+                                        <field name="discount" groups="sale.group_discount_per_so_line"/>
                                         <field name="price_subtotal" />
                                         <field name="state" />
-                                        <field name="cardex_ids" invisible ="1"/>
                                         <button type="action" class="oe_stat_button" 
                                         id="cardex_smart_button" icon="fa-user-plus" 
                                         name="%(launch_checkin_wizard_add)d" 
                                         context="{'partner_id': partner_id,'enter_date': checkin,
                                             'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True}"
-                                        attrs="{'invisible':[('state','not in',('confirm','booking')),
-                                                ('cardex_ids','!=',False)]}"
+                                        attrs="{'invisible':[('state','not in',('confirm','booking'))]}"
                                         />
                                         <field name="partner_id" invisible="1"/>
                                     </tree>

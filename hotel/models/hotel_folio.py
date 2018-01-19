@@ -224,17 +224,20 @@ class HotelFolio(models.Model):
         }
 
     @api.multi
-    def action_invoices(self):
+    def action_payments(self):
         self.ensure_one()
+        payments_obj = self.env['account.payment']
+        payments = payments_obj.search([('folio_id','=',self.id)])
+        payment_ids = payments.mapped('id')
         invoices = self.mapped('invoice_ids.id')
         return{
-            'name': _('Invoices'),
+            'name': _('Payments'),
             'view_type': 'form',
             'view_mode': 'tree,form',
-            'res_model': 'account.invoice',
+            'res_model': 'account.payment',
             'target': 'new',
             'type': 'ir.actions.act_window',
-            'domain': [('id', 'in', invoices), ('type', '!=', 'out_refund')],
+            'domain': [('id', 'in', payment_ids)],
         }
 
     @api.multi
