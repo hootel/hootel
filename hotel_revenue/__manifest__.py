@@ -34,11 +34,8 @@
     },
     'data': [
         'wizard/revenue_wizard.xml',
+        'views/cash_daily_blance.xml',
     ],
-    'qweb': [],
-    'test': [
-    ],
-
     'installable': True,
     'auto_install': False,
     'application': False,

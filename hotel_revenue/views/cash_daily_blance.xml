@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+		<act_window
+			id="action_cash_daily_balance"
+			name="Action Cash Daily Balance"
+			res_model="account.payment"
+			view_mode="tree,form"
+            domain= "[('payment_date', '=', current_date)]"
+		/>
+
+		<menuitem
+			id="menu_cash_daily"
+			name="Cash Daily"
+			parent="hotel.hotel_reports_menu"
+			sequence="50"
+			action="action_cash_daily_balance"
+		/>
+
+    </data>
+</odoo>
