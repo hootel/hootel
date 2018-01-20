@@ -291,7 +291,6 @@ class TestWubook(TestHotelWubook):
                 }
             }
         )
-        _logger.info("--JUJUJU")
         wbooks = [book_a, book_b]
         processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
             self.env['wubook'].sudo().generate_reservations(wbooks)

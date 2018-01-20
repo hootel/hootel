@@ -269,7 +269,8 @@ class HotelReservation(models.Model):
     def get_wubook_availability(self, checkin, checkout, product_id,
                                 dbchanged=True):
         date_start = date_utils.get_datetime(checkin)
-        date_diff = date_utils.date_diff(checkin, checkout, hours=False) + 1
+        # Not count end day of the reservation
+        date_diff = date_utils.date_diff(checkin, checkout, hours=False)
 
         vroom_obj = self.env['hotel.virtual.room']
         virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
