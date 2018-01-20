@@ -108,15 +108,15 @@ class HotelReservation(models.Model):
                 older_vals.append({
                     'checkin': record.checkin,
                     'checkout': record.checkout,
-                    'product_id': record.product_id and record.product_id.id
-                    or False,
+                    'product_id': record.product_id.id if
+                    record.product_id else False,
                 })
                 new_vals.append({
                     'checkin': vals.get('checkin', record.checkin),
                     'checkout': vals.get('checkout', record.checkout),
                     'product_id': vals.get(
                         'product_id',
-                        record.product_id and record.product_id.id or False),
+                        record.product_id.id if record.product_id else False),
                 })
 
             res = super(HotelReservation, self).write(vals)
@@ -213,18 +213,6 @@ class HotelReservation(models.Model):
                             'Cancelled by %s' % partner_id.name)
                         if not wres:
                             raise ValidationError("Can't cancel reservation \
-                                                                    on WuBook")
-                    rooms_avail = self.get_wubook_availability(
-                        record.checkin,
-                        record.checkout,
-                        record.product_id.id)
-                    _logger.info("DISPONIBILIDAD CANCEL")
-                    _logger.info(rooms_avail)
-                    if any(rooms_avail):
-                        wres = self.env['wubook'].update_availability(
-                                                                rooms_avail)
-                        if not wres:
-                            raise ValidationError("Can't update availability \
                                                                     on WuBook")
         return res
 
