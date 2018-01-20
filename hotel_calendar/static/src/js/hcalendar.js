@@ -999,7 +999,7 @@ HotelCalendar.prototype = {
         var days = _.keys(restrictions);
         for (var day of days) {
           var rest_day = restrictions[day];
-          console.log(rest_day);
+          //console.log(rest_day);
         }
       }
     }
