@@ -914,7 +914,9 @@ class WuBook(models.TransientModel):
                             'date': date_str,
                         })
                         virtual_room_avail_obj.with_context({
-                                        'wubook_action': False}).create(vals)
+                            'wubook_action': False,
+                            'mail_create_nosubscribe': True,
+                        }).create(vals)
                     date_dt = date_dt + timedelta(days=1)
 
         return True

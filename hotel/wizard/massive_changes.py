@@ -146,7 +146,7 @@ class MassiveChangesWizard(models.TransientModel):
                                 domain+[('virtual_room_id', '=', vroom.id)]
                             )
                             if any(vrooms_avail):
-                                # Mail module don't want singleton
+                                # Mail module want a singleton
                                 for vr_avail in vrooms_avail:
                                     vr_avail.write(vals)
                             else:
@@ -265,5 +265,4 @@ class MassiveChangesWizard(models.TransientModel):
                                 'product_tmpl_id': prod_tmpl_id.id,
                                 'fixed_price': price,
                             })
-            _logger.info("---------- POOM 22")
         return True
