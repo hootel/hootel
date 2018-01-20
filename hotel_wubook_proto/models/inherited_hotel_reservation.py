@@ -99,7 +99,9 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         if self._context.get('wubook_action', True) and \
-                self.env['wubook'].is_valid_account():
+                self.env['wubook'].is_valid_account() and \
+                (vals.get('checkin') or vals.get('checkout') or
+                    vals.get('product_id')):
             for record in self:
                 older_vals = {
                     'checkin': record.checkin,
@@ -107,51 +109,22 @@ class HotelReservation(models.Model):
                     'product_id': record.product_id.id,
                 }
                 new_vals = {
-                    'checkin': vals.get('checkin'),
-                    'checkout': vals.get('checkout'),
-                    'product_id': vals.get('product_id'),
+                    'checkin': vals.get('checkin', record.checkin),
+                    'checkout': vals.get('checkout', record.checkout),
+                    'product_id': vals.get('product_id',
+                                           record.product_id.id),
                 }
-                if new_vals['checkin'] or new_vals['checkout'] or \
-                        new_vals['product_id']:
-                    old_rooms_avail = []
-                    new_rooms_avail = []
-                    if older_vals['checkin'] and older_vals['checkout'] and \
-                            older_vals['product_id']:
-                        old_rooms_avail = self.get_wubook_availability(
-                            older_vals['checkin'],
-                            older_vals['checkout'],
-                            older_vals['product_id'])
-                    if new_vals['checkin'] and new_vals['checkout'] and \
-                            new_vals['product_id']:
-                        new_rooms_avail = self.get_wubook_availability(
-                            new_vals['checkin'],
-                            new_vals['checkout'],
-                            new_vals['product_id'])
-                    # Merge Old & New Dicts (Updating Old Dict)
-                    for newitem in new_rooms_avail:
-                        found = False
-                        for olditem in old_rooms_avail:
-                            if olditem['id'] == newitem['id']:
-                                for newdays in newitem['days']:
-                                    foundday = False
-                                    for olddays in olditem['days']:
-                                        if olddays['date'] == newdays['date']:
-                                            olddays.update(newdays)
-                                            foundday = True
-                                    if not foundday:
-                                        olditem['days'].append(newdays)
-                                found = True
-                        if not found:
-                            old_rooms_avail.append(newitem)
+
+                navails = self._generate_wubook_availability(older_vals,
+                                                             new_vals)
+                if any(navails):
                     # Push avail
-                    if any(old_rooms_avail):
-                        _logger.info("DISPONIBILIDAD WRITE")
-                        _logger.info(old_rooms_avail)
-                        wres = self.env['wubook'].update_availability(
-                                                            old_rooms_avail)
-                        if not wres:
-                            raise ValidationError("Can't update availability \
-                                                                    on WuBook")
+                    _logger.info("DISPONIBILIDAD WRITE")
+                    _logger.info(navails)
+                    wres = self.env['wubook'].update_availability(navails)
+                    if not wres:
+                        raise ValidationError("Can't update availability \
+                                                                on WuBook")
         return super(HotelReservation, self).write(vals)
 
     @api.multi
@@ -180,6 +153,42 @@ class HotelReservation(models.Model):
                         raise ValidationError("Can't update availability \
                                                                     on WuBook")
         return res
+
+    @api.model
+    def _generate_wubook_availability(self, older_vals, new_vals):
+        if new_vals['checkin'] or new_vals['checkout'] or \
+                new_vals['product_id']:
+            old_rooms_avail = []
+            new_rooms_avail = []
+            if older_vals['checkin'] and older_vals['checkout'] and \
+                    older_vals['product_id']:
+                old_rooms_avail = self.get_wubook_availability(
+                    older_vals['checkin'],
+                    older_vals['checkout'],
+                    older_vals['product_id'])
+            if new_vals['checkin'] and new_vals['checkout'] and \
+                    new_vals['product_id']:
+                new_rooms_avail = self.get_wubook_availability(
+                    new_vals['checkin'],
+                    new_vals['checkout'],
+                    new_vals['product_id'])
+            # Merge Old & New Dicts (Updating Old Dict)
+            for newitem in new_rooms_avail:
+                found = False
+                for olditem in old_rooms_avail:
+                    if olditem['id'] == newitem['id']:
+                        for newdays in newitem['days']:
+                            foundday = False
+                            for olddays in olditem['days']:
+                                if olddays['date'] == newdays['date']:
+                                    olddays.update(newdays)
+                                    foundday = True
+                            if not foundday:
+                                olditem['days'].append(newdays)
+                        found = True
+                if not found:
+                    old_rooms_avail.append(newitem)
+        return old_rooms_avail
 
     @api.multi
     def action_cancel(self):

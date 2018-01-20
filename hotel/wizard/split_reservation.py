@@ -40,10 +40,6 @@ class SplitReservationWizard(models.TransientModel):
         reservation_id = self.env['hotel.reservation'].browse(
                                             self.env.context.get('active_id'))
         if reservation_id:
-            if reservation_id.state == 'cancelled' \
-                    or reservation_id.state == 'confirm':
-                raise ValidationError("This reservation can't be splitted")
-
             date_start_dt = date_utils.get_datetime(reservation_id.checkin)
             date_end_dt = date_utils.get_datetime(reservation_id.checkout)
             date_diff = date_utils.date_diff(date_start_dt, date_end_dt,

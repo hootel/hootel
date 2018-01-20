@@ -21,6 +21,7 @@
 #
 ##############################################################################
 from .common import TestHotelWubook
+from openerp.exceptions import ValidationError
 
 
 class TestVirtualRoomAvailability(TestHotelWubook):
@@ -28,7 +29,11 @@ class TestVirtualRoomAvailability(TestHotelWubook):
     def test_write(self):
         vroom_avail_obj = self.env['hotel.virtual.room.availability']
         avail = vroom_avail_obj.search([], limit=1)
+        with self.assertRaises(ValidationError):
+            avail.write({
+                'avail': 9,
+            })
         avail.write({
-            'avail': 9,
+            'avail': 1,
         })
-        self.assertEqual(avail.avail, 9, "Invalid avail")
+        self.assertEqual(avail.avail, 1, "Invalid avail")

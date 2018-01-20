@@ -26,6 +26,8 @@ from openerp.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT)
 from odoo.addons.hotel import date_utils
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class MassiveChangesWizard(models.TransientModel):
@@ -128,9 +130,12 @@ class MassiveChangesWizard(models.TransientModel):
                     if any(vals) or record.change_avail:
                         for vroom in vrooms:
                             if record.change_avail:
-                                cavail = len(hotel_vroom_obj.check_availability_virtual_room(ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                                                                                             ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                                                                                             virtual_room_id=vroom.id))
+                                cavail = len(hotel_vroom_obj.check_availability_virtual_room(
+                                    ndate.strftime(
+                                            DEFAULT_SERVER_DATETIME_FORMAT),
+                                    ndate.strftime(
+                                            DEFAULT_SERVER_DATETIME_FORMAT),
+                                    virtual_room_id=vroom.id))
                                 vals.update({
                                     'avail': min(cavail,
                                                  vroom.total_rooms_count,
@@ -140,15 +145,19 @@ class MassiveChangesWizard(models.TransientModel):
                             vrooms_avail = hotel_vroom_avail_obj.search(
                                 domain+[('virtual_room_id', '=', vroom.id)]
                             )
-                            if vrooms_avail:
-                                vrooms_avail.write(vals)
+                            if any(vrooms_avail):
+                                # Mail module don't want singleton
+                                for vr_avail in vrooms_avail:
+                                    vr_avail.write(vals)
                             else:
                                 vals.update({
                                     'date': ndate.strftime(
                                                 DEFAULT_SERVER_DATE_FORMAT),
                                     'virtual_room_id': vroom.id
                                 })
-                                hotel_vroom_avail_obj.create(vals)
+                                hotel_vroom_avail_obj.with_context({
+                                    'mail_create_nosubscribe': True,
+                                }).create(vals)
                 elif record.section == '1':
                     domain = [
                         ('date_start', '>=', ndate.strftime(
@@ -256,4 +265,5 @@ class MassiveChangesWizard(models.TransientModel):
                                 'product_tmpl_id': prod_tmpl_id.id,
                                 'fixed_price': price,
                             })
+            _logger.info("---------- POOM 22")
         return True

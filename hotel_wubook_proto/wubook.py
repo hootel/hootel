@@ -906,7 +906,8 @@ class WuBook(models.TransientModel):
                     }
                     if vroom_avail:
                         vroom_avail.with_context({
-                                        'wubook_action': False}).write(vals)
+                            'wubook_action': False,
+                        }).write(vals)
                     else:
                         vals.update({
                             'virtual_room_id': vroom.id,

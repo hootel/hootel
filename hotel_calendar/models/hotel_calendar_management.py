@@ -110,7 +110,7 @@ class HotelCalendarManagement(models.TransientModel):
                 cavail = len(vroom_obj.check_availability_virtual_room(
                     avail['date'], avail['date'], virtual_room_id=vroom_id.id))
                 ravail = min(cavail, vroom_id.total_rooms_count,
-                             avail['avail'])
+                             int(avail['avail']))
                 avail_id = vroom_avail_obj.search([
                     ('date', '=', avail['date']),
                     ('virtual_room_id', '=', vroom_id.id),
