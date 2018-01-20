@@ -115,12 +115,14 @@ class HotelReservation(models.Model):
                  vals.get('product_id') or vals.get('state')):
             older_vals = []
             new_vals = []
+            min_date = False
+            max_date = False
             for record in self:
                 older_vals.append({
                     'checkin': record.checkin,
                     'checkout': record.checkout,
-                    'product_id': record.product_id.id if
-                    record.product_id else False,
+                    'product_id':
+                        record.product_id.id if record.product_id else False,
                 })
                 new_vals.append({
                     'checkin': vals.get('checkin', record.checkin),
@@ -147,8 +149,19 @@ class HotelReservation(models.Model):
                         if not wres:
                             raise ValidationError("Can't update availability \
                                                                     on WuBook")
-                        checkin_dt = date_utils.get_datetime(record.checkin)
-                        checkout_dt = date_utils.get_datetime(record.checkout)
+                        # Get avail old dates
+                        checkin_dt = date_utils.get_datetime(
+                                                    older_vals[i]['checkin'])
+                        checkout_dt = date_utils.get_datetime(
+                                                    older_vals[i]['checkout'])
+                        wres = wubook_obj.fetch_rooms_values(
+                            checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                            checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                        # Get avail new dates
+                        checkin_dt = date_utils.get_datetime(
+                                                    new_vals[i]['checkin'])
+                        checkout_dt = date_utils.get_datetime(
+                                                    new_vals[i]['checkout'])
                         wres = wubook_obj.fetch_rooms_values(
                             checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                             checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
