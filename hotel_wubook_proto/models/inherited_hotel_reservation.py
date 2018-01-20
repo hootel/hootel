@@ -84,10 +84,21 @@ class HotelReservation(models.Model):
             _logger.info("DISPONIBILIDAD CREATE")
             _logger.info(rooms_avail)
             if any(rooms_avail):
-                wres = self.env['wubook'].update_availability(rooms_avail)
-                if not wres:
-                    raise ValidationError("Can't update availability \
-                                                                    on WuBook")
+                wubook_obj = self.env['wubook'].with_context({
+                    'init_connection': False,
+                })
+                if wubook_obj.init_connection():
+                    wres = wubook_obj.update_availability(rooms_avail)
+                    if not wres:
+                        raise ValidationError("Can't update availability \
+                                                                on WuBook")
+                    checkin_dt = date_utils.get_datetime(vals['checkin'])
+                    checkout_dt = date_utils.get_datetime(vals['checkout'])
+                    wres = wubook_obj.fetch_rooms_values(
+                        checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        rcheckout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                    wubook_obj.close_connection()
+
         res = super(HotelReservation, self).create(vals)
         return res
 
@@ -128,10 +139,20 @@ class HotelReservation(models.Model):
                     # Push avail
                     _logger.info("DISPONIBILIDAD WRITE")
                     _logger.info(navails)
-                    wres = self.env['wubook'].update_availability(navails)
-                    if not wres:
-                        raise ValidationError("Can't update availability \
-                                                                on WuBook")
+                    wubook_obj = self.env['wubook'].with_context({
+                        'init_connection': False,
+                    })
+                    if wubook_obj.init_connection():
+                        wres = wubook_obj.update_availability(navails)
+                        if not wres:
+                            raise ValidationError("Can't update availability \
+                                                                    on WuBook")
+                        checkin_dt = date_utils.get_datetime(record.checkin)
+                        checkout_dt = date_utils.get_datetime(record.checkout)
+                        wres = wubook_obj.fetch_rooms_values(
+                            checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                            rcheckout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                        wubook_obj.close_connection()
         else:
             res = super(HotelReservation, self).write(vals)
         return res
