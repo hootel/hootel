@@ -115,22 +115,23 @@ class HotelReservation(models.Model):
                  vals.get('product_id') or vals.get('state')):
             older_vals = []
             new_vals = []
-            min_date = False
-            max_date = False
             for record in self:
+                prod_id = False
+                if record.product_id:
+                    prod_id = record.product_id.id
                 older_vals.append({
                     'checkin': record.checkin,
                     'checkout': record.checkout,
-                    'product_id':
-                        record.product_id.id if record.product_id else False,
+                    'product_id': prod_id,
                 })
                 new_vals.append({
                     'checkin': vals.get('checkin', record.checkin),
                     'checkout': vals.get('checkout', record.checkout),
-                    'product_id': vals.get(
-                        'product_id',
-                        record.product_id.id if record.product_id else False),
+                    'product_id': vals.get('product_id', prod_id),
                 })
+                _logger.info("----------____----")
+                _logger.info(older_vals)
+                _logger.info(new_vals)
 
             res = super(HotelReservation, self).write(vals)
 
