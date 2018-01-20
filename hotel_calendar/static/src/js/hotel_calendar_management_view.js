@@ -80,7 +80,6 @@ var HotelCalendarManagementView = View.extend({
     /** VIEW METHODS **/
     init: function(parent, dataset, fields_view, options) {
         this._super.apply(this, arguments);
-        console.log(this.fields_view);
         this.shown = $.Deferred();
         this.dataset = dataset;
         this.model = dataset.model;
@@ -91,7 +90,6 @@ var HotelCalendarManagementView = View.extend({
         this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
 
         //Bus.on("notification", this, this._on_bus_signal);
-        console.log(this.fields_view);
     },
 
     start: function () {
@@ -128,6 +126,7 @@ var HotelCalendarManagementView = View.extend({
 
     /** CUSTOM METHODS **/
     save_changes: function() {
+        var self = this;
         var btn_save = this.$el.find('#btn_save_changes');
         if (!btn_save.hasClass('need-save')) {
             return;
@@ -141,6 +140,7 @@ var HotelCalendarManagementView = View.extend({
         var oparams = [false, params['prices'], params['restrictions'], pricelist, restrictions, availability];
         this._model.call('save_changes', oparams).then(function(results){
             btn_save.removeClass('need-save');
+            self._hcalendar.setData(results[0], results[1], results[2]);
         });
     },
 

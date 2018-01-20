@@ -229,7 +229,7 @@ HotelCalendarManagement.prototype = {
     telm.setAttribute('id', this._sanitizeId(`RESERVED_ROOMS_${roomId}_${dateShortStr}`));
     telm.setAttribute('name', 'reserved_rooms');
     telm.setAttribute('type', 'edit');
-    telm.setAttribute('title', 'Free Rooms');
+    telm.setAttribute('title', 'Reserved Rooms');
     telm.setAttribute('readonly', 'readonly');
     telm.setAttribute('disabled', 'disabled');
     telm.style.backgroundColor = 'lightgray';
@@ -256,8 +256,8 @@ HotelCalendarManagement.prototype = {
     return table;
   },
 
-  setData: function(prices, restrictions, avail, free_rooms) {
-    this._updateView();
+  setData: function(prices, restrictions, avail, count_reserved_rooms) {
+    //this._updateView();
     if (typeof prices !== 'undefined' && prices) {
       this._setPricelist(prices);
     }
@@ -267,8 +267,8 @@ HotelCalendarManagement.prototype = {
     if (typeof avail !== 'undefined' && avail) {
       this._setAvailability(avail);
     }
-    if (typeof free_rooms !== 'undefined' && free_rooms) {
-      this._setFreeRooms(free_rooms);
+    if (typeof count_reserved_rooms !== 'undefined' && count_reserved_rooms) {
+      this._setNumReservedRooms(count_reserved_rooms);
     }
   },
 
@@ -418,26 +418,11 @@ HotelCalendarManagement.prototype = {
       var room = this.getRoom(vroomId);
       for (var restriction of restrictions[vroomId]) {
         var dd = HotelCalendarManagement.toMoment(restriction.date, this.options.dateFormatShort);
-        var inputIds = [
-          `MIN_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, restriction.min_stay,
-          `MIN_STAY_ARRIVAL_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, restriction.min_stay_arrival,
-          `MAX_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, restriction.max_stay
-        ];
-
-        for (var i=0; i<inputIds.length; i+=2) {
-          var inputId = this._sanitizeId(inputIds[i]);
-          var input = this.etable.querySelector(`#${inputId}`);
-          if (input) {
-            input.dataset.orgValue = inputIds[i+1];
-            input.value = inputIds[i+1];
-            if (i < 4) { // Only min and min arrival
-              input.style.backgroundColor = (input.value >= room.capacity)?'yellow':'white';
-            }
-            else {
-              input.style.backgroundColor = (input.value > 0 && input.value != input.dataset.orgValue)?'yellow':'white';
-            }
-          }
-        }
+        // var inputIds = [
+        //   `MIN_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, restriction.min_stay,
+        //   `MIN_STAY_ARRIVAL_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, restriction.min_stay_arrival,
+        //   `MAX_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, restriction.max_stay
+        // ];
 
         var inputClousureId = this._sanitizeId(`CLOUSURE_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`);
         var inputClousure = this.etable.querySelector(`#${inputClousureId}`);
@@ -485,8 +470,8 @@ HotelCalendarManagement.prototype = {
     return data;
   },
 
-  //==== FREE Rooms
-  _setFreeRooms: function(/*List*/free_rooms) {
+  //==== RESERVED Rooms
+  _setNumReservedRooms: function(/*List*/free_rooms) {
     this._free_rooms = free_rooms;
     var keys = Object.keys(free_rooms);
     for (var vroomId of keys) {
