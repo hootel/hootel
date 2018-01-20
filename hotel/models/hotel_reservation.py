@@ -487,7 +487,7 @@ class HotelReservation(models.Model):
         if record.state == 'draft' and record.folio_id.state == 'sale':
             record.state = 'confirm'
             record.reserve_color = record._compute_color()
-            
+
 
         # Update Availability (Removed because wubook-proto do it)
         # cavail = self.env['hotel.reservation'].get_availability(
@@ -613,7 +613,8 @@ class HotelReservation(models.Model):
                 self.virtual_room_id = room.price_virtual_room.id
 
     @api.model
-    def get_availability(self, checkin, checkout, product_id, dbchanged=True):
+    def get_availability(self, checkin, checkout, product_id, dbchanged=True,
+                         dtformat=DEFAULT_SERVER_DATE_FORMAT):
         date_start = date_utils.get_datetime(checkin)
         date_end = date_utils.get_datetime(checkout)
         # Not count end day of the reservation
@@ -637,17 +638,11 @@ class HotelReservation(models.Model):
                     virtual_room_id=vroom.id))
                 if not dbchanged:
                     avail = avail - 1
-                vroom_avail_id = virtual_room_avail_obj.search([
-                    ('virtual_room_id', '=', vroom.id),
-                    ('date', '=', ndate_str)], limit=1)
-                max_avail = vroom.total_rooms_count
-                if vroom_avail_id:
-                    max_avail = vroom_avail_id.avail
                 # Can be less than zero because 'avail' can not equal
                 # with the real 'avail' (ex. Online Limits)
-                avail = max(min(avail, max_avail), 0)
+                avail = max(min(avail, vroom.total_rooms_count), 0)
                 rdays.append({
-                    'date': ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    'date': ndate_dt.strftime(dtformat),
                     'avail': avail,
                 })
             ravail = {'id': vroom.id, 'days': rdays}

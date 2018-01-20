@@ -80,7 +80,8 @@ class HotelReservation(models.Model):
                 vals['checkin'],
                 vals['checkout'],
                 vals['product_id'],
-                dbchanged=False)
+                dbchanged=False,
+                dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
             _logger.info("DISPONIBILIDAD CREATE")
             _logger.info(rooms_avail)
             if any(rooms_avail):
@@ -188,7 +189,8 @@ class HotelReservation(models.Model):
                 rooms_avail = self.get_availability(
                     record['checkin'],
                     record['checkout'],
-                    record['product_id'])
+                    record['product_id'],
+                    dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
                 _logger.info("DISPONIBILIDAD UNLINK")
                 _logger.info(rooms_avail)
                 if any(rooms_avail):
@@ -218,13 +220,15 @@ class HotelReservation(models.Model):
             old_rooms_avail = self.get_availability(
                 older_vals['checkin'],
                 older_vals['checkout'],
-                older_vals['product_id'])
+                older_vals['product_id'],
+                dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
         if new_vals['checkin'] and new_vals['checkout'] and \
                 new_vals['product_id']:
             new_rooms_avail = self.get_availability(
                 new_vals['checkin'],
                 new_vals['checkout'],
-                new_vals['product_id'])
+                new_vals['product_id'],
+                dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
         # Merge Old & New Dicts (Updating Old Dict)
         for newitem in new_rooms_avail:
             found = False
