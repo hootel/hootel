@@ -134,7 +134,7 @@ class HotelReservation(models.Model):
                 _logger.info(new_vals)
 
             res = super(HotelReservation, self).write(vals)
-
+            self.cr.commit()
             for i in range(0, len(older_vals)):
                 navails = self._generate_wubook_availability(older_vals[i],
                                                              new_vals[i])
