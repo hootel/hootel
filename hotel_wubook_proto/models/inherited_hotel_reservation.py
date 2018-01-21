@@ -326,7 +326,14 @@ class HotelReservation(models.Model):
                         virtual_room_id=vroom.id))
                     if not dbchanged:
                         avail = avail - 1
-                    avail = max(min(avail, vroom.total_rooms_count), 0)
+                    max_avail = vroom.total_rooms_count
+                    vroom_avail_id = virtual_room_avail_obj.search([
+                        ('virtual_room_id', '=', vroom.id),
+                        ('date', '=', ndate_str)], limit=1)
+                    if vroom_avail_id and vroom_avail_id.wmax_avail >= 0:
+                        max_avail = vroom_avail_id.wmax_avail
+                    avail = max(
+                            min(avail, vroom.total_rooms_count, max_avail), 0)
                     rdays.append({
                         'date': ndate_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                         'avail': avail,
