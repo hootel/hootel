@@ -56,6 +56,8 @@ WUBOOK_STATUS_BAD = [
     WUBOOK_STATUS_CANCELLED_PENALTY,
 ]
 
+def _partner_split_comma_name(partner_name):
+    return [' '.join(partner_name.split(',')[:-1]), ' '.join(partner_name.split(',')[-1:])]
 
 # WUBOOK
 class WuBook(models.TransientModel):
@@ -394,8 +396,8 @@ class WuBook(models.TransientModel):
             ('product_id', '=', reserv.product_id.id)
         ], limit=1)
         customer = {
-            'lname': _partner_split_name(reserv.partner_id.name)[1],
-            'fname': _partner_split_name(reserv.partner_id.name)[0],
+            'lname': _partner_split_name(reserv.partner_id.name)[0],
+            'fname': _partner_split_name(reserv.partner_id.name)[1],
             'email': reserv.partner_id.email,
             'city': reserv.partner_id.city,
             'phone': reserv.partner_id.phone,
@@ -1182,8 +1184,8 @@ class WuBook(models.TransientModel):
             if not partner_id:
                 # lang = self.env['res.lang'].search([('code', '=', book['customer_language_iso'])], limit=1)
                 vals = {
-                    'name': "%s %s" %
-                    (book['customer_name'], book['customer_surname']),
+                    'name': "%s, %s" %
+                    (book['customer_surname'], book['customer_name']),
                     'country_id': country_id and country_id.id,
                     'city': book['customer_city'],
                     'phone': book['customer_phone'],
