@@ -468,7 +468,7 @@ class HotelReservation(models.Model):
             record.adults = room.capacity
         if record.state == 'draft' and record.folio_id.state == 'sale':
             record.state = 'confirm'
-            record.reserve_color = record._compute_color()
+        record.reserve_color = record._compute_color()
             
 
         # Update Availability (Removed because wubook-proto do it)
@@ -510,6 +510,8 @@ class HotelReservation(models.Model):
             self.reservation_lines = rlines['commands']
             if self.reservation_type not in ['staff', 'out']:
                 self.price_unit = rlines['total_price']
+            if self.folio_id:
+                self.folio_id.compute_invoices_amount()
 
         return res
 
