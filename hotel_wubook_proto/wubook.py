@@ -908,14 +908,17 @@ class WuBook(models.TransientModel):
                     }
                     if vroom_avail:
                         vroom_avail.with_context({
-                                        'wubook_action': False}).write(vals)
+                            'wubook_action': False,
+                        }).write(vals)
                     else:
                         vals.update({
                             'virtual_room_id': vroom.id,
                             'date': date_str,
                         })
                         virtual_room_avail_obj.with_context({
-                                        'wubook_action': False}).create(vals)
+                            'wubook_action': False,
+                            'mail_create_nosubscribe': True,
+                        }).create(vals)
                     date_dt = date_dt + timedelta(days=1)
 
         return True

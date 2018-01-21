@@ -381,13 +381,27 @@ class HotelReservation(models.Model):
                 ])
 
     @api.multi
+    def open_master(self):
+        self.ensure_one()
+        if not self.parent_reservation:
+            raise ValidationError("This is the parent reservation")
+
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'hotel.reservation',
+            'views': [[False, "form"]],
+            'target': 'new',
+            'res_id': self.parent_reservation.id,
+        }
+
+    @api.multi
     def unify(self):
         self.ensure_one()
-        if not self.splitted or self.state == 'cancelled' \
-                or self.state == 'confirm':
+        if not self.splitted:
             raise ValidationError("This reservation can't be unified")
 
         master_reservation = self.parent_reservation or self
+        self_is_master = (master_reservation == self)
 
         splitted_reservs = self.env['hotel.reservation'].search([
             ('splitted', '=', True),
@@ -417,6 +431,7 @@ class HotelReservation(models.Model):
                 'date': rline.date,
                 'price': rline.price,
             }))
+
         # Unify
         splitted_reservs.unlink()
         master_reservation.write({
@@ -425,6 +440,8 @@ class HotelReservation(models.Model):
             'splitted': False,
         })
 
+        if not self_is_master:
+            return {'type': 'ir.actions.act_window_close'}
         return True
 
     @api.multi
@@ -439,6 +456,7 @@ class HotelReservation(models.Model):
             'folio_id': self.folio_id.id,
             'product_id': self.product_id.id,
             'parent_reservation': self.parent_reservation.id,
+            'state': self.state,
         }
 
     @api.model
@@ -470,7 +488,6 @@ class HotelReservation(models.Model):
             record.state = 'confirm'
         record.reserve_color = record._compute_color()
             
-
         # Update Availability (Removed because wubook-proto do it)
         # cavail = self.env['hotel.reservation'].get_availability(
         #     record.checkin,
@@ -597,7 +614,8 @@ class HotelReservation(models.Model):
                 self.virtual_room_id = room.price_virtual_room.id
 
     @api.model
-    def get_availability(self, checkin, checkout, product_id, dbchanged=True):
+    def get_availability(self, checkin, checkout, product_id, dbchanged=True,
+                         dtformat=DEFAULT_SERVER_DATE_FORMAT):
         date_start = date_utils.get_datetime(checkin)
         date_end = date_utils.get_datetime(checkout)
         # Not count end day of the reservation
@@ -621,17 +639,11 @@ class HotelReservation(models.Model):
                     virtual_room_id=vroom.id))
                 if not dbchanged:
                     avail = avail - 1
-                vroom_avail_id = virtual_room_avail_obj.search([
-                    ('virtual_room_id', '=', vroom.id),
-                    ('date', '=', ndate_str)], limit=1)
-                max_avail = vroom.total_rooms_count
-                if vroom_avail_id:
-                    max_avail = vroom_avail_id.avail
                 # Can be less than zero because 'avail' can not equal
                 # with the real 'avail' (ex. Online Limits)
-                avail = max(min(avail, max_avail), 0)
+                avail = max(min(avail, vroom.total_rooms_count), 0)
                 rdays.append({
-                    'date': ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    'date': ndate_dt.strftime(dtformat),
                     'avail': avail,
                 })
             ravail = {'id': vroom.id, 'days': rdays}
@@ -801,7 +813,8 @@ class HotelReservation(models.Model):
 
     @api.multi
     def unlink(self):
-        self.order_line_id.unlink()
+        for record in self:
+            record.order_line_id.unlink()
         return super(HotelReservation, self).unlink()
 
     @api.model

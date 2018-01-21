@@ -11,6 +11,7 @@
                 <form string="Reservation" >
                     <header>
                         <field name="splitted" invisible="True" />
+                        <field name="parent_reservation" invisible="True" />
                         <!--<button name="send_reservation_mail" type="object" string="Send Reservation Email" states="confirm" class="oe_highlight"/>-->
                         <button name="confirm" string="Confirm" states="draft" class="oe_highlight" type="object"/>
                         <button name="action_cancel" string="Cancel Reservation" states="draft,confirm,done" class="oe_highlight" type="object"/>
@@ -18,6 +19,7 @@
                         <button name="draft" string="Set to Draft" states="cancel" class="oe_highlight" type="object"/>
                         <button name="%(action_hotel_split_reservation)d" string="Split" type="action" class="oe_highlight" icon="fa-cut" state="draft,confirm"/>
                         <button name="unify" string="Unify" type="object" class="oe_highlight" icon="fa-compress" states="draft" attrs="{'invisible':['|',['splitted', '=', False]]}" />
+                        <!--button name="open_master" string="Open Master" type="object" class="oe_highlight" icon="fa-file" attrs="{'invisible':['|',['parent_reservation', '=', False]]}" /-->
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
@@ -116,9 +118,9 @@
                     <field name="state" />
                     <field name="cardex_ids" invisible ="1"/>
                     <field name="to_assign" invisible="True"/>
-                    <button type="action" class="oe_stat_button" 
-                    id="cardex_smart_button" icon="fa-user-plus" 
-                    name="%(launch_checkin_wizard_add)d" 
+                    <button type="action" class="oe_stat_button"
+                    id="cardex_smart_button" icon="fa-user-plus"
+                    name="%(launch_checkin_wizard_add)d"
                     context="{'partner_id': partner_id,'enter_date': checkin,
                         'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
                     attrs="{'invisible':[('state','not in',('confirm','booking')),

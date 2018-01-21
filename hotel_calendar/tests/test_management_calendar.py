@@ -27,14 +27,14 @@ from openerp.tools import (
 from openerp.exceptions import ValidationError
 from .common import TestHotelCalendar
 from odoo.addons.hotel import date_utils
-import pytz
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class TestManagementCalendar(TestHotelCalendar):
 
     def test_calendar_prices(self):
         now_utc_dt = date_utils.now()
-        real_start_utc_dt = (now_utc_dt - timedelta(days=1))
         adv_utc_dt = now_utc_dt + timedelta(days=15)
 
         vrooms = (self.hotel_vroom_budget, self.hotel_vroom_special)
@@ -83,7 +83,6 @@ class TestManagementCalendar(TestHotelCalendar):
 
     def test_calendar_restrictions(self):
         now_utc_dt = date_utils.now()
-        real_start_utc_dt = (now_utc_dt - timedelta(days=1))
         adv_utc_dt = now_utc_dt + timedelta(days=15)
         vrooms = (self.hotel_vroom_budget, self.hotel_vroom_special)
 
@@ -133,11 +132,12 @@ class TestManagementCalendar(TestHotelCalendar):
 
     def test_calendar_availability(self):
         now_utc_dt = date_utils.now()
-        real_start_utc_dt = (now_utc_dt - timedelta(days=1))
-        adv_utc_dt = now_utc_dt + timedelta(days=15)
+        adv_utc_dt = now_utc_dt + timedelta(days=6)
         vrooms = (self.hotel_vroom_budget, self.hotel_vroom_special)
 
         hotel_cal_mngt_obj = self.env['hotel.calendar.management'].sudo(
+                                                    self.user_hotel_manager)
+        vroom_avail_obj = self.env['hotel.virtual.room.availability'].sudo(
                                                     self.user_hotel_manager)
 
         hcal_data = hotel_cal_mngt_obj.get_hcalendar_all_data(
@@ -158,9 +158,30 @@ class TestManagementCalendar(TestHotelCalendar):
                             "Hotel Calendar Management Availability \
                                                             doesn't match!")
 
-        # REMOVE RESTRICTIONS
-        vroom_avail_obj = self.env['hotel.virtual.room.availability'].sudo(
-                                                    self.user_hotel_manager)
+        # CHANGE AVAIL
+        avail_ids = vroom_avail_obj.search([
+            ('virtual_room_id', 'in', (self.hotel_vroom_budget.id,
+                                       self.hotel_vroom_special.id)),
+        ])
+        for avail_id in avail_ids:
+            avail_id.sudo(self.user_hotel_manager).write({'avail': 1})
+        hcal_data = hotel_cal_mngt_obj.get_hcalendar_all_data(
+            now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+            adv_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+            self.parity_pricelist_id,
+            self.parity_restrictions_id,
+            True)
+        for vroom in vrooms:
+            for k_pr, v_pr in hcal_data['availability'].iteritems():
+                if k_pr == vroom.id:    # Only Check Test Cases
+                    for k_info, v_info in enumerate(v_pr):
+                        self.assertEqual(
+                            v_info['avail'],
+                            1,
+                            "Hotel Calendar Management Availability \
+                                                            doesn't match!")
+
+        # REMOVE AVAIL
         avail_ids = vroom_avail_obj.search([
             ('virtual_room_id', 'in', (self.hotel_vroom_budget.id,
                                        self.hotel_vroom_special.id)),

@@ -42,6 +42,7 @@ class HotelCalendarManagement(models.TransientModel):
         vroom_avail_obj = self.env['hotel.virtual.room.availability']
 
         # Save Pricelist
+        new_prices = {}
         for k_price, v_price in pricelist.iteritems():
             vroom_id = vroom_obj.browse([int(k_price)])
             vroom_prod_tmpl_id = vroom_id.product_id.product_tmpl_id
@@ -55,7 +56,7 @@ class HotelCalendarManagement(models.TransientModel):
                     ('product_tmpl_id', '=', vroom_prod_tmpl_id.id),
                 ], limit=1)
                 if not price_id:
-                    product_pricelist_item_obj.create({
+                    price_id = product_pricelist_item_obj.create({
                         'date_start': price['date'],
                         'date_end': price['date'],
                         'pricelist_id': int(pricelist_id),
@@ -68,8 +69,14 @@ class HotelCalendarManagement(models.TransientModel):
                     price_id.write({
                         'fixed_price': price['price']
                     })
+                new_prices.setdefault(k_price, []).append({
+                    'id': price_id.id,
+                    'date': price_id.date_start,
+                    'price': price_id.fixed_price,
+                })
 
         # Save Restrictions
+        new_rests = {}
         for k_res, v_res in restrictions.iteritems():
             for restriction in v_res:
                 res_id = vroom_rest_item_obj.search([
@@ -80,7 +87,7 @@ class HotelCalendarManagement(models.TransientModel):
                     ('virtual_room_id', '=', int(k_res)),
                 ], limit=1)
                 if not res_id:
-                    vroom_rest_item_obj.create({
+                    res_id = vroom_rest_item_obj.create({
                         'date_start': restriction['date'],
                         'date_end': restriction['date'],
                         'restriction_id': int(restriction_id),
@@ -102,21 +109,34 @@ class HotelCalendarManagement(models.TransientModel):
                         'closed_arrival': restriction['closed_arrival'],
                         'closed_departure': restriction['closed_departure'],
                     })
+                new_rests.setdefault(k_res, []).append({
+                    'id': res_id.id,
+                    'date': res_id.date_start,
+                    'min_stay': res_id.min_stay,
+                    'min_stay_arrival': res_id.min_stay_arrival,
+                    'max_stay': res_id.max_stay,
+                    'closed': res_id.closed,
+                    'closed_arrival': res_id.closed_arrival,
+                    'closed_departure': res_id.closed_departure,
+                })
 
         # Save Availability
+        new_avails = {}
         for k_avail, v_avail in availability.iteritems():
             vroom_id = vroom_obj.browse(int(k_avail))
             for avail in v_avail:
                 cavail = len(vroom_obj.check_availability_virtual_room(
                     avail['date'], avail['date'], virtual_room_id=vroom_id.id))
                 ravail = min(cavail, vroom_id.total_rooms_count,
-                             avail['avail'])
+                             int(avail['avail']))
                 avail_id = vroom_avail_obj.search([
                     ('date', '=', avail['date']),
                     ('virtual_room_id', '=', vroom_id.id),
                 ], limit=1)
                 if not avail_id:
-                    vroom_avail_obj.create({
+                    avail_id = vroom_avail_obj.with_context({
+                        'mail_create_nosubscribe': True,
+                    }).create({
                         'date': avail['date'],
                         'no_ota': avail['no_ota'],
                         'avail': ravail,
@@ -127,7 +147,13 @@ class HotelCalendarManagement(models.TransientModel):
                         'no_ota': avail['no_ota'],
                         'avail': ravail,
                     })
-        return True
+                new_avails.setdefault(k_avail, []).append({
+                    'id': avail_id.id,
+                    'date': avail_id.date,
+                    'avail': avail_id.avail,
+                    'no_ota': avail_id.no_ota,
+                })
+        return (new_prices, new_rests, new_avails)
 
     def _hcalendar_room_json_data(self, rooms):
         json_data = []
@@ -193,7 +219,7 @@ class HotelCalendarManagement(models.TransientModel):
                 ])
                 if avail:
                     json_data[vroom.id].append({
-                        'id': vroom.id,
+                        'id': avail.id,
                         'date': avail.date,
                         'avail': avail.avail,
                         'no_ota': avail.no_ota,

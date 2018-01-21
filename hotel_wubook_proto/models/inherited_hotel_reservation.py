@@ -84,10 +84,21 @@ class HotelReservation(models.Model):
             _logger.info("DISPONIBILIDAD CREATE")
             _logger.info(rooms_avail)
             if any(rooms_avail):
-                wres = self.env['wubook'].update_availability(rooms_avail)
-                if not wres:
-                    raise ValidationError("Can't update availability \
-                                                                    on WuBook")
+                wubook_obj = self.env['wubook'].with_context({
+                    'init_connection': False,
+                })
+                if wubook_obj.init_connection():
+                    wres = wubook_obj.update_availability(rooms_avail)
+                    if not wres:
+                        raise ValidationError("Can't update availability \
+                                                                on WuBook")
+                    checkin_dt = date_utils.get_datetime(vals['checkin'])
+                    checkout_dt = date_utils.get_datetime(vals['checkout'])
+                    wres = wubook_obj.fetch_rooms_values(
+                        checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                    wubook_obj.close_connection()
+
         res = super(HotelReservation, self).create(vals)
         return res
 
@@ -99,80 +110,138 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         if self._context.get('wubook_action', True) and \
-                self.env['wubook'].is_valid_account():
+                self.env['wubook'].is_valid_account() and \
+                (vals.get('checkin') or vals.get('checkout') or
+                 vals.get('product_id') or vals.get('state')):
+            older_vals = []
+            new_vals = []
             for record in self:
-                older_vals = {
+                prod_id = False
+                if record.product_id:
+                    prod_id = record.product_id.id
+                older_vals.append({
                     'checkin': record.checkin,
                     'checkout': record.checkout,
-                    'product_id': record.product_id.id,
-                }
-                new_vals = {
-                    'checkin': vals.get('checkin'),
-                    'checkout': vals.get('checkout'),
-                    'product_id': vals.get('product_id'),
-                }
-                if new_vals['checkin'] or new_vals['checkout'] or \
-                        new_vals['product_id']:
-                    old_rooms_avail = []
-                    new_rooms_avail = []
-                    if older_vals['checkin'] and older_vals['checkout'] and \
-                            older_vals['product_id']:
-                        old_rooms_avail = self.get_wubook_availability(
-                            older_vals['checkin'],
-                            older_vals['checkout'],
-                            older_vals['product_id'])
-                    if new_vals['checkin'] and new_vals['checkout'] and \
-                            new_vals['product_id']:
-                        new_rooms_avail = self.get_wubook_availability(
-                            new_vals['checkin'],
-                            new_vals['checkout'],
-                            new_vals['product_id'])
-                    # Merge Old & New Dicts (Updating Old Dict)
-                    for newitem in new_rooms_avail:
-                        found = False
-                        for olditem in old_rooms_avail:
-                            if olditem['id'] == newitem['id']:
-                                for newdays in newitem['days']:
-                                    foundday = False
-                                    for olddays in olditem['days']:
-                                        if olddays['date'] == newdays['date']:
-                                            olddays.update(newdays)
-                                            foundday = True
-                                    if not foundday:
-                                        olditem['days'].append(newdays)
-                                found = True
-                        if not found:
-                            old_rooms_avail.append(newitem)
+                    'product_id': prod_id,
+                })
+                new_vals.append({
+                    'checkin': vals.get('checkin', record.checkin),
+                    'checkout': vals.get('checkout', record.checkout),
+                    'product_id': vals.get('product_id', prod_id),
+                })
+                _logger.info("----------____----")
+                _logger.info(older_vals)
+                _logger.info(new_vals)
+
+            res = super(HotelReservation, self).write(vals)
+
+            for i in range(0, len(older_vals)):
+                navails = self._generate_wubook_availability(older_vals[i],
+                                                             new_vals[i])
+                _logger.info("DISPONIBILIDAD WRITE")
+                _logger.info(navails)
+                if any(navails):
                     # Push avail
-                    if any(old_rooms_avail):
-                        _logger.info("DISPONIBILIDAD WRITE")
-                        _logger.info(old_rooms_avail)
-                        wres = self.env['wubook'].update_availability(
-                                                            old_rooms_avail)
+                    wubook_obj = self.env['wubook'].with_context({
+                        'init_connection': False,
+                    })
+                    if wubook_obj.init_connection():
+                        wres = wubook_obj.update_availability(navails)
                         if not wres:
                             raise ValidationError("Can't update availability \
                                                                     on WuBook")
-        return super(HotelReservation, self).write(vals)
+                        # Get avail old dates
+                        checkin_dt = date_utils.get_datetime(
+                                                    older_vals[i]['checkin'])
+                        checkout_dt = date_utils.get_datetime(
+                                                    older_vals[i]['checkout'])
+                        wres = wubook_obj.fetch_rooms_values(
+                            checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                            checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                        # Get avail new dates
+                        checkin_dt = date_utils.get_datetime(
+                                                    new_vals[i]['checkin'])
+                        checkout_dt = date_utils.get_datetime(
+                                                    new_vals[i]['checkout'])
+                        wres = wubook_obj.fetch_rooms_values(
+                            checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                            checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                        wubook_obj.close_connection()
+        else:
+            res = super(HotelReservation, self).write(vals)
+        return res
 
     @api.multi
     def unlink(self):
+        vals = {}
+        for record in self:
+            vals.update({
+                'checkin': record.checkin,
+                'checkout': record.checkout,
+                'product_id': record.product_id.id,
+            })
+        res = super(HotelReservation, self).unlink()
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
-            checkin = self.checkin
-            checkout = self.checkout
-            product_id = self.product_id.id
-            res = super(HotelReservation, self).unlink()
-            rooms_avail = self.get_wubook_availability(checkin,
-                                                       checkout,
-                                                       product_id)
-            _logger.info("DISPONIBILIDAD UNLINK")
-            _logger.info(rooms_avail)
-            if any(rooms_avail):
-                wres = self.env['wubook'].update_availability(rooms_avail)
-                if not wres:
-                    raise ValidationError("Can't update availability \
+            vals = {}
+            for record in vals:
+                rooms_avail = self.get_wubook_availability(
+                    record['checkin'],
+                    record['checkout'],
+                    record['product_id'])
+                _logger.info("DISPONIBILIDAD UNLINK")
+                _logger.info(rooms_avail)
+                if any(rooms_avail):
+                    wubook_obj = self.env['wubook'].with_context({
+                        'init_connection': False,
+                    })
+                    if wubook_obj.init_connection():
+                        wres = wubook_obj.update_availability(rooms_avail)
+                        if not wres:
+                            raise ValidationError("Can't update availability \
                                                                     on WuBook")
+                        checkin_dt = date_utils.get_datetime(record['checkin'])
+                        checkout_dt = date_utils.get_datetime(
+                                                            record['checkout'])
+                        wres = wubook_obj.fetch_rooms_values(
+                            checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                            checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                        wubook_obj.close_connection()
         return res
+
+    @api.model
+    def _generate_wubook_availability(self, older_vals, new_vals):
+        old_rooms_avail = []
+        new_rooms_avail = []
+        if older_vals['checkin'] and older_vals['checkout'] and \
+                older_vals['product_id']:
+            old_rooms_avail = self.get_wubook_availability(
+                older_vals['checkin'],
+                older_vals['checkout'],
+                older_vals['product_id'])
+        if new_vals['checkin'] and new_vals['checkout'] and \
+                new_vals['product_id']:
+            new_rooms_avail = self.get_wubook_availability(
+                new_vals['checkin'],
+                new_vals['checkout'],
+                new_vals['product_id'])
+        # Merge Old & New Dicts (Updating Old Dict)
+        for newitem in new_rooms_avail:
+            found = False
+            for olditem in old_rooms_avail:
+                if olditem['id'] == newitem['id']:
+                    for newdays in newitem['days']:
+                        foundday = False
+                        for olddays in olditem['days']:
+                            if olddays['date'] == newdays['date']:
+                                olddays.update(newdays)
+                                foundday = True
+                        if not foundday:
+                            olditem['days'].append(newdays)
+                    found = True
+            if not found:
+                old_rooms_avail.append(newitem)
+        return old_rooms_avail
 
     @api.multi
     def action_cancel(self):
@@ -190,18 +259,6 @@ class HotelReservation(models.Model):
                             'Cancelled by %s' % partner_id.name)
                         if not wres:
                             raise ValidationError("Can't cancel reservation \
-                                                                    on WuBook")
-                    rooms_avail = self.get_wubook_availability(
-                        record.checkin,
-                        record.checkout,
-                        record.product_id.id)
-                    _logger.info("DISPONIBILIDAD CANCEL")
-                    _logger.info(rooms_avail)
-                    if any(rooms_avail):
-                        wres = self.env['wubook'].update_availability(
-                                                                rooms_avail)
-                        if not wres:
-                            raise ValidationError("Can't update availability \
                                                                     on WuBook")
         return res
 
@@ -246,7 +303,8 @@ class HotelReservation(models.Model):
     def get_wubook_availability(self, checkin, checkout, product_id,
                                 dbchanged=True):
         date_start = date_utils.get_datetime(checkin)
-        date_diff = date_utils.date_diff(checkin, checkout, hours=False) + 1
+        # Not count end day of the reservation
+        date_diff = date_utils.date_diff(checkin, checkout, hours=False)
 
         vroom_obj = self.env['hotel.virtual.room']
         virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
@@ -268,13 +326,7 @@ class HotelReservation(models.Model):
                         virtual_room_id=vroom.id))
                     if not dbchanged:
                         avail = avail - 1
-                    vroom_avail_id = virtual_room_avail_obj.search([
-                        ('virtual_room_id', '=', vroom.id),
-                        ('date', '=', ndate_str)], limit=1)
-                    max_avail = vroom.total_rooms_count
-                    if vroom_avail_id:
-                        max_avail = vroom_avail_id.avail
-                    avail = min(avail, max_avail)
+                    avail = max(min(avail, vroom.total_rooms_count), 0)
                     rdays.append({
                         'date': ndate_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                         'avail': avail,

@@ -32,3 +32,4 @@ from . import test_product_pricelist_model
 from . import test_hotel_calendar_management_model
 from . import test_hotel_folio_model
 from . import test_hotel_virtual_room_model
+from . import test_hotel_reservation_model
