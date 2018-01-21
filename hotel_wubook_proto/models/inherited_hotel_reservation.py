@@ -249,12 +249,13 @@ class HotelReservation(models.Model):
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
             partner_id = self.env['res.users'].browse(self.env.uid).partner_id
+            wubook_obj = self.env['wubook']
             for record in self:
                     # Only can cancel reservations created directly in wubook
-                    if self.wrid and self.wrid != '' and \
-                            not self.wchannel_id and \
-                            self.wstatus in ['1', '2', '4']:
-                        wres = self.env['wubook'].cancel_reservation(
+                    if record.wrid and record.wrid != '' and \
+                            not record.wchannel_id and \
+                            record.wstatus in ['1', '2', '4']:
+                        wres = wubook_obj.cancel_reservation(
                             record.wrid,
                             'Cancelled by %s' % partner_id.name)
                         if not wres:
