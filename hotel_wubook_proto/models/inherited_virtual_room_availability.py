@@ -26,21 +26,15 @@ from openerp.exceptions import ValidationError
 class VirtualRoomAvailability(models.Model):
     _inherit = 'hotel.virtual.room.availability'
 
-    wmax_avail = filed.Integer("Max. Wubook Avail", default=-1)
+    wmax_avail = fields.Integer("Max. Wubook Avail", default=-1)
     wpushed = fields.Boolean("WuBook Pushed", readonly=True, default=False)
 
     @api.constrains('wmax_avail')
     def _check_wmax_avail(self):
-        vroom_obj = self.env['hotel.virtual.room']
-        cavail = len(vroom_obj.check_availability_virtual_room(
-            self.date,
-            self.date,
-            virtual_room_id=self.virtual_room_id.id))
-        max_avail = min(cavail,
-                        self.virtual_room_id.total_rooms_count)
-        if self.wmax_avail > max_avail:
+        if self.wmax_avail > self.virtual_room_id.total_rooms_count:
             raise ValidationError("max avail for wubook can't be high \
-                                                    than real availability")
+                than toal rooms \
+                    count: %d" % self.virtual_room_id.total_rooms_count)
 
     @api.multi
     def write(self, vals):

@@ -136,8 +136,8 @@ class HotelReservation(models.Model):
             res = super(HotelReservation, self).write(vals)
 
             for i in range(0, len(older_vals)):
-                navails = self._generate_wubook_availability(older_vals[i],
-                                                             new_vals[i])
+                navails = self._generate_wubook_diff_avail(older_vals[i],
+                                                           new_vals[i])
                 _logger.info("DISPONIBILIDAD WRITE")
                 _logger.info(navails)
                 if any(navails):
@@ -210,7 +210,7 @@ class HotelReservation(models.Model):
         return res
 
     @api.model
-    def _generate_wubook_availability(self, older_vals, new_vals):
+    def _generate_wubook_diff_avail(self, older_vals, new_vals):
         old_rooms_avail = []
         new_rooms_avail = []
         if older_vals['checkin'] and older_vals['checkout'] and \

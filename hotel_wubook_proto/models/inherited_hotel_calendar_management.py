@@ -28,6 +28,11 @@ class HotelCalendarManagement(models.TransientModel):
     @api.multi
     def save_changes(self, pricelist_id, restriction_id, pricelist,
                      restrictions, availability):
+
+        for k_avail, v_avail in availability.iteritems():
+            for avail in v_avail:
+                avail.update({'wmax_avail': avail['avail']})
+
         res = super(HotelCalendarManagement, self).save_changes(
             pricelist_id,
             restriction_id,

@@ -27,7 +27,7 @@
   </record>
 
   <!-- TREE restriction -->
-  <record id="reservation_restriction_view_tree" model="ir.ui.view">
+  <record id="virtual_room_availability_view_tree" model="ir.ui.view">
     <field name="name">hotel.virtual.room.availability.tree</field>
     <field name="model">hotel.virtual.room.availability</field>
     <field name="type">tree</field>
