@@ -41,12 +41,9 @@ class Wizard(models.TransientModel):
     @api.one
     def generate_file(self):
         compa = self.env.user.company_id
-        compapolice = 'NoValid'
         if compa.police <> False and compa.property_name <> False:
-            if compa.police <> False:
-                compapolice = compa.police
             lines = self.env['cardex'].search([('enter_date','=',self.download_date)])
-            content = "1|"+compapolice+"|"+compa.property_name.upper()[0:40]+"|"
+            content = "1|"+compa.police+"|"+compa.property_name.upper()[0:40]+"|"
             content += datetime.datetime.now().strftime("%Y%m%d|%H%M")
             content += "|"+str(len(lines))+ """
     """
@@ -73,7 +70,7 @@ class Wizard(models.TransientModel):
     """
 
             return self.write({
-                'txt_filename': compapolice +'.'+ self.download_num,
+                'txt_filename': compa.police +'.'+ self.download_num,
                 'txt_message': _('Generated file. Download it and give it to the police.'),
                 'txt_binary': base64.encodestring(content.encode("iso-8859-1"))
                 })
