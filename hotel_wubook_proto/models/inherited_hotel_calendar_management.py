@@ -20,19 +20,23 @@
 #
 ##############################################################################
 from openerp import models, api
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class HotelCalendarManagement(models.TransientModel):
     _inherit = 'hotel.calendar.management'
 
+    @api.model
+    def _get_availability_values(self, avail, vroom):
+        vals = super(HotelCalendarManagement, self)._get_availability_values(
+                                                                avail, vroom)
+        vals.update({'wmax_avail': vals['avail']})
+        return vals
+
     @api.multi
     def save_changes(self, pricelist_id, restriction_id, pricelist,
                      restrictions, availability):
-
-        for k_avail, v_avail in availability.iteritems():
-            for avail in v_avail:
-                avail.update({'wmax_avail': avail['avail']})
-
         res = super(HotelCalendarManagement, self).save_changes(
             pricelist_id,
             restriction_id,

@@ -26,8 +26,6 @@ from openerp.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT)
 from odoo.addons.hotel import date_utils
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class MassiveChangesWizard(models.TransientModel):
@@ -169,15 +167,13 @@ class MassiveChangesWizard(models.TransientModel):
         if record.change_min_stay:
             vals.update({'min_stay': record.min_stay})
         if record.change_min_stay_arrival:
-            vals.update({
-                'min_stay_arrival': record.min_stay_arrival})
+            vals.update({'min_stay_arrival': record.min_stay_arrival})
         if record.change_max_stay:
             vals.update({'max_stay': record.max_stay})
         if record.change_closed:
             vals.update({'closed': record.closed})
         if record.change_closed_departure:
-            vals.update({
-                'closed_departure': record.closed_departure})
+            vals.update({'closed_departure': record.closed_departure})
         if record.change_closed_arrival:
             vals.update({'closed_arrival': record.closed_arrival})
         return vals
@@ -186,31 +182,27 @@ class MassiveChangesWizard(models.TransientModel):
     def _save_restrictions(self, ndate, vrooms, record):
         hotel_vroom_re_it_obj = self.env['hotel.virtual.room.restriction.item']
         domain = [
-            ('date_start', '>=', ndate.strftime(
-                                    DEFAULT_SERVER_DATE_FORMAT)),
-            ('date_end', '<=', ndate.strftime(
-                                    DEFAULT_SERVER_DATE_FORMAT)),
+            ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+            ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
             ('restriction_id', '=', record.restriction_id.id),
             ('applied_on', '=', '0_virtual_room'),
         ]
 
-        for vroom_id in vrooms.ids:
+        for vroom in vrooms:
             vals = self._get_restrictions_values(ndate, vroom, record)
             if not any(vals):
                 continue
 
             rrest_item_ids = hotel_vroom_re_it_obj.search(
-                domain+[('virtual_room_id', '=', vroom_id)])
+                domain+[('virtual_room_id', '=', vroom.id)])
             if any(rrest_item_ids):
                 rrest_item_ids.write(vals)
             else:
                 vals.update({
-                    'date_start': ndate.strftime(
-                                DEFAULT_SERVER_DATE_FORMAT),
-                    'date_end': ndate.strftime(
-                                DEFAULT_SERVER_DATE_FORMAT),
+                    'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                     'restriction_id': record.restriction_id.id,
-                    'virtual_room_id': vroom_id,
+                    'virtual_room_id': vroom.id,
                     'applied_on': '0_virtual_room',
                 })
                 hotel_vroom_re_it_obj.create(vals)
@@ -223,18 +215,13 @@ class MassiveChangesWizard(models.TransientModel):
             vals.update({'no_ota': record.no_ota})
         if record.change_avail:
             cavail = len(hotel_vroom_obj.check_availability_virtual_room(
-                ndate.strftime(
-                        DEFAULT_SERVER_DATETIME_FORMAT),
-                ndate.strftime(
-                        DEFAULT_SERVER_DATETIME_FORMAT),
+                ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                 virtual_room_id=vroom.id))
             vals.update({
-                'avail': min(cavail,
-                             vroom.total_rooms_count,
-                             record.avail),
+                'avail': min(cavail, vroom.total_rooms_count, record.avail),
             })
-
-        return vrooms_avail, vals
+        return vals
 
     @api.model
     def _save_availability(self, ndate, vrooms, record):
@@ -242,13 +229,13 @@ class MassiveChangesWizard(models.TransientModel):
         hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
         domain = [('date', '=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))]
 
-        for vroom_id in vrooms.ids:
-            vals = _get_availability_values(ndate, vroom, record)
+        for vroom in vrooms:
+            vals = self._get_availability_values(ndate, vroom, record)
             if not any(vals):
                 continue
 
             vrooms_avail = hotel_vroom_avail_obj.search(
-                domain+[('virtual_room_id', '=', vroom_id)]
+                domain+[('virtual_room_id', '=', vroom.id)]
             )
             if any(vrooms_avail):
                 # Mail module want a singleton
@@ -256,9 +243,8 @@ class MassiveChangesWizard(models.TransientModel):
                     vr_avail.write(vals)
             else:
                 vals.update({
-                    'date': ndate.strftime(
-                                DEFAULT_SERVER_DATE_FORMAT),
-                    'virtual_room_id': vroom_id
+                    'date': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    'virtual_room_id': vroom.id
                 })
                 hotel_vroom_avail_obj.with_context({
                     'mail_create_nosubscribe': True,
