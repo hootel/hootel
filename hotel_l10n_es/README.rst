@@ -10,6 +10,8 @@ Use
 ===
 Instal in Odoo and checkin
 
+Remember to complete the "hotel settings" configuration fields in the company file.
+
 Credits
 =======
 
