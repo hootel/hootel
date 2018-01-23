@@ -513,7 +513,8 @@ HotelCalendar.prototype = {
       action: this.ACTION.NONE,
       reservation: null,
       oldReservationObj: null,
-      newReservationObj: null
+      newReservationObj: null,
+      mousePos: false,
     };
   },
 
@@ -595,7 +596,7 @@ HotelCalendar.prototype = {
       cell.dataset.hcalBedNum = i;
       cell.addEventListener('mouseenter', function(ev){
         var date_cell = HotelCalendar.toMoment($this.etable.querySelector(`#${this.dataset.hcalParentCell}`).dataset.hcalDate);
-        if ($this._isLeftButtonPressed(ev)) {
+        if ($this._isLeftButtonPressed(ev) && $this.reservationAction.mousePos) {
           // workarround for not trigger reservation change
           var a = $this.reservationAction.mousePos[0] - ev.x;
           var b = $this.reservationAction.mousePos[1] - ev.y;
