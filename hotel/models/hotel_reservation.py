@@ -199,12 +199,10 @@ class HotelReservation(models.Model):
     }
 
     reservation_no = fields.Char('Reservation No', size=64, readonly=True)
-    adults = fields.Integer('Adults', size=64, readonly=True,
-                            states={'draft': [('readonly', False)]},
+    adults = fields.Integer('Adults', size=64, readonly=False,
                             track_visibility='always',
                             help='List of adults there in guest list. ')
-    children = fields.Integer('Children', size=64, readonly=True,
-                              states={'draft': [('readonly', False)]},
+    children = fields.Integer('Children', size=64, readonly=False,
                               track_visibility='always',
                               help='Number of children there in guest list.')
     to_assign = fields.Boolean('To Assign')
@@ -214,11 +212,7 @@ class HotelReservation(models.Model):
                              'State', readonly=True,
                              default=lambda *a: 'draft',
                              track_visibility='always')
-    reservation_type = fields.Selection([
-        ('normal', 'Normal'),
-        ('staff', 'Staff'),
-        ('out', 'Out of Service')], 'Reservation Type',
-        default=lambda *a: 'normal')
+    reservation_type = fields.Selection(related='folio_id.reservation_type')
     cancelled_reason = fields.Selection([('late', 'Late'), ('intime', 'In time'),
                               ('noshow', 'No Show')],'Cause of cancelled')
     out_service_description = fields.Text('Cause of out of service')
@@ -601,6 +595,7 @@ class HotelReservation(models.Model):
 
         if self.reservation_type in ['staff', 'out']:
             self.price_unit = 0.0
+            self.cardex_pending = 0
         else:
             self.price_unit = rlines['total_price']
 

@@ -23,6 +23,8 @@
                                     />
                                 <field name="order_partner_id" invisible="1"/>
                                 <field name="folio_id" invisible="1"/>
+                                                            <field name="tax_id" colspan="4" />
+
                             </group>
                             <separator string="Manual Description" colspan="4" />
                             <field name="name" colspan="4" select="2"
@@ -32,7 +34,6 @@
                                 <field name="discount" />
                             </group>
                             <newline />
-                            <field name="tax_id" colspan="4" />
                             <group>
                                 <separator string="States" colspan="4" />
                                 <field name="state" select="2" />

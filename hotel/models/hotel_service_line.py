@@ -128,29 +128,28 @@ class HotelServiceLine(models.Model):
     #     ~ return super(HotelServiceLine, self).unlink()
 
     @api.onchange('product_id')
-    def product_id_change(self):
-        '''
-        @param self: object pointer
-        '''
+    def product_id_change_hotel(self):
+        #~ '''
+        #~ @param self: object pointer
+        #~ '''
         if self.product_id and self.folio_id.partner_id:
             self.name = self.product_id.name
             self.price_unit = self.product_id.lst_price
             self.product_uom = self.product_id.uom_id
-            tax_obj = self.env['account.tax']
-            prod = self.product_id
-            self.price_unit = tax_obj._fix_tax_included_price(prod.price,
-                                                              prod.taxes_id,
-                                                              self.tax_id)
+            self.price_unit = self.product_id.price
+            #~ prod = self.product_id	
+            #~ self.price_unit = tax_obj._fix_tax_included_price(prod.price,
+                                                              #~ prod.taxes_id,
+                                                              #~ self.tax_id)
         elif self.product_id and self.ser_room_line:
             self.folio_id = self.ser_room_line.folio_id
             self.name = self.product_id.name
             self.price_unit = self.product_id.lst_price
             self.product_uom = self.product_id.uom_id
-            tax_obj = self.env['account.tax']
-            prod = self.product_id
-            self.price_unit = tax_obj._fix_tax_included_price(prod.price,
-                                                              prod.taxes_id,
-                                                              self.tax_id)
+            self.price_unit = self.product_id.price
+            #~ self.price_unit = tax_obj._fix_tax_included_price(prod.price,
+                                                              #~ prod.taxes_id,
+                                                              #~ self.tax_id)
 
     #     ~ _logger.info(self._context)
     #     ~ if 'folio_id' in self._context:
@@ -168,11 +167,11 @@ class HotelServiceLine(models.Model):
     #     ~ rooms = self.mapped('folio_id.room_lines.id')
     #     ~ return {'domain': {'ser_room_line': rooms}}
 
-    @api.onchange('product_uom')
-    def product_uom_change(self):
-        '''
-        @param self: object pointer
-        '''
+    #~ @api.onchange('product_uom')
+    #~ def product_uom_change(self):
+        #~ '''
+        #~ @param self: object pointer
+        #~ '''
         # ~ if not self.product_uom:
         #     ~ self.price_unit = 0.0
         #     ~ return

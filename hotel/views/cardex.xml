@@ -23,7 +23,7 @@
                 action="action_cardex"
             />
 
-            <record id="view_form_cardes" model="ir.ui.view">
+            <record id="view_form_cardex" model="ir.ui.view">
                 <field name="name">Cardex Form</field>
                 <field name="model">cardex</field>
                 <field name="arch" type="xml">
@@ -49,11 +49,11 @@
                 <field name="model">cardex</field>
                 <field name="arch" type="xml">
                     <tree>
-                        <field name="partner_id" context="{'form_view_ref':'odoo_pms_checkin.partners_form_cardex'}" string="Client name"/>
+                        <field name="partner_id" string="Client name"/>
                         <field name="enter_date"/>
                         <field name="exit_date"/>
                         <field name="reservation_id"/>
-                        <button type="action" class="oe_stat_button" id="cardex_smart_button" icon="fa-bed" name="%(launch_checkin_wizard_add)d" context="{'partner_id': partner_id,'enter_date': enter_date,'exit_date': exit_date,'reservation_id': reservation_id, 'hidden_cardex': True, 'edit_cardex': True }"/>
+                        <button type="action" class="oe_stat_button" id="cardex_smart_button" icon="fa-bed" />
                     </tree>
 
                 </field>

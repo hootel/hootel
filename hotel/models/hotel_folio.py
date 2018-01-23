@@ -128,6 +128,7 @@ class HotelFolio(models.Model):
                             "count from the check-in and check-out date. ")
     currrency_ids = fields.One2many('currency.exchange', 'folio_no',
                                     readonly=True)
+    partner_invoice_id = fields.Many2one('res.partner', string='Invoice Address', readonly=False, required=True, help="Invoice address for current sales order.")
     hotel_invoice_id = fields.Many2one('account.invoice', 'Invoice')
     invoices_amount = fields.Monetary(compute='compute_invoices_amount',
                                       store=True)
@@ -153,6 +154,11 @@ class HotelFolio(models.Model):
         help='Margin in days to create a notice if a payment \
                 advance has not been recorded')
     color = fields.Char(string='Color')
+    reservation_type = fields.Selection([
+        ('normal', 'Normal'),
+        ('staff', 'Staff'),
+        ('out', 'Out of Service')], 'Type',
+        default=lambda *a: 'normal')
 
     @api.model
     def daily_plan(self):
@@ -290,20 +296,22 @@ class HotelFolio(models.Model):
     def _compute_cardex_count(self):
         for fol in self:
             num_cardex = 0
-            for reser in fol.room_lines:
-                if reser.state != 'cancelled':
-                    num_cardex += len(reser.cardex_ids)
-            fol.cardex_count = num_cardex
-            pending = 0
-            for reser in fol.room_lines:
-                if reser.state != 'cancelled':
-                    pending += (reser.adults + reser.children) \
-                                    - len(reser.cardex_ids)
-            if pending <= 0:
-                fol.cardex_pending = False
-            else:
-                fol.cardex_pending = True
-            fol.cardex_pending_num = pending
+            pending = False
+            if fol.reservation_type == 'normal':
+                for reser in fol.room_lines:
+                    if reser.state != 'cancelled':
+                        num_cardex += len(reser.cardex_ids)
+                fol.cardex_count = num_cardex
+                pending = 0
+                for reser in fol.room_lines:
+                    if reser.state != 'cancelled':
+                        pending += (reser.adults + reser.children) \
+                                          - len(reser.cardex_ids)
+                if pending <= 0:
+                    fol.cardex_pending = False
+                else:
+                    fol.cardex_pending = True
+        fol.cardex_pending_num = pending
 
     @api.multi
     def go_to_currency_exchange(self):
