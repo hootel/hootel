@@ -128,7 +128,7 @@ class HotelFolio(models.Model):
                             "count from the check-in and check-out date. ")
     currrency_ids = fields.One2many('currency.exchange', 'folio_no',
                                     readonly=True)
-    partner_invoice_id = fields.Many2one('res.partner', string='Invoice Address', readonly=False, required=True, help="Invoice address for current sales order.")
+    #~ partner_invoice_id = fields.Many2one('res.partner', string='Invoice Address', readonly=False, required=True, help="Invoice address for current sales order.")
     hotel_invoice_id = fields.Many2one('account.invoice', 'Invoice')
     invoices_amount = fields.Monetary(compute='compute_invoices_amount',
                                       store=True)
