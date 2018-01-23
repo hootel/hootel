@@ -118,7 +118,7 @@ class HotelCalendarManagement(models.TransientModel):
                 ], limit=1)
                 vals = self._get_restrictions_values(restriction)
                 if not res_id:
-                    vals.udapte({
+                    vals.update({
                         'date_start': restriction['date'],
                         'date_end': restriction['date'],
                         'restriction_id': int(restriction_id),
