@@ -9,6 +9,13 @@
                 view_mode="form"
             />
 
+            <!--Import assets-->
+            <template id="assets_backend" name="custom assets" inherit_id="web.assets_backend">
+              <xpath expr="." position="inside">
+                <link rel="stylesheet" href="/hotel_l10n_es/static/src/css/hotel_l10n_es.css"/>
+              </xpath>
+            </template>
+
             <record id="view_police_download" model="ir.ui.view">
                 <field name="name">Police File Download</field>
                 <field name="model">police.wizard</field>
@@ -17,7 +24,7 @@
                         <sheet>
                             <group string="Generar fichero diario para la Policía" colspan="1">
                                     <field name="download_date"/>
-                                    <field name="download_num" style="width:3em"/>
+                                    <field name="download_num" style="max-width:3em"/>
                             </group>
                                 <div>
                                     <button name="generate_file" class="oe_form_button_save btn btn-primary btn-sm" type="object" string="Generate Police file"/>

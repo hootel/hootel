@@ -8,6 +8,13 @@
 			view_mode="form"
 		/>
 
+    <!--Import assets-->
+    <template id="assets_backend" name="custom assets" inherit_id="web.assets_backend">
+      <xpath expr="." position="inside">
+        <link rel="stylesheet" href="/hotel_revenue/static/src/css/hotel_revenue.css"/>
+      </xpath>
+    </template>
+
 	    <record id="view_revenue_download" model="ir.ui.view">
 	        <field name="name">REVENUE File Download</field>
 	        <field name="model">revenue.exporter.wizard</field>
@@ -18,8 +25,8 @@
 	                            <!-- <field name="room_type_id"
 	                             widget="many2many_tags"
 	                             options="{'no_create': True}"/>  -->
- 	                            <field name="period_1" style="max-width:110px" required="True"/>
-	                            <field name="period_2" style="max-width:110px" required="True"/>
+ 	                            <field name="period_1" style="max-width:8em;" required="True"/>
+	                            <field name="period_2" style="max-width:8em;" required="True"/>
  	                            <field name="date_1" style="max-width:110px" required="True"/>
  	                            <field name="date_2" style="max-width:110px" required="True"/>
 	                    </group>

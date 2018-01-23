@@ -54,6 +54,7 @@
     ],
     'test': [
     ],
+    'css': ['static/src/css/hotel_l10n_es.css'],
     'installable': True,
     'auto_install': False,
     'application': False,

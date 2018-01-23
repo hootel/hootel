@@ -36,6 +36,7 @@
         'wizard/revenue_wizard.xml',
         'views/cash_daily_blance.xml',
     ],
+    'css': ['static/src/css/hotel_revenue.css'],
     'installable': True,
     'auto_install': False,
     'application': False,
