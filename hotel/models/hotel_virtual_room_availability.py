@@ -21,6 +21,8 @@
 ##############################################################################
 from openerp import models, fields, api
 from openerp.exceptions import ValidationError
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class HotelVirtualRoomAvailability(models.Model):
@@ -48,6 +50,11 @@ class HotelVirtualRoomAvailability(models.Model):
             virtual_room_id=self.virtual_room_id.id))
         max_avail = min(cavail,
                         self.virtual_room_id.total_rooms_count)
+        _logger.info("------ MIRRR")
+        _logger.info(self.virtual_room_id.id)
+        _logger.info(cavail)
+        _logger.info(self.virtual_room_id.total_rooms_count)
+        _logger.info(self.avail)
         if self.avail > max_avail:
             raise ValidationError("avail can't be high than real availability")
 

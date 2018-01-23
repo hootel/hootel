@@ -167,6 +167,8 @@ var HotelCalendarView = View.extend({
         this._hcalendar.addEventListener('hcalOnChangeReservation', function(ev){
             var newReservation = ev.detail.newReserv;
             var oldReservation = ev.detail.oldReserv;
+            var oldPrice = ev.detail.oldPrice;
+            var newPrice = ev.detail.newPrice;
             var folio_id = newReservation.getUserData('folio_id');
 
             var reservs = self._hcalendar.getReservations(newReservation);
@@ -180,9 +182,11 @@ var HotelCalendarView = View.extend({
                 ncheckin: newReservation.startDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
                 ncheckout: newReservation.endDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
                 nroom: newReservation.room.number,
+                nprice: newPrice,
                 ocheckin: oldReservation.startDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
                 ocheckout: oldReservation.endDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
                 oroom: oldReservation.room.number,
+                oprice: oldPrice,
                 hasReservesLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
             };
             var dialog = new Dialog(self, {

@@ -342,21 +342,6 @@ class HotelFolio(models.Model):
                             },
                 }
 
-    @api.constrains('room_lines')
-    def folio_room_lines(self):
-        '''
-        This method is used to validate the room_lines.
-        ------------------------------------------------
-        @param self: object pointer
-        @return: raise warning depending on the validation
-        '''
-        folio_rooms = []
-        rooms = self[0].room_lines.filtered(lambda r: r.state != 'cancelled')
-        for room in rooms:
-            if not room.splitted and room.product_id.id in folio_rooms:
-                raise ValidationError(_('You Cannot Take Same Room Twice'))
-            folio_rooms.append(room.product_id.id)
-
     @api.model
     def create(self, vals, check=True):
         """
