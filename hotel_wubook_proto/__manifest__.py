@@ -44,6 +44,7 @@
         'views/res_config_views.xml',
         'views/inherited_hotel_reservation_views.xml',
         'views/inherited_hotel_virtual_room_views.xml',
+        'views/inherited_hotel_virtual_room_availability_views.xml',
         'views/inherited_hotel_folio_views.xml',
         'views/inherited_product_pricelist_views.xml',
         'views/inherited_product_pricelist_item_views.xml',

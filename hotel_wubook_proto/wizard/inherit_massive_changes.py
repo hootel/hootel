@@ -27,6 +27,15 @@ from openerp import models, api
 class MassiveChangesWizard(models.TransientModel):
     _inherit = 'hotel.wizard.massive.changes'
 
+    @api.model
+    def _get_availability_values(self, ndate, vroom, record):
+        vals = super(MassiveChangesWizard, self)._get_availability_values(
+            ndate, vroom, record)
+        vals.update({
+            'wmax_avail': vals['avail']
+        })
+        return vals
+
     @api.multi
     def massive_change(self):
         res = super(MassiveChangesWizard, self).massive_change()

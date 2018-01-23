@@ -136,8 +136,8 @@ class HotelReservation(models.Model):
             res = super(HotelReservation, self).write(vals)
 
             for i in range(0, len(older_vals)):
-                navails = self._generate_wubook_availability(older_vals[i],
-                                                             new_vals[i])
+                navails = self._generate_wubook_diff_avail(older_vals[i],
+                                                           new_vals[i])
                 _logger.info("DISPONIBILIDAD WRITE")
                 _logger.info(navails)
                 if any(navails):
@@ -210,7 +210,7 @@ class HotelReservation(models.Model):
         return res
 
     @api.model
-    def _generate_wubook_availability(self, older_vals, new_vals):
+    def _generate_wubook_diff_avail(self, older_vals, new_vals):
         old_rooms_avail = []
         new_rooms_avail = []
         if older_vals['checkin'] and older_vals['checkout'] and \
@@ -327,7 +327,14 @@ class HotelReservation(models.Model):
                         virtual_room_id=vroom.id))
                     if not dbchanged:
                         avail = avail - 1
-                    avail = max(min(avail, vroom.total_rooms_count), 0)
+                    max_avail = vroom.total_rooms_count
+                    vroom_avail_id = virtual_room_avail_obj.search([
+                        ('virtual_room_id', '=', vroom.id),
+                        ('date', '=', ndate_str)], limit=1)
+                    if vroom_avail_id and vroom_avail_id.wmax_avail >= 0:
+                        max_avail = vroom_avail_id.wmax_avail
+                    avail = max(
+                            min(avail, vroom.total_rooms_count, max_avail), 0)
                     rdays.append({
                         'date': ndate_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                         'avail': avail,

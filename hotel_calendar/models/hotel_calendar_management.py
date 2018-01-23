@@ -33,6 +33,37 @@ _logger = logging.getLogger(__name__)
 class HotelCalendarManagement(models.TransientModel):
     _name = 'hotel.calendar.management'
 
+    @api.model
+    def _get_prices_values(self, price):
+        vals = {
+            'fixed_price': price['price'],
+        }
+        return vals
+
+    @api.model
+    def _get_restrictions_values(self, restriction):
+        vals = {
+            'min_stay': restriction['min_stay'],
+            'min_stay_arrival': restriction['min_stay_arrival'],
+            'max_stay': restriction['max_stay'],
+            'closed': restriction['closed'],
+            'closed_arrival': restriction['closed_arrival'],
+            'closed_departure': restriction['closed_departure'],
+        }
+        return vals
+
+    @api.model
+    def _get_availability_values(self, avail, vroom):
+        vroom_obj = self.env['hotel.virtual.room']
+        cavail = len(vroom_obj.check_availability_virtual_room(
+            avail['date'], avail['date'], virtual_room_id=vroom.id))
+        ravail = min(cavail, vroom.total_rooms_count, int(avail['avail']))
+        vals = {
+            'no_ota': avail['no_ota'],
+            'avail': ravail,
+        }
+        return vals
+
     @api.multi
     def save_changes(self, pricelist_id, restriction_id, pricelist,
                      restrictions, availability):
@@ -55,20 +86,19 @@ class HotelCalendarManagement(models.TransientModel):
                     ('compute_price', '=', 'fixed'),
                     ('product_tmpl_id', '=', vroom_prod_tmpl_id.id),
                 ], limit=1)
+                vals = self._get_prices_values(price)
                 if not price_id:
-                    price_id = product_pricelist_item_obj.create({
+                    vals.update({
                         'date_start': price['date'],
                         'date_end': price['date'],
                         'pricelist_id': int(pricelist_id),
                         'applied_on': '1_product',
                         'compute_price': 'fixed',
-                        'fixed_price': price['price'],
                         'product_tmpl_id': vroom_prod_tmpl_id.id,
                     })
+                    price_id = product_pricelist_item_obj.create(vals)
                 else:
-                    price_id.write({
-                        'fixed_price': price['price']
-                    })
+                    price_id.write(vals)
                 new_prices.setdefault(k_price, []).append({
                     'id': price_id.id,
                     'date': price_id.date_start,
@@ -86,29 +116,18 @@ class HotelCalendarManagement(models.TransientModel):
                     ('applied_on', '=', '0_virtual_room'),
                     ('virtual_room_id', '=', int(k_res)),
                 ], limit=1)
+                vals = self._get_restrictions_values(restriction)
                 if not res_id:
-                    res_id = vroom_rest_item_obj.create({
+                    vals.update({
                         'date_start': restriction['date'],
                         'date_end': restriction['date'],
                         'restriction_id': int(restriction_id),
                         'applied_on': '0_virtual_room',
                         'virtual_room_id': int(k_res),
-                        'min_stay': restriction['min_stay'],
-                        'min_stay_arrival': restriction['min_stay_arrival'],
-                        'max_stay': restriction['max_stay'],
-                        'closed': restriction['closed'],
-                        'closed_arrival': restriction['closed_arrival'],
-                        'closed_departure': restriction['closed_departure'],
                     })
+                    res_id = vroom_rest_item_obj.create(vals)
                 else:
-                    res_id.write({
-                        'min_stay': restriction['min_stay'],
-                        'min_stay_arrival': restriction['min_stay_arrival'],
-                        'max_stay': restriction['max_stay'],
-                        'closed': restriction['closed'],
-                        'closed_arrival': restriction['closed_arrival'],
-                        'closed_departure': restriction['closed_departure'],
-                    })
+                    res_id.write(vals)
                 new_rests.setdefault(k_res, []).append({
                     'id': res_id.id,
                     'date': res_id.date_start,
@@ -125,28 +144,21 @@ class HotelCalendarManagement(models.TransientModel):
         for k_avail, v_avail in availability.iteritems():
             vroom_id = vroom_obj.browse(int(k_avail))
             for avail in v_avail:
-                cavail = len(vroom_obj.check_availability_virtual_room(
-                    avail['date'], avail['date'], virtual_room_id=vroom_id.id))
-                ravail = min(cavail, vroom_id.total_rooms_count,
-                             int(avail['avail']))
+                vals = self._get_availability_values(avail, vroom_id)
                 avail_id = vroom_avail_obj.search([
                     ('date', '=', avail['date']),
                     ('virtual_room_id', '=', vroom_id.id),
                 ], limit=1)
                 if not avail_id:
-                    avail_id = vroom_avail_obj.with_context({
-                        'mail_create_nosubscribe': True,
-                    }).create({
+                    vals.update({
                         'date': avail['date'],
-                        'no_ota': avail['no_ota'],
-                        'avail': ravail,
                         'virtual_room_id': vroom_id.id,
                     })
+                    avail_id = vroom_avail_obj.with_context({
+                        'mail_create_nosubscribe': True,
+                    }).create(vals)
                 else:
-                    avail_id.write({
-                        'no_ota': avail['no_ota'],
-                        'avail': ravail,
-                    })
+                    avail_id.write(vals)
                 new_avails.setdefault(k_avail, []).append({
                     'id': avail_id.id,
                     'date': avail_id.date,

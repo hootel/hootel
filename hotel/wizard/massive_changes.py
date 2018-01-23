@@ -26,8 +26,6 @@ from openerp.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT)
 from odoo.addons.hotel import date_utils
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class MassiveChangesWizard(models.TransientModel):
@@ -96,13 +94,165 @@ class MassiveChangesWizard(models.TransientModel):
         return (chkdate >= self.date_start and chkdate <= self.date_end
                 and wedays[wday])
 
-    # FIXME: Method too long!
+    @api.model
+    def _save_prices(self, ndate, vrooms, record):
+        product_pricelist_item_obj = self.env['product.pricelist.item']
+        price = 0.0
+        operation = 'a'
+        if record.price[0] == '+' or record.price[0] == '-':
+            if record.price[-1] == '%':
+                price = float(record.price[1:-1])
+                operation = (ecord.price[0] == '+') and 'ap' or 'sp'
+            else:
+                price = float(record.price[1:])
+                operation = (ecord.price[0] == '+') and 'a' or 's'
+        else:
+            if record.price[-1] == '%':
+                price = float(record.price[:-1])
+                operation = 'np'
+            else:
+                price = float(record.price)
+                operation = 'n'
+
+        domain = [
+            ('pricelist_id', '=', record.pricelist_id.id),
+            ('date_start', '>=', ndate.strftime(
+                                    DEFAULT_SERVER_DATE_FORMAT)),
+            ('date_end', '<=', ndate.strftime(
+                                    DEFAULT_SERVER_DATE_FORMAT)),
+            ('compute_price', '=', 'fixed'),
+            ('applied_on', '=', '1_product'),
+        ]
+
+        product_tmpl_ids = vrooms.mapped(
+                                    'product_id.product_tmpl_id')
+        for vroom in vrooms:
+            prod_tmpl_id = vroom.product_id.product_tmpl_id
+            pricelist_item_ids = product_pricelist_item_obj.search(
+                domain+[('product_tmpl_id', '=', prod_tmpl_id.id)])
+            if any(pricelist_item_ids):
+                if operation != 'n':
+                    for pli in pricelist_item_ids:
+                        pli_price = pli.fixed_price
+                        if operation == 'a':
+                            pli.write({
+                                'fixed_price': pli_price + price})
+                        elif operation == 'ap':
+                            pli.write({'fixed_price': pli_price + price * pli_price * 0.01})
+                        elif operation == 's':
+                            pli.write({
+                                'fixed_price': pli_price - price})
+                        elif operation == 'sp':
+                            pli.write({'fixed_price': pli_price - price * pli_price * 0.01})
+                        elif operation == 'np':
+                            pli.write({'fixed_price': price * pli_price * 0.01})
+                else:
+                    pricelist_item_ids.write({'fixed_price': price})
+            else:
+                product_pricelist_item_obj.create({
+                    'pricelist_id': record.pricelist_id.id,
+                    'date_start': ndate.strftime(
+                                    DEFAULT_SERVER_DATE_FORMAT),
+                    'date_end': ndate.strftime(
+                                    DEFAULT_SERVER_DATE_FORMAT),
+                    'compute_price': 'fixed',
+                    'applied_on': '1_product',
+                    'product_tmpl_id': prod_tmpl_id.id,
+                    'fixed_price': price,
+                })
+
+    @api.model
+    def _get_restrictions_values(self, ndate, vroom, record):
+        vals = {}
+        if record.change_min_stay:
+            vals.update({'min_stay': record.min_stay})
+        if record.change_min_stay_arrival:
+            vals.update({'min_stay_arrival': record.min_stay_arrival})
+        if record.change_max_stay:
+            vals.update({'max_stay': record.max_stay})
+        if record.change_closed:
+            vals.update({'closed': record.closed})
+        if record.change_closed_departure:
+            vals.update({'closed_departure': record.closed_departure})
+        if record.change_closed_arrival:
+            vals.update({'closed_arrival': record.closed_arrival})
+        return vals
+
+    @api.model
+    def _save_restrictions(self, ndate, vrooms, record):
+        hotel_vroom_re_it_obj = self.env['hotel.virtual.room.restriction.item']
+        domain = [
+            ('date_start', '>=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+            ('date_end', '<=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+            ('restriction_id', '=', record.restriction_id.id),
+            ('applied_on', '=', '0_virtual_room'),
+        ]
+
+        for vroom in vrooms:
+            vals = self._get_restrictions_values(ndate, vroom, record)
+            if not any(vals):
+                continue
+
+            rrest_item_ids = hotel_vroom_re_it_obj.search(
+                domain+[('virtual_room_id', '=', vroom.id)])
+            if any(rrest_item_ids):
+                rrest_item_ids.write(vals)
+            else:
+                vals.update({
+                    'date_start': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    'date_end': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    'restriction_id': record.restriction_id.id,
+                    'virtual_room_id': vroom.id,
+                    'applied_on': '0_virtual_room',
+                })
+                hotel_vroom_re_it_obj.create(vals)
+
+    @api.model
+    def _get_availability_values(self, ndate, vroom, record):
+        hotel_vroom_obj = self.env['hotel.virtual.room']
+        vals = {}
+        if record.change_no_ota:
+            vals.update({'no_ota': record.no_ota})
+        if record.change_avail:
+            cavail = len(hotel_vroom_obj.check_availability_virtual_room(
+                ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                ndate.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                virtual_room_id=vroom.id))
+            vals.update({
+                'avail': min(cavail, vroom.total_rooms_count, record.avail),
+            })
+        return vals
+
+    @api.model
+    def _save_availability(self, ndate, vrooms, record):
+        hotel_vroom_obj = self.env['hotel.virtual.room']
+        hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
+        domain = [('date', '=', ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))]
+
+        for vroom in vrooms:
+            vals = self._get_availability_values(ndate, vroom, record)
+            if not any(vals):
+                continue
+
+            vrooms_avail = hotel_vroom_avail_obj.search(
+                domain+[('virtual_room_id', '=', vroom.id)]
+            )
+            if any(vrooms_avail):
+                # Mail module want a singleton
+                for vr_avail in vrooms_avail:
+                    vr_avail.write(vals)
+            else:
+                vals.update({
+                    'date': ndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    'virtual_room_id': vroom.id
+                })
+                hotel_vroom_avail_obj.with_context({
+                    'mail_create_nosubscribe': True,
+                }).create(vals)
+
     @api.multi
     def massive_change(self):
         hotel_vroom_obj = self.env['hotel.virtual.room']
-        hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
-        hotel_vroom_re_it_obj = self.env['hotel.virtual.room.restriction.item']
-        product_pricelist_item_obj = self.env['product.pricelist.item']
         for record in self:
             date_start_dt = date_utils.get_datetime(record.date_start,
                                                     hours=False)
@@ -117,152 +267,13 @@ class MassiveChangesWizard(models.TransientModel):
 
             for i in range(0, diff_days):
                 ndate = date_start_dt + timedelta(days=i)
-                ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
                 if not wedays[ndate.timetuple()[6]]:
                     continue
+
                 if record.section == '0':
-                    domain = [('date', '=', ndate_str)]
-
-                    vals = {}
-                    if record.change_no_ota:
-                        vals.update({'no_ota': record.no_ota})
-
-                    if any(vals) or record.change_avail:
-                        for vroom in vrooms:
-                            if record.change_avail:
-                                cavail = len(hotel_vroom_obj.check_availability_virtual_room(
-                                    ndate.strftime(
-                                            DEFAULT_SERVER_DATETIME_FORMAT),
-                                    ndate.strftime(
-                                            DEFAULT_SERVER_DATETIME_FORMAT),
-                                    virtual_room_id=vroom.id))
-                                vals.update({
-                                    'avail': min(cavail,
-                                                 vroom.total_rooms_count,
-                                                 record.avail),
-                                })
-
-                            vrooms_avail = hotel_vroom_avail_obj.search(
-                                domain+[('virtual_room_id', '=', vroom.id)]
-                            )
-                            if any(vrooms_avail):
-                                # Mail module want a singleton
-                                for vr_avail in vrooms_avail:
-                                    vr_avail.write(vals)
-                            else:
-                                vals.update({
-                                    'date': ndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT),
-                                    'virtual_room_id': vroom.id
-                                })
-                                hotel_vroom_avail_obj.with_context({
-                                    'mail_create_nosubscribe': True,
-                                }).create(vals)
+                    self._save_availability(ndate, vrooms, record)
                 elif record.section == '1':
-                    domain = [
-                        ('date_start', '>=', ndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT)),
-                        ('date_end', '<=', ndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT)),
-                        ('restriction_id', '=', record.restriction_id.id),
-                        ('applied_on', '=', '0_virtual_room'),
-                    ]
-
-                    vals = {}
-                    if record.change_min_stay:
-                        vals.update({'min_stay': record.min_stay})
-                    if record.change_min_stay_arrival:
-                        vals.update({
-                            'min_stay_arrival': record.min_stay_arrival})
-                    if record.change_max_stay:
-                        vals.update({'max_stay': record.max_stay})
-                    if record.change_closed:
-                        vals.update({'closed': record.closed})
-                    if record.change_closed_departure:
-                        vals.update({
-                            'closed_departure': record.closed_departure})
-                    if record.change_closed_arrival:
-                        vals.update({'closed_arrival': record.closed_arrival})
-
-                    if any(vals):
-                        for vroom_id in vrooms.ids:
-                            rrest_item_ids = hotel_vroom_re_it_obj.search(
-                                domain+[('virtual_room_id', '=', vroom_id)])
-                            if rrest_item_ids:
-                                rrest_item_ids.write(vals)
-                            else:
-                                vals.update({
-                                    'date_start': ndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT),
-                                    'date_end': ndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT),
-                                    'restriction_id': record.restriction_id.id,
-                                    'virtual_room_id': vroom_id,
-                                    'applied_on': '0_virtual_room',
-                                })
-                                hotel_vroom_re_it_obj.create(vals)
+                    self._save_restrictions(ndate, vrooms, record)
                 elif record.section == '2':
-                    price = 0.0
-                    operation = 'a'
-                    if record.price[0] == '+' or record.price[0] == '-':
-                        if record.price[-1] == '%':
-                            price = float(record.price[1:-1])
-                            operation = (ecord.price[0] == '+') and 'ap' or 'sp'
-                        else:
-                            price = float(record.price[1:])
-                            operation = (ecord.price[0] == '+') and 'a' or 's'
-                    else:
-                        if record.price[-1] == '%':
-                            price = float(record.price[:-1])
-                            operation = 'np'
-                        else:
-                            price = float(record.price)
-                            operation = 'n'
-
-                    domain = [
-                        ('pricelist_id', '=', record.pricelist_id.id),
-                        ('date_start', '>=', ndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT)),
-                        ('date_end', '<=', ndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT)),
-                        ('compute_price', '=', 'fixed'),
-                        ('applied_on', '=', '1_product'),
-                    ]
-
-                    product_tmpl_ids = vrooms.mapped(
-                                                'product_id.product_tmpl_id')
-                    for vroom_id in vrooms:
-                        prod_tmpl_id = vroom_id.product_id.product_tmpl_id
-                        pricelist_item_ids = product_pricelist_item_obj.search(
-                            domain+[('product_tmpl_id', '=', prod_tmpl_id.id)])
-                        if any(pricelist_item_ids):
-                            if operation != 'n':
-                                for pli in pricelist_item_ids:
-                                    pli_price = pli.fixed_price
-                                    if operation == 'a':
-                                        pli.write({
-                                            'fixed_price': pli_price + price})
-                                    elif operation == 'ap':
-                                        pli.write({'fixed_price': pli_price + price * pli_price * 0.01})
-                                    elif operation == 's':
-                                        pli.write({
-                                            'fixed_price': pli_price - price})
-                                    elif operation == 'sp':
-                                        pli.write({'fixed_price': pli_price - price * pli_price * 0.01})
-                                    elif operation == 'np':
-                                        pli.write({'fixed_price': price * pli_price * 0.01})
-                            else:
-                                pricelist_item_ids.write({'fixed_price': price})
-                        else:
-                            product_pricelist_item_obj.create({
-                                'pricelist_id': record.pricelist_id.id,
-                                'date_start': ndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT),
-                                'date_end': ndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT),
-                                'compute_price': 'fixed',
-                                'applied_on': '1_product',
-                                'product_tmpl_id': prod_tmpl_id.id,
-                                'fixed_price': price,
-                            })
+                    self._save_prices(ndate, vrooms, record)
         return True
