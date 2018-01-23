@@ -26,7 +26,12 @@ from openerp.exceptions import ValidationError
 class VirtualRoomAvailability(models.Model):
     _inherit = 'hotel.virtual.room.availability'
 
-    wmax_avail = fields.Integer("Max. Wubook Avail", default=-1)
+    @api.model
+    def _default_wmax_avail(self):
+        return self.virtual_room_id.max_real_rooms
+
+    wmax_avail = fields.Integer("Max. Wubook Avail",
+                                default=_default_wmax_avail)
     wpushed = fields.Boolean("WuBook Pushed", readonly=True, default=False)
 
     @api.constrains('wmax_avail')
