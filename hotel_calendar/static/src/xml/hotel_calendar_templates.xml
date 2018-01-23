@@ -8,17 +8,29 @@
 			<div class="col-xl-6 col-lg-6">
 				<strong>Reserve unchanged:</strong>
 				<div class="well well-small">
-					<strong>Checkin:</strong> <t t-esc="ocheckin"/><br/>
-					<strong>Checkout:</strong> <t t-esc="ocheckout"/><br/>
-					<strong>Room:</strong> <t t-esc="oroom"/><br/>
+					<t t-if="ocheckin != ncheckin">
+						<strong>Checkin:</strong> <t t-esc="ocheckin"/><br/>
+					</t>
+					<t t-if="ocheckout != ncheckout">
+						<strong>Checkout:</strong> <t t-esc="ocheckout"/><br/>
+					</t>
+					<t t-if="oroom != nroom">
+						<strong>Room:</strong> <t t-esc="oroom"/><br/>
+					</t>
 				</div>
 			</div>
 			<div class="col-xl-6 col-lg-6">
 				<strong>Reserve changed:</strong>
 				<div class="well well-small">
-					<strong>Checkin:</strong> <t t-esc="ncheckin"/><br/>
-					<strong>Checkout:</strong> <t t-esc="ncheckout"/><br/>
-					<strong>Room:</strong> <t t-esc="nroom"/><br/>
+					<t t-if="ocheckin != ncheckin">
+						<strong>Checkin:</strong> <t t-esc="ncheckin"/><br/>
+					</t>
+					<t t-if="ocheckout != ncheckout">
+						<strong>Checkout:</strong> <t t-esc="ncheckout"/><br/>
+					</t>
+					<t t-if="oroom != nroom">
+						<strong>Room:</strong> <t t-esc="nroom"/><br/>
+					</t>
 				</div>
 			</div>
 		</div>

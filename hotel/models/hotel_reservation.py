@@ -487,7 +487,7 @@ class HotelReservation(models.Model):
         if record.state == 'draft' and record.folio_id.state == 'sale':
             record.state = 'confirm'
         record.reserve_color = record._compute_color()
-            
+
         # Update Availability (Removed because wubook-proto do it)
         # cavail = self.env['hotel.reservation'].get_availability(
         #     record.checkin,
@@ -741,17 +741,19 @@ class HotelReservation(models.Model):
         '''
         @param self: object pointer
         '''
+        hotel_folio_obj = self.env['hotel.folio']
+        hotel_reserv_obj = self.env['hotel.reservation']
         for r in self:
             r.write({'state': 'confirm', 'to_assign': False})
             if r.checkin_is_today():
                 r.is_checkin = True
-                folio = self.env['hotel.folio'].browse(self.folio_id.id)
+                folio = hotel_folio_obj.browse(r.folio_id.id)
                 folio.checkins_reservations = folio.room_lines.search_count([
                     ('folio_id', '=', folio.id), ('is_checkin', '=', True)])
 
             if r.splitted:
                 master_reservation = r.parent_reservation or r
-                splitted_reservs = self.env['hotel.reservation'].search([
+                splitted_reservs = hotel_reserv_obj.search([
                     ('splitted', '=', True),
                     '|', ('parent_reservation', '=', master_reservation.id),
                          ('id', '=', master_reservation.id),

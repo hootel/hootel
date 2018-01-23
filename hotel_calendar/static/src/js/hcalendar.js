@@ -61,7 +61,6 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
   this.isNRerservation = true;
   this.tableCreated = false;
   this.cellSelection = {start:false, end:false, current:false};
-  this.numRooms = this.options.rooms.length;
   /** Constants **/
   this.ACTION = { NONE: -1, MOVE_ALL: 0, MOVE_LEFT: 1, MOVE_RIGHT: 2 };
 
@@ -502,7 +501,7 @@ HotelCalendar.prototype = {
     }
 
     var reservs = this.getReservationsByDay(day, true);
-    return Math.round(reservs.length/this.numRooms*100.0);
+    return Math.round(reservs.length/this.options.rooms.length*100.0);
   },
 
 
@@ -597,101 +596,107 @@ HotelCalendar.prototype = {
       cell.addEventListener('mouseenter', function(ev){
         var date_cell = HotelCalendar.toMoment($this.etable.querySelector(`#${this.dataset.hcalParentCell}`).dataset.hcalDate);
         if ($this._isLeftButtonPressed(ev)) {
-          var reserv = null;
-          var toRoom = undefined;
-          var needUpdate = false;
-          if (!$this.reservationAction.reservation) {
-            if ($this.cellSelection.start && $this.cellSelection.start.dataset.hcalParentRow === this.dataset.hcalParentRow) {
-              $this.cellSelection.current = this;
-            }
-            $this._updateCellSelection();
-          } else if ($this.reservationAction.action == $this.ACTION.MOVE_RIGHT) {
-            reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
-            if (reserv.fixDays) {
-              $this._reset_action_reservation();
-              return true;
-            }
-            if (!date_cell.isAfter(reserv.startDate.clone().startOf('day'))) {
-              date_cell = reserv.startDate.clone().startOf('day').add(1, 'd');
-            }
-            if (!$this.reservationAction.oldReservationObj) {
-              $this.reservationAction.oldReservationObj = _.clone(reserv);
-              $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
-              $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
-            }
-            reserv.endDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
-            $this.reservationAction.newReservationObj = reserv;
-            needUpdate = true;
-          } else if ($this.reservationAction.action == $this.ACTION.MOVE_LEFT) {
-            reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
-            if (reserv.fixDays) {
-              $this._reset_action_reservation();
-              return true;
-            }
-            var ndate = reserv.endDate.clone().endOf('day').subtract(1, 'd');
-            if (!date_cell.isBefore(ndate)) {
-              date_cell = ndate;
-            }
-            if (!$this.reservationAction.oldReservationObj) {
-              $this.reservationAction.oldReservationObj = _.clone(reserv);
-              $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
-              $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
-            }
-            reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
-            $this.reservationAction.newReservationObj = reserv;
-            needUpdate = true;
-          } else if ($this.reservationAction.action == $this.ACTION.MOVE_ALL) {
-            reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
-            if (!$this.reservationAction.oldReservationObj) {
-              $this.reservationAction.oldReservationObj = _.clone(reserv);
-              $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
-              $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
-            }
-            var parentRow = $this.$base.querySelector(`#${this.dataset.hcalParentRow}`);
-            var room = $this.getRoom(parentRow.dataset.hcalRoomObjId);
-            reserv.room = room;
-            var diff_date = $this.getDateDiffDays(reserv.startDate, reserv.endDate);
-            reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
-            var date_end = reserv.startDate.clone().add(diff_date, 'd');
-            reserv.endDate.set({'date': date_end.date(), 'month': date_end.month(), 'year': date_end.year()});
-            $this.reservationAction.newReservationObj = reserv;
-            toRoom = +this.dataset.hcalBedNum;
-            needUpdate = true;
-          }
-
-          if (needUpdate) {
-            var linkedReservations = $this.getLinkedReservations($this.reservationAction.newReservationObj);
-            linkedReservations.push(reserv);
-
-            for (var lr of linkedReservations) {
-              if (lr!==reserv) {
-                lr.startDate = reserv.startDate.clone();
-                lr.endDate = reserv.endDate.clone();
+          // workarround for not trigger reservation change
+          var a = $this.reservationAction.mousePos[0] - ev.x;
+          var b = $this.reservationAction.mousePos[1] - ev.y;
+          var dist = Math.sqrt(a*a + b*b);
+          if (dist > 0) {
+            var reserv = null;
+            var toRoom = undefined;
+            var needUpdate = false;
+            if (!$this.reservationAction.reservation) {
+              if ($this.cellSelection.start && $this.cellSelection.start.dataset.hcalParentRow === this.dataset.hcalParentRow) {
+                $this.cellSelection.current = this;
               }
+              $this._updateCellSelection();
+            } else if ($this.reservationAction.action == $this.ACTION.MOVE_RIGHT) {
+              reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
+              if (reserv.fixDays) {
+                $this._reset_action_reservation();
+                return true;
+              }
+              if (!date_cell.isAfter(reserv.startDate.clone().startOf('day'))) {
+                date_cell = reserv.startDate.clone().startOf('day').add(1, 'd');
+              }
+              if (!$this.reservationAction.oldReservationObj) {
+                $this.reservationAction.oldReservationObj = _.clone(reserv);
+                $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
+                $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
+              }
+              reserv.endDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
+              $this.reservationAction.newReservationObj = reserv;
+              needUpdate = true;
+            } else if ($this.reservationAction.action == $this.ACTION.MOVE_LEFT) {
+              reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
+              if (reserv.fixDays) {
+                $this._reset_action_reservation();
+                return true;
+              }
+              var ndate = reserv.endDate.clone().endOf('day').subtract(1, 'd');
+              if (!date_cell.isBefore(ndate)) {
+                date_cell = ndate;
+              }
+              if (!$this.reservationAction.oldReservationObj) {
+                $this.reservationAction.oldReservationObj = _.clone(reserv);
+                $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
+                $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
+              }
+              reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
+              $this.reservationAction.newReservationObj = reserv;
+              needUpdate = true;
+            } else if ($this.reservationAction.action == $this.ACTION.MOVE_ALL) {
+              reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
+              if (!$this.reservationAction.oldReservationObj) {
+                $this.reservationAction.oldReservationObj = _.clone(reserv);
+                $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
+                $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
+              }
+              var parentRow = $this.$base.querySelector(`#${this.dataset.hcalParentRow}`);
+              var room = $this.getRoom(parentRow.dataset.hcalRoomObjId);
+              reserv.room = room;
+              var diff_date = $this.getDateDiffDays(reserv.startDate, reserv.endDate);
+              reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
+              var date_end = reserv.startDate.clone().add(diff_date, 'd');
+              reserv.endDate.set({'date': date_end.date(), 'month': date_end.month(), 'year': date_end.year()});
+              $this.reservationAction.newReservationObj = reserv;
+              toRoom = +this.dataset.hcalBedNum;
+              needUpdate = true;
+            }
 
-              var reservationDiv = $this.getReservationDiv(lr);
-              if (reservationDiv) {
-                if (lr.unusedZone) {
-                  reservationDiv.style.visibility = 'hidden';
-                  continue;
-                }
-                var limits = $this.getReservationCellLimits(
-                  lr,
-                  lr===reserv?toRoom:undefined,
-                  !$this.options.assistedMovement);
-                $this._updateDivReservation(reservationDiv, limits);
+            if (needUpdate) {
+              var linkedReservations = $this.getLinkedReservations($this.reservationAction.newReservationObj);
+              linkedReservations.push(reserv);
 
-                if (!$this.checkReservationPlace(lr) || !limits) {
-                  reservationDiv.classList.add('hcal-reservation-invalid');
-                } else {
-                  reservationDiv.classList.remove('hcal-reservation-invalid');
+              for (var lr of linkedReservations) {
+                if (lr!==reserv) {
+                  lr.startDate = reserv.startDate.clone();
+                  lr.endDate = reserv.endDate.clone();
                 }
 
-                if (lr.fixRooms && $this.reservationAction.oldReservationObj.room.id != lr.room.id) {
-                  reservationDiv.classList.add('hcal-reservation-invalid');
-                }
-                if (lr.fixDays && !$this.reservationAction.oldReservationObj.startDate.isSame(lr.startDate, 'day')) {
-                  reservationDiv.classList.add('hcal-reservation-invalid');
+                var reservationDiv = $this.getReservationDiv(lr);
+                if (reservationDiv) {
+                  if (lr.unusedZone) {
+                    reservationDiv.style.visibility = 'hidden';
+                    continue;
+                  }
+                  var limits = $this.getReservationCellLimits(
+                    lr,
+                    lr===reserv?toRoom:undefined,
+                    !$this.options.assistedMovement);
+                  $this._updateDivReservation(reservationDiv, limits);
+
+                  if (!$this.checkReservationPlace(lr) || !limits) {
+                    reservationDiv.classList.add('hcal-reservation-invalid');
+                  } else {
+                    reservationDiv.classList.remove('hcal-reservation-invalid');
+                  }
+
+                  if (lr.fixRooms && $this.reservationAction.oldReservationObj.room.id != lr.room.id) {
+                    reservationDiv.classList.add('hcal-reservation-invalid');
+                  }
+                  if (lr.fixDays && !$this.reservationAction.oldReservationObj.startDate.isSame(lr.startDate, 'day')) {
+                    reservationDiv.classList.add('hcal-reservation-invalid');
+                  }
                 }
               }
             }
@@ -1272,7 +1277,8 @@ HotelCalendar.prototype = {
         if (!$this.reservationAction.reservation && $this._isLeftButtonPressed(ev)) {
           $this.reservationAction = {
             action: $this._getRerservationPositionAction(this, ev.layerX, ev.layerY),
-            reservation: this
+            reservation: this,
+            mousePos: [ev.x, ev.y]
           };
 
           var reserv = $this.getReservation(this.dataset.hcalReservationObjId);

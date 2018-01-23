@@ -174,6 +174,8 @@ var HotelCalendarView = View.extend({
                 return (item.getUserData('folio_id') === folio_id);
             });
 
+            var hasChanged = false;
+
             var qdict = {
                 ncheckin: newReservation.startDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
                 ncheckout: newReservation.endDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
@@ -183,7 +185,7 @@ var HotelCalendarView = View.extend({
                 oroom: oldReservation.room.number,
                 hasReservesLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
             };
-            new Dialog(self, {
+            var dialog = new Dialog(self, {
                 title: _t("Confirm Reservation Changes"),
                 buttons: [
                     {
@@ -202,18 +204,21 @@ var HotelCalendarView = View.extend({
                             });
                             // Workarround for dispatch room lines regeneration
                             new Model('hotel.reservation').call('on_change_checkin_checkout_product_id', [[newReservation.id], false]);
+                            hasChanged = true;
                         }
                     },
                     {
                         text: _t("No"),
                         close: true,
-                        click: function() {
-                            self._hcalendar.swapReservation(newReservation, oldReservation);
-                        }
                     }
                 ],
                 $content: QWeb.render('HotelCalendar.ConfirmReservationChanges', qdict)
             }).open();
+            dialog.$modal.on('hide.bs.modal', function(e){
+              if (!hasChanged) {
+                self._hcalendar.swapReservation(newReservation, oldReservation);
+              }
+            });
         });
         this._hcalendar.addEventListener('hcalOnUpdateSelection', function(ev){
         	for (var td of ev.detail.old_cells) {
