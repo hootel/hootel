@@ -440,16 +440,19 @@ HotelCalendar.prototype = {
     return _.find(this.options.rooms, function(item){ return item.id == id; });
   },
 
-  getRoomPrice: function(/*String*/id, /*String,MomentObject*/day) {
+  getRoomPrice: function(/*String,HRoom*/id, /*String,MomentObject*/day) {
     var day = HotelCalendar.toMomentUTC(day);
     if (!day) {
       return 0.0;
     }
 
-    var room = this.getRoom(id);
+    var room = id;
+    if (!(room instanceof HRoom)) {
+      room = this.getRoom(id);
+    }
     if (room.price[0] == 'fixed') {
       return room.price[1];
-    } else if (room.price[0] == 'pricelist'){
+    } else if (room.price[0] == 'pricelist') {
       var price_input = this.edtable.querySelector('#'+this._sanitizeId(`CELL_PRICE_${room.price[2]}_${room.price[1]}_${day.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
       return parseFloat(price_input.textContent.replace(",", "."));
     }
@@ -1540,11 +1543,30 @@ HotelCalendar.prototype = {
           if (!this.options.allowInvalidActions && (reservDiv.classList.contains('hcal-reservation-invalid') || hasInvalidLink)) {
             this.swapReservation(this.reservationAction.newReservationObj, this.reservationAction.oldReservationObj);
           } else {
+            var oldReservation = this.reservationAction.oldReservationObj;
+            var newReservation = this.reservationAction.newReservationObj;
+            // Calc Old Reservation Price
+            var oldDiff = this.getDateDiffDays(oldReservation.startDate, oldReservation.endDate);
+            var oldPrice = 0.0
+            for (var e=0; e<oldDiff; e++) {
+              var ndate = oldReservation.startDate.clone().add(e, 'd');
+              oldPrice += this.getRoomPrice(oldReservation.room, ndate);
+            }
+            // Calc New Reservation Price
+            var newDiff = this.getDateDiffDays(newReservation.startDate, newReservation.endDate);
+            var newPrice = 0.0
+            for (var e=0; e<newDiff; e++) {
+              var ndate = newReservation.startDate.clone().add(e, 'd');
+              newPrice += this.getRoomPrice(newReservation.room, ndate);
+            }
+
             this.e.dispatchEvent(new CustomEvent(
               'hcalOnChangeReservation',
               { 'detail': {
-                  'oldReserv':this.reservationAction.oldReservationObj,
-                  'newReserv':this.reservationAction.newReservationObj
+                  'oldReserv': oldReservation,
+                  'newReserv': newReservation,
+                  'oldPrice': oldPrice,
+                  'newPrice': newPrice
                 }
               }));
             this._updateReservationOccupation();
