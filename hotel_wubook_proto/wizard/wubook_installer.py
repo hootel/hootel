@@ -35,7 +35,7 @@ class WuBookInstaller(models.TransientModel):
     wubook_passwd = fields.Char('Password', required=True)
     wubook_lcode = fields.Char('LCode', required=True)
     wubook_server = fields.Char(string='Server',
-                                default='https://wubook.net/xrws/',
+                                default='https://wired.wubook.net/xrws/',
                                 required=True)
     wubook_pkey = fields.Char('PKey', required=True)
     activate_push = fields.Boolean('Active Push Notifications', default=True)
@@ -74,11 +74,12 @@ class WuBookInstaller(models.TransientModel):
         if not wres:
             raise ValidationError("Can't finish installation!")
 
+        v_id = 'hotel_wubook_proto.view_wubook_configuration_installer_parity'
         return {
             'name': _("Configure Hotel Parity"),
             'type': 'ir.actions.act_window',
             'res_model': 'wubook.installer.parity',
-            'view_id': self.env.ref('hotel_wubook_proto.view_wubook_configuration_installer_parity').id,
+            'view_id': self.env.ref(v_id).id,
             'view_type': 'form',
             'view_mode': 'form',
             'target': 'new'

@@ -37,7 +37,7 @@ class WubookConfiguration(models.TransientModel):
     wubook_passwd = fields.Char('WuBook Password')
     wubook_lcode = fields.Char('WuBook lcode')
     wubook_server = fields.Char('WuBook Server',
-                                default='https://wubook.net/xrws/')
+                                default='https://wired.wubook.net/xrws/')
     wubook_pkey = fields.Char('WuBook PKey')
     wubook_push_security_token = fields.Char('WuBook Push Notification \
                                                             Security Token')
