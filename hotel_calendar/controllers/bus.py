@@ -25,12 +25,13 @@ from openerp.http import request
 HOTEL_BUS_CHANNEL_ID = 'hpublic'
 
 
+# More info...
+# https://github.com/odoo/odoo/commit/092cf33f93830daf5e704b964724bdf8586da8d9
 class Controller(BusController):
     def _poll(self, dbname, channels, last, options):
         if request.session.uid:
             # registry, cr, uid, context = request.registry, request.cr, \
             #                              request.session.uid, request.context
-            # See https://github.com/odoo/odoo/commit/092cf33f93830daf5e704b964724bdf8586da8d9
             channels = channels + [(
                 request.db,
                 'hotel.reservation',

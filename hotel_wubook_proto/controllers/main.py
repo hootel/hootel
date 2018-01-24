@@ -62,8 +62,8 @@ class website_wubook(http.Controller):
         # Create Reservation
         request.env['wubook'].sudo().fetch_booking(lcode, rcode)
 
-        return request.make_response(
-                                    '200 OK', [('Content-Type', 'text/plain')])
+        return request.make_response('200 OK',
+                                     [('Content-Type', 'text/plain')])
 
     # Called when modify room values (Delay: ~5mins)
     @http.route(['/wubook/push/rooms/<string:security_token>'], type='http',
@@ -108,5 +108,5 @@ class website_wubook(http.Controller):
                     wubook_obj.fetch_plan_prices(pricelist_id.wpid, dfrom, dto)
             wubook_obj.close_connection()
 
-        return request.make_response(
-                                    '200 OK', [('Content-Type', 'text/plain')])
+        return request.make_response('200 OK',
+                                     [('Content-Type', 'text/plain')])
