@@ -129,27 +129,23 @@ class HotelServiceLine(models.Model):
 
     @api.onchange('product_id')
     def product_id_change_hotel(self):
-        #~ '''
-        #~ @param self: object pointer
-        #~ '''
-        if self.product_id and self.folio_id.partner_id:
+        '''
+            @param self: object pointer
+        '''
+        if self.product_id:
+            if not (self.folio_id and self.folio_id.partner_id) and \
+                    self.ser_room_line:
+                self.folio_id = self.ser_room_line.folio_id
+
             self.name = self.product_id.name
             self.price_unit = self.product_id.lst_price
             self.product_uom = self.product_id.uom_id
             self.price_unit = self.product_id.price
-            #~ prod = self.product_id	
-            #~ self.price_unit = tax_obj._fix_tax_included_price(prod.price,
-                                                              #~ prod.taxes_id,
-                                                              #~ self.tax_id)
-        elif self.product_id and self.ser_room_line:
-            self.folio_id = self.ser_room_line.folio_id
-            self.name = self.product_id.name
-            self.price_unit = self.product_id.lst_price
-            self.product_uom = self.product_id.uom_id
-            self.price_unit = self.product_id.price
-            #~ self.price_unit = tax_obj._fix_tax_included_price(prod.price,
-                                                              #~ prod.taxes_id,
-                                                              #~ self.tax_id)
+
+            self.tax_id = [(6, False, self.product_id.taxes_id.ids)]
+                #~ self.price_unit = tax_obj._fix_tax_included_price(prod.price,
+                                                                  #~ prod.taxes_id,
+                                                                  #~ self.tax_id)
 
     #     ~ _logger.info(self._context)
     #     ~ if 'folio_id' in self._context:
@@ -246,5 +242,6 @@ class HotelServiceLine(models.Model):
 
     @api.multi
     def unlink(self):
-        self.service_line_id.unlink()
+        for record in self:
+            record.service_line_id.unlink()
         return super(HotelServiceLine, self).unlink()

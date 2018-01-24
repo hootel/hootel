@@ -438,6 +438,12 @@ class HotelReservation(models.Model):
             return {'type': 'ir.actions.act_window_close'}
         return True
 
+    '''
+          Created this because "copy()" function create a new record
+        and collide with date restrictions.
+        This function generate a usable dictionary with reservation values
+        for copy purposes.
+    '''
     @api.multi
     def generate_copy_values(self, checkin=False, checkout=False):
         self.ensure_one()
