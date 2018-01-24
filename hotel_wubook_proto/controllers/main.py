@@ -36,8 +36,8 @@ class website_wubook(http.Controller):
         hotel_security_token = request.env['ir.values'].sudo().get_default(
                         'wubook.config.settings', 'wubook_push_security_token')
         if security_token != hotel_security_token:
-            _logger.info("Invalid Tokens: '%s' != '%s'" %
-                         (security_token, hotel_security_token))
+            # _logger.info("Invalid Tokens: '%s' != '%s'" %
+            #              (security_token, hotel_security_token))
             raise ValidationError('Invalid Security Token!')
 
         rcode = kwargs.get('rcode')
@@ -74,8 +74,8 @@ class website_wubook(http.Controller):
         hotel_security_token = request.env['ir.values'].sudo().get_default(
                         'wubook.config.settings', 'wubook_push_security_token')
         if security_token != hotel_security_token:
-            _logger.info("Invalid Tokens: '%s' != '%s'" %
-                         (security_token, hotel_security_token))
+            # _logger.info("Invalid Tokens: '%s' != '%s'" %
+            #              (security_token, hotel_security_token))
             raise ValidationError('Invalid Security Token!')
 
         lcode = kwargs.get('lcode')
