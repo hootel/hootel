@@ -24,10 +24,64 @@ from openerp import models, fields, api
 from openerp.exceptions import UserError
 from openerp.tools.translate import _
 import logging
+from datetime import datetime, timedelta
 _logger=logging.getLogger(__name__)
 
 class Wizard(models.TransientModel):
     _inherit = 'checkin.wizard'
+
+    # Birthdate validation
+    @api.onchange('birthdate_date_cardex')
+    def validation_under_age(self):
+        if self.birthdate_date_cardex <> False:
+            years = str(datetime.now().date() - timedelta(days=365*16+4))
+            limit_date = datetime.strptime(years, "%Y-%m-%d")
+            birth_date = datetime.strptime(self.birthdate_date_cardex, '%Y-%m-%d')
+            limite = str(limit_date.day)+ ' de ' +  str(limit_date.month)+ ' de ' + str(limit_date.year)
+            if limit_date < birth_date:
+                return {'warning': {'title': _('Error in Birthdate'), 'message': _('Does the client have less than 16 years?. Data collection is not performed for those born before %s.' % (limite)),},}
+            if self.polexpedition_cardex <> False:
+                if self.birthdate_date_cardex > self.polexpedition_cardex:
+                    return {'warning': {'title': _('Error in Birthdate or Expedition date'), 'message': _('Date of document shipment, prior to birth date'),},}
+
+    # Expedition validation
+    @api.onchange('polexpedition_cardex')
+    def validation_polexpedition(self):
+        if self.birthdate_date_cardex <> False and self.polexpedition_cardex <> False:
+            if self.birthdate_date_cardex > self.polexpedition_cardex:
+                return {'warning': {'title': _('Error in Birthdate or Expedition date'), 'message': _('Date of document shipment, prior to birth date'),},}
+
+    # Validation for DNI/Permiso conducir erroneo
+    @api.onchange('poldocument_cardex')
+    def validation_poldocument_dni(self):
+        if self.poldocument_cardex <> False:
+            if self.documenttype_cardex in ['D','C','I']:
+                validcaracter = "TRWAGMYFPDXBNJZSQVHLCKE"
+                dig_ext = "XYZ"
+                reemp_dig_ext = {'X':'0', 'Y':'1', 'Z':'2'}
+                numeros = "1234567890"
+                dni = self.poldocument_cardex.upper()
+                if len(dni) == 9:
+                    dig_control = dni[8]
+                    dni = dni[:8]
+                    # 'extranjero empieza por XYZ'
+                    if dni[0] in dig_ext:
+                        dni = dni.replace(dni[0], reemp_dig_ext[dni[0]])
+                    if not ((len(dni) == len([n for n in dni if n in numeros])) and (validcaracter[int(dni)%23] == dig_control)):
+                        return {'warning': {'title': _('Error in DNI/NIE'), 'message': _('Wrong DNI, check it.'),},}
+                else:
+                    return {'warning': {'title': _('Error in DNI/NIE'), 'message': _('DNI / NIE erroneous length, the correct format is: (12345678A or X1234567A)'),},}
+
+
+
+
+    # Validation for Tipo de documento no valido para Extranjero
+    # @api.onchange('x')
+    # Pendiente
+
+    # Validation for Nacionalidad erronea
+    # @api.onchange('x')
+    # Pendiente
 
     documenttype_cardex = fields.Selection([
         ('D', 'DNI'),
@@ -112,3 +166,8 @@ class Wizard(models.TransientModel):
         del action_report['report_type']
         return action_report
         #return {'type': 'ir.actions.act_window_close'}
+
+
+        # Debug Stop -------------------
+        #    import wdb; wdb.set_trace()
+        # Debug Stop -------------------
