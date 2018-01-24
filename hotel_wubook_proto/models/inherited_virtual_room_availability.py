@@ -28,7 +28,9 @@ class VirtualRoomAvailability(models.Model):
 
     @api.model
     def _default_wmax_avail(self):
-        return self.virtual_room_id.max_real_rooms
+        if self.virtual_room_id:
+            return self.virtual_room_id.max_real_rooms
+        return -1
 
     wmax_avail = fields.Integer("Max. Wubook Avail",
                                 default=_default_wmax_avail)
@@ -40,6 +42,11 @@ class VirtualRoomAvailability(models.Model):
             raise ValidationError("max avail for wubook can't be high \
                 than toal rooms \
                     count: %d" % self.virtual_room_id.total_rooms_count)
+
+    @api.onchange('virtual_room_id')
+    def onchange_virtual_room_id(self):
+        if self.virtual_room_id:
+            self.wmax_avail = self.virtual_room_id.max_real_rooms
 
     @api.multi
     def write(self, vals):
