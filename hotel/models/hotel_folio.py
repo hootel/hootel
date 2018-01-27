@@ -162,6 +162,7 @@ class HotelFolio(models.Model):
 
     @api.model
     def daily_plan(self):
+        _logger.info('daily_plan')
         self._cr.execute("update hotel_folio set checkins_reservations = 0, \
             checkouts_reservations = 0 where checkins_reservations > 0  \
             or checkouts_reservations > 0")
@@ -187,7 +188,25 @@ class HotelFolio(models.Model):
     @api.depends('amount_total', 'room_lines', 'service_lines')
     @api.multi
     def compute_invoices_amount(self):
+        _logger.info('compute_invoices_amount')
         acc_pay_obj = self.env['account.payment']
+        for record in self:
+            amount_pending = 0
+            total_paid = 0
+            total_inv_refund = 0
+            payments = acc_pay_obj.search([
+                '|',
+                ('invoice_ids', 'in', record.invoice_ids.ids),
+                ('folio_id', '=', record.id)
+            ])
+            total_paid = sum(pay.amount for pay in payments)
+            record.invoices_amount = record.amount_total - total_paid
+            record.invoices_paid = total_paid
+            for inv in record.invoice_ids:
+                if inv.type == 'out_refund':
+                    total_inv_refund += inv.amount_total
+            record.refund_amount = total_inv_refund
+
         for record in self:
             amount_pending = 0
             total_paid = 0
@@ -294,6 +313,7 @@ class HotelFolio(models.Model):
 
     @api.multi
     def _compute_cardex_count(self):
+        _logger.info('_compute_cardex_amount')
         for fol in self:
             num_cardex = 0
             pending = False
@@ -350,6 +370,7 @@ class HotelFolio(models.Model):
         @param vals: dictionary of fields value.
         @return: new record set for hotel folio.
         """
+        _logger.info('create')
         if not 'service_lines' and 'folio_id' in vals:
             tmp_room_lines = vals.get('room_lines', [])
             vals['order_policy'] = vals.get('hotel_policy', 'manual')
@@ -365,6 +386,7 @@ class HotelFolio(models.Model):
             folio_id = super(HotelFolio, self).create(vals)
 
         return folio_id
+    
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
@@ -374,6 +396,7 @@ class HotelFolio(models.Model):
         ---------------------------------------------------------------
         @param self: object pointer
         '''
+        _logger.info('onchange_partner_id')
         if self.partner_id:
             partner_rec = self.env['res.partner'].browse(self.partner_id.id)
             order_ids = [folio.order_id.id for folio in self]
@@ -504,8 +527,10 @@ class HotelFolio(models.Model):
 
     @api.multi
     def action_confirm(self):
+        _logger.info('action_confirm')
         auto_done = self.env['ir.values'].get_default('sale.config.settings',
                                                       'auto_done_setting')
+    
         for sale in self:
             for order in sale.order_id:
                 order.state = 'sale'

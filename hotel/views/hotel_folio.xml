@@ -112,12 +112,12 @@
                             </div>
                         </div>
                         <group colspan="4" col="4">
-                            <field name="partner_invoice_id" domain="[('parent_id','=',partner_id)]" />
-                            <field name="pricelist_id" domain="[('type','=','sale')]" />
+                            <field name="partner_invoice_id" domain="[('parent_id','=',partner_id)]" invisible="1"/>
+                            <field name="pricelist_id" domain="[('type','=','sale')]" invisible="1"/>
                             <field name="project_id" invisible="1"/>
                             <field name="partner_shipping_id" invisible="1" domain="[('parent_id','=',partner_id)]" />
                             <field name="date_order" />
-                            <field name="reservation_type" />
+                            <field name="reservation_type" attrs="{'readonly':[('state','not in',('draft'))]}"/>
                             <field name="warehouse_id" string="Branch" invisible="1"/>
                             <field name="invoice_status" invisible="1" />
                             <field name="hotel_invoice_id" states='progress,done,cancel'
@@ -177,7 +177,7 @@
                                 </group>
                                 <div class="oe_clear" />
                             </page>
-                            <page string="Other data">
+                            <page string="Other data" invisible="1">
                                 <group>
                                     <field name="user_id" />
                                     <field name="hotel_policy" attrs="{'readonly':[('state','not in',('draft'))]}" />
@@ -188,7 +188,7 @@
                                 <separator string="Related invoices" colspan="4" />
                                 <field name="invoice_ids" colspan="4" nolabel="1" />
                             </page>
-                            <page string="Foreign Exchange" name="foreign exchange">
+                            <page string="Foreign Exchange" name="foreign exchange" invisible="1">
                                 <separator string="Foreign Exchange" colspan="4" />
                                 <field name="currrency_ids" colspan="4" nolabel="1">
                                     <tree>

@@ -51,6 +51,7 @@
         'views/report_viajero.xml',
         'views/inherit_cardex.xml',
         'security/ir.model.access.csv',
+        'views/inherit_res_partner.xml',
     ],
     'test': [
     ],

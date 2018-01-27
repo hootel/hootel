@@ -17,24 +17,24 @@
                                     options="{'create': False, 'create_edit': False}"
                                     context="{'partner_id':order_partner_id,'quantity':product_uom_qty,'pricelist':parent.pricelist_id,'uom':product_uom}" />
                                 <field name="ser_room_line" options="{'create': False, 'create_edit': False}"/>
-                                <field name="product_uom" options="{'create': False, 'create_edit': False}"/>
+                                <field name="product_uom" options="{'create': False, 'create_edit': False}" invisible="1"/>
                                 <field name="product_uom_qty" select="1"
                                     context="{'partner_id':order_partner_id,'quantity':product_uom_qty,'pricelist':parent.pricelist_id,'uom':product_uom}"
-                                    />
+                                    invisible="1"/>
                                 <field name="order_partner_id" invisible="1"/>
                                 <field name="folio_id" invisible="1"/>
-                                                            <field name="tax_id" colspan="4" />
+                                                            <field name="tax_id" colspan="4" invisible="1"/>
 
                             </group>
-                            <separator string="Manual Description" colspan="4" />
+                            <separator string="Manual Description" colspan="4" invisible="1"/>
                             <field name="name" colspan="4" select="2"
-                                placeholder="---Description---" />
+                                placeholder="---Description---" invisible="1"/>
                             <group>
                                 <field name="price_unit" select="2" />
                                 <field name="discount" />
                             </group>
                             <newline />
-                            <group>
+                            <group invisible="1">
                                 <separator string="States" colspan="4" />
                                 <field name="state" select="2" />
                                 <field name="invoice_status" />

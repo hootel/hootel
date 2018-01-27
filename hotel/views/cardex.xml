@@ -53,7 +53,9 @@
                         <field name="enter_date"/>
                         <field name="exit_date"/>
                         <field name="reservation_id"/>
+<!--
                         <button type="action" class="oe_stat_button" id="cardex_smart_button" icon="fa-bed" />
+-->
                     </tree>
 
                 </field>

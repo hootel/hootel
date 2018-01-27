@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="view_partner_form" model="ir.ui.view">
+            <field name="name"> hotel.view.partner.form </field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="partner_contact_personal_information_page.personal_information" />
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='personal_information_page']" position='inside'>
+                    <group colspan="4">
+                        <group>
+                            <field name="documenttype"/>
+                            <field name="poldocument"/> 
+                            <field name="polexpedition"/>
+                        </group>
+                        <group> 
+                            <field name="code_ine"/> 
+                            <field name="poldocument"/>                         
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</openerp>

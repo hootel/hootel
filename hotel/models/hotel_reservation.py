@@ -43,6 +43,7 @@ class HotelReservation(models.Model):
 
     @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
     def _compute_color(self):
+        _logger.info('_compute_color')
         now_str = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         for rec in self:
             now_date = datetime.strptime(now_str,
@@ -95,8 +96,20 @@ class HotelReservation(models.Model):
                     rec.reserve_color = self.env['ir.values'].get_default(
                         'hotel.config.settings', 'color_payment_pending')
             rec.write({})   # To dispatch the calendar bus notification
+            if rec.splitted:
+                hotel_reserv_obj = self.env['hotel.reservation']
+                master_reservation = rec.parent_reservation or rec
+                splitted_reservs = hotel_reserv_obj.search([
+                    ('splitted', '=', True),
+                    '|', ('parent_reservation', '=', master_reservation.id),
+                         ('id', '=', master_reservation.id),
+                    ('folio_id', '=', rec.folio_id.id),
+                    ('id', '!=', rec.id),
+                    ('state', '!=', 'confirm')
+                ])
+                splitted_reservs.write({'reserve_color':rec.reserve_color})
             rec.folio_id.color = rec.reserve_color
-            return rec.reserve_color
+        return rec.reserve_color
 
     @api.multi
     def copy(self, default=None):
@@ -235,7 +248,9 @@ class HotelReservation(models.Model):
                                         'reservation_id',
                                         readonly=True,
                                         states={'draft': [('readonly', False)],
-                                                'sent': [('readonly', False)]})
+                                                'sent': [('readonly', False)],
+                                                'confirm': [('readonly', False)], #TODO: Caution When change delegation relation between hotel.reservation and sale.order.line
+                                                'booking': [('readonly', False)]})
     reserve_color = fields.Char(compute='_compute_color', string='Color',
                                 store=True)
     service_line_ids = fields.One2many('hotel.service.line', 'ser_room_line')
@@ -255,9 +270,19 @@ class HotelReservation(models.Model):
     splitted = fields.Boolean('Splitted', default=False)
     parent_reservation = fields.Many2one('hotel.reservation',
                                          'Parent Reservation')
+    amount_reservation = fields.Float('Total',compute='_computed_amount_reservation') #To show de total amount line in read_only mode
+    
+    @api.onchange('reservation_lines')
+    def _computed_amount_reservation(self):
+        _logger.info('_computed_amount_reservation')
+        amount_reservation = 0
+        for line in self.reservation_lines:
+            amount_reservation += line.price
+        self.amount_reservation = amount_reservation
 
     @api.multi
     def _compute_cardex_count(self):
+        _logger.info('_compute_cardex_count')
         for res in self:
             res.cardex_count = len(res.cardex_ids)
             res.cardex_pending_num = (res.adults + res.children) \
@@ -269,6 +294,7 @@ class HotelReservation(models.Model):
 
     @api.model
     def daily_plan(self):
+        _logger.info('daily_plan')
         today_utc_dt = date_utils.now()
         yesterday_utc_dt = today_utc_dt - timedelta(days=1)
         hotel_tz = self.env['ir.values'].get_default('hotel.config.settings',
@@ -517,7 +543,6 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         res = super(HotelReservation, self).write(vals)
-
         if 'checkin' in vals or 'checkout' in vals:
             checkin = vals.get('checkin', self.checkin)
             checkout = vals.get('checkout', self.checkout)
@@ -555,8 +580,9 @@ class HotelReservation(models.Model):
                 self.children = 0
                 raise UserError('%s people do not fit in this room! ;)' % (persons))
 
-    @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type')
+    @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type', 'virtual_room_id')
     def on_change_checkin_checkout_product_id(self):
+        _logger.info('on_change_checkin_checkout_product_id')
         if not self.checkin:
             self.checkin = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         if not self.checkout:
@@ -593,7 +619,7 @@ class HotelReservation(models.Model):
                 folio.checkouts_reservations = folio.room_lines.search_count([
                     ('folio_id', '=', folio.id), ('is_checkout', '=', True)
                 ])
-
+		
         days_diff = date_utils.date_diff(
                                 self.checkin, self.checkout, hours=False) + 1
         rlines = self.prepare_reservation_lines(self.checkin, days_diff)
@@ -611,7 +637,7 @@ class HotelReservation(models.Model):
             ])
             if self.adults == 0:
                 self.adults = room.capacity
-            if room.price_virtual_room:
+            if not self.virtual_room_id and room.price_virtual_room:
                 self.virtual_room_id = room.price_virtual_room.id
 
     @api.model
@@ -656,8 +682,11 @@ class HotelReservation(models.Model):
     def prepare_reservation_lines(self, str_start_date_utc, days):
         self.ensure_one()
         total_price = 0.0
-        cmds = [(5, False, False)]
-
+        cmds = [(5, False, False)] 
+        #TO-DO: Redesign relation between hotel.reservation and sale.order.line to allow manage days by units in order
+        if self.invoice_status == 'invoiced' and not self.splitted:
+            raise ValidationError("This reservation is already invoiced. \
+                        To expand it you must create a new reservation.")			
         hotel_tz = self.env['ir.values'].sudo().get_default(
             'hotel.config.settings', 'hotel_tz')
         start_date_utc_dt = date_utils.get_datetime(str_start_date_utc)
@@ -666,8 +695,10 @@ class HotelReservation(models.Model):
         room = self.env['hotel.room'].search([
             ('product_id', '=', self.product_id.id)
         ])
-        product_id = room.sale_price_type == 'vroom' \
-            and room.price_virtual_room.product_id or self.product_id
+        product_id = self.virtual_room_id \
+            or room.sale_price_type == 'vroom' \
+            and room.price_virtual_room.product_id \
+            or self.product_id
         pricelist_id = self.env['ir.values'].sudo().get_default(
             'hotel.config.settings', 'parity_pricelist_id')
         if pricelist_id:
@@ -705,6 +736,7 @@ class HotelReservation(models.Model):
         -----------------------------------------------------------------
         @param self: object pointer
         '''
+        _logger.info('on_change_checkout')
         self.ensure_one()
         now_utc_dt = date_utils.now()
         if not self.checkin:
@@ -724,17 +756,18 @@ class HotelReservation(models.Model):
             ('isroom', '=', True),
             ('id', 'not in', rooms_occupied)
         ]
-        if self.room_type_id:
-            domain_rooms.append(
-                ('categ_id.id', '=', self.room_type_id.cat_id.id))
-        if self.virtual_room_id:
-            room_categories = self.virtual_room_id.room_type_ids.mapped(
-                'cat_id.id')
-            link_virtual_rooms = self.virtual_room_id.room_ids\
-                | self.env['hotel.room'].search([
-                    ('categ_id.id', 'in', room_categories)])
-            room_ids = link_virtual_rooms.mapped('product_id.id')
-            domain_rooms.append(('id', 'in', room_ids))
+        if self.check_rooms:
+			if self.room_type_id:
+				domain_rooms.append(
+					('categ_id.id', '=', self.room_type_id.cat_id.id))
+			if self.virtual_room_id:
+				room_categories = self.virtual_room_id.room_type_ids.mapped(
+					'cat_id.id')
+				link_virtual_rooms = self.virtual_room_id.room_ids\
+					| self.env['hotel.room'].search([
+						('categ_id.id', 'in', room_categories)])
+				room_ids = link_virtual_rooms.mapped('product_id.id')
+				domain_rooms.append(('id', 'in', room_ids))
         return {'domain': {'product_id': domain_rooms}}
 
     @api.multi
@@ -742,10 +775,14 @@ class HotelReservation(models.Model):
         '''
         @param self: object pointer
         '''
+        _logger.info('confirm')
         hotel_folio_obj = self.env['hotel.folio']
         hotel_reserv_obj = self.env['hotel.reservation']
         for r in self:
-            r.write({'state': 'confirm', 'to_assign': False})
+            if r.cardex_ids:
+                r.write({'state': 'booking', 'to_assign': False})
+            else:
+                r.write({'state': 'confirm', 'to_assign': False})
             if r.checkin_is_today():
                 r.is_checkin = True
                 folio = hotel_folio_obj.browse(r.folio_id.id)
