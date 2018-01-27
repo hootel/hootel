@@ -492,33 +492,33 @@ var HotelCalendarView = View.extend({
 
         var HotelFolioObj = new Model('hotel.folio');
 
-         //~ // Checkouts Button
-        //~ domain = [['checkouts_reservations', '>', 0]];
-        //~ HotelFolioObj.call('search_count', [domain]).then(function(count){
-            //~ var $ninfo = self.$el.find('#pms-menu #btn_action_checkout div.ninfo');
-            //~ var $badge_checkout = $ninfo.find('.badge');
-            //~ if (count > 0) {
-                //~ $badge_checkout.text(count);
-                //~ $badge_checkout.parent().show();
-                //~ $ninfo.show();
-            //~ } else {
-                //~ $ninfo.hide();
-            //~ }
-        //~ });
+         // Checkouts Button
+        domain = [['checkouts_reservations', '>', 0]];
+        HotelFolioObj.call('search_count', [domain]).then(function(count){
+            var $ninfo = self.$el.find('#pms-menu #btn_action_checkout div.ninfo');
+            var $badge_checkout = $ninfo.find('.badge');
+            if (count > 0) {
+                $badge_checkout.text(count);
+                $badge_checkout.parent().show();
+                $ninfo.show();
+            } else {
+                $ninfo.hide();
+            }
+        });
 
-        //~ // Checkins Button
-        //~ domain = [['checkins_reservations', '>', 0]];
-        //~ HotelFolioObj.call('search_count', [domain]).then(function(count){
-            //~ var $ninfo = self.$el.find('#pms-menu #btn_action_checkin div.ninfo');
-            //~ var $badge_checkin = $ninfo.find('.badge');
-            //~ if (count > 0) {
-                //~ $badge_checkin.text(count);
-                //~ $badge_checkin.parent().show();
-                //~ $ninfo.show();
-            //~ } else {
-                //~ $ninfo.hide();
-            //~ }
-        //~ });
+        // Checkins Button
+        domain = [['checkins_reservations', '>', 0]];
+        HotelFolioObj.call('search_count', [domain]).then(function(count){
+            var $ninfo = self.$el.find('#pms-menu #btn_action_checkin div.ninfo');
+            var $badge_checkin = $ninfo.find('.badge');
+            if (count > 0) {
+                $badge_checkin.text(count);
+                $badge_checkin.parent().show();
+                $ninfo.show();
+            } else {
+                $ninfo.hide();
+            }
+        });
 
         //~ // Charges Button
         //~ domain = [['invoices_amount','>',0 ],['room_lines.checkout','<=', moment().startOf('day').utc().format(ODOO_DATETIME_MOMENT_FORMAT)]];
