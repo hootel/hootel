@@ -18,7 +18,7 @@
                         <button name="action_reservation_checkout" string="Done" states="booking,cancelled" class="oe_highlight" type="object"/>
                         <button name="draft" string="Set to Draft" states="cancel" class="oe_highlight" type="object"/>
                         <button name="%(action_hotel_split_reservation)d" string="Split" type="action" class="oe_highlight" icon="fa-cut" state="draft,confirm"/>
-                        <button name="unify" string="Unify" type="object" class="oe_highlight" icon="fa-compress" states="draft" attrs="{'invisible':['|',['splitted', '=', False]]}" />
+                        <button name="unify" string="Unify" type="object" class="oe_highlight" icon="fa-compress" attrs="{'invisible':['|',['splitted', '=', False]]}" />
                         <!--button name="open_master" string="Open Master" type="object" class="oe_highlight" icon="fa-file" attrs="{'invisible':['|',['parent_reservation', '=', False]]}" /-->
                         <field name="state" widget="statusbar"/>
                     </header>
@@ -86,7 +86,7 @@
                                 </page>
                                 <page name="others" string="Others">
                                     <group colspan="4" col="4">
-                                        <field name="reservation_type" />                                        
+                                        <field name="reservation_type" />
                                         <field name="out_service_description" attrs="{'invisible':[('reservation_type','not in',('out'))]}"/>
                                     </group>
                                 </page>
