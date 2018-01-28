@@ -279,6 +279,7 @@ class HotelReservation(models.Model):
         for line in self.reservation_lines:
             amount_reservation += line.price
         self.amount_reservation = amount_reservation
+        self.price_unit = amount_reservation
 
     @api.multi
     def _compute_cardex_count(self):
