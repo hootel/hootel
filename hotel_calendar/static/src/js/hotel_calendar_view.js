@@ -772,8 +772,10 @@ var HotelCalendarView = View.extend({
 
     _on_bus_signal: function(notifications) {
         var need_reload_pricelists = false;
+        var need_update_counters = false;
         for (var notif of notifications) {
           if (notif[0][1] === 'hotel.reservation') {
+            console.log("BUS MESSAGE!!");
             switch (notif[1]['type']) {
               case 'reservation':
                 var reserv = notif[1]['reservation'];
@@ -822,7 +824,7 @@ var HotelCalendarView = View.extend({
                   }
                 }
 
-                this.update_buttons_counter();
+                need_update_counters = true;
                 break;
               case 'pricelist':
                 var price = notif[1]['price'];
@@ -832,6 +834,9 @@ var HotelCalendarView = View.extend({
                 // Do Nothing
             }
           }
+        }
+        if (need_update_counters) {
+          this.update_buttons_counter();
         }
     },
 

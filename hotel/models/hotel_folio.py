@@ -191,8 +191,6 @@ class HotelFolio(models.Model):
         _logger.info('compute_invoices_amount')
         acc_pay_obj = self.env['account.payment']
         for record in self:
-            amount_pending = 0
-            total_paid = 0
             total_inv_refund = 0
             payments = acc_pay_obj.search([
                 '|',
@@ -200,29 +198,15 @@ class HotelFolio(models.Model):
                 ('folio_id', '=', record.id)
             ])
             total_paid = sum(pay.amount for pay in payments)
-            record.invoices_amount = record.amount_total - total_paid
-            record.invoices_paid = total_paid
             for inv in record.invoice_ids:
                 if inv.type == 'out_refund':
                     total_inv_refund += inv.amount_total
-            record.refund_amount = total_inv_refund
-
-        for record in self:
-            amount_pending = 0
-            total_paid = 0
-            total_inv_refund = 0
-            payments = acc_pay_obj.search([
-                '|',
-                ('invoice_ids', 'in', record.invoice_ids.ids),
-                ('folio_id', '=', record.id)
-            ])
-            total_paid = sum(pay.amount for pay in payments)
-            record.invoices_amount = record.amount_total - total_paid
-            record.invoices_paid = total_paid
-            for inv in record.invoice_ids:
-                if inv.type == 'out_refund':
-                    total_inv_refund += inv.amount_total
-            record.refund_amount = total_inv_refund
+            vals = {
+                'invoices_amount': record.amount_total - total_paid,
+                'invoices_paid': total_paid,
+                'refund_amount': total_inv_refund,
+            }
+            record.update(vals)
 
     @api.multi
     def action_pay(self):
@@ -386,7 +370,7 @@ class HotelFolio(models.Model):
             folio_id = super(HotelFolio, self).create(vals)
 
         return folio_id
-    
+
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
@@ -530,7 +514,7 @@ class HotelFolio(models.Model):
         _logger.info('action_confirm')
         auto_done = self.env['ir.values'].get_default('sale.config.settings',
                                                       'auto_done_setting')
-    
+
         for sale in self:
             for order in sale.order_id:
                 order.state = 'sale'

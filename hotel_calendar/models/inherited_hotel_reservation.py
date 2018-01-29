@@ -288,48 +288,54 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         ret_vals = super(HotelReservation, self).write(vals)
-        rpartn_obj = self.env['res.partner']
-        prod_obj = self.env['product.product']
-        folio_obj = self.env['hotel.folio']
-        res_obj = self.env['hotel.reservation']
-        for record in self:
-            partner_id = vals.get('partner_id') and rpartn_obj.browse(
-                                vals.get('partner_id')) or record.partner_id
-            checkin = vals.get('checkin') or record.checkin
-            checkout = vals.get('checkout') or record.checkout
-            product_id = vals.get('product_id') and prod_obj.browse(
-                                vals.get('product_id')) or record.product_id
-            adults = vals.get('adults') or record.adults
-            children = vals.get('children') or record.children
-            folio_id = vals.get('folio_id') and folio_obj.browse(
-                                    vals.get('folio_id')) or record.folio_id
-            color = vals.get('reserve_color') or record.reserve_color
-            state = vals.get('state') or record.state
-            splitted = vals.get('splitted') or record.splitted
-            parent_reservation = vals.get('parent_reservation') and \
-                res_obj.browse(vals.get('parent_reservation')) \
-                or record.parent_reservation
+        if vals.get('partner_id') or vals.get('checkin') or \
+                vals.get('checkout') or vals.get('product_id') or \
+                vals.get('adults') or vals.get('children') or \
+                vals.get('reserve_color') or vals.get('state') or \
+                vals.get('splitted') or vals.get('product_id'):
+            rpartn_obj = self.env['res.partner']
+            prod_obj = self.env['product.product']
+            folio_obj = self.env['hotel.folio']
+            res_obj = self.env['hotel.reservation']
+            for record in self:
+                partner_id = vals.get('partner_id') and rpartn_obj.browse(
+                                    vals.get('partner_id')) or \
+                                    record.partner_id
+                checkin = vals.get('checkin', record.checkin)
+                checkout = vals.get('checkout', record.checkout)
+                product_id = vals.get('product_id') and prod_obj.browse(
+                    vals.get('product_id')) or record.product_id
+                adults = vals.get('adults', record.adults)
+                children = vals.get('children', record.children)
+                folio_id = vals.get('folio_id') and folio_obj.browse(
+                    vals.get('folio_id')) or record.folio_id
+                color = vals.get('reserve_color', record.reserve_color)
+                state = vals.get('state', record.state)
+                splitted = vals.get('splitted', record.splitted)
+                parent_reservation = vals.get('parent_reservation') and \
+                    res_obj.browse(vals.get('parent_reservation')) \
+                    or record.parent_reservation
 
-            self.env['bus.hotel.calendar'].send_reservation_notification(
-                'write',
-                ('cancelled' == vals.get('state')) and 'warn' or 'notify',
-                ('cancelled' == vals.get('state')) and
-                _("Reservation Cancelled") or _("Reservation Changed"),
-                product_id.id,
-                record.id,
-                partner_id.name,
-                adults,
-                children,
-                checkin,
-                checkout,
-                folio_id.id,
-                color,
-                splitted,
-                parent_reservation.id,
-                product_id.name,
-                partner_id.mobile or partner_id.phone or _('Undefined'),
-                state,
-                splitted)
+                self.env['bus.hotel.calendar'].send_reservation_notification(
+                    'write',
+                    ('cancelled' == state) and 'warn' or 'notify',
+                    ('cancelled' == state) and
+                    _("Reservation Cancelled") or _("Reservation Changed"),
+                    product_id.id,
+                    record.id,
+                    partner_id.name,
+                    adults,
+                    children,
+                    checkin,
+                    checkout,
+                    folio_id.id,
+                    color,
+                    splitted,
+                    parent_reservation.id,
+                    product_id.name,
+                    partner_id.mobile or partner_id.phone or _('Undefined'),
+                    state,
+                    splitted)
         return ret_vals
 
     @api.multi
