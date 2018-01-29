@@ -139,7 +139,7 @@
                                         <field name="children" />
                                         <field name="price_unit" />
                                         <field name="discount" groups="sale.group_discount_per_so_line"/>
-                                        <field name="price_subtotal" />
+                                        <field name="price_subtotal" invisible="1" />
                                         <field name="state" />
                                         <button type="action" class="oe_stat_button" 
                                         id="cardex_smart_button" icon="fa-user-plus" 

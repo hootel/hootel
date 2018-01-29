@@ -20,7 +20,7 @@
                                 <field name="product_uom" options="{'create': False, 'create_edit': False}" invisible="1"/>
                                 <field name="product_uom_qty" select="1"
                                     context="{'partner_id':order_partner_id,'quantity':product_uom_qty,'pricelist':parent.pricelist_id,'uom':product_uom}"
-                                    invisible="1"/>
+                                    />
                                 <field name="order_partner_id" invisible="1"/>
                                 <field name="folio_id" invisible="1"/>
                                                             <field name="tax_id" colspan="4" invisible="1"/>
