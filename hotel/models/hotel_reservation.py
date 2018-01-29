@@ -105,9 +105,8 @@ class HotelReservation(models.Model):
                          ('id', '=', master_reservation.id),
                     ('folio_id', '=', rec.folio_id.id),
                     ('id', '!=', rec.id),
-                    ('state', '!=', 'confirm')
                 ])
-                splitted_reservs.write({'reserve_color':rec.reserve_color})
+                splitted_reservs.write({'reserve_color': rec.reserve_color})
             rec.folio_id.color = rec.reserve_color
         return rec.reserve_color
 
@@ -271,7 +270,7 @@ class HotelReservation(models.Model):
     parent_reservation = fields.Many2one('hotel.reservation',
                                          'Parent Reservation')
     amount_reservation = fields.Float('Total',compute='_computed_amount_reservation') #To show de total amount line in read_only mode
-    
+
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
         _logger.info('_computed_amount_reservation')
@@ -504,16 +503,17 @@ class HotelReservation(models.Model):
         room = self.env['hotel.room'].search([
             ('product_id', '=', record.product_id.id)
         ])
-        persons = vals['adults'] + vals['children']
+        persons = record.adults + record.children
         if persons > room.capacity:
             raise ValidationError(
                 "Reservation persons can't be higher than room capacity")
-
         if record.adults == 0:
-            record.adults = room.capacity
+            raise ValidationError(
+                "Reservation has no adults")
+
         if record.state == 'draft' and record.folio_id.state == 'sale':
-            record.state = 'confirm'
-        record.reserve_color = record._compute_color()
+            record.confirm()
+        record._compute_color()
 
         # Update Availability (Removed because wubook-proto do it)
         # cavail = self.env['hotel.reservation'].get_availability(
@@ -543,18 +543,21 @@ class HotelReservation(models.Model):
 
     @api.multi
     def write(self, vals):
-        res = super(HotelReservation, self).write(vals)
-        if 'checkin' in vals or 'checkout' in vals:
+        datesChanged = ('checkin' in vals or 'checkout' in vals)
+        if datesChanged:
             checkin = vals.get('checkin', self.checkin)
             checkout = vals.get('checkout', self.checkout)
-            days_diff = date_utils.date_diff(
-                                        checkin, checkout, hours=False) + 1
-            rlines = self.prepare_reservation_lines(self.checkin, days_diff)
-            self.reservation_lines = rlines['commands']
-            if self.reservation_type not in ['staff', 'out']:
-                self.price_unit = rlines['total_price']
-            if self.folio_id:
-                self.folio_id.compute_invoices_amount()
+            days_diff = date_utils.date_diff(checkin,
+                                             checkout, hours=False) + 1
+            rlines = self.prepare_reservation_lines(checkin, days_diff)
+            vals.update({
+                'reservation_lines': rlines['commands'],
+            })
+            if self.reservation_type not in ('staff', 'out'):
+                vals.update({'price_unit':  rlines['total_price']})
+        res = super(HotelReservation, self).write(vals)
+        if datesChanged and self.folio_id:
+            self.folio_id.compute_invoices_amount()
 
         return res
 
@@ -620,7 +623,7 @@ class HotelReservation(models.Model):
                 folio.checkouts_reservations = folio.room_lines.search_count([
                     ('folio_id', '=', folio.id), ('is_checkout', '=', True)
                 ])
-		
+
         days_diff = date_utils.date_diff(
                                 self.checkin, self.checkout, hours=False) + 1
         rlines = self.prepare_reservation_lines(self.checkin, days_diff)
@@ -683,11 +686,11 @@ class HotelReservation(models.Model):
     def prepare_reservation_lines(self, str_start_date_utc, days):
         self.ensure_one()
         total_price = 0.0
-        cmds = [(5, False, False)] 
+        cmds = [(5, False, False)]
         #TO-DO: Redesign relation between hotel.reservation and sale.order.line to allow manage days by units in order
         if self.invoice_status == 'invoiced' and not self.splitted:
             raise ValidationError("This reservation is already invoiced. \
-                        To expand it you must create a new reservation.")			
+                        To expand it you must create a new reservation.")
         hotel_tz = self.env['ir.values'].sudo().get_default(
             'hotel.config.settings', 'hotel_tz')
         start_date_utc_dt = date_utils.get_datetime(str_start_date_utc)
@@ -758,10 +761,11 @@ class HotelReservation(models.Model):
             ('id', 'not in', rooms_occupied)
         ]
         if self.check_rooms:
-			if self.room_type_id:
+            if self.room_type_id:
 				domain_rooms.append(
-					('categ_id.id', '=', self.room_type_id.cat_id.id))
-			if self.virtual_room_id:
+                    ('categ_id.id', '=', self.room_type_id.cat_id.id)
+                )
+            if self.virtual_room_id:
 				room_categories = self.virtual_room_id.room_type_ids.mapped(
 					'cat_id.id')
 				link_virtual_rooms = self.virtual_room_id.room_ids\
@@ -780,15 +784,17 @@ class HotelReservation(models.Model):
         hotel_folio_obj = self.env['hotel.folio']
         hotel_reserv_obj = self.env['hotel.reservation']
         for r in self:
+            vals = {}
             if r.cardex_ids:
-                r.write({'state': 'booking', 'to_assign': False})
+                vals.update({'state': 'booking', 'to_assign': False})
             else:
-                r.write({'state': 'confirm', 'to_assign': False})
+                vals.update({'state': 'confirm', 'to_assign': False})
             if r.checkin_is_today():
-                r.is_checkin = True
+                vals.update({'is_checkin': True})
                 folio = hotel_folio_obj.browse(r.folio_id.id)
                 folio.checkins_reservations = folio.room_lines.search_count([
                     ('folio_id', '=', folio.id), ('is_checkin', '=', True)])
+            r.write(vals)
 
             if r.splitted:
                 master_reservation = r.parent_reservation or r
