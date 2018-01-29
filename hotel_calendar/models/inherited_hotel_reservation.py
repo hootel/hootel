@@ -161,7 +161,7 @@ class HotelReservation(models.Model):
                     ndate.strftime("%d/%m/%Y"): prod_price_id and
                     prod_price_id.price or vroom.product_id.with_context(
                         quantity=1,
-                        date=date_start,
+                        date=ndate_str,
                         pricelist=pricelist_id).price
                 })
             json_rooms_prices[pricelist_id].append({
