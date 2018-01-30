@@ -112,7 +112,8 @@ class HotelReservation(models.Model):
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account() and \
                 (vals.get('checkin') or vals.get('checkout') or
-                 vals.get('product_id') or vals.get('state')):
+                 vals.get('product_id') or vals.get('state') or
+                 vals.get('reserve_color')):
             older_vals = []
             new_vals = []
             for record in self:

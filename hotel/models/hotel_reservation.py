@@ -508,8 +508,7 @@ class HotelReservation(models.Model):
             raise ValidationError(
                 "Reservation persons can't be higher than room capacity")
         if record.adults == 0:
-            raise ValidationError(
-                "Reservation has no adults")
+            raise ValidationError("Reservation has no adults")
 
         if record.state == 'draft' and record.folio_id.state == 'sale':
             record.confirm()
