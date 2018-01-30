@@ -52,7 +52,7 @@ class Wizard(models.TransientModel):
                 return {'warning': {'title': _('Error in Birthdate or Expedition date'), 'message': _('Date of document shipment, prior to birth date'),},}
 
     # Validation for DNI/Permiso conducir erroneo
-    @api.onchange('poldocument_cardex')
+    @api.onchange('poldocument_cardex', 'documenttype_cardex')
     def validation_poldocument_dni(self):
         if self.poldocument_cardex <> False:
             if self.documenttype_cardex in ['D','C','I']:
@@ -71,9 +71,6 @@ class Wizard(models.TransientModel):
                         return {'warning': {'title': _('Error in DNI/NIE'), 'message': _('Wrong DNI, check it.'),},}
                 else:
                     return {'warning': {'title': _('Error in DNI/NIE'), 'message': _('DNI / NIE erroneous length, the correct format is: (12345678A or X1234567A)'),},}
-
-
-
 
     # Validation for Tipo de documento no valido para Extranjero
     # @api.onchange('x')
