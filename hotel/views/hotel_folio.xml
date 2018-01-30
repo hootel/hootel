@@ -141,9 +141,9 @@
                                         <field name="discount" groups="sale.group_discount_per_so_line"/>
                                         <field name="price_subtotal" invisible="1" />
                                         <field name="state" />
-                                        <button type="action" class="oe_stat_button" 
-                                        id="cardex_smart_button" icon="fa-user-plus" 
-                                        name="%(launch_checkin_wizard_add)d" 
+                                        <button type="action" class="oe_stat_button"
+                                        id="cardex_smart_button" icon="fa-user-plus"
+                                        name="%(launch_checkin_wizard_add)d"
                                         context="{'partner_id': partner_id,'enter_date': checkin,
                                             'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True}"
                                         attrs="{'invisible':[('state','not in',('confirm','booking'))]}"
@@ -228,7 +228,7 @@
                 </tree>
             </field>
         </record>
-        
+
         <!-- Folio Kanban View -->
         <record model="ir.ui.view" id="hotel_folio_kanban_view">
             <field name="name">hotel.folio.kanban</field>
@@ -253,7 +253,7 @@
                     <field name="prepaid_warning_days"/>
                     <field name="date_order"/>
                     <field name="color" widget="color"/>
-                    <templates>                        
+                    <templates>
                         <t t-name="kanban-box">
                             <div class="oe_kanban_global_click o_res_partner_kanban">
                                 <div class="o_kanban_tags_section oe_kanban_partner_categories"/>
@@ -274,7 +274,7 @@
                                         </t>
                                     </t>
                                 </div>
--->                            
+-->
                                 <div class="oe_kanban_details">
                                     <strong class="oe_partner_heading"><field name="partner_id"/></strong>
                                     <ul>

@@ -147,6 +147,9 @@ HotelCalendar.prototype = {
     if (reservations.length > 0 && !(reservations[0] instanceof HReservation)) {
       console.warn("[HotelCalendar][setReservations] Invalid Reservation definition!");
     } else {
+      if (!noUnusedZones)
+        this._cleanAllUnusedZones();
+
       // Merge
       for (var reserv of reservations) {
     	var index =  _.findKey(this._reservations, {'id': reserv.id});

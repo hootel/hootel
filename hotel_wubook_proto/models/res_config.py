@@ -228,5 +228,6 @@ class WubookConfiguration(models.TransientModel):
         # Push Changes
         if wubook_obj.init_connection():
             wubook_obj.push_activation()
+            wubook_obj.import_channels_info()
             wubook_obj.push_changes()
             wubook_obj.close_connection()

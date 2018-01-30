@@ -198,6 +198,14 @@ class WuBook(models.TransientModel):
                                                 DEFAULT_SERVER_DATE_FORMAT),
         })
 
+    def close_day(day_str):
+        vrooms = self.env['hotel.virtual.room'].search([])
+        return True
+
+    def open_day(day_str):
+        vrooms = self.env['hotel.virtual.room'].search([])
+        return True
+
     # === ROOMS
     @api.model
     def create_room(self, shortcode, name, capacity, price, availability):
