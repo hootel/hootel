@@ -30,20 +30,21 @@
                         </div>
                              <group colspan="4" col="4">
                                 <field name="product_id"
-                                    select="1" domain="[('isroom','=',True)]"
-                                    string="Room No" options="{'create': False, 'create_edit': False}"/>
+								select="1" domain="[('isroom','=',True),('id','not in', get_rooms_occupied[0][2])]"
+                                    string="Room No" options="{'no_create': True}"/>
                                 <field name="folio_id" readonly="1"/>
                                 <field name="checkin"/>
                                 <field name="adults"/>
                                 <field name="checkout"/>
                                 <field name="children"/>
+                                <field name="get_rooms_occupied" invisible="1" />
                             </group>
                             <group>
                                 <field name="pricelist_id" invisible="1"/>
                             </group>
                             <group colspan="6" col="6">
-                                <field name="virtual_room_id" on_change="1" options="{'create': False, 'create_edit': False}"/>
-                                <field name="room_type_id" options="{'create': False, 'create_edit': False}"/>
+                                <field name="virtual_room_id" on_change="1" options="{'no_create': True}"/>
+                                <field name="room_type_id" options="{'no_create': True}"/>
                                 <field name="check_rooms"/>
                             </group>
                             <group>
@@ -115,8 +116,8 @@
                     <field name="discount" groups="sale.group_discount_per_so_line"/>
                     <field name="price_subtotal" />
                     <field name="adults"/>
-                    <field name="children"/>
-                    <field name="state" />
+                    <field name="children"/>                    
+                     <field name="state" />
                     <field name="cardex_ids" invisible ="1"/>
                     <field name="to_assign" invisible="True"/>
                     <button type="action" class="oe_stat_button"

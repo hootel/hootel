@@ -96,8 +96,8 @@ class HotelReservation(models.Model):
                     rec.reserve_color = self.env['ir.values'].get_default(
                         'hotel.config.settings', 'color_payment_pending')
             rec.write({})   # To dispatch the calendar bus notification
+            hotel_reserv_obj = self.env['hotel.reservation']
             if rec.splitted:
-                hotel_reserv_obj = self.env['hotel.reservation']
                 master_reservation = rec.parent_reservation or rec
                 splitted_reservs = hotel_reserv_obj.search([
                     ('splitted', '=', True),
@@ -270,6 +270,7 @@ class HotelReservation(models.Model):
     parent_reservation = fields.Many2one('hotel.reservation',
                                          'Parent Reservation')
     amount_reservation = fields.Float('Total',compute='_computed_amount_reservation') #To show de total amount line in read_only mode
+    get_rooms_occupied = fields.Many2many('product.product',compute='_computed_rooms_occupied')   
 
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
@@ -776,6 +777,28 @@ class HotelReservation(models.Model):
         return {'domain': {'product_id': domain_rooms}}
 
     @api.multi
+    def _computed_rooms_occupied(self):
+        for res in self:
+            now_utc_dt = date_utils.now()
+            checkin = res.checkin
+            checkout = res.checkout
+            if not checkin:
+                checkin = now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+            if not checkout:
+                now_utc_dt = self.checkin.strptime(DEFAULT_SERVER_DATETIME_FORMAT)\
+                    + timedelta(days=1)
+                checkout = now_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+            checkout_dt = date_utils.get_datetime(checkout)
+            # Reservation end day count as free day. Not check it
+            checkout_dt -= timedelta(days=1)
+            occupied = self.env['hotel.reservation'].occupied(
+                checkin,
+                checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
+            rooms_occupied = occupied.mapped('product_id.id')
+            res.get_rooms_occupied = [(6,0,rooms_occupied)]
+        
+
+    @api.multi
     def confirm(self):
         '''
         @param self: object pointer
@@ -831,7 +854,7 @@ class HotelReservation(models.Model):
         sale_line_obj = self.env['sale.order.line'].browse(line_id)
         return sale_line_obj.copy_data(default=default)
 
-    @api.constrains('checkin', 'checkout', 'state')
+    @api.constrains('checkin', 'checkout', 'state', 'product_id')
     def check_dates(self):
         """
         1.-When date_order is less then checkin date or
@@ -884,3 +907,5 @@ class HotelReservation(models.Model):
             ('state', '!=', 'cancelled')
         ])
         return reservations
+
+

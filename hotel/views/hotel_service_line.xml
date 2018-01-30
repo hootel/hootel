@@ -23,7 +23,7 @@
                                     />
                                 <field name="order_partner_id" invisible="1"/>
                                 <field name="folio_id" invisible="1"/>
-                                                            <field name="tax_id" colspan="4" invisible="1"/>
+                                <field name="tax_id" widget="many2many_tags"  invisible="0"/>
 
                             </group>
                             <separator string="Manual Description" colspan="4" invisible="1"/>
