@@ -278,7 +278,8 @@ class HotelReservation(models.Model):
                 record.folio_id.id,
                 record.reserve_color,
                 record.splitted,
-                record.parent_reservation.id,
+                record.parent_reservation and
+                record.parent_reservation.id or 0,
                 record.product_id.name,
                 record.partner_id.mobile
                 or record.partner_id.phone or _('Undefined'),
@@ -300,7 +301,8 @@ class HotelReservation(models.Model):
                 vals.get('checkout') or vals.get('product_id') or \
                 vals.get('adults') or vals.get('children') or \
                 vals.get('reserve_color') or vals.get('state') or \
-                vals.get('splitted') or vals.get('product_id'):
+                vals.get('splitted') or vals.get('product_id') or \
+                self._context.get('dispatch_calendar_bus', False):
             for record in self:
                 record.send_bus_notification(
                     'write',
@@ -320,7 +322,7 @@ class HotelReservation(models.Model):
     @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
     def _compute_color(self):
         res = super(HotelReservation, self)._compute_color()
-        self.send_bus_notification('write',
-                                   'notify',
-                                   _("Reservation Changed"))
+        # self.send_bus_notification('write',
+        #                            'notify',
+        #                            _("Reservation Changed"))
         return res

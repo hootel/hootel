@@ -95,6 +95,7 @@ class HotelReservation(models.Model):
                 else:
                     rec.reserve_color = self.env['ir.values'].get_default(
                         'hotel.config.settings', 'color_payment_pending')
+            #rec.with_context(write({''})
             #~ hotel_reserv_obj = self.env['hotel.reservation']
             #~ if rec.splitted:
                 #~ master_reservation = rec.parent_reservation or rec
@@ -269,7 +270,7 @@ class HotelReservation(models.Model):
     parent_reservation = fields.Many2one('hotel.reservation',
                                          'Parent Reservation')
     amount_reservation = fields.Float('Total',compute='_computed_amount_reservation') #To show de total amount line in read_only mode
-    get_rooms_occupied = fields.Many2many('product.product',compute='_computed_rooms_occupied')   
+    get_rooms_occupied = fields.Many2many('product.product',compute='_computed_rooms_occupied')
 
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
@@ -795,7 +796,7 @@ class HotelReservation(models.Model):
                 checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
             rooms_occupied = occupied.mapped('product_id.id')
             res.get_rooms_occupied = [(6,0,rooms_occupied)]
-        
+
 
     @api.multi
     def confirm(self):
@@ -906,5 +907,3 @@ class HotelReservation(models.Model):
             ('state', '!=', 'cancelled')
         ])
         return reservations
-
-
