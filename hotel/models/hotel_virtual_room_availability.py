@@ -41,7 +41,7 @@ class HotelVirtualRoomAvailability(models.Model):
     @api.constrains('avail')
     def _check_avail(self):
         if self.avail < 0:
-            raise ValidationError("avail can't be less than zero")
+            self.avail = 0
 
         vroom_obj = self.env['hotel.virtual.room']
         cavail = len(vroom_obj.check_availability_virtual_room(
@@ -51,7 +51,7 @@ class HotelVirtualRoomAvailability(models.Model):
         max_avail = min(cavail,
                         self.virtual_room_id.total_rooms_count)
         if self.avail > max_avail:
-            raise ValidationError("avail can't be high than real availability")
+            self.avail = max_avail
 
     @api.constrains('date', 'virtual_room_id')
     def _check_date_virtual_room_id(self):
