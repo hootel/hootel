@@ -273,8 +273,8 @@ class HotelReservation(models.Model):
     parent_reservation = fields.Many2one('hotel.reservation',
                                          'Parent Reservation')
     amount_reservation = fields.Float('Total',compute='_computed_amount_reservation') #To show de total amount line in read_only mode
-    get_rooms_occupied = fields.Many2many('product.product',compute='_computed_rooms_occupied')
-
+    edit_room = fields.Boolean(default=True)
+        
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
         _logger.info('_computed_amount_reservation')
@@ -558,11 +558,10 @@ class HotelReservation(models.Model):
                 'reservation_lines': rlines['commands'],
             })
             if self.reservation_type not in ('staff', 'out'):
-                vals.update({'price_unit':  rlines['total_price']})
+                vals.update({'price_unit':  rlines['total_price'],'edit_room': False,})
         res = super(HotelReservation, self).write(vals)
         if datesChanged and self.folio_id:
             self.folio_id.compute_invoices_amount()
-
         return res
 
     @api.multi
@@ -588,7 +587,25 @@ class HotelReservation(models.Model):
                 self.children = 0
                 raise UserError('%s people do not fit in this room! ;)' % (persons))
 
-    @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type', 'virtual_room_id')
+    @api.onchange('virtual_room_id')
+    def on_change_virtual_room_id(self):
+        if not self.checkin:
+            self.checkin = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        if not self.checkout:
+            self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        days_diff = date_utils.date_diff(
+                                self.checkin, self.checkout, hours=False) + 1
+        rlines = self.prepare_reservation_lines(self.checkin, days_diff, update_old_prices = True)
+        self.reservation_lines = rlines['commands']
+
+        if self.reservation_type in ['staff', 'out']:
+            self.price_unit = 0.0
+            self.cardex_pending = 0
+        else:
+            self.price_unit = rlines['total_price']
+
+            
+    @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type')
     def on_change_checkin_checkout_product_id(self):
         _logger.info('on_change_checkin_checkout_product_id')
         if not self.checkin:
@@ -630,7 +647,7 @@ class HotelReservation(models.Model):
 
         days_diff = date_utils.date_diff(
                                 self.checkin, self.checkout, hours=False) + 1
-        rlines = self.prepare_reservation_lines(self.checkin, days_diff)
+        rlines = self.prepare_reservation_lines(self.checkin, days_diff, update_old_prices=False)
         self.reservation_lines = rlines['commands']
 
         if self.reservation_type in ['staff', 'out']:
@@ -638,7 +655,6 @@ class HotelReservation(models.Model):
             self.cardex_pending = 0
         else:
             self.price_unit = rlines['total_price']
-
         if self.product_id:
             room = self.env['hotel.room'].search([
                 ('product_id', '=', self.product_id.id)
@@ -687,7 +703,7 @@ class HotelReservation(models.Model):
         return rooms_avail
 
     @api.multi
-    def prepare_reservation_lines(self, str_start_date_utc, days):
+    def prepare_reservation_lines(self, str_start_date_utc, days, update_old_prices=False):
         self.ensure_one()
         total_price = 0.0
         cmds = [(5, False, False)]
@@ -711,9 +727,10 @@ class HotelReservation(models.Model):
             'hotel.config.settings', 'parity_pricelist_id')
         if pricelist_id:
             pricelist_id = int(pricelist_id)
+        old_lines_ids = self.mapped('reservation_lines.id')
         for i in range(0, days-1):
             ndate = start_date_dt + timedelta(days=i)
-            ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
+            ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)            
             prod = product_id.with_context(
                 lang=self.partner_id.lang,
                 partner=self.partner_id.id,
@@ -721,11 +738,19 @@ class HotelReservation(models.Model):
                 date=ndate_str,
                 pricelist=pricelist_id,
                 uom=self.product_uom.id)
-            line_price = prod.price
-            cmds.append((0, False, {
-                'date': ndate_str,
-                'price': line_price
-            }))
+            if not self.reservation_lines.ids or ndate_str not in self.mapped('reservation_lines.date') or update_old_prices: #Dont update price in old reservation lines
+                line_price = prod.price
+                cmds.append((0, False, {
+                    'date': ndate_str,
+                    'price': line_price
+                }))
+            else:
+                line = self.reservation_lines.search([('id','in', old_lines_ids),('date','=',ndate)])
+                line_price = line.price
+                cmds.append((0, False, {
+                        'date': ndate_str,
+                        'price': line_price
+                    }))
             total_price += line_price
         if self.adults == 0 and self.product_id:
             room = self.env['hotel.room'].search([
@@ -736,7 +761,7 @@ class HotelReservation(models.Model):
 
     @api.multi
     @api.onchange('checkin', 'checkout', 'room_type_id', 'virtual_room_id',
-                  'check_rooms')
+                  'check_rooms', 'edit_room')
     def on_change_checkout(self):
         '''
         When you change checkin or checkout it will checked it
@@ -778,28 +803,6 @@ class HotelReservation(models.Model):
 				room_ids = link_virtual_rooms.mapped('product_id.id')
 				domain_rooms.append(('id', 'in', room_ids))
         return {'domain': {'product_id': domain_rooms}}
-
-    @api.multi
-    def _computed_rooms_occupied(self):
-        for res in self:
-            now_utc_dt = date_utils.now()
-            checkin = res.checkin
-            checkout = res.checkout
-            if not checkin:
-                checkin = now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-            if not checkout:
-                now_utc_dt = self.checkin.strptime(DEFAULT_SERVER_DATETIME_FORMAT)\
-                    + timedelta(days=1)
-                checkout = now_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-            checkout_dt = date_utils.get_datetime(checkout)
-            # Reservation end day count as free day. Not check it
-            checkout_dt -= timedelta(days=1)
-            occupied = self.env['hotel.reservation'].occupied(
-                checkin,
-                checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
-            rooms_occupied = occupied.mapped('product_id.id')
-            res.get_rooms_occupied = [(6,0,rooms_occupied)]
-
 
     @api.multi
     def confirm(self):

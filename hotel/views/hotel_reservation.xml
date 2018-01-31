@@ -28,22 +28,31 @@
                                 <field name="partner_id" default_focus="1" placeholder="Name" readonly="1"/>
                             </h1>
                         </div>
+							<table class="oe_form_group" colspan="6">
+								<tr><field name="folio_id" readonly="1"/></tr>
+								<tr><h3>Room No: </h3></tr>
+								<tr class="oe_form_group_row">
+									<td class="oe_form_group_cell oe_form_group_cell_label"><field name="edit_room" nolabel="1"/></td>
+									<td class="oe_form_group_cell">
+										<h2>
+										<field name="product_id" select="1" domain="[('isroom','=',True)]"
+											string="Room No" options="{'no_create': True}"
+											attrs="{'readonly':[('edit_room','=',False)]}"/>
+										</h2>
+									</td>
+								</tr>								
+							</table>   
                              <group colspan="4" col="4">
-                                <field name="product_id"
-								select="1" domain="[('isroom','=',True),('id','not in', get_rooms_occupied[0][2])]"
-                                    string="Room No" options="{'no_create': True}"/>
-                                <field name="folio_id" readonly="1"/>
                                 <field name="checkin"/>
                                 <field name="adults"/>
                                 <field name="checkout"/>
                                 <field name="children"/>
-                                <field name="get_rooms_occupied" invisible="1" />
                             </group>
                             <group>
                                 <field name="pricelist_id" invisible="1"/>
                             </group>
                             <group colspan="6" col="6">
-                                <field name="virtual_room_id" on_change="1" options="{'no_create': True}"/>
+                                <field name="virtual_room_id" on_change="1" options="{'no_create': True}" attrs="{'readonly':[('state','not in',('draft'))]}"/>
                                 <field name="room_type_id" options="{'no_create': True}"/>
                                 <field name="check_rooms"/>
                             </group>

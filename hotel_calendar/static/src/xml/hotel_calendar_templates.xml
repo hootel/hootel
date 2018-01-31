@@ -17,9 +17,11 @@
 					<t t-if="oroom != nroom">
 						<strong>Room:</strong> <t t-esc="oroom"/><br/>
 					</t>
+<!--
 					<t t-if="oprice != nprice">
 						<strong>Price:</strong> <t t-esc="oprice" widget="monetary"/><br/>
 					</t>
+-->
 				</div>
 			</div>
 			<div class="col-xl-6 col-lg-6">
@@ -34,9 +36,11 @@
 					<t t-if="oroom != nroom">
 						<strong>Room:</strong> <t t-esc="nroom"/><br/>
 					</t>
+<!--
 					<t t-if="oprice != nprice">
 						<strong>Price:</strong> <t t-esc="nprice" widget="monetary"/><br/>
 					</t>
+-->
 				</div>
 			</div>
 		</div>

@@ -23,6 +23,7 @@ from openerp import models, fields, api, _
 
 class HotelReservationLine(models.Model):
     _name = "hotel.reservation.line"
+    _order = "date"
 
     reservation_id = fields.Many2one('hotel.reservation', string='Reservation',
                                      ondelete='cascade')

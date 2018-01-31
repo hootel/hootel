@@ -130,7 +130,7 @@
                         <notebook colspan="4" col="1">
                             <page string="Lines">
                                 <field name="room_lines" colspan="4" string="Room Line"
-                                    nolabel="1" context="{'folio_id': id}">
+                                    nolabel="1" context="{'room_lines':room_lines,'folio_id': id}">
                                     <tree string="Room Line" colors="red:state == 'cancelled'">
                                         <field name="product_id" string="Room No" />
                                         <field name="checkin" />
