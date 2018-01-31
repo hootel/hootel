@@ -95,18 +95,17 @@ class HotelReservation(models.Model):
                 else:
                     rec.reserve_color = self.env['ir.values'].get_default(
                         'hotel.config.settings', 'color_payment_pending')
-            rec.write({})   # To dispatch the calendar bus notification
-            hotel_reserv_obj = self.env['hotel.reservation']
-            if rec.splitted:
-                master_reservation = rec.parent_reservation or rec
-                splitted_reservs = hotel_reserv_obj.search([
-                    ('splitted', '=', True),
-                    '|', ('parent_reservation', '=', master_reservation.id),
-                         ('id', '=', master_reservation.id),
-                    ('folio_id', '=', rec.folio_id.id),
-                    ('id', '!=', rec.id),
-                ])
-                splitted_reservs.write({'reserve_color': rec.reserve_color})
+            #~ hotel_reserv_obj = self.env['hotel.reservation']
+            #~ if rec.splitted:
+                #~ master_reservation = rec.parent_reservation or rec
+                #~ splitted_reservs = hotel_reserv_obj.search([
+                    #~ ('splitted', '=', True),
+                    #~ '|', ('parent_reservation', '=', master_reservation.id),
+                         #~ ('id', '=', master_reservation.id),
+                    #~ ('folio_id', '=', rec.folio_id.id),
+                    #~ ('id', '!=', rec.id),
+                #~ ])
+                #~ splitted_reservs.write({'reserve_color': rec.reserve_color})
             rec.folio_id.color = rec.reserve_color
         return rec.reserve_color
 
@@ -275,11 +274,12 @@ class HotelReservation(models.Model):
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
         _logger.info('_computed_amount_reservation')
-        amount_reservation = 0
-        for line in self.reservation_lines:
-            amount_reservation += line.price
-        self.amount_reservation = amount_reservation
-        self.price_unit = amount_reservation
+        for res in self:
+            amount_reservation = 0
+            for line in res.reservation_lines:
+                amount_reservation += line.price
+            res.amount_reservation = amount_reservation
+            res.price_unit = amount_reservation
 
     @api.multi
     def _compute_cardex_count(self):
