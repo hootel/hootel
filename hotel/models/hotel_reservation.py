@@ -56,6 +56,8 @@ class HotelReservation(models.Model):
                                 rec.checkout,
                                 DEFAULT_SERVER_DATETIME_FORMAT))
             difference_checkout = relativedelta(now_date, checkout_date)
+            _logger.info("COLOR INIT")
+            _logger.info(rec.reserve_color)
             if rec.reservation_type == 'staff':
                 rec.reserve_color = self.env['ir.values'].get_default(
                     'hotel.config.settings', 'color_staff')
@@ -95,7 +97,8 @@ class HotelReservation(models.Model):
                 else:
                     rec.reserve_color = self.env['ir.values'].get_default(
                         'hotel.config.settings', 'color_payment_pending')
-            #rec.with_context(write({''})
+            _logger.info(rec.reserve_color)
+            rec.write({})     # FIXME: workaround for dispatch write events
             #~ hotel_reserv_obj = self.env['hotel.reservation']
             #~ if rec.splitted:
                 #~ master_reservation = rec.parent_reservation or rec
@@ -108,7 +111,7 @@ class HotelReservation(models.Model):
                 #~ ])
                 #~ splitted_reservs.write({'reserve_color': rec.reserve_color})
             rec.folio_id.color = rec.reserve_color
-        return rec.reserve_color
+        _logger.info('END _compute_color')
 
     @api.multi
     def copy(self, default=None):

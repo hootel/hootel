@@ -780,7 +780,7 @@ var HotelCalendarView = View.extend({
               case 'reservation':
                 var reserv = notif[1]['reservation'];
                 // Only show notifications of other users
-                if (this._view_options['show_notifications'] && notif[1]['userid'] != this.dataset.context.uid) {
+                if (notif[1]['subtype'] !== 'noshow' && this._view_options['show_notifications'] && notif[1]['userid'] != this.dataset.context.uid) {
                   var qdict = _.clone(reserv);
                   qdict = _.extend(qdict, {
                     'checkin': HotelCalendar.toMomentUTC(qdict['checkin'], ODOO_DATETIME_MOMENT_FORMAT).clone().local().format(L10N_DATETIME_MOMENT_FORMAT), // UTC -> Local

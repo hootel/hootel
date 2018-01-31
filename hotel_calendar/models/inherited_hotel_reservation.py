@@ -261,7 +261,7 @@ class HotelReservation(models.Model):
         return vals
 
     @api.multi
-    def send_bus_notification(self, naction, ntype, ntitle):
+    def send_bus_notification(self, naction, ntype, ntitle=''):
         hotel_cal_obj = self.env['bus.hotel.calendar']
         for record in self:
             hotel_cal_obj.send_reservation_notification(
@@ -300,9 +300,8 @@ class HotelReservation(models.Model):
         if vals.get('partner_id') or vals.get('checkin') or \
                 vals.get('checkout') or vals.get('product_id') or \
                 vals.get('adults') or vals.get('children') or \
-                vals.get('reserve_color') or vals.get('state') or \
-                vals.get('splitted') or vals.get('product_id') or \
-                self._context.get('dispatch_calendar_bus', False):
+                vals.get('state') or vals.get('splitted') or \
+                vals.get('reserve_color') or vals.get('product_id'):
             for record in self:
                 record.send_bus_notification(
                     'write',
@@ -310,6 +309,8 @@ class HotelReservation(models.Model):
                     ('cancelled' == record.state) and
                     _("Reservation Cancelled") or _("Reservation Changed")
                 )
+        elif not any(vals):
+            self.send_bus_notification('write', 'noshow')
         return ret
 
     @api.multi
@@ -318,11 +319,3 @@ class HotelReservation(models.Model):
                                    'warn',
                                    _("Reservation Deleted"))
         return super(HotelReservation, self).unlink()
-
-    @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
-    def _compute_color(self):
-        res = super(HotelReservation, self)._compute_color()
-        # self.send_bus_notification('write',
-        #                            'notify',
-        #                            _("Reservation Changed"))
-        return res

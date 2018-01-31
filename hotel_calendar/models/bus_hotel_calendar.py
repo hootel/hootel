@@ -29,6 +29,17 @@ class BusHotelCalendar(models.TransientModel):
     _name = 'bus.hotel.calendar'
 
     # FIXME: Too many parameters... perhaps best use kargs?
+    '''
+    action:
+        - create
+        - write
+        - unlink
+        - cancelled
+    ntype:
+        - notif : Show a normal notification
+        - warn : Show a warning notification
+        - noshow : Don't show any notification
+    '''
     @api.model
     def _generate_reservation_notif(self, action, ntype, title,
                                     product_id, reserv_id, partner_name,
