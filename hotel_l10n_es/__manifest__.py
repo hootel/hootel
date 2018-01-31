@@ -48,10 +48,11 @@
         'views/category.xml',
         'views/code_ine.xml',
         'views/inherit_res_company.xml',
-        'views/report_viajero.xml',
         'views/inherit_cardex.xml',
         'security/ir.model.access.csv',
         'views/inherit_res_partner.xml',
+        'views/report_viajero_document.xml',
+        'views/report_viajero.xml',
     ],
     'test': [
     ],
