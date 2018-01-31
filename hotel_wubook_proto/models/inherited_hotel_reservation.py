@@ -139,14 +139,14 @@ class HotelReservation(models.Model):
                 _logger.info(navails)
                 if any(navails):
                     # Push avail
+                    wres = self.env['wubook'].update_availability(navails)
+                    if not wres:
+                        raise ValidationError("Can't update availability \
+                                                                on WuBook")
                     wubook_obj = self.env['wubook'].with_context({
                         'init_connection': False,
                     })
                     if wubook_obj.init_connection():
-                        wres = wubook_obj.update_availability(navails)
-                        if not wres:
-                            raise ValidationError("Can't update availability \
-                                                                    on WuBook")
                         # Get avail old dates
                         checkin_dt = date_utils.get_datetime(
                                                     older_vals[i]['checkin'])
