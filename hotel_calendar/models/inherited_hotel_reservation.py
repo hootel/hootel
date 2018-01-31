@@ -260,106 +260,60 @@ class HotelReservation(models.Model):
 
         return vals
 
+    @api.multi
+    def send_bus_notification(self, naction, ntype, ntitle):
+        self.ensure_one()
+        self.env['bus.hotel.calendar'].send_reservation_notification(
+            naction,
+            ntype,
+            _("Reservation Created"),
+            self.product_id.id,
+            self.id,
+            self.partner_id.name,
+            self.adults,
+            self.children,
+            self.checkin,
+            self.checkout,
+            self.folio_id.id,
+            self.reserve_color,
+            self.splitted,
+            self.parent_reservation.id,
+            self.product_id.name,
+            self.partner_id.mobile
+            or self.partner_id.phone or _('Undefined'),
+            self.state,
+            self.splitted)
+
     @api.model
     def create(self, vals):
         reservation_id = super(HotelReservation, self).create(vals)
-        self.env['bus.hotel.calendar'].send_reservation_notification(
-            'create',
-            'notify',
-            _("Reservation Created"),
-            reservation_id.product_id.id,
-            reservation_id.id,
-            reservation_id.partner_id.name,
-            reservation_id.adults,
-            reservation_id.children,
-            reservation_id.checkin,
-            reservation_id.checkout,
-            reservation_id.folio_id.id,
-            reservation_id.reserve_color,
-            reservation_id.splitted,
-            reservation_id.parent_reservation.id,
-            reservation_id.product_id.name,
-            reservation_id.partner_id.mobile
-            or reservation_id.partner_id.phone or _('Undefined'),
-            reservation_id.state,
-            reservation_id.splitted)
+        reservation_id.send_bus_notification('create',
+                                             'notify',
+                                             _("Reservation Created"))
         return reservation_id
 
     @api.multi
     def write(self, vals):
-        ret_vals = super(HotelReservation, self).write(vals)
+        ret = super(HotelReservation, self).write(vals)
         if vals.get('partner_id') or vals.get('checkin') or \
                 vals.get('checkout') or vals.get('product_id') or \
                 vals.get('adults') or vals.get('children') or \
                 vals.get('reserve_color') or vals.get('state') or \
                 vals.get('splitted') or vals.get('product_id'):
-            rpartn_obj = self.env['res.partner']
-            prod_obj = self.env['product.product']
-            folio_obj = self.env['hotel.folio']
-            res_obj = self.env['hotel.reservation']
             for record in self:
-                partner_id = vals.get('partner_id') and rpartn_obj.browse(
-                                    vals.get('partner_id')) or \
-                                    record.partner_id
-                checkin = vals.get('checkin', record.checkin)
-                checkout = vals.get('checkout', record.checkout)
-                product_id = vals.get('product_id') and prod_obj.browse(
-                    vals.get('product_id')) or record.product_id
-                adults = vals.get('adults', record.adults)
-                children = vals.get('children', record.children)
-                folio_id = vals.get('folio_id') and folio_obj.browse(
-                    vals.get('folio_id')) or record.folio_id
-                color = vals.get('reserve_color', record.reserve_color)
-                state = vals.get('state', record.state)
-                splitted = vals.get('splitted', record.splitted)
-                parent_reservation = vals.get('parent_reservation') and \
-                    res_obj.browse(vals.get('parent_reservation')) \
-                    or record.parent_reservation
-
-                self.env['bus.hotel.calendar'].send_reservation_notification(
+                record.send_bus_notification(
                     'write',
                     ('cancelled' == state) and 'warn' or 'notify',
                     ('cancelled' == state) and
-                    _("Reservation Cancelled") or _("Reservation Changed"),
-                    product_id.id,
-                    record.id,
-                    partner_id.name,
-                    adults,
-                    children,
-                    checkin,
-                    checkout,
-                    folio_id.id,
-                    color,
-                    splitted,
-                    parent_reservation.id,
-                    product_id.name,
-                    partner_id.mobile or partner_id.phone or _('Undefined'),
-                    state,
-                    splitted)
-        return ret_vals
+                    _("Reservation Cancelled") or _("Reservation Changed")
+                )
+        return ret
 
     @api.multi
     def unlink(self):
         bus_cal_obj = self.env['bus.hotel.calendar']
         for record in self:
-            bus_cal_obj.send_reservation_notification(
-                'unlink',
-                'warn',
-                _("Reservation Deleted"),
-                record.product_id.id,
-                record.id,
-                record.partner_id.name,
-                record.adults,
-                record.children,
-                record.checkin,
-                record.checkout,
-                record.folio_id.id,
-                record.reserve_color,
-                record.splitted,
-                record.parent_reservation.id,
-                record.product_id.name,
-                record.partner_id.mobile or record.partner_id.phone
-                or _('Undefined'),
-                record.state,
-                record.splitted)
+            record.send_bus_notification('unlink',
+                                         'warn',
+                                         _("Reservation Deleted"))
         return super(HotelReservation, self).unlink()

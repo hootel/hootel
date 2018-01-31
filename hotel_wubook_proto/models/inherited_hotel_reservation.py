@@ -112,8 +112,7 @@ class HotelReservation(models.Model):
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account() and \
                 (vals.get('checkin') or vals.get('checkout') or
-                 vals.get('product_id') or vals.get('state') or
-                 vals.get('reserve_color')):
+                 vals.get('product_id') or vals.get('state')):
             older_vals = []
             new_vals = []
             for record in self:
@@ -130,9 +129,6 @@ class HotelReservation(models.Model):
                     'checkout': vals.get('checkout', record.checkout),
                     'product_id': vals.get('product_id', prod_id),
                 })
-                _logger.info("----------____----")
-                _logger.info(older_vals)
-                _logger.info(new_vals)
 
             res = super(HotelReservation, self).write(vals)
 
