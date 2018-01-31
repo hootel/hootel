@@ -262,27 +262,28 @@ class HotelReservation(models.Model):
 
     @api.multi
     def send_bus_notification(self, naction, ntype, ntitle):
-        self.ensure_one()
-        self.env['bus.hotel.calendar'].send_reservation_notification(
-            naction,
-            ntype,
-            _("Reservation Created"),
-            self.product_id.id,
-            self.id,
-            self.partner_id.name,
-            self.adults,
-            self.children,
-            self.checkin,
-            self.checkout,
-            self.folio_id.id,
-            self.reserve_color,
-            self.splitted,
-            self.parent_reservation.id,
-            self.product_id.name,
-            self.partner_id.mobile
-            or self.partner_id.phone or _('Undefined'),
-            self.state,
-            self.splitted)
+        hotel_cal_obj = self.env['bus.hotel.calendar']
+        for record in self:
+            hotel_cal_obj.send_reservation_notification(
+                naction,
+                ntype,
+                ntitle,
+                record.product_id.id,
+                record.id,
+                record.partner_id.name,
+                record.adults,
+                record.children,
+                record.checkin,
+                record.checkout,
+                record.folio_id.id,
+                record.reserve_color,
+                record.splitted,
+                record.parent_reservation.id,
+                record.product_id.name,
+                record.partner_id.mobile
+                or record.partner_id.phone or _('Undefined'),
+                record.state,
+                record.splitted)
 
     @api.model
     def create(self, vals):
@@ -303,17 +304,23 @@ class HotelReservation(models.Model):
             for record in self:
                 record.send_bus_notification(
                     'write',
-                    ('cancelled' == state) and 'warn' or 'notify',
-                    ('cancelled' == state) and
+                    ('cancelled' == record.state) and 'warn' or 'notify',
+                    ('cancelled' == record.state) and
                     _("Reservation Cancelled") or _("Reservation Changed")
                 )
         return ret
 
     @api.multi
     def unlink(self):
-        bus_cal_obj = self.env['bus.hotel.calendar']
-        for record in self:
-            record.send_bus_notification('unlink',
-                                         'warn',
-                                         _("Reservation Deleted"))
+        self.send_bus_notification('unlink',
+                                   'warn',
+                                   _("Reservation Deleted"))
         return super(HotelReservation, self).unlink()
+
+    @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
+    def _compute_color(self):
+        res = super(HotelReservation, self)._compute_color()
+        self.send_bus_notification('write',
+                                   'notify',
+                                   _("Reservation Changed"))
+        return res
