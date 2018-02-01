@@ -29,6 +29,7 @@ class ImportAvailabilityWizard(models.TransientModel):
 
     date_start = fields.Datetime('Start Date', required=True)
     date_end = fields.Datetime('End Date', required=True)
+    set_wmax_avail = fields.Boolean('Set wmax_avail?', default=True)
 
     @api.multi
     def import_availability(self):
@@ -37,7 +38,8 @@ class ImportAvailabilityWizard(models.TransientModel):
             date_end_dt = fields.Datetime.from_string(record.date_end)
             wres = self.env['wubook'].fetch_rooms_values(
                 date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                set_wmax_avail=record.set_wmax_avail)
             if not wres:
                 raise ValidationError("Can't fetch availability from WuBook")
         return True
