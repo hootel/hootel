@@ -1373,6 +1373,14 @@ class WuBook(models.TransientModel):
                         })
                         folio_id = hotel_folio_obj.with_context({
                                         'wubook_action': False}).create(vals)
+
+                    # Update Reservation Spitted Parents
+                    for k_pid, v_pid in splitted_map.iteritems():
+                        preserv = folio_id.room_lines[k_pid-1]
+                        for pid in v_pid:
+                            creserv = folio_id.room_lines[pid-1]
+                            creserv.parent_reservation = preserv.id
+
                     processed_rids.append(rcode)
                 except Exception, e:
                     self.create_wubook_issue(
@@ -1380,14 +1388,6 @@ class WuBook(models.TransientModel):
                         str(e),
                         '', wid=rcode)
                     failed_reservations.append(crcode)
-
-            # Update Reservation Spitted Parents
-            for k_pid, v_pid in splitted_map.iteritems():
-                preserv = folio_id.room_lines[k_pid-1]
-                for pid in v_pid:
-                    creserv = folio_id.room_lines[pid-1]
-                    creserv.parent_reservation = preserv.id
-
         return (processed_rids, any(failed_reservations),
                 checkin_utc_dt, checkout_utc_dt)
 
