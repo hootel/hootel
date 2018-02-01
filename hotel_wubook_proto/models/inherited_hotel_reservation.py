@@ -76,7 +76,7 @@ class HotelReservation(models.Model):
         avail_obj = self.env['hotel.virtual.room.availability']
         vroom_obj = self.env['hotel.virtual.room']
         for wavail in wavails:
-            for wrid, days in wavails.iteritems():
+            for wrid, days in wavail.iteritems():
                 vroom = vroom_obj.search([('wrid', '=', wrid)], limit=1)
                 if vroom:
                     for date, avail in days.iteritems():
