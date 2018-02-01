@@ -195,7 +195,7 @@ class HotelReservation(models.Model):
                 _logger.info("DISPONIBILIDAD UNLINK")
                 _logger.info(rooms_avail)
                 if any(rooms_avail):
-                    wres = wubook_obj.update_availability(rooms_avail)
+                    wres = self.env['wubook'].update_availability(rooms_avail)
                     if not wres:
                         raise ValidationError("Can't update availability \
                                                                 on WuBook")

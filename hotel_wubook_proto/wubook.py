@@ -323,7 +323,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def fetch_rooms_values(self, dfrom, dto, rooms=False,
-                           set_wmax_value=False):
+                           set_wmax_avail=False):
         init_connection = self._context.get('init_connection', True)
         if init_connection:
             if not self.init_connection():
@@ -353,7 +353,7 @@ class WuBook(models.TransientModel):
                                      results, dfrom=dfrom, dto=dto)
         else:
             self.generate_room_values(dfrom, dto, results,
-                                      set_wmax_value=set_wmax_value)
+                                      set_wmax_avail=set_wmax_avail)
 
         return rcode == 0
 
@@ -894,7 +894,7 @@ class WuBook(models.TransientModel):
 
     # === WUBOOK -> ODOO
     @api.model
-    def generate_room_values(self, dfrom, dto, values, set_wmax_value=False):
+    def generate_room_values(self, dfrom, dto, values, set_wmax_avail=False):
         virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
         for k_rid, v_rid in values.iteritems():
@@ -915,7 +915,7 @@ class WuBook(models.TransientModel):
                         'avail': day_vals.get('avail', 0),
                         'wpushed': True,
                     }
-                    if set_wmax_value:
+                    if set_wmax_avail:
                         vals.update({'wmax_avail': day_vals.get('avail', 0)})
                     if vroom_avail:
                         vroom_avail.with_context({
