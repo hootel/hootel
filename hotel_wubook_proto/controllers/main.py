@@ -98,7 +98,7 @@ class website_wubook(http.Controller):
         })
         if wubook_obj.init_connection():
             wubook_obj.fetch_rooms_values(dfrom, dto)
-            wubook_obj.fetch_rplan_restrictions(dfrom, dto)
+            # wubook_obj.fetch_rplan_restrictions(dfrom, dto)
             parity_pricelist_id = request.env['ir.values'].sudo().get_default(
                                 'hotel.config.settings', 'parity_pricelist_id')
             if parity_pricelist_id:
