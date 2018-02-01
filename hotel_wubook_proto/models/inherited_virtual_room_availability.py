@@ -21,6 +21,8 @@
 ##############################################################################
 from openerp import models, fields, api
 from openerp.exceptions import ValidationError
+from odoo.addons.hotel import date_utils
+from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 
 class VirtualRoomAvailability(models.Model):
@@ -36,12 +38,44 @@ class VirtualRoomAvailability(models.Model):
                                 default=_default_wmax_avail)
     wpushed = fields.Boolean("WuBook Pushed", readonly=True, default=False)
 
+    @api.constrains('avail')
+    def _check_avail(self):
+        vroom_obj = self.env['hotel.virtual.room']
+        cavail = len(vroom_obj.check_availability_virtual_room(
+            self.date,
+            self.date,
+            virtual_room_id=self.virtual_room_id.id))
+        max_avail = min(cavail,
+                        self.virtual_room_id.total_rooms_count)
+        if self.avail > max_avail:
+            self.env['wubook.issue'].create({
+                'section': 'avail',
+                'message': "The new availability can't be greater than \
+                    the actual availability \
+                    \n[%s]\nInput: %d\Limit: %d" % (self.virtual_room_id.name,
+                                                    self.avail,
+                                                    max_avail),
+                'wid': self.virtual_room_id.wrid,
+                'date_start': self.date,
+                'date_end': self.date,
+            })
+            # Auto-Fix wubook availability
+            date_dt = date_utils.get_datetime(self.date)
+            self.env['wubook'].update_availability([{
+                'id': self.virtual_room_id.wrid,
+                'days': [{
+                    'date': date_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                    'avail': max_avail,
+                }],
+            }])
+        return super(VirtualRoomAvailability, self)._check_avail()
+
     @api.constrains('wmax_avail')
     def _check_wmax_avail(self):
         if self.wmax_avail > self.virtual_room_id.total_rooms_count:
             raise ValidationError("max avail for wubook can't be high \
                 than toal rooms \
-                    count: %d" % self.virtual_room_id.total_rooms_count)
+                count: %d" % self.virtual_room_id.total_rooms_count)
 
     @api.onchange('virtual_room_id')
     def onchange_virtual_room_id(self):

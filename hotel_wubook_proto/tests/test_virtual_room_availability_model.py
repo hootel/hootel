@@ -29,10 +29,6 @@ class TestVirtualRoomAvailability(TestHotelWubook):
     def test_write(self):
         vroom_avail_obj = self.env['hotel.virtual.room.availability']
         avail = vroom_avail_obj.search([], limit=1)
-        with self.assertRaises(ValidationError):
-            avail.write({
-                'avail': 9,
-            })
         avail.write({
             'avail': 1,
         })
