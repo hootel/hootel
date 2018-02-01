@@ -81,7 +81,7 @@ class HotelReservation(models.Model):
                 if vroom:
                     for date, avail in days.iteritems():
                         date_dt = datetime.strptime(
-                            item['date'],
+                            date,
                             DEFAULT_WUBOOK_DATE_FORMAT)
                         odate_str = date_dt.strftime(
                                                     DEFAULT_SERVER_DATE_FORMAT)
