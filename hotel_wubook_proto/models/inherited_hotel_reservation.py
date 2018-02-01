@@ -178,9 +178,9 @@ class HotelReservation(models.Model):
 
     @api.multi
     def unlink(self):
-        vals = {}
+        vals = []
         for record in self:
-            vals.update({
+            vals.append({
                 'checkin': record.checkin,
                 'checkout': record.checkout,
                 'product_id': record.product_id.id,
