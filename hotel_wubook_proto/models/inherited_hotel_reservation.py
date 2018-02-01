@@ -148,21 +148,21 @@ class HotelReservation(models.Model):
                             raise ValidationError("Can't update availability \
                                                                     on WuBook")
                         # Get avail old dates
-                        checkin_dt = date_utils.get_datetime(
-                                                    older_vals[i]['checkin'])
-                        checkout_dt = date_utils.get_datetime(
-                                                    older_vals[i]['checkout'])
-                        wres = wubook_obj.fetch_rooms_values(
-                            checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                            checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
-                        # Get avail new dates
-                        checkin_dt = date_utils.get_datetime(
-                                                    new_vals[i]['checkin'])
-                        checkout_dt = date_utils.get_datetime(
-                                                    new_vals[i]['checkout'])
-                        wres = wubook_obj.fetch_rooms_values(
-                            checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                            checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                        # checkin_dt = date_utils.get_datetime(
+                        #                             older_vals[i]['checkin'])
+                        # checkout_dt = date_utils.get_datetime(
+                        #                             older_vals[i]['checkout'])
+                        # wres = wubook_obj.fetch_rooms_values(
+                        #     checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        #     checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                        # # Get avail new dates
+                        # checkin_dt = date_utils.get_datetime(
+                        #                             new_vals[i]['checkin'])
+                        # checkout_dt = date_utils.get_datetime(
+                        #                             new_vals[i]['checkout'])
+                        # wres = wubook_obj.fetch_rooms_values(
+                        #     checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        #     checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
                         wubook_obj.close_connection()
         else:
             res = super(HotelReservation, self).write(vals)

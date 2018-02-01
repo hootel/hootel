@@ -1499,7 +1499,6 @@ class WuBook(models.TransientModel):
 
     @api.model
     def push_restrictions(self):
-        return True
         unpushed = self.env['hotel.virtual.room.restriction.item'].search([
             ('wpushed', '=', False),
             ('date_start', '>=', datetime.strftime(fields.datetime.now(),
