@@ -80,9 +80,14 @@ class HotelReservation(models.Model):
                 vroom = vroom_obj.search([('wrid', '=', wrid)], limit=1)
                 if vroom:
                     for date, avail in days.iteritems():
+                        date_dt = datetime.strptime(
+                            item['date'],
+                            DEFAULT_WUBOOK_DATE_FORMAT)
+                        odate_str = date_dt.strftime(
+                                                    DEFAULT_SERVER_DATE_FORMAT)
                         cavail = avail_obj.search([
                             ('virtual_room_id', '=', vroom.id),
-                            ('date', '=', date)
+                            ('date', '=', odate_str)
                         ])
                         if cavail:
                             cavail.with_context({
@@ -94,7 +99,7 @@ class HotelReservation(models.Model):
                         else:
                             navail = avail_obj.create({
                                 'virtual_room_id': vroom.id,
-                                'date': date,
+                                'date': odate_str,
                                 'avail': avail,
                                 'wpushed': True,
                             })
@@ -183,7 +188,6 @@ class HotelReservation(models.Model):
         res = super(HotelReservation, self).unlink()
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
-            vals = {}
             for record in vals:
                 rooms_avail = self.get_wubook_availability(
                     record['checkin'],
