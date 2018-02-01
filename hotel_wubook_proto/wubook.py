@@ -795,7 +795,6 @@ class WuBook(models.TransientModel):
 
     @api.model
     def update_rplan_values(self, rpid, dfrom, values):
-        return True     # FIXME: OOps!
         init_connection = self._context.get('init_connection', True)
         if init_connection:
             if not self.init_connection():
@@ -1538,6 +1537,7 @@ class WuBook(models.TransientModel):
                             'closed_arrival': (restr and restr.closed_arrival) and 1 or 0,
                             'closed_departure': (restr and restr.closed_departure) and 1 or 0,
                         })
+            _logger.info("UPDATING RESTRICTIONS...")
             _logger.info(restrictions)
             for k_res, v_res in restrictions.iteritems():
                 if any(v_res):

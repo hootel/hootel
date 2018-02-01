@@ -59,17 +59,18 @@ class HotelVirtualRoom(models.Model):
             ('virtual_room_id', '=', self.id),
             ('restriction_id', '=', restriction_plan_id)
         ], limit=1)
-        if restriction:
-            return restriction
-        else:
-            vroom_rest_it_obj = self.env['hotel.virtual.room.restriction.item']
-            global_restr = vroom_rest_it_obj.search([
-                ('applied_on', '=', '1_global'),
-                ('restriction_id', '=', restriction_plan_id)
-            ], limit=1)
-            if global_restr:
-                return global_restr
-        return False
+        return restriction
+        # if restriction:
+        #     return restriction
+        # else:
+        #     vroom_rest_it_obj = self.env['hotel.virtual.room.restriction.item']
+        #     global_restr = vroom_rest_it_obj.search([
+        #         ('applied_on', '=', '1_global'),
+        #         ('restriction_id', '=', restriction_plan_id)
+        #     ], limit=1)
+        #     if global_restr:
+        #         return global_restr
+        # return False
 
     @api.model
     def create(self, vals):
