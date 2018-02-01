@@ -795,6 +795,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def update_rplan_values(self, rpid, dfrom, values):
+        return True     # FIXME: OOps!
         init_connection = self._context.get('init_connection', True)
         if init_connection:
             if not self.init_connection():
@@ -1498,6 +1499,7 @@ class WuBook(models.TransientModel):
 
     @api.model
     def push_restrictions(self):
+        return True
         unpushed = self.env['hotel.virtual.room.restriction.item'].search([
             ('wpushed', '=', False),
             ('date_start', '>=', datetime.strftime(fields.datetime.now(),
