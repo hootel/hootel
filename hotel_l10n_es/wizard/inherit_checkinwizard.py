@@ -68,9 +68,9 @@ class Wizard(models.TransientModel):
                     if dni[0] in dig_ext:
                         dni = dni.replace(dni[0], reemp_dig_ext[dni[0]])
                     if not ((len(dni) == len([n for n in dni if n in numeros])) and (validcaracter[int(dni)%23] == dig_control)):
-                        return {'warning': {'title': _('Error in DNI/NIE'), 'message': _('Wrong DNI, check it.'),},}
+                        return {'warning': {'title': _('Error in DNI/NIE/DRIVE LICENSE'), 'message': _('Wrong DNI/NIE/DRIVE LICENSE, check it.'),},}
                 else:
-                    return {'warning': {'title': _('Error in DNI/NIE'), 'message': _('DNI / NIE erroneous length, the correct format is: (12345678A or X1234567A)'),},}
+                    return {'warning': {'title': _('Error in DNI/NIE/DRIVE LICENSE'), 'message': _('DNI/NIE/DRIVE LICENSE erroneous length, the correct format is: (12345678A or X1234567A)'),},}
 
     # Validation for Tipo de documento no valido para Extranjero
     # @api.onchange('x')
