@@ -418,11 +418,17 @@ HotelCalendarManagement.prototype = {
       var room = this.getRoom(vroomId);
       for (var restriction of restrictions[vroomId]) {
         var dd = HotelCalendarManagement.toMoment(restriction.date, this.options.dateFormatShort);
-        // var inputIds = [
-        //   `MIN_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, restriction.min_stay,
-        //   `MIN_STAY_ARRIVAL_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, restriction.min_stay_arrival,
-        //   `MAX_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, restriction.max_stay
-        // ];
+        var inputIds = [
+          this._sanitizeId(`MIN_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`), restriction.min_stay,
+          this._sanitizeId(`MIN_STAY_ARRIVAL_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`), restriction.min_stay_arrival,
+          this._sanitizeId(`MAX_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`), restriction.max_stay
+        ];
+        for (var i=0; i<inputIds.length; i+=2) {
+          var inputItem = this.etable.querySelector(`#${inputIds[i]}`);
+          if (inputItem) {
+            inputItem.dataset.orgValue = inputItem.value = inputIds[i+1];
+          }
+        }
 
         var inputClousureId = this._sanitizeId(`CLOUSURE_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`);
         var inputClousure = this.etable.querySelector(`#${inputClousureId}`);

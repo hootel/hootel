@@ -76,36 +76,35 @@ class HotelReservation(models.Model):
         avail_obj = self.env['hotel.virtual.room.availability']
         vroom_obj = self.env['hotel.virtual.room']
         for wavail in wavails:
-            for wrid, days in wavail.iteritems():
-                vroom = vroom_obj.search([('wrid', '=', wrid)], limit=1)
-                if vroom:
-                    for date, avail in days.iteritems():
-                        date_dt = datetime.strptime(
-                            date,
-                            DEFAULT_WUBOOK_DATE_FORMAT)
-                        odate_str = date_dt.strftime(
-                                                    DEFAULT_SERVER_DATE_FORMAT)
-                        cavail = avail_obj.search([
-                            ('virtual_room_id', '=', vroom.id),
-                            ('date', '=', odate_str)
-                        ])
-                        if cavail:
-                            cavail.with_context({
-                                'wubook_action': False,
-                            }).write({
-                                'avail': avail,
-                                'wpushed': True,
-                            })
-                        else:
-                            navail = avail_obj.create({
-                                'virtual_room_id': vroom.id,
-                                'date': odate_str,
-                                'avail': avail,
-                                'wpushed': True,
-                            })
-                            if not navail:
-                                raise ValidationError(
-                                        "Can't update availability in Odoo!")
+            vroom = vroom_obj.search([('wrid', '=', wavail['id'])], limit=1)
+            if vroom:
+                for day in wavail['days']:
+                    date_dt = datetime.strptime(
+                        day['date'],
+                        DEFAULT_WUBOOK_DATE_FORMAT)
+                    odate_str = date_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)
+                    cavail = avail_obj.search([
+                        ('virtual_room_id', '=', vroom.id),
+                        ('date', '=', odate_str)
+                    ])
+                    if cavail:
+                        cavail.with_context({
+                            'wubook_action': False,
+                        }).write({
+                            'avail': day['avail'],
+                            'wpushed': True,
+                        })
+                    else:
+                        navail = avail_obj.create({
+                            'virtual_room_id': vroom.id,
+                            'date': odate_str,
+                            'avail': day['avail'],
+                            'wpushed': True,
+                        })
+                        if not navail:
+                            raise ValidationError(
+                                    "Can't update availability in Odoo!")
 
     @api.model
     def create(self, vals):
@@ -196,7 +195,7 @@ class HotelReservation(models.Model):
                 _logger.info("DISPONIBILIDAD UNLINK")
                 _logger.info(rooms_avail)
                 if any(rooms_avail):
-                    wres = wubook_obj.update_availability(rooms_avail)
+                    wres = self.env['wubook'].update_availability(rooms_avail)
                     if not wres:
                         raise ValidationError("Can't update availability \
                                                                 on WuBook")

@@ -102,10 +102,10 @@ class MassiveChangesWizard(models.TransientModel):
         if record.price[0] == '+' or record.price[0] == '-':
             if record.price[-1] == '%':
                 price = float(record.price[1:-1])
-                operation = (ecord.price[0] == '+') and 'ap' or 'sp'
+                operation = (record.price[0] == '+') and 'ap' or 'sp'
             else:
                 price = float(record.price[1:])
-                operation = (ecord.price[0] == '+') and 'a' or 's'
+                operation = (record.price[0] == '+') and 'a' or 's'
         else:
             if record.price[-1] == '%':
                 price = float(record.price[:-1])

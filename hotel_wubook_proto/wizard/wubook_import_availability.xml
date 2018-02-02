@@ -14,6 +14,9 @@
 						<field name="date_end" required="1" />
 					</group>
 				</group>
+				<group>
+					<field name="set_wmax_avail" />
+				</group>
 				<footer>
 					<button name="import_availability" string="Import" type="object"
 						class="oe_highlight" />

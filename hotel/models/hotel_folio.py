@@ -101,8 +101,12 @@ class HotelFolio(models.Model):
 
     name = fields.Char('Folio Number', readonly=True, index=True,
                        default='New')
+    email = fields.Char('E-mail', related='partner_id.email')
+    mobile = fields.Char('Mobile', related='partner_id.mobile')
+    image = fields.Binary('Image', related='partner_id.image')
     order_id = fields.Many2one('sale.order', 'Order', delegate=True,
                                required=True, ondelete='cascade')
+                        
     room_lines = fields.One2many('hotel.reservation', 'folio_id',
                                  readonly=False,
                                  states={'done': [('readonly', True)]},

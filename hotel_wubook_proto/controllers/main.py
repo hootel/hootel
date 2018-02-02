@@ -98,7 +98,16 @@ class website_wubook(http.Controller):
         })
         if wubook_obj.init_connection():
             wubook_obj.fetch_rooms_values(dfrom, dto)
-            wubook_obj.fetch_rplan_restrictions(dfrom, dto)
+
+            # parity_restr_id = request.env['ir.values'].sudo().get_default(
+            #                 'hotel.config.settings', 'parity_restrictions_id')
+            # if parity_restr_id:
+            #     vroom_restr_obj = request.env['hotel.virtual.room.restriction']
+            #     restr_id = vroom_restr_obj.sudo().browse(int(parity_restr_id))
+            #     if restr_id and restr_id.wpid:
+            #         wubook_obj.fetch_rplan_restrictions(dfrom, dto,
+            #                                             rpid=restr_id.wpid)
+
             parity_pricelist_id = request.env['ir.values'].sudo().get_default(
                                 'hotel.config.settings', 'parity_pricelist_id')
             if parity_pricelist_id:

@@ -322,7 +322,8 @@ class WuBook(models.TransientModel):
         return (rcode == 0, count)
 
     @api.model
-    def fetch_rooms_values(self, dfrom, dto, rooms=False):
+    def fetch_rooms_values(self, dfrom, dto, rooms=False,
+                           set_wmax_avail=False):
         init_connection = self._context.get('init_connection', True)
         if init_connection:
             if not self.init_connection():
@@ -351,7 +352,8 @@ class WuBook(models.TransientModel):
                                      "Can't fetch rooms values from WuBook",
                                      results, dfrom=dfrom, dto=dto)
         else:
-            self.generate_room_values(dfrom, dto, results)
+            self.generate_room_values(dfrom, dto, results,
+                                      set_wmax_avail=set_wmax_avail)
 
         return rcode == 0
 
@@ -892,7 +894,7 @@ class WuBook(models.TransientModel):
 
     # === WUBOOK -> ODOO
     @api.model
-    def generate_room_values(self, dfrom, dto, values):
+    def generate_room_values(self, dfrom, dto, values, set_wmax_avail=False):
         virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
         for k_rid, v_rid in values.iteritems():
@@ -910,10 +912,11 @@ class WuBook(models.TransientModel):
                     vals = {
                         'no_ota': day_vals.get('no_ota'),
                         'booked': day_vals.get('booked'),
-                        'avail': 0 if not day_vals.get('avail') else
-                        day_vals['avail'],
+                        'avail': day_vals.get('avail', 0),
                         'wpushed': True,
                     }
+                    if set_wmax_avail:
+                        vals.update({'wmax_avail': day_vals.get('avail', 0)})
                     if vroom_avail:
                         vroom_avail.with_context({
                             'wubook_action': False,
@@ -1370,6 +1373,14 @@ class WuBook(models.TransientModel):
                         })
                         folio_id = hotel_folio_obj.with_context({
                                         'wubook_action': False}).create(vals)
+
+                    # Update Reservation Spitted Parents
+                    for k_pid, v_pid in splitted_map.iteritems():
+                        preserv = folio_id.room_lines[k_pid-1]
+                        for pid in v_pid:
+                            creserv = folio_id.room_lines[pid-1]
+                            creserv.parent_reservation = preserv.id
+
                     processed_rids.append(rcode)
                 except Exception, e:
                     self.create_wubook_issue(
@@ -1377,14 +1388,6 @@ class WuBook(models.TransientModel):
                         str(e),
                         '', wid=rcode)
                     failed_reservations.append(crcode)
-
-            # Update Reservation Spitted Parents
-            for k_pid, v_pid in splitted_map.iteritems():
-                preserv = folio_id.room_lines[k_pid-1]
-                for pid in v_pid:
-                    creserv = folio_id.room_lines[pid-1]
-                    creserv.parent_reservation = preserv.id
-
         return (processed_rids, any(failed_reservations),
                 checkin_utc_dt, checkout_utc_dt)
 
