@@ -58,7 +58,6 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
   this._pricelist = pricelist || [];
   this._restrictions = restrictions || {};
   this._reservations = [];
-  this.isNRerservation = true;
   this.tableCreated = false;
   this.cellSelection = {start:false, end:false, current:false};
   /** Constants **/
@@ -135,9 +134,8 @@ HotelCalendar.prototype = {
   },
 
   setReservations: function(/*List*/reservations) {
-    var ids = _.pluck(this._reservations, 'id');
-    for (var id of ids) {
-      this.removeReservation(id, true);
+    for (var reservation of reservations) {
+      this.removeReservation(reservation, true);
     }
     this._reservations = [];
     this.addReservations(reservations);
@@ -152,7 +150,7 @@ HotelCalendar.prototype = {
 
       // Merge
       for (var reserv of reservations) {
-    	var index =  _.findKey(this._reservations, {'id': reserv.id});
+        var index =  _.findKey(this._reservations, {'id': reserv.id});
         if (index) {
           this._reservations[index] = reserv;
         } else {
@@ -190,25 +188,27 @@ HotelCalendar.prototype = {
             }
           }
         }
+        this._updateReservation(reserv);
       }
 
-      this.isNRerservation = true;
-      this._updateReservations();
-	  if (!noUnusedZones && this.options.divideRoomsByCapacity) {
+	    if (!noUnusedZones && this.options.divideRoomsByCapacity) {
       	this._updateUnusedZones();
       }
     }
   },
 
-  removeReservation: function(/*Int*/reservationID, /*Boolean?*/noupdate) {
-    var reserv = _.find(this._reservations, {'id': +reservationID});
+  removeReservation: function(/*Int/HReservationObject*/reservation, /*Boolean?*/noupdate) {
+    var reserv = reservation;
+    if (typeof reservation === 'int') {
+      reserv = _.find(this._reservations, {'id': +reservation});
+    }
     if (reserv) {
       var resDiv = this.getReservationDiv(reserv);
       if (resDiv) {
         resDiv.parentNode.removeChild(resDiv);
       }
       this._reservations = _.without(this._reservations, reserv);
-      this.isNRerservation = true;
+
       if (!noupdate) {
         this._updateReservations();
         if (this.options.divideRoomsByCapacity) {
@@ -1230,8 +1230,8 @@ HotelCalendar.prototype = {
 
   setDetailPrice: function(/*String*/room_type, /*String*/date, /*Float*/price) {
     var dd = HotelCalendar.toMomentUTC(date);
-    var selector = this._sanitizeId(`#CELL_PRICE_${room_type}_${dd.local().format(HotelCalendar.DATE_FORMAT_SHORT_)}`);
-    var cell_input = this.edtable.querySelector(`${selector} input`);
+    var selector = this._sanitizeId(`CELL_PRICE_${room_type}_${dd.local().format(HotelCalendar.DATE_FORMAT_SHORT_)}`);
+    var cell_input = this.edtable.querySelector('#'+`${selector} input`);
     cell_input.value = price;
   },
 
@@ -1239,36 +1239,25 @@ HotelCalendar.prototype = {
     return _.reject(this._reservations, function(item){ return item === reservationObj || item.linkedId !== reservationObj.id; });
   },
 
+  _updateReservation: function(/*HReservationObject*/reservationObj) {
+    var limits = this.getReservationCellLimits(reservationObj);
+
+    // Fill
+    if (limits.isValid()) {
+      var divRes = this.getReservationDiv(reservationObj);
+      this._updateDivReservation(divRes, limits);
+    } else {
+      console.warn(`[Hotel Calendar][_updateReservation] Can't place reservation ID@${reservationObj.id}`);
+      this.removeReservation(reservationObj, true);
+    }
+  },
+
   _updateReservations: function() {
-      var $this = this;
-
-      var errors = [];
-      this._reservations.forEach(function(itemReserv, indexReserv){
-        var limits = $this.getReservationCellLimits(itemReserv);
-
-        // Fill
-        if (limits.isValid()) {
-          var divRes = $this.getReservationDiv(itemReserv);
-          $this._updateDivReservation(divRes, limits);
-        } else {
-          console.warn(`[Hotel Calendar][updateReservations_] Can't place reservation ID@${itemReserv.id}`);
-          errors.push(itemReserv.id);
-        }
-      });
-
-      // Delete Reservations with errors
-      for (var reservID of errors) {
-        this.removeReservation(reservID, true);
+      for (var reservation of this._reservations){
+        this._updateReservation(reservation);
       }
-
       //this._assignReservationsEvents();
       this._updateReservationOccupation();
-      //this._updatePriceList();
-
-//        if (errors.length && this.isNRerservation) {
-//            alert("[Hotel Calendar]\nWARNING: Can't show all reservations!\n\nSee debugger for more details.");
-//        }
-      this.isNRerservation = false;
   },
 
   _assignReservationsEvents: function(reservDivs) {
@@ -1384,35 +1373,46 @@ HotelCalendar.prototype = {
   },
 
   _updateReservationOccupation: function() {
-    var cells = this.edtable.querySelectorAll('td.hcal-cell-detail-room-free-type-group-item-day');
-    for (var cell of cells) {
-      var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
-      var cell_date = cell.dataset.hcalDate;
-      var num_rooms = this.getRoomsCapacityByType(parentRow.dataset.hcalRoomType); // FIXME: Too expensive, hard search!!
-      var occup = this.calcDayRoomTypeReservations(cell_date, parentRow.dataset.hcalRoomType);
-      cell.innerText = occup;
-      cell.style.backgroundColor = this._generateColor(occup, num_rooms, 0.35, true, true);
-    }
+    var cells = [
+      this.edtable.querySelectorAll('td.hcal-cell-detail-room-free-type-group-item-day'),
+      this.edtable.querySelectorAll('td.hcal-cell-detail-room-free-total-group-item-day'),
+      this.edtable.querySelectorAll('td.hcal-cell-detail-room-perc-occup-group-item-day')
+    ];
+    var num_cells = cells[0].length;
+    var num_rooms = this.getRoomsCapacityTotal();
+    for (var i=0; i<num_cells; ++i) {
+      var cell = false;
+      // Occupation by Type
+      cell = cells[0][i];
+      if (cell) {
+        var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
+        var cell_date = cell.dataset.hcalDate;
+        var num_rooms = this.getRoomsCapacityByType(parentRow.dataset.hcalRoomType);
+        var occup = this.calcDayRoomTypeReservations(cell_date, parentRow.dataset.hcalRoomType);
+        cell.innerText = occup;
+        cell.style.backgroundColor = this._generateColor(occup, num_rooms, 0.35, true, true);
+      }
 
-    cells = this.edtable.querySelectorAll('td.hcal-cell-detail-room-free-total-group-item-day');
-    for (var cell of cells) {
-      var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
-      var cell_date = cell.dataset.hcalDate;
-      var num_rooms = this.getRoomsCapacityTotal(); // FIXME: Too expensive, hard search!!
-      var occup = this.calcDayRoomTotalReservations(cell_date);
-      cell.innerText = occup;
-      cell.style.backgroundColor = this._generateColor(occup, num_rooms, 0.35, true, true);
-    }
+      // Occupation Total
+      cell = cells[1][i];
+      if (cell) {
+        var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
+        var cell_date = cell.dataset.hcalDate;
+        var occup = this.calcDayRoomTotalReservations(cell_date);
+        cell.innerText = occup;
+        cell.style.backgroundColor = this._generateColor(occup, num_rooms, 0.35, true, true);
+      }
 
-    cells = this.edtable.querySelectorAll('td.hcal-cell-detail-room-perc-occup-group-item-day');
-    for (var cell of cells) {
-      var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
-      var cell_date = cell.dataset.hcalDate;
-      var num_rooms = this.getRoomsCapacityTotal(); // FIXME: Too expensive, hard search!!
-      var occup = this.calcDayRoomTotalReservations(cell_date);
-      var perc = 100.0 - (occup * 100.0 / num_rooms);
-      cell.innerText = perc.toFixed(0);
-      cell.style.backgroundColor = this._generateColor(perc, 100.0, 0.35, false, true);
+      // Occupation Total Percentage
+      cell = cells[2][i];
+      if (cell) {
+        var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
+        var cell_date = cell.dataset.hcalDate;
+        var occup = this.calcDayRoomTotalReservations(cell_date);
+        var perc = 100.0 - (occup * 100.0 / num_rooms);
+        cell.innerText = perc.toFixed(0);
+        cell.style.backgroundColor = this._generateColor(perc, 100.0, 0.35, false, true);
+      }
     }
   },
 
@@ -1478,7 +1478,7 @@ HotelCalendar.prototype = {
   },
 
   _sanitizeId: function(/*String*/str) {
-    return str.replace(/[^a-zA-Z0-9\.\-_:]/g, '_');
+    return str.replace(/[^a-zA-Z0-9\-_]/g, '_');
   },
 
   _isLeftButtonPressed: function(/*EventObject*/evt) {
