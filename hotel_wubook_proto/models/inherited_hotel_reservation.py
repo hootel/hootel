@@ -19,12 +19,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from datetime import datetime, timedelta
 from openerp import models, fields, api
 from openerp.exceptions import UserError, ValidationError
-from openerp.tools import (
-    DEFAULT_SERVER_DATE_FORMAT,
-    DEFAULT_SERVER_DATETIME_FORMAT)
 from ..wubook import (
     DEFAULT_WUBOOK_DATE_FORMAT,
     WUBOOK_STATUS_CONFIRMED,
@@ -71,61 +67,16 @@ class HotelReservation(models.Model):
     wstatus_reason = fields.Char("WuBook Status Reason", readonly=True)
     wcustomer_notes = fields.Text(related='folio_id.wcustomer_notes')
 
-    @api.multi
-    def save_wubook_availability(self, wavails):
-        avail_obj = self.env['hotel.virtual.room.availability']
-        vroom_obj = self.env['hotel.virtual.room']
-        for wavail in wavails:
-            vroom = vroom_obj.search([('wrid', '=', wavail['id'])], limit=1)
-            if vroom:
-                for day in wavail['days']:
-                    date_dt = datetime.strptime(
-                        day['date'],
-                        DEFAULT_WUBOOK_DATE_FORMAT)
-                    odate_str = date_dt.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT)
-                    cavail = avail_obj.search([
-                        ('virtual_room_id', '=', vroom.id),
-                        ('date', '=', odate_str)
-                    ])
-                    if cavail:
-                        cavail.with_context({
-                            'wubook_action': False,
-                        }).write({
-                            'avail': day['avail'],
-                            'wpushed': True,
-                        })
-                    else:
-                        navail = avail_obj.create({
-                            'virtual_room_id': vroom.id,
-                            'date': odate_str,
-                            'avail': day['avail'],
-                            'wpushed': True,
-                        })
-                        if not navail:
-                            raise ValidationError(
-                                    "Can't update availability in Odoo!")
-
     @api.model
     def create(self, vals):
+        res = super(HotelReservation, self).create(vals)
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
-            reserv_obj = self.env['hotel.reservation']
-            rooms_avail = reserv_obj.get_wubook_availability(
+            self.env['hotel.virtual.room.availability'].refresh_availability(
                 vals['checkin'],
                 vals['checkout'],
-                vals['product_id'],
-                dbchanged=False)
-            _logger.info("DISPONIBILIDAD CREATE")
-            _logger.info(rooms_avail)
-            if any(rooms_avail):
-                wres = self.env['wubook'].update_availability(rooms_avail)
-                if not wres:
-                    raise ValidationError("Can't update availability \
-                                                            on WuBook")
-                self.save_wubook_availability(rooms_avail)
-
-        res = super(HotelReservation, self).create(vals)
+                vals['product_id'])
+            self.env['wubook'].push_availability()
         return res
 
 #     @api.multi
@@ -158,19 +109,17 @@ class HotelReservation(models.Model):
 
             res = super(HotelReservation, self).write(vals)
 
+            vroom_avail_obj = self.env['hotel.virtual.room.availability']
             for i in range(0, len(older_vals)):
-                navails = self._generate_wubook_diff_avail(older_vals[i],
-                                                           new_vals[i])
-                _logger.info("DISPONIBILIDAD WRITE")
-                _logger.info(navails)
-                if any(navails):
-                    # Push avail to Wubook
-                    wres = self.env['wubook'].update_availability(navails)
-                    if not wres:
-                        raise ValidationError("Can't update availability \
-                                                                on WuBook")
-                    # Update Availability in Odoo
-                    self.save_wubook_availability(navails)
+                vroom_avail_obj.refresh_availability(
+                    older_vals[i]['checkin'],
+                    older_vals[i]['checkout'],
+                    older_vals[i]['product_id'])
+                vroom_avail_obj.refresh_availability(
+                    new_vals[i]['checkin'],
+                    new_vals[i]['checkout'],
+                    new_vals[i]['product_id'])
+            self.env['wubook'].push_availability()
         else:
             res = super(HotelReservation, self).write(vals)
         return res
@@ -187,54 +136,14 @@ class HotelReservation(models.Model):
         res = super(HotelReservation, self).unlink()
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
+            vroom_avail_obj = self.env['hotel.virtual.room.availability']
             for record in vals:
-                rooms_avail = self.get_wubook_availability(
+                vroom_avail_obj.refresh_availability(
                     record['checkin'],
                     record['checkout'],
                     record['product_id'])
-                _logger.info("DISPONIBILIDAD UNLINK")
-                _logger.info(rooms_avail)
-                if any(rooms_avail):
-                    wres = self.env['wubook'].update_availability(rooms_avail)
-                    if not wres:
-                        raise ValidationError("Can't update availability \
-                                                                on WuBook")
-                    self.save_wubook_availability(rooms_avail)
+            self.env['wubook'].push_availability()
         return res
-
-    @api.model
-    def _generate_wubook_diff_avail(self, older_vals, new_vals):
-        old_rooms_avail = []
-        new_rooms_avail = []
-        if older_vals['checkin'] and older_vals['checkout'] and \
-                older_vals['product_id']:
-            old_rooms_avail = self.get_wubook_availability(
-                older_vals['checkin'],
-                older_vals['checkout'],
-                older_vals['product_id'])
-        if new_vals['checkin'] and new_vals['checkout'] and \
-                new_vals['product_id']:
-            new_rooms_avail = self.get_wubook_availability(
-                new_vals['checkin'],
-                new_vals['checkout'],
-                new_vals['product_id'])
-        # Merge Old & New Dicts (Updating Old Dict)
-        for newitem in new_rooms_avail:
-            found = False
-            for olditem in old_rooms_avail:
-                if olditem['id'] == newitem['id']:
-                    for newdays in newitem['days']:
-                        foundday = False
-                        for olddays in olditem['days']:
-                            if olddays['date'] == newdays['date']:
-                                olddays.update(newdays)
-                                foundday = True
-                        if not foundday:
-                            olditem['days'].append(newdays)
-                    found = True
-            if not found:
-                old_rooms_avail.append(newitem)
-        return old_rooms_avail
 
     @api.multi
     def action_cancel(self):
@@ -292,50 +201,6 @@ class HotelReservation(models.Model):
     def mark_as_readed(self):
         for record in self:
             record.write({'to_read': False})
-
-    @api.model
-    def get_wubook_availability(self, checkin, checkout, product_id,
-                                dbchanged=True):
-        date_start = date_utils.get_datetime(checkin)
-        # Not count end day of the reservation
-        date_diff = date_utils.date_diff(checkin, checkout, hours=False)
-
-        vroom_obj = self.env['hotel.virtual.room']
-        virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
-
-        rooms_avail = []
-        vrooms = vroom_obj.search([
-            ('room_ids.product_id', '=', product_id)
-        ])
-        for vroom in vrooms:
-            if vroom.wrid and vroom.wrid != '':
-                rdays = []
-                for i in range(0, date_diff):
-                    ndate_dt = date_start + timedelta(days=i)
-                    ndate_str = ndate_dt.strftime(
-                                                DEFAULT_SERVER_DATETIME_FORMAT)
-                    avail = len(vroom_obj.check_availability_virtual_room(
-                        ndate_str,
-                        ndate_str,
-                        virtual_room_id=vroom.id))
-                    if not dbchanged:
-                        avail = avail - 1
-                    max_avail = vroom.total_rooms_count
-                    vroom_avail_id = virtual_room_avail_obj.search([
-                        ('virtual_room_id', '=', vroom.id),
-                        ('date', '=', ndate_str)], limit=1)
-                    if vroom_avail_id and vroom_avail_id.wmax_avail >= 0:
-                        max_avail = vroom_avail_id.wmax_avail
-                    avail = max(
-                            min(avail, vroom.total_rooms_count, max_avail), 0)
-                    rdays.append({
-                        'date': ndate_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                        'avail': avail,
-                    })
-                ravail = {'id': vroom.wrid, 'days': rdays}
-                rooms_avail.append(ravail)
-
-        return rooms_avail
 
     @api.onchange('checkin', 'checkout', 'product_id')
     def on_change_checkin_checkout_product_id(self):

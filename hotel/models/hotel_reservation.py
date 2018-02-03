@@ -41,77 +41,76 @@ _logger = logging.getLogger(__name__)
 
 class HotelReservation(models.Model):
 
+    @api.multi
+    def _generate_color(self):
+        self.ensure_one()
+        now_utc_dt = date_utils.now()
+        diff_checkin_now = date_utils.date_diff(now_utc_dt, self.checkin,
+                                                hours=False)
+        diff_checkout_now = date_utils.date_diff(now_utc_dt, self.checkout,
+                                                 hours=False)
+
+        ir_values_obj = self.env['ir.values']
+        reserv_color = '#FFFFFF'
+        if self.reservation_type == 'staff':
+            reserv_color = ir_values_obj.get_default('hotel.config.settings',
+                                                     'color_staff')
+        elif self.reservation_type == 'out':
+            reserv_color = ir_values_obj.get_default('hotel.config.settings',
+                                                     'color_dontsell')
+        elif self.to_assign:
+            reserv_color = ir_values_obj.get_default('hotel.config.settings',
+                                                     'color_to_assign')
+        elif self.state == 'draft':
+            reserv_color = ir_values_obj.get_default('hotel.config.settings',
+                                                     'color_pre_reservation')
+        elif self.state == 'confirm':
+            if self.folio_id.invoices_amount == 0:
+                reserv_color = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_reservation_pay')
+            else:
+                reserv_color = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_reservation')
+        elif self.state == 'booking' and diff_checkout_now == 0:
+            if self.folio_id.invoices_amount == 0:
+                reserv_color = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_checkout_pay')
+            else:
+                reserv_color = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_checkout')
+        elif self.state == 'booking':
+            if self.folio_id.invoices_amount == 0:
+                reserv_color = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_stay_pay')
+            else:
+                reserv_color = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_stay')
+        else:
+            if self.folio_id.invoices_amount == 0:
+                reserv_color = '#FFFFFF'
+            else:
+                reserv_color = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_payment_pending')
+        return reserv_color
+
     @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
     def _compute_color(self):
         _logger.info('_compute_color')
-        now_str = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         for rec in self:
-            now_date = datetime.strptime(now_str,
-                                         DEFAULT_SERVER_DATETIME_FORMAT)
-            checkin_date = (datetime.strptime(
-                                rec.checkin,
-                                DEFAULT_SERVER_DATETIME_FORMAT))
-            difference_checkin = relativedelta(now_date, checkin_date)
-            checkout_date = (datetime.strptime(
-                                rec.checkout,
-                                DEFAULT_SERVER_DATETIME_FORMAT))
-            difference_checkout = relativedelta(now_date, checkout_date)
-            _logger.info("COLOR INIT")
-            _logger.info(rec.reserve_color)
-            if rec.reservation_type == 'staff':
-                rec.reserve_color = self.env['ir.values'].get_default(
-                    'hotel.config.settings', 'color_staff')
-            elif rec.reservation_type == 'out':
-                rec.reserve_color = self.env['ir.values'].get_default(
-                    'hotel.config.settings', 'color_dontsell')
-            elif rec.to_assign:
-                rec.reserve_color = self.env['ir.values'].get_default(
-                    'hotel.config.settings', 'color_to_assign')
-            elif rec.state == 'draft':
-                rec.reserve_color = self.env['ir.values'].get_default(
-                    'hotel.config.settings', 'color_pre_reservation')
-            elif rec.state == 'confirm':
-                if rec.folio_id.invoices_amount == 0:
-                    rec.reserve_color = self.env['ir.values'].get_default(
-                        'hotel.config.settings', 'color_reservation_pay')
-                else:
-                    rec.reserve_color = self.env['ir.values'].get_default(
-                        'hotel.config.settings', 'color_reservation')
-            elif rec.state == 'booking' and difference_checkout.days == 0:
-                if rec.folio_id.invoices_amount == 0:
-                    rec.reserve_color = self.env['ir.values'].get_default(
-                        'hotel.config.settings', 'color_checkout_pay')
-                else:
-                    rec.reserve_color = self.env['ir.values'].get_default(
-                        'hotel.config.settings', 'color_checkout')
-            elif rec.state == 'booking':
-                if rec.folio_id.invoices_amount == 0:
-                    rec.reserve_color = self.env['ir.values'].get_default(
-                        'hotel.config.settings', 'color_stay_pay')
-                else:
-                    rec.reserve_color = self.env['ir.values'].get_default(
-                        'hotel.config.settings', 'color_stay')
-            else:
-                if rec.folio_id.invoices_amount == 0:
-                    rec.reserve_color = '#FFFFFF'
-                else:
-                    rec.reserve_color = self.env['ir.values'].get_default(
-                        'hotel.config.settings', 'color_payment_pending')
-            _logger.info(rec.reserve_color)
-            rec.write({})     # FIXME: workaround for dispatch write events
-            #~ hotel_reserv_obj = self.env['hotel.reservation']
-            #~ if rec.splitted:
-                #~ master_reservation = rec.parent_reservation or rec
-                #~ splitted_reservs = hotel_reserv_obj.search([
-                    #~ ('splitted', '=', True),
-                    #~ '|', ('parent_reservation', '=', master_reservation.id),
-                         #~ ('id', '=', master_reservation.id),
-                    #~ ('folio_id', '=', rec.folio_id.id),
-                    #~ ('id', '!=', rec.id),
-                #~ ])
-                #~ splitted_reservs.write({'reserve_color': rec.reserve_color})
-            rec.folio_id.color = rec.reserve_color
-        _logger.info('END _compute_color')
+            reserve_color = rec._generate_color()
+            rec.reserve_color = reserve_color
+            rec.folio_id.color = reserve_color
+            # hotel_reserv_obj = self.env['hotel.reservation']
+            # if rec.splitted:
+            #     master_reservation = rec.parent_reservation or rec
+            #     splitted_reservs = hotel_reserv_obj.search([
+            #         ('splitted', '=', True),
+            #         '|', ('parent_reservation', '=', master_reservation.id),
+            #              ('id', '=', master_reservation.id),
+            #         ('folio_id', '=', rec.folio_id.id),
+            #         ('id', '!=', rec.id),
+            #     ])
+            #     splitted_reservs.write({'reserve_color': rec.reserve_color})
 
     @api.multi
     def copy(self, default=None):
@@ -274,7 +273,7 @@ class HotelReservation(models.Model):
                                          'Parent Reservation')
     amount_reservation = fields.Float('Total',compute='_computed_amount_reservation') #To show de total amount line in read_only mode
     edit_room = fields.Boolean(default=True)
-        
+
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
         _logger.info('_computed_amount_reservation')
@@ -604,7 +603,7 @@ class HotelReservation(models.Model):
         else:
             self.price_unit = rlines['total_price']
 
-            
+
     @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type')
     def on_change_checkin_checkout_product_id(self):
         _logger.info('on_change_checkin_checkout_product_id')
@@ -730,7 +729,7 @@ class HotelReservation(models.Model):
         old_lines_ids = self.mapped('reservation_lines.id')
         for i in range(0, days-1):
             ndate = start_date_dt + timedelta(days=i)
-            ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)            
+            ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
             prod = product_id.with_context(
                 lang=self.partner_id.lang,
                 partner=self.partner_id.id,

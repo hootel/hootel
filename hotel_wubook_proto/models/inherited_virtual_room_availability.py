@@ -19,9 +19,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from datetime import timedelta
 from openerp import models, fields, api
 from openerp.exceptions import ValidationError
 from odoo.addons.hotel import date_utils
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 
@@ -88,3 +90,43 @@ class VirtualRoomAvailability(models.Model):
                 self.env['wubook'].is_valid_account():
             vals.update({'wpushed': False})
         return super(VirtualRoomAvailability, self).write(vals)
+
+    @api.model
+    def refresh_availability(self, checkin, checkout, product_id):
+        date_start = date_utils.get_datetime(checkin)
+        # Not count end day of the reservation
+        date_diff = date_utils.date_diff(checkin, checkout, hours=False)
+
+        vroom_obj = self.env['hotel.virtual.room']
+        virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
+
+        vrooms = vroom_obj.search([
+            ('room_ids.product_id', '=', product_id)
+        ])
+        for vroom in vrooms:
+            if vroom.wrid and vroom.wrid != '':
+                for i in range(0, date_diff):
+                    ndate_dt = date_start + timedelta(days=i)
+                    ndate_str = ndate_dt.strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)
+                    avail = len(vroom_obj.check_availability_virtual_room(
+                        ndate_str,
+                        ndate_str,
+                        virtual_room_id=vroom.id))
+                    max_avail = vroom.total_rooms_count
+                    vroom_avail_id = virtual_room_avail_obj.search([
+                        ('virtual_room_id', '=', vroom.id),
+                        ('date', '=', ndate_str)], limit=1)
+                    if vroom_avail_id and vroom_avail_id.wmax_avail >= 0:
+                        max_avail = vroom_avail_id.wmax_avail
+                    avail = max(
+                            min(avail, vroom.total_rooms_count, max_avail), 0)
+
+                    if vroom_avail_id:
+                        vroom_avail_id.write({'avail': avail})
+                    else:
+                        virtual_room_avail_obj.create({
+                            'virtual_room_id': vroom.id,
+                            'date': ndate_str,
+                            'avail': avail,
+                        })

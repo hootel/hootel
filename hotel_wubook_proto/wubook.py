@@ -1252,35 +1252,30 @@ class WuBook(models.TransientModel):
                             notthis=used_rooms)
                     if any(free_rooms):
                         num_free_rooms = len(free_rooms)
-                        # Total Price Room
-                        reservation_lines = []
-                        tprice = 0.0
+                        # Generate Reservation
+                        customer_room_index = 0
                         for broom in book['booked_rooms']:
                             if str(broom['room_id']) == vroom.wrid:
-                                for brday in broom['roomdays']:
-                                    wndate = datetime.strptime(
-                                        brday['day'],
-                                        DEFAULT_WUBOOK_DATE_FORMAT
-                                    ).replace(tzinfo=pytz.utc)
-                                    if date_utils.date_in(wndate, dates_checkin[0], dates_checkout[0]-timedelta(days=1), hours=False) == 0:
-                                        reservation_lines.append((0, False, {
-                                            'date': wndate.strftime(
-                                                DEFAULT_SERVER_DATE_FORMAT),
-                                            'price': brday['price']
-                                        }))
-                                        tprice += brday['price']
-                                break
-                        # Occupancy
-                        occupancy = 0
-                        customer_room_index = 0
-                        for broom in book['rooms_occupancies']:
-                            if str(broom['id']) == vroom.wrid:
                                 if num_free_rooms > customer_room_index:
-                                    occupancy = broom['occupancy']
+                                    # Generate Reservation Day Lines
+                                    reservation_lines = []
+                                    tprice = 0.0
+                                    for brday in broom['roomdays']:
+                                        wndate = datetime.strptime(
+                                            brday['day'],
+                                            DEFAULT_WUBOOK_DATE_FORMAT
+                                        ).replace(tzinfo=pytz.utc)
+                                        if date_utils.date_in(wndate, dates_checkin[0], dates_checkout[0]-timedelta(days=1), hours=False) == 0:
+                                            reservation_lines.append((0, False, {
+                                                'date': wndate.strftime(
+                                                    DEFAULT_SERVER_DATE_FORMAT),
+                                                'price': brday['price']
+                                            }))
+                                            tprice += brday['price']
                                     vals = {
                                         'checkin': checkin_str,
                                         'checkout': checkout_str,
-                                        'adults': occupancy,
+                                        'adults': broom['ancillary']['guests'],
                                         'children': 0,
                                         'product_id': free_rooms[
                                             customer_room_index].product_id.id,
@@ -1319,7 +1314,6 @@ class WuBook(models.TransientModel):
                                         "Can't found a free room for \
                                                 reservation from wubook (#B)",
                                         '', wid=rcode)
-
                         dates_checkin = [dates_checkin[1], False]
                         dates_checkout = [dates_checkout[1], False]
                     else:
@@ -1359,6 +1353,7 @@ class WuBook(models.TransientModel):
             # Create Folio
             if not any(failed_reservations) and any(reservations):
                 try:
+                    _logger.info("HILA!! START")
                     vals = {
                         'room_lines': reservations,
                         'wcustomer_notes': book['customer_notes'],
@@ -1374,12 +1369,16 @@ class WuBook(models.TransientModel):
                         folio_id = hotel_folio_obj.with_context({
                                         'wubook_action': False}).create(vals)
 
+                    _logger.info("HILA!! MID")
+
                     # Update Reservation Spitted Parents
                     for k_pid, v_pid in splitted_map.iteritems():
                         preserv = folio_id.room_lines[k_pid-1]
                         for pid in v_pid:
                             creserv = folio_id.room_lines[pid-1]
                             creserv.parent_reservation = preserv.id
+
+                    _logger.info("HILA!! FIN")
 
                     processed_rids.append(rcode)
                 except Exception, e:
