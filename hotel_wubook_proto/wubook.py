@@ -1272,10 +1272,14 @@ class WuBook(models.TransientModel):
                                                 'price': brday['price']
                                             }))
                                             tprice += brday['price']
+                                    persons = vroom.wcapacity
+                                    if 'ancillary' in broom and 'guests' in \
+                                            broom['ancillary']:
+                                        persons = broom['ancillary']['guests']
                                     vals = {
                                         'checkin': checkin_str,
                                         'checkout': checkout_str,
-                                        'adults': broom['ancillary']['guests'],
+                                        'adults': persons,
                                         'children': 0,
                                         'product_id': free_rooms[
                                             customer_room_index].product_id.id,
@@ -1353,7 +1357,6 @@ class WuBook(models.TransientModel):
             # Create Folio
             if not any(failed_reservations) and any(reservations):
                 try:
-                    _logger.info("HILA!! START")
                     vals = {
                         'room_lines': reservations,
                         'wcustomer_notes': book['customer_notes'],
@@ -1369,16 +1372,12 @@ class WuBook(models.TransientModel):
                         folio_id = hotel_folio_obj.with_context({
                                         'wubook_action': False}).create(vals)
 
-                    _logger.info("HILA!! MID")
-
                     # Update Reservation Spitted Parents
                     for k_pid, v_pid in splitted_map.iteritems():
                         preserv = folio_id.room_lines[k_pid-1]
                         for pid in v_pid:
                             creserv = folio_id.room_lines[pid-1]
                             creserv.parent_reservation = preserv.id
-
-                    _logger.info("HILA!! FIN")
 
                     processed_rids.append(rcode)
                 except Exception, e:
