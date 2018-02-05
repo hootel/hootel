@@ -234,7 +234,7 @@ class HotelReservation(models.Model):
                                domainReservations, withRooms=True,
                                withPricelist=True, withRestrictions=True):
         if not dfrom or not dto:
-            raise ValidationError('Input Error: No dates defined!')
+            raise ValidationError(_('Input Error: No dates defined!'))
 
         domainRooms = domainRooms or []
         domainReservations = domainReservations or []

@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from openerp.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT)
-from openerp import models, api
+from openerp import models, api, _
 from openerp.exceptions import ValidationError
 from odoo.addons.hotel import date_utils
 import logging
@@ -303,7 +303,7 @@ class HotelCalendarManagement(models.TransientModel):
     def get_hcalendar_all_data(self, dfrom, dto, pricelist_id, restriction_id,
                                withRooms):
         if not dfrom or not dto:
-            raise ValidationError('Input Error: No dates defined!')
+            raise ValidationError(_('Input Error: No dates defined!'))
         vals = {}
         if not pricelist_id:
             pricelist_id = self.env['ir.values'].sudo().get_default(

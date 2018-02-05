@@ -6,22 +6,22 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-31 12:08+0100\n"
-"PO-Revision-Date: 2017-12-31 13:43+0100\n"
+"POT-Creation-Date: 2018-02-05 16:51+0000\n"
+"PO-Revision-Date: 2018-02-05 17:55+0100\n"
+"Last-Translator: Jose Luis Algara <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.1\n"
-"Last-Translator: \n"
+"Plural-Forms: \n"
 "Language: es\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:13
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:73
-#, fuzzy, python-format
+#, python-format
 msgid "&nbsp;"
 msgstr "&nbsp;"
 
@@ -59,15 +59,15 @@ msgstr "Permitir No válidas"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:25
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:34
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:47
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:56
 #, python-format
 msgid "Are you sure you want to make this changes?"
 msgstr "¿Estás seguo de que quieres confirmar estos cambios?"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:42
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:64
 #, python-format
 msgid "Arrival Hour:"
 msgstr "Hora de Llegada:"
@@ -79,7 +79,7 @@ msgstr "Asistido"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:53
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:75
 #, python-format
 msgid "Belongs to the Virtual Rooms:"
 msgstr "Incluida en las Habitaciones Virtuales:"
@@ -124,14 +124,14 @@ msgstr "Colores del Calendario"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:77
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:99
 #, python-format
 msgid "Check-In:"
 msgstr "Entrada:"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:78
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:100
 #, python-format
 msgid "Check-Out:"
 msgstr "Salida:"
@@ -143,8 +143,8 @@ msgstr "Entrada"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:11
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:19
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:12
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:31
 #, python-format
 msgid "Checkin:"
 msgstr "Entrada:"
@@ -156,28 +156,23 @@ msgstr "Salida"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:12
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:20
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:15
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:34
 #, python-format
 msgid "Checkout:"
 msgstr "Salida"
 
 #. module: hotel_calendar
-#: model:ir.model.fields,field_description:hotel_calendar.field_hotel_reservation_reserve_color
-msgid "Color"
-msgstr "Color"
-
-#. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:331
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:340
+#, python-format
 msgid "Confirm Folio"
 msgstr "Confirmar Ficha"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:187
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:193
+#, python-format
 msgid "Confirm Reservation Changes"
 msgstr "Confirmar Reserva Cambios"
 
@@ -188,8 +183,8 @@ msgstr "Reserva Confirmada"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:306
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:315
+#, python-format
 msgid "Create: "
 msgstr "Creado: "
 
@@ -197,7 +192,6 @@ msgstr "Creado: "
 #: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_create_uid
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_create_uid
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_create_uid
-#, fuzzy
 msgid "Created by"
 msgstr "Creado por"
 
@@ -205,53 +199,48 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_create_date
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_create_date
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_create_date
-#, fuzzy
 msgid "Created on"
 msgstr "Creado en"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:32
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:54
+#, python-format
 msgid "Current Price:"
 msgstr "Precio Actual:"
 
 #. module: hotel_calendar
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_date
-#, fuzzy
 msgid "Date"
 msgstr "Fecha"
 
 #. module: hotel_calendar
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_default_num_days
-#, fuzzy
 msgid "Default number of days"
-msgstr "Número de Ficha"
+msgstr "Número predeterminado de días"
 
 #. module: hotel_calendar
 #: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_display_name
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_display_name
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_display_name
-#, fuzzy
 msgid "Display Name"
 msgstr "Mostrar Nombre"
 
 #. module: hotel_calendar
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_divide_rooms_by_capacity
-#, fuzzy
 msgid "Divide rooms by capacity"
-msgstr "Capacidad:"
+msgstr "Divida las habitaciones por capacidad"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:69
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:91
 #, python-format
 msgid "Do you want to confirm this folio?"
 msgstr "Deseas confirmar la fiha?"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:86
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:108
 #, python-format
 msgid "Do you want to save these changes?"
 msgstr "Deseas confirmar la ficha?"
@@ -270,19 +259,18 @@ msgstr "Último día de Semana"
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:39
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:82
-#, fuzzy, python-format
+#, python-format
 msgid "FROM"
 msgstr "DE"
 
 #. module: hotel_calendar
 #: selection:hotel.config.settings,end_day_week:0
-#, fuzzy
 msgid "Friday"
 msgstr "Viernes"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:85
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:107
 #, python-format
 msgid "Have unsaved changes!"
 msgstr "Tienes cambios sin guardar!"
@@ -292,7 +280,7 @@ msgstr "Tienes cambios sin guardar!"
 #: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:59
 #: model:ir.actions.act_window,name:hotel_calendar.action_hotel_calendar
 #: model:ir.ui.menu,name:hotel_calendar.hotel_calendar_menu
-#, fuzzy, python-format
+#, python-format
 msgid "Hotel Calendar"
 msgstr "Calendario del Hotel"
 
@@ -308,32 +296,38 @@ msgstr "Calendario de Configuración del Hotel"
 #. module: hotel_calendar
 #: model:ir.actions.act_window,name:hotel_calendar.hotel_reservation_action_checkin
 msgid "Hotel folio checkin"
-msgstr "Hotel Ficha Checkin"
+msgstr "Checking Ficha de reserva"
 
 #. module: hotel_calendar
 #: model:ir.actions.act_window,name:hotel_calendar.hotel_reservation_action_checkout
 msgid "Hotel folio checkout"
-msgstr "Hotel Ficha Checkout"
+msgstr "Checkout Ficha de reserva"
 
 #. module: hotel_calendar
 #: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_id
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_id
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_id
-#, fuzzy
 msgid "ID"
 msgstr "ID"
 
 #. module: hotel_calendar
+#: code:addons/hotel_calendar/models/hotel_calendar_management.py:306
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:237
+#, python-format
+msgid "Input Error: No dates defined!"
+msgstr "Error de entrada: ¡no hay fechas definidas!"
+
+#. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:19
-#, fuzzy, python-format
+#, python-format
 msgid "LIST"
 msgstr "LISTA"
 
 #. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:45
-#, fuzzy, python-format
+#, python-format
 msgid "LOCATION:"
 msgstr "UBICACIÓN:"
 
@@ -341,7 +335,6 @@ msgstr "UBICACIÓN:"
 #: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar___last_update
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management___last_update
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached___last_update
-#, fuzzy
 msgid "Last Modified on"
 msgstr "Última modificación en"
 
@@ -349,7 +342,6 @@ msgstr "Última modificación en"
 #: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_write_uid
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_write_uid
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_write_uid
-#, fuzzy
 msgid "Last Updated by"
 msgstr "Última actualización por"
 
@@ -357,7 +349,6 @@ msgstr "Última actualización por"
 #: model:ir.model.fields,field_description:hotel_calendar.field_bus_hotel_calendar_write_date
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_calendar_management_write_date
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_write_date
-#, fuzzy
 msgid "Last Updated on"
 msgstr "Última actualización en"
 
@@ -370,43 +361,42 @@ msgstr "Guardar Cambios Masivos"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:79
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:101
 #, python-format
 msgid "Made by:"
 msgstr "Hecho por:"
 
 #. module: hotel_calendar
 #: selection:hotel.config.settings,end_day_week:0
-#, fuzzy
 msgid "Monday"
 msgstr "Lunes"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:75
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:97
+#, python-format
 msgid "Name:"
 msgstr "Nombre:"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:33
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:55
+#, python-format
 msgid "New Price:"
 msgstr "Nuevo Precio:"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:64
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:86
+#, python-format
 msgid "Nights:"
 msgstr "Noches"
 
 #. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/js/hotel_calendar_management_view.js:442
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:208
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:346
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:215
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:355
 #, python-format
 msgid "No"
 msgstr "No"
@@ -462,14 +452,13 @@ msgstr "Pago Pendiente"
 
 #. module: hotel_calendar
 #: model:ir.model,name:hotel_calendar.model_account_payment
-#, fuzzy
 msgid "Payments"
 msgstr "Pagos"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:41
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:63
+#, python-format
 msgid "Phone:"
 msgstr "Teléfono:"
 
@@ -480,13 +469,12 @@ msgstr "Pre-reserva"
 
 #. module: hotel_calendar
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_price
-#, fuzzy
 msgid "Price"
 msgstr "Precio"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:51
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:73
 #, python-format
 msgid "Price From:"
 msgstr "Precio desde:"
@@ -499,38 +487,38 @@ msgstr "Elemento Tarifa"
 #. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_management_view.xml:27
-#, fuzzy, python-format
+#, python-format
 msgid "RESTRICTIONS:"
 msgstr "Restricciones"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:306
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:315
 #, python-format
 msgid "Reservation"
 msgstr "Reserva"
 
 #. module: hotel_calendar
-#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:336
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:310
 #, python-format
 msgid "Reservation Cancelled"
 msgstr "Reserva Cancelada"
 
 #. module: hotel_calendar
-#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:336
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:310
+#, python-format
 msgid "Reservation Changed"
 msgstr "Reserva Cambiada"
 
 #. module: hotel_calendar
-#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:298
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:294
+#, python-format
 msgid "Reservation Created"
 msgstr "Reserva Creada"
 
 #. module: hotel_calendar
-#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:360
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:320
+#, python-format
 msgid "Reservation Deleted"
 msgstr "Reserva Eliminada"
 
@@ -541,37 +529,36 @@ msgstr "Modo de Movimiento de Reservas"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:17
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:28
+#, python-format
 msgid "Reserve changed:"
 msgstr "Reserva modificada:"
 
 #. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:9
-#, fuzzy, python-format
+#, python-format
 msgid "Reserve unchanged:"
 msgstr "Reserva no modificada:"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:13
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:21
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:76
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:18
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:37
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:98
+#, python-format
 msgid "Room:"
 msgstr "Habitación:"
 
 #. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:37
-#, fuzzy, python-format
+#, python-format
 msgid "SEGMENTATION:"
 msgstr "SEGMENTACIÓN:"
 
 #. module: hotel_calendar
 #: selection:hotel.config.settings,end_day_week:0
-#, fuzzy
 msgid "Saturday"
 msgstr "Sábado"
 
@@ -584,7 +571,7 @@ msgstr "Guardar Cambios"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:276
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:285
 #, python-format
 msgid "Select Partner"
 msgstr "Seleccionar Huésped"
@@ -596,22 +583,20 @@ msgstr "Mostrar Notificaciones"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:44
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:66
 #, python-format
 msgid "Splitted:"
 msgstr "Dividida:"
 
 #. module: hotel_calendar
 #: model:ir.model.fields,field_description:hotel_calendar.field_hotel_config_settings_color_staff
-#, fuzzy
 msgid "Staff"
 msgstr "Staff"
 
 #. module: hotel_calendar
 #: selection:hotel.config.settings,end_day_week:0
-#, fuzzy
 msgid "Sunday"
-msgstr "Lunes"
+msgstr "Domingo"
 
 #. module: hotel_calendar
 #. openerp-web
@@ -624,42 +609,32 @@ msgstr "A"
 #. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:5
-#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:31
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:53
+#, python-format
 msgid "The following changes will be made..."
 msgstr "Los próximos cambios serán realizados..."
 
 #. module: hotel_calendar
-#: code:addons/hotel_calendar/models/inherited_account_payment.py:45
-#, python-format
-msgid "This pay is related with more than one Reservation."
-msgstr "Este pago está relacionado con más de una reserva."
-
-#. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:6
-#, fuzzy, python-format
+#, python-format
 msgid "This reservation belongs to a folio with more reservations!"
 msgstr "Esta reserva pertenece a un folio con más reservas!"
 
 #. module: hotel_calendar
 #: selection:hotel.config.settings,end_day_week:0
-#, fuzzy
 msgid "Thursday"
 msgstr "Jueves"
 
 #. module: hotel_calendar
 #: selection:hotel.config.settings,end_day_week:0
-#, fuzzy
 msgid "Tuesday"
 msgstr "Martes"
 
 #. module: hotel_calendar
-#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:110
-#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:311
-#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:349
-#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:373
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:69
+#: code:addons/hotel_calendar/models/inherited_hotel_reservation.py:285
+#, python-format
 msgid "Undefined"
 msgstr "Indefinido"
 
@@ -678,18 +653,17 @@ msgstr "Usuarios"
 #. module: hotel_calendar
 #. openerp-web
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_view.xml:61
-#, fuzzy, python-format
+#, python-format
 msgid "VIRTUAL TYPE:"
 msgstr "TIPO VIRTUAL:"
 
 #. module: hotel_calendar
 #: model:ir.ui.menu,name:hotel_calendar.hotel_virtual_room_pricelist_cached
 msgid "VRoom Pricelist Cached"
-msgstr "VRoom Pricelist Cached"
+msgstr "Lista de precios de la habitación virtual en caché"
 
 #. module: hotel_calendar
 #: model:ir.model.fields,field_description:hotel_calendar.field_virtual_room_pricelist_cached_virtual_room_id
-#, fuzzy
 msgid "Virtual Room"
 msgstr "Habitación Virtual"
 
@@ -697,32 +671,25 @@ msgstr "Habitación Virtual"
 #: model:ir.actions.act_window,name:hotel_calendar.hotel_virtual_room_pricelist_cached_action_form_tree
 #: model:ir.ui.view,arch_db:hotel_calendar.view_hotel_virtual_room_pricelist_cached_form
 #: model:ir.ui.view,arch_db:hotel_calendar.view_hotel_virtual_room_pricelist_cached_tree
-msgid "Virtual Room Pircelist Cached"
-msgstr "Virtual Room Pircelist Cached"
-
-#. module: hotel_calendar
-#: code:addons/hotel_calendar/models/inherited_account_payment.py:45
-#, fuzzy, python-format
-msgid "Warning"
-msgstr "Aviso"
+msgid "Virtual Room Pricelist Cached"
+msgstr "Lista de precios de la habitación virtual en caché"
 
 #. module: hotel_calendar
 #: selection:hotel.config.settings,end_day_week:0
-#, fuzzy
 msgid "Wednesday"
 msgstr "Miércoles"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:190
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:196
+#, python-format
 msgid "Yes, change it"
 msgstr "Confirmar cambio"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:334
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:343
+#, python-format
 msgid "Yes, confirm it"
 msgstr "Confirmar"
 
@@ -735,8 +702,8 @@ msgstr "Confirmar"
 
 #. module: hotel_calendar
 #. openerp-web
-#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:341
-#, fuzzy, python-format
+#: code:addons/hotel_calendar/static/src/js/hotel_calendar_view.js:350
+#, python-format
 msgid ""
 "[Hotel Calendar]\n"
 "ERROR: Can't confirm folio!"
@@ -747,7 +714,7 @@ msgstr ""
 #. module: hotel_calendar
 #: model:ir.model,name:hotel_calendar.model_bus_hotel_calendar
 msgid "bus.hotel.calendar"
-msgstr ""
+msgstr "bus.hotel.calendar"
 
 #. module: hotel_calendar
 #: model:ir.ui.view,arch_db:hotel_calendar.view_hotel_config_settings
@@ -762,14 +729,19 @@ msgstr "Reserva"
 #. module: hotel_calendar
 #: model:ir.model,name:hotel_calendar.model_hotel_calendar_management
 msgid "hotel.calendar.management"
-msgstr ""
+msgstr "hotel.calendar.management"
 
 #. module: hotel_calendar
 #: model:ir.model,name:hotel_calendar.model_hotel_config_settings
 msgid "hotel.config.settings"
-msgstr ""
+msgstr "hotel.config.settings"
+
+#. module: hotel_calendar
+#: model:ir.model,name:hotel_calendar.model_hotel_virtual_room
+msgid "hotel.virtual.room"
+msgstr "hotel.virtual.room"
 
 #. module: hotel_calendar
 #: model:ir.model,name:hotel_calendar.model_virtual_room_pricelist_cached
 msgid "virtual.room.pricelist.cached"
-msgstr ""
+msgstr "virtual.room.pricelist.cached"

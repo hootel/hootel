@@ -8,7 +8,7 @@
             <field name="name">hotel.virtual.room.pricelist.cached.form</field>
             <field name="model">virtual.room.pricelist.cached</field>
             <field name="arch" type="xml">
-                <form string=" Virtual Room Pircelist Cached">
+                <form string=" Virtual Room Pricelist Cached">
                     <sheet>
                         <group>
                             <field name="virtual_room_id" />
@@ -25,7 +25,7 @@
             <field name="name">hotel.virtual.room.pricelist.cached.tree</field>
             <field name="model">virtual.room.pricelist.cached</field>
             <field name="arch" type="xml">
-                <tree string=" Virtual Room Pircelist Cached">
+                <tree string=" Virtual Room Pricelist Cached">
                     <field name="virtual_room_id" />
                     <field name="date" />
                     <field name="price" />
