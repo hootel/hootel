@@ -106,7 +106,7 @@ class HotelFolio(models.Model):
     image = fields.Binary('Image', related='partner_id.image')
     order_id = fields.Many2one('sale.order', 'Order', delegate=True,
                                required=True, ondelete='cascade')
-                        
+
     room_lines = fields.One2many('hotel.reservation', 'folio_id',
                                  readonly=False,
                                  states={'done': [('readonly', True)]},
@@ -392,7 +392,7 @@ class HotelFolio(models.Model):
                 self.partner_invoice_id = partner_rec.id
                 self.partner_shipping_id = partner_rec.id
                 self.pricelist_id = partner_rec.property_product_pricelist.id
-                raise UserError('Not Any Order For  %s ' % (partner_rec.name))
+                raise UserError(_('Not Any Order For  %s ') % (partner_rec.name))
             else:
                 self.partner_invoice_id = partner_rec.id
                 self.partner_shipping_id = partner_rec.id

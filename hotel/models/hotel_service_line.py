@@ -204,7 +204,7 @@ class HotelServiceLine(models.Model):
         chkin_utc_dt = date_utils.get_datetime(self.ser_checkin)
         chkout_utc_dt = date_utils.get_datetime(self.ser_checkout)
         if chkout_utc_dt < chkin_utc_dt:
-            raise UserError('Checkout must be greater or equal checkin date')
+            raise UserError(_('Checkout must be greater or equal checkin date'))
         if self.ser_checkin and self.ser_checkout:
             diffDate = date_utils.date_diff(self.ser_checkin,
                                             self.ser_checkout, hours=False) + 1

@@ -21,7 +21,7 @@
 #
 ##############################################################################
 
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.exceptions import except_orm, ValidationError
 from odoo.addons.hotel import date_utils
 import datetime
@@ -35,7 +35,7 @@ class Cardex(models.Model):
     def validation_dates(self):
         if self.exit_date < self.enter_date:
             raise models.ValidationError(
-                'Departure date (%s) is prior to arrival on %s' %
+                _('Departure date (%s) is prior to arrival on %s') %
                 (self.exit_date, self.enter_date))
 
     def default_reservation_id(self):
@@ -77,7 +77,7 @@ class Cardex(models.Model):
             date_2 = date_1 + datetime.timedelta(days=1)
             self.update({'exit_date': date_2, })
             raise ValidationError(
-                'Departure date, is prior to arrival. Check it now. %s' %
+                _('Departure date, is prior to arrival. Check it now. %s') %
                 (date_2))
 
     partner_id = fields.Many2one('res.partner', default=default_partner_id)

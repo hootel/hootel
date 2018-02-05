@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 import re
 import pytz
@@ -92,6 +92,6 @@ class HotelConfiguration(models.TransientModel):
     def _check_hours(self):
         r = re.compile('[0-5][0-9]:[0-5][0-9]')
         if not r.match(self.default_arrival_hour):
-            raise ValidationError("Invalid arrival hour (Format: HH:mm)")
+            raise ValidationError(_("Invalid arrival hour (Format: HH:mm)"))
             if not r.match(self.default_departure_hour):
-                raise ValidationError("Invalid departure hour (Format: HH:mm)")
+                raise ValidationError(_("Invalid departure hour (Format: HH:mm)"))

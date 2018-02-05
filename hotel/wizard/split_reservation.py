@@ -21,7 +21,7 @@
 ##############################################################################
 from openerp.exceptions import ValidationError
 from datetime import datetime, timedelta
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT,
     DEFAULT_SERVER_DATE_FORMAT)
@@ -48,8 +48,8 @@ class SplitReservationWizard(models.TransientModel):
                 new_start_date_dt = date_start_dt + \
                                     timedelta(days=date_diff-record.nights)
                 if record.nights >= date_diff or record.nights < 1:
-                    raise ValidationError("Invalid Nights! Max is \
-                                            '%d'" % (date_diff-1))
+                    raise ValidationError(_("Invalid Nights! Max is \
+                                            '%d'") % (date_diff-1))
 
                 vals = reservation_id.generate_copy_values(
                     new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
@@ -95,8 +95,8 @@ class SplitReservationWizard(models.TransientModel):
                 })
                 reservation_copy = self.env['hotel.reservation'].create(vals)
                 if not reservation_copy:
-                    raise ValidationError("Unexpected error copying record. \
-                                            Can't split reservation!")
+                    raise ValidationError(_("Unexpected error copying record. \
+                                            Can't split reservation!"))
             # return {
             #     'type': 'ir.actions.act_window',
             #     'res_model': 'hotel.folio',

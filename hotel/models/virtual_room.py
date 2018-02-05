@@ -62,8 +62,8 @@ class VirtualRoom(models.Model):
                     ('categ_id.id', 'in', room_categories)
                 ])
                 rooms_name = ','.join(str(x.name) for x in room_ids)
-                warning_msg += 'You can not enter the same room in duplicate \
-                                    (check the room types) %s' % rooms_name
+                warning_msg += _('You can not enter the same room in duplicate \
+                                    (check the room types) %s') % rooms_name
                 raise models.ValidationError(warning_msg)
 
     @api.constrains('max_real_rooms', 'room_ids', 'room_type_ids')
@@ -71,8 +71,8 @@ class VirtualRoom(models.Model):
         warning_msg = ""
         for r in self:
             if self.max_real_rooms > self.total_rooms_count:
-                warning_msg += 'The Maxime rooms allowed can not be greate \
-                                    than total rooms count'
+                warning_msg += _('The Maxime rooms allowed can not be greate \
+                                    than total rooms count')
                 raise models.ValidationError(warning_msg)
 
     virtual_code = fields.Char('Code')

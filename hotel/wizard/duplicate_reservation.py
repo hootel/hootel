@@ -21,7 +21,7 @@
 ##############################################################################
 from openerp.exceptions import ValidationError
 from datetime import datetime, timedelta
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT,
     DEFAULT_SERVER_DATE_FORMAT)
@@ -42,7 +42,7 @@ class DuplicateReservationWizard(models.TransientModel):
             return False
 
         if reservation_id.splitted:
-            raise ValidationError("Can't duplicate splitted reservations")
+            raise ValidationError(_("Can't duplicate splitted reservations"))
 
         hotel_room_obj = self.env['hotel.room']
         hotel_vroom_obj = self.env['hotel.virtual.room']
@@ -72,8 +72,8 @@ class DuplicateReservationWizard(models.TransientModel):
             total_free_rooms += len(avails)
 
         if total_free_rooms < self.num:
-            raise ValidationError("Too much duplicated reservations! \
-                                    There are no '%d' free rooms" % self.num)
+            raise ValidationError(_("Too much duplicated reservations! \
+                                    There are no '%d' free rooms") % self.num)
 
         for i in range(0, self.num):
             for vroom in vroom_ids:
@@ -98,6 +98,6 @@ class DuplicateReservationWizard(models.TransientModel):
                         new_reservation_id.order_id.partner_id = rpartner_id
                     break
                 else:
-                    raise ValidationError("Unexpected Error: Can't found a \
-                                            free room")
+                    raise ValidationError(_("Unexpected Error: Can't found a \
+                                            free room"))
         return True

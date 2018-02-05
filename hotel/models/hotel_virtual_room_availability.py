@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 import logging
 _logger = logging.getLogger(__name__)
@@ -60,5 +60,5 @@ class HotelVirtualRoomAvailability(models.Model):
             ('virtual_room_id', '=', self.virtual_room_id.id)
         ])
         if count > 1:
-            raise ValidationError("can't assign the same date to more than \
-                                    one virtual room")
+            raise ValidationError(_("can't assign the same date to more than \
+                                    one virtual room"))

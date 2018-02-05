@@ -24,7 +24,7 @@ import pytz
 from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT,
     DEFAULT_SERVER_DATE_FORMAT)
-from openerp import fields
+from openerp import fields, _
 from openerp.exceptions import ValidationError
 
 
@@ -107,7 +107,7 @@ def date_diff(date_start, date_end, hours=True, tz=False):
         date_end_dt = date_end
 
     if not date_start_dt or not date_end_dt:
-        raise ValidationError("Invalid date. Can't compare it!")
+        raise ValidationError(_("Invalid date. Can't compare it!"))
 
     if not hours:
         date_start_dt = dt_no_hours(date_start_dt)
@@ -150,7 +150,7 @@ def date_in(str_date, str_start_date, str_end_date, hours=True, tz=False):
         date_end_dt = str_end_date
 
     if not date_start_dt or not date_end_dt or not date_dt:
-        raise ValidationError("Invalid date. Can't compare it!")
+        raise ValidationError(_("Invalid date. Can't compare it!"))
 
     if not hours:
         date_start_dt = dt_no_hours(date_start_dt)
@@ -184,7 +184,7 @@ def range_dates_in(str_start_date_a,
 
     if not date_start_dt_a or not date_end_dt_a \
             or not date_start_dt_b or not date_end_dt_b:
-        raise ValidationError("Invalid date. Can't compare it!")
+        raise ValidationError(_("Invalid date. Can't compare it!"))
 
     if not hours:
         date_start_dt_b = dt_no_hours(date_start_dt_b)

@@ -408,7 +408,7 @@ class HotelReservation(models.Model):
     def open_master(self):
         self.ensure_one()
         if not self.parent_reservation:
-            raise ValidationError("This is the parent reservation")
+            raise ValidationError(_("This is the parent reservation"))
 
         return {
             'type': 'ir.actions.act_window',
@@ -422,7 +422,7 @@ class HotelReservation(models.Model):
     def unify(self):
         self.ensure_one()
         if not self.splitted:
-            raise ValidationError("This reservation can't be unified")
+            raise ValidationError(_("This reservation can't be unified"))
 
         master_reservation = self.parent_reservation or self
         self_is_master = (master_reservation == self)
@@ -437,8 +437,8 @@ class HotelReservation(models.Model):
         if len(rooms_products) > 1 or \
                 (len(rooms_products) == 1
                     and master_reservation.product_id.id != rooms_products[0]):
-            raise ValidationError("This reservation can't be unified: They \
-                                    all need to be in the same room")
+            raise ValidationError(_("This reservation can't be unified: They \
+                                    all need to be in the same room"))
 
         # Search checkout
         last_checkout = splitted_reservs[0].checkout
@@ -510,9 +510,9 @@ class HotelReservation(models.Model):
         persons = record.adults + record.children
         if persons > room.capacity:
             raise ValidationError(
-                "Reservation persons can't be higher than room capacity")
+                _("Reservation persons can't be higher than room capacity"))
         if record.adults == 0:
-            raise ValidationError("Reservation has no adults")
+            raise ValidationError(_("Reservation has no adults"))
 
         if record.state == 'draft' and record.folio_id.state == 'sale':
             record.confirm()
@@ -584,7 +584,7 @@ class HotelReservation(models.Model):
             if room.capacity < persons:
                 self.adults = room.capacity
                 self.children = 0
-                raise UserError('%s people do not fit in this room! ;)' % (persons))
+                raise UserError(_('%s people do not fit in this room! ;)') % (persons))
 
     @api.onchange('virtual_room_id')
     def on_change_virtual_room_id(self):
@@ -708,8 +708,8 @@ class HotelReservation(models.Model):
         cmds = [(5, False, False)]
         #TO-DO: Redesign relation between hotel.reservation and sale.order.line to allow manage days by units in order
         if self.invoice_status == 'invoiced' and not self.splitted:
-            raise ValidationError("This reservation is already invoiced. \
-                        To expand it you must create a new reservation.")
+            raise ValidationError(_("This reservation is already invoiced. \
+                        To expand it you must create a new reservation."))
         hotel_tz = self.env['ir.values'].sudo().get_default(
             'hotel.config.settings', 'hotel_tz')
         start_date_utc_dt = date_utils.get_datetime(str_start_date_utc)
@@ -881,9 +881,9 @@ class HotelReservation(models.Model):
             and r.id != self.id)
         occupied_name = ','.join(str(x.folio_id.name) for x in occupied)
         if occupied:
-            warning_msg = 'You tried to change/confirm \
+            warning_msg = _('You tried to change/confirm \
                reservation with room those already reserved in this \
-               reservation period: %s' % occupied_name
+               reservation period: %s') % occupied_name
             raise ValidationError(warning_msg)
 
     @api.multi
