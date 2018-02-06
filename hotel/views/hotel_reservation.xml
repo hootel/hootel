@@ -42,7 +42,7 @@
 									</td>
 								</tr>								
 							</table>   
-                             <group colspan="4" col="4">
+                             <group colspan="4" col="4">			  
                                 <field name="checkin"/>
                                 <field name="adults"/>
                                 <field name="checkout"/>
@@ -63,6 +63,7 @@
                                 <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>
                                 <field name="amount_reservation" readonly="1"/>
                                 <field name="price_unit" invisible="1"/>
+                                <field name="name" invisible="1" />
                                 <label for="discount" groups="sale.group_discount_per_so_line"/>
                                 <div name="discount" groups="sale.group_discount_per_so_line">
                                     <field name="discount" class="oe_inline"/> %
