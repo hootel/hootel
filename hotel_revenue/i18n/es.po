@@ -6,9 +6,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-01-21 20:11+0000\n"
-"PO-Revision-Date: 2018-01-21 21:17+0100\n"
-"Last-Translator: <>\n"
+"POT-Creation-Date: 2018-02-06 09:42+0000\n"
+"PO-Revision-Date: 2018-02-06 10:48+0100\n"
+"Last-Translator: Jose Luis Algara <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,14 +18,38 @@ msgstr ""
 "X-Generator: Poedit 1.8.7.1\n"
 
 #. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:172
+#, python-format
+msgid " at "
+msgstr "a"
+
+#. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:173
+#, python-format
+msgid " until "
+msgstr "hasta"
+
+#. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:183
+#, python-format
+msgid "ADR"
+msgstr "ADR"
+
+#. module: hotel_revenue
 #: model:ir.actions.act_window,name:hotel_revenue.action_cash_daily_balance
 msgid "Action Cash Daily Balance"
-msgstr "Action Cash Daily Balance"
+msgstr "Acción Balance diario de efectivo"
 
 #. module: hotel_revenue
 #: model:ir.actions.act_window,name:hotel_revenue.action_revenue_download
 msgid "Action REVENUE File Download"
-msgstr "Action REVENUE File Download"
+msgstr "Acción REVENUE descarga de fichero"
+
+#. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:180
+#, python-format
+msgid "Cancel."
+msgstr "Cancel."
 
 #. module: hotel_revenue
 #: model:ir.ui.menu,name:hotel_revenue.menu_cash_daily
@@ -35,17 +59,23 @@ msgstr "Caja Diaria"
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard_create_uid
 msgid "Created by"
-msgstr "Created by"
+msgstr "Creado por"
 
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard_create_date
 msgid "Created on"
-msgstr "Created on"
+msgstr "Creado en"
+
+#. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:175
+#, python-format
+msgid "Date"
+msgstr "Fecha"
 
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard_display_name
 msgid "Display Name"
-msgstr "Display Name"
+msgstr "Mostrar Nombre"
 
 #. module: hotel_revenue
 #: code:addons/hotel_revenue/wizard/revenue_wizard.py:295
@@ -85,17 +115,29 @@ msgstr "ID"
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard___last_update
 msgid "Last Modified on"
-msgstr "Last Modified on"
+msgstr "Última modificación en"
 
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard_write_uid
 msgid "Last Updated by"
-msgstr "Last Updated by"
+msgstr "Última actualización por"
 
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard_write_date
 msgid "Last Updated on"
-msgstr "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:170
+#, python-format
+msgid "Period:"
+msgstr "Periodo:"
+
+#. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:176
+#, python-format
+msgid "Pick Up"
+msgstr "Pick Up"
 
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard_date_2
@@ -108,6 +150,24 @@ msgid "PickUp start date"
 msgstr "PickUp Fecha 1"
 
 #. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:171
+#, python-format
+msgid "PickUp:"
+msgstr "PickUp:"
+
+#. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:177
+#, python-format
+msgid "R.Night"
+msgstr "R.Night"
+
+#. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:182
+#, python-format
+msgid "RevPAR"
+msgstr "RevPAR"
+
+#. module: hotel_revenue
 #: model:ir.ui.menu,name:hotel_revenue.menu_revenue_download
 msgid "Revenue File Download"
 msgstr "Revenue Descarga Archivo"
@@ -115,7 +175,13 @@ msgstr "Revenue Descarga Archivo"
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard_room_type_id
 msgid "Room Type"
-msgstr "Tipo Habitación"
+msgstr "Tipo de Habitación"
+
+#. module: hotel_revenue
+#: code:addons/hotel_revenue/wizard/revenue_wizard.py:179
+#, python-format
+msgid "Room/Date"
+msgstr "Hab./Dia"
 
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard_period_1
@@ -126,20 +192,20 @@ msgstr "Fecha Inicio"
 #: code:addons/hotel_revenue/wizard/revenue_wizard.py:93
 #, python-format
 msgid "The beginning of the period can not be past the end of the period."
-msgstr "La Fechade Inicio no puedo superior a la de fin"
+msgstr "La Fecha de Inicio no puede ser superior a la de final"
 
 #. module: hotel_revenue
 #: code:addons/hotel_revenue/wizard/revenue_wizard.py:105
 #: code:addons/hotel_revenue/wizard/revenue_wizard.py:111
 #, python-format
 msgid "The date of the end of the PickUp can not be before the first PickUp date."
-msgstr "La Primera Fecha no puede ser superior a la primera"
+msgstr "El final del Pickup no puede ser anterior al inicio."
 
 #. module: hotel_revenue
 #: code:addons/hotel_revenue/wizard/revenue_wizard.py:99
 #, python-format
 msgid "The end of the period can not be before the beginning of the period."
-msgstr "The end of the period can not be before the beginning of the period."
+msgstr "El final de periodo no puede ser anterior al inicio."
 
 #. module: hotel_revenue
 #: model:ir.model.fields,field_description:hotel_revenue.field_revenue_exporter_wizard_txt_binary

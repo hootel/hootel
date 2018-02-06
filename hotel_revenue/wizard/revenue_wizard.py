@@ -167,20 +167,20 @@ class Wizard(models.TransientModel):
             row = 4
             col = 0
             worksheet.set_column(col, col+21, 11)
-            worksheet.write(1, col+0, 'Periodo:', cab1_format_xls)
-            worksheet.write(2, col+0, 'PickUp:', cab1_format_xls)
-            worksheet.write(1, col+1, self.period_1+' a '+self.period_2, cab1_format_xls)
-            worksheet.write(2, col+1, self.date_1+' hasta '+self.date_2, cab1_format_xls)
+            worksheet.write(1, col+0, _('Period:'), cab1_format_xls)
+            worksheet.write(2, col+0, _('PickUp:'), cab1_format_xls)
+            worksheet.write(1, col+1, self.period_1+_(' at ')+self.period_2, cab1_format_xls)
+            worksheet.write(2, col+1, self.date_1+_(' until ')+self.date_2, cab1_format_xls)
 
-            worksheet.write(3, col+0, 'Fecha', cab_format_xls)
-            worksheet.write(3, col+1, 'Pick Up', cab_format_xls)
-            worksheet.write(3, col+2, 'R.Night', cab_format_xls)
+            worksheet.write(3, col+0, _('Date'), cab_format_xls)
+            worksheet.write(3, col+1, _('Pick Up'), cab_format_xls)
+            worksheet.write(3, col+2, _('R.Night'), cab_format_xls)
             worksheet.write(3, col+3, u'% Ocup.', cab_format_xls)
-            worksheet.write(3, col+4, 'Hab/Dia', cab_format_xls)
-            worksheet.write(3, col+5, 'Cancel.', cab_format_xls)
+            worksheet.write(3, col+4, _('Room/Date'), cab_format_xls)
+            worksheet.write(3, col+5, _('Cancel.'), cab_format_xls)
             worksheet.write(3, col+6, u'Reve.€', cab_format_xls)
-            worksheet.write(3, col+7, 'RevPAR', cab_format_xls)
-            worksheet.write(3, col+8, 'ADR', cab_format_xls)
+            worksheet.write(3, col+7, _('RevPAR'), cab_format_xls)
+            worksheet.write(3, col+8, _('ADR'), cab_format_xls)
 
             # For UTC use take zone
             if self._context.get('tz'):
