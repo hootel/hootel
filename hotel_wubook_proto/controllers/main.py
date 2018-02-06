@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import http
+from openerp import http, _
 from openerp.http import request
 import logging
 from openerp.exceptions import ValidationError
@@ -38,14 +38,14 @@ class website_wubook(http.Controller):
         if security_token != hotel_security_token:
             # _logger.info("Invalid Tokens: '%s' != '%s'" %
             #              (security_token, hotel_security_token))
-            raise ValidationError('Invalid Security Token!')
+            raise ValidationError(_('Invalid Security Token!'))
 
         rcode = kwargs.get('rcode')
         lcode = kwargs.get('lcode')
 
         # Correct Input?
         if not lcode or not rcode:
-            raise ValidationError('Invalid Input Parameters!')
+            raise ValidationError(_('Invalid Input Parameters!'))
 
         # WuBook Check
         if rcode == '2000' and lcode == '1000':
@@ -56,9 +56,9 @@ class website_wubook(http.Controller):
         wlcode = request.env['ir.values'].sudo().get_default(
                                     'wubook.config.settings', 'wubook_lcode')
         if lcode != wlcode:
-            raise ValidationError("Error! lcode doesn't match!")
+            raise ValidationError(_("Error! lcode doesn't match!"))
 
-        _logger.info("[WUBOOK] Importing Reservations...")
+        _logger.info(_("[WUBOOK] Importing Reservations..."))
         # Create Reservation
         request.env['wubook'].sudo().fetch_booking(lcode, rcode)
 
@@ -76,7 +76,7 @@ class website_wubook(http.Controller):
         if security_token != hotel_security_token:
             # _logger.info("Invalid Tokens: '%s' != '%s'" %
             #              (security_token, hotel_security_token))
-            raise ValidationError('Invalid Security Token!')
+            raise ValidationError(_('Invalid Security Token!'))
 
         lcode = kwargs.get('lcode')
         dfrom = kwargs.get('dfrom')
@@ -84,15 +84,15 @@ class website_wubook(http.Controller):
 
         # Correct Input?
         if not lcode or not dfrom or not dto:
-            raise ValidationError('Invalid Input Parameters!')
+            raise ValidationError(_('Invalid Input Parameters!'))
 
         # Poor Security Check
         wlcode = request.env['ir.values'].sudo().get_default(
                                     'wubook.config.settings', 'wubook_lcode')
         if lcode != wlcode:
-            raise ValidationError("Error! lcode doesn't match!")
+            raise ValidationError(_("Error! lcode doesn't match!"))
 
-        _logger.info("[WUBOOK] Updating values...")
+        _logger.info(_("[WUBOOK] Updating values..."))
         wubook_obj = request.env['wubook'].sudo().with_context({
             'init_connection': False
         })

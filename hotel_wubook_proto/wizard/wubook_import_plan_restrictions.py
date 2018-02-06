@@ -20,7 +20,7 @@
 #
 ##############################################################################
 from openerp.exceptions import ValidationError
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from odoo.addons.hotel import date_utils
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
@@ -44,6 +44,6 @@ class ImportPlanRestrictionsWizard(models.TransientModel):
                     date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                     restriction_id.wpid)
                 if not wres:
-                    raise ValidationError("Can't fetch restrictions \
-                                                                from WuBook")
+                    raise ValidationError(_("Can't fetch restrictions \
+                                                                from WuBook"))
         return True

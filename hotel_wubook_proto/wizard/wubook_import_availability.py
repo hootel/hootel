@@ -20,7 +20,7 @@
 #
 ##############################################################################
 from openerp.exceptions import ValidationError
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 
@@ -41,5 +41,5 @@ class ImportAvailabilityWizard(models.TransientModel):
                 date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                 set_wmax_avail=record.set_wmax_avail)
             if not wres:
-                raise ValidationError("Can't fetch availability from WuBook")
+                raise ValidationError(_("Can't fetch availability from WuBook"))
         return True

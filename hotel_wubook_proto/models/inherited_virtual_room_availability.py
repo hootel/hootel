@@ -20,7 +20,7 @@
 #
 ##############################################################################
 from datetime import timedelta
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 from odoo.addons.hotel import date_utils
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
@@ -52,9 +52,9 @@ class VirtualRoomAvailability(models.Model):
         if self.avail > max_avail:
             self.env['wubook.issue'].create({
                 'section': 'avail',
-                'message': "The new availability can't be greater than \
+                'message': _("The new availability can't be greater than \
                     the actual availability \
-                    \n[%s]\nInput: %d\Limit: %d" % (self.virtual_room_id.name,
+                    \n[%s]\nInput: %d\Limit: %d") % (self.virtual_room_id.name,
                                                     self.avail,
                                                     max_avail),
                 'wid': self.virtual_room_id.wrid,
@@ -75,9 +75,9 @@ class VirtualRoomAvailability(models.Model):
     @api.constrains('wmax_avail')
     def _check_wmax_avail(self):
         if self.wmax_avail > self.virtual_room_id.total_rooms_count:
-            raise ValidationError("max avail for wubook can't be high \
+            raise ValidationError(_("max avail for wubook can't be high \
                 than toal rooms \
-                count: %d" % self.virtual_room_id.total_rooms_count)
+                count: %d") % self.virtual_room_id.total_rooms_count)
 
     @api.onchange('virtual_room_id')
     def onchange_virtual_room_id(self):

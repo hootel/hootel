@@ -20,7 +20,7 @@
 #
 ##############################################################################
 from openerp.exceptions import ValidationError
-from openerp import models, api
+from openerp import models, api, _
 
 
 class MassiveChangesWizard(models.TransientModel):
@@ -31,5 +31,5 @@ class MassiveChangesWizard(models.TransientModel):
         reservation_id = self.env['hotel.reservation'].browse(
                                             self.env.context.get('active_id'))
         if reservation_id and reservation_id.wis_from_channel:
-            raise ValidationError("Can't duplicate a reservation from channel")
+            raise ValidationError(_("Can't duplicate a reservation from channel"))
         return super(MassiveChangesWizard, self).duplicate_reservation()

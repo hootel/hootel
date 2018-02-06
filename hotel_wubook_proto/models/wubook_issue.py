@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 
 
@@ -62,7 +62,7 @@ class WuBookIssue(models.Model):
             res = self.env['wubook'].mark_bookings(reserv_ids)
             if not res:
                 raise ValidationError(
-                                "Can't mark reservation as readed in WuBook!")
+                            _("Can't mark reservation as readed in WuBook!"))
 
     @api.model
     def _needaction_domain_get(self):

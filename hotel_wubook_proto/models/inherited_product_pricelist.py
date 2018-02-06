@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, timedelta
@@ -102,7 +102,7 @@ class ProductPricelist(models.Model):
                                                   vals.get('wdaily') and
                                                   1 or 0)
             if not wpid:
-                raise ValidationError("Can't create plan on WuBook")
+                raise ValidationError(_("Can't create plan on WuBook"))
             vals.update({'wpid': wpid})
         pricelist = super(ProductPricelist, self).create(vals)
         return pricelist
@@ -118,8 +118,8 @@ class ProductPricelist(models.Model):
                         vals.get('wpid', record.wpid),
                         nname)
                     if not wres:
-                        raise ValidationError("Can't update plan name \
-                                                                    on WuBook")
+                        raise ValidationError(_("Can't update plan name \
+                                                                    on WuBook"))
         updated = super(ProductPricelist, self).write(vals)
         return updated
 
@@ -131,7 +131,7 @@ class ProductPricelist(models.Model):
                 if record.wpid and record.wpid != '':
                     wres = self.env['wubook'].delete_plan(record.wpid)
                     if not wres:
-                        raise ValidationError("Can't delete plan on WuBook")
+                        raise ValidationError(_("Can't delete plan on WuBook"))
         return super(ProductPricelist, self).unlink()
 
     @api.multi

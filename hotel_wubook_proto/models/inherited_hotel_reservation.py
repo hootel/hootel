@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.exceptions import UserError, ValidationError
 from ..wubook import (
     DEFAULT_WUBOOK_DATE_FORMAT,
@@ -161,8 +161,8 @@ class HotelReservation(models.Model):
                             record.wrid,
                             'Cancelled by %s' % partner_id.name)
                         if not wres:
-                            raise ValidationError("Can't cancel reservation \
-                                                                    on WuBook")
+                            raise ValidationError(_("Can't cancel reservation \
+                                                                    on WuBook"))
         return res
 
     @api.multi

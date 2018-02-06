@@ -71,7 +71,8 @@ class ReservationRestriction(models.Model):
                 self.env['wubook'].is_valid_account():
             wpid = self.env['wubook'].create_rplan(vals['name'])
             if not wpid:
-                raise ValidationError("Can't create rplan on WuBook")
+                raise ValidationError(_("Can't create restriction plan on \
+                                WuBook"))
             vals.update({'wpid': wpid})
 
         rules = self._context.get('rules')
@@ -107,7 +108,8 @@ class ReservationRestriction(models.Model):
                         vals.get('wpid', record.wpid),
                         nname)
                     if not wres:
-                        raise ValidationError("Can't rname rplan on WuBook")
+                        raise ValidationError(_("Can't rename restriction plan \
+                        on WuBook"))
         updated = super(ReservationRestriction, self).write(vals)
         return updated
 
@@ -119,7 +121,8 @@ class ReservationRestriction(models.Model):
                 if record.wpid and record.wpid != '':
                     wres = self.env['wubook'].delete_rplan(record.wpid)
                     if not wres:
-                        raise ValidationError("Can't delete rplan on WuBook")
+                        raise ValidationError(_("Can't delete restriction plan \
+                        on WuBook"))
         return super(ReservationRestriction, self).unlink()
 
     @api.multi

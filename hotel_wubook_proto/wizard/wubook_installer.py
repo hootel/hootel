@@ -134,7 +134,7 @@ class WuBookInstallerParity(models.TransientModel):
                     rec.parity_restrictions_id.wpid)
 
                 if not wresAvail or not wresPrices or not wresRestr:
-                    raise ValidationError("Errors importing data from WuBook")
+                    raise ValidationError(_("Errors importing data from WuBook"))
 
                 # Reservations
                 wubookObj.fetch_new_bookings()

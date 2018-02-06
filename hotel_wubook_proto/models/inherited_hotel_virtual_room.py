@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 
 
@@ -40,7 +40,7 @@ class HotelVirtualRoom(models.Model):
     @api.constrains('wcapacity')
     def _check_wcapacity(self):
         if self.wcapacity < 1:
-            raise ValidationError("wcapacity can't be less than one")
+            raise ValidationError(_("wcapacity can't be less than one"))
 
     @api.multi
     @api.constrains('wscode')
@@ -87,7 +87,7 @@ class HotelVirtualRoom(models.Model):
                 vroom.max_real_rooms
             )
             if not wrid:
-                raise ValidationError("Can't create room on WuBook")
+                raise ValidationError(_("Can't create room on WuBook"))
             vroom.with_context(wubook_action=False).write({
                 'wrid': wrid,
                 'wscode': shortcode,
@@ -109,7 +109,7 @@ class HotelVirtualRoom(models.Model):
                         vals.get('max_real_rooms', record.max_real_rooms),
                         vals.get('wscode', record.wscode))
                     if not wres:
-                        raise ValidationError("Can't modify room on WuBook")
+                        raise ValidationError(_("Can't modify room on WuBook"))
         return super(HotelVirtualRoom, self).write(vals)
 
     @api.multi
@@ -120,7 +120,7 @@ class HotelVirtualRoom(models.Model):
                 if record.wrid and record.wrid != '':
                     wres = self.env['wubook'].delete_room(record.wrid)
                     if not wres:
-                        raise ValidationError("Can't delete room on WuBook")
+                        raise ValidationError(_("Can't delete room on WuBook"))
         return super(HotelVirtualRoom, self).unlink()
 
     @api.multi
