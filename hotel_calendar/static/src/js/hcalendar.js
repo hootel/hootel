@@ -134,9 +134,10 @@ HotelCalendar.prototype = {
   },
 
   setReservations: function(/*List*/reservations) {
-    for (var reservation of reservations) {
+    for (var reservation of this._reservations) {
       this.removeReservation(reservation, true);
     }
+
     this._reservations = [];
     this.addReservations(reservations);
   },
@@ -359,6 +360,10 @@ HotelCalendar.prototype = {
   },
 
   //==== CELLS
+  getMainCell: function(/*MomentObject*/date, /*String*/type, /*String*/number) {
+    return this.etable.querySelector('#'+$this._sanitizeId(`${type}_${number}_${date.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
+  },
+
   getCell: function(/*MomentObject*/date, /*String*/type, /*String*/number, /*Int*/bednum) {
     var elms = this.etable.querySelectorAll("td[data-hcal-date='"+date.format(HotelCalendar.DATE_FORMAT_SHORT_)+"'] table td[data-hcal-bed-num='"+bednum+"']");
     for (var elm of elms) {
@@ -439,7 +444,7 @@ HotelCalendar.prototype = {
     return _.uniq(_.pluck(this.options.rooms, 'type'));
   },
 
-  getRoom: function(/*String*/id) {
+  getRoom: function(/*String,Int*/id) {
     return _.find(this.options.rooms, function(item){ return item.id == id; });
   },
 
@@ -792,10 +797,10 @@ HotelCalendar.prototype = {
     /** ROOM LINES **/
     var tbody = document.createElement("tbody");
     this.etable.appendChild(tbody);
-    this.options.rooms.forEach(function(itemRoom, indexRoom){
+    for (var itemRoom of this.options.rooms) {
       // Room Number
       row = tbody.insertRow();
-      row.setAttribute('id', $this._sanitizeId(`ROW_${itemRoom.number}_${itemRoom.type}_${indexRoom}`));
+      row.setAttribute('id', $this._sanitizeId(`ROW_${itemRoom.number}_${itemRoom.type}`));
       row.dataset.hcalRoomObjId = itemRoom.id;
       row.classList.add('hcal-row-room-type-group-item');
       cell = row.insertCell();
@@ -813,7 +818,7 @@ HotelCalendar.prototype = {
     	var dd = $this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
         var dd_local = dd.clone().local();
         cell = row.insertCell();
-        cell.setAttribute('id', $this._sanitizeId(`${itemRoom.type}_${itemRoom.number}_${indexRoom}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
+        cell.setAttribute('id', $this._sanitizeId(`${itemRoom.type}_${itemRoom.number}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
         cell.classList.add('hcal-cell-room-type-group-item-day');
         cell.dataset.hcalParentRow = row.getAttribute('id');
         cell.dataset.hcalDate = dd_local.format(HotelCalendar.DATE_FORMAT_SHORT_);
@@ -830,7 +835,7 @@ HotelCalendar.prototype = {
           cell.classList.add('hcal-cell-end-week');
         }
       }
-    });
+    }
   },
 
   _createTableDetailDays: function() {
@@ -1004,17 +1009,24 @@ HotelCalendar.prototype = {
       }
     }
     // Rooms Restrictions
-    if (this._restrictions) {
-      var restrictions_keys = _.keys(this._restrictions)
-      for (var room_id of restrictions_keys) {
-        var restrictions = this._restrictions[room_id]
-        var days = _.keys(restrictions);
-        for (var day of days) {
-          var rest_day = restrictions[day];
-          //console.log(rest_day);
-        }
-      }
-    }
+  //   console.log(this.options.rooms);
+  //   if (this._restrictions) {
+  //     var restrictions_keys = _.keys(this._restrictions)
+  //     for (var room_id of restrictions_keys) {
+  //       console.log(room_id);
+  //       var room = this.getRoom(room_id);
+  //       var restrictions = this._restrictions[room_id]
+  //       var days = _.keys(restrictions);
+  //       for (var day of days) {
+  //         var rest_day = restrictions[day];
+  //         if (rest_day[0] > 0 || rest_day[1] > 0 || rest_day[2] > 0 || rest_day[3] || rest_day[4] || rest_day[5]) {
+  //           var day_dt = HotelCalendar.toMoment(day);
+  //           var cell = this.getMainCell(day_dt, room.type, room.number);
+  //           cell.classList.add('hcal-restriction-room-day');
+  //         }
+  //       }
+  //     }
+  //   }
   },
 
   //==== UPDATE FUNCTIONS

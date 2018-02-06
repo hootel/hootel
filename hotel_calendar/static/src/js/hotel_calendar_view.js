@@ -588,6 +588,33 @@ var HotelCalendarView = View.extend({
         $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
         this._last_dates = this.generate_domains()['dates'];
 
+        // Initial State
+        var $pms_search = this.$el.find('#pms-search');
+        $pms_search.css({
+          'top': `-${$pms_search.height()}px`,
+          'opacity': 0.5,
+        });
+        // Show search (Alt+S)
+        $(document).keyup(function(ev){
+          if (ev.altKey) {
+            if (ev.key == 's' || ev.key == 'S')
+            {
+              if ($pms_search.position().top < 0)
+              {
+                $pms_search.animate({
+                  'top': `${$('.main-nav').height()}px`,
+                  'opacity': 1.0,
+                }, 'fast');
+              } else {
+                $pms_search.animate({
+                  'top': `-${$pms_search.height()}px`,
+                  'opacity': 0.0,
+                }, 'slow');
+              }
+            }
+          }
+        });
+
         // View Events
         this.$el.find("#pms-search #search_query").on('change', function(ev){
             self.reload_hcalendar_reservations(true, false, false);
@@ -863,7 +890,6 @@ var HotelCalendarView = View.extend({
           false,
           withPricelist || false,
           withRestrictions || false,
-          false
         ];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
             self._reserv_tooltips = _.extend(self._reserv_tooltips, results['tooltips']);
@@ -891,6 +917,9 @@ var HotelCalendarView = View.extend({
 
             if (withPricelist) {
               self._hcalendar.addPricelist(results['pricelist']);
+            }
+            if (withRestrictions) {
+              self._hcalendar.addRestrictions(results['restrictions']);
             }
             if (clearReservations) {
               self._hcalendar.setReservations(reservs);

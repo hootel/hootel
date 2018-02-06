@@ -27,7 +27,7 @@
                 </button-->
             </div>
             <div class="col-xs-11 col-lg-11 nopadding">
-                <div class="col-xs-12 col-lg-12 nopadding" id="pms-search">
+                <div class="col-xs-11 col-lg-11 nopadding" id="pms-search">
                     <table class="col-xs-12 col-lg-12 nopadding" id="pms-search-table">
                         <tbody>
                             <tr>
