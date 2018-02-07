@@ -8,7 +8,7 @@
 			<field name="arch" type="xml">
 				<xpath expr="//field[@name='parent_id']" position="after">
 					<group>
-				  	<field name="unconfirmed" />
+				  	<field name="unconfirmed" invisible="1"/>
 					</group>
 				</xpath>
 	    </field>
