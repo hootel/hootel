@@ -1,6 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
 <data>
+
+
+
+<!-- Main template -->
+<template id="report.viajero">
+    <style type="text/css">
+        .titulo {font-size:0.93em;}
+        .titulo2 {font-size:1.93em;}
+        .page {margin: 0 auto; font-family:kiro, Verdana, Geneva, sans-serif;}
+        img {max-width:100%;}
+        .cabezera{width:100%; margin:0 auto;}
+        .cabezera h3 {font-size:0.93em;}
+        #datos{ text-align: center; padding:0 15px; font-size:0.85em;}
+        .bloque {margin:5px 0;}
+        td {font-size:1.5em;}
+        .fecha {font-weight:bold;font-size:0.85em;}
+        .firma {width: 80%; border:dotted 1px; height: 80px; margin:0 auto;}
+        .legal p {font-size:0.6em;}
+        h3, #pie, .legal, #cabezera {text-align:center;}
+        h3, #cabezera, td {font-family:kiro, Verdana, Geneva, sans-serif;}
+        h3 {font-size:1.15em;}
+        .numerocheck {font-size:0.9em;}
+        .container-fluid, row, col-md-12 {padding-left: 0 !important; padding-right: 0 !important;}
+    </style>
+    <t>
+        .titulo {font-size:0.93em;}
+        .titulo2 {font-size:1.93em;}
+    </t>
+    <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="report_viajero_document" t-lang="o.partner_id.lang"/>
+            <!-- <t t-raw="translate_doc(o, doc_model, 'partner_id.lang', 'hotel_l10n_es.report_viajero_document')"/> -->
+        </t>
+    </t>
+</template>
+
+<!-- Translatable template -->
+<template id="report_viajero_document">
+    <t t-call="report.external_layout">
+      <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+          <img src='/hotel_l10n_es/static/src/img/logo_alda_bn.png'
+          style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
+          <p style="font-size:1.16em;">PARTE DE ENTRADA DE VIAJEROS</p>
+          <p class="numerocheck">Nº parte: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
+          <p style="font-size:0.65em;"> Importe total (Ficha de Reserva): <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong></p>
+          <p><strong>CIF: <t t-esc="company.vat"/></strong><br/>
+          <strong><t t-esc="company.display_name"/></strong><br/>
+          <strong><t t-esc="company.street"/> <t t-esc="company.street2"/></strong><br/>
+          <strong><t t-esc="company.zip"/> <t t-esc="company.city"/></strong><br/></p>
+          <p class="titulo">DOCUMENTO DEL VIAJERO</p>
+      </div>
+    </t>
+</template>
+
+
+
+<template id="report.viajeroxxxxx">
+    <t t-call="report.html_container">
+        <t t-foreach="docs" t-as="o">
+            <t t-call="report_viajero_document" t-lang="o.partner_id.lang"/>
+        </t>
+    </t>
+</template>
+
+<template id="report_viajero_documentxxxxx">
+  <t t-foreach='o.partner_id' t-as='partner'>
+    <t t-foreach='o.reservation_id' t-as='reservation'>
+      <t t-set="company" t-value="res_company"></t>
+      <p><strong>CIF: <t t-esc="company.vat"/></strong><br/>
+      <strong> <t t-esc="partner.gender"/></strong><br/>
+      <t t-esc="company.city"/>, <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%A, %d de %B de %Y')"/>
+
+    </t>
+  </t>
+</template>
+
+  <!--
 <template id="report.viajero">
     <style type="text/css">
         .titulo {font-size:0.93em;}
@@ -30,6 +107,6 @@
             <t t-call="hotel_l10n_es.report_viajero_document" t-lang="o.partner_id.lang"/>
         </t>
     </t>
-</template>
+</template> -->
 </data>
 </openerp>
