@@ -9,14 +9,14 @@
                         <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <img src='/hotel_l10n_es/static/src/img/logo_alda_bn.png'
                             style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
-                            <p style="font-size:1.16em;">PARTE DE ENTRADA DE VIAJEROS</p>
-                            <p class="numerocheck">Nº parte: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
-                            <p style="font-size:0.65em;"> Importe total (Ficha de Reserva): <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong></p>
+                            <p style="font-size:1.16em;">PART OF TRAVELERS ENTRY</p>
+                            <p class="numerocheck">Document number: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
+                            <p style="font-size:0.65em;"> Total amount (Reservation Card): <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong></p>
                             <p><strong>CIF: <span t-field="company.vat"/></strong><br/>
                             <strong><span t-field="company.display_name"/></strong><br/>
                             <strong><span t-field="company.street"/> <span t-field="company.street2"/></strong><br/>
                             <strong><span t-field="company.zip"/> <span t-field="company.city"/></strong><br/></p>
-                            <p class="titulo">DOCUMENTO DEL VIAJERO</p>
+                            <p class="titulo">TRAVELER'S DOCUMENT</p>
                         </div>
                     </div>
 
@@ -25,13 +25,13 @@
                             <table width="100%" border="1" style="border-style: double;">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Nº de documento</td>
+                                    Document number</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong> <span t-field="o.partner_id.poldocument"/></strong></td>
                               </tr>
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Tipo</td>
+                                    Type</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong>
                                         <t t-esc="dict(o.partner_id.fields_get(allfields=['documenttype'])['documenttype']['selection'])[o.partner_id.documenttype]"/>
@@ -39,7 +39,7 @@
                               </tr>
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Fecha expedición</td>
+                                    Expedition date</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong> <span t-field="o.partner_id.polexpedition" t-field-options='{"format": "d MMMM y"}'/></strong></td>
                               </tr>
@@ -51,13 +51,13 @@
                             <table width="100%" border="1" style="border-style: double;">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Nombre</td>
+                                    Name</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong> <span t-field="o.partner_id.firstname"/></strong></td>
                               </tr>
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Apellidos</td>
+                                    Surnames</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong> <span t-field="o.partner_id.lastname"/></strong></td>
                               </tr>
@@ -69,19 +69,19 @@
                             <table width="100%" border="1" style="border-style: double;">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Sexo</td>
+                                    Gender</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong> <span t-field="o.partner_id.gender"/></strong></td>
                               </tr>
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    F. de nacimiento</td>
+                                    Birthdate</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong> <span t-field="o.partner_id.birthdate_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
                               </tr>
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Procedencia</td>
+                                    Origin</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong> <span t-field="o.partner_id.code_ine"/></strong></td>
                               </tr>
@@ -93,13 +93,13 @@
                             <table width="100%">
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Fecha de entrada</td>
+                                    Entry date</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong> <span t-field="o.enter_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
                               </tr>
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Fecha de salida</td>
+                                    Exit date</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                                     <strong><span t-field="o.exit_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
                               </tr>
@@ -109,134 +109,135 @@
                     <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                         <div class="col-md-12" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
                             <p class="text-center">
-                                <span t-field="company.city"/>, a <span t-esc="time.strftime('%Y-%m-%d')" t-options="{&quot;widget&quot;: &quot;date&quot;}"/>
+                                <span t-field="company.city"/>, at <span t-esc="time.strftime('%Y-%m-%d')" t-options="{&quot;widget&quot;: &quot;date&quot;}"/>
                             </p>
                             <div class="firma" style="width: 85%; border:dotted 1px; height: 60px; margin:0 auto;">
                             </div><br/>
-                            <p class="text-center">Firma del viajero</p>
+                            <p class="text-center">Traveler's signature</p>
                             <p class="text-center" style="font-size:0.65em;"><span t-field="company.cardex_warning"/></p>
-                            <p class="text-center" style="font-size:0.6em;">La recogida y tratamiento se hará de acuerdo con la Ley Orgánica 15/1999, de 13 de dic. de protección de datos de carácter personal y al amparo de lo dispuesto en el art. 12.1 de la Ley Orgánica 1/1992, de 21 de febrero, sobre protección de la seguridad ciudadana.</p>
+                            <p class="text-center" style="font-size:0.6em;">The collection and treatment will be done in accordance with the Organic Law 15/1999, of December 13. of protection of personal data and under the provisions of art. 12.1 of the Organic Law 1/1992, of February 21, on the protection of citizen security.</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="page" style="font-size:xx-small; padding-left: 0 !important; padding-right: 0 !important;">
-                <div class="container-fluid" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                    <div class="row cabezera" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                            <img src='/hotel_l10n_es/static/src/img/logo_alda_bn.png'
-                            style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
-                            <p style="font-size:1.16em;">PARTE DE ENTRADA DE VIAJEROS</p>
-                            <p class="numerocheck">Nº parte: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
-                            <p style="font-size:0.65em;"> Importe total (Ficha de Reserva): <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong></p>
-                            <p><strong>CIF: <span t-field="company.vat"/></strong><br/>
-                            <strong><span t-field="company.display_name"/></strong><br/>
-                            <strong><span t-field="company.street"/> <span t-field="company.street2"/></strong><br/>
-                            <strong><span t-field="company.zip"/> <span t-field="company.city"/></strong><br/></p>
-                            <p class="titulo">DOCUMENTO DEL VIAJERO</p>
-                        </div>
-                    </div>
+                        <div class="page" style="font-size:xx-small; padding-left: 0 !important; padding-right: 0 !important;">
+                            <div class="container-fluid" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                <div class="row cabezera" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                    <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                        <img src='/hotel_l10n_es/static/src/img/logo_alda_bn.png'
+                                        style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
+                                        <p style="font-size:1.16em;">PART OF TRAVELERS ENTRY</p>
+                                        <p class="numerocheck">Document number: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
+                                        <p style="font-size:0.65em;"> Total amount (Reservation Card): <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong></p>
+                                        <p><strong>CIF: <span t-field="company.vat"/></strong><br/>
+                                        <strong><span t-field="company.display_name"/></strong><br/>
+                                        <strong><span t-field="company.street"/> <span t-field="company.street2"/></strong><br/>
+                                        <strong><span t-field="company.zip"/> <span t-field="company.city"/></strong><br/></p>
+                                        <p class="titulo">TRAVELER'S DOCUMENT</p>
+                                    </div>
+                                </div>
 
-                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                            <table width="100%" border="1" style="border-style: double;">
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Nº de documento</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.partner_id.poldocument"/></strong></td>
-                              </tr>
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Tipo</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong>
-                                        <t t-esc="dict(o.partner_id.fields_get(allfields=['documenttype'])['documenttype']['selection'])[o.partner_id.documenttype]"/>
-                                    </strong></td>
-                              </tr>
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Fecha expedición</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.partner_id.polexpedition" t-field-options='{"format": "d MMMM y"}'/></strong></td>
-                              </tr>
-                            </table><br/>
+                                <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                    <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                        <table width="100%" border="1" style="border-style: double;">
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Document number</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong> <span t-field="o.partner_id.poldocument"/></strong></td>
+                                          </tr>
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Type</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong>
+                                                    <t t-esc="dict(o.partner_id.fields_get(allfields=['documenttype'])['documenttype']['selection'])[o.partner_id.documenttype]"/>
+                                                </strong></td>
+                                          </tr>
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Expedition date</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong> <span t-field="o.partner_id.polexpedition" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                          </tr>
+                                        </table><br/>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                    <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                        <table width="100%" border="1" style="border-style: double;">
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Name</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong> <span t-field="o.partner_id.firstname"/></strong></td>
+                                          </tr>
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Surnames</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong> <span t-field="o.partner_id.lastname"/></strong></td>
+                                          </tr>
+                                        </table><br/>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                    <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                        <table width="100%" border="1" style="border-style: double;">
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Gender</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong> <span t-field="o.partner_id.gender"/></strong></td>
+                                          </tr>
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Birthdate</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong> <span t-field="o.partner_id.birthdate_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                          </tr>
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Origin</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong> <span t-field="o.partner_id.code_ine"/></strong></td>
+                                          </tr>
+                                        </table><br/>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                    <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                        <table width="100%">
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Entry date</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong> <span t-field="o.enter_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                          </tr>
+                                          <tr>
+                                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                                Exit date</td>
+                                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                                <strong><span t-field="o.exit_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                          </tr>
+                                        </table><br/>
+                                    </div>
+                                </div>
+                                <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                    <div class="col-md-12" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
+                                        <p class="text-center">
+                                            <span t-field="company.city"/>, at <span t-esc="time.strftime('%Y-%m-%d')" t-options="{&quot;widget&quot;: &quot;date&quot;}"/>
+                                        </p><br/>
+                                        <!-- <t t-esc="company.city"/>, <span t-esc="time.strftime('%A, %d de %B de %Y')"/> -->
+                                        <p class="text-center">
+                                            <strong>COPY TO THE USER</strong></p>
+                                        <p class="text-center" style="font-size:0.65em;"><span t-field="company.cardex_warning"/></p>
+                                        <p class="text-center" style="font-size:0.6em;">The collection and treatment will be done in accordance with the Organic Law 15/1999, of December 13. of protection of personal data and under the provisions of art. 12.1 of the Organic Law 1/1992, of February 21, on the protection of citizen security.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                            <table width="100%" border="1" style="border-style: double;">
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Nombre</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.partner_id.firstname"/></strong></td>
-                              </tr>
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Apellidos</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.partner_id.lastname"/></strong></td>
-                              </tr>
-                            </table><br/>
-                        </div>
-                    </div>
-                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                            <table width="100%" border="1" style="border-style: double;">
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Sexo</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.partner_id.gender"/></strong></td>
-                              </tr>
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    F. de nacimiento</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.partner_id.birthdate_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
-                              </tr>
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Procedencia</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.partner_id.code_ine"/></strong></td>
-                              </tr>
-                            </table><br/>
-                        </div>
-                    </div>
-                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                        <div class="col-md-12 text-center" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                            <table width="100%">
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Fecha de entrada</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.enter_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
-                              </tr>
-                              <tr>
-                                <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
-                                    Fecha de salida</td>
-                                <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong><span t-field="o.exit_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
-                              </tr>
-                            </table><br/>
-                        </div>
-                    </div>
-                    <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                        <div class="col-md-12" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important;">
-                            <p class="text-center">
-                                <span t-field="company.city"/>, a <span t-esc="time.strftime('%Y-%m-%d')" t-options="{&quot;widget&quot;: &quot;date&quot;}"/>
-                            </p><br/>
-                            <p class="text-center">
-                                <strong>COPIA PARA EL USUARIO</strong></p>
-                            <p class="text-center" style="font-size:0.65em;"><span t-field="company.cardex_warning"/></p>
-                            <p class="text-center" style="font-size:0.6em;">La recogida y tratamiento se hará de acuerdo con la Ley Orgánica 15/1999, de 13 de dic. de protección de datos de carácter personal y al amparo de lo dispuesto en el art. 12.1 de la Ley Orgánica 1/1992, de 21 de febrero, sobre protección de la seguridad ciudadana.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-    </template>
-</data>
-</openerp>
+                </template>
+            </data>
+            </openerp>

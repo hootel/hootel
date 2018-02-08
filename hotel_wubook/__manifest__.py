@@ -36,7 +36,8 @@
     },
     'data': [
         'views/inherited_res_partner_views.xml',
-        'views/res_config_views.xml'
+        'views/res_config_views.xml',
+        'security/hotel_security.xml'
     ],
     'test': [
     ],

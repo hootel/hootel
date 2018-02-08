@@ -557,7 +557,8 @@ class HotelReservation(models.Model):
                 'reservation_lines': rlines['commands'],
             })
             if self.reservation_type not in ('staff', 'out'):
-                vals.update({'price_unit':  rlines['total_price'],'edit_room': False,})
+                vals.update({'price_unit':  rlines['total_price'],})
+        vals.update({'edit_room': False,})
         res = super(HotelReservation, self).write(vals)
         if datesChanged and self.folio_id:
             self.folio_id.compute_invoices_amount()
@@ -611,13 +612,18 @@ class HotelReservation(models.Model):
             self.checkin = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         if not self.checkout:
             self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-        self.name = self.product_id.name
-        self.product_uom = self.product_id.uom_id
+
         # UTC -> Hotel tz
         tz = self.env['ir.values'].get_default('hotel.config.settings',
                                                'tz_hotel')
         chkin_utc_dt = date_utils.get_datetime(self.checkin)
         chkout_utc_dt = date_utils.get_datetime(self.checkout)
+
+        if self.product_id:
+            checkin_str = chkin_utc_dt.strftime('%d/%m/%Y')
+            checkout_str = chkout_utc_dt.strftime('%d/%m/%Y')
+            self.name = self.product_id.name + ': ' + checkin_str + ' - ' + checkout_str
+            self.product_uom = self.product_id.uom_id
 
         if chkin_utc_dt >= chkout_utc_dt:
             dpt_hour = self.env['ir.values'].get_default(

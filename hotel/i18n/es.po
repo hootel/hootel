@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-02-05 10:01+0000\n"
-"PO-Revision-Date: 2018-02-05 17:20+0100\n"
+"PO-Revision-Date: 2018-02-07 14:03+0100\n"
 "Last-Translator: Jose Luis Algara <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -903,7 +903,7 @@ msgstr "Confirmar"
 #. module: hotel
 #: model:ir.ui.view,arch_db:hotel.view_hotel_folio1_form
 msgid "Confirm Sale"
-msgstr "Confirmar venta"
+msgstr "Confirmar ficha"
 
 #. module: hotel
 #: model:ir.model.fields,field_description:hotel.field_hotel_folio_confirmation_date

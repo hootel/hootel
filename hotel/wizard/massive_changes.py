@@ -78,10 +78,15 @@ class MassiveChangesWizard(models.TransientModel):
     # Pricelist fields
     pricelist_id = fields.Many2one('product.pricelist', 'Pricelist')
     price = fields.Char('Price', help="Can use '+','-' \
-                                        or '%'...\nExamples:\n ⚫ +12.3 \
+                                        or '%'...\nExamples:\n a) +12.3 \
                                         \t> Increase the price in 12.3\n \
-                                        ⚫ -1.45% \t> Substract 1.45%\n ⚫ 45 \
+                                        b) -1.45% \t> Substract 1.45%\n c) 45 \
                                         \t\t> Sets the price to 45")
+
+    @api.onchange('date_start')
+    def onchange_date_start(self):
+        self.ensure_one()
+        self.date_end = self.date_start
 
     @api.multi
     def is_valid_date(self, chkdate):
