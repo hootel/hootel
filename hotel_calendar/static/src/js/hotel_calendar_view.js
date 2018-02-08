@@ -595,7 +595,7 @@ var HotelCalendarView = View.extend({
           'opacity': 0.5,
         });
         // Show search (Alt+S)
-        $(document).keyup(function(ev){
+        $(document).keydown(function(ev){
           if (ev.altKey) {
             if (ev.key == 's' || ev.key == 'S')
             {
@@ -855,6 +855,7 @@ var HotelCalendarView = View.extend({
                 break;
               case 'pricelist':
                 var price = notif[1]['price'];
+                console.log(price);
                 this._hcalendar.addPricelist(price);
                 break;
               default:

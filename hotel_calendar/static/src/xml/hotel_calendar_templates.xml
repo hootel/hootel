@@ -86,6 +86,17 @@
 	<span><b t-esc="nights"/> Nights: <b t-esc="total_price" t-widget="monetary"/>€</span>
 </t>
 
+<t t-name="HotelCalendar.TooltipRestriction">
+	<ul class="oe_tooltip_technical">
+		<li><b>Min. Stay:</b> <t t-esc="min_stay"/></li>
+		<li><b>Max. Stay:</b> <t t-esc="max_stay"/></li>
+		<li><b>Max. Stay Arrival:</b> <t t-esc="max_stay_arrival"/></li>
+		<li><b>Closed:</b> <t t-esc="closed"/></li>
+		<li><b>Closed Arrival:</b> <t t-esc="closed_arrival"/></li>
+		<li><b>Closed Departure:</b> <t t-esc="closed_departure"/></li>
+	</ul>
+</t>
+
 <t t-name="HotelCalendar.ConfirmFolio">
 	<div class="content">
 		<p>Do you want to confirm this folio?</p>

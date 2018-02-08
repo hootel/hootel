@@ -71,6 +71,7 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
 
   /** Main Events **/
   document.addEventListener('mouseup', this.onMainMouseUp.bind(this), false);
+  document.addEventListener('touchend', this.onMainMouseUp.bind(this), false);
   window.addEventListener('resize', this.onMainResize.bind(this), false);
 
   return this;
@@ -191,6 +192,8 @@ HotelCalendar.prototype = {
         }
         this._updateReservation(reserv);
       }
+
+      this._updateReservationOccupation();
 
 	    if (!noUnusedZones && this.options.divideRoomsByCapacity) {
       	this._updateUnusedZones();
@@ -361,7 +364,7 @@ HotelCalendar.prototype = {
 
   //==== CELLS
   getMainCell: function(/*MomentObject*/date, /*String*/type, /*String*/number) {
-    return this.etable.querySelector('#'+$this._sanitizeId(`${type}_${number}_${date.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
+    return this.etable.querySelector('#'+this._sanitizeId(`${type}_${number}_${date.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
   },
 
   getCell: function(/*MomentObject*/date, /*String*/type, /*String*/number, /*Int*/bednum) {
@@ -1009,24 +1012,36 @@ HotelCalendar.prototype = {
       }
     }
     // Rooms Restrictions
-  //   console.log(this.options.rooms);
-  //   if (this._restrictions) {
-  //     var restrictions_keys = _.keys(this._restrictions)
-  //     for (var room_id of restrictions_keys) {
-  //       console.log(room_id);
-  //       var room = this.getRoom(room_id);
-  //       var restrictions = this._restrictions[room_id]
-  //       var days = _.keys(restrictions);
-  //       for (var day of days) {
-  //         var rest_day = restrictions[day];
-  //         if (rest_day[0] > 0 || rest_day[1] > 0 || rest_day[2] > 0 || rest_day[3] || rest_day[4] || rest_day[5]) {
-  //           var day_dt = HotelCalendar.toMoment(day);
-  //           var cell = this.getMainCell(day_dt, room.type, room.number);
-  //           cell.classList.add('hcal-restriction-room-day');
-  //         }
-  //       }
-  //     }
-  //   }
+    for (var room of this.options.rooms) {
+      if (room.price[0] == 'pricelist') {
+        var date = this.options.startDate.clone().startOf('day');
+        for (var i=0; i<=this.options.days; ++i) {
+          var dd = date.add(1, 'd');
+          var date_str = dd.clone().utc().format(HotelCalendar.DATE_FORMAT_SHORT_);
+          if (date_str in this._restrictions[room.price[1]]) {
+            var restr = this._restrictions[room.price[1]][date_str];
+            if (restr && (restr[0] > 0 || restr[1] > 0 || restr[2] > 0 || restr[3] || restr[4] || restr[5])) {
+              var cell = this.getMainCell(dd, room.type, room.number);
+              cell.classList.add('hcal-restriction-room-day');
+              var humantext = "Restrictions:\n";
+              if (restr[0] > 0)
+                humantext += `Min. Stay: ${restr[0]}\n`;
+              if (restr[1] > 0)
+                humantext += `Max. Stay: ${restr[1]}\n`;
+              if (restr[2] > 0)
+                humantext += `Max. Stay Arrival: ${restr[2]}\n`;
+              if (restr[3])
+                humantext += `Closed: ${restr[3]}\n`;
+              if (restr[4])
+                humantext += `Closed Arrival: ${restr[4]}\n`;
+              if (restr[5])
+                humantext += `Closed Departure: ${restr[5]}`;
+              cell.title = humantext;
+            }
+          }
+        }
+      }
+    }
   },
 
   //==== UPDATE FUNCTIONS
@@ -1436,7 +1451,7 @@ HotelCalendar.prototype = {
 
   addPricelist: function(/*Dictionary*/pricelist) {
     var keys = _.keys(pricelist);
-    for (var k of keys) {
+    for (var priceplan of pricelist) {
       var pr = pricelist[k];
       for (var pr_k in pr) {
         var pr_item = pricelist[k][pr_k];
@@ -1444,6 +1459,7 @@ HotelCalendar.prototype = {
         if (pr_fk) {
           this._pricelist[k][pr_fk].room = pr_item.room;
           this._pricelist[k][pr_fk].days = _.extend(this._pricelist[k][pr_fk].days, pr_item.days);
+          console.log(this._pricelist[k][pr_fk]);
           if (pr_item.title) {
             this._pricelist[k][pr_fk].title = pr_item.title;
           }
