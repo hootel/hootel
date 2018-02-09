@@ -363,15 +363,27 @@
 
 % for row in object.room_lines:
                                              <tr>
-                                               <td align="justify" class="subheading" style="color: #555555"><strong>${row.virtual_room_id}[[tipo de habitación]]${row.virtual_room_id.name}</strong></td>
+                                               % if row.virtual_room_id.name:
+                                               <td align="justify" class="subheading" style="color: #555555"><strong>${row.virtual_room_id.name}</strong></td>
+                                               % else:
+                                               <td align="justify" class="subheading" style="color: #555555"><strong>habitación</strong></td>
+                                               % endif
                                              </tr>
                                              <tr>
                                                <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">Esta habitación cuenta con TV, Wi-Fi gratuita, calefacción y baño privado.<br />
-                                               <strong>Día de entrada</strong>: ${row.checkin}<br />
-                                               <strong>Día de entrada</strong>: ${row.checkout}<br />
-                                               <strong>Nombre del huésped</strong>: [[nombre]]<br />
-                                               <strong>Nombre del huésped</strong>: [[nombre]]<br />
-                                                 <strong>Número de huéspedes</strong>: [[nº de huéspedes]]<br />
+
+
+                                               <strong>Día de entrada</strong>: ${row.checkin[6:2]}/${row.checkin[4:2]}/${row.checkin[0:4]}<br />
+                                               <strong>Día de salida</strong>: ${row.checkout[6:2]}/${row.checkout[4:2]}/${row.checkout[0:4]}<br />
+                                                 <strong>Número de huéspedes</strong>:
+                                               % if row.adults > 0:
+                                                  ${row.adults} Adultos
+                                               % endif
+                                               % if row.children > 0:
+                                                   / ${row.children} Niños
+                                               % endif
+
+                                                  [[nº de huéspedes]]<br />
                                                  <strong>Régimen de comidas</strong>: [[tipo de régimen]]<br /></td>
                                                </tr>
                                                <tr> </tr>
@@ -394,7 +406,7 @@
                                                  </td>
                                                </table>
                                              </td>
-%endfor
+% endfor
 
 
 
