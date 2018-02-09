@@ -19,22 +19,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields
 
 
-class HotelVirtualRoom(models.Model):
-    _inherit = 'hotel.virtual.room'
+class HotelRoom(models.Model):
+    _inherit = 'hotel.room'
 
     hcal_sequence = fields.Integer('Calendar Sequence', default=0)
-
-    @api.multi
-    def unlink(self):
-        vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
-        for record in self:
-            pr_chached = vroom_pr_cached_obj.search([
-                ('virtual_room_id', '=', record.id)
-            ])
-            #  Because 'pricelist.cached' is an isolated model,
-            # doesn't trigger 'ondelete'. Need call 'unlink' instead.
-            pr_chached.unlink()
-        return super(HotelVirtualRoom, self).unlink()

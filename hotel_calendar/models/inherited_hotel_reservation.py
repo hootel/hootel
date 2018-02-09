@@ -227,6 +227,8 @@ class HotelReservation(models.Model):
             'default_departure_hour': self.env['ir.values'].get_default(
                     'hotel.config.settings', 'default_departure_hour'),
             'show_notifications': user_id.pms_show_notifications,
+            'show_pricelist': user_id.pms_show_pricelist,
+            'show_availability': user_id.pms_show_availability,
         }
 
     @api.multi
@@ -239,7 +241,8 @@ class HotelReservation(models.Model):
         domainRooms = domainRooms or []
         domainReservations = domainReservations or []
 
-        rooms = self.env['hotel.room'].search(domainRooms)
+        rooms = self.env['hotel.room'].search(domainRooms,
+                                              order='hcal_sequence ASC')
         json_res, json_res_tooltips = self.get_hcalendar_reservations_data(
             dfrom, dto, domainReservations, rooms)
 

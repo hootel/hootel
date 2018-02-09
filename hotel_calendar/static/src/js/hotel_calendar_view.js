@@ -432,7 +432,9 @@ var HotelCalendarView = View.extend({
                 endOfWeek: parseInt(self._view_options['eday_week']) || 6,
                 divideRoomsByCapacity: self._view_options['divide_rooms_by_capacity'] || false,
                 allowInvalidActions: self._view_options['allow_invalid_actions'] || false,
-                assistedMovement: self._view_options['assisted_movement'] || false
+                assistedMovement: self._view_options['assisted_movement'] || false,
+                showPricelist: self._view_options['show_pricelist'] || false,
+                showAvailability: self._view_options['show_availability'] || false
             }, results['pricelist'], results['restrictions']);
 
             var reservs = [];
@@ -855,7 +857,6 @@ var HotelCalendarView = View.extend({
                 break;
               case 'pricelist':
                 var price = notif[1]['price'];
-                console.log(price);
                 this._hcalendar.addPricelist(price);
                 break;
               default:

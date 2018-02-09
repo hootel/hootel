@@ -26,3 +26,5 @@ class ResUsers(models.Model):
     _inherit = 'res.users'
 
     pms_show_notifications = fields.Boolean('Show Notifications', default=True)
+    pms_show_pricelist = fields.Boolean('Show Pricelist', default=True)
+    pms_show_availability = fields.Boolean('Show Availability', default=True)

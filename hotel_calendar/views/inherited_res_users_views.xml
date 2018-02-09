@@ -9,6 +9,8 @@
 					<xpath expr="//page/group/group[@name='preferences']" position="before">
 						<group string="Calendar (PMS)" name="calendar">
 							<field name="pms_show_notifications" />
+							<field name="pms_show_pricelist" />
+							<field name="pms_show_availability" />
 						</group>
 					</xpath>
         </field>
