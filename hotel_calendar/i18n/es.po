@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-02-05 16:51+0000\n"
-"PO-Revision-Date: 2018-02-07 11:20+0100\n"
+"PO-Revision-Date: 2018-02-09 14:01+0100\n"
 "Last-Translator: Jose Luis Algara <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -236,7 +236,7 @@ msgstr "Divida las habitaciones por capacidad"
 #: code:addons/hotel_calendar/static/src/xml/hotel_calendar_templates.xml:91
 #, python-format
 msgid "Do you want to confirm this folio?"
-msgstr "Deseas confirmar la fiha?"
+msgstr "Deseas confirmar la ficha?"
 
 #. module: hotel_calendar
 #. openerp-web
