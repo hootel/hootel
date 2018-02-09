@@ -22,6 +22,7 @@ var Core = require('web.core'),
     Ajax = require('web.ajax'),
     ControlPanel = require('web.ControlPanel'),
     Session = require('web.session'),
+    SystrayMenu = require('web.SystrayMenu'),
     formats = require('web.formats'),
 
     _t = Core._t,
@@ -52,6 +53,27 @@ ControlPanel.include({
       this._toggle_visibility(!options.toHide);
   }
 });
+
+/** SYSTRAY **/
+// var MessagingMenu = Widget.extend({
+//     template:'mail.chat.MessagingMenu',
+//     events: {
+//         "click": "on_click",
+//         "click .o_filter_button": "on_click_filter_button",
+//         "click .o_new_message": "on_click_new_message",
+//         "click .o_mail_channel_preview": "on_click_channel",
+//     },
+//     start: function () {
+//         this.$filter_buttons = this.$('.o_filter_button');
+//         this.$channels_preview = this.$('.o_mail_navbar_dropdown_channels');
+//         this.filter = false;
+//         chat_manager.bus.on("update_channel_unread_counter", this, this.update_counter);
+//         chat_manager.is_ready.then(this.update_counter.bind(this));
+//         return this._super();
+//     },
+// });
+//SystrayMenu.Items.push(MessagingMenu);
+//SystrayMenu.Items.push(InboxItem);
 
 var HotelCalendarView = View.extend({
     /** VIEW OPTIONS **/
@@ -693,8 +715,8 @@ var HotelCalendarView = View.extend({
         this.$el.find("#btn_action_paydue").on('click', function(ev){
             self.call_action('hotel_calendar.hotel_reservation_action_paydue');
         });
-	      this.$el.find("#btn_action_paydue").on('click', function(ev){
-            self.call_action('hotel.open_hotel_folio1_form_tree_all');
+        this.$el.find("#btn_action_control").on('click', function(ev){
+            self.call_action('hotel_calendar.open_wizard_reservations');
         });
 //        this.$el.find("#btn_action_refresh").on('click', function(ev){
 //            window.location.reload();
