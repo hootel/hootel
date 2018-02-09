@@ -1300,7 +1300,7 @@ HotelCalendar.prototype = {
 
   setDetailPrice: function(/*String*/room_type, /*String*/date, /*Float*/price) {
     var dd = HotelCalendar.toMoment(date);
-    var selector = this._sanitizeId(`CELL_PRICE_${room_type}_${dd.local().format(HotelCalendar.DATE_FORMAT_SHORT_)}`);
+    var selector = this._sanitizeId(`CELL_PRICE_${room_type}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`);
     var cell_input = this.edtable.querySelector('#'+`${selector} input`);
     cell_input.value = price;
   },
@@ -1443,6 +1443,9 @@ HotelCalendar.prototype = {
   },
 
   _updateReservationOccupation: function() {
+    if (!this.options.showAvailability) {
+      return;
+    }
     var cells = [
       this.edtable.querySelectorAll('td.hcal-cell-detail-room-free-type-group-item-day'),
       this.edtable.querySelectorAll('td.hcal-cell-detail-room-free-total-group-item-day'),
@@ -1521,15 +1524,17 @@ HotelCalendar.prototype = {
   },
 
   _updatePriceList: function() {
+    if (!this.options.showPricelist) {
+      return;
+    }
     var keys = _.keys(this._pricelist);
     for (var k of keys) {
       var pr = this._pricelist[k];
       for (var pr_item of pr) {
         var pr_keys = _.keys(pr_item['days']);
         for (var prk of pr_keys) {
-          var dd = HotelCalendar.toMoment(prk, HotelCalendar.DATE_FORMAT_SHORT_);
           var price = pr_item['days'][prk];
-          var cell = this.edtable.querySelector('#'+this._sanitizeId(`CELL_PRICE_${k}_${pr_item['room']}_${dd.startOf('day').utc().format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
+          var cell = this.edtable.querySelector('#'+this._sanitizeId(`CELL_PRICE_${k}_${pr_item['room']}_${prk}`));
           if (cell) {
             cell.textContent = price;
           }
