@@ -559,11 +559,14 @@ class HotelFolio(models.Model):
         template message loaded by default.
         @param self: object pointer
         '''
+        # Debug Stop -------------------
+        #import wdb; wdb.set_trace()
+        # Debug Stop -------------------
         self.ensure_one()
         ir_model_data = self.env['ir.model.data']
         try:
             template_id = (ir_model_data.get_object_reference
-                           ('hotel_reservation',
+                           ('hotel',
                             'mail_template_hotel_reservation')[1])
         except ValueError:
             template_id = False
