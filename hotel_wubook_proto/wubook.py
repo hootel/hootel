@@ -198,7 +198,7 @@ class WuBook(models.TransientModel):
                                                 DEFAULT_SERVER_DATE_FORMAT),
         })
 
-    def set_clousure_today(status):
+    def set_clousure_today(self, status):
         hotel_tz = self.env['ir.values'].get_default('hotel.config.settings',
                                                      'tz_hotel')
         now_utc_dt = date_utils.now()
