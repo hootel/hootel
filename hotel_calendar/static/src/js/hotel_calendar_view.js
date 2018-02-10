@@ -445,8 +445,6 @@ var HotelCalendarView = View.extend({
                 rooms.push(nroom);
             }
 
-            console.log(results['restrictions']);
-
             self.create_calendar({
                 startDate: HotelCalendar.toMomentUTC(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT),
                 days: self._view_options['days'] + 1,
@@ -456,11 +454,12 @@ var HotelCalendarView = View.extend({
                 allowInvalidActions: self._view_options['allow_invalid_actions'] || false,
                 assistedMovement: self._view_options['assisted_movement'] || false,
                 showPricelist: self._view_options['show_pricelist'] || false,
-                showAvailability: self._view_options['show_availability'] || false
+                showAvailability: self._view_options['show_availability'] || false,
+                showNumRooms: self._view_options['show_num_rooms'] || 0,
+                endOfWeekOffset: self._view_options['eday_week_offset'] || 0
             }, results['pricelist'], results['restrictions']);
 
             var reservs = [];
-            console.log(results['reservations']);
             for (var r of results['reservations']) {
                 var room = self._hcalendar.getRoom(r[0]);
                 var nreserv = new HReservation(
@@ -615,8 +614,8 @@ var HotelCalendarView = View.extend({
         // Initial State
         var $pms_search = this.$el.find('#pms-search');
         $pms_search.css({
-          'top': `-${$pms_search.height()}px`,
-          'opacity': 0.5,
+          'top': `-100%`,
+          'opacity': 0.0,
         });
         // Show search (Alt+S)
         $(document).keydown(function(ev){

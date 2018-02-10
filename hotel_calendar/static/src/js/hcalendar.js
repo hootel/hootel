@@ -44,10 +44,12 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
     allowInvalidActions: options.allowInvalidActions || false,
     assistedMovement: options.assistedMovement || false,
     endOfWeek: options.endOfWeek || 6,
+    endOfWeekOffset: options.endOfWeekOffset || 0,
     divideRoomsByCapacity: options.divideRoomsByCapacity || false,
     currencySymbol: options.currencySymbol || '€',
     showPricelist: options.showPricelist || false,
     showAvailability: options.showAvailability || false,
+    showNumRooms: options.showNumRooms || 0,
   };
 
   // Check correct values
@@ -206,7 +208,7 @@ HotelCalendar.prototype = {
 
   removeReservation: function(/*Int/HReservationObject*/reservation, /*Boolean?*/noupdate) {
     var reserv = reservation;
-    if (typeof reservation === 'int') {
+    if (typeof reservation !== HReservation) {
       reserv = _.find(this._reservations, {'id': +reservation});
     }
     if (reserv) {
@@ -850,7 +852,7 @@ HotelCalendar.prototype = {
       }
       if (dd_local.isSame(now, 'day')) {
         cell.classList.add('hcal-cell-current-day');
-      } else if (dd_local.format('e') == this.options.endOfWeek) {
+      } else if (dd_local.format('e') >= this.options.endOfWeek-this.options.endOfWeekOffset && dd_local.format('e') <= this.options.endOfWeek) {
         cell.classList.add('hcal-cell-end-week');
       }
       ++months[cur_month].colspan;
@@ -887,7 +889,7 @@ HotelCalendar.prototype = {
       cell.classList.add('btn-hcal');
       cell.classList.add('btn-hcal-flat');
       for (var i=0; i<=$this.options.days; i++) {
-    	var dd = $this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
+        var dd = $this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
         var dd_local = dd.clone().local();
         cell = row.insertCell();
         cell.setAttribute('id', $this._sanitizeId(`${itemRoom.type}_${itemRoom.number}_${dd_local.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
@@ -903,10 +905,22 @@ HotelCalendar.prototype = {
         }
         if (dd_local.isSame(now, 'day')) {
           cell.classList.add('hcal-cell-current-day');
-        } else if (dd_local.format('e') == $this.options.endOfWeek) {
+        }  else if (dd_local.format('e') >= this.options.endOfWeek-this.options.endOfWeekOffset && dd_local.format('e') <= this.options.endOfWeek) {
           cell.classList.add('hcal-cell-end-week');
         }
       }
+    }
+
+    // Adjust view
+    if (this.options.showNumRooms > 0) {
+      var rows = this.edivr.querySelectorAll('tr.hcal-row-room-type-group-item');
+      var cheight = 0.0;
+      for (var i=0; i<this.options.showNumRooms && i<rows.length; ++i)
+      {
+        var bounds = rows[i].getBoundingClientRect();
+        cheight += bounds.bottom-bounds.top;
+      }
+      this.edivr.style.height = `${cheight}px`;
     }
   },
 
@@ -938,7 +952,7 @@ HotelCalendar.prototype = {
       }
       if (dd_local.isSame(now, 'day')) {
         cell.classList.add('hcal-cell-current-day');
-      } else if (dd_local.format('e') == this.options.endOfWeek) {
+      } else if (dd_local.format('e') >= this.options.endOfWeek-this.options.endOfWeekOffset && dd_local.format('e') <= this.options.endOfWeek) {
         cell.classList.add('hcal-cell-end-week');
       }
     }
@@ -976,7 +990,7 @@ HotelCalendar.prototype = {
             }
             if (dd_local.isSame(now, 'day')) {
               cell.classList.add('hcal-cell-current-day');
-            } else if (dd_local.format('e') == $this.options.endOfWeek) {
+            } else if (dd_local.format('e') >= this.options.endOfWeek-this.options.endOfWeekOffset && dd_local.format('e') <= this.options.endOfWeek) {
               cell.classList.add('hcal-cell-end-week');
             }
           }
@@ -1007,7 +1021,7 @@ HotelCalendar.prototype = {
         }
         if (dd_local.isSame(now, 'day')) {
           cell.classList.add('hcal-cell-current-day');
-        } else if (dd_local.format('e') == this.options.endOfWeek) {
+        }  else if (dd_local.format('e') >= this.options.endOfWeek-this.options.endOfWeekOffset && dd_local.format('e') <= this.options.endOfWeek) {
           cell.classList.add('hcal-cell-end-week');
         }
       }
@@ -1036,7 +1050,7 @@ HotelCalendar.prototype = {
         }
         if (dd_local.isSame(now, 'day')) {
           cell.classList.add('hcal-cell-current-day');
-        } else if (dd_local.format('e') == this.options.endOfWeek) {
+        }  else if (dd_local.format('e') >= this.options.endOfWeek-this.options.endOfWeekOffset && dd_local.format('e') <= this.options.endOfWeek) {
           cell.classList.add('hcal-cell-end-week');
         }
       }
@@ -1074,7 +1088,7 @@ HotelCalendar.prototype = {
           }
           if (dd_local.isSame(now, 'day')) {
             cell.classList.add('hcal-cell-current-day');
-          } else if (dd_local.format('e') == $this.options.endOfWeek) {
+          } else if (dd_local.format('e') >= this.options.endOfWeek-this.options.endOfWeekOffset && dd_local.format('e') <= this.options.endOfWeek) {
             cell.classList.add('hcal-cell-end-week');
           }
 

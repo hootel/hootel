@@ -26,27 +26,6 @@ from odoo.addons.hotel import date_utils
 class HotelConfiguration(models.TransientModel):
     _inherit = 'hotel.config.settings'
 
-    divide_rooms_by_capacity = fields.Boolean('Divide rooms by capacity')
-    end_day_week = fields.Selection([
-        ('0', 'Monday'),
-        ('1', 'Tuesday'),
-        ('2', 'Wednesday'),
-        ('3', 'Thursday'),
-        ('4', 'Friday'),
-        ('5', 'Saturday'),
-        ('6', 'Sunday')
-    ], string='End day of week', default='6')
-    type_move = fields.Selection([
-        ('normal', 'Normal'),
-        ('assisted', 'Assisted'),
-        ('allow_invalid', 'Allow Invalid')
-    ], string='Reservation move mode', default='normal')
-    default_num_days = fields.Selection([
-        ('month', '1 Month'),
-        ('21', '3 Weeks'),
-        ('14', '2 Weeks'),
-        ('7', '1 Week')
-    ], string='Default number of days', default='month')
     color_pre_reservation = fields.Char('Pre-reservation', default='#A4A4A4')
     color_reservation = fields.Char('Confirmed Reservation ',
                                     default='#4E9DC4')
@@ -153,24 +132,3 @@ class HotelConfiguration(models.TransientModel):
         return self.env['ir.values'].sudo().set_default(
             'hotel.config.settings',
             'default_arrival_hour', self.default_arrival_hour)
-
-    @api.multi
-    def set_divide_rooms_by_capacity(self):
-        return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings',
-            'divide_rooms_by_capacity', self.divide_rooms_by_capacity)
-
-    @api.multi
-    def set_end_day_week(self):
-        return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings', 'end_day_week', self.end_day_week)
-
-    @api.multi
-    def set_type_move(self):
-        return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings', 'type_move', self.type_move)
-
-    @api.multi
-    def set_default_num_days(self):
-        return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings', 'default_num_days', self.default_num_days)

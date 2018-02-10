@@ -210,16 +210,13 @@ class HotelReservation(models.Model):
 
     @api.multi
     def get_hcalendar_settings(self):
-        type_move = self.env['ir.values'].get_default(
-                                        'hotel.config.settings', 'type_move')
         user_id = self.env['res.users'].browse(self.env.uid)
+        type_move = user_id.pms_type_move
         return {
-            'divide_rooms_by_capacity': self.env['ir.values'].get_default(
-                    'hotel.config.settings', 'divide_rooms_by_capacity'),
-            'eday_week': self.env['ir.values'].get_default(
-                        'hotel.config.settings', 'end_day_week'),
-            'days': self.env['ir.values'].get_default(
-                    'hotel.config.settings', 'default_num_days') or 'month',
+            'divide_rooms_by_capacity': user_id.pms_divide_rooms_by_capacity,
+            'eday_week': user_id.pms_end_day_week,
+            'eday_week_offset': user_id.pms_end_day_week_offset,
+            'days': user_id.pms_default_num_days,
             'allow_invalid_actions': type_move == 'allow_invalid',
             'assisted_movement': type_move == 'assisted',
             'default_arrival_hour': self.env['ir.values'].get_default(
@@ -229,6 +226,7 @@ class HotelReservation(models.Model):
             'show_notifications': user_id.pms_show_notifications,
             'show_pricelist': user_id.pms_show_pricelist,
             'show_availability': user_id.pms_show_availability,
+            'show_num_rooms': user_id.pms_show_num_rooms,
         }
 
     @api.multi
