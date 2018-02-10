@@ -199,8 +199,11 @@ class WuBook(models.TransientModel):
         })
 
     def set_clousure_today(status):
+        hotel_tz = self.env['ir.values'].get_default('hotel.config.settings',
+                                                     'tz_hotel')
         now_utc_dt = date_utils.now()
-        now_utc_str = now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+        now_dt = date_utils.dt_as_timezone(now_utc_dt, hotel_tz)
+        now_str = now_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
         vrooms = self.env['hotel.virtual.room'].search([])
 
         restriction_parity_id = self.env['ir.values'].sudo().get_default(
@@ -209,31 +212,35 @@ class WuBook(models.TransientModel):
             restriction_parity_id = int(restriction_parity_id)
 
         vroom_restr_obj = self.env['hotel.virtual.room.restriction.item']
+        vroom_obj = self.env['hotel.virtual.room']
 
-        restr = vroom_restr_obj.search([
-            ('restriction_id', '=', restriction_parity_id),
-            ('start_date', '>=', now_utc_str),
-            ('end_date', '<=', now_utc_str),
-            ('applied_on', '=', '0_virtual_room'),
-        ])
-        if any(restr):
-            restr.write({'closed': status})
-        else:
-            restr = vroom_restr_obj.create({
-                'start_date': now_utc_str,
-                'end_date': now_utc_str,
-                'virtual_room_id': vroom.id,
-                'applied_on': '0_virtual_room',
-                'restriction_id': restriction_parity_id,
-                'min_stay': 0,
-                'min_stay_arrival': 0,
-                'max_stay': 0,
-                'closed': status,
-                'closed_departure': False,
-                'closed_arrival': False,
-            })
-            if not restr:
-                raise ValidationError("Can't close rooms!")
+        vrooms = vroom_obj.search([])
+        for vroom in vrooms:
+            restr = vroom_restr_obj.search([
+                ('restriction_id', '=', restriction_parity_id),
+                ('virtual_room_id', '=', vroom.id),
+                ('start_date', '>=', now_str),
+                ('end_date', '<=', now_str),
+                ('applied_on', '=', '0_virtual_room'),
+            ], limit=1)
+            if restr:
+                restr.write({'closed': status})
+            else:
+                restr = vroom_restr_obj.create({
+                    'start_date': now_str,
+                    'end_date': now_str,
+                    'virtual_room_id': vroom.id,
+                    'applied_on': '0_virtual_room',
+                    'restriction_id': restriction_parity_id,
+                    'min_stay': 0,
+                    'min_stay_arrival': 0,
+                    'max_stay': 0,
+                    'closed': status,
+                    'closed_departure': False,
+                    'closed_arrival': False,
+                })
+                if not restr:
+                    raise ValidationError("Can't close rooms!")
         return self.push_changes()
 
     # === ROOMS
