@@ -214,7 +214,7 @@ class WuBook(models.TransientModel):
         vroom_restr_obj = self.env['hotel.virtual.room.restriction.item']
         vroom_obj = self.env['hotel.virtual.room']
 
-        vrooms = vroom_obj.search([])
+        vrooms = vroom_obj.search([('wrid', '!=', False), ('wrid', '!=', '')])
         for vroom in vrooms:
             restr = vroom_restr_obj.search([
                 ('restriction_id', '=', restriction_parity_id),
@@ -238,10 +238,11 @@ class WuBook(models.TransientModel):
                     'closed': status,
                     'closed_departure': False,
                     'closed_arrival': False,
+                    'wpushed': False,
                 })
                 if not restr:
                     raise ValidationError("Can't close rooms!")
-        return self.push_changes()
+        return self.push_restrictions()
 
     # === ROOMS
     @api.model
