@@ -120,4 +120,22 @@
 	</div>
 </t>
 
+<t t-name="HotelCalendar.SettingsMenu">
+    <li class="o_calendar_settings">
+        <a href="#" title="Calendar Settings" class="dropdown-toggle" data-toggle="dropdown">
+            <span class="fa fa-calendar"/>
+            <b class="caret"/>
+        </a>
+        <ul class="dropdown-menu o_calendar_settings_dropdown" role="menu"/>
+    </li>
+</t>
+
+<t t-name="HotelCalendar.SettingsMenu.Global">
+		<li><a href="#" data-action="toggle_show_adv_controls">Toggle Advance Controls</a></li>
+		<li class="divider"/>
+    <li><a href="#" data-action="toggle_show_notification"><span t-if="manager._show_notifications" class="fa fa-check"/> Show Notifications</a></li>
+		<li><a href="#" data-action="toggle_show_pricelist"><span t-if="manager._show_pricelist" class="fa fa-check"/> Show Pricelist</a></li>
+		<li><a href="#" data-action="toggle_show_availability"><span t-if="manager._show_availability" class="fa fa-check"/> Show Availability</a></li>
+</t>
+
 </template>

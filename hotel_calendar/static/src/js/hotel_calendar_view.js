@@ -23,6 +23,7 @@ var Core = require('web.core'),
     ControlPanel = require('web.ControlPanel'),
     Session = require('web.session'),
     SystrayMenu = require('web.SystrayMenu'),
+    Widget = require('web.Widget'),
     formats = require('web.formats'),
 
     _t = Core._t,
@@ -55,25 +56,102 @@ ControlPanel.include({
 });
 
 /** SYSTRAY **/
-// var MessagingMenu = Widget.extend({
-//     template:'mail.chat.MessagingMenu',
-//     events: {
-//         "click": "on_click",
-//         "click .o_filter_button": "on_click_filter_button",
-//         "click .o_new_message": "on_click_new_message",
-//         "click .o_mail_channel_preview": "on_click_channel",
-//     },
-//     start: function () {
-//         this.$filter_buttons = this.$('.o_filter_button');
-//         this.$channels_preview = this.$('.o_mail_navbar_dropdown_channels');
-//         this.filter = false;
-//         chat_manager.bus.on("update_channel_unread_counter", this, this.update_counter);
-//         chat_manager.is_ready.then(this.update_counter.bind(this));
-//         return this._super();
-//     },
-// });
-//SystrayMenu.Items.push(MessagingMenu);
-//SystrayMenu.Items.push(InboxItem);
+var CalendarMenu = Widget.extend({
+    template: 'HotelCalendar.SettingsMenu',
+    events: {
+      "click a[data-action]": "perform_callback",
+    },
+
+    init: function(){
+      this._super.apply(this, arguments);
+    },
+
+    start: function(){
+      this.$dropdown = this.$(".o_calendar_settings_dropdown");
+      return $.when(
+        new Model("res.users").call("read", [[Session.uid], ["pms_show_notifications", "pms_show_pricelist", "pms_show_availability"]])
+      ).then(function(result) {
+        this._show_notifications = result[0]['pms_show_notifications'];
+        this._show_pricelist = result[0]['pms_show_pricelist'];
+        this._show_availability = result[0]['pms_show_availability'];
+        return this.update();
+      }.bind(this));
+    },
+
+    perform_callback: function (evt) {
+        evt.preventDefault();
+        var params = $(evt.target).data();
+        var callback = params.action;
+
+        if (callback && this[callback]) {
+            this[callback](params, evt);
+        } else {
+            console.warn("No handler for ", callback);
+        }
+    },
+
+    update: function() {
+      // var view_type = this.getParent().getParent()._current_state.view_type;
+      // if (view_type === 'pms') {
+      //   this.do_show();
+        this.$dropdown
+            .empty()
+            .append(QWeb.render('HotelCalendar.SettingsMenu.Global', {
+                manager: this,
+            }));
+      // }
+      // else {
+      //   this.do_hide();
+      // }
+      return $.when();
+    },
+
+    toggle_show_adv_controls: function() {
+      var $pms_search = $(document).find('#pms-search');
+      if ($pms_search[0]) {
+        if ($pms_search.position().top < 0)
+        {
+          $pms_search.animate({
+            'top': `${$('.main-nav').height()}px`,
+            'opacity': 1.0,
+          }, 'fast');
+        } else {
+          $pms_search.animate({
+            'top': `-${$pms_search.height()}px`,
+            'opacity': 0.0,
+          }, 'slow');
+        }
+      }
+    },
+
+    toggle_show_notification: function() {
+      this._show_notifications = !this._show_notifications;
+      new Model('res.users').call('write', [Session.uid, {
+          pms_show_notifications: this._show_notifications
+      }]).then(function () {
+          window.location.reload();
+      });
+    },
+
+    toggle_show_pricelist: function() {
+      this._show_pricelist = !this._show_pricelist;
+      new Model('res.users').call('write', [Session.uid, {
+          pms_show_pricelist: this._show_pricelist
+      }]).then(function () {
+          window.location.reload();
+      });
+    },
+
+    toggle_show_availability: function() {
+      this._show_availability = !this._show_availability;
+      new Model('res.users').call('write', [Session.uid, {
+          pms_show_availability: this._show_availability
+      }]).then(function () {
+          window.location.reload();
+      });
+    }
+});
+SystrayMenu.Items.push(CalendarMenu);
 
 var HotelCalendarView = View.extend({
     /** VIEW OPTIONS **/
@@ -619,21 +697,9 @@ var HotelCalendarView = View.extend({
         });
         // Show search (Alt+S)
         $(document).keydown(function(ev){
-          if (ev.altKey) {
-            if (ev.key == 's' || ev.key == 'S')
-            {
-              if ($pms_search.position().top < 0)
-              {
-                $pms_search.animate({
-                  'top': `${$('.main-nav').height()}px`,
-                  'opacity': 1.0,
-                }, 'fast');
-              } else {
-                $pms_search.animate({
-                  'top': `-${$pms_search.height()}px`,
-                  'opacity': 0.0,
-                }, 'slow');
-              }
+          if (ev.altKey){
+            if (ev.key == 'x' || ev.key == 'X'){
+              self.toggle_pms_search();
             }
           }
         });
@@ -790,6 +856,22 @@ var HotelCalendarView = View.extend({
         });
 
         return $.when();
+    },
+
+    toggle_pms_search: function() {
+      var $pms_search = this.$el.find('#pms-search');
+      if ($pms_search.position().top < 0)
+      {
+        $pms_search.animate({
+          'top': `${$('.main-nav').height()}px`,
+          'opacity': 1.0,
+        }, 'fast');
+      } else {
+        $pms_search.animate({
+          'top': `-${$pms_search.height()}px`,
+          'opacity': 0.0,
+        }, 'slow');
+      }
     },
 
     on_change_filter_date: function(ev, isStartDate) {
