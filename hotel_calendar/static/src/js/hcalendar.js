@@ -921,6 +921,7 @@ HotelCalendar.prototype = {
         cheight += bounds.bottom-bounds.top;
       }
       this.edivr.style.height = `${cheight}px`;
+      this.edivr.style.maxHeight = 'initial';
     }
   },
 
