@@ -208,7 +208,7 @@ HotelCalendar.prototype = {
 
   removeReservation: function(/*Int/HReservationObject*/reservation, /*Boolean?*/noupdate) {
     var reserv = reservation;
-    if (typeof reservation !== HReservation) {
+    if (!(reserv instanceof HReservation)) {
       reserv = _.find(this._reservations, {'id': +reservation});
     }
     if (reserv) {
