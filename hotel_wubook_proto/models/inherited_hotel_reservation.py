@@ -147,6 +147,12 @@ class HotelReservation(models.Model):
 
     @api.multi
     def action_cancel(self):
+        for record in self:
+            # Can't cancel in Odoo
+            if record.wis_from_channel:
+                raise ValidationError(_("Can't cancel reservations \
+                                        from OTA's"))
+
         res = super(HotelReservation, self).action_cancel()
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
