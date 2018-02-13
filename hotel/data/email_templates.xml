@@ -56,11 +56,11 @@
 
 
                      <!--Content Wrapper-->
-                     <table class="content" bgcolor="#ffffff" align="center" cellpadding="0" cellspacing="0" border="0">
+                     <table class="content" bgcolor="#ffffff" align="center" cellpadding="0" cellspacing="0" border="0" style="width: 650px !important;">
 
                        <!--Header-->
                        <tr>
-                         <td bgcolor="#1B1B1B" style="padding: 30px 30px 20px 30px;">
+                         <td style="padding: 30px 30px 20px 30px;background-color:#1B1B1B">
                            <table border="0x" cellpadding="0" cellspacing="0" width="100%" class="columns">
                              <tr valign="top">									</tr>
                            </table>
@@ -87,12 +87,13 @@
 
                        <tr> </tr>
 
+
                        <!--1 Column-->
                        <tr>
                          <td class="borderbottom" style="padding: 60px 30px 60px 30px;">
                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
                              <tr>
-                               <td align="center" class="h2"> Confirmación de reserva en ${object.company_id.name}</td>
+                               <td align="center" class="h2"> Confirmación de reserva en ${object.company_id.property_name}</td>
                              </tr>
                              <tr>
                                <td align="center" style="padding: 20px 0 0 0;">
@@ -107,7 +108,7 @@
                              </tr>
                              <tr>
                                <td align="justify" class="paragraph" style="padding: 10px 0 0 0;">Hola ${object.partner_id.firstname}<br />
-                                 Tu reserva en <b>${object.company_id.name}</b> queda confirmada. Te esperamos el <b>${object.checkin}</b>. Si podemos ayudarte en cualquier tipo de gestión, no dudes en hacérnoslo saber.<br /></td>
+                                 Tu reserva en <b>${object.company_id.property_name}</b> queda confirmada. Te esperamos el día <b>${object.room_lines[0].checkin[8:10]} del ${object.room_lines[0].checkin[5:7]} de ${object.room_lines[0].checkin[0:4]}</b>. Si podemos ayudarte en cualquier tipo de gestión, no dudes en hacérnoslo saber.<br /></td>
                                </tr>
                                <tr>
                                  <td align="center" style="padding: 20px 0 0px 0; ">
@@ -133,7 +134,7 @@
                                  <tr>
                                    <td valign="top" style="padding: 20px 30px 20px 0px;"><table border="0" cellspacing="0" cellpadding="0">
                                      <tr>
-                                       <td class="h2" style="padding: 10px 0 0 0;"> ¿LlegaráS más tarde de las 17:00 horas?</td>
+                                       <td class="h2" style="padding: 10px 0 0 0;"> ¿Llegarás más tarde de las 17:00 horas?</td>
                                      </tr>
                                      <tr>
                                        <td style="padding: 20px 0 10px 0;"><table width="50px" style="width: 50px;" height="5px" border="0" cellspacing="0" cellpadding="0" >
@@ -225,14 +226,20 @@
                                              <td align="justify" class="subheading" style="color: #555555"><strong>${object.partner_id.name}</strong></td>
                                            </tr>
                                            <tr>
-                                             <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;"> [[dirección]${object.company_id.street}<br />
-                                               [[teléfono]]${object.company_id.phone}<br />
+                                             <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">
+                                              % if object.partner_id.contact_address:
+                                                ${object.partner_id.contact_address}<br />
+                                              % endif
+                                              % if object.partner_id.phone:
+                                                Tel.: ${object.partner_id.phone}<br />
+                                              % endif
+                                              % if object.partner_id.mobile:
+                                                Mov.: ${object.partner_id.mobile}<br />
+                                              % endif
                                                <br />
-                                               <strong>Entrada</strong>: ${object.checkin}<br />
-                                               <strong>Salida</strong>: ${object.checkout}<br />
-                                               <strong>Nº de noches</strong>: [[nº de noches]]<br />
-                                               <strong>Tipo de habitación</strong>: [[tipo de habitación]]<br />
-                                               <strong>Forma de pago</strong>: [[forma de pago]]<br />
+                                               <strong>Entrada</strong>: ${object.room_lines[0].checkin[8:10]} del ${object.room_lines[0].checkin[5:7]} de ${object.room_lines[0].checkin[0:4]}<br />
+                                               <strong>Salida</strong>: ${object.room_lines[0].checkout[8:10]} del ${object.room_lines[0].checkout[5:7]} de ${object.room_lines[0].checkout[0:4]}<br />
+                                               <strong>Nº de noches</strong>: ${len(object.room_lines[0].reservation_lines)}<br />
                                                <br />
                                                Recuerda que puedas cancelar gratuitamente esta reserva hasta las 12:00 h del día anterior a tu llegada.</td>
 
@@ -316,14 +323,13 @@
                                              <td class="h2" style="color: #C50967">IMPORTES</td>
                                            </tr>
                                            <tr>
-                                             <td align="justify" class="subheading" style="color: #555555"><strong>[[forma de pago]]</strong></td>
+                                             <td align="justify" class="subheading" style="color: #555555"><strong>Noches</strong>: ${len(object.room_lines[0].reservation_lines)}</td>
                                            </tr>
                                            <tr>
-                                             <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;"><strong>Noches</strong>: [[nº de noches]]<br />
-                                               <strong>[[tipo de habitación]]</strong>: [[importe]]<br />
-                                               <strong>I.V.A (10%)</strong>: ${object.amount_tax}<br />
-                                               <strong>Precio total</strong>: ${object.amount_total}<br />
-                                               <strong>Pagos ya realizados</strong>: [[importe]]<br />
+                                             <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">
+                                               <strong>Base imponible</strong>: ${object.amount_untaxed} €<br />
+                                               <strong>I.V.A (10%)</strong>: ${object.amount_tax} €<br />
+                                               <strong>Precio total</strong>: ${object.amount_total} €<br />
                                                <br /></td>
                                              </tr>
                                              <tr> </tr>
@@ -364,44 +370,38 @@
 % for row in object.room_lines:
                                              <tr>
                                                % if row.virtual_room_id.name:
-                                               <td align="justify" class="subheading" style="color: #555555"><strong>${row.virtual_room_id.name}</strong></td>
+                                               <td align="justify" class="subheading" style="color: #555555"><strong>${row.virtual_room_id.name} ${loop.index}</strong></td>
                                                % else:
-                                               <td align="justify" class="subheading" style="color: #555555"><strong>habitación</strong></td>
+                                               <td align="justify" class="subheading" style="color: #555555"><strong>Habitación ${loop.index}</strong></td>
                                                % endif
                                              </tr>
                                              <tr>
                                                <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">Esta habitación cuenta con TV, Wi-Fi gratuita, calefacción y baño privado.<br />
 
 
-                                               <strong>Día de entrada</strong>: ${row.checkin[6:2]}/${row.checkin[4:2]}/${row.checkin[0:4]}<br />
-                                               <strong>Día de salida</strong>: ${row.checkout[6:2]}/${row.checkout[4:2]}/${row.checkout[0:4]}<br />
-                                                 <strong>Número de huéspedes</strong>:
-                                               % if row.adults > 0:
-                                                  ${row.adults} Adultos
-                                               % endif
-                                               % if row.children > 0:
-                                                   / ${row.children} Niños
-                                               % endif
-
-                                                  [[nº de huéspedes]]<br />
-                                                 <strong>Régimen de comidas</strong>: [[tipo de régimen]]<br /></td>
+                                               <strong>Tipo:</strong>: ${row.room_type_id.code_type}<br />
+                                               <strong>Día de entrada</strong>: ${row.checkin[8:10]}/${row.checkin[5:7]}/${row.checkin[0:4]}<br />
+                                               <strong>Día de salida</strong>: ${row.checkout[8:10]}/${row.checkout[5:7]}/${row.checkout[0:4]}<br />
+                                               <strong>Nº de noches</strong>: ${len(row.reservation_lines)}<br />
+                                               <strong>Número de huéspedes</strong>:
+                                                 % if row.adults > 0:
+                                                    ${row.adults} Adultos
+                                                 % endif
+                                                 % if row.children > 0:
+                                                     / ${row.children} Menores
+                                                 % endif
+                                               <br /></td>
                                                </tr>
                                                <tr> </tr>
                                                <td valign="top" style="padding: 30px 0px 0px 0px;">
                                                  <table border="0" cellspacing="0" cellpadding="0">
-
                                                    <tr>
-                                                     <td align="justify" class="subheading" style="color: #555555"><strong>[[tipo de habitación]]</strong></td>
+                                                     <td></td>
                                                    </tr>
                                                    <tr>
-                                                     <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">Esta habitación cuenta con TV, Wi-Fi gratuita, calefacción y baño privado.<br />
-                                                       <br />
-                                                       <strong>Nombre del huésped</strong>: [[nombre]]<br />
-                                                       <strong>Número de huéspedes</strong>: [[nº de huéspedes]]<br />
-                                                       <strong>Régimen de comidas</strong>: [[tipo de régimen]]<br /></td>
+                                                     <td></td>
                                                      </tr>
                                                      <tr> </tr>
-
                                                    </table>
                                                  </td>
                                                </table>
