@@ -343,7 +343,9 @@ class HotelCalendarManagement(models.TransientModel):
         })
 
         if withRooms:
-            room_ids = self.env['hotel.virtual.room'].search([])
+            room_ids = self.env['hotel.virtual.room'].search(
+                [],
+                order='hcal_sequence ASC')
             json_rooms = self._hcalendar_room_json_data(room_ids)
             vals.update({'rooms': json_rooms or []})
 

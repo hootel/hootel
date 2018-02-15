@@ -8,7 +8,19 @@
 				<field name="arch" type="xml">
 					<xpath expr="//page/group/group[@name='preferences']" position="before">
 						<group string="Calendar (PMS)" name="calendar">
-							<field name="pms_show_notifications" />
+							<group colspan="4">
+								<field name="pms_show_notifications" />
+								<field name="pms_show_pricelist" />
+								<field name="pms_show_availability" />
+								<field name="pms_show_num_rooms" />
+							</group>
+							<group colspan="4">
+									<field name="pms_divide_rooms_by_capacity" />
+									<field name="pms_end_day_week" required="True" />
+									<field name="pms_end_day_week_offset" required="True" />
+									<field name="pms_type_move" required="True" />
+									<field name="pms_default_num_days" required="True" />
+							</group>
 						</group>
 					</xpath>
         </field>

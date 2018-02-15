@@ -10,12 +10,6 @@
         	<xpath expr="//group[@name='default_hours']" position="after">
                 <notebook colspan="4" col="1">
                     <page string="calendar">
-                        <group colspan="4">
-                            <field name="divide_rooms_by_capacity" />
-                            <field name="end_day_week" required="True" />
-                            <field name="type_move" required="True" />
-                            <field name="default_num_days" required="True" />
-                        </group>
                         <group string="Calendar colors" colspan="4">
                             <group>
                                 <field name="color_pre_reservation" required="True"  widget="color"/>
@@ -31,7 +25,7 @@
                                 <field name="color_staff" required="True"  widget="color"/>
                                 <field name="color_to_assign" required="True"  widget="color"/>
                                 <field name="color_payment_pending" required="True"  widget="color"/>
-                            </group>                            
+                            </group>
                         </group>
                     </page>
                 </notebook>

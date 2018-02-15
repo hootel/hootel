@@ -22,6 +22,8 @@ var Core = require('web.core'),
     Ajax = require('web.ajax'),
     ControlPanel = require('web.ControlPanel'),
     Session = require('web.session'),
+    SystrayMenu = require('web.SystrayMenu'),
+    Widget = require('web.Widget'),
     formats = require('web.formats'),
 
     _t = Core._t,
@@ -52,6 +54,104 @@ ControlPanel.include({
       this._toggle_visibility(!options.toHide);
   }
 });
+
+/** SYSTRAY **/
+var CalendarMenu = Widget.extend({
+    template: 'HotelCalendar.SettingsMenu',
+    events: {
+      "click a[data-action]": "perform_callback",
+    },
+
+    init: function(){
+      this._super.apply(this, arguments);
+    },
+
+    start: function(){
+      this.$dropdown = this.$(".o_calendar_settings_dropdown");
+      return $.when(
+        new Model("res.users").call("read", [[Session.uid], ["pms_show_notifications", "pms_show_pricelist", "pms_show_availability"]])
+      ).then(function(result) {
+        this._show_notifications = result[0]['pms_show_notifications'];
+        this._show_pricelist = result[0]['pms_show_pricelist'];
+        this._show_availability = result[0]['pms_show_availability'];
+        return this.update();
+      }.bind(this));
+    },
+
+    perform_callback: function (evt) {
+        evt.preventDefault();
+        var params = $(evt.target).data();
+        var callback = params.action;
+
+        if (callback && this[callback]) {
+            this[callback](params, evt);
+        } else {
+            console.warn("No handler for ", callback);
+        }
+    },
+
+    update: function() {
+      // var view_type = this.getParent().getParent()._current_state.view_type;
+      // if (view_type === 'pms') {
+      //   this.do_show();
+        this.$dropdown
+            .empty()
+            .append(QWeb.render('HotelCalendar.SettingsMenu.Global', {
+                manager: this,
+            }));
+      // }
+      // else {
+      //   this.do_hide();
+      // }
+      return $.when();
+    },
+
+    toggle_show_adv_controls: function() {
+      var $pms_search = $(document).find('#pms-search');
+      if ($pms_search[0]) {
+        if ($pms_search.position().top < 0)
+        {
+          $pms_search.animate({
+            'top': `${$('.main-nav').height()}px`,
+            'opacity': 1.0,
+          }, 'fast');
+        } else {
+          $pms_search.animate({
+            'top': `-${$pms_search.height()}px`,
+            'opacity': 0.0,
+          }, 'slow');
+        }
+      }
+    },
+
+    toggle_show_notification: function() {
+      this._show_notifications = !this._show_notifications;
+      new Model('res.users').call('write', [Session.uid, {
+          pms_show_notifications: this._show_notifications
+      }]).then(function () {
+          window.location.reload();
+      });
+    },
+
+    toggle_show_pricelist: function() {
+      this._show_pricelist = !this._show_pricelist;
+      new Model('res.users').call('write', [Session.uid, {
+          pms_show_pricelist: this._show_pricelist
+      }]).then(function () {
+          window.location.reload();
+      });
+    },
+
+    toggle_show_availability: function() {
+      this._show_availability = !this._show_availability;
+      new Model('res.users').call('write', [Session.uid, {
+          pms_show_availability: this._show_availability
+      }]).then(function () {
+          window.location.reload();
+      });
+    }
+});
+SystrayMenu.Items.push(CalendarMenu);
 
 var HotelCalendarView = View.extend({
     /** VIEW OPTIONS **/
@@ -423,8 +523,6 @@ var HotelCalendarView = View.extend({
                 rooms.push(nroom);
             }
 
-            console.log(results['restrictions']);
-
             self.create_calendar({
                 startDate: HotelCalendar.toMomentUTC(domains['dates'][0], ODOO_DATETIME_MOMENT_FORMAT),
                 days: self._view_options['days'] + 1,
@@ -432,11 +530,14 @@ var HotelCalendarView = View.extend({
                 endOfWeek: parseInt(self._view_options['eday_week']) || 6,
                 divideRoomsByCapacity: self._view_options['divide_rooms_by_capacity'] || false,
                 allowInvalidActions: self._view_options['allow_invalid_actions'] || false,
-                assistedMovement: self._view_options['assisted_movement'] || false
+                assistedMovement: self._view_options['assisted_movement'] || false,
+                showPricelist: self._view_options['show_pricelist'] || false,
+                showAvailability: self._view_options['show_availability'] || false,
+                showNumRooms: self._view_options['show_num_rooms'] || 0,
+                endOfWeekOffset: self._view_options['eday_week_offset'] || 0
             }, results['pricelist'], results['restrictions']);
 
             var reservs = [];
-            console.log(results['reservations']);
             for (var r of results['reservations']) {
                 var room = self._hcalendar.getRoom(r[0]);
                 var nreserv = new HReservation(
@@ -591,26 +692,14 @@ var HotelCalendarView = View.extend({
         // Initial State
         var $pms_search = this.$el.find('#pms-search');
         $pms_search.css({
-          'top': `-${$pms_search.height()}px`,
-          'opacity': 0.5,
+          'top': `-100%`,
+          'opacity': 0.0,
         });
         // Show search (Alt+S)
         $(document).keydown(function(ev){
-          if (ev.altKey) {
-            if (ev.key == 's' || ev.key == 'S')
-            {
-              if ($pms_search.position().top < 0)
-              {
-                $pms_search.animate({
-                  'top': `${$('.main-nav').height()}px`,
-                  'opacity': 1.0,
-                }, 'fast');
-              } else {
-                $pms_search.animate({
-                  'top': `-${$pms_search.height()}px`,
-                  'opacity': 0.0,
-                }, 'slow');
-              }
+          if (ev.altKey){
+            if (ev.key == 'x' || ev.key == 'X'){
+              self.toggle_pms_search();
             }
           }
         });
@@ -691,8 +780,8 @@ var HotelCalendarView = View.extend({
         this.$el.find("#btn_action_paydue").on('click', function(ev){
             self.call_action('hotel_calendar.hotel_reservation_action_paydue');
         });
-	      this.$el.find("#btn_action_paydue").on('click', function(ev){
-            self.call_action('hotel.open_hotel_folio1_form_tree_all');
+        this.$el.find("#btn_action_control").on('click', function(ev){
+            self.call_action('hotel_calendar.open_wizard_reservations');
         });
 //        this.$el.find("#btn_action_refresh").on('click', function(ev){
 //            window.location.reload();
@@ -767,6 +856,22 @@ var HotelCalendarView = View.extend({
         });
 
         return $.when();
+    },
+
+    toggle_pms_search: function() {
+      var $pms_search = this.$el.find('#pms-search');
+      if ($pms_search.position().top < 0)
+      {
+        $pms_search.animate({
+          'top': `${$('.main-nav').height()}px`,
+          'opacity': 1.0,
+        }, 'fast');
+      } else {
+        $pms_search.animate({
+          'top': `-${$pms_search.height()}px`,
+          'opacity': 0.0,
+        }, 'slow');
+      }
     },
 
     on_change_filter_date: function(ev, isStartDate) {
@@ -855,7 +960,6 @@ var HotelCalendarView = View.extend({
                 break;
               case 'pricelist':
                 var price = notif[1]['price'];
-                console.log(price);
                 this._hcalendar.addPricelist(price);
                 break;
               default:

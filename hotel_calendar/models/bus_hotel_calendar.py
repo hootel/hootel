@@ -93,12 +93,14 @@ class BusHotelCalendar(models.TransientModel):
         date_dt = datetime.strptime(date, DEFAULT_SERVER_DATE_FORMAT)
         return {
             'type': 'pricelist',
-            'price': [{
-                'days': {
-                    date_dt.strftime("%d/%m/%Y"): price,
-                },
-                'room': vroom,
-            }],
+            'price': {
+                pricelist: [{
+                    'days': {
+                        date_dt.strftime("%d/%m/%Y"): price,
+                    },
+                    'room': vroom,
+                }],
+            },
         }
 
     # FIXME: Too many parameters... perhaps best use kargs?
