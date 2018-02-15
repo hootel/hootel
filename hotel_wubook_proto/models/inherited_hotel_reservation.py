@@ -147,22 +147,29 @@ class HotelReservation(models.Model):
 
     @api.multi
     def action_cancel(self):
+        waction = self._context.get('wubook_action', True)
+        if waction:
+            for record in self:
+                # Can't cancel in Odoo
+                if record.wis_from_channel:
+                    raise ValidationError(_("Can't cancel reservations \
+                                            from OTA's"))
+
         res = super(HotelReservation, self).action_cancel()
-        if self._context.get('wubook_action', True) and \
-                self.env['wubook'].is_valid_account():
+        if waction and self.env['wubook'].is_valid_account():
             partner_id = self.env['res.users'].browse(self.env.uid).partner_id
             wubook_obj = self.env['wubook']
             for record in self:
-                    # Only can cancel reservations created directly in wubook
-                    if record.wrid and record.wrid != '' and \
-                            not record.wchannel_id and \
-                            record.wstatus in ['1', '2', '4']:
-                        wres = wubook_obj.cancel_reservation(
-                            record.wrid,
-                            'Cancelled by %s' % partner_id.name)
-                        if not wres:
-                            raise ValidationError(_("Can't cancel reservation \
-                                                                    on WuBook"))
+                # Only can cancel reservations created directly in wubook
+                if record.wrid and record.wrid != '' and \
+                        not record.wchannel_id and \
+                        record.wstatus in ['1', '2', '4']:
+                    wres = wubook_obj.cancel_reservation(
+                        record.wrid,
+                        'Cancelled by %s' % partner_id.name)
+                    if not wres:
+                        raise ValidationError(_("Can't cancel reservation \
+                                                                on WuBook"))
         return res
 
     @api.multi
