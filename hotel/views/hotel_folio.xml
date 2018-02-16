@@ -13,9 +13,10 @@
                     <header>
                         <button name="action_confirm" states="draft" string="Confirm Sale"
                             class="btn-primary" type="object" />
-                        <button name="send_reservation_mail" type="object" string="Send Reservation Email"
+                        <button name="send_reservation_mail" type="object" string="Send Confirmation Email"
                            states="sale" class="oe_highlight"/>
-
+                        <button name="send_cancel_mail" type="object" string="Send Cancel Email"
+                              states="cancel" class="oe_highlight"/>
                         <button name="%(sale.action_view_sale_advance_payment_inv)d"
                             string="Create Invoice" type="action" class="btn-primary" states="sale"
                             attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>

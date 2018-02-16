@@ -73,7 +73,7 @@
                                      <td align="right" valign="middle" style="padding: 0px 0px 0px 0px;">
                                        <table border="0" cellspacing="0" cellpadding="0" class="link">
                                          <tr>
-                                           <td style="padding: 0px 15px 0px 0px;"><a href="#">www.aldahotels.com</a></td>
+                                           <td style="padding: 0px 15px 0px 0px;"><a href="#" style="color:#FFFFFF" >www.aldahotels.com</a></td>
                                          </tr>
                                        </table>
                                      </td>
@@ -116,7 +116,7 @@
                                      <tr>
                                        <td align="center">
                                          <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
-                                           <a href="tel:+34 981 558 111" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">Contactar</a>
+                                           <a href="tel:${object.company_id.phone}" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">Contactar</a>
                                          </div>
                                        </td>
                                      </tr>
@@ -272,7 +272,14 @@
 
                                              <tr> </tr>
                                              <tr>
-                                               <iframe width="600" height="150" frameborder="0" style="border:0" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2923.5415828314776!2d-8.544295684527095!3d42.8825189791552!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd2efe44e20741e5%3A0x3b28b9ccbea2e29d!2sHotel+Alda+Algalia!5e0!3m2!1ses!2ses!4v1516057736163" width="600" height="450" frameborder="0" style="border:0" allowfullscreen></iframe>
+                                              <a href="http://maps.google.es/?q=42.501845%20-5.73967" style="color:#ffffff;background-color:transparent" target="_blank" >Abrir mapa<br/>
+                                               <img src="https://www.aldahotels.es/firma/email/llegada/mapa_google.png" alt="Ver mapa" border="0">
+                                               </a>
+
+
+
+
+
                                              </tr>
                                              <tr>
                                                <td style="padding: 20px 0 20px 0; ">
@@ -376,21 +383,19 @@
                                                % endif
                                              </tr>
                                              <tr>
-                                               <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">Esta habitación cuenta con TV, Wi-Fi gratuita, calefacción y baño privado.<br />
-
-
-                                               <strong>Tipo:</strong>: ${row.room_type_id.code_type}<br />
-                                               <strong>Día de entrada</strong>: ${row.checkin[8:10]}/${row.checkin[5:7]}/${row.checkin[0:4]}<br />
-                                               <strong>Día de salida</strong>: ${row.checkout[8:10]}/${row.checkout[5:7]}/${row.checkout[0:4]}<br />
-                                               <strong>Nº de noches</strong>: ${len(row.reservation_lines)}<br />
-                                               <strong>Número de huéspedes</strong>:
-                                                 % if row.adults > 0:
-                                                    ${row.adults} Adultos
-                                                 % endif
-                                                 % if row.children > 0:
-                                                     / ${row.children} Menores
-                                                 % endif
-                                               <br /></td>
+                                                 <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">Esta habitación cuenta con TV, Wi-Fi gratuita, calefacción y baño privado.<br />
+                                                 <strong>Día de entrada</strong>: ${row.checkin[8:10]}/${row.checkin[5:7]}/${row.checkin[0:4]}<br />
+                                                 <strong>Día de salida</strong>: ${row.checkout[8:10]}/${row.checkout[5:7]}/${row.checkout[0:4]}<br />
+                                                 <strong>Nº de noches</strong>: ${len(row.reservation_lines)}<br />
+                                                 <strong>Número de huéspedes</strong>:
+                                                   % if row.adults > 0:
+                                                      ${row.adults} Adultos
+                                                   % endif
+                                                   % if row.children > 0:
+                                                       / ${row.children} Menores
+                                                   % endif
+                                                 <br />
+                                                 </td>
                                                </tr>
                                                <tr> </tr>
                                                <td valign="top" style="padding: 30px 0px 0px 0px;">
@@ -404,12 +409,9 @@
                                                      <tr> </tr>
                                                    </table>
                                                  </td>
+% endfor
                                                </table>
                                              </td>
-% endfor
-
-
-
                                            </tr>
                                          </table>
                                        </td>
@@ -639,10 +641,10 @@
                                                  <td valign="top" style="padding: 30px 30px 20px 30px; height: 230px;" height="230px">
                                                    <table border="0" cellspacing="0" cellpadding="0">
                                                      <tr>
-                                                       <td align="justify" class="h2" style="padding: 15px 0 0 0; color: #ffffff;"> Alda Algalia</td>
+                                                       <td align="justify" class="h2" style="padding: 15px 0 0 0;"> Alda Algalia</td>
                                                      </tr>
                                                      <tr>
-                                                       <td align="justify" class="paragraph"  style="padding: 10px 0 0 0; color: #ffffff;"> El Hotel Alda Algalia cuenta con el privilegio de ocupar una antigua casona de 1796 totalmente restaurada y cargada de encanto. Su inmejorable ubicación combinada con una decoración cuidada, otorgan a este hotel una identidad única compostelana. </td>
+                                                       <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;"> El Hotel Alda Algalia cuenta con el privilegio de ocupar una antigua casona de 1796 totalmente restaurada y cargada de encanto. Su inmejorable ubicación combinada con una decoración cuidada, otorgan a este hotel una identidad única compostelana. </td>
                                                      </tr>
                                                      <tr> </tr>
                                                    </table>
