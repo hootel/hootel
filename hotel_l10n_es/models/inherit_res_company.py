@@ -51,3 +51,11 @@ class Inherit_res_company(models.Model):
                     el establecimiento cobrará un día de estancia según \
                     tarifa vigente ese día.",
         help="Notice under the signature on the traveler's ticket.")
+    hotel_latitude = fields.Char('Latitude', default="40.964971",
+                help="Provide latitude for google maps in mail template.\
+                    Example 40.964971 or -5.6641045\
+                    It points to the main square of Salamanca.")
+    hotel_longitude = fields.Char('Longitude', default="-5.6641045",
+                help="Provide longitude for google maps in mail template.\
+                    Example 40.964971 or -5.6641045\
+                    It points to the main square of Salamanca.")

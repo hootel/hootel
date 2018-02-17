@@ -272,7 +272,7 @@
 
                                              <tr> </tr>
                                              <tr>
-                                              <a href="http://maps.google.es/?q=42.501845%20-5.73967" style="color:#ffffff;background-color:transparent" target="_blank" >Abrir mapa<br/>
+                                              <a href="http://maps.google.es/?q=${object.company_id.hotel_latitude}%20${object.company_id.hotel_longitude}" style="color:#ffffff;background-color:transparent" target="_blank" >Abrir mapa<br/>
                                                <img src="https://www.aldahotels.es/firma/email/llegada/mapa_google.png" alt="Ver mapa" border="0">
                                                </a>
 

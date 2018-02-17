@@ -21,6 +21,8 @@
                                     <field name="eventualstaff" />
                                     <field name="police" />
                                     <field name="cardex_warning" />
+                                    <field name="hotel_latitude" />
+                                    <field name="hotel_longitude" />
                                 </group>
                             </group>
                         </page>
