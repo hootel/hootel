@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xml>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">
 
         <!-- Email Template For Hotel Reservation -->
         <record id="mail_template_hotel_reservation" model="mail.template">
@@ -9,7 +9,7 @@
             <field name="email_from">${(object.warehouse_id.partner_id.email or
                 '')}
             </field>
-            <field name="subject">Hotel Reservation Detail</field>
+            <field name="subject">Confirmation of the details of your reservation in ${object.company_id.property_name}</field>
             <field name="partner_to">${(object.partner_id.id or '')}</field>
             <field name="model_id" ref="hotel.model_hotel_folio"/>
             <field name="auto_delete" eval="True" />
@@ -269,17 +269,14 @@
                                        <tr>
                                          <td align="center" valign="middle" style="padding: 20px 0px 0px 0px;">
                                            <table border="0" cellspacing="0" cellpadding="0">
-
                                              <tr> </tr>
                                              <tr>
-                                              <a href="http://maps.google.es/?q=${object.company_id.hotel_latitude}%20${object.company_id.hotel_longitude}" style="color:#ffffff;background-color:transparent" target="_blank" >Abrir mapa<br/>
+                                              <a href="http://maps.google.es/?q=${object.company_id.property_name}%20${object.company_id.street}%20${object.company_id.city}" style="background-color:transparent" target="_blank" ><br/>
                                                <img src="https://www.aldahotels.es/firma/email/llegada/mapa_google.png" alt="Ver mapa" border="0">
                                                </a>
-
-
-
-
-
+                                               <p><br/>
+                                               <a href="https://www.google.com/maps/dir/?api=1&destination=${object.company_id.property_name}%20${object.company_id.street}%20${object.company_id.city}">Pulse en este enlace, para conocer como llegar desde su ubicación actual, o en el mapa para localizar el hotel.</a>
+                                               </p>
                                              </tr>
                                              <tr>
                                                <td style="padding: 20px 0 20px 0; ">
@@ -377,7 +374,7 @@
 % for row in object.room_lines:
                                              <tr>
                                                % if row.virtual_room_id.name:
-                                               <td align="justify" class="subheading" style="color: #555555"><strong>${row.virtual_room_id.name} ${loop.index}</strong></td>
+                                               <td align="justify" class="subheading" style="color: #555555"><strong>${row.virtual_room_id.name}</strong></td>
                                                % else:
                                                <td align="justify" class="subheading" style="color: #555555"><strong>Habitación ${loop.index}</strong></td>
                                                % endif
@@ -513,7 +510,11 @@
                                                    <td align="justify" class="subheading" style="color: #555555"><strong> En coche</strong></td>
                                                  </tr>
                                                  <tr>
-                                                   <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;"> Si vienes en coche, queremos informarte de que nos encontramos en una calle peatonal. Para aparcar, te recomendamos nuestro parking concertado, a tan sólo 3 minutos caminando. Es el Parking La Salle, en la calle  Ramón del Valle Inclán. Tiene un coste de 10€/día por ser cliente de Alda Hotels.</td>
+                                                   <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">
+                                                     <p><br/>
+                                                     <a href="https://www.google.com/maps/dir/?api=1&destination=${object.company_id.property_name}%20${object.company_id.street}%20${object.company_id.city}">Pulse en este enlace, para conocer como llegar desde su ubicación actual</a>
+                                                   </p>
+                                                      Si vienes en coche, queremos informarte de que nos encontramos en una calle peatonal. Para aparcar, te recomendamos nuestro parking concertado, a tan sólo 3 minutos caminando. Es el Parking La Salle, en la calle  Ramón del Valle Inclán. Tiene un coste de 10€/día por ser cliente de Alda Hotels.</td>
                                                  </tr>
                                                  <tr> </tr>
                                                </table>

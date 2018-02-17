@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xml>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">
 
         <!-- Email Template For Hotel Reservation -->
         <record id="mail_template_hotel_cancel" model="mail.template">
@@ -9,7 +9,7 @@
             <field name="email_from">${(object.warehouse_id.partner_id.email or
                 '')}
             </field>
-            <field name="subject">Hotel Reservation Cancel Detail</field>
+            <field name="subject">Confirmation of the cancellation of your reservation in ${object.company_id.property_name}</field>
             <field name="partner_to">${(object.partner_id.id or '')}</field>
             <field name="model_id" ref="hotel.model_hotel_folio"/>
             <field name="auto_delete" eval="True" />
@@ -168,7 +168,7 @@
                                               <br />
 % for row in object.room_lines:
                                           % if row.virtual_room_id.name:
-                                          <strong>${row.virtual_room_id.name} ${loop.index}</strong>
+                                          <strong>${row.virtual_room_id.name}</strong>
                                           % else:
                                           <strong>Habitación ${loop.index}</strong>
                                           % endif
@@ -347,15 +347,9 @@
                                               <table border="0" cellspacing="0" cellpadding="0">
                                                 <tr>
                                                   <td align="center">
-                                                    <!--[if gte mso 12>
-                                                      <div style="border: 2px solid #5e96ea;">
-                                                    <![endif]-->
-                                                      <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
+                                                    <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
                                           <a href="https://www.facebook.com/aldahotels" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">Dale a Me gusta</a>
                                         </div>
-                                                    <!--[if gte mso 12>
-                                                      </div>
-                                                    <![endif]-->
                                                   </td>
                                                 </tr>
                                               </table>
@@ -400,7 +394,7 @@
                                                     <!--[if gte mso 12>
                                                       <div style="border: 2px solid #5e96ea;">
                                                     <![endif]-->
-             <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
+                                                    <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
                                           <a href="https://www.instagram.com/aldahotels" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">#Entra</a>
                                         </div>
                                                     <!--[if gte mso 12>
@@ -450,7 +444,7 @@
                                                     <!--[if gte mso 12>
                                                       <div style="border: 2px solid #5e96ea;">
                                                     <![endif]-->
-                                                      <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
+                                                    <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
                                           <a href="https://www.twitter.com/aldahotels" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">Síguenos</a>
                                         </div>
                                                     <!--[if gte mso 12>
