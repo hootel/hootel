@@ -106,7 +106,8 @@ var HotelCalendarManagementView = View.extend({
     do_show: function() {
         var $widget = this.$el.find("#hcal_management_widget");
         if ($widget) {
-            $widget.show();
+          $widget.show();
+          $('.o_content').css('overflow', 'hidden');
         }
         this.do_push_state({});
         this.shown.resolve();
@@ -116,6 +117,7 @@ var HotelCalendarManagementView = View.extend({
         var $widget = this.$el.find("#hcal_management_widget");
         if ($widget) {
             $widget.hide();
+            $('.o_content').css('overflow', '');
         }
         return this._super();
     },
@@ -150,6 +152,7 @@ var HotelCalendarManagementView = View.extend({
         if (this._hcalendar) {
             delete this._hcalendar;
         }
+
         var $widget = this.$el.find("#hcal_management_widget");
         var $hcal = $widget.find('#hcalendar_management');
         if ($hcal) { $hcal.remove(); }
@@ -172,6 +175,30 @@ var HotelCalendarManagementView = View.extend({
         this._hcalendar.addEventListener('hcmOnInputChanged', function(ev){
             var btn_save = self.$el.find('#btn_save_changes');
             btn_save.addClass('need-save');
+        });
+
+        // Test
+        $('div#hcalendar_management').scroll(function(){
+            var offset = 0; //$('div#mpms-search').height();
+            var $divHeader = $("div.table-vroom-data-header");
+            console.log(offset);
+            var curScrollPos = $(this).scrollTop();
+            if (curScrollPos > offset) {
+                var minHeight = $('nav.main-nav').height();
+                var headerHeight = $divHeader.height();
+                var divTable = $('div#hcal-management-rooms');
+                //$('div.table-vroom-data').css('margin-top', `${headerHeight}px`);
+                $divHeader.css({
+                    top: `${curScrollPos}px`,
+                    position: 'sticky'
+                });
+            } else {
+                //$('div.table-vroom-data').css('margin-top', '0px');
+                $divHeader.css({
+                    top: '0px',
+                    position: 'initial'
+                });
+            }
         });
     },
 
@@ -281,8 +308,9 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(15, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(15, 'd');
+            var days = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).clone().local().daysInMonth();
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(days, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(days, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -305,8 +333,9 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(15, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(15, 'd');
+            var days = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).clone().local().daysInMonth();
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(days, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(days, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);

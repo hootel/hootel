@@ -113,7 +113,7 @@ class VirtualRoomAvailability(models.Model):
                         ndate_str,
                         ndate_str,
                         virtual_room_id=vroom.id))
-                    max_avail = vroom.total_rooms_count
+                    max_avail = vroom.max_real_rooms
                     vroom_avail_id = virtual_room_avail_obj.search([
                         ('virtual_room_id', '=', vroom.id),
                         ('date', '=', ndate_str)], limit=1)

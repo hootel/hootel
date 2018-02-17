@@ -250,51 +250,21 @@ class HotelCalendarManagement(models.TransientModel):
         date_start = date_utils.get_datetime(dfrom, hours=False)
         date_diff = date_utils.date_diff(dfrom, dto, hours=False) + 1
         hotel_vroom_obj = self.env['hotel.virtual.room']
-        hotel_room_obj = self.env['hotel.room']
-        hotel_reservation_obj = self.env['hotel.reservation']
         vrooms = hotel_vroom_obj.search([])
-
-        nn = {}
-        for i in range(0, date_diff):
-            cur_date = date_start + timedelta(days=i)
-            cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
-            occupied_reservations = hotel_reservation_obj.occupied(
-                '%s 00:00:00' % cur_date_str,
-                '%s 00:00:00' % cur_date_str)
-
-            if cur_date not in nn:
-                nn.update({cur_date_str: {}})
-            if not any(occupied_reservations):
-                for vroom in vrooms:    # Recorremos habs virtuales ocupadas
-                    if vroom.id not in nn[cur_date_str]:
-                        nn[cur_date_str][vroom.id] = 0
-            else:
-                for oreserv in occupied_reservations:
-                    occupied_room = hotel_room_obj.search([
-                        ('product_id', '=', oreserv.product_id.id)
-                    ], limit=1)
-                    occupied_vrooms = hotel_vroom_obj.search([
-                        '|', ('room_ids', 'in', [occupied_room.id]),
-                             ('room_type_ids', 'in', [
-                                                    occupied_room.categ_id.id])
-                    ])
-
-                    if cur_date_str not in nn:
-                        nn.update({cur_date_str: {}})
-                    for vroom in vrooms:    # Recorremos habs. virt. ocupadas
-                        if vroom.id not in nn[cur_date_str]:
-                            nn[cur_date_str][vroom.id] = 0
-                        if vroom.id in occupied_vrooms.ids:
-                            nn[cur_date_str][vroom.id] += 1
-
         json_data = {}
-        for date in nn:
-            for vroom in nn[date]:
-                if vroom not in json_data:
-                    json_data[vroom] = []
-                json_data[vroom].append({
-                    'date': date,
-                    'num': nn[date][vroom],
+
+        for vroom in vrooms:
+            for i in range(0, date_diff):
+                cur_date = date_start + timedelta(days=i)
+                cur_date_str = cur_date.strftime(DEFAULT_SERVER_DATE_FORMAT)
+
+                json_data.setdefault(vroom.id, []).append({
+                    'date': cur_date_str,
+                    'num': len(
+                        hotel_vroom_obj.check_availability_virtual_room(
+                            cur_date_str,
+                            cur_date_str,
+                            virtual_room_id=vroom.id)),
                 })
 
         return json_data
