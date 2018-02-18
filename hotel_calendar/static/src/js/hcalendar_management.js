@@ -276,6 +276,13 @@ HotelCalendarManagement.prototype = {
     }
   },
 
+  clearInputsChanged: function() {
+    var inputs = this.e.querySelectorAll('pinput.hcal-management-input-changed');
+    for (input of inputs) {
+      input.classList.remove('hcal-management-input-changed');
+    }
+  },
+
   //==== ROOMS
   getRoom: function(/*String*/id) {
     return _.find(this.options.rooms, function(item){ return item.id == id; });
@@ -594,7 +601,6 @@ HotelCalendarManagement.prototype = {
             if (input.tagName.toLowerCase() === 'button') {
               input.dataset.state = inputIds[i+1];
               input.textContent = inputIds[i+1]?"No OTA!":"No OTA";
-              input.classList.remove('hcal-management-input-changed');
               if (inputIds[i+1]) {
                 input.classList.add('hcal-management-input-active');
               }
@@ -603,6 +609,7 @@ HotelCalendarManagement.prototype = {
               }
             }
             else {
+              input.classList.remove('hcal-management-input-changed');
               input.value = inputIds[i+1];
             }
           }

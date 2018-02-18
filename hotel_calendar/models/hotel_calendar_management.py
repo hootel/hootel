@@ -73,7 +73,6 @@ class HotelCalendarManagement(models.TransientModel):
         vroom_avail_obj = self.env['hotel.virtual.room.availability']
 
         # Save Pricelist
-        new_prices = {}
         for k_price, v_price in pricelist.iteritems():
             vroom_id = vroom_obj.browse([int(k_price)])
             vroom_prod_tmpl_id = vroom_id.product_id.product_tmpl_id
@@ -99,14 +98,8 @@ class HotelCalendarManagement(models.TransientModel):
                     price_id = product_pricelist_item_obj.create(vals)
                 else:
                     price_id.write(vals)
-                new_prices.setdefault(k_price, []).append({
-                    'id': price_id.id,
-                    'date': price_id.date_start,
-                    'price': price_id.fixed_price,
-                })
 
         # Save Restrictions
-        new_rests = {}
         for k_res, v_res in restrictions.iteritems():
             for restriction in v_res:
                 res_id = vroom_rest_item_obj.search([
@@ -128,19 +121,8 @@ class HotelCalendarManagement(models.TransientModel):
                     res_id = vroom_rest_item_obj.create(vals)
                 else:
                     res_id.write(vals)
-                new_rests.setdefault(k_res, []).append({
-                    'id': res_id.id,
-                    'date': res_id.date_start,
-                    'min_stay': res_id.min_stay,
-                    'min_stay_arrival': res_id.min_stay_arrival,
-                    'max_stay': res_id.max_stay,
-                    'closed': res_id.closed,
-                    'closed_arrival': res_id.closed_arrival,
-                    'closed_departure': res_id.closed_departure,
-                })
 
         # Save Availability
-        new_avails = {}
         for k_avail, v_avail in availability.iteritems():
             vroom_id = vroom_obj.browse(int(k_avail))
             for avail in v_avail:
@@ -159,13 +141,6 @@ class HotelCalendarManagement(models.TransientModel):
                     }).create(vals)
                 else:
                     avail_id.write(vals)
-                new_avails.setdefault(k_avail, []).append({
-                    'id': avail_id.id,
-                    'date': avail_id.date,
-                    'avail': avail_id.avail,
-                    'no_ota': avail_id.no_ota,
-                })
-        return (new_prices, new_rests, new_avails)
 
     def _hcalendar_room_json_data(self, rooms):
         json_data = []

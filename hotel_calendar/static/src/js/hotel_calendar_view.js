@@ -653,6 +653,7 @@ var HotelCalendarView = View.extend({
             language : moment.locale(),
             locale : moment.locale(),
             format : L10N_DATE_MOMENT_FORMAT,
+            disabledHours: true // TODO: Odoo uses old datetimepicker version
         };
         var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
@@ -661,9 +662,11 @@ var HotelCalendarView = View.extend({
         $dateTimePickerBegin.on("dp.change", function (e) {
             $dateTimePickerEnd.data("DateTimePicker").setMinDate(e.date.add(3,'d'));
             $dateTimePickerEnd.data("DateTimePicker").setMaxDate(e.date.add(2,'M'));
+            $dateTimePickerBegin.data("DateTimePicker").hide(); // TODO: Odoo uses old datetimepicker version
             self.on_change_filter_date(e, true);
         });
         $dateTimePickerEnd.on("dp.change", function (e) {
+            $dateTimePickerEnd.data("DateTimePicker").hide(); // TODO: Odoo uses old datetimepicker version
             self.on_change_filter_date(e, false);
         });
         //this.$el.find('#pms-search #cal-pag-selector').datetimepicker($.extend({}, DTPickerOptions, {
@@ -769,6 +772,33 @@ var HotelCalendarView = View.extend({
             ev.preventDefault();
         });
 
+        /* TOUCH EVENTS */
+        this.$el.on('touchstart', function(ev){
+          var orgEvent = ev.originalEvent;
+          this._mouseEventStartPos = [orgEvent.touches[0].screenX, orgEvent.touches[0].screenY];
+        });
+        this.$el.on('touchend', function(ev){
+          var orgEvent = ev.originalEvent;
+          if (orgEvent.changedTouches.length == 1) {
+            var mousePos = [orgEvent.changedTouches[0].screenX, orgEvent.changedTouches[0].screenY];
+            var mouseDiffX = mousePos[0] - this._mouseEventStartPos[0];
+            var moveLength = 20;
+            var date_begin = false;
+            if (mouseDiffX < -moveLength) {
+              date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().add('1', 'd');
+            }
+            else if (mouseDiffX > moveLength) {
+              date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().subtract('1', 'd');
+            }
+            if (date_begin) {
+              var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
+              $dateTimePickerEnd.data("ignore_onchange", true);
+              $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+              $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+            }
+          }
+        });
+
         /* BUTTONS */
         this.update_buttons_counter();
         this.$el.find("#btn_action_checkout").on('click', function(ev){
@@ -790,9 +820,12 @@ var HotelCalendarView = View.extend({
         /** RENDER CALENDAR **/
         this._model.call('get_hcalendar_settings', [false]).then(function(results){
         	self._view_options = results;
-
           var date_begin = moment().startOf('day');
-          self._view_options['days'] = (self._view_options['days'] !== 'month')?parseInt(self._view_options['days']):date_begin.daysInMonth();
+          if (['xs', 'md'].indexOf(self._findBootstrapEnvironment()) >= 0) {
+            self._view_options['days'] = 7;
+          } else {
+            self._view_options['days'] = (self._view_options['days'] !== 'month')?parseInt(self._view_options['days']):date_begin.daysInMonth();
+          }
           var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
           var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
           var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
@@ -1075,6 +1108,23 @@ var HotelCalendarView = View.extend({
             'reservations': domainReservations,
             'dates': [date_begin, date_end]
         };
+    },
+
+    _findBootstrapEnvironment: function() {
+        var envs = ['xs', 'sm', 'md', 'lg'];
+
+        var $el = $('<div>');
+        $el.appendTo($('body'));
+
+        for (var i = envs.length - 1; i >= 0; i--) {
+            var env = envs[i];
+
+            $el.addClass('hidden-'+env);
+            if ($el.is(':hidden')) {
+                $el.remove();
+                return env;
+            }
+        }
     }
 });
 

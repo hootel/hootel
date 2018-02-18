@@ -1354,7 +1354,7 @@ HotelCalendar.prototype = {
         var posAction = $this._getRerservationPositionAction(this, ev.layerX, ev.layerY);
         this.style.cursor = (posAction == $this.ACTION.MOVE_LEFT || posAction == $this.ACTION.MOVE_RIGHT)?'col-resize':'pointer';
       }, false);
-      rdiv.addEventListener('mousedown', function(ev){
+      var _funcEvent = function(ev){
         if (!$this.reservationAction.reservation && $this._isLeftButtonPressed(ev)) {
           $this.reservationAction = {
             action: $this._getRerservationPositionAction(this, ev.layerX, ev.layerY),
@@ -1386,7 +1386,9 @@ HotelCalendar.prototype = {
             }
           }
         }
-      }, false);
+      };
+      rdiv.addEventListener('mousedown', _funcEvent, false);
+      rdiv.addEventListener('touchstart', _funcEvent, false);
       rdiv.addEventListener('mouseenter', function(ev){
         $this.e.dispatchEvent(new CustomEvent(
           'hcalOnMouseEnterReservation',
@@ -1569,6 +1571,9 @@ HotelCalendar.prototype = {
 
   _isLeftButtonPressed: function(/*EventObject*/evt) {
     evt = evt || window.event;
+    if (evt.touched && evt.touched.length) {
+      return true;
+    }
     return ("buttons" in evt)?(evt.buttons === 1):(evt.which || evt.button);
   },
 

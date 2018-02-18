@@ -28,11 +28,11 @@ class HotelVirtualRoomAvailability(models.Model):
     def create(self, vals):
         res = super(HotelVirtualRoomAvailability, self).create(vals)
         self.env['bus.hotel.calendar'].send_availability_notification({
-            'date': self.date,
-            'avail': self.avail,
-            'no_ota': self.no_ota,
-            'virtual_room_id': self.virtual_room_id.id,
-            'id': self.id,
+            'date': res.date,
+            'avail': res.avail,
+            'no_ota': res.no_ota,
+            'virtual_room_id': res.virtual_room_id.id,
+            'id': res.id,
         })
         return res
 
@@ -59,7 +59,7 @@ class HotelVirtualRoomAvailability(models.Model):
                 'date': record.date,
                 'avail': record.virtual_room_id.max_real_rooms,
                 'virtual_room_id': record.virtual_room_id.id,
-                'no_ota': record.no_ota,
+                'no_ota': False,
                 'id': record.id,
             })
         res = super(HotelVirtualRoomAvailability, self).unlink()

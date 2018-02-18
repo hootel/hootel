@@ -140,7 +140,6 @@ var HotelCalendarManagementView = View.extend({
         var oparams = [false, params['prices'], params['restrictions'], pricelist, restrictions, availability];
         this._model.call('save_changes', oparams).then(function(results){
             btn_save.removeClass('need-save');
-            self._hcalendar.setData(results[0], results[1], results[2]);
         });
     },
 
@@ -275,6 +274,7 @@ var HotelCalendarManagementView = View.extend({
                },
             language : moment.locale(),
             format : L10N_DATE_MOMENT_FORMAT,
+            disabledHours: true // TODO: Odoo uses old datetimepicker version
         };
         var $dateTimePickerBegin = this.$el.find('#mpms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#mpms-search #date_end');
@@ -283,10 +283,12 @@ var HotelCalendarManagementView = View.extend({
         $dateTimePickerBegin.on("dp.change", function (e) {
             $dateTimePickerEnd.data("DateTimePicker").setMinDate(e.date.add(3,'d'));
             $dateTimePickerEnd.data("DateTimePicker").setMaxDate(e.date.add(2,'M'));
+            $dateTimePickerBegin.data("DateTimePicker").hide(); // TODO: Odoo uses old datetimepicker version
             self.on_change_filter_date(e, true);
         });
         $dateTimePickerEnd.on("dp.change", function (e) {
             self.on_change_filter_date(e, false);
+            $dateTimePickerEnd.data("DateTimePicker").hide(); // TODO: Odoo uses old datetimepicker version
         });
 
         var date_begin = moment().startOf('day');
