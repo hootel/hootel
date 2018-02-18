@@ -219,9 +219,9 @@ class HotelReservation(models.Model):
             'days': user_id.pms_default_num_days,
             'allow_invalid_actions': type_move == 'allow_invalid',
             'assisted_movement': type_move == 'assisted',
-            'default_arrival_hour': self.env['ir.values'].get_default(
+            'default_arrival_hour': self.env['ir.values'].sudo().get_default(
                     'hotel.config.settings', 'default_arrival_hour'),
-            'default_departure_hour': self.env['ir.values'].get_default(
+            'default_departure_hour': self.env['ir.values'].sudo().get_default(
                     'hotel.config.settings', 'default_departure_hour'),
             'show_notifications': user_id.pms_show_notifications,
             'show_pricelist': user_id.pms_show_pricelist,

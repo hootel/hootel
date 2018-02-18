@@ -210,19 +210,42 @@ class TestReservationsCalendar(TestHotelCalendar):
         hcal_options = self.env['hotel.reservation'].sudo(
                             self.user_hotel_manager).get_hcalendar_settings()
 
-        self.assertEqual(hcal_options['divide_rooms_by_capacity'], True,
+        self.assertEqual(hcal_options['divide_rooms_by_capacity'],
+                         self.user_hotel_manager.pms_divide_rooms_by_capacity,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['eday_week'], 6,
+        self.assertEqual(hcal_options['eday_week'],
+                         self.user_hotel_manager.pms_end_day_week,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['days'], 'month',
+        self.assertEqual(hcal_options['days'],
+                         self.user_hotel_manager.pms_default_num_days,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['allow_invalid_actions'], False,
+        self.assertEqual(
+            hcal_options['allow_invalid_actions'],
+            self.user_hotel_manager.pms_type_move == 'allow_invalid',
+            "Hotel Calendar Invalid Options!")
+        self.assertEqual(
+            hcal_options['assisted_movement'],
+            self.user_hotel_manager.pms_type_move == 'assisted',
+            "Hotel Calendar Invalid Options!")
+        default_arrival_hour = self.env['ir.values'].sudo().get_default(
+                'hotel.config.settings', 'default_arrival_hour')
+        self.assertEqual(hcal_options['default_arrival_hour'],
+                         default_arrival_hour,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['assisted_movement'], False,
+        default_departure_hour = self.env['ir.values'].sudo().get_default(
+                'hotel.config.settings', 'default_departure_hour')
+        self.assertEqual(hcal_options['default_departure_hour'],
+                         default_departure_hour,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['default_arrival_hour'], '14:00',
+        self.assertEqual(hcal_options['show_notifications'],
+                         self.user_hotel_manager.pms_show_notifications,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['default_departure_hour'], '12:00',
+        self.assertEqual(hcal_options['pms_show_num_rooms'],
+                         self.user_hotel_manager.pms_show_num_rooms,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['show_notifications'], True,
+        self.assertEqual(hcal_options['pms_show_pricelist'],
+                         self.user_hotel_manager.pms_show_pricelist,
+                         "Hotel Calendar Invalid Options!")
+        self.assertEqual(hcal_options['pms_show_availability'],
+                         self.user_hotel_manager.pms_show_availability,
                          "Hotel Calendar Invalid Options!")
