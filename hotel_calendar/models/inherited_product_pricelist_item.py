@@ -47,11 +47,13 @@ class ProductPricelistItem(models.Model):
                 pricelist=pricelist_id)
             prod_price = prod.price
 
-            self.env['bus.hotel.calendar'].send_pricelist_notification(
-                pricelist_id,
-                date_start,
-                vroom.id,
-                prod_price)
+            self.env['bus.hotel.calendar'].send_pricelist_notification({
+                'pricelist_id': pricelist_id,
+                'date': date_start,
+                'virtual_room_id': vroom.id,
+                'price': prod_price,
+                'id', self.id,
+            })
 
             vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
             vroom_pr_cached_id = vroom_pr_cached_obj.search([
@@ -100,11 +102,13 @@ class ProductPricelistItem(models.Model):
                         pricelist=pricelist_id)
                     prod_price = prod.price
 
-                    bus_calendar_obj.send_pricelist_notification(
-                        pricelist_id,
-                        date_start,
-                        vroom.id,
-                        prod_price)
+                    bus_calendar_obj.send_pricelist_notification({
+                        'pricelist_id': pricelist_id,
+                        'date': date_start,
+                        'virtual_room_id': vroom.id,
+                        'price': prod_price,
+                        'id', record.id,
+                    })
 
                     vroom_pr_cached_id = vroom_pr_cached_obj.search([
                         ('virtual_room_id', '=', vroom.id),
@@ -137,7 +141,8 @@ class ProductPricelistItem(models.Model):
             unlink_vals.append({
                 'pricelist_id': record.pricelist_id.id,
                 'date': record.date_start,
-                'vroom': vroom
+                'vroom': vroom,
+                'id': record.id,
             })
         # Do Normal Stuff
         res = super(ProductPricelistItem, self).unlink()
@@ -154,11 +159,13 @@ class ProductPricelistItem(models.Model):
                 pricelist=pricelist_id)
 
             # Send Notification to update calendar pricelist
-            bus_calendar_obj.send_pricelist_notification(
-                pricelist_id,
-                date_start,
-                vroom.id,
-                prod.price)
+            bus_calendar_obj.send_pricelist_notification({
+                'pricelist_id': pricelist_id,
+                'date': date_start,
+                'virtual_room_id': vroom.id,
+                'price': prod.price,
+                'id', vals['id'],
+            })
 
             # Remove records from cache model
             vroom_pr_cached_id = vroom_pr_cached_obj.search([

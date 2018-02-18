@@ -259,16 +259,20 @@ HotelCalendarManagement.prototype = {
   setData: function(prices, restrictions, avail, count_free_rooms) {
     //this._updateView();
     if (typeof prices !== 'undefined' && prices) {
-      this._setPricelist(prices);
+      this._pricelist = prices;
+      this._updatePriceList();
     }
     if (typeof restrictions !== 'undefined' && restrictions) {
-      this._setRestrictions(restrictions);
+      this._restrictions = restrictions;
+      this._updateRestrictions();
     }
     if (typeof avail !== 'undefined' && avail) {
-      this._setAvailability(avail);
+      this._availability = avail;
+      this._updateAvailability();
     }
     if (typeof count_free_rooms !== 'undefined' && count_free_rooms) {
-      this._setNumFreeRooms(count_free_rooms);
+      this._free_rooms = count_free_rooms;
+      this._updateNumFreeRooms();
     }
   },
 
@@ -387,11 +391,30 @@ HotelCalendarManagement.prototype = {
   },
 
   //==== PRICELIST
-  _setPricelist: function(/*List*/pricelist) {
-    this._pricelist = pricelist;
-    var keys = Object.keys(pricelist);
+  addPricelist: function(/*Object*/pricelist) {
+    var vroom_ids = Object.keys(pricelist);
+    for (var vid of vroom_ids) {
+      if (vid in this._pricelist) {
+        for (var price of pricelist[vid]) {
+          var index = _.findIndex(this._pricelist[vid], {date: price['date']});
+          if (index >= 0) {
+            this._pricelist[vid][index] = rest;
+          } else {
+            this._pricelist[vid].push(rest);
+          }
+        }
+      }
+      else {
+        this._pricelist[vid] = pricelist[vid];
+      }
+    }
+    this._updatePriceList();
+  },
+
+  _updatePriceList: function() {
+    var keys = Object.keys(this._pricelist);
     for (var vroomId of keys) {
-      for (var price of pricelist[vroomId]) {
+      for (var price of this._pricelist[vroomId]) {
         var dd = HotelCalendarManagement.toMoment(price.date, this.options.dateFormatShort);
         var inputId = this._sanitizeId(`PRICE_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`);
         var input = this.etable.querySelector(`#${inputId}`);
@@ -425,12 +448,31 @@ HotelCalendarManagement.prototype = {
   },
 
   //==== RESTRICTIONS
-  _setRestrictions: function(/*List*/restrictions) {
-    this._restrictions = restrictions;
-    var keys = Object.keys(restrictions);
+  addRestrictions: function(/*Object*/restrictions) {
+    var vroom_ids = Object.keys(restrictions);
+    for (var vid of vroom_ids) {
+      if (vid in this._restrictions) {
+        for (var rest of restrictions[vid]) {
+          var index = _.findIndex(this._restrictions[vid], {date: rest['date']});
+          if (index >= 0) {
+            this._restrictions[vid][index] = rest;
+          } else {
+            this._restrictions[vid].push(rest);
+          }
+        }
+      }
+      else {
+        this._restrictions[vid] = restrictions[vid];
+      }
+    }
+    this._updateRestrictions();
+  },
+
+  _updateRestrictions: function() {
+    var keys = Object.keys(this._restrictions);
     for (var vroomId of keys) {
       var room = this.getRoom(vroomId);
-      for (var restriction of restrictions[vroomId]) {
+      for (var restriction of this._restrictions[vroomId]) {
         var dd = HotelCalendarManagement.toMoment(restriction.date, this.options.dateFormatShort);
         var inputIds = [
           this._sanitizeId(`MIN_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`), restriction.min_stay,
@@ -492,12 +534,10 @@ HotelCalendarManagement.prototype = {
   },
 
   //==== FREE Rooms
-  _setNumFreeRooms: function(/*List*/free_rooms) {
-    console.log(free_rooms);
-    this._free_rooms = free_rooms;
-    var keys = Object.keys(free_rooms);
+  _updateNumFreeRooms: function() {
+    var keys = Object.keys(this._free_rooms);
     for (var vroomId of keys) {
-      for (var fnroom of free_rooms[vroomId]) {
+      for (var fnroom of this._free_rooms[vroomId]) {
         var dd = HotelCalendarManagement.toMoment(fnroom.date, this.options.dateFormatShort);
         var inputIds = [
           `FREE_ROOMS_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, fnroom.num,
@@ -516,11 +556,10 @@ HotelCalendarManagement.prototype = {
   },
 
   //==== AVAILABILITY
-  _setAvailability: function(/*List*/availability) {
-    this._availability = availability;
-    var keys = Object.keys(availability);
+  _updateAvailability: function() {
+    var keys = Object.keys(this._availability);
     for (var vroomId of keys) {
-      for (var avail of availability[vroomId]) {
+      for (var avail of this._availability[vroomId]) {
         var dd = HotelCalendarManagement.toMoment(avail.date, this.options.dateFormatShort);
         var inputIds = [
           `AVAIL_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`, avail.avail,
