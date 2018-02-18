@@ -5,4 +5,10 @@
 	<t t-esc="message"/>
 </t>
 
+<t t-extend="HotelCalendar.TooltipReservation">
+	<t t-jquery="ul.oe_tooltip_technical li:last-child" t-operation="after">
+		<li><b>Channel:</b> <t t-esc="channel_name"/></li>
+	</t>
+</t>
+
 </template>

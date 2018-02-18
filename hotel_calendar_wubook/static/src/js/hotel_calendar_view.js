@@ -115,7 +115,13 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
           }
         }
       }
-    }
+    },
+
+    _generate_reservation_tooltip_dict: function(tp) {
+      var qdict = this._super(tp);
+      qdict['channel_name'] = tp[5];
+      return qdict;
+    },
   });
 
   return HotelCalendarViewWuBook;

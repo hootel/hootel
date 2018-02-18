@@ -57,8 +57,8 @@ class HotelReservation(models.Model):
                                                                 reservations)
         hotel_reservation_obj = self.env['hotel.reservation']
         json_reservations = []
-        for reserv_vals in vals[0]:
-            reserv = hotel_reservation_obj.browse(reserv_vals[1])
+        for k_rval, v_rval in enumerate(vals[0]):
+            reserv = hotel_reservation_obj.browse(v_rval[1])
             json_reservations.append((
                 reserv.product_id.id,
                 reserv.id,
@@ -77,4 +77,6 @@ class HotelReservation(models.Model):
                 (reserv.wrid and reserv.wrid != '') or reserv.splitted,
                 # Fix Rooms
                 False))
+            # Update tooltips
+            vals[1][k_rval].append(reserv.wchannel_id.name)
         return (json_reservations, vals[1])

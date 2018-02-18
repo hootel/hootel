@@ -97,6 +97,7 @@ class HotelVirtualRoomResrtrictionItem(models.Model):
                 'max_stay': 0,
                 'closed': False,
                 'closed_departure': False,
+                'closed_arrival': False,
                 'virtual_room_id': record.virtual_room_id.id,
                 'id': record.id,
             })

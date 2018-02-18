@@ -219,6 +219,16 @@ var HotelCalendarView = View.extend({
     },
 
     /** CUSTOM METHODS **/
+    _generate_reservation_tooltip_dict: function(tp) {
+      return {
+        'name': tp[0],
+        'phone': tp[1],
+        'arrival_hour': HotelCalendar.toMomentUTC(tp[2], ODOO_DATETIME_MOMENT_FORMAT).local().format('HH:mm'),
+        'num_split': tp[3],
+        'amount_total': Number(tp[4]).toLocaleString()
+      };
+    },
+
     create_calendar: function(options, pricelist, restrictions) {
         var self = this;
         // CALENDAR
@@ -233,20 +243,12 @@ var HotelCalendarView = View.extend({
         this._hcalendar = new HotelCalendar('#hcalendar', options, pricelist, restrictions, this.$el[0]);
         this._hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){
             var tp = self._reserv_tooltips[ev.detail.reservationObj.id];
-            var arrival_hour = HotelCalendar.toMomentUTC(tp[2], ODOO_DATETIME_MOMENT_FORMAT).local().format('HH:mm'); // UTC to Local
-
-            var qdict = {
-                'name': tp[0],
-                'phone': tp[1],
-                'arrival_hour': arrival_hour,
-                'num_split': tp[3]
-            };
-
+            var qdict = self._generate_reservation_tooltip_dict(tp);
             $(ev.detail.reservationDiv).tooltip({
-                animation: true,
-                html: true,
-                placement: 'bottom',
-                title: QWeb.render('HotelCalendar.TooltipReservation', qdict)
+              animation: true,
+              html: true,
+              placement: 'bottom',
+              title: QWeb.render('HotelCalendar.TooltipReservation', qdict)
             }).tooltip('show');
         });
         this._hcalendar.addEventListener('hcalOnClickReservation', function(ev){

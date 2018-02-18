@@ -65,6 +65,8 @@
 		<t t-if="num_split &gt; 1">
 			<li><b>Splitted:</b> <t t-esc="num_split"/></li>
 		</t>
+		<!-- FIXME: HARD CURRENCY -->
+		<li><b>Total Amount:</b> <t t-esc="amount_total" t-widget="monetary"/>€</li>
 	</ul>
 </t>
 

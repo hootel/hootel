@@ -240,12 +240,12 @@ class TestReservationsCalendar(TestHotelCalendar):
         self.assertEqual(hcal_options['show_notifications'],
                          self.user_hotel_manager.pms_show_notifications,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['pms_show_num_rooms'],
+        self.assertEqual(hcal_options['show_num_rooms'],
                          self.user_hotel_manager.pms_show_num_rooms,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['pms_show_pricelist'],
+        self.assertEqual(hcal_options['show_pricelist'],
                          self.user_hotel_manager.pms_show_pricelist,
                          "Hotel Calendar Invalid Options!")
-        self.assertEqual(hcal_options['pms_show_availability'],
+        self.assertEqual(hcal_options['show_availability'],
                          self.user_hotel_manager.pms_show_availability,
                          "Hotel Calendar Invalid Options!")

@@ -63,12 +63,13 @@ class HotelReservation(models.Model):
                     ('splitted', '=', True),
                 ])
             json_reservation_tooltips.update({
-                reserv.id: (
+                reserv.id: [
                     reserv.folio_id.partner_id.name,
                     reserv.folio_id.partner_id.mobile or
                     reserv.folio_id.partner_id.phone or _('Undefined'),
                     reserv.checkin,
-                    num_split)
+                    num_split,
+                    reserv.folio_id.amount_total]
             })
         return (json_reservations, json_reservation_tooltips)
 
