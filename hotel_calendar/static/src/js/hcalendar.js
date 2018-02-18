@@ -486,7 +486,7 @@ HotelCalendar.prototype = {
 
   addRestrictions: function(/*Object*/restrictions) {
     var vroom_ids = Object.keys(restrictions);
-    for (var vid in vroom_ids) {
+    for (var vid of vroom_ids) {
       if (vid in this._restrictions) {
         this._restrictions[vid] = _.extend(this._restrictions[vid], restrictions[vid]);
       }

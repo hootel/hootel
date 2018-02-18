@@ -89,17 +89,54 @@ class BusHotelCalendar(models.TransientModel):
         }
 
     @api.model
-    def _generate_pricelist_notification(self, pricelist, date, vroom, price):
-        date_dt = datetime.strptime(date, DEFAULT_SERVER_DATE_FORMAT)
+    def _generate_pricelist_notification(self, vals):
+        date_dt = datetime.strptime(vals['date'], DEFAULT_SERVER_DATE_FORMAT)
         return {
             'type': 'pricelist',
             'price': {
-                pricelist: [{
+                vals['pricelist_id']: [{
                     'days': {
-                        date_dt.strftime("%d/%m/%Y"): price,
+                        date_dt.strftime("%d/%m/%Y"): vals['price'],
                     },
-                    'room': vroom,
+                    'room': vals['virtual_room_id'],
+                    'id': vals['id'],
                 }],
+            },
+        }
+
+    @api.model
+    def _generate_restriction_notification(self, vals):
+        date_dt = datetime.strptime(vals['date'], DEFAULT_SERVER_DATE_FORMAT)
+        return {
+            'type': 'restriction',
+            'restriction': {
+                vals['virtual_room_id']: {
+                    date_dt.strftime("%d/%m/%Y"): [
+                        vals['min_stay'],
+                        vals['min_stay_arrival'],
+                        vals['max_stay'],
+                        vals['closed'],
+                        vals['closed_arrival'],
+                        vals['closed_departure'],
+                        vals['id'],
+                    ],
+                },
+            },
+        }
+
+    @api.model
+    def _generate_availability_notification(self, vals):
+        date_dt = datetime.strptime(vals['date'], DEFAULT_SERVER_DATE_FORMAT)
+        return {
+            'type': 'availability',
+            'availability': {
+                vals['virtual_room_id']: {
+                    date_dt.strftime("%d/%m/%Y"): [
+                        vals['avail'],
+                        vals['no_ota'],
+                        vals['id'],
+                    ],
+                },
             },
         }
 
@@ -124,8 +161,19 @@ class BusHotelCalendar(models.TransientModel):
                                      HOTEL_BUS_CHANNEL_ID), notif)
 
     @api.model
-    def send_pricelist_notification(self, pricelist, date, vroom, price):
-        notif = self._generate_pricelist_notification(pricelist, date, vroom,
-                                                      price)
+    def send_pricelist_notification(self, vals):
+        notif = self._generate_pricelist_notification(vals)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
+                                     HOTEL_BUS_CHANNEL_ID), notif)
+
+    @api.model
+    def send_restriction_notification(self, vals):
+        notif = self._generate_restriction_notification(vals)
+        self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
+                                     HOTEL_BUS_CHANNEL_ID), notif)
+
+    @api.model
+    def send_availability_notification(self, vals):
+        notif = self._generate_availability_notification(vals)
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
                                      HOTEL_BUS_CHANNEL_ID), notif)

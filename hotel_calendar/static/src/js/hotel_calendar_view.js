@@ -907,7 +907,6 @@ var HotelCalendarView = View.extend({
         var need_update_counters = false;
         for (var notif of notifications) {
           if (notif[0][1] === 'hotel.reservation') {
-            console.log("BUS MESSAGE!!");
             switch (notif[1]['type']) {
               case 'reservation':
                 var reserv = notif[1]['reservation'];
@@ -959,8 +958,10 @@ var HotelCalendarView = View.extend({
                 need_update_counters = true;
                 break;
               case 'pricelist':
-                var price = notif[1]['price'];
-                this._hcalendar.addPricelist(price);
+                this._hcalendar.addPricelist(notif[1]['price']);
+                break;
+              case 'restriction':
+                this._hcalendar.addRestrictions(notif[1]['restriction']);
                 break;
               default:
                 // Do Nothing
