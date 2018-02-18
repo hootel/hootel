@@ -398,9 +398,9 @@ HotelCalendarManagement.prototype = {
         for (var price of pricelist[vid]) {
           var index = _.findIndex(this._pricelist[vid], {date: price['date']});
           if (index >= 0) {
-            this._pricelist[vid][index] = rest;
+            this._pricelist[vid][index] = price;
           } else {
-            this._pricelist[vid].push(rest);
+            this._pricelist[vid].push(price);
           }
         }
       }
@@ -556,6 +556,26 @@ HotelCalendarManagement.prototype = {
   },
 
   //==== AVAILABILITY
+  addAvailability: function(/*Object*/availability) {
+    var vroom_ids = Object.keys(availability);
+    for (var vid of vroom_ids) {
+      if (vid in this._availability) {
+        for (var avail of availability[vid]) {
+          var index = _.findIndex(this._availability[vid], {date: avail['date']});
+          if (index >= 0) {
+            this._availability[vid][index] = avail;
+          } else {
+            this._availability[vid].push(avail);
+          }
+        }
+      }
+      else {
+        this._availability[vid] = availability[vid];
+      }
+    }
+    this._updateAvailability();
+  },
+
   _updateAvailability: function() {
     var keys = Object.keys(this._availability);
     for (var vroomId of keys) {

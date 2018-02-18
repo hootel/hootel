@@ -20,8 +20,6 @@
 #
 ##############################################################################
 from openerp import models, fields, api
-import logging
-_logger = logging.getLogger(__name__)
 
 
 class ProductPricelistItem(models.Model):
@@ -52,7 +50,7 @@ class ProductPricelistItem(models.Model):
                 'date': date_start,
                 'virtual_room_id': vroom.id,
                 'price': prod_price,
-                'id', self.id,
+                'id': self.id,
             })
 
             vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
@@ -107,7 +105,7 @@ class ProductPricelistItem(models.Model):
                         'date': date_start,
                         'virtual_room_id': vroom.id,
                         'price': prod_price,
-                        'id', record.id,
+                        'id': record.id,
                     })
 
                     vroom_pr_cached_id = vroom_pr_cached_obj.search([
@@ -164,7 +162,7 @@ class ProductPricelistItem(models.Model):
                 'date': date_start,
                 'virtual_room_id': vroom.id,
                 'price': prod.price,
-                'id', vals['id'],
+                'id': vals['id'],
             })
 
             # Remove records from cache model

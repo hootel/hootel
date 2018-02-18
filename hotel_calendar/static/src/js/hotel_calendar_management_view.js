@@ -411,6 +411,20 @@ var HotelCalendarManagementView = View.extend({
         for (var notif of notifications) {
             if (notif[0][1] === 'hotel.reservation') {
                 switch (notif[1]['type']) {
+                    case 'availability':
+                        var avail = notif[1]['availability'];
+                        var vroom = Object.keys(avail)[0];
+                        var day = Object.keys(avail[vroom])[0];
+                        var dt = HotelCalendarManagement.toMoment(day);
+                        var availability = {};
+                        availability[vroom] = [{
+                            'date': dt.format(ODOO_DATE_MOMENT_FORMAT),
+                            'avail': avail[vroom][day][0],
+                            'no_ota': avail[vroom][day][1],
+                            'id': avail[vroom][day][2]
+                        }];
+                        this._hcalendar.addAvailability(availability);
+                        break;
                     case 'pricelist':
                         var prices = notif[1]['price'];
                         var pricelist_id = Object.keys(prices)[0];
@@ -419,9 +433,10 @@ var HotelCalendarManagementView = View.extend({
                             pr[price['room']] = [];
                             var days = Object.keys(price['days']);
                             for (var day of days) {
+                                var dt = HotelCalendarManagement.toMoment(day);
                                 pr[price['room']].push({
-                                    'date': price['days'][day]['date'],
-                                    'price':  price['days'][day]['price'],
+                                    'date': dt.format(ODOO_DATE_MOMENT_FORMAT),
+                                    'price':  price['days'][day],
                                     'id': price['id']
                                 });
                             }
