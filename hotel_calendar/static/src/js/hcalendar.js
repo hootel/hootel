@@ -1445,6 +1445,7 @@ HotelCalendar.prototype = {
           itemReserv.startDate.clone(),
           itemReserv.endDate.clone(),
           '#c2c2c2',
+          '#c2c2c2',
           false,
           true,
           true,

@@ -57,7 +57,7 @@ class HotelReservation(models.Model):
                                                                 reservations)
         hotel_reservation_obj = self.env['hotel.reservation']
         json_reservations = []
-        for k_rval, v_rval in enumerate(vals[0]):
+        for v_rval in vals[0]:
             reserv = hotel_reservation_obj.browse(v_rval[1])
             json_reservations.append((
                 reserv.product_id.id,
@@ -69,6 +69,7 @@ class HotelReservation(models.Model):
                 reserv.checkout,
                 reserv.folio_id.id,
                 reserv.reserve_color,
+                reserv.reserve_color_text,
                 reserv.splitted,
                 reserv.parent_reservation.id,
                 # Read-Only
@@ -78,5 +79,5 @@ class HotelReservation(models.Model):
                 # Fix Rooms
                 False))
             # Update tooltips
-            vals[1][k_rval].append(reserv.wchannel_id.name)
+            vals[1][reserv.id].append(reserv.wchannel_id.name)
         return (json_reservations, vals[1])
