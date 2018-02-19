@@ -16,11 +16,8 @@
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
                     CHARGES
                 </button>
-                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_lists">
-                    LIST
-                </button>
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_control">
-                    CONTROL
+                    WIZARD
                 </button>
                 <!--button class="btn btn-default col-xs-12 col-md-12" id="btn_action_refresh">
                     <i class="fa fa-4x fa-refresh"> </i>

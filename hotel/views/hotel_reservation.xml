@@ -47,6 +47,7 @@
                                 <field name="adults"/>
                                 <field name="checkout"/>
                                 <field name="children"/>
+                                <field name="reserve_color_text"/>
                             </group>
                             <group>
                                 <field name="pricelist_id" invisible="1"/>
@@ -63,6 +64,7 @@
                                 <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>
                                 <field name="amount_reservation" readonly="1"/>
                                 <field name="price_unit" invisible="1"/>
+				<field name="nights" invisible="1"/>
                                 <field name="name" invisible="1" />
                                 <label for="discount" groups="sale.group_discount_per_so_line"/>
                                 <div name="discount" groups="sale.group_discount_per_so_line">
@@ -122,6 +124,7 @@
                     <field name="folio_id"/>
                     <field name="checkin"/>
                     <field name="checkout"/>
+		    <field name="nights" /> 
                     <field name="price_unit" />
                     <field name="discount" groups="sale.group_discount_per_so_line"/>
                     <field name="price_subtotal" />

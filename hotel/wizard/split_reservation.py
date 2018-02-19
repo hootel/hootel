@@ -92,6 +92,7 @@ class SplitReservationWizard(models.TransientModel):
                     'price_unit': tprice[1],
                     'reservation_lines': reservation_lines[1],
                     'parent_reservation': parent_res.id,
+                    'virtual_room_id': parent_res.virtual_room_id.id,
                 })
                 reservation_copy = self.env['hotel.reservation'].create(vals)
                 if not reservation_copy:
