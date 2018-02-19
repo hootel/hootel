@@ -78,8 +78,5 @@ class HotelReservation(models.Model):
                 # Fix Rooms
                 False))
             # Update tooltips
-            if reserv.wchannel_id.name:
-                vals[1][k_rval].append(reserv.wchannel_id.name)
-            else:
-                vals[1][k_rval].append('')
+            #~ vals[1][k_rval].append(reserv.wchannel_id.name) TOFIX
         return (json_reservations, vals[1])
