@@ -28,7 +28,7 @@
                 <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>
             </xpath>
             <xpath expr="//field[@name='virtual_room_id']" position="attributes">
-                <attribute name="attrs">{'readonly': [('wrid','!=','none')]}</attribute>
+                <attribute name="attrs">{'readonly': [('wrid','!=',False)]}</attribute>
             </xpath>
             <xpath expr="//field[@name='children']" position="attributes">
                 <attribute name="attrs">{'readonly': [('wis_from_channel','=',True)]}</attribute>

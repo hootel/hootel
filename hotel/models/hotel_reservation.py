@@ -526,7 +526,6 @@ class HotelReservation(models.Model):
             vals.update({'order_id': folio.order_id.id})
 
         record = super(HotelReservation, self).create(vals)
-
         # Check Capacity
         room = self.env['hotel.room'].search([
             ('product_id', '=', record.product_id.id)

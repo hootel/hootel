@@ -146,7 +146,15 @@ class FolioWizard(models.TransientModel):
     def onchange_virtual_room_id(self):
         self.ensure_one()
         if self.virtual_room_id and self.checkin and self.checkout:
-            self.max_rooms = len(self.virtual_room_id.check_availability_virtual_room(self.checkin,self.checkout,self.virtual_room_id.id))
+            checkout_dt = date_utils.get_datetime(self.checkout)
+            # Reservation end day count as free day. Not check it
+            checkout_dt -= timedelta(days=1)
+            self.max_rooms = len(
+                self.virtual_room_id.check_availability_virtual_room(
+                        self.checkin,
+                        checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                        self.virtual_room_id.id)
+                        )
 
     @api.onchange('rooms_num')
     def onchange_rooms_num(self):
@@ -246,6 +254,7 @@ class FolioWizard(models.TransientModel):
         if self.confirm:
             newfol.action_confirm()
 
+
 class ReservationWizard(models.TransientModel):
     _name = 'hotel.reservation.wizard'
 
@@ -325,16 +334,15 @@ class ReservationWizard(models.TransientModel):
                 adults =  self.env['hotel.room'].search([('product_id.id','=',line.product_id.id)]).capacity
                 line.amount_reservation = res_price
                 line.price = res_price
-            else:
-                checkout_dt = date_utils.get_datetime(self.checkout)
-                checkout_dt -= timedelta(days=1)
-                occupied = self.env['hotel.reservation'].occupied(
-                    self.checkin,
-                    checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
-                rooms_occupied = occupied.mapped('product_id.id')
-                domain_rooms = [
-                    ('isroom', '=', True),
-                    ('id', 'not in', rooms_occupied)
-                ]
-                return {'domain': {'product_id': domain_rooms}}
+            checkout_dt = date_utils.get_datetime(self.checkout)
+            checkout_dt -= timedelta(days=1)
+            occupied = self.env['hotel.reservation'].occupied(
+                self.checkin,
+                checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
+            rooms_occupied = occupied.mapped('product_id.id')
+            domain_rooms = [
+                ('isroom', '=', True),
+                ('id', 'not in', rooms_occupied)
+            ]
+            return {'domain': {'product_id': domain_rooms}}
                 

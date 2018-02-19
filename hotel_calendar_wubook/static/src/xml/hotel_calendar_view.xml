@@ -10,7 +10,7 @@
 				</div>
 			</button>
 		</t>
-		<t t-jquery="button#btn_action_lists" t-operation="after">
+		<t t-jquery="button#btn_action_paydue" t-operation="after">
 			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_issues">
 				<div class="ninfo"><span class="badge badge-danger">0</span></div>
 				ISSUES

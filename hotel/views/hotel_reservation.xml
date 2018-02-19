@@ -47,7 +47,6 @@
                                 <field name="adults"/>
                                 <field name="checkout"/>
                                 <field name="children"/>
-                                <field name="reserve_color_text"/>
                             </group>
                             <group>
                                 <field name="pricelist_id" invisible="1"/>
