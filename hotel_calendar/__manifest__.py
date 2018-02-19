@@ -49,6 +49,7 @@
         'data/menus.xml',
 	    'security/ir.model.access.csv',
         'data/records.xml',
+        'wizard/wizard_reservation.xml'
     ],
     'qweb': [
         'static/src/xml/*.xml',

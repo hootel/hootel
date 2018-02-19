@@ -52,54 +52,70 @@ class HotelReservation(models.Model):
 
         ir_values_obj = self.env['ir.values']
         reserv_color = '#FFFFFF'
+        reserv_color_text = '#000000'
         if self.reservation_type == 'staff':
             reserv_color = ir_values_obj.get_default('hotel.config.settings',
                                                      'color_staff')
+            reserv_color_text = ir_values_obj.get_default('hotel.config.settings',
+                                                     'color_letter_staff')
         elif self.reservation_type == 'out':
             reserv_color = ir_values_obj.get_default('hotel.config.settings',
                                                      'color_dontsell')
+            reserv_color_text = ir_values_obj.get_default('hotel.config.settings',
+                                                     'color_letter_dontsell')                                         
         elif self.to_assign:
             reserv_color = ir_values_obj.get_default('hotel.config.settings',
                                                      'color_to_assign')
+            reserv_color_text = ir_values_obj.get_default('hotel.config.settings',
+                                                     'color_letter_to_assign')
         elif self.state == 'draft':
             reserv_color = ir_values_obj.get_default('hotel.config.settings',
                                                      'color_pre_reservation')
+            reserv_color_text = ir_values_obj.get_default('hotel.config.settings',
+                                                     'color_letter_pre_reservation')                                         
         elif self.state == 'confirm':
             if self.folio_id.invoices_amount == 0:
                 reserv_color = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_reservation_pay')
+                reserv_color_text = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_letter_reservation_pay')    
             else:
                 reserv_color = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_reservation')
-        elif self.state == 'booking' and diff_checkout_now == 0:
-            if self.folio_id.invoices_amount == 0:
-                reserv_color = ir_values_obj.get_default(
-                    'hotel.config.settings', 'color_checkout_pay')
-            else:
-                reserv_color = ir_values_obj.get_default(
-                    'hotel.config.settings', 'color_checkout')
+                reserv_color_text = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_letter_reservation')    
         elif self.state == 'booking':
             if self.folio_id.invoices_amount == 0:
                 reserv_color = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_stay_pay')
+                reserv_color_text = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_letter_stay_pay')                
             else:
                 reserv_color = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_stay')
+                reserv_color_text = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_letter_stay')
         else:
             if self.folio_id.invoices_amount == 0:
-                reserv_color = '#FFFFFF'
+                reserv_color = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_checkout')
+                reserv_color_text = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_letter_checkout')
             else:
                 reserv_color = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_payment_pending')
-        return reserv_color
+                reserv_color_text = ir_values_obj.get_default(
+                    'hotel.config.settings', 'color_letter_payment_pending')
+        return (reserv_color,reserv_color_text)
 
     @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
     def _compute_color(self):
         _logger.info('_compute_color')
         for rec in self:
-            reserve_color = rec._generate_color()
-            rec.reserve_color = reserve_color
-            rec.folio_id.color = reserve_color
+            colors = rec._generate_color()
+            rec.reserve_color = colors[0]
+            rec.reserve_color_text = colors[1]
+            rec.folio_id.color = colors[0]
             # hotel_reserv_obj = self.env['hotel.reservation']
             # if rec.splitted:
             #     master_reservation = rec.parent_reservation or rec
@@ -243,7 +259,8 @@ class HotelReservation(models.Model):
                                track_visibility='always')
     room_type_id = fields.Many2one('hotel.room.type', string='Room Type')
     virtual_room_id = fields.Many2one('hotel.virtual.room',
-                                      string='Virtual Room Type')
+                                      string='Virtual Room Type',
+                                      required=True)
     partner_id = fields.Many2one(related='folio_id.partner_id')
     reservation_lines = fields.One2many('hotel.reservation.line',
                                         'reservation_id',
@@ -253,6 +270,8 @@ class HotelReservation(models.Model):
                                                 'confirm': [('readonly', False)], #TODO: Caution When change delegation relation between hotel.reservation and sale.order.line
                                                 'booking': [('readonly', False)]})
     reserve_color = fields.Char(compute='_compute_color', string='Color',
+                                store=True)
+    reserve_color_text = fields.Char(compute='_compute_color', string='Color',
                                 store=True)
     service_line_ids = fields.One2many('hotel.service.line', 'ser_room_line')
     pricelist_id = fields.Many2one('product.pricelist',
@@ -273,6 +292,7 @@ class HotelReservation(models.Model):
                                          'Parent Reservation')
     amount_reservation = fields.Float('Total',compute='_computed_amount_reservation') #To show de total amount line in read_only mode
     edit_room = fields.Boolean(default=True)
+    nights = fields.Integer('Nights')
 
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
@@ -457,7 +477,11 @@ class HotelReservation(models.Model):
             }))
 
         # Unify
+        folio = self.folio_id # FIX: To Allow Unify confirm reservations
+        state = folio.state # FIX
+        folio.state = 'draft'  #FIX
         splitted_reservs.unlink()
+        folio.state = state  #FIX
         master_reservation.write({
             'reservation_lines': rlines,
             'checkout': last_checkout,
@@ -555,10 +579,17 @@ class HotelReservation(models.Model):
             rlines = self.prepare_reservation_lines(checkin, days_diff)
             vals.update({
                 'reservation_lines': rlines['commands'],
+                'nights': days_diff - 1,
             })
             if self.reservation_type not in ('staff', 'out'):
                 vals.update({'price_unit':  rlines['total_price'],})
+        elif self.checkin and self.checkout:
+            nights = days_diff = date_utils.date_diff(self.checkin,
+                                             self.checkout, hours=False)
+            vals.update({'nights': nights,})
         vals.update({'edit_room': False,})
+        
+            
         res = super(HotelReservation, self).write(vals)
         if datesChanged and self.folio_id:
             self.folio_id.compute_invoices_amount()
@@ -654,6 +685,7 @@ class HotelReservation(models.Model):
                                 self.checkin, self.checkout, hours=False) + 1
         rlines = self.prepare_reservation_lines(self.checkin, days_diff, update_old_prices=False)
         self.reservation_lines = rlines['commands']
+        
 
         if self.reservation_type in ['staff', 'out']:
             self.price_unit = 0.0
@@ -780,9 +812,9 @@ class HotelReservation(models.Model):
         if not self.checkin:
             self.checkin = now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         if not self.checkout:
-            now_utc_dt = self.checkin.strptime(DEFAULT_SERVER_DATETIME_FORMAT)\
+            now_utc_dt = date_utils.get_datetime(self.checkin)\
                 + timedelta(days=1)
-            self.checkout = now_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+            self.checkout = now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         checkout_dt = date_utils.get_datetime(self.checkout)
         # Reservation end day count as free day. Not check it
         checkout_dt -= timedelta(days=1)

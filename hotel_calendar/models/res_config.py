@@ -42,10 +42,10 @@ class HotelConfiguration(models.TransientModel):
     color_letter_reservation = fields.Char('Letter  Confirmed Reservation ',
                                     default='#000000')
     color_letter_reservation_pay = fields.Char('Letter Paid Reservation', default='#000000')
-    color_letter_stay = fields.Char('Letter Checkin', default='#FFF')
+    color_letter_stay = fields.Char('Letter Checkin', default='#FFFFFF')
     color_letter_stay_pay = fields.Char('Letter Stay Pay', default='#000000')
-    color_letter_checkout = fields.Char('Letter Checkout', default='#FFF')
-    color_letter_dontsell = fields.Char('Letter Dont Sell', default='#FFF')
+    color_letter_checkout = fields.Char('Letter Checkout', default='#FFFFFF')
+    color_letter_dontsell = fields.Char('Letter Dont Sell', default='#FFFFFF')
     color_letter_staff = fields.Char('Letter Staff', default='#000000')
     color_letter_to_assign = fields.Char('Letter Ota to Assign',
                                   default='#000000')
@@ -153,7 +153,7 @@ class HotelConfiguration(models.TransientModel):
     @api.multi
     def set_color_letter_stay(self):
         return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings', 'color_stay', self.color_letter_stay)
+            'hotel.config.settings', 'color_letter_stay', self.color_letter_stay)
 
     @api.multi
     def set_color_letter_stay_pay(self):

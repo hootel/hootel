@@ -89,5 +89,6 @@ class AccountPayment(models.Model):
                 fol.write({'invoices_amount': amount_pending})
                 fol.write({'invoices_paid': paid})
                 payment.amount_total_folio = total_folio
+                fol.room_lines[0]._compute_color()
                 res += payment
             return res

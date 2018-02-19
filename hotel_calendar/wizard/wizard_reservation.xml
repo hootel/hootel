@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<odoo>
+
+	<record model="ir.ui.view" id="hotel_folio_wizard">
+		<field name="name">hotel.folio.wizard</field>
+		<field name="model">hotel.folio.wizard</field>
+		<field name="arch" type="xml">
+			<form string="Reservation Wizard" >
+				<sheet>
+					<group colspan="4" col="4">
+						<field name="virtual_room_id" attrs="{'readonly':[('checkin','=', False)]}" options="{'no_create': True}"/>
+						<field name="partner_id"/>
+						<field name="checkin" required="1" colspan="1"/>
+						<field name="checkout" required="1" colspan="1"/>
+						
+					</group>
+					<group col="3" colspan="3" attrs="{'invisible':[('virtual_room_id', '=', False)]}">
+						<table class="oe_form_group">
+							<thead>
+								<th width="40%"></th>
+								<th></th>
+							</thead>
+							<tbody>
+								<tr class="oe_form_group_row">
+									<td class="oe_form_group_cell oe_form_group_cell_label"> <field name="rooms_num" /></td>
+									<td class="oe_form_group_cell" colspan="3"><strong> Max(<field name="max_rooms"/>)</strong></td>
+								</tr>							
+							</tbody>
+						</table>						
+					</group>
+					<group colspan="4" col="4">
+						<field name="total"/>
+						<field name="confirm"/>
+					</group>
+					<group>
+						<field name="reservation_wizard_ids" colspan="4" string="Room Lines"
+							nolabel="1">
+							<tree string="Room Line" editable="bottom">
+								<field name="product_id" string="Room No" options="{'no_create': True}"/>
+								<field name="virtual_room_id" options="{'no_create': True}" />
+								<field name="checkin" />
+								<field name="checkout" />
+								<field name="nights" /> 
+								<field name="adults" />
+								<field name="children" />
+								<field name="amount_reservation" />
+								<field name="price" invisible = "1"/>
+								<field name="partner_id" invisible = "1" />
+								<field name="folio_wizard_id" invisible = "1" />
+							</tree>
+						</field>
+						
+					</group>
+					<footer>
+						<button name="create_folio" string="Create Reservations" type="object"
+							class="oe_highlight" />
+						<button string="Back" class="oe_link" special="cancel" />
+					</footer>
+				</sheet>
+			</form>
+		</field>
+	</record>
+
+	<record id="open_wizard_reservations" model="ir.actions.act_window">
+		<field name="name">Hotel Reservation Wizard</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">hotel.folio.wizard</field>
+		<field name="view_id" ref="hotel_folio_wizard"/>
+		<field name="view_type">form</field>
+		<field name="view_mode">form</field>
+		<field name="target">new</field>
+	</record>
+
+</odoo>
