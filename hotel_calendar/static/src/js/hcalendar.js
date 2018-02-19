@@ -1249,9 +1249,7 @@ HotelCalendar.prototype = {
       divRes.style.borderColor = `rgb(${bbColor[0]},${bbColor[1]},${bbColor[2]})`;
     }
     divRes.style.backgroundColor = reserv.color;
-    var rgb = this._hexToRGB(`0x${reserv.color.substr(1)}`);
-    var invColor = this._getInverseColor(rgb[0]/255, rgb[1]/255, rgb[2]/255);
-    divRes.style.color = `rgb(${invColor[0]*255},${invColor[1]*255},${invColor[2]*255})`;
+    divRes.style.color = reserv.colorText;
 
     divRes.style.top = `${boundsInit.top-etableOffset.top}px`;
     var divHeight = (boundsEnd.bottom-etableOffset.top)-(boundsInit.top-etableOffset.top);
@@ -1757,11 +1755,6 @@ HotelCalendar.prototype = {
     return [r,g,b];
   },
 
-  _getInverseColor: function(/*Int*/r, /*Int*/g, /*Int*/b) {
-      //return this._hslToRgb(hsl[0], hsl[1], hsl[2]);
-    return [1.0-r, 1.0-g, 1.0-b];
-  },
-
   _generateColor: function(/*Int*/value, /*Int*/max, /*Int*/offset, /*Bool*/reverse, /*Bool*/strmode) {
     var rgb = [offset,1.0,0.5];
     if (value > max) {
@@ -1845,8 +1838,8 @@ HRoom.prototype = {
 /** RESERVATION OBJECT **/
 function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/adults,
                         /*Int?*/childrens, /*String,MomentObject??*/startDate, /*String,MomentObject??*/endDate,
-                        /*String?*/color, /*Boolean?*/splitted, /*Boolean?*/readOnly, /*Boolean?*/fixDays, /*Boolean?*/fixRooms,
-                        /*Boolean?*/unusedZone, /*Int?*/linkedId) {
+                        /*String?*/color, /*String?*/colorText, /*Boolean?*/splitted, /*Boolean?*/readOnly,
+                        /*Boolean?*/fixDays, /*Boolean?*/fixRooms, /*Boolean?*/unusedZone, /*Int?*/linkedId) {
   if (typeof room === 'undefined') {
     delete this;
     console.warn("[Hotel Calendar][HReservation] room can't be empty!");
@@ -1861,6 +1854,7 @@ function HReservation(/*Int*/id, /*HRoomObject*/room, /*String?*/title, /*Int?*/
   this.startDate = startDate || null;
   this.endDate = endDate || null;
   this.color = color || '#000';
+  this.colorText = colorText || '#FFF';
   this.readOnly = readOnly || false;
   this.fixDays = fixDays || false;
   this.fixRooms = fixRooms || false;

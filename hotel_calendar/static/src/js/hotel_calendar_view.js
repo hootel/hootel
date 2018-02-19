@@ -551,13 +551,14 @@ var HotelCalendarView = View.extend({
                     HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT), // Date Start
                     HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT), // Date End
                     r[8], // Color
-                    r[9], // Splitted
-                    r[11] || false, // Read Only
-                    r[12] || false, // Move Days
-                    r[13] || false // Move Rooms
+                    r[9], // Color Text
+                    r[10], // Splitted
+                    r[12] || false, // Read Only
+                    r[13] || false, // Move Days
+                    r[14] || false // Move Rooms
                 );
                 nreserv.addUserData({'folio_id': r[7]});
-                nreserv.addUserData({'parent_reservation': r[10]});
+                nreserv.addUserData({'parent_reservation': r[11]});
                 reservs.push(nreserv);
             }
             self._hcalendar.setReservations(reservs);
@@ -1046,13 +1047,14 @@ var HotelCalendarView = View.extend({
                     HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT), // Date Start
                     HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT), // Date End
                     r[8], // Color
-                    r[9], // Splitted
-                    r[11] || false, // Read Only
-                    r[12] || false, // Move Days
-                    r[13] || false // Move Rooms
+                    r[9], // Color Text
+                    r[10], // Splitted
+                    r[12] || false, // Read Only
+                    r[13] || false, // Move Days
+                    r[14] || false // Move Rooms
                 );
                 nreserv.addUserData({'folio_id': r[7]});
-                nreserv.addUserData({'parent_reservation': r[10]});
+                nreserv.addUserData({'parent_reservation': r[11]});
                 reservs.push(nreserv);
             }
 

@@ -48,6 +48,7 @@ class HotelReservation(models.Model):
                 reserv.checkout,
                 reserv.folio_id.id,
                 reserv.reserve_color,
+                reserv.reserve_color_text,
                 reserv.splitted,
                 reserv.parent_reservation.id,
                 False,  # Read-Only
