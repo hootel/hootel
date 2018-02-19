@@ -44,7 +44,7 @@ class BusHotelCalendar(models.TransientModel):
     def _generate_reservation_notif(self, action, ntype, title,
                                     product_id, reserv_id, partner_name,
                                     adults, children, checkin, checkout,
-                                    folio_id, color, splitted,
+                                    folio_id, color, color_text, splitted,
                                     parent_reservation, room_name,
                                     partner_phone, state, fix_days):
         user_id = self.env['res.users'].browse(self.env.uid)
@@ -72,6 +72,7 @@ class BusHotelCalendar(models.TransientModel):
                 'checkout': checkout,
                 'folio_id': folio_id,
                 'reserve_color': color,
+                'reserve_color_text': color_text,
                 'splitted': splitted,
                 'parent_reservation': parent_reservation,
                 'room_name': room_name,
@@ -145,15 +146,15 @@ class BusHotelCalendar(models.TransientModel):
     def send_reservation_notification(self, action, ntype, title, product_id,
                                       reserv_id, partner_name, adults,
                                       children, checkin, checkout, folio_id,
-                                      color, splitted, parent_reservation,
-                                      room_name, partner_phone, state,
-                                      fix_days):
+                                      color, color_text, splitted,
+                                      parent_reservation, room_name,
+                                      partner_phone, state, fix_days):
         notif = self._generate_reservation_notif(action, ntype, title,
                                                  product_id, reserv_id,
                                                  partner_name, adults,
                                                  children, checkin,
                                                  checkout, folio_id,
-                                                 color, splitted,
+                                                 color, color_text, splitted,
                                                  parent_reservation,
                                                  room_name, partner_phone,
                                                  state, fix_days)

@@ -979,6 +979,7 @@ var HotelCalendarView = View.extend({
                       HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
                       HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
                       reserv['reserve_color'],
+                      reserv['reserve_color_text'],
                       reserv['splitted'],
                       reserv['read_only'],
                       reserv['fix_days'],

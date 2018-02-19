@@ -280,6 +280,7 @@ class HotelReservation(models.Model):
                 record.checkout,
                 record.folio_id.id,
                 record.reserve_color,
+                record.reserve_color_text,
                 record.splitted,
                 record.parent_reservation and
                 record.parent_reservation.id or 0,

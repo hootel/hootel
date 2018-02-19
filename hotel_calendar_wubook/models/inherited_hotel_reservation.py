@@ -35,14 +35,14 @@ class HotelReservation(models.Model):
     def _generate_reservation_notif(self, action, ntype, title,
                                     product_id, reserv_id, partner_name,
                                     adults, children, checkin, checkout,
-                                    folio_id, color, splitted,
+                                    folio_id, color, color_text, splitted,
                                     parent_reservation, room_name,
                                     partner_phone, state, fix_days):
         vals = super(HotelReservation, self)._generate_reservation_notif(
             action, ntype, title, product_id,
             reserv_id, partner_name, adults,
             children, checkin, checkout,
-            folio_id, color, splitted, parent_reservation,
+            folio_id, color, color_text, splitted, parent_reservation,
             room_name, partner_phone, state, fix_days)
         reserv = self.env['hotel.reservation'].browse(vals['reserv_id'])
         vals['reservation'].update({
