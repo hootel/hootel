@@ -1255,7 +1255,7 @@ HotelCalendar.prototype = {
     var divHeight = (boundsEnd.bottom-etableOffset.top)-(boundsInit.top-etableOffset.top);
     divRes.style.height = `${divHeight}px`;
     divRes.style.lineHeight = `${divHeight-3}px`;
-    var fontHeight = divHeight/2;
+    var fontHeight = divHeight/1.2;
     if (fontHeight > 16) {
       fontHeight = 16;
     }

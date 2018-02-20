@@ -292,7 +292,16 @@ class HotelReservation(models.Model):
                                          'Parent Reservation')
     amount_reservation = fields.Float('Total',compute='_computed_amount_reservation') #To show de total amount line in read_only mode
     edit_room = fields.Boolean(default=True)
-    nights = fields.Integer('Nights')
+    nights = fields.Integer('Nights',computed='_computed_nights')
+
+    @api.onchange('checkin','checkout')
+    def _computed_nights(self):
+        _logger.info('_computed_amount_reservation')
+        for res in self:
+            if res.checkin and res.checkout:
+                nights = days_diff = date_utils.date_diff(self.checkin,
+                                             self.checkout, hours=False)
+            res.nights = nights
 
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
@@ -582,10 +591,6 @@ class HotelReservation(models.Model):
             })
             if self.reservation_type not in ('staff', 'out'):
                 vals.update({'price_unit':  rlines['total_price'],})
-        elif self.checkin and self.checkout:
-            nights = days_diff = date_utils.date_diff(self.checkin,
-                                             self.checkout, hours=False)
-            vals.update({'nights': nights,})
         vals.update({'edit_room': False,})
         
             
