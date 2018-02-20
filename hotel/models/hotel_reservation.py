@@ -294,7 +294,7 @@ class HotelReservation(models.Model):
     edit_room = fields.Boolean(default=True)
     nights = fields.Integer('Nights',computed='_computed_nights')
 
-    @api.onchange('checkin','checkout')
+    @api.depends('checkin','checkout')
     def _computed_nights(self):
         _logger.info('_computed_amount_reservation')
         for res in self:
@@ -588,15 +588,16 @@ class HotelReservation(models.Model):
             vals.update({
                 'reservation_lines': rlines['commands'],
                 'nights': days_diff - 1,
+                'price_unit':  rlines['total_price'],
             })
-            if self.reservation_type not in ('staff', 'out'):
-                vals.update({'price_unit':  rlines['total_price'],})
         vals.update({'edit_room': False,})
-        
-            
+                    
         res = super(HotelReservation, self).write(vals)
-        if datesChanged and self.folio_id:
-            self.folio_id.compute_invoices_amount()
+        if datesChanged:
+            for record in self:
+                if record.reservation_type in ('staff', 'out'):
+                    record.update({'price_unit': 0})
+                record.folio_id.compute_invoices_amount()
         return res
 
     @api.multi
