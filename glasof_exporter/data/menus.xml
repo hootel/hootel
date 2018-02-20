@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <menuitem id="glasof_exporter" name="Glasof Exporter"
+            parent="hotel.hotel_reports_menu" sequence="10"
+            action="action_open_glasof_exporter" />
+
+    </data>
+</odoo>
