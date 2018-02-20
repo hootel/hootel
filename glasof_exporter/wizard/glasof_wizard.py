@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
-#                       Alexandre Díaz <dev@redneboa.es>
+#    Copyright (C) 2018 Alexandre Díaz <dev@redneboa.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -25,7 +24,6 @@ import xlsxwriter
 import base64
 
 
-# WUBOOK
 class GlassofExporterWizard(models.TransientModel):
     FILENAME = 'invoices_glasof.xls'
     _name = 'glasof.exporter.wizard'
@@ -116,10 +114,10 @@ class GlassofExporterWizard(models.TransientModel):
         workbook.close()
         file_data.seek(0)
         tnow = fields.Datetime.now().replace(' ', '_')
-        self.write({
+        return {
             'xls_journals_filename': 'journals_glasof_%s.xlsx' % tnow,
             'xls_journals_binary': base64.encodestring(file_data.read()),
-        })
+        }
 
     @api.model
     def _export_invoices(self):
@@ -217,17 +215,20 @@ class GlassofExporterWizard(models.TransientModel):
         workbook.close()
         file_data.seek(0)
         tnow = fields.Datetime.now().replace(' ', '_')
-        self.write({
+        return {
             'xls_invoices_filename': 'invoices_glasof_%s.xlsx' % tnow,
             'xls_invoices_binary': base64.encodestring(file_data.read()),
-        })
+        }
 
     @api.multi
     def export(self):
+        towrite = {}
         if self.export_journals:
-            self._export_journals()
+            towrite.update(self._export_journals())
         if self.export_invoices:
-            self._export_invoices()
+            towrite.update(self._export_invoices())
+        if any(towrite):
+            self.write(towrite)
         return {
             "type": "ir.actions.do_nothing",
         }
