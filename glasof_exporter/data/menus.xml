@@ -3,8 +3,9 @@
     <data>
 
         <menuitem id="glasof_exporter" name="Glasof Exporter"
-            parent="hotel.hotel_reports_menu" sequence="10"
-            action="action_open_glasof_exporter" />
+            parent="account.menu_finance_legal_statement"
+            groups="account.group_account_manager,account.group_account_user"
+            action="action_open_glasof_exporter" sequence="10" />
 
     </data>
 </odoo>
