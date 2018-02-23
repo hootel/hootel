@@ -950,6 +950,7 @@ class HotelReservation(models.Model):
                                          hours=False) + 1
         dates_list = date_utils.generate_dates_list(checkin_dt, days_diff,
                                                     tz=tz_hotel)
+        import wdb; wdb.set_trace()
         reservations = self.env['hotel.reservation'].search([
             ('reservation_lines.date', 'in', dates_list),
             ('state', '!=', 'cancelled')

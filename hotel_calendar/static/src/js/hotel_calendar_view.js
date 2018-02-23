@@ -714,7 +714,7 @@ var HotelCalendarView = View.extend({
         this.$el.find("#pms-search #search_query").on('change', function(ev){
             self.reload_hcalendar_reservations(true, false, false);
         });
-        this.$el.find("#pms-search #cal-pag-prev-plus").on('click', function(ev){
+        this.$el.find("#cal-pag-prev-plus").on('click', function(ev){
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
@@ -726,7 +726,7 @@ var HotelCalendarView = View.extend({
 
             ev.preventDefault();
         });
-        this.$el.find("#pms-search #cal-pag-prev").on('click', function(ev){
+        this.$el.find("#cal-pag-prev").on('click', function(ev){
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
@@ -738,7 +738,7 @@ var HotelCalendarView = View.extend({
 
             ev.preventDefault();
         });
-        this.$el.find("#pms-search #cal-pag-next-plus").on('click', function(ev){
+        this.$el.find("#cal-pag-next-plus").on('click', function(ev){
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
@@ -750,7 +750,7 @@ var HotelCalendarView = View.extend({
 
             ev.preventDefault();
         });
-        this.$el.find("#pms-search #cal-pag-next").on('click', function(ev){
+        this.$el.find("#cal-pag-next").on('click', function(ev){
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
@@ -762,7 +762,7 @@ var HotelCalendarView = View.extend({
 
             ev.preventDefault();
         });
-        this.$el.find("#pms-search #cal-pag-selector").on('click', function(ev){
+        this.$el.find("#cal-pag-selector").on('click', function(ev){
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');

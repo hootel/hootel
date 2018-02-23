@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
 	<t t-extend="hotel_calendar.HotelCalendarView">
-		<t t-jquery="button#btn_action_checkout" t-operation="before">
+		<t t-jquery="div#pms-search-cal-pag" t-operation="before">
 			<button class="btn col-xs-12 col-lg-12" id="btn_channel_manager_request">
 				<div class="fa-stack fa-2x">
 					<i class="fa fa-cloud fa-stack-2x"> </i>
