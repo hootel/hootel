@@ -158,7 +158,7 @@ class HotelConfiguration(models.TransientModel):
     @api.multi
     def set_color_letter_stay_pay(self):
         return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings', 'color_letter_stay_pay', self.color_stay_pay)
+            'hotel.config.settings', 'color_letter_stay_pay', self.color_letter_stay_pay)
 
     @api.multi
     def set_color_letter_checkout(self):
