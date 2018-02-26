@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
-#                       Alexandre Díaz <dev@redneboa.es>
+#    Copyright (C) 2018 Alexandre Díaz <dev@redneboa.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,4 +18,31 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import glassof_wizard
+
+{
+    'name': 'Glasof Exporter',
+    'version': '1.0',
+    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
+    'website': 'https://www.eiqui.com',
+    'category': 'hotel/glasof',
+    'summary': "Export Odoo Data to xls compatible with Glasof",
+    'description': "Glasof Exporter",
+    'depends': [
+        'account',
+    ],
+    'external_dependencies': {
+        'python': ['xlsxwriter']
+    },
+    'data': [
+        'wizard/glasof_wizard.xml',
+        'data/menus.xml',
+    ],
+    'qweb': [],
+    'test': [
+    ],
+
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+    'license': 'AGPL-3',
+}

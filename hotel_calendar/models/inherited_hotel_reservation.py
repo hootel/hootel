@@ -50,7 +50,8 @@ class HotelReservation(models.Model):
                 reserv.reserve_color,
                 reserv.reserve_color_text,
                 reserv.splitted,
-                reserv.parent_reservation.id,
+                reserv.parent_reservation and reserv.parent_reservation.id
+                or False,
                 False,  # Read-Only
                 reserv.splitted,   # Fix Days
                 False))  # Fix Rooms
@@ -89,7 +90,8 @@ class HotelReservation(models.Model):
             ], limit=1)
             vrooms = vroom_obj.search([
                 '|', ('room_ids', 'in', room.id),
-                     ('room_type_ids.id', '=', room.categ_id.id)])
+                     ('room_type_ids.id', '=', room.categ_id.id)],
+                order='hcal_sequence ASC')
             json_rooms.append((
                 room.product_id.id,
                 room.name,
@@ -147,7 +149,9 @@ class HotelReservation(models.Model):
         date_diff = date_utils.date_diff(date_start, dto, hours=False) + 1
         # Get Prices
         json_rooms_prices = {pricelist_id: []}
-        vrooms = self.env['hotel.virtual.room'].search([])
+        vrooms = self.env['hotel.virtual.room'].search(
+            [],
+            order='hcal_sequence ASC')
         vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
 
         for vroom in vrooms:
@@ -184,7 +188,9 @@ class HotelReservation(models.Model):
         date_diff = date_utils.date_diff(dfrom, dto, hours=False) + 1
         # Get Prices
         json_rooms_rests = {}
-        vrooms = self.env['hotel.virtual.room'].search([])
+        vrooms = self.env['hotel.virtual.room'].search(
+            [],
+            order='hcal_sequence ASC')
         vroom_rest_obj = self.env['hotel.virtual.room.restriction.item']
         for vroom in vrooms:
             days = {}

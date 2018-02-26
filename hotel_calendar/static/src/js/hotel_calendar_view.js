@@ -782,16 +782,17 @@ var HotelCalendarView = View.extend({
         });
         this.$el.on('touchend', function(ev){
           var orgEvent = ev.originalEvent;
-          if (orgEvent.changedTouches.length == 1) {
+          if (orgEvent.changedTouches.length > 2) {
             var mousePos = [orgEvent.changedTouches[0].screenX, orgEvent.changedTouches[0].screenY];
             var mouseDiffX = mousePos[0] - this._mouseEventStartPos[0];
-            var moveLength = 20;
+            var moveLength = 40;
             var date_begin = false;
+            var days = orgEvent.changedTouches.length == 3 && 7 || 1;
             if (mouseDiffX < -moveLength) {
-              date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().add('1', 'd');
+              date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().add(days, 'd');
             }
             else if (mouseDiffX > moveLength) {
-              date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().subtract('1', 'd');
+              date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone().subtract(days, 'd');
             }
             if (date_begin) {
               var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
