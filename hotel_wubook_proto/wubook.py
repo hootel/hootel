@@ -219,16 +219,16 @@ class WuBook(models.TransientModel):
             restr = vroom_restr_obj.search([
                 ('restriction_id', '=', restriction_parity_id),
                 ('virtual_room_id', '=', vroom.id),
-                ('start_date', '>=', now_str),
-                ('end_date', '<=', now_str),
+                ('date_start', '>=', now_str),
+                ('date_end', '<=', now_str),
                 ('applied_on', '=', '0_virtual_room'),
             ], limit=1)
             if restr:
                 restr.write({'closed': status})
             else:
                 restr = vroom_restr_obj.create({
-                    'start_date': now_str,
-                    'end_date': now_str,
+                    'date_start': now_str,
+                    'date_end': now_str,
                     'virtual_room_id': vroom.id,
                     'applied_on': '0_virtual_room',
                     'restriction_id': restriction_parity_id,
