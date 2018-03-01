@@ -30,7 +30,7 @@ class GlassofExporterWizard(models.TransientModel):
 
     date_start = fields.Date("Start Date")
     date_end = fields.Date("End Date")
-    export_journals = fields.Boolean("Export Journals?", default=True)
+    export_journals = fields.Boolean("Export Account Movements?", default=True)
     export_invoices = fields.Boolean("Export Invoices?", default=True)
     seat_num = fields.Integer("Seat Number Start", default=1)
     xls_journals_filename = fields.Char()
@@ -96,19 +96,21 @@ class GlassofExporterWizard(models.TransientModel):
         for move in account_moves:
             nmove = True
             for line in move.line_ids:
-                worksheet.write(nrow, 0, nmove and start_seat or '',
-                                xls_cell_format_seat)
-                worksheet.write(nrow, 1, nmove and line.date or '',
-                                xls_cell_format_date)
-                worksheet.write(nrow, 2, line.account_id.code,
-                                xls_cell_format_saccount)
-                worksheet.write(nrow, 3, '')
-                worksheet.write(nrow, 4, line.ref and line.ref[:50] or '')
-                worksheet.write(nrow, 5, line.debit, xls_cell_format_money)
-                worksheet.write(nrow, 6, line.credit, xls_cell_format_money)
-                worksheet.write(nrow, 7, '')
-                nmove = False
-                nrow += 1
+                if line.journal_id.type in ('cash', 'bank'):
+                    worksheet.write(nrow, 0, nmove and start_seat or '',
+                                    xls_cell_format_seat)
+                    worksheet.write(nrow, 1, nmove and line.date or '',
+                                    xls_cell_format_date)
+                    worksheet.write(nrow, 2, line.account_id.code,
+                                    xls_cell_format_saccount)
+                    worksheet.write(nrow, 3, '')
+                    worksheet.write(nrow, 4, line.ref and line.ref[:50] or '')
+                    worksheet.write(nrow, 5, line.debit, xls_cell_format_money)
+                    worksheet.write(nrow, 6, line.credit,
+                                    xls_cell_format_money)
+                    worksheet.write(nrow, 7, '')
+                    nmove = False
+                    nrow += 1
             start_seat += 1
 
         workbook.close()
@@ -149,6 +151,9 @@ class GlassofExporterWizard(models.TransientModel):
         xls_cell_format_money = workbook.add_format({
             'num_format': '#,##0.00'
         })
+        xls_cell_format_odec = workbook.add_format({
+            'num_format': '#,#0.0'
+        })
         xls_cell_format_header = workbook.add_format({
             'bg_color': '#CCCCCC'
         })
@@ -164,7 +169,7 @@ class GlassofExporterWizard(models.TransientModel):
         nrow = 0
         for inv in account_invs:
             worksheet.write(nrow, 0, inv.name)
-            worksheet.write(nrow, 1, inv.date_invoice)
+            worksheet.write(nrow, 1, inv.date_invoice, xls_cell_format_date)
             worksheet.write(nrow, 2, '')
             worksheet.write(nrow, 3, inv.partner_id.vat and
                             inv.partner_id.vat[:2] or '')
@@ -173,12 +178,18 @@ class GlassofExporterWizard(models.TransientModel):
             worksheet.write(nrow, 5, inv.partner_id.lastname)
             worksheet.write(nrow, 6, '')
             worksheet.write(nrow, 7, inv.partner_id.firstname)
-            worksheet.write(nrow, 8, 700.0)
-            worksheet.write(nrow, 9, '')
-            worksheet.write(nrow, 10, inv.tax_line_ids and
-                            inv.tax_line_ids[0].name or '')
+            worksheet.write(nrow, 8, 705.0, xls_cell_format_odec)
+            worksheet.write(nrow, 9, inv.amount_untaxed, xls_cell_format_money)
+            if any(inv.tax_line_ids):
+                worksheet.write(nrow,
+                                10,
+                                inv.tax_line_ids[0].tax_id.amount,
+                                xls_cell_format_money)
+            else:
+                worksheet.write(nrow, 10, '')
             worksheet.write(nrow, 11, inv.tax_line_ids and
-                            inv.tax_line_ids[0].amount or '')
+                            inv.tax_line_ids[0].amount or '',
+                            xls_cell_format_money)
             worksheet.write(nrow, 12, '')
             worksheet.write(nrow, 13, '')
             worksheet.write(nrow, 14, '')
@@ -190,7 +201,10 @@ class GlassofExporterWizard(models.TransientModel):
             worksheet.write(nrow, 20, '')
             worksheet.write(nrow, 21, 'S')
             worksheet.write(nrow, 22, '')
-            worksheet.write(nrow, 23, '')
+            if inv.type == 'out_refund':
+                worksheet.write(nrow, 23, inv.origin)
+            else:
+                worksheet.write(nrow, 23, '')
             worksheet.write(nrow, 24, '')
             worksheet.write(nrow, 25, '')
             worksheet.write(nrow, 27, '')
