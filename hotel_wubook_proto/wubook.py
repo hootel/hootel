@@ -207,7 +207,7 @@ class WuBook(models.TransientModel):
         vrooms = self.env['hotel.virtual.room'].search([])
 
         restriction_parity_id = self.env['ir.values'].sudo().get_default(
-                            'hotel.config.settings', 'restriction_parity_id')
+                            'hotel.config.settings', 'parity_restrictions_id')
         if restriction_parity_id:
             restriction_parity_id = int(restriction_parity_id)
 
@@ -1537,7 +1537,9 @@ class WuBook(models.TransientModel):
 
     @api.model
     def push_restrictions(self):
-        unpushed = self.env['hotel.virtual.room.restriction.item'].search([
+        vroom_rest_obj = self.env['hotel.virtual.room.restriction']
+        rest_item_obj = self.env['hotel.virtual.room.restriction.item']
+        unpushed = rest_item_obj.search([
             ('wpushed', '=', False),
             ('date_start', '>=', datetime.strftime(fields.datetime.now(),
                                                    DEFAULT_SERVER_DATE_FORMAT))
@@ -1547,11 +1549,11 @@ class WuBook(models.TransientModel):
                                            DEFAULT_SERVER_DATE_FORMAT)
             date_end = datetime.strptime(unpushed[-1].date_start,
                                          DEFAULT_SERVER_DATE_FORMAT)
-            days_diff = abs((date_end-date_start).days) + 1
-
+            days_diff = date_utils.date_diff(
+                date_start,
+                date_end,
+                hours=False) + 1
             restrictions = {}
-            vroom_rest_obj = self.env['hotel.virtual.room.restriction']
-            rest_item_obj = self.env['hotel.virtual.room.restriction.item']
             restriction_plan_ids = vroom_rest_obj.search([
                 ('wpid', '!=', False),
                 ('active', '=', True)
