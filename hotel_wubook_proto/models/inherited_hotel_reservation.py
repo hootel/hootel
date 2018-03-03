@@ -184,7 +184,7 @@ class HotelReservation(models.Model):
                                             checkin=checkin, checkout=checkout)
         res.update({
             'wrid': self.wrid,
-            'wchannel_id': self.wchannel_id,
+            'wchannel_id': self.wchannel_id and self.wchannel_id.id or False,
             'wchannel_reservation_code': self.wchannel_reservation_code,
             'wis_from_channel': self.wis_from_channel,
             'to_read': self.to_read,
