@@ -458,8 +458,8 @@ var HotelCalendarManagementView = View.extend({
                             'min_stay_arrival': restriction[vroom][day][1],
                             'max_stay': restriction[vroom][day][2],
                             'closed': restriction[vroom][day][3],
-                            'closed_departure': restriction[vroom][day][4],
-                            'closed_arrival': restriction[vroom][day][5],
+                            'closed_arrival': restriction[vroom][day][4],
+                            'closed_departure': restriction[vroom][day][5],
                             'id': restriction[vroom][day][6]
                         }];
                         this._hcalendar.addRestrictions(rest);

@@ -1568,8 +1568,9 @@ class WuBook(models.TransientModel):
                 for vroom in virtual_room_ids:
                     restrictions[rp.wpid].update({vroom.wrid: []})
                     for i in range(0, days_diff):
+                        ndate_dt = date_start + timedelta(days=i)
                         restr = vroom.get_restrictions(
-                            date_start.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                            ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
                         if restr:
                             restrictions[rp.wpid][vroom.wrid].append({
                                 'min_stay': restr.min_stay or 0,
