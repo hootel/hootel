@@ -1570,14 +1570,17 @@ class WuBook(models.TransientModel):
                     for i in range(0, days_diff):
                         restr = vroom.get_restrictions(
                             date_start.strftime(DEFAULT_SERVER_DATE_FORMAT))
-                        restrictions[rp.wpid][vroom.wrid].append({
-                            'min_stay': restr and restr.min_stay or 0,
-                            'min_stay_arrival': restr and restr.min_stay_arrival or 0,
-                            'max_stay': restr and restr.max_stay or 0,
-                            'closed': (restr and restr.closed) and 1 or 0,
-                            'closed_arrival': (restr and restr.closed_arrival) and 1 or 0,
-                            'closed_departure': (restr and restr.closed_departure) and 1 or 0,
-                        })
+                        if restr:
+                            restrictions[rp.wpid][vroom.wrid].append({
+                                'min_stay': restr.min_stay or 0,
+                                'min_stay_arrival': restr.min_stay_arrival or 0,
+                                'max_stay': restr.max_stay or 0,
+                                'closed': restr.closed and 1 or 0,
+                                'closed_arrival': restr.closed_arrival and 1 or 0,
+                                'closed_departure': restr.closed_departure and 1 or 0,
+                            })
+                        else:
+                            restrictions[rp.wpid][vroom.wrid].append({})
             _logger.info("UPDATING RESTRICTIONS...")
             _logger.info(restrictions)
             for k_res, v_res in restrictions.iteritems():

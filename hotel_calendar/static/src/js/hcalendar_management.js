@@ -168,7 +168,7 @@ HotelCalendarManagement.prototype = {
     telm.setAttribute('name', 'min_stay');
     telm.setAttribute('type', 'edit');
     telm.setAttribute('title', 'Min. Stay');
-    telm.value = 0;
+    telm.dataset.orgValue = telm.value = 0;
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     telm.classList.add('hcal-management-input');
     telm.addEventListener('change', function(ev){ $this.onInputChange(ev, this); }, false);
@@ -179,7 +179,7 @@ HotelCalendarManagement.prototype = {
     telm.setAttribute('name', 'min_stay_arrival');
     telm.setAttribute('type', 'edit');
     telm.setAttribute('title', 'Min. Stay Arrival');
-    telm.value = 0;
+    telm.dataset.orgValue = telm.value = 0;
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     telm.classList.add('hcal-management-input');
     telm.addEventListener('change', function(ev){ $this.onInputChange(ev, this); }, false);
@@ -190,7 +190,7 @@ HotelCalendarManagement.prototype = {
     telm.setAttribute('name', 'max_stay');
     telm.setAttribute('type', 'edit');
     telm.setAttribute('title', 'Max. Stay');
-    telm.value = 0;
+    telm.dataset.orgValue = telm.value = 0;
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     telm.classList.add('hcal-management-input');
     telm.addEventListener('change', function(ev){ $this.onInputChange(ev, this); }, false);
@@ -206,6 +206,7 @@ HotelCalendarManagement.prototype = {
     telm.setAttribute('id', this._sanitizeId(`CLOUSURE_${roomId}_${dateShortStr}`));
     telm.setAttribute('name', 'clousure');
     telm.setAttribute('title', 'Closure');
+    telm.dataset.orgValue = 'open';
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     var selectOpt = document.createElement("option");
     selectOpt.value = "open";

@@ -1412,8 +1412,16 @@ HotelCalendar.prototype = {
 
   _getRerservationPositionAction: function(/*HTMLObject*/elm, /*Int*/posX, /*Int*/posY) {
     var bounds = elm.getBoundingClientRect();
-    if (posX <= 5) { return this.ACTION.MOVE_LEFT; }
-    else if (posX >= bounds.width-10) { return this.ACTION.MOVE_RIGHT; }
+    var mouseActMargin = 10*bounds.width*0.01;
+    console.log("------- Esta aiki");
+    console.log(posX);
+    var ppOsX = posX - posX*(1.0-window.devicePixelRatio);
+    posX -= ppOsX;
+    console.log(posX);
+    var mouseActMarginV = (10*bounds.width)/100;
+    //debugger;
+    if (posX <= mouseActMargin) { return this.ACTION.MOVE_LEFT; }
+    else if (posX >= bounds.width-mouseActMargin) { return this.ACTION.MOVE_RIGHT; }
     return this.ACTION.MOVE_ALL;
   },
 
