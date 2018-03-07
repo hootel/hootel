@@ -20,7 +20,7 @@
 #
 ##############################################################################
 
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 import base64
 import datetime
 import calendar
@@ -92,42 +92,51 @@ class Wizard(models.TransientModel):
             ET.SubElement(cabezera,"LOCALIDAD").text = compan.city
             ET.SubElement(cabezera,"MUNICIPIO").text = compan.city
             ET.SubElement(cabezera,"PROVINCIA").text = compan.state_id.display_name
-            ET.SubElement(cabezera,"TELEFONO_1").text = compan.phone
-            ET.SubElement(cabezera,"TIPO").text = compan.category_id.name
-            ET.SubElement(cabezera,"CATEGORIA").text = compan.vat
+            ET.SubElement(cabezera,"TELEFONO_1").text = compan.phone.replace(' ', '')[0:12]
+            ET.SubElement(cabezera,"TIPO").text = compan.category_id.tipo
+            ET.SubElement(cabezera,"CATEGORIA").text = compan.category_id.name
             active_room = self.env['hotel.room'].search_count([('capacity', '>', 0)])
             ET.SubElement(cabezera,"HABITACIONES").text = str(active_room)
             ET.SubElement(cabezera,"PLAZAS_DISPONIBLES_SIN_SUPLETORIAS").text = str(compan.seats)
             ET.SubElement(cabezera,"URL").text = compan.website
-
             alojamiento = ET.SubElement(encuesta, "ALOJAMIENTO")
             #Bucle de RESIDENCIA
 
-            #Reset Variables
+            #Init Variables
             ine_entrada = []
             ine_salidas = []
             ine_pernoct = []
-            for x in xrange(last_day+1):
+            ine_pernoct_total = []
+            for x in range(last_day+1):
                 ine_entrada.append(0)
                 ine_salidas.append(0)
                 ine_pernoct.append(0)
+                ine_pernoct_total.append(0)
+
+            #active_rooms = self.env['hotel.room'].search([('capacity', '>', 0)])
+            active_rooms = self.env['hotel.room'].search([('active', '=', True)])
 
             #Cabezera
             code_control = lines[0].partner_id.code_ine.code
-            residencia = ET.SubElement(alojamiento, "RESIDENCIA")
 
             for linea in lines:
                 #Si ha cambiado el codigo
                 if code_control<>linea.partner_id.code_ine.code:
-                    ET.SubElement(residencia,"ID_PROVINCIA_ISLA").text = str(code_control)
+                    residencia = ET.SubElement(alojamiento, "RESIDENCIA")
+                    if len(code_control)>3:
+                        ET.SubElement(residencia,"ID_PROVINCIA_ISLA").text = str(code_control)
+                    else:
+                        ET.SubElement(residencia,"ID_PAIS").text = str(code_control)
 
-                    for x in xrange(1,last_day+1):
+                    for x in range(1,last_day+1):
                         if ine_entrada[x]+ine_salidas[x]+ine_pernoct[x] > 0:
                             movimiento = ET.SubElement(residencia, "MOVIMIENTO")
                             ET.SubElement(movimiento,"N_DIA").text = "%02d" % (x)
                             ET.SubElement(movimiento,"ENTRADAS").text = str(ine_entrada[x])
                             ET.SubElement(movimiento,"SALIDAS").text = str(ine_salidas[x])
                             ET.SubElement(movimiento,"PERNOCTACIONES").text = str(ine_pernoct[x])
+                            # Guardamos el total de pernoctaciones/dia
+                            ine_pernoct_total[x] += ine_pernoct[x]
 
                     #Reset Variables
                     ine_entrada = []
@@ -150,12 +159,13 @@ class Wizard(models.TransientModel):
                 else:
                     # No marco entrada y cuento desde el dia 1
                     cuenta_entrada = 1
+                # Ha salido este mes
                 if int(f_salida[1]) == self.ine_month:
                     ine_salidas[int(f_salida[2])] += 1
                     cuenta_salida = int(f_salida[2])
                 else:
                     # No marco entrada y cuento desde el dia 1
-                    cuenta_salida = last_day
+                    cuenta_salida = last_day+1
                 #Contando pernoctaciones
                 for i in range(cuenta_salida-cuenta_entrada):
                     ine_pernoct[cuenta_entrada+i] += 1
@@ -168,28 +178,38 @@ class Wizard(models.TransientModel):
             month_adr_rooms = 0
             month_revpar_staff_rooms = 0
             movimientos = []
-            for x in xrange(last_day+1):
+
+            #Reset Variables
+            ine_entrada = []
+            ine_salidas = []
+            for x in range(last_day+1):
+                ine_entrada.append(0)
+                ine_salidas.append(0)
+
+            for x in range(last_day+1):
                 movimientos.append([0,0,0,0,0,0,active_room])
                 #movimientos.append(['suple','doble','indi','otra','adr_sum','adr_rum','adr_staff'])
 
             lines_res = self.env['hotel.reservation'].search(['|','|','&',('checkout','>=',str(m_f_d_search)),('checkout','<=',str(m_e_d_search)),'&',('checkin','>=',str(m_f_d_search)),('checkin','<=',str(m_e_d_search)),'&',('checkin','<=',str(m_f_d_search)),('checkout','>=',str(m_e_d_search))] , order="checkin" )
             for line_res in lines_res:
                 room = self.env['hotel.room'].search([('product_id','=',line_res.product_id.id)])
-                #No es Staff o Out
-                if line_res.reservation_type == 'normal':
+                #No es Staff o Out y esta booking
+                if (line_res.reservation_type == 'normal') and ((line_res.state == 'booking') or (line_res.state == 'done')):
+                #if (line_res.reservation_type == 'normal') and (line_res.state == 'booking'):
+
 
                     #calculamos capacidad de habitacion
                     # !!!!! ATENCION !!!!
                     #pendiente de añadir un campo con las supletorias.
-                    #asumimos de momento que por defecto supletorias sera 1 por ejemplo para todas......
+                    #asumimos de momento que por defecto supletorias sera 0 por ejemplo para todas......
                     #cambiar / calcular la siguiente linea cuando el campo exista.
-                    suple_room = 1
+                    suple_room = 0
 
-                    capacidad = room.capacity - suple_room
+                    capacidad = room.capacity + suple_room
 
                     #Cuadramos adultos con los checkin realizados.
-                    if line_res.adults > line_res.checkin:
-                        adultos = line_res.checkin
+                    if line_res.adults > line_res.cardex_count:
+                        adultos = line_res.cardex_count
                     else:
                         adultos = line_res.adults
 
@@ -205,6 +225,7 @@ class Wizard(models.TransientModel):
                     else:
                         # No marco entrada y cuento desde el dia 1
                         cuenta_entrada = 1
+                    # Ha salido este mes?
                     if int(f_salida[1]) == self.ine_month:
                         ine_salidas[int(f_salida[2])] += 1
                         cuenta_salida = int(f_salida[2])
@@ -213,27 +234,33 @@ class Wizard(models.TransientModel):
                         cuenta_salida = last_day +1
 
                     # para las noches que ha estado
-                    for xx in xrange(cuenta_entrada,cuenta_salida):
-                        if capacidad == 1:
-                            # Habitacion Individual
-                            movimientos[xx][3]+= 1
-                            if adultos > 1:
-                                # Supletorias
-                                movimientos[xx][0]+= 1
-                        if capacidad == 2:
-                            # Habitacion Doble
-                            if adultos == 1:
-                                #Uso individual
-                                movimientos[xx][2]+= 1
-                            if adultos > 2:
-                                #Doble + supletorias
-                                movimientos[xx][0]+= adultos - 2
-                            else:
-                                #Doble
-                                movimientos[xx][1]+= 1
-                        if capacidad > 2:
-                            #Otras Habitaciones
-                            movimientos[xx][3]+= 1
+                    for dia_x in range(cuenta_entrada,cuenta_salida+1):
+                        # si no supera el numero de habitaciones ni de pernoctaciones totales del dia...
+                        if ((movimientos[dia_x-1][1]+movimientos[dia_x-1][2]+movimientos[dia_x-1][3]) < active_room and
+                           (((movimientos[dia_x-1][1]*2)+movimientos[dia_x-1][2]+movimientos[dia_x-1][3]) < ine_pernoct_total[dia_x-1])):
+                            if capacidad == 1:
+                                # Habitacion Individual
+                                movimientos[dia_x-1][3]+= 1
+                                if adultos > 1:
+                                    # Supletorias
+                                    movimientos[dia_x-1][0]+= 1
+                            elif capacidad == 2:
+                                # Habitacion Doble
+                                if adultos == 1:
+                                    #Uso individual
+                                    movimientos[dia_x-1][2]+= 1
+                                else:
+                                    #Doble
+                                    movimientos[dia_x-1][1]+= 1
+                                    if adultos > 2:
+                                        #Doble + supletorias
+                                        movimientos[dia_x-1][0]+= (adultos-2)
+                            elif capacidad > 2:
+                                #Otras Habitaciones
+                                movimientos[dia_x-1][3]+= 1
+                        else:
+                            _logger.info(str(dia_x)+'---- Exceso de habitaciones ---'+str(line_res)+' '+
+                            line_res.name+' '+line_res.partner_id.name+' PERNOCTACIONES:'+str(ine_pernoct_total[dia_x-1]))
 
                     # ADR y RevPar
                     for xx_lines in line_res.reservation_lines:
@@ -251,18 +278,18 @@ class Wizard(models.TransientModel):
                             # Restamos una Habitacion no valida para RevPar
                             movimientos[int(xx_dia[2])][6]-= 1
 
-            for xx in xrange(1,last_day+1):
+            for dia_x in xrange(1,last_day+1):
                 habitaciones_m = ET.SubElement(habitaciones,"HABITACIONES_MOVIMIENTO")
-                ET.SubElement(habitaciones_m,"HABITACIONES_N_DIA").text = "%02d" % (xx)
-                ET.SubElement(habitaciones_m,"PLAZAS_SUPLETORIAS").text = str(movimientos[xx][0])
-                ET.SubElement(habitaciones_m,"HABITACIONES_DOBLES_USO_DOBLE").text = str(movimientos[xx][1])
-                ET.SubElement(habitaciones_m,"HABITACIONES_DOBLES_USO_INDIVIDUAL").text = str(movimientos[xx][2])
-                ET.SubElement(habitaciones_m,"HABITACIONES_OTRAS").text = str(movimientos[xx][3])
+                ET.SubElement(habitaciones_m,"HABITACIONES_N_DIA").text = "%02d" % (dia_x)
+                ET.SubElement(habitaciones_m,"PLAZAS_SUPLETORIAS").text = str(movimientos[dia_x][0])
+                ET.SubElement(habitaciones_m,"HABITACIONES_DOBLES_USO_DOBLE").text = str(movimientos[dia_x][1])
+                ET.SubElement(habitaciones_m,"HABITACIONES_DOBLES_USO_INDIVIDUAL").text = str(movimientos[dia_x][2])
+                ET.SubElement(habitaciones_m,"HABITACIONES_OTRAS").text = str(movimientos[dia_x][3])
 
                 #calculo ADR
-                month_adr_sum += movimientos[xx][4]
-                month_adr_rooms += movimientos[xx][5]
-                month_revpar_staff_rooms += movimientos[xx][6]
+                month_adr_sum += movimientos[dia_x][4]
+                month_adr_rooms += movimientos[dia_x][5]
+                month_revpar_staff_rooms += movimientos[dia_x][6]
 
             precios = ET.SubElement(encuesta, "PRECIOS")
             ET.SubElement(precios,"REVPAR_MENSUAL").text = str(round(month_adr_sum/month_revpar_staff_rooms,2))
@@ -298,11 +325,16 @@ class Wizard(models.TransientModel):
             #file=base64.encodestring( xmlstr )
             return self.write({
                  'txt_filename': 'INE_'+str(self.ine_month)+'_'+str(self.ine_year) +'.'+ 'xml',
-                 'adr_screen' : 'ADR en el mes de la encuesta: '+str(round(month_adr_sum/month_adr_rooms,2))+'€',
-                 'rev_screen' : 'RevPar : '+str(round(month_adr_sum/month_revpar_staff_rooms,2))+'€',
+                 'adr_screen' : _('ADR in the month of the survey: ')+str(round(month_adr_sum/month_adr_rooms,2))+_('€ and '),
+                 'rev_screen' : ' RevPar : '+str(round(month_adr_sum/month_revpar_staff_rooms,2))+'€',
                  'txt_binary': base64.encodestring(xmlstr)
                  })
         else:
             return self.write({
-                 'rev_screen': 'No hay datos en este mes'
+                 'rev_screen': _('No data in this month')
                  })
+
+
+                 # Debug Stop -------------------
+                 #import wdb; wdb.set_trace()
+                 # Debug Stop -------------------
