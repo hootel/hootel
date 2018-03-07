@@ -1,19 +1,21 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* hotel_l10n_es
+# 	* hotel_l10n_es
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-07 19:10+0000\n"
-"PO-Revision-Date: 2018-02-07 19:10+0000\n"
-"Last-Translator: <>\n"
+"POT-Creation-Date: 2018-03-07 10:02+0000\n"
+"PO-Revision-Date: 2018-03-07 11:06+0100\n"
+"Last-Translator: Jose Luis Algara <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
+"Language: es\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
@@ -36,6 +38,12 @@ msgid "<strong>COPY TO THE USER</strong>"
 msgstr "<strong>COPIA PARA EL USUARIO</strong>"
 
 #. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inewizard.py:328
+#, python-format
+msgid "ADR in the month of the survey: "
+msgstr "ADR en el mes de la encuesta:  "
+
+#. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.view_ine_download
 msgid "ADR y RevPar"
 msgstr "ADR y RevPar"
@@ -43,12 +51,12 @@ msgstr "ADR y RevPar"
 #. module: hotel_l10n_es
 #: model:ir.actions.act_window,name:hotel_l10n_es.action_ine_download
 msgid "Action INE File Download"
-msgstr "Action INE File Download"
+msgstr "Acción descarga fichero para INE"
 
 #. module: hotel_l10n_es
 #: model:ir.actions.act_window,name:hotel_l10n_es.action_police_download
 msgid "Action Police File Download"
-msgstr "Action Police File Download"
+msgstr "Acción descarga fichero para Policía"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
@@ -58,7 +66,7 @@ msgstr "Dirección"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_adr_screen
 msgid "Adr screen"
-msgstr "Adr screen"
+msgstr "Pantalla ADR"
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
@@ -73,7 +81,7 @@ msgstr "Agosto"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_seats
 msgid "Beds available"
-msgstr "Beds available"
+msgstr "Camas disponibles"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
@@ -84,7 +92,7 @@ msgstr "Fecha de nacimiento"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_birthdate_date_cardex
 #: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
 msgid "Birthdate"
-msgstr "F. de nacimiento"
+msgstr "Fecha de nacimiento"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
@@ -99,23 +107,23 @@ msgstr "Carta o Doc. de Identidad"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_name
 msgid "Category"
-msgstr "Category"
+msgstr "Categoría"
 
 #. module: hotel_l10n_es
 #: model:ir.actions.act_window,name:hotel_l10n_es.action_category
 #: model:ir.ui.menu,name:hotel_l10n_es.menu_category
 msgid "Category Codes"
-msgstr "Category Codes"
+msgstr "Codigos de categoria"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_category_id
 msgid "Category id"
-msgstr "Category id"
+msgstr "Id de Categoria"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_tipo
 msgid "Category type"
-msgstr "Category type"
+msgstr "Tipo de Categoria"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
@@ -125,7 +133,7 @@ msgstr "Ciudad"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_code
 msgid "Code"
-msgstr "Code"
+msgstr "Código"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.checkin_wizard_form_2
@@ -138,7 +146,7 @@ msgstr "Código en el INE"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_code_ine
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_users_code_ine
 msgid "Code ine"
-msgstr "Code ine"
+msgstr "Código en el INE"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
@@ -153,7 +161,7 @@ msgstr "Compañías"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_download_num
 msgid "Correlative number"
-msgstr "Correlative number"
+msgstr "Número correlativo"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
@@ -176,7 +184,7 @@ msgstr "País o provincia de origen. Usado para estadísticas INE."
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_create_uid
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_create_uid
 msgid "Created by"
-msgstr "Created by"
+msgstr "Creado por"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_create_date
@@ -184,7 +192,7 @@ msgstr "Created by"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_create_date
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_create_date
 msgid "Created on"
-msgstr "Created on"
+msgstr "Creado en"
 
 #. module: hotel_l10n_es
 #: selection:res.partner,documenttype:0
@@ -200,7 +208,7 @@ msgstr "DNI / NIE / CARNET DE CONDUCIR longitud errónea, el formato correcto es
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_download_date
 msgid "Date"
-msgstr "Date"
+msgstr "Fecha"
 
 #. module: hotel_l10n_es
 #: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:45
@@ -220,7 +228,7 @@ msgstr "Diciembre"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_display_name
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_display_name
 msgid "Display Name"
-msgstr "Display Name"
+msgstr "Mostrar Nombre"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_poldocument_cardex
@@ -310,12 +318,12 @@ msgstr "Error en DNI/NIE/CARNET DE CONDUCIR"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_eventualstaff
 msgid "Eventual Staff"
-msgstr "Eventual Staff"
+msgstr "Personal eventual"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
 msgid "Exit date"
-msgstr "Fecha de salida"
+msgstr "Fecha Salida"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_polexpedition_cardex
@@ -400,12 +408,12 @@ msgstr "Código INE"
 #: model:ir.actions.act_window,name:hotel_l10n_es.action_code_ine
 #: model:ir.ui.menu,name:hotel_l10n_es.menu_code_ine
 msgid "INE Codes"
-msgstr "INE Codes"
+msgstr "Códigos INE"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.menu,name:hotel_l10n_es.menu_ine_download
 msgid "INE File Download"
-msgstr "INE File Download"
+msgstr "Fichero descarga INE"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.alda_view_company_form
@@ -433,7 +441,7 @@ msgstr "Junio"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard___last_update
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard___last_update
 msgid "Last Modified on"
-msgstr "Last Modified on"
+msgstr "Última modificación en"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_write_uid
@@ -441,7 +449,7 @@ msgstr "Last Modified on"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_write_uid
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_write_uid
 msgid "Last Updated by"
-msgstr "Last Updated by"
+msgstr "Última actualización por"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_category_write_date
@@ -449,7 +457,7 @@ msgstr "Last Updated by"
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_write_date
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_write_date
 msgid "Last Updated on"
-msgstr "Last Updated on"
+msgstr "Última actualización en"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_lastname_cardex
@@ -475,7 +483,7 @@ msgstr "Móvil"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_ine_month
 msgid "Month"
-msgstr "Month"
+msgstr "Mes"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
@@ -485,12 +493,18 @@ msgstr "Nombre"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_property_name
 msgid "Name of the Hotel/Property."
-msgstr "Name of the Hotel/Property."
+msgstr "Nombre del Hotel/Propiedad."
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inewizard.py:334
+#, python-format
+msgid "No data in this month"
+msgstr "No hay datos en este mes"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_cardex_warning
 msgid "Notice under the signature on the traveler's ticket."
-msgstr "Notice under the signature on the traveler's ticket."
+msgstr "Aviso debajo de la firma, en el parte del viajero."
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
@@ -500,7 +514,7 @@ msgstr "Noviembre"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_police_wizard_download_num
 msgid "Number provided by the police"
-msgstr "Number provided by the police"
+msgstr "Número proporcionado por la policía"
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
@@ -510,7 +524,7 @@ msgstr "Octubre"
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
 msgid "Origin"
-msgstr "Origen"
+msgstr "Procedencia"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
@@ -540,7 +554,7 @@ msgstr "Pasaporte"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_permanentstaff
 msgid "Permanent Staff"
-msgstr "Permanent Staff"
+msgstr "Personal"
 
 #. module: hotel_l10n_es
 #: selection:res.partner,documenttype:0
@@ -570,22 +584,22 @@ msgstr "Teléfonos"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_code_ine_name
 msgid "Place"
-msgstr "Place"
+msgstr "Lugar"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.menu,name:hotel_l10n_es.menu_police_download
 msgid "Police File Download"
-msgstr "Police File Download"
+msgstr "Descargar fichero para Policía"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_police
 msgid "Police number"
-msgstr "Police number"
+msgstr "Número de la Policia"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_property_name
 msgid "Property name"
-msgstr "Property name"
+msgstr "Nombre de la propiedad"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_tourism
@@ -600,7 +614,7 @@ msgstr "Rev screen"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_rooms
 msgid "Rooms Available"
-msgstr "Rooms Available"
+msgstr "Habitaciones disponibles"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.checkin_wizard_form_2
@@ -672,7 +686,7 @@ msgstr "Importe total (Ficha de Reserva):"
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_tourism
 msgid "Tourism number"
-msgstr "Tourism number"
+msgstr "Numero de Turismo"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
@@ -707,7 +721,7 @@ msgstr "Tipo"
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_rooms
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_seats
 msgid "Used for INE statistics."
-msgstr "Used for INE statistics."
+msgstr "Usado para estadísticas INE."
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_police
@@ -717,7 +731,7 @@ msgstr "Se usa para generar el nombre del archivo que se le dará a la policía.
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_cardex_warning
 msgid "Warning in Cardex"
-msgstr "Warning in Cardex"
+msgstr "Advertencia en Checkin"
 
 #. module: hotel_l10n_es
 #: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:71
@@ -728,7 +742,7 @@ msgstr "DNI/NIE/CARNET DE CONDUCIR incorrecto, compruébelo."
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_ine_wizard_ine_year
 msgid "Year"
-msgstr "Year"
+msgstr "Año"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
@@ -738,7 +752,7 @@ msgstr "C.P."
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_category
 msgid "category"
-msgstr "category"
+msgstr "categoria"
 
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_checkin_wizard
@@ -760,3 +774,8 @@ msgstr "ine.wizard"
 msgid "police.wizard"
 msgstr "police.wizard"
 
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inewizard.py:328
+#, python-format
+msgid "€ and "
+msgstr "€ y "
