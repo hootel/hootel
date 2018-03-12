@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xml>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
 
         <!-- Email Template For Hotel Reservation -->
         <record id="mail_template_hotel_reservation" model="mail.template">
@@ -43,8 +43,8 @@
                }
                </style>
 
-               <div style="bgcolor:#f6f6f6; margin: 0; padding: 0; min-width: 100%!important;">
-               <table width="100%" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0">
+               <div style="background-color:#f6f6f6; margin: 0; padding: 0; min-width: 100%!important;font-family: sans-serif; font-size: 16px; line-height: 22px; color: #666666; font-weight: 200; padding: 20px 0 0 0;">
+               <table width="100%" background-color="#ffffff" border="0" cellpadding="0" cellspacing="0">
                  <tr>
                    <td>
 
@@ -56,7 +56,7 @@
 
 
                      <!--Content Wrapper-->
-                     <table class="content" bgcolor="#ffffff" align="center" cellpadding="0" cellspacing="0" border="0" style="width: 650px !important;">
+                     <table class="content" background-color="#ffffff" align="center" cellpadding="0" cellspacing="0" border="0" style="width: 650px !important; border: 1px solid #eeeeee;">
 
                        <!--Header-->
                        <tr>
@@ -64,7 +64,7 @@
                            <table border="0x" cellpadding="0" cellspacing="0" width="100%" class="columns">
                              <tr valign="top">									</tr>
                            </table>
-                           <img src="http://www.aldahotels.es/firma/email/llegada/logobl.png" width="251" height="57" alt=""/>
+                           <img src="http://www.aldahotels.es/firma/email/llegada/logobl.png" width="251" height="57" alt="Alda Hotels"/>
                            <table border="0x" cellpadding="0" cellspacing="0" width="100%" class="columns">
                              <tr valign="top">
                                <td width="50%" valign="middle" class="columncontainer" >
@@ -93,17 +93,11 @@
                          <td class="borderbottom" style="padding: 60px 30px 60px 30px;">
                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
                              <tr>
-                               <td align="center" class="h2"> Confirmación de reserva en ${object.company_id.property_name}</td>
+                               <td align="center" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #444444; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> Confirmación de reserva en ${object.company_id.property_name}</td>
                              </tr>
                              <tr>
                                <td align="center" style="padding: 20px 0 0 0;">
-                                 <table width="50px" style="width: 50px;" height="5px" border="0" cellspacing="0" cellpadding="0" >
-                                   <tr>
-                                     <td bgcolor="#C50967" height="5px" style="font-size: 1px; line-height: 5px;">&nbsp;
-
-                                     </td>
-                                   </tr>
-                                 </table>
+                                 <p style="font-size: 2em; line_height=0px; color: #C50967;">__</p>
                                </td>
                              </tr>
                              <tr>
@@ -115,9 +109,10 @@
                                    <table border="0" cellspacing="0" cellpadding="0">
                                      <tr>
                                        <td align="center">
-                                         <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
-                                           <a href="tel:${object.company_id.phone}" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">Contactar</a>
-                                         </div>
+                                           <a href="tel:${object.company_id.phone}" target="_blank" style="text-decoration: none; color: #FFFFFF; font-size: 20px; padding: 10px 20px 10px 20px;">
+                                               <div style="padding: 0.5em; background-color: #C50967; border-color: #C50967; border-width: 2px;border-style:solid; border-bottom-style: solid;border-left-style: solid;border-right-style: solid;border-top-style: solid;-webkit-border-radius: 10; -moz-border-radius: 10; border-radius: 10px;">Contactar
+                                               </div>
+                                           </a>
                                        </td>
                                      </tr>
                                    </table>
@@ -134,14 +129,14 @@
                                  <tr>
                                    <td valign="top" style="padding: 20px 30px 20px 0px;"><table border="0" cellspacing="0" cellpadding="0">
                                      <tr>
-                                       <td class="h2" style="padding: 10px 0 0 0;"> ¿Llegarás más tarde de las 17:00 horas?</td>
+                                       <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #444444; padding: 10px 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> ¿Llegarás más tarde de las 17:00 horas?</td>
                                      </tr>
                                      <tr>
-                                       <td style="padding: 20px 0 10px 0;"><table width="50px" style="width: 50px;" height="5px" border="0" cellspacing="0" cellpadding="0" >
-                                         <tr>
-                                           <td bgcolor="#C50967" height="5px" style="font-size: 1px; line-height: 5px;">&nbsp;</td>
-                                         </tr>
-                                       </table></td>
+                                       <td style="padding: 20px 0 10px 0;">
+
+                                       <p style="font-size: 2em; line_height=0px; color: #C50967;">__</p>
+
+                                   </td>
                                      </tr>
                                      <tr>
                                        <td align="justify" class="paragraph" style="padding: 10px 0 0 0;">En ese caso te rogamos que <strong>te pongas en contacto con nosotros</strong> para facilitarte las instrucciones necesarias.<br /></td>
@@ -149,13 +144,23 @@
                                      <tr>
                                        <td align="left" valign="middle" style="padding: 30px 0 20px 0; "><table border="0" cellspacing="0" cellpadding="0">
                                          <tr>
-                                           <td align="center"><!--[if gte mso 12>
+                                           <td align="center">
+                                               <!--[if gte mso 12>
                                              <div style="border: 2px solid #5e96ea;">
                                              <![endif]-->
-                                             <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;"> <a href="tel:+34 981 558 111" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">Contactar</a> </div>
+
+                                             <a href="tel:${object.company_id.phone}" target="_blank" style="text-decoration: none; color: #FFFFFF; font-size: 20px; padding: 10px 20px 10px 20px;">
+                                                 <div style="padding: 0.5em; background-color: #C50967; border-color: #C50967; border-width: 2px;border-style:solid; border-bottom-style: solid;border-left-style: solid;border-right-style: solid;border-top-style: solid;-webkit-border-radius: 10; -moz-border-radius: 10; border-radius: 10px;">Contactar
+                                                 </div>
+                                             </a>
+
+
                                              <!--[if gte mso 12>
                                            </div>
-                                           <![endif]--></td>
+                                           <![endif]-->
+
+
+                                       </td>
                                          </tr>
                                        </table></td>
                                      </tr>
@@ -168,25 +173,25 @@
                                      <tr>
                                        <td style="padding: 10px 30px 10px 30px;"><table border="0" cellspacing="0" cellpadding="0">
                                          <tr>
-                                           <td class="h4" style="padding: 10px 0 0 0;"> Servicios</td>
+                                           <td class="h2" style=" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #666666; padding: 10px 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> Servicios</td>
                                          </tr>
                                          <tr>
-                                           <td style="padding: 20px 0 10px 0;"><table border="0" cellspacing="0" cellpadding="0" >
+                                           <td style="padding: 20px 0 10px 0; background-color:#F9F9F9"><table border="0" cellspacing="0" cellpadding="0" >
                                              <tr>
                                                <td height="50" valign="middle" style="padding: 0 10px 0 0;"><img src="http://www.aldahotels.es/firma/email/llegada/infoturistica.png"</td>
-                                               <td class="listitem" style="padding: 10px 10px 0 0;">Información turística</td>
+                                               <td class="listitem" style="padding: 10px 10px 0 0;color: #666666; font-weight: 200">Información turística</td>
                                              </tr>
                                              <tr>
                                                <td height="50" valign="middle" style="padding: 0 10px 0 0;"><img src="http://www.aldahotels.es/firma/email/llegada/wi-fi.png"</td>
-                                               <td class="listitem" style="padding: 10px 10px 0 0;">Wi-Fi gratuito</td>
+                                               <td class="listitem" style="padding: 10px 10px 0 0;color: #666666; font-weight: 200">Wi-Fi gratuito</td>
                                              </tr>
                                              <tr>
                                                <td height="50" valign="middle" style="padding: 0 10px 0 0;"><img src="http://www.aldahotels.es/firma/email/llegada/restauracion.png"</td>
-                                               <td class="listitem" style="padding: 10px 10px 0 0;">Restauración</td>
+                                               <td class="listitem" style="padding: 10px 10px 0 0;color: #666666; font-weight: 200">Restauración</td>
                                              </tr>
                                              <tr>
                                                <td height="50" valign="middle" style="padding: 0 10px 0 0;"><img src="http://www.aldahotels.es/firma/email/llegada/parking.png"</td>
-                                               <td class="listitem" style="padding: 10px 10px 0 0;">Parking concertado</td>
+                                               <td class="listitem" style="padding: 10px 10px 0 0;color: #666666; font-weight: 200">Parking concertado</td>
                                              </tr>
 
                                            </table></td>
@@ -220,7 +225,7 @@
                                        <td valign="top" style="padding: 20px 30px 20px 30px;">
                                          <table border="0" cellspacing="0" cellpadding="0">
                                            <tr>
-                                             <td class="h2" style="color: #C50967">Datos de tu reserva</td>
+                                             <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Datos de tu reserva</td>
                                            </tr>
                                            <tr>
                                              <td align="justify" class="subheading" style="color: #555555"><strong>${object.partner_id.name}</strong></td>
@@ -264,7 +269,7 @@
                                      <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                        <tr> </tr>
                                        <tr>
-                                         <td class="h2" style="color: #C50967"> Mapa</td>
+                                         <td class="h2"  style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> Mapa</td>
                                        </tr>
                                        <tr>
                                          <td align="center" valign="middle" style="padding: 20px 0px 0px 0px;">
@@ -275,7 +280,10 @@
                                                <img src="https://www.aldahotels.es/firma/email/llegada/mapa_google.png" alt="Ver mapa" border="0">
                                                </a>
                                                <p><br/>
-                                               <a href="https://www.google.com/maps/dir/?api=1&destination=${object.company_id.property_name}%20${object.company_id.street}%20${object.company_id.city}">Pulse en este enlace, para conocer como llegar desde su ubicación actual, o en el mapa para localizar el hotel.</a>
+                                               <a href="https://www.google.com/maps/dir/?api=1&destination=${object.company_id.property_name}%20${object.company_id.street}%20${object.company_id.city}" target="_blank" style="text-decoration: none; color: #FFFFFF; font-size: 20px; padding: 10px 20px 10px 20px;">
+                                                   <div style="padding: 0.5em; background-color: #C50967; border-color: #C50967; border-width: 2px;border-style:solid; border-bottom-style: solid;border-left-style: solid;border-right-style: solid;border-top-style: solid;-webkit-border-radius: 10; -moz-border-radius: 10; border-radius: 10px;">¿Como llegar desde su ubicación actual?</div>
+                                               </a>
+
                                                </p>
                                              </tr>
                                              <tr>
@@ -324,7 +332,7 @@
                                        <td valign="top" style="padding: 20px 30px 20px 30px;">
                                          <table border="0" cellspacing="0" cellpadding="0">
                                            <tr>
-                                             <td class="h2" style="color: #C50967">IMPORTES</td>
+                                             <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">IMPORTES</td>
                                            </tr>
                                            <tr>
                                              <td align="justify" class="subheading" style="color: #555555"><strong>Noches</strong>: ${len(object.room_lines[0].reservation_lines)}</td>
@@ -367,7 +375,7 @@
                                          <td valign="top" style="padding: 20px 30px 20px 30px;">
                                            <table border="0" cellspacing="0" cellpadding="0">
                                              <tr>
-                                               <td class="h2" style="color: #C50967">Información de la habitación</td>
+                                               <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Información de la habitación</td>
                                              </tr>
 
 
@@ -436,7 +444,7 @@
                                              <td valign="top" style="padding: 20px 30px 20px 30px;">
                                                <table border="0" cellspacing="0" cellpadding="0">
                                                  <tr>
-                                                   <td class="h2" style="color: #C50967">Peticiones especiales</td>
+                                                   <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Peticiones especiales</td>
                                                  </tr>
                                                  <tr>
                                                    <td align="justify" class="subheading" style="color: #555555"><strong>Estamos a tu servicio</strong></td>
@@ -464,12 +472,12 @@
                                        <tr>
                                          <td valign="top" style="padding: 20px 30px 20px 0px;"><table border="0" cellspacing="0" cellpadding="0">
                                            <tr>
-                                             <td class="h2" style="padding: 10px 0 0 0;"> Información adicional</td>
+                                             <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #444444; padding: 10px 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> Información adicional</td>
                                            </tr>
                                            <tr>
                                              <td style="padding: 20px 0 10px 0;"><table width="50px" style="width: 50px;" height="5px" border="0" cellspacing="0" cellpadding="0" >
                                                <tr>
-                                                 <td bgcolor="#C50967" height="5px" style="font-size: 1px; line-height: 5px;">&nbsp;</td>
+                                                   <p style="font-size: 2em; line_height=0px; color: #C50967;">__</p>
                                                </tr>
                                              </table></td>
                                            </tr>
@@ -504,7 +512,7 @@
                                              <td valign="top" style="padding: 20px 30px 20px 30px;">
                                                <table border="0" cellspacing="0" cellpadding="0">
                                                  <tr>
-                                                   <td class="h2" style="color: #C50967">Cómo acceder</td>
+                                                   <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Cómo acceder</td>
                                                  </tr>
                                                  <tr>
                                                    <td align="justify" class="subheading" style="color: #555555"><strong> En coche</strong></td>
@@ -546,7 +554,7 @@
                                              <td valign="top" style="padding: 20px 30px 20px 30px;">
                                                <table border="0" cellspacing="0" cellpadding="0">
                                                  <tr>
-                                                   <td class="h2" style="color: #C50967">Cómo acceder</td>
+                                                   <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Cómo acceder</td>
                                                  </tr>
                                                  <tr>
                                                    <td class="subheading" style="color: #555555"><strong> En autobús o tren</strong></td>
@@ -572,22 +580,22 @@
                                  <td>
                                    <table border="0" cellpadding="0" cellspacing="0" width="650" class="columns">
                                      <tr valign="top">
-                                       <td width="50%" class="columncontainer">
+                                       <td width="50%" class="columncontainer"  style = "background-color:#f9f9f9">
                                          <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                            <tr>
-                                             <td valign="top" width="50%" bgcolor="#f9f9f9">
+                                             <td valign="top" width="50%" background-color="#f9f9f9">
                                                <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                                  <tr>
                                                    <td valign="top" style="padding: 30px 30px 20px 30px; height: 230px;" height="230px">
                                                      <table border="0" cellspacing="0" cellpadding="0">
                                                        <tr>
-                                                         <td align="justify" class="h2" style="padding: 15px 0 0 0; color: #C50967;"> Santiago de Compostela</td>
+                                                         <td align="justify" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 15px 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">${object.company_id.city}</td>
                                                        </tr>
                                                        <tr>
-                                                         <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">Ciudad declarada Patrimonio de la Humanidad por la UNESCO y meta de una milenaria ruta de peregrinación: el Camino de Santiago.</td>
+                                                         <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ac lobortis sem. Donec in tincidunt diam, id ultrices risus. Fusce ultrices posuere lectus vitae commodo.</td>
                                                        </tr>
                                                        <tr>
-                                                         <td style="padding: 20px 0 20px 0; ">
+                                                         <td style="padding: 20px 0 20px 0;  background-color:#F9F9F9">
                                                            <table border="0" cellspacing="0" cellpadding="0">
                                                              <tr>
                                                                <td align="center">
@@ -633,19 +641,19 @@
                                          </tr>
                                        </table>
                                      </td>
-                                     <td width="50%" class="columncontainer">
+                                     <td width="50%" class="columncontainer" style = "background-color:#C50967">
                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                          <tr>
-                                           <td valign="top" width="50%" bgcolor="#C50967">
+                                           <td valign="top" width="50%" >
                                              <table border="0" cellpadding="0" cellspacing="0" width="100%" >
                                                <tr>
-                                                 <td valign="top" style="padding: 30px 30px 20px 30px; height: 230px;" height="230px">
+                                                 <td valign="top" style="padding: 30px 30px 20px 30px; height: 230px; background-color:#C50967 ">
                                                    <table border="0" cellspacing="0" cellpadding="0">
                                                      <tr>
-                                                       <td align="justify" class="h2" style="padding: 15px 0 0 0;"> Alda Algalia</td>
+                                                       <td align="justify" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #FFFFFF; padding: 15px 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">${object.company_id.property_name}</td>
                                                      </tr>
                                                      <tr>
-                                                       <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;"> El Hotel Alda Algalia cuenta con el privilegio de ocupar una antigua casona de 1796 totalmente restaurada y cargada de encanto. Su inmejorable ubicación combinada con una decoración cuidada, otorgan a este hotel una identidad única compostelana. </td>
+                                                       <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;color: #FFFFFF;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ac lobortis sem. Donec in tincidunt diam, id ultrices risus. Fusce ultrices posuere lectus vitae commodo. Nulla facilisi. Donec condimentum gravida ex et dapibus.</td>
                                                      </tr>
                                                      <tr> </tr>
                                                    </table>
@@ -668,7 +676,7 @@
                                      <td width="50%" class="columncontainer">
                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                          <tr>
-                                           <td class="h2" style="color: #C50967">NUESTRAS REDES SOCIALES</td>
+                                           <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">NUESTRAS REDES SOCIALES</td>
                                            <td style="padding: 0 0 50px 0;">&nbsp;</td>
                                          </tr>
                                          <tr> </tr>
@@ -695,13 +703,13 @@
                                                  </td>
                                                </tr>
                                                <tr>
-                                                 <td align="center" class="h2" style="color: #3B5998"> Facebook</td>
+                                                 <td align="center" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #3B5998; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> Facebook</td>
                                                </tr>
                                                <tr>
                                                  <td align="center" style="padding: 20px 0 10px 0;">
                                                    <table width="50px" style="width: 50px;" height="5px" border="0" cellspacing="0" cellpadding="0" >
                                                      <tr>
-                                                       <td bgcolor="#3B5998" height="5px" style="font-size: 1px; line-height: 5px;">&nbsp;
+                                                       <td background-color="#3B5998" height="5px" style="font-size: 1px; line-height: 5px;">&nbsp;
 
                                                        </td>
                                                      </tr>
@@ -719,9 +727,10 @@
                                                          <!--[if gte mso 12>
                                                          <div style="border: 2px solid #5e96ea;">
                                                          <![endif]-->
-                                                         <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
-                                                           <a href="https://www.facebook.com/aldahotels" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">Dale a Me gusta</a>
-                                                         </div>
+
+                                                         <a href="https://www.facebook.com/aldahotels" target="_blank" style="text-decoration: none; color: #FFFFFF; font-size: 20px; padding: 10px 20px 10px 20px;">
+                                                             <div style="padding: 0.5em; background-color: #C50967; border-color: #C50967; border-width: 2px;border-style:solid; border-bottom-style: solid;border-left-style: solid;border-right-style: solid;border-top-style: solid;-webkit-border-radius: 10; -moz-border-radius: 10; border-radius: 10px;">Dale a Me gusta</div>
+                                                         </a>
                                                          <!--[if gte mso 12>
                                                        </div>
                                                        <![endif]-->
@@ -745,13 +754,13 @@
                                                </td>
                                              </tr>
                                              <tr>
-                                               <td align="center" class="h2" style="color: #E56459"> Instagram</td>
+                                               <td align="center" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #E56459; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> Instagram</td>
                                              </tr>
                                              <tr>
                                                <td align="center" style="padding: 20px 0 10px 0;">
                                                  <table width="50px" style="width: 50px;" height="5px" border="0" cellspacing="0" cellpadding="0" >
                                                    <tr>
-                                                     <td bgcolor="#E56459" height="5px" style="font-size: 1px; line-height: 5px;">&nbsp;
+                                                     <td background-color="#E56459" height="5px" style="font-size: 1px; line-height: 5px;">&nbsp;
 
                                                      </td>
                                                    </tr>
@@ -769,9 +778,12 @@
                                                        <!--[if gte mso 12>
                                                        <div style="border: 2px solid #5e96ea;">
                                                        <![endif]-->
-                                                       <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
-                                                         <a href="#" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">#Entra</a>
-                                                       </div>
+
+                                                       <a href="https://www.instagram.com/aldahotels/" target="_blank" style="text-decoration: none; color: #FFFFFF; font-size: 20px; padding: 10px 20px 10px 20px;">
+                                                           <div style="padding: 0.5em; background-color: #C50967; border-color: #C50967; border-width: 2px;border-style:solid; border-bottom-style: solid;border-left-style: solid;border-right-style: solid;border-top-style: solid;-webkit-border-radius: 10; -moz-border-radius: 10; border-radius: 10px;">#Entra
+                                                           </div>
+                                                       </a>
+
                                                        <!--[if gte mso 12>
                                                      </div>
                                                      <![endif]-->
@@ -795,13 +807,13 @@
                                              </td>
                                            </tr>
                                            <tr>
-                                             <td align="center" class="h2" style="color: #1DA1F2"> Twitter</td>
+                                             <td align="center" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #1DA1F2; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> Twitter</td>
                                            </tr>
                                            <tr>
                                              <td align="center" style="padding: 20px 0 10px 0;">
                                                <table width="50px" style="width: 50px;" height="5px" border="0" cellspacing="0" cellpadding="0" >
                                                  <tr>
-                                                   <td bgcolor="#1DA1F2" height="5px" style="font-size: 1px; line-height: 5px;">&nbsp;
+                                                   <td background-color="#1DA1F2" height="5px" style="font-size: 1px; line-height: 5px;">&nbsp;
 
                                                    </td>
                                                  </tr>
@@ -819,9 +831,10 @@
                                                      <!--[if gte mso 12>
                                                      <div style="border: 2px solid #5e96ea;">
                                                      <![endif]-->
-                                                     <div style="border: 2px solid #C50967; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
-                                                       <a href="https://www.twitter.com/aldahotels" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #C50967; border-color: #C50967; border: 2px solid #C50967; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">Síguenos</a>
-                                                     </div>
+                                                     <a href="https://www.twitter.com/aldahotels" target="_blank" style="text-decoration: none; color: #FFFFFF; font-size: 20px; padding: 10px 20px 10px 20px;">
+                                                         <div style="padding: 0.5em; background-color: #C50967; border-color: #C50967; border-width: 2px;border-style:solid; border-bottom-style: solid;border-left-style: solid;border-right-style: solid;border-top-style: solid;-webkit-border-radius: 10; -moz-border-radius: 10; border-radius: 10px;">Síguenos
+                                                         </div>
+                                                     </a>
                                                      <!--[if gte mso 12>
                                                    </div>
                                                    <![endif]-->
@@ -845,10 +858,10 @@
 
                        <!--1 Column-->
                        <tr>
-                         <td style="padding: 30px 30px 30px 30px;" bgcolor="#C50967">
+                         <td style="padding: 30px 30px 20px 30px;background-color:#C50967">
                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
                              <tr>
-                               <td align="center" class="h2" style="color: #fff;"> ¡Muchas gracias por alojarte con nosotros!</td>
+                               <td align="center" class="h2"  style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #FFFFFF; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> ¡Muchas gracias por alojarte con nosotros!</td>
                              </tr>
                              <tr> </tr>
 
