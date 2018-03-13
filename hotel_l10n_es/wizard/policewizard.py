@@ -74,6 +74,9 @@ class Wizard(models.TransientModel):
     """
                 else:
                     _logger.info('---- Problema generando el fichero. Checkin Saltado ----')
+                    return self.write({
+                    'txt_message': _('Problem generating the file. Checkin without data, or incorrect data.')
+                    })      
 
 
             return self.write({
