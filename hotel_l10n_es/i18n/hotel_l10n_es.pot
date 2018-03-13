@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-12-31 11:33+0000\n"
-"PO-Revision-Date: 2017-12-31 11:33+0000\n"
+"POT-Creation-Date: 2018-03-13 18:54+0000\n"
+"PO-Revision-Date: 2018-03-13 18:54+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,13 +16,29 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: hotel_l10n_es
-#: selection:ine.wizard,ine_year:0
-msgid "2016"
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid ", at"
 msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_year:0
 msgid "2017"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: selection:ine.wizard,ine_year:0
+msgid "2018"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "<strong>COPY TO THE USER</strong>"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inewizard.py:328
+#, python-format
+msgid "ADR in the month of the survey: "
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -72,7 +88,13 @@ msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_birthdate_date_cardex
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
 msgid "Birthdate"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "CIF:"
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -145,9 +167,12 @@ msgid "Country"
 msgstr ""
 
 #. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/models/inherit_res_partner.py:47
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:105
 #: model:ir.model.fields,help:hotel_l10n_es.field_checkin_wizard_code_ine_cardex
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_partner_code_ine
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_users_code_ine
+#, python-format
 msgid "Country or province of origin. Used for INE statistics."
 msgstr ""
 
@@ -173,8 +198,21 @@ msgid "DNI"
 msgstr ""
 
 #. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:73
+#, python-format
+msgid "DNI/NIE/DRIVE LICENSE erroneous length, the correct format is: (12345678A or X1234567A)"
+msgstr ""
+
+#. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_download_date
 msgid "Date"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:45
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:52
+#, python-format
+msgid "Date of document shipment, prior to birth date"
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -196,7 +234,12 @@ msgid "Doc. number"
 msgstr ""
 
 #. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/models/inherit_res_partner.py:40
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:93
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_documenttype_cardex
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_documenttype
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_users_documenttype
+#, python-format
 msgid "Doc. type"
 msgstr ""
 
@@ -215,6 +258,7 @@ msgstr ""
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_poldocument
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_users_poldocument
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
 msgid "Document number"
 msgstr ""
 
@@ -224,9 +268,14 @@ msgid "Document number (DNI: 123456789A)"
 msgstr ""
 
 #. module: hotel_l10n_es
-#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_documenttype
-#: model:ir.model.fields,field_description:hotel_l10n_es.field_res_users_documenttype
-msgid "Document type"
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "Document number:"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:42
+#, python-format
+msgid "Does the client have less than 16 years?. Data collection is not performed for those born before %s."
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -240,18 +289,55 @@ msgid "Ej.: name@domain.com"
 msgstr ""
 
 #. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "Entry date"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:42
+#, python-format
+msgid "Error in Birthdate"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:45
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:52
+#, python-format
+msgid "Error in Birthdate or Expedition date"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:71
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:73
+#, python-format
+msgid "Error in DNI/NIE/DRIVE LICENSE"
+msgstr ""
+
+#. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_eventualstaff
 msgid "Eventual Staff"
 msgstr ""
 
 #. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "Exit date"
+msgstr ""
+
+#. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_polexpedition_cardex
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
 msgid "Expedition date"
 msgstr ""
 
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "February"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/policewizard.py:88
+#, python-format
+msgid "File not generated by configuration error."
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -263,6 +349,7 @@ msgstr ""
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_gender_cardex
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
 msgid "Gender"
 msgstr ""
 
@@ -287,13 +374,19 @@ msgid "Generate file"
 msgstr ""
 
 #. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/policewizard.py:84
+#, python-format
+msgid "Generated file. Download it and give it to the police."
+msgstr ""
+
+#. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.alda_view_company_form
 msgid "Hotel Settings"
 msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_category_id
-msgid "Hotel category in the Ministry of Tourism. Used for INE statistics."
+msgid "Hotel category in the Ministry of                                             Tourism. Used for INE statistics."
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -391,8 +484,19 @@ msgid "Month"
 msgstr ""
 
 #. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "Name"
+msgstr ""
+
+#. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_property_name
 msgid "Name of the Hotel/Property."
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inewizard.py:334
+#, python-format
+msgid "No data in this month"
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -413,6 +517,16 @@ msgstr ""
 #. module: hotel_l10n_es
 #: selection:ine.wizard,ine_month:0
 msgid "October"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "Origin"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "PART OF TRAVELERS ENTRY"
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -481,13 +595,19 @@ msgid "Police number"
 msgstr ""
 
 #. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/policewizard.py:78
+#, python-format
+msgid "Problem generating the file. Checkin without data, or incorrect data."
+msgstr ""
+
+#. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_property_name
 msgid "Property name"
 msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_tourism
-msgid "Registration number in the Ministry of Tourism. Used for INE statistics."
+msgid "Registration number in the Ministry of                                             Tourism. Used for INE statistics."
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -503,6 +623,16 @@ msgstr ""
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.checkin_wizard_form_2
 msgid "Save Checkin and Print"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/models/inherit_res_partner.py:38
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:90
+#: model:ir.model.fields,help:hotel_l10n_es.field_checkin_wizard_documenttype_cardex
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_partner_documenttype
+#: model:ir.model.fields,help:hotel_l10n_es.field_res_users_documenttype
+#, python-format
+msgid "Select a valid document type"
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -526,6 +656,16 @@ msgid "Street..."
 msgstr ""
 
 #. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "Surnames"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "TRAVELER'S DOCUMENT"
+msgstr ""
+
+#. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_checkin_wizard_category_id_cardex
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "Tags"
@@ -538,8 +678,23 @@ msgid "Tags..."
 msgstr ""
 
 #. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "The collection and treatment will be done in accordance with the Organic Law 15/1999, of December 13. of protection of personal data and under the provisions of art. 12.1 of the Organic Law 1/1992, of February 21, on the protection of citizen security."
+msgstr ""
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "Total amount (Reservation Card):"
+msgstr ""
+
+#. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_tourism
 msgid "Tourism number"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "Traveler's signature"
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -555,6 +710,16 @@ msgid "Txt filename"
 msgstr ""
 
 #. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_txt_message
+msgid "Txt message"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_document
+msgid "Type"
+msgstr ""
+
+#. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_eventualstaff
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_permanentstaff
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_rooms
@@ -564,12 +729,18 @@ msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,help:hotel_l10n_es.field_res_company_police
-msgid "Used to generate the name of the file that will be given to the police. 10 Caracters"
+msgid "Used to generate the name of the file that                                     will be given to the police. 10 Caracters"
 msgstr ""
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_company_cardex_warning
 msgid "Warning in Cardex"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inherit_checkinwizard.py:71
+#, python-format
+msgid "Wrong DNI/NIE/DRIVE LICENSE, check it."
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -580,13 +751,6 @@ msgstr ""
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.partners_form_cardex
 msgid "ZIP"
-msgstr ""
-
-#. module: hotel_l10n_es
-#: model:ir.model.fields,help:hotel_l10n_es.field_checkin_wizard_documenttype_cardex
-#: model:ir.model.fields,help:hotel_l10n_es.field_res_partner_documenttype
-#: model:ir.model.fields,help:hotel_l10n_es.field_res_users_documenttype
-msgid "blabla"
 msgstr ""
 
 #. module: hotel_l10n_es
@@ -612,5 +776,11 @@ msgstr ""
 #. module: hotel_l10n_es
 #: model:ir.model,name:hotel_l10n_es.model_police_wizard
 msgid "police.wizard"
+msgstr ""
+
+#. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/wizard/inewizard.py:328
+#, python-format
+msgid "€ and "
 msgstr ""
 
