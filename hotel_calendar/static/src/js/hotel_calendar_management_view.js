@@ -136,10 +136,13 @@ var HotelCalendarManagementView = View.extend({
         var restrictions = this._hcalendar.getRestrictions(true);
         var availability = this._hcalendar.getAvailability(true);
 
+        debugger;
+
         var params = this.generate_params();
         var oparams = [false, params['prices'], params['restrictions'], pricelist, restrictions, availability];
         this._model.call('save_changes', oparams).then(function(results){
             btn_save.removeClass('need-save');
+            $('.hcal-management-input-changed').removeClass('hcal-management-input-changed');
         });
     },
 
@@ -232,7 +235,7 @@ var HotelCalendarManagementView = View.extend({
                 var $list = self.$el.find('#mpms-search #restriction_list');
                 $list.html('');
                 resultsRestrictions.forEach(function(item, index){
-                    $list.append(`<option value="${item.id}">${item.name}</option>`);
+                    $list.append(`<option value="${item.id}" ${item.id==self._restriction_id?'selected':''}>${item.name}</option>`);
                 });
                 $list.select2();
                 $list.on('change', function(ev){

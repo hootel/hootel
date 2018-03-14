@@ -426,7 +426,7 @@ HotelCalendarManagement.prototype = {
         var dd = HotelCalendarManagement.toMoment(price.date, this.options.dateFormatShort);
         var inputId = this._sanitizeId(`PRICE_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`);
         var input = this.etable.querySelector(`#${inputId}`);
-        if (input) {
+        if (input && !input.classList.contains('hcal-management-input-changed')) {
           input.dataset.orgValue = price.price;
           input.value = price.price;
           input.classList.remove('hcal-management-input-changed');
@@ -489,7 +489,7 @@ HotelCalendarManagement.prototype = {
         ];
         for (var i=0; i<inputIds.length; i+=2) {
           var inputItem = this.etable.querySelector(`#${inputIds[i]}`);
-          if (inputItem) {
+          if (inputItem && !inputItem.classList.contains('hcal-management-input-changed')) {
             inputItem.dataset.orgValue = inputItem.value = inputIds[i+1];
             inputItem.classList.remove('hcal-management-input-changed');
           }
@@ -497,7 +497,7 @@ HotelCalendarManagement.prototype = {
 
         var inputClousureId = this._sanitizeId(`CLOUSURE_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`);
         var inputClousure = this.etable.querySelector(`#${inputClousureId}`);
-        if (inputClousure) {
+        if (inputClousure && !inputClousure.classList.contains('hcal-management-input-changed')) {
           inputClousure.dataset.orgValue = inputClousure.value = (restriction.closed && 'closed') ||
                                                           (restriction.closed_arrival && 'closed_arrival') ||
                                                           (restriction.closed_departure && 'closed_departure') || 'open';
@@ -597,7 +597,7 @@ HotelCalendarManagement.prototype = {
         for (var i=0; i<inputIds.length; i+=2) {
           var inputId = this._sanitizeId(inputIds[i]);
           var input = this.etable.querySelector(`#${inputId}`);
-          if (input) {
+          if (input && !input.classList.contains('hcal-management-input-changed')) {
             input.dataset.orgValue = inputIds[i+1];
             if (input.tagName.toLowerCase() === 'button') {
               input.dataset.state = inputIds[i+1];
