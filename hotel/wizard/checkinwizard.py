@@ -96,7 +96,8 @@ class Wizard(models.TransientModel):
     pending_cardex = fields.Integer('Cardex pending',
                                     default=default_pending_cardex)
     partner_id = fields.Many2one('res.partner',
-                                 default=default_partner_id)
+                                 default=default_partner_id,
+                                 required=True)
     reservation_id = fields.Many2one('hotel.reservation',
                                      default=default_reservation_id)
     enter_date = fields.Date(default=default_enter_date,

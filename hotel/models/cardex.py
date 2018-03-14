@@ -80,7 +80,8 @@ class Cardex(models.Model):
                 _('Departure date, is prior to arrival. Check it now. %s') %
                 (date_2))
 
-    partner_id = fields.Many2one('res.partner', default=default_partner_id)
+    partner_id = fields.Many2one('res.partner', default=default_partner_id,
+                                 required=True)
     reservation_id = fields.Many2one(
         'hotel.reservation',
         default=default_reservation_id, readonly=True)
