@@ -51,7 +51,8 @@ class Wizard(models.TransientModel):
             for line in lines :
                 if ((line.partner_id.documenttype <> False)
                     and (line.partner_id.poldocument <> False)
-                    and (line.partner_id.firstname <> False)):
+                    and (line.partner_id.firstname <> False)
+                    and (line.partner_id.lastname <> False)):
 
                     if  line.partner_id.documenttype in ["D","P","C"]:
                         content += "2|"+line.partner_id.poldocument + "||"
@@ -76,7 +77,7 @@ class Wizard(models.TransientModel):
                     _logger.info('---- Problema generando el fichero. Checkin Saltado ----')
                     return self.write({
                     'txt_message': _('Problem generating the file. Checkin without data, or incorrect data.')
-                    })      
+                    })
 
 
             return self.write({
