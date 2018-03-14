@@ -46,7 +46,7 @@ class Wizard(models.TransientModel):
             content = "1|"+compa.police+"|"+compa.property_name.upper()[0:40]+"|"
             content += datetime.datetime.now().strftime("%Y%m%d|%H%M")
             content += "|"+str(len(lines))+ """
-    """
+"""
 
             for line in lines :
                 if ((line.partner_id.documenttype <> False)
@@ -72,7 +72,7 @@ class Wizard(models.TransientModel):
                     content += line.partner_id.code_ine.name.upper()[0:21] + "|"
                     content += datetime.datetime.strptime(line.enter_date, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
                     content += """
-    """
+"""
                 else:
                     _logger.info('---- Problema generando el fichero. Checkin Saltado ----')
                     return self.write({
