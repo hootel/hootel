@@ -205,6 +205,35 @@ class HotelReservation(models.Model):
                                                 action_reservation_checkout()
 
     @api.multi
+    def send_bus_notification(self, naction, ntype, ntitle=''):
+        hotel_cal_obj = self.env['bus.hotel.calendar']
+        for record in self:
+            if not record.wis_from_channel:
+                continue
+            hotel_cal_obj.send_reservation_notification(
+                naction,
+                ntype,
+                ntitle,
+                record.product_id.id,
+                record.id,
+                record.partner_id.name,
+                record.adults,
+                record.children,
+                record.checkin,
+                record.checkout,
+                record.folio_id.id,
+                record.reserve_color,
+                record.reserve_color_text,
+                record.splitted,
+                record.parent_reservation and
+                record.parent_reservation.id or 0,
+                record.product_id.name,
+                record.partner_id.mobile
+                or record.partner_id.phone or _('Undefined'),
+                record.state,
+                record.splitted)
+
+    @api.multi
     def mark_as_readed(self):
         for record in self:
             record.write({'to_read': False})
