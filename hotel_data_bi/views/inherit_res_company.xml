@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Hotel Settings -->
+    <data>
+        <!--  Inherit Company view to add 'Hotel data' -->
+        <record id="data_bi_view_company_form" model="ir.ui.view">
+            <field name="name">databi.config.view_company_form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page" position="after">
+                        <page string="Revenue Settings">
+                            <group>
+                                <group name="aldahotels_grp" string="Revenue Settings data">
+                                    <field name="ID_Hotel" />
+                                </group>
+                            </group>
+                        </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+
+</odoo>
