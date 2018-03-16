@@ -62,7 +62,7 @@ class HotelReservation(models.Model):
             reserv_color = ir_values_obj.get_default('hotel.config.settings',
                                                      'color_dontsell')
             reserv_color_text = ir_values_obj.get_default('hotel.config.settings',
-                                                     'color_letter_dontsell')                                         
+                                                     'color_letter_dontsell')
         elif self.to_assign:
             reserv_color = ir_values_obj.get_default('hotel.config.settings',
                                                      'color_to_assign')
@@ -72,24 +72,24 @@ class HotelReservation(models.Model):
             reserv_color = ir_values_obj.get_default('hotel.config.settings',
                                                      'color_pre_reservation')
             reserv_color_text = ir_values_obj.get_default('hotel.config.settings',
-                                                     'color_letter_pre_reservation')                                         
+                                                     'color_letter_pre_reservation')
         elif self.state == 'confirm':
             if self.folio_id.invoices_amount == 0:
                 reserv_color = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_reservation_pay')
                 reserv_color_text = ir_values_obj.get_default(
-                    'hotel.config.settings', 'color_letter_reservation_pay')    
+                    'hotel.config.settings', 'color_letter_reservation_pay')
             else:
                 reserv_color = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_reservation')
                 reserv_color_text = ir_values_obj.get_default(
-                    'hotel.config.settings', 'color_letter_reservation')    
+                    'hotel.config.settings', 'color_letter_reservation')
         elif self.state == 'booking':
             if self.folio_id.invoices_amount == 0:
                 reserv_color = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_stay_pay')
                 reserv_color_text = ir_values_obj.get_default(
-                    'hotel.config.settings', 'color_letter_stay_pay')                
+                    'hotel.config.settings', 'color_letter_stay_pay')
             else:
                 reserv_color = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_stay')
@@ -106,16 +106,19 @@ class HotelReservation(models.Model):
                     'hotel.config.settings', 'color_payment_pending')
                 reserv_color_text = ir_values_obj.get_default(
                     'hotel.config.settings', 'color_letter_payment_pending')
-        return (reserv_color,reserv_color_text)
+        return (reserv_color, reserv_color_text)
 
     @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
     def _compute_color(self):
         _logger.info('_compute_color')
         for rec in self:
             colors = rec._generate_color()
-            rec.reserve_color = colors[0]
-            rec.reserve_color_text = colors[1]
+            rec.update({
+                'reserve_color': colors[0],
+                'reserve_color_text': colors[1],
+            })
             rec.folio_id.color = colors[0]
+
             # hotel_reserv_obj = self.env['hotel.reservation']
             # if rec.splitted:
             #     master_reservation = rec.parent_reservation or rec
@@ -591,7 +594,7 @@ class HotelReservation(models.Model):
                 'price_unit':  rlines['total_price'],
             })
         vals.update({'edit_room': False,})
-                    
+
         res = super(HotelReservation, self).write(vals)
         if datesChanged:
             for record in self:
@@ -690,7 +693,7 @@ class HotelReservation(models.Model):
                                 self.checkin, self.checkout, hours=False) + 1
         rlines = self.prepare_reservation_lines(self.checkin, days_diff, update_old_prices=False)
         self.reservation_lines = rlines['commands']
-        
+
 
         if self.reservation_type in ['staff', 'out']:
             self.price_unit = 0.0
