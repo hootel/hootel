@@ -22,7 +22,7 @@
 from openerp import models, fields, api, _
 from openerp.exceptions import except_orm, ValidationError
 from odoo.addons.hotel import date_utils
-from datetime import datetime, date, time, timedelta
+from datetime import date
 
 
 class Data_Bi(models.Model):
@@ -83,6 +83,13 @@ class Data_Bi(models.Model):
                             'ID_Regimen': tarifa['id'],
                             'Descripcion': tarifa['name']})
 
+        diccEstados = []  # Diccionario con los Estados
+        estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
+        for i in range(0, len(estado_array)):
+            diccEstados.append({'ID_Hotel': compan.id_hotel,
+                                'ID_EstadoReserva': i,
+                                'Descripcion': estado_array[i]})
+
         diccReservas = []
         # Diccionario con los nombre de los Paises TODO ¿necesidad de esto?
         lineas = self.env['hotel.reservation.line'].search(
@@ -90,28 +97,27 @@ class Data_Bi(models.Model):
              ('reservation_id.reservation_type', '=', 'normal'),
              ], order="date")
         for linea in lineas:
-            diccReservas.append({'ID_Reserva': 'xxxxx',
-                                 'ID_Hotel': compan.id_hotel,
-                                 'ID_EstadoReserva': 'xxxxx',
-                                 'FechaVenta': 'xxxxx',
-                                 'ID_Segmento': 'xxxxx',
-                                 'ID_Cliente': 'xxxxx',
-                                 'ID_Canal': 'xxxxx',
-                                 'FechaExtraccion': 'xxxxx',
-                                 'Entrada': 'xxxxx',
-                                 'Salida': 'xxxxx',
-                                 'Noches': 'xxxxx',
-                                 'ID_TipoHabitacion': 'xxxxx',
-                                 'ID_Regimen': 'xxxxx',
-                                 'Adultos': 'xxxxx',
-                                 'Menores': 'xxxxx',
-                                 'Cunas': 'xxxxx',
-                                 'PrecioDiario': linea.price,
-                                 'ID_Tarifa': 'xxxxx',
-                                 'ID_Reserva': 'xxxxx',
-                                 'ID_Reserva': 'xxxxx',
-                                 'ID_Reserva': 'xxxxx',
-                                 'ID_Pais': pais['id']})
+            id_estado_r = linea.reservation_id.state
+            diccReservas.append({
+                'ID_Reserva': linea.reservation_id.folio_id.id,
+                'ID_Hotel': compan.id_hotel,
+                'ID_EstadoReserva': estado_array.index(id_estado_r),
+                'FechaVenta': linea.reservation_id.create_date[0:10],
+                'ID_Segmento': 'xxxxx',
+                'ID_Cliente': 'xxxxx',
+                'ID_Canal': 'xxxxx',
+                'FechaExtraccion': date.today().strftime('%Y-%m-%d'),
+                'Entrada': linea.date,
+                'Salida': 'xxxxx',
+                'Noches': 1,
+                'ID_TipoHabitacion': linea.reservation_id.room_type_id,
+                'ID_Regimen': 'xxxxx',
+                'Adultos': linea.reservation_id.adults,
+                'Menores': linea.reservation_id.children,
+                'Cunas': 0,
+                'PrecioDiario': linea.price,
+                'ID_Tarifa': linea.reservation_id.pricelist_id,
+                'ID_Pais': linea.reservation_id.partner_id.code_ine})
 
 # ID_Reserva numérico Código único de la reserva
 # ID_Hotel numérico Código del Hotel
