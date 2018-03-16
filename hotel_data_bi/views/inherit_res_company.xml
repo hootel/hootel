@@ -3,7 +3,7 @@
 
     <!-- Hotel Settings -->
     <data>
-        <!--  Inherit Company view to add 'Hotel data' -->
+        <!--  Inherit Company view to add 'Hotel dataBI' -->
         <record id="data_bi_view_company_form" model="ir.ui.view">
             <field name="name">databi.config.view_company_form</field>
             <field name="model">res.company</field>

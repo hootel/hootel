@@ -30,7 +30,6 @@ class Data_Bi(models.Model):
     """Management and export data for MopSolution MyDataBI."""
     _name = 'data_bi'
 
-    ID_Hotel = fields.Integer("ID Hotel")  # numérico Código del Hotel
     Fecha = fields.Date("Primer dia mes")  # fecha Primer día del mes
     Room_Nights = fields.Float("Room Nights", digits=(6, 2))
     # Número de Room Nights
@@ -53,30 +52,35 @@ class Data_Bi(models.Model):
     @api.multi
     def export(self, fechafoto=date.today()):
         self.ensure_one()
+        compan = self.env.user.company_id
         diccTarifa = []  # Diccionario con las tarifas
         tarifas = self.env['product.pricelist'].search_read([], ['name'])
         for tarifa in tarifas:
-            diccTarifa.append({'ID_Hotel': 1, 'ID_Tarifa': tarifa['id'],
+            diccTarifa.append({'ID_Hotel': compan.ID_Hotel,
+                               'ID_Tarifa': tarifa['id'],
                                'Descripcion': tarifa['name']})
 
         diccCanal = []  # TODO Diccionario con los Canales
-        diccCanal.append({'ID_Hotel': 1, 'ID_Canal': tarifa['id'],
+        diccCanal.append({'ID_Hotel': compan.ID_Hotel,
+                          'ID_Canal': tarifa['id'],
                           'Descripcion': tarifa['name']})
 
         diccHotel = []  # Diccionario con los nombre de los hoteles
-        compan = self.env.user.company_id
-        diccHotel.append({'ID_Hotel': 1, 'Descripcion': compan.property_name})
+        diccHotel.append({'ID_Hotel': compan.ID_Hotel,
+                          'Descripcion': compan.property_name})
 
         diccPais = []
         paises = self.env['code_ine'].search_read([], ['name'])
         for pais in paises:
             # Diccionario con los nombre de los Paises TODO ¿necesidad de esto?
-            diccPais.append({'ID_Hotel': 1, 'ID_Pais': pais['id'],
+            diccPais.append({'ID_Hotel': compan.ID_Hotel,
+                             'ID_Pais': pais['id'],
                              'Descripcion': pais['name']})
 
         diccRegimen = []  # TODO Diccionario con los diccRegimen
-        diccRegimen.append({'ID_Hotel': 1, 'ID_Regimen': tarifa['id'],
-                          'Descripcion': tarifa['name']})
+        diccRegimen.append({'ID_Hotel': compan.ID_Hotel,
+                            'ID_Regimen': tarifa['id'],
+                            'Descripcion': tarifa['name']})
 
         # Debug Stop -------------------
         import wdb; wdb.set_trace()
