@@ -12,8 +12,8 @@
                 <xpath expr="//page" position="after">
                         <page string="Revenue Settings">
                             <group>
-                                <group name="aldahotels_grp" string="Revenue Settings data">
-                                    <field name="ID_Hotel" />
+                                <group name="revenue_grp" string="Revenue Settings data">
+                                    <field name="id_hotel" />
                                 </group>
                             </group>
                         </page>

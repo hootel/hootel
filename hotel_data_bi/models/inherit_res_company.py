@@ -25,5 +25,5 @@ from openerp import models, fields, api
 class Inherit_res_company(models.Model):
     _inherit = 'res.company'
 
-    ID_Hotel = fields.Integer('Unique ID for Revenue', default=0,
+    id_hotel = fields.Integer('Unique ID for Revenue', default=0,
                               help='It must be unique to be able to identify the hotel, within a hotel group.')

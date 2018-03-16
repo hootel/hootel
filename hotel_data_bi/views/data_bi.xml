@@ -10,7 +10,7 @@
 
       <menuitem
         id="menu_data_bi"
-        name="MyDataBI Conexion ------"
+        name="MyDataBI Conexion"
         parent="hotel.configuration_others"
         sequence="26"
         action="action_data_bi"
@@ -24,9 +24,6 @@
 	                <sheet>
 	                    <group string="CONECTAR CON MOP-SOLUTION." colspan="1">
                           <group name="group_top">
-                              <group name="group_left">
-                                  <field name="ID_Hotel"/>
-                              </group>
                               <group name="group_left">
                                   <field name="Fecha"/>
                               </group>
