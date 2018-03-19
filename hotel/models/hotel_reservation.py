@@ -494,9 +494,12 @@ class HotelReservation(models.Model):
         folio.state = 'draft'  #FIX
         splitted_reservs.unlink()
         folio.state = state  #FIX
+
+        # FIXME: Two writes because checkout regenerate reservation lines
+        master_reservation.checkout = last_checkout
         master_reservation.write({
             'reservation_lines': rlines,
-            'checkout': last_checkout,
+            # 'checkout': last_checkout,
             'splitted': False,
         })
 
@@ -643,7 +646,6 @@ class HotelReservation(models.Model):
         else:
             self.price_unit = rlines['total_price']
 
-
     @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type')
     def on_change_checkin_checkout_product_id(self):
         _logger.info('on_change_checkin_checkout_product_id')
@@ -693,7 +695,6 @@ class HotelReservation(models.Model):
                                 self.checkin, self.checkout, hours=False) + 1
         rlines = self.prepare_reservation_lines(self.checkin, days_diff, update_old_prices=False)
         self.reservation_lines = rlines['commands']
-
 
         if self.reservation_type in ['staff', 'out']:
             self.price_unit = 0.0

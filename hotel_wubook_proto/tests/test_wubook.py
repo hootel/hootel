@@ -238,6 +238,14 @@ class TestWubook(TestHotelWubook):
         self.assertEqual(len(processed_rids), 1, "Reservation not found")
         self.assertFalse(errors, "Reservation errors")
         check_state(processed_rids, 'cancelled')
+        # Try Confirm It
+        reserv = self.env['hotel.reservation'].sudo().search([
+            ('wrid', 'in', wrids)
+        ], limit=1)
+        with self.assertRaises(ValidationError):
+            reserv.confirm()
+
+
 
         # Create Reservation and Cancel It
         nbook = self.create_wubook_booking(

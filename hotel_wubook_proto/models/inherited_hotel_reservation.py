@@ -28,7 +28,8 @@ from ..wubook import (
     WUBOOK_STATUS_REFUSED,
     WUBOOK_STATUS_ACCEPTED,
     WUBOOK_STATUS_CANCELLED,
-    WUBOOK_STATUS_CANCELLED_PENALTY)
+    WUBOOK_STATUS_CANCELLED_PENALTY,
+    WUBOOK_STATUS_BAD)
 from odoo.addons.hotel import date_utils
 import logging
 _logger = logging.getLogger(__name__)
@@ -175,6 +176,12 @@ class HotelReservation(models.Model):
     @api.multi
     def confirm(self):
         self.mark_as_readed()
+        can_confirm = True
+        for record in self:
+            if record.wis_from_channel and record.wstatus == WUBOOK_STATUS_BAD:
+                can_confirm = False
+        if not can_confirm:
+            raise ValidationError(_("Can't confirm cancelled reservations"))
         return super(HotelReservation, self).confirm()
 
     @api.multi
