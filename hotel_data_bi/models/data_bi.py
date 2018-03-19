@@ -22,7 +22,7 @@
 from openerp import models, fields, api, _
 from openerp.exceptions import except_orm, ValidationError
 from odoo.addons.hotel import date_utils
-from datetime import date
+from datetime import date, datetime, timedelta
 
 
 class Data_Bi(models.Model):
@@ -72,7 +72,7 @@ class Data_Bi(models.Model):
 
         diccPais = []
         # Diccionario con los nombre de los Paises usando los del INE
-        paises = self.env['code_ine'].search_read([], ['code','name'])
+        paises = self.env['code_ine'].search_read([], ['code', 'name'])
         for pais in paises:
             diccPais.append({'ID_Hotel': compan.id_hotel,
                              'ID_Pais': pais['code'],
@@ -90,8 +90,18 @@ class Data_Bi(models.Model):
                                 'ID_EstadoReserva': i,
                                 'Descripcion': estado_array[i]})
 
+        diccTipo_Habitacion = []  # TODO Diccionario con los diccRegimen
+        tipo = self.env['hotel.virtual.room'].search_read([],
+                                                          ['virtual_code',
+                                                          'product_id'])
+        for i in tipo:
+            diccTipo_Habitacion.append({
+                'ID_Hotel': compan.id_hotel,
+                'ID_Tipo_Habitacion': i['product_id'][0],
+                'Descripcion': i['product_id'][1]})
+
         diccReservas = []
-        # Diccionario con los nombre de los Paises TODO ¿necesidad de esto?
+        # Diccionario con las Reservas
         lineas = self.env['hotel.reservation.line'].search(
             ['&', ('date', '>=', fechafoto),
              ('reservation_id.reservation_type', '=', 'normal'),
@@ -111,9 +121,11 @@ class Data_Bi(models.Model):
                 'ID_Canal': 'xxxxx',
                 'FechaExtraccion': date.today().strftime('%Y-%m-%d'),
                 'Entrada': linea.date,
-                'Salida': 'xxxxx',
+                'Salida': (datetime.strptime(linea.date, "%Y-%m-%d") +
+                           timedelta(days=1)).strftime("%Y-%m-%d"),
                 'Noches': 1,
-                'ID_TipoHabitacion': linea.reservation_id.room_type_id,
+                'ID_TipoHabitacion':
+                linea.reservation_id.virtual_room_id.product_id.id,
                 'ID_Regimen': 'xxxxx',
                 'Adultos': linea.reservation_id.adults,
                 'Menores': linea.reservation_id.children,
