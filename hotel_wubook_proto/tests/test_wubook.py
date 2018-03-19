@@ -245,8 +245,6 @@ class TestWubook(TestHotelWubook):
         with self.assertRaises(ValidationError):
             reserv.confirm()
 
-
-
         # Create Reservation and Cancel It
         nbook = self.create_wubook_booking(
             self.user_hotel_manager,

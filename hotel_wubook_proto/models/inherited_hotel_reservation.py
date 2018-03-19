@@ -178,7 +178,7 @@ class HotelReservation(models.Model):
         self.mark_as_readed()
         can_confirm = True
         for record in self:
-            if record.wis_from_channel and record.wstatus == WUBOOK_STATUS_BAD:
+            if record.wis_from_channel and record.wstatus in WUBOOK_STATUS_BAD:
                 can_confirm = False
         if not can_confirm:
             raise ValidationError(_("Can't confirm cancelled reservations"))
