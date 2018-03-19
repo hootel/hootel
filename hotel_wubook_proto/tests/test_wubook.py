@@ -240,7 +240,7 @@ class TestWubook(TestHotelWubook):
         check_state(processed_rids, 'cancelled')
         # Try Confirm It
         reserv = self.env['hotel.reservation'].sudo().search([
-            ('wrid', 'in', wrids)
+            ('wrid', 'in', processed_rids)
         ], limit=1)
         with self.assertRaises(ValidationError):
             reserv.confirm()
