@@ -28,7 +28,7 @@
     'category': 'hotel/revenue',
     'summary': "Revenue system and export Odoo Data to MyDataBI",
     'description': "Revenue MyDataBI Exporter",
-    'depends': ['hotel'],
+    'depends': ['hotel', 'hotel_l10n_es'],
     'data': [
         'views/data_bi.xml',
         'views/inherit_res_company.xml',

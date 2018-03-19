@@ -9,14 +9,8 @@
             <field name="model">res.company</field>
             <field name="inherit_id" ref="base.view_company_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//page" position="after">
-                        <page string="Revenue Settings">
-                            <group>
-                                <group name="revenue_grp" string="Revenue Settings data">
-                                    <field name="id_hotel" />
-                                </group>
-                            </group>
-                        </page>
+                <xpath expr="//field[@name='cardex_warning']" position="after">
+                      <field name="id_hotel" />
                 </xpath>
             </field>
         </record>

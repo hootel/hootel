@@ -66,7 +66,7 @@ class Data_Bi(models.Model):
                           'ID_Canal': tarifa['id'],
                           'Descripcion': tarifa['name']})
 
-        diccHotel = []  # Diccionario con los nombre de los hoteles
+        diccHotel = []  # Diccionario con el/los nombre de los hoteles
         diccHotel.append({'ID_Hotel': compan.id_hotel,
                           'Descripcion': compan.property_name})
 
