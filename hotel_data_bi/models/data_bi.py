@@ -25,15 +25,28 @@ from odoo.addons.hotel import date_utils
 from datetime import date, datetime, timedelta
 
 
+def get_years():
+    year_list = []
+    for i in range(2018, 2036):
+        year_list.append((i, str(i)))
+    return year_list
+
 class Data_Bi(models.Model):
 
     """Management and export data for MopSolution MyDataBI."""
     _name = 'data_bi'
 
-    Fecha = fields.Date("Primer dia mes")  # fecha Primer día del mes
-    Room_Nights = fields.Float("Room Nights", digits=(6, 2))
+    # fecha Primer día del mes
+    month = fields.Selection([(1, 'January'), (2, 'February'), (3, 'March'),
+                              (4, 'April'), (5, 'May'), (6, 'June'),
+                              (7, 'July'), (8, 'August'), (9, 'September'),
+                              (10, 'October'), (11, 'November'),
+                              (12, 'December'), ],
+                             string='Month', required=True)
+    year = fields.Selection(get_years(), string='Year', required=True)
+    Room_Nights = fields.Float("Room Nights", required=True, digits=(6, 2))
     # Número de Room Nights
-    Room_Revenue = fields.Float("Room Nights", digits=(6, 2))
+    Room_Revenue = fields.Float("Room Revenue", required=True, digits=(6, 2))
     # Ingresos por Reservas
     Estancias = fields.Integer()  # Número de Estancias
 
@@ -90,15 +103,59 @@ class Data_Bi(models.Model):
                                 'ID_EstadoReserva': i,
                                 'Descripcion': estado_array[i]})
 
-        diccTipo_Habitacion = []  # TODO Diccionario con los diccRegimen
-        tipo = self.env['hotel.virtual.room'].search_read([],
-                                                          ['virtual_code',
-                                                          'product_id'])
+        diccTipo_Habitacion = []  # Diccionario con Virtuals Rooms
+        tipo = self.env['hotel.virtual.room'].search_read(
+            [], ['virtual_code', 'product_id'])
         for i in tipo:
             diccTipo_Habitacion.append({
                 'ID_Hotel': compan.id_hotel,
                 'ID_Tipo_Habitacion': i['product_id'][0],
                 'Descripcion': i['product_id'][1]})
+
+        diccCapacidad = []  # TODO Diccionario con las capacidades
+        diccCapacidad.append({'ID_Hotel': compan.id_hotel,
+                              'Hasta_Fecha': tarifa['id'],
+                              'ID_Tipo_Habitacion': tarifa['id'],
+                              'Nro_Habitaciones': tarifa['id']})
+
+        diccBudget = []  # TODO Diccionario con las previsiones Budget
+        diccBudget.append({'ID_Hotel': compan.id_hotel,
+                           'Fecha': 'xxxxx',
+                           'ID_Tarifa': 'xxxxx',
+                           'ID_Canal': 'xxxxx',
+                           'ID_Pais': 'xxxxx',
+                           'ID_Regimen': 'xxxxx',
+                           'ID_Tipo_Habitacion': 'xxxxx',
+                           'ID_Cliente': 'xxxxx',
+                           'Room_Nights': 'xxxxx',
+                           'Room_Revenue': 'xxxxx',
+                           'Pension_Revenue': 'xxxxx',
+                           'Estancias': 'xxxxx',})
+# Budget
+# BUDGET
+# Campo Tipo Descripción
+# ID_Hotel numérico Código del Hotel
+# Fecha fecha Primer día del mes
+# ID_Tarifa numérico Código de la Tarifa
+# ID_Canal numérico Código del Canal
+# ID_Pais numérico Código del País
+# ID_Regimen numérico Cóigo del Régimen
+# ID_Tipo_Habitacion numérico Código del Tipo de Habitación
+# iD_Segmento numérico Código del Segmento
+# ID_Cliente numérico Código del Cliente
+# Room_Nights
+# numérico con dos
+# decimales Número de Room Nights
+# Room_Revenue
+# numérico con dos
+# decimales Ingresos por Reservas
+# Pension_Revenue
+# numérico con dos
+# decimales Ingresos por Pensión
+# Estancias numérico Número de Estancias
+
+
+
 
         diccReservas = []
         # Diccionario con las Reservas

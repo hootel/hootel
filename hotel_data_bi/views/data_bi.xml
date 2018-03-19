@@ -5,7 +5,7 @@
         id="action_data_bi"
         name="Action REVENUE Conexion"
         res_model="data_bi"
-        view_mode="form"
+        view_mode="tree,form"
       />
 
       <menuitem
@@ -24,11 +24,17 @@
 	                <sheet>
 	                    <group string="CONECTAR CON MOP-SOLUTION." colspan="1">
                           <group name="group_top">
-                              <group name="group_left">
-                                  <field name="Fecha"/>
+                              <group>
+                                  <div>
+                                      <label for="month" string="Month"
+                                             style="font-weight: bold !important;margin-right:107px;margin-left: 0px;"/>
+                                      <field name="month" style="width:110px"/>
+                                      <field name="year" style="width:110px;margin-left: 34px;"/>
+                                  </div>
                               </group>
-                              <group name="group_right">
+                              <group>
                                   <field name="Room_Nights"/>
+                                  <field name="Room_Revenue"/>
                               </group>
                           </group>
 	                    </group>
@@ -42,7 +48,18 @@
 	            </form>
 	        </field>
 	    </record>
-
+        <record id="view_tree_data_bi" model="ir.ui.view">
+            <field name="name">REVENUE CONEXION</field>
+            <field name="model">data_bi</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="month"/>
+                    <field name="year"/>
+                    <field name="Room_Nights"/>
+                    <field name="Room_Revenue"/>
+                </tree>
+            </field>
+        </record>
 
     </data>
 </odoo>
