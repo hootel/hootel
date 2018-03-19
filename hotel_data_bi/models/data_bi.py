@@ -71,11 +71,11 @@ class Data_Bi(models.Model):
                           'Descripcion': compan.property_name})
 
         diccPais = []
-        # Diccionario con los nombre de los Paises TODO ¿necesidad de esto?
-        paises = self.env['code_ine'].search_read([], ['name'])
+        # Diccionario con los nombre de los Paises usando los del INE
+        paises = self.env['code_ine'].search_read([], ['code','name'])
         for pais in paises:
             diccPais.append({'ID_Hotel': compan.id_hotel,
-                             'ID_Pais': pais['id'],
+                             'ID_Pais': pais['code'],
                              'Descripcion': pais['name']})
 
         diccRegimen = []  # TODO Diccionario con los diccRegimen
@@ -98,6 +98,9 @@ class Data_Bi(models.Model):
              ], order="date")
         for linea in lineas:
             id_estado_r = linea.reservation_id.state
+            id_codeine = 0
+            if linea.reservation_id.partner_id.code_ine.code:
+                id_codeine = linea.reservation_id.partner_id.code_ine.code
             diccReservas.append({
                 'ID_Reserva': linea.reservation_id.folio_id.id,
                 'ID_Hotel': compan.id_hotel,
@@ -117,7 +120,7 @@ class Data_Bi(models.Model):
                 'Cunas': 0,
                 'PrecioDiario': linea.price,
                 'ID_Tarifa': linea.reservation_id.pricelist_id,
-                'ID_Pais': linea.reservation_id.partner_id.code_ine})
+                'ID_Pais': id_codeine})
 
 # ID_Reserva numérico Código único de la reserva
 # ID_Hotel numérico Código del Hotel
