@@ -24,7 +24,7 @@ var Core = require('web.core'),
     Session = require('web.session'),
     SystrayMenu = require('web.SystrayMenu'),
     Widget = require('web.Widget'),
-    formats = require('web.formats'),
+    //Formats = require('web.formats'),
 
     _t = Core._t,
     _lt = Core._lt,
@@ -541,22 +541,29 @@ var HotelCalendarView = View.extend({
 
             var reservs = [];
             for (var r of results['reservations']) {
+                console.log("=== RESERVATION JJJJ");
+                console.log(r);
+                console.log("===== STATE");
+                console.log(r[15]);
                 var room = self._hcalendar.getRoom(r[0]);
-                var nreserv = new HReservation(
-                    r[1], // Id
-                    room, // Room
-                    r[2], // Title
-                    r[3], // Adults
-                    r[4], // Childrens
-                    HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT), // Date Start
-                    HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT), // Date End
-                    r[8], // Color
-                    r[9], // Color Text
-                    r[10], // Splitted
-                    r[12] || false, // Read Only
-                    r[13] || false, // Move Days
-                    r[14] || false // Move Rooms
-                );
+                var nreserv = new HReservation({
+                  'id': r[1],
+                  'room': room,
+                  'title': r[2],
+                  'adults': r[3],
+                  'childrens': r[4],
+                  'startDate': HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT),
+                  'endDate': HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT),
+                  'color': r[8],
+                  'colorText': r[9],
+                  'splitted': r[10],
+                  'readOnly': r[12],
+                  'fixDays': r[13],
+                  'fixRooms': r[14],
+                  'unusedZone': false,
+                  'linkedId': false,
+                  'state': r[15],
+                });
                 nreserv.addUserData({'folio_id': r[7]});
                 nreserv.addUserData({'parent_reservation': r[11]});
                 reservs.push(nreserv);
@@ -971,21 +978,24 @@ var HotelCalendarView = View.extend({
                 } else {
                   var room = this._hcalendar.getRoom(reserv['product_id']);
                   if (room) {
-                    var nreserv = new HReservation(
-                      reserv['reserv_id'],
-                      room,
-                      reserv['partner_name'],
-                      reserv['adults'],
-                      reserv['children'],
-                      HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
-                      HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
-                      reserv['reserve_color'],
-                      reserv['reserve_color_text'],
-                      reserv['splitted'],
-                      reserv['read_only'],
-                      reserv['fix_days'],
-                      reserv['fix_rooms']
-                    );
+                    var nreserv = new HReservation({
+                      'id': reserv['reserv_id'],
+                      'room': room,
+                      'title': reserv['partner_name'],
+                      'adults': reserv['adults'],
+                      'childrens': reserv['children'],
+                      'startDate': HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
+                      'endDate': HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
+                      'color': reserv['reserve_color'],
+                      'colorText': reserv['reserve_color_text'],
+                      'splitted': reserv['splitted'],
+                      'readOnly': reserv['read_only'],
+                      'fixDays': reserv['fix_days'],
+                      'fixRooms': reserv['fix_rooms'],
+                      'unusedZone': false,
+                      'linkedId': false,
+                      'state': reserv['state'],
+                    });
                     nreserv.addUserData({'folio_id': reserv['folio_id']});
                     nreserv.addUserData({'parent_reservation': reserv['parent_reservation']});
                     this._reserv_tooltips[reserv['reserv_id']] = notif[1]['tooltip'];
@@ -1040,21 +1050,24 @@ var HotelCalendarView = View.extend({
             var reservs = [];
             for (var r of results['reservations']) {
                 var room = self._hcalendar.getRoom(r[0]);
-                var nreserv = new HReservation(
-                    r[1], // Id
-                    room, // Room
-                    r[2], // Title
-                    r[3], // Adults
-                    r[4], // Childrens
-                    HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT), // Date Start
-                    HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT), // Date End
-                    r[8], // Color
-                    r[9], // Color Text
-                    r[10], // Splitted
-                    r[12] || false, // Read Only
-                    r[13] || false, // Move Days
-                    r[14] || false // Move Rooms
-                );
+                var nreserv = new HReservation({
+                  'id': r[1],
+                  'room': room,
+                  'title': r[2],
+                  'adults': r[3],
+                  'childrens': r[4],
+                  'startDate': HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT),
+                  'endDate': HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT),
+                  'color': r[8],
+                  'colorText': r[9],
+                  'splitted': r[10],
+                  'readOnly': r[12] || false,
+                  'fixDays': r[13] || false,
+                  'fixRooms': r[14] || false,
+                  'unusedZone': false,
+                  'linkedId': false,
+                  'state': r[15],
+                });
                 nreserv.addUserData({'folio_id': r[7]});
                 nreserv.addUserData({'parent_reservation': r[11]});
                 reservs.push(nreserv);

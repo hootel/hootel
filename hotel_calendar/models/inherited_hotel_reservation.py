@@ -37,6 +37,7 @@ class HotelReservation(models.Model):
     def _hcalendar_reservation_data(self, reservations):
         json_reservations = []
         json_reservation_tooltips = {}
+        _logger.info("==== JSON RESERVATION")
         for reserv in reservations:
             json_reservations.append((
                 reserv.product_id.id,
@@ -54,7 +55,8 @@ class HotelReservation(models.Model):
                 or False,
                 False,  # Read-Only
                 reserv.splitted,   # Fix Days
-                False))  # Fix Rooms
+                False,  # Fix Rooms
+                reserv.state))
             num_split = 0
             if reserv.splitted:
                 master_reserv = reserv.parent_reservation or reserv
@@ -123,6 +125,7 @@ class HotelReservation(models.Model):
                                           'confirm',
                                           'booking',
                                           'done',
+                                          'overbooking',
                                           False]))
         reservations_raw = self.env['hotel.reservation'].search(
             domain,

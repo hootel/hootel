@@ -310,21 +310,20 @@ class HotelFolio(models.Model):
         for fol in self:
             num_cardex = 0
             pending = False
+            vals = {}
             if fol.reservation_type == 'normal':
-                for reser in fol.room_lines:
-                    if reser.state != 'cancelled':
-                        num_cardex += len(reser.cardex_ids)
-                fol.cardex_count = num_cardex
+                for k_reser, v_reser in fol.room_lines.iteritems():
+                    if v_reser.state != 'cancelled':
+                        num_cardex += len(v_reser.cardex_ids)
                 pending = 0
-                for reser in fol.room_lines:
-                    if reser.state != 'cancelled':
-                        pending += (reser.adults + reser.children) \
-                                          - len(reser.cardex_ids)
-                if pending <= 0:
-                    fol.cardex_pending = False
-                else:
-                    fol.cardex_pending = True
-        fol.cardex_pending_num = pending
+                for k_reser, v_reser in fol.room_lines.iteritems():
+                    if v_reser.state != 'cancelled':
+                        pending += (v_reser.adults + v_reser.children) - len(v_reser.cardex_ids)
+            fol.write({
+                'cardex_amount': num_cardex,
+                'cardex_pending': (pending > 0),
+                'cardex_pending_num': pending,
+            })
 
     @api.multi
     def go_to_currency_exchange(self):
@@ -379,7 +378,6 @@ class HotelFolio(models.Model):
             folio_id = super(HotelFolio, self).create(vals)
 
         return folio_id
-
 
     @api.onchange('partner_id')
     def onchange_partner_id(self):
@@ -539,8 +537,12 @@ class HotelFolio(models.Model):
 
     @api.multi
     def print_quotation(self):
-        self.order_id.filtered(lambda s: s.state == 'draft').write({'state': 'sent'})
-        return self.env['report'].get_action(self.order_id, 'sale.report_saleorder')
+        self.order_id.filtered(lambda s: s.state == 'draft').write({
+            'state': 'sent',
+        })
+        return self.env['report'].get_action(
+            self.order_id,
+            'sale.report_saleorder')
 
     @api.multi
     def action_cancel_draft(self):
