@@ -31,6 +31,7 @@ def get_years():
         year_list.append((i, str(i)))
     return year_list
 
+
 class Data_Bi(models.Model):
 
     """Management and export data for MopSolution MyDataBI."""
@@ -48,8 +49,7 @@ class Data_Bi(models.Model):
     # Número de Room Nights
     Room_Revenue = fields.Float("Room Revenue", required=True, digits=(6, 2))
     # Ingresos por Reservas
-    Estancias = fields.Integer()  # Número de Estancias
-
+    Estancias = fields.Integer("Estancias")  # Número de Estancias
     # ID_Tarifa numérico Código de la Tarifa
     # ID_Canal numérico Código del Canal
     # ID_Pais numérico Código del País
@@ -96,7 +96,7 @@ class Data_Bi(models.Model):
                             'ID_Regimen': tarifa['id'],
                             'Descripcion': tarifa['name']})
 
-        diccEstados = []  # Diccionario con los Estados
+        diccEstados = []  # Diccionario con los Estados Reserva
         estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
         for i in range(0, len(estado_array)):
             diccEstados.append({'ID_Hotel': compan.id_hotel,
@@ -118,22 +118,23 @@ class Data_Bi(models.Model):
                               'ID_Tipo_Habitacion': tarifa['id'],
                               'Nro_Habitaciones': tarifa['id']})
 
-        diccBudget = []  # TODO Diccionario con las previsiones Budget
-        diccBudget.append({'ID_Hotel': compan.id_hotel,
-                           'Fecha': 'xxxxx',
-                           'ID_Tarifa': 'xxxxx',
-                           'ID_Canal': 'xxxxx',
-                           'ID_Pais': 'xxxxx',
-                           'ID_Regimen': 'xxxxx',
-                           'ID_Tipo_Habitacion': 'xxxxx',
-                           'ID_Cliente': 'xxxxx',
-                           'Room_Nights': 'xxxxx',
-                           'Room_Revenue': 'xxxxx',
-                           'Pension_Revenue': 'xxxxx',
-                           'Estancias': 'xxxxx',})
+        budgets = self.env['data_bi'].search([])
+        diccBudget = []  # Diccionario con las previsiones Budget
+        for budget in budgets:
+            diccBudget.append({'ID_Hotel': compan.id_hotel,
+                               'Fecha': str(budget.year) + '-'
+                               + str(budget.month).zfill(2) + '-01',
+                               'ID_Tarifa': 'xxxxx',
+                               'ID_Canal': 'xxxxx',
+                               'ID_Pais': 'xxxxx',
+                               'ID_Regimen': 'xxxxx',
+                               'ID_Tipo_Habitacion': 'xxxxx',
+                               'ID_Cliente': 'xxxxx',
+                               'Room_Nights': budget.Room_Nights,
+                               'Room_Revenue': budget.Room_Revenue,
+                               'Pension_Revenue': 'xxxxx',
+                               'Estancias': budget.Estancias})
 # Budget
-# BUDGET
-# Campo Tipo Descripción
 # ID_Hotel numérico Código del Hotel
 # Fecha fecha Primer día del mes
 # ID_Tarifa numérico Código de la Tarifa
@@ -143,17 +144,53 @@ class Data_Bi(models.Model):
 # ID_Tipo_Habitacion numérico Código del Tipo de Habitación
 # iD_Segmento numérico Código del Segmento
 # ID_Cliente numérico Código del Cliente
-# Room_Nights
-# numérico con dos
-# decimales Número de Room Nights
-# Room_Revenue
-# numérico con dos
-# decimales Ingresos por Reservas
-# Pension_Revenue
-# numérico con dos
-# decimales Ingresos por Pensión
+# Room_Nights numérico con dos decimales Número de Room Nights
+# Room_Revenue numérico con dos decimales Ingresos por Reservas
+# Pension_Revenue numérico con dos decimales Ingresos por Pensión
 # Estancias numérico Número de Estancias
 
+        diccBloqueos = []  # TODO Diccionario con Bloqueos
+        diccBloqueos.append({'ID_Hotel': compan.id_hotel,
+                             'Fecha_desde': 'xxxxx',
+                             'Fecha_hasta': 'xxxxx',
+                             'ID_Tipo_Habitacion': 'xxxxx',
+                             'ID_Motivo_Bloqueo': 'xxxxx',
+                             'Nro_Habitaciones': 'xxxxx',
+                             })
+# Bloqueos
+# ID_Hotel numérico Código del Hotel
+# Fecha_desde fecha Fecha de inicio de bloqueo
+# Fecha_hasta fecha Fecha de final de bloqueo
+# ID_Tipo_Habitacion numérico Código del Tipo de Habitacion
+# ID_Motivo_Bloqueo numérico Código del Motivo del Bloqueo
+# Nro_Habitaciones numérico con dos decimales Número de habitaciones bloqueadas
+
+        diccMotivBloq = []  # TODO Diccionario con Motivo Bloqueos
+        diccMotivBloq.append({'ID_Hotel': compan.id_hotel,
+                              'ID_Motivo_Bloqueo': 'xxxxx',
+                              'Descripción': 'xxxxx'})
+# Motivo Bloqueos
+# ID_Hotel numérico Código del Hotel
+# ID_Motivo_Bloqueo numérico Código del motivo del bloqueo de la habitacion
+# Descripción texto(50) Descripción del tipo de habitación
+
+        diccSegmentos = []  # TODO Diccionario con Segmentos
+        diccSegmentos.append({'ID_Hotel': compan.id_hotel,
+                              'ID_Segmento': 'xxxxx',
+                              'Descripción': 'xxxxx'})
+# Segmentos
+# ID_Hotel numérico Código del Hotel
+# ID_Segmento numérico Código del segmento de la reserva
+# Descripción texto(50) Descripción del tipo de habitación
+
+        diccClientes = []  # TODO Diccionario con Clientes
+        diccClientes.append({'ID_Hotel': compan.id_hotel,
+                             'ID_Cliente': 'xxxxx',
+                             'Descripción': 'xxxxx'})
+# Clientes
+# ID_Hotel numérico Código del Hotel
+# ID_Cliente numérico Código del Cliente de la reserva
+# Descripción texto(50) Descripción del Cliente
 
 
 
@@ -207,9 +244,7 @@ class Data_Bi(models.Model):
 # Adultos numérico Nro. de adultos
 # Menores numérico Nro. de menores
 # Cunas numérico Nro. de cunas
-# PrecioDiario
-# numérico con
-# dos decimales Precio por noche de la reserva
+# PrecioDiario numérico con dos decimales Precio por noche de la reserva
 # ID_Tarifa numérico Código de la tarifa aplicada a la reserva
 # ID_Pais numérico Código del país
 
