@@ -69,7 +69,6 @@ class Data_Bi(models.Model):
         """
         self.ensure_one()
         compan = self.env.user.company_id
-        diccExport = []  # Diccionario con todo lo necesario para exportar.
         diccTarifa = []  # Diccionario con las tarifas
         tarifas = self.env['product.pricelist'].search_read([], ['name'])
         for tarifa in tarifas:
@@ -121,6 +120,20 @@ class Data_Bi(models.Model):
                               'ID_Tipo_Habitacion': 'xxxxx',
                               'Nro_Habitaciones': 'xxxxx'})
 
+# Budget
+# ID_Hotel numérico Código del Hotel
+# Fecha fecha Primer día del mes
+# ID_Tarifa numérico Código de la Tarifa
+# ID_Canal numérico Código del Canal
+# ID_Pais numérico Código del País
+# ID_Regimen numérico Cóigo del Régimen
+# ID_Tipo_Habitacion numérico Código del Tipo de Habitación
+# iD_Segmento numérico Código del Segmento
+# ID_Cliente numérico Código del Cliente
+# Room_Nights numérico con dos decimales Número de Room Nights
+# Room_Revenue numérico con dos decimales Ingresos por Reservas
+# Pension_Revenue numérico con dos decimales Ingresos por Pensión
+# Estancias numérico Número de Estancias
         budgets = self.env['data_bi'].search([])
         diccBudget = []  # Diccionario con las previsiones Budget
         for budget in budgets:
@@ -137,20 +150,6 @@ class Data_Bi(models.Model):
                                'Room_Revenue': budget.Room_Revenue,
                                # 'Pension_Revenue': 0,
                                'Estancias': budget.Estancias})
-# Budget
-# ID_Hotel numérico Código del Hotel
-# Fecha fecha Primer día del mes
-# ID_Tarifa numérico Código de la Tarifa
-# ID_Canal numérico Código del Canal
-# ID_Pais numérico Código del País
-# ID_Regimen numérico Cóigo del Régimen
-# ID_Tipo_Habitacion numérico Código del Tipo de Habitación
-# iD_Segmento numérico Código del Segmento
-# ID_Cliente numérico Código del Cliente
-# Room_Nights numérico con dos decimales Número de Room Nights
-# Room_Revenue numérico con dos decimales Ingresos por Reservas
-# Pension_Revenue numérico con dos decimales Ingresos por Pensión
-# Estancias numérico Número de Estancias
 
         diccMotivBloq = []  # Diccionario con Motivo de Bloqueos
         bloqeo_array = ['Staff', _('Out of Service')]
@@ -158,10 +157,6 @@ class Data_Bi(models.Model):
             diccMotivBloq.append({'ID_Hotel': compan.id_hotel,
                                   'ID_Motivo_Bloqueo': i,
                                   'Descripcion': bloqeo_array[i]})
-# Motivo Bloqueos
-# ID_Hotel numérico Código del Hotel
-# ID_Motivo_Bloqueo numérico Código del motivo del bloqueo de la habitacion
-# Descripción texto(50) Descripción del tipo de habitación
 
         diccBloqueos = []  # Diccionario con Bloqueos
         lineas = self.env['hotel.reservation.line'].search(
@@ -183,13 +178,6 @@ class Data_Bi(models.Model):
                 'ID_Motivo_Bloqueo': id_m_b,
                 'Nro_Habitaciones': 1,
                 })
-# Bloqueos
-# ID_Hotel numérico Código del Hotel
-# Fecha_desde fecha Fecha de inicio de bloqueo
-# Fecha_hasta fecha Fecha de final de bloqueo
-# ID_Tipo_Habitacion numérico Código del Tipo de Habitacion
-# ID_Motivo_Bloqueo numérico Código del Motivo del Bloqueo
-# Nro_Habitaciones numérico con dos decimales Número de habitaciones bloqueadas
 
         lineas = self.env['res.partner.category'].search([])
         diccSegmentos = []  # Diccionario con Segmentación
@@ -199,56 +187,15 @@ class Data_Bi(models.Model):
                 diccSegmentos.append({'ID_Hotel': compan.id_hotel,
                                       'ID_Segmento': linea.id,
                                       'Descripcion': seg_desc})
-# Segmentos
-# ID_Hotel numérico Código del Hotel
-# ID_Segmento numérico Código del segmento de la reserva
-# Descripción texto(50) Descripción del tipo de habitación
 
-        diccClientes = []  # TODO Diccionario con Clientes
-        diccClientes.append({'ID_Hotel': compan.id_hotel,
-                             'ID_Cliente': 'xxxxx',
-                             'Descripcion': 'xxxxx'})
 # Clientes
 # ID_Hotel numérico Código del Hotel
 # ID_Cliente numérico Código del Cliente de la reserva
 # Descripción texto(50) Descripción del Cliente
-
-        diccReservas = []
-        # Diccionario con las Reservas
-        lineas = self.env['hotel.reservation.line'].search(
-            ['&', ('date', '>=', fechafoto),
-             ('reservation_id.reservation_type', '=', 'normal'),
-             ], order="date")
-        for linea in lineas:
-            id_estado_r = linea.reservation_id.state
-            id_codeine = 0
-            if linea.reservation_id.partner_id.code_ine.code:
-                id_codeine = linea.reservation_id.partner_id.code_ine.code
-            id_segmen = 0
-            if linea.reservation_id.partner_id.category_id.id:
-                id_segmen = linea.reservation_id.partner_id.category_id.id
-            diccReservas.append({
-                'ID_Reserva': linea.reservation_id.folio_id.id,
-                'ID_Hotel': compan.id_hotel,
-                'ID_EstadoReserva': estado_array.index(id_estado_r),
-                'FechaVenta': linea.reservation_id.create_date[0:10],
-                'ID_Segmento': id_segmen,
-                'ID_Cliente': 'xxxxx',
-                'ID_Canal': 'xxxxx',
-                'FechaExtraccion': date.today().strftime('%Y-%m-%d'),
-                'Entrada': linea.date,
-                'Salida': (datetime.strptime(linea.date, "%Y-%m-%d") +
-                           timedelta(days=1)).strftime("%Y-%m-%d"),
-                'Noches': 1,
-                'ID_TipoHabitacion':
-                linea.reservation_id.virtual_room_id.product_id.id,
-                'ID_Regimen': 'xxxxx',
-                'Adultos': linea.reservation_id.adults,
-                'Menores': linea.reservation_id.children,
-                'Cunas': 0,
-                'PrecioDiario': linea.price,
-                'ID_Tarifa': linea.reservation_id.pricelist_id.id,
-                'ID_Pais': id_codeine})
+        diccClientes = []  # TODO Diccionario con Clientes
+        diccClientes.append({'ID_Hotel': compan.id_hotel,
+                             'ID_Cliente': 'xxxxx',
+                             'Descripcion': 'xxxxx'})
 
 # ID_Reserva numérico Código único de la reserva
 # ID_Hotel numérico Código del Hotel
@@ -269,6 +216,44 @@ class Data_Bi(models.Model):
 # PrecioDiario numérico con dos decimales Precio por noche de la reserva
 # ID_Tarifa numérico Código de la tarifa aplicada a la reserva
 # ID_Pais numérico Código del país
+        diccReservas = []
+        # Diccionario con las Reservas
+        lineas = self.env['hotel.reservation.line'].search(
+            ['&', ('date', '>=', fechafoto),
+             ('reservation_id.reservation_type', '=', 'normal'),
+             ], order="date")
+        for linea in lineas:
+            id_estado_r = linea.reservation_id.state
+            id_codeine = 0
+            if linea.reservation_id.partner_id.code_ine.code:
+                id_codeine = linea.reservation_id.partner_id.code_ine.code
+            id_segmen = 0
+            if linea.reservation_id.partner_id.category_id.id:
+                id_segmen = linea.reservation_id.partner_id.category_id.id
+            diccReservas.append({
+                'ID_Reserva': linea.reservation_id.folio_id.id,
+                'ID_Hotel': compan.id_hotel,
+                'ID_EstadoReserva': estado_array.index(id_estado_r),
+                'FechaVenta': linea.reservation_id.create_date[0:10],
+                'ID_Segmento': id_segmen,
+                'ID_Cliente': 0,
+                'ID_Canal': 0,
+                'FechaExtraccion': date.today().strftime('%Y-%m-%d'),
+                'Entrada': linea.date,
+                'Salida': (datetime.strptime(linea.date, "%Y-%m-%d") +
+                           timedelta(days=1)).strftime("%Y-%m-%d"),
+                'Noches': 1,
+                'ID_TipoHabitacion':
+                linea.reservation_id.virtual_room_id.product_id.id,
+                'ID_Regimen': 'xxxxx',
+                'Adultos': linea.reservation_id.adults,
+                'Menores': linea.reservation_id.children,
+                'Cunas': 0,
+                'PrecioDiario': linea.price,
+                'ID_Tarifa': linea.reservation_id.pricelist_id.id,
+                'ID_Pais': id_codeine})
+
+        diccExport = []  # Diccionario con todo lo necesario para exportar.
         diccExport.append({'Tarifa': diccTarifa})
         diccExport.append({'Canal': diccCanal})
         diccExport.append({'Hotel': diccHotel})
