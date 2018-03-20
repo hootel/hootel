@@ -25,6 +25,7 @@ from openerp import models, fields, api, _
 from datetime import date, datetime, timedelta
 import json
 
+
 def get_years():
     """Return a year list, to select in year field."""
     year_list = []
@@ -68,7 +69,7 @@ class Data_Bi(models.Model):
         """
         self.ensure_one()
         compan = self.env.user.company_id
-
+        diccExport = []  # Diccionario con todo lo necesario para exportar.
         diccTarifa = []  # Diccionario con las tarifas
         tarifas = self.env['product.pricelist'].search_read([], ['name'])
         for tarifa in tarifas:
@@ -156,7 +157,7 @@ class Data_Bi(models.Model):
         for i in range(0, len(bloqeo_array)):
             diccMotivBloq.append({'ID_Hotel': compan.id_hotel,
                                   'ID_Motivo_Bloqueo': i,
-                                  'Descripción': bloqeo_array[i]})
+                                  'Descripcion': bloqeo_array[i]})
 # Motivo Bloqueos
 # ID_Hotel numérico Código del Hotel
 # ID_Motivo_Bloqueo numérico Código del motivo del bloqueo de la habitacion
@@ -190,10 +191,14 @@ class Data_Bi(models.Model):
 # ID_Motivo_Bloqueo numérico Código del Motivo del Bloqueo
 # Nro_Habitaciones numérico con dos decimales Número de habitaciones bloqueadas
 
-        diccSegmentos = []  # TODO Diccionario con Segmentos
-        diccSegmentos.append({'ID_Hotel': compan.id_hotel,
-                              'ID_Segmento': 'xxxxx',
-                              'Descripción': 'xxxxx'})
+        lineas = self.env['res.partner.category'].search([])
+        diccSegmentos = []  # Diccionario con Segmentación
+        for linea in lineas:
+            if linea.parent_id.name:
+                seg_desc = linea.parent_id.name + " / " + linea.name
+                diccSegmentos.append({'ID_Hotel': compan.id_hotel,
+                                      'ID_Segmento': linea.id,
+                                      'Descripcion': seg_desc})
 # Segmentos
 # ID_Hotel numérico Código del Hotel
 # ID_Segmento numérico Código del segmento de la reserva
@@ -202,7 +207,7 @@ class Data_Bi(models.Model):
         diccClientes = []  # TODO Diccionario con Clientes
         diccClientes.append({'ID_Hotel': compan.id_hotel,
                              'ID_Cliente': 'xxxxx',
-                             'Descripción': 'xxxxx'})
+                             'Descripcion': 'xxxxx'})
 # Clientes
 # ID_Hotel numérico Código del Hotel
 # ID_Cliente numérico Código del Cliente de la reserva
@@ -219,12 +224,15 @@ class Data_Bi(models.Model):
             id_codeine = 0
             if linea.reservation_id.partner_id.code_ine.code:
                 id_codeine = linea.reservation_id.partner_id.code_ine.code
+            id_segmen = 0
+            if linea.reservation_id.partner_id.category_id.id:
+                id_segmen = linea.reservation_id.partner_id.category_id.id
             diccReservas.append({
                 'ID_Reserva': linea.reservation_id.folio_id.id,
                 'ID_Hotel': compan.id_hotel,
                 'ID_EstadoReserva': estado_array.index(id_estado_r),
                 'FechaVenta': linea.reservation_id.create_date[0:10],
-                'ID_Segmento': 'xxxxx',
+                'ID_Segmento': id_segmen,
                 'ID_Cliente': 'xxxxx',
                 'ID_Canal': 'xxxxx',
                 'FechaExtraccion': date.today().strftime('%Y-%m-%d'),
@@ -261,8 +269,22 @@ class Data_Bi(models.Model):
 # PrecioDiario numérico con dos decimales Precio por noche de la reserva
 # ID_Tarifa numérico Código de la tarifa aplicada a la reserva
 # ID_Pais numérico Código del país
+        diccExport.append({'Tarifa': diccTarifa})
+        diccExport.append({'Canal': diccCanal})
+        diccExport.append({'Hotel': diccHotel})
+        diccExport.append({'Pais': diccPais})
+        diccExport.append({'Regimen': diccRegimen})
+        diccExport.append({'Reservas': diccReservas})
+        diccExport.append({'Tipo Habitación': diccTipo_Habitacion})
+        diccExport.append({'Capacidad': diccCapacidad})
+        diccExport.append({'Budget': diccBudget})
+        diccExport.append({'Bloqueos': diccBloqueos})
+        diccExport.append({'Motivo Bloqueo': diccMotivBloq})
+        diccExport.append({'Segmentos': diccSegmentos})
+        diccExport.append({'Clientes': diccClientes})
+        diccExport.append({'Estado Reservas': diccEstados})
 
-        dictionaryToJson = json.dumps(diccReservas)
+        dictionaryToJson = json.dumps(diccExport)
         # Debug Stop -------------------
         import wdb; wdb.set_trace()
         # Debug Stop -------------------
