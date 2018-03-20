@@ -23,7 +23,7 @@ from openerp import models, fields, api, _
 # from openerp.exceptions import except_orm, ValidationError
 # from odoo.addons.hotel import date_utils
 from datetime import date, datetime, timedelta
-
+import json
 
 def get_years():
     """Return a year list, to select in year field."""
@@ -239,7 +239,7 @@ class Data_Bi(models.Model):
                 'Menores': linea.reservation_id.children,
                 'Cunas': 0,
                 'PrecioDiario': linea.price,
-                'ID_Tarifa': linea.reservation_id.pricelist_id,
+                'ID_Tarifa': linea.reservation_id.pricelist_id.id,
                 'ID_Pais': id_codeine})
 
 # ID_Reserva numérico Código único de la reserva
@@ -262,7 +262,8 @@ class Data_Bi(models.Model):
 # ID_Tarifa numérico Código de la tarifa aplicada a la reserva
 # ID_Pais numérico Código del país
 
+        dictionaryToJson = json.dumps(diccReservas)
         # Debug Stop -------------------
         import wdb; wdb.set_trace()
         # Debug Stop -------------------
-        return diccTarifa
+        return dictionaryToJson
