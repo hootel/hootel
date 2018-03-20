@@ -20,8 +20,8 @@
 #
 ##############################################################################
 from openerp import models, fields, api, _
-from openerp.exceptions import except_orm, ValidationError
-from odoo.addons.hotel import date_utils
+# from openerp.exceptions import except_orm, ValidationError
+# from odoo.addons.hotel import date_utils
 from datetime import date, datetime, timedelta
 
 
@@ -34,8 +34,8 @@ def get_years():
 
 
 class Data_Bi(models.Model):
-
     """Management and export data for MopSolution MyDataBI."""
+
     _name = 'data_bi'
 
     # fecha Primer día del mes
@@ -62,7 +62,7 @@ class Data_Bi(models.Model):
 
     @api.multi
     def export(self, lugar, fechafoto=date.today()):
-        """Management and export data for MyDataBI.
+        """Prepare a Json Objet to export data for MyDataBI.
 
         Generate a dicctionary to by send in JSON
         """
@@ -78,8 +78,8 @@ class Data_Bi(models.Model):
 
         diccCanal = []  # TODO Diccionario con los Canales
         diccCanal.append({'ID_Hotel': compan.id_hotel,
-                          'ID_Canal': 'xxxxx',
-                          'Descripcion': 'xxxxx'})
+                          'ID_Canal': 0,
+                          'Descripcion': 'Sin Canal'})
 
         diccHotel = []  # Diccionario con el/los nombre de los hoteles
         diccHotel.append({'ID_Hotel': compan.id_hotel,
@@ -95,8 +95,8 @@ class Data_Bi(models.Model):
 
         diccRegimen = []  # TODO Diccionario con los diccRegimen
         diccRegimen.append({'ID_Hotel': compan.id_hotel,
-                            'ID_Regimen': 'xxxxx',
-                            'Descripcion': 'xxxxx',})
+                            'ID_Regimen': 0,
+                            'Descripcion': 'Sin régimen'})
 
         diccEstados = []  # Diccionario con los Estados Reserva
         estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
@@ -208,8 +208,6 @@ class Data_Bi(models.Model):
 # ID_Cliente numérico Código del Cliente de la reserva
 # Descripción texto(50) Descripción del Cliente
 
-
-
         diccReservas = []
         # Diccionario con las Reservas
         lineas = self.env['hotel.reservation.line'].search(
@@ -263,7 +261,6 @@ class Data_Bi(models.Model):
 # PrecioDiario numérico con dos decimales Precio por noche de la reserva
 # ID_Tarifa numérico Código de la tarifa aplicada a la reserva
 # ID_Pais numérico Código del país
-
 
         # Debug Stop -------------------
         import wdb; wdb.set_trace()
