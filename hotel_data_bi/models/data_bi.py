@@ -26,6 +26,7 @@ from datetime import date, datetime, timedelta
 
 
 def get_years():
+    """Return a year list, to select in year field."""
     year_list = []
     for i in range(2018, 2036):
         year_list.append((i, str(i)))
@@ -49,7 +50,7 @@ class Data_Bi(models.Model):
     # Número de Room Nights
     Room_Revenue = fields.Float("Room Revenue", required=True, digits=(6, 2))
     # Ingresos por Reservas
-    Estancias = fields.Integer("Estancias")  # Número de Estancias
+    Estancias = fields.Integer("Number of Stays")  # Número de Estancias
     # ID_Tarifa numérico Código de la Tarifa
     # ID_Canal numérico Código del Canal
     # ID_Pais numérico Código del País
@@ -67,6 +68,7 @@ class Data_Bi(models.Model):
         """
         self.ensure_one()
         compan = self.env.user.company_id
+
         diccTarifa = []  # Diccionario con las tarifas
         tarifas = self.env['product.pricelist'].search_read([], ['name'])
         for tarifa in tarifas:
@@ -76,8 +78,8 @@ class Data_Bi(models.Model):
 
         diccCanal = []  # TODO Diccionario con los Canales
         diccCanal.append({'ID_Hotel': compan.id_hotel,
-                          'ID_Canal': tarifa['id'],
-                          'Descripcion': tarifa['name']})
+                          'ID_Canal': 'xxxxx',
+                          'Descripcion': 'xxxxx'})
 
         diccHotel = []  # Diccionario con el/los nombre de los hoteles
         diccHotel.append({'ID_Hotel': compan.id_hotel,
@@ -93,8 +95,8 @@ class Data_Bi(models.Model):
 
         diccRegimen = []  # TODO Diccionario con los diccRegimen
         diccRegimen.append({'ID_Hotel': compan.id_hotel,
-                            'ID_Regimen': tarifa['id'],
-                            'Descripcion': tarifa['name']})
+                            'ID_Regimen': 'xxxxx',
+                            'Descripcion': 'xxxxx',})
 
         diccEstados = []  # Diccionario con los Estados Reserva
         estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
@@ -114,9 +116,9 @@ class Data_Bi(models.Model):
 
         diccCapacidad = []  # TODO Diccionario con las capacidades
         diccCapacidad.append({'ID_Hotel': compan.id_hotel,
-                              'Hasta_Fecha': tarifa['id'],
-                              'ID_Tipo_Habitacion': tarifa['id'],
-                              'Nro_Habitaciones': tarifa['id']})
+                              'Hasta_Fecha': 'xxxxx',
+                              'ID_Tipo_Habitacion': 'xxxxx',
+                              'Nro_Habitaciones': 'xxxxx'})
 
         budgets = self.env['data_bi'].search([])
         diccBudget = []  # Diccionario con las previsiones Budget
@@ -124,15 +126,15 @@ class Data_Bi(models.Model):
             diccBudget.append({'ID_Hotel': compan.id_hotel,
                                'Fecha': str(budget.year) + '-'
                                + str(budget.month).zfill(2) + '-01',
-                               'ID_Tarifa': 'xxxxx',
-                               'ID_Canal': 'xxxxx',
-                               'ID_Pais': 'xxxxx',
-                               'ID_Regimen': 'xxxxx',
-                               'ID_Tipo_Habitacion': 'xxxxx',
-                               'ID_Cliente': 'xxxxx',
+                               # 'ID_Tarifa': 0,
+                               # 'ID_Canal': 0,
+                               # 'ID_Pais': 0,
+                               # 'ID_Regimen': 0,
+                               # 'ID_Tipo_Habitacion': 0,
+                               # 'ID_Cliente': 0,
                                'Room_Nights': budget.Room_Nights,
                                'Room_Revenue': budget.Room_Revenue,
-                               'Pension_Revenue': 'xxxxx',
+                               # 'Pension_Revenue': 0,
                                'Estancias': budget.Estancias})
 # Budget
 # ID_Hotel numérico Código del Hotel
@@ -149,14 +151,37 @@ class Data_Bi(models.Model):
 # Pension_Revenue numérico con dos decimales Ingresos por Pensión
 # Estancias numérico Número de Estancias
 
-        diccBloqueos = []  # TODO Diccionario con Bloqueos
-        diccBloqueos.append({'ID_Hotel': compan.id_hotel,
-                             'Fecha_desde': 'xxxxx',
-                             'Fecha_hasta': 'xxxxx',
-                             'ID_Tipo_Habitacion': 'xxxxx',
-                             'ID_Motivo_Bloqueo': 'xxxxx',
-                             'Nro_Habitaciones': 'xxxxx',
-                             })
+        diccMotivBloq = []  # Diccionario con Motivo de Bloqueos
+        bloqeo_array = ['Staff', _('Out of Service')]
+        for i in range(0, len(bloqeo_array)):
+            diccMotivBloq.append({'ID_Hotel': compan.id_hotel,
+                                  'ID_Motivo_Bloqueo': i,
+                                  'Descripción': bloqeo_array[i]})
+# Motivo Bloqueos
+# ID_Hotel numérico Código del Hotel
+# ID_Motivo_Bloqueo numérico Código del motivo del bloqueo de la habitacion
+# Descripción texto(50) Descripción del tipo de habitación
+
+        diccBloqueos = []  # Diccionario con Bloqueos
+        lineas = self.env['hotel.reservation.line'].search(
+            ['&', ('date', '>=', fechafoto),
+             ('reservation_id.reservation_type', '<>', 'normal'),
+             ], order="date")
+        for linea in lineas:
+            if linea.reservation_id.reservation_type == 'out':
+                id_m_b = 1
+            else:
+                id_m_b = 0
+            diccBloqueos.append({
+                'ID_Hotel': compan.id_hotel,
+                'Fecha_desde': linea.date,
+                'Fecha_hasta': (datetime.strptime(linea.date, "%Y-%m-%d") +
+                                timedelta(days=1)).strftime("%Y-%m-%d"),
+                'ID_Tipo_Habitacion':
+                linea.reservation_id.virtual_room_id.product_id.id,
+                'ID_Motivo_Bloqueo': id_m_b,
+                'Nro_Habitaciones': 1,
+                })
 # Bloqueos
 # ID_Hotel numérico Código del Hotel
 # Fecha_desde fecha Fecha de inicio de bloqueo
@@ -164,15 +189,6 @@ class Data_Bi(models.Model):
 # ID_Tipo_Habitacion numérico Código del Tipo de Habitacion
 # ID_Motivo_Bloqueo numérico Código del Motivo del Bloqueo
 # Nro_Habitaciones numérico con dos decimales Número de habitaciones bloqueadas
-
-        diccMotivBloq = []  # TODO Diccionario con Motivo Bloqueos
-        diccMotivBloq.append({'ID_Hotel': compan.id_hotel,
-                              'ID_Motivo_Bloqueo': 'xxxxx',
-                              'Descripción': 'xxxxx'})
-# Motivo Bloqueos
-# ID_Hotel numérico Código del Hotel
-# ID_Motivo_Bloqueo numérico Código del motivo del bloqueo de la habitacion
-# Descripción texto(50) Descripción del tipo de habitación
 
         diccSegmentos = []  # TODO Diccionario con Segmentos
         diccSegmentos.append({'ID_Hotel': compan.id_hotel,
