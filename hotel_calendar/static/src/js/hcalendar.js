@@ -1440,6 +1440,7 @@ HotelCalendar.prototype = {
   },
 
   _updateUnusedZones: function() {
+    return;
     this._cleanAllUnusedZones();
 
     var unused_id = 0;
