@@ -158,10 +158,8 @@ class Wizard(models.TransientModel):
 #             'hidden_cardex': True,
 #             'edit_cardex': True
 #         }
-        # FIXME: Hackish solution for close & print (https://www.odoo.com/es_ES/forum/ayuda-1/question/close-wizard-after-print-report-86786)
-        action_report = self.pdf_viajero(cardex.id)
-        del action_report['report_type']
-        return action_report
+
+        return self.pdf_viajero(cardex.id)
         #return {'type': 'ir.actions.act_window_close'}
 
 
