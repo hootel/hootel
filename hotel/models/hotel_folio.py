@@ -627,5 +627,6 @@ class HotelFolio(models.Model):
 
     @api.multi
     def unlink(self):
-        self.order_id.unlink()
+        for record in self:
+            record.order_id.unlink()
         return super(HotelFolio, self).unlink()
