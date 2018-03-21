@@ -24,6 +24,7 @@ from openerp import models, fields, api, _
 # from odoo.addons.hotel import date_utils
 from datetime import date, datetime, timedelta
 import json
+import requests
 
 
 def get_years():
@@ -245,7 +246,7 @@ class Data_Bi(models.Model):
                 'Noches': 1,
                 'ID_TipoHabitacion':
                 linea.reservation_id.virtual_room_id.product_id.id,
-                'ID_Regimen': 'xxxxx',
+                'ID_Regimen': 0,
                 'Adultos': linea.reservation_id.adults,
                 'Menores': linea.reservation_id.children,
                 'Cunas': 0,
@@ -269,8 +270,12 @@ class Data_Bi(models.Model):
         diccExport.append({'Clientes': diccClientes})
         diccExport.append({'Estado Reservas': diccEstados})
 
+        # return requests.post("http://0.0.0.0:10069/export",
+        #                      data=json.dumps(diccExport),
+        #                      headers={"Content-Type": "application/json"})
+
         dictionaryToJson = json.dumps(diccExport)
         # Debug Stop -------------------
-        import wdb; wdb.set_trace()
+        # import wdb; wdb.set_trace()
         # Debug Stop -------------------
         return dictionaryToJson
