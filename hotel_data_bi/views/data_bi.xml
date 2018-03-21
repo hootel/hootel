@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+      <act_window
+        id="action_data_bi"
+        name="Action REVENUE Conexion"
+        res_model="data_bi"
+        view_mode="tree,form"
+      />
+
+      <menuitem
+        id="menu_data_bi"
+        name="MyDataBI Conexion"
+        parent="hotel.configuration_others"
+        sequence="26"
+        action="action_data_bi"
+      />
+
+	    <record id="view_data_bi" model="ir.ui.view">
+	        <field name="name">REVENUE CONEXION</field>
+	        <field name="model">data_bi</field>
+	        <field name="arch" type="xml">
+	            <form>
+	                <sheet>
+	                    <group string="Hotel Budget:" colspan="1">
+                          <group name="group_top">
+                              <group>
+                                  <div>
+                                      <label for="month" string="Period:"
+                                             style="font-weight: bold !important;margin-right:107px;margin-left: 0px;"/>
+                                      <field name="month" style="width:110px"/>
+                                      <field name="year" style="width:110px;margin-left: 34px;"/>
+                                  </div>
+                              </group>
+                              <group>
+                                  <field name="room_nights"/>
+                                  <field name="room_revenue"/>
+                                  <field name="estancias"/>
+                              </group>
+                          </group>
+	                    </group>
+	                    <div>
+	                           <button name="export_data_bi" class="oe_form_button_save btn btn-primary btn-sm" type="object" string="Generate Conexion"/>
+	                    </div>
+	                </sheet>
+	            </form>
+	        </field>
+	    </record>
+        <record id="view_tree_data_bi" model="ir.ui.view">
+            <field name="name">REVENUE CONEXION</field>
+            <field name="model">data_bi</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="month"/>
+                    <field name="year"/>
+                    <field name="room_nights"/>
+                    <field name="room_revenue"/>
+                    <field name="estancias"/>
+                </tree>
+            </field>
+        </record>
+
+    </data>
+</odoo>
