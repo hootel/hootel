@@ -33,18 +33,15 @@
                                   </div>
                               </group>
                               <group>
-                                  <field name="Room_Nights"/>
-                                  <field name="Room_Revenue"/>
-                                  <field name="Estancias"/>
+                                  <field name="room_nights"/>
+                                  <field name="room_revenue"/>
+                                  <field name="estancias"/>
                               </group>
                           </group>
 	                    </group>
 	                    <div>
-
-	                    <button name="export" class="oe_form_button_save btn btn-primary btn-sm" type="object" string="Generate Conexion"/>
-
+	                           <button name="export_data_bi" class="oe_form_button_save btn btn-primary btn-sm" type="object" string="Generate Conexion"/>
 	                    </div>
-
 	                </sheet>
 	            </form>
 	        </field>
@@ -56,9 +53,9 @@
                 <tree>
                     <field name="month"/>
                     <field name="year"/>
-                    <field name="Room_Nights"/>
-                    <field name="Room_Revenue"/>
-                    <field name="Estancias"/>
+                    <field name="room_nights"/>
+                    <field name="room_revenue"/>
+                    <field name="estancias"/>
                 </tree>
             </field>
         </record>
