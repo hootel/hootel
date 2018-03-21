@@ -307,13 +307,13 @@ class HotelFolio(models.Model):
             pending = False
             vals = {}
             if fol.reservation_type == 'normal':
-                for k_reser, v_reser in fol.room_lines.iteritems():
-                    if v_reser.state != 'cancelled':
-                        num_cardex += len(v_reser.cardex_ids)
+                for reserv in fol.room_lines:
+                    if reserv.state != 'cancelled':
+                        num_cardex += len(reserv.cardex_ids)
                 pending = 0
-                for k_reser, v_reser in fol.room_lines.iteritems():
-                    if v_reser.state != 'cancelled':
-                        pending += (v_reser.adults + v_reser.children) - len(v_reser.cardex_ids)
+                for reserv in fol.room_lines:
+                    if reserv.state != 'cancelled':
+                        pending += (reserv.adults + reserv.children) - len(reserv.cardex_ids)
             fol.write({
                 'cardex_amount': num_cardex,
                 'cardex_pending': (pending > 0),
