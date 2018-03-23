@@ -180,9 +180,6 @@ HotelCalendar.prototype = {
             var row = this.getRoomRow(reserv.room, true);
             var room = this.getRoom(row.dataset.hcalRoomObjId);
             reserv.room = room;
-            console.log("=== PASA POR AKI 11");
-            console.log(row);
-            console.log(room);
           }
           var limits = this.getReservationCellLimits(reserv);
           if (limits.isValid()) {

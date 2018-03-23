@@ -574,18 +574,28 @@ var HotelCalendarView = View.extend({
         $(this._hcalendar.etable).find('.hcal-cell-room-type-group-item.btn-hcal-3d').on("mouseenter", function(){
         	var $this = $(this);
         	var room = self._hcalendar.getRoom($this.parent().data("hcalRoomObjId"));
-        	var qdict = {
-    			'price_from': room.getUserData('price_from'),
-                'inside_rooms': room.getUserData('inside_rooms'),
-                'num_inside_rooms': room.getUserData('inside_rooms').length,
-                'name': room.number
-        	};
-        	$this.tooltip({
-                animation: true,
-                html: true,
-                placement: 'right',
-                title: QWeb.render('HotelCalendar.TooltipRoom', qdict)
-            }).tooltip('show');
+          if (room.overbooking) {
+            $this.tooltip({
+                  animation: true,
+                  html: true,
+                  placement: 'right',
+                  title: QWeb.render('HotelCalendar.TooltipRoomOverbooking', {'name': room.number})
+              }).tooltip('show');
+            return;
+          } else {
+          	var qdict = {
+      			  'price_from': room.getUserData('price_from'),
+              'inside_rooms': room.getUserData('inside_rooms'),
+              'num_inside_rooms': room.getUserData('inside_rooms').length,
+              'name': room.number
+          	};
+          	$this.tooltip({
+                  animation: true,
+                  html: true,
+                  placement: 'right',
+                  title: QWeb.render('HotelCalendar.TooltipRoom', qdict)
+              }).tooltip('show');
+          }
         });
     },
 

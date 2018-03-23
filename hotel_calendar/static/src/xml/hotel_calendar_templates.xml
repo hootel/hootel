@@ -83,6 +83,11 @@
 	</t>
 </t>
 
+<t t-name="HotelCalendar.TooltipRoomOverbooking">
+	<div class="oe_tooltip_string"><t t-esc="name"/></div>
+	<p><b>Overbooking Management</b></p>
+</t>
+
 <t t-name="HotelCalendar.TooltipSelection">
 	<!-- FIXME: HARD CURRENCY -->
 	<span><b t-esc="nights"/> Nights: <b t-esc="total_price" t-widget="monetary"/>€</span>

@@ -54,7 +54,6 @@ class HotelReservation(models.Model):
                                       compute=_is_from_channel, store=False,
                                       readonly=True)
     to_read = fields.Boolean('To Read', default=False)
-    state = fields.Selection(selection_add=[('overbooking', 'OverBooking')])
 
     wstatus = fields.Selection([
         ('0', 'No WuBook'),

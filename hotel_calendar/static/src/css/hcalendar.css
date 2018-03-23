@@ -286,6 +286,10 @@
 	text-align: center;
 }
 
+tr.hcal-row-room-type-group-overbooking-item td {
+	background-color: #8b8b8b;
+}
+
 .hcal-cell-month-day {
 	text-align: center !important;
 }
