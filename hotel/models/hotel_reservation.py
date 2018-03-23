@@ -242,7 +242,8 @@ class HotelReservation(models.Model):
     to_assign = fields.Boolean('To Assign')
     state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirm'),
                               ('booking', 'Booking'), ('done', 'Done'),
-                              ('cancelled', 'Cancelled')],
+                              ('cancelled', 'Cancelled'),
+                              ('overbooking', 'OverBooking')],
                              'State', readonly=True,
                              default=lambda *a: 'draft',
                              track_visibility='always')
