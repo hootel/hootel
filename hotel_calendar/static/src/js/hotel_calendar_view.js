@@ -541,10 +541,6 @@ var HotelCalendarView = View.extend({
 
             var reservs = [];
             for (var r of results['reservations']) {
-                console.log("=== RESERVATION JJJJ");
-                console.log(r);
-                console.log("===== STATE");
-                console.log(r[15]);
                 var room = self._hcalendar.getRoom(r[0]);
                 var nreserv = new HReservation({
                   'id': r[1],
@@ -976,7 +972,7 @@ var HotelCalendarView = View.extend({
                   this._hcalendar.removeReservation(reserv['reserv_id']);
                   this._reserv_tooltips = _.pick(this._reserv_tooltips, function(value, key, obj){ return key != reserv['reserv_id']; });
                 } else {
-                  var room = this._hcalendar.getRoom(reserv['product_id']);
+                  var room = this._hcalendar.getRoom(reserv['product_id'], reserv['state'] === 'overbooking');
                   if (room) {
                     var nreserv = new HReservation({
                       'id': reserv['reserv_id'],
@@ -1049,7 +1045,7 @@ var HotelCalendarView = View.extend({
             self._reserv_tooltips = _.extend(self._reserv_tooltips, results['tooltips']);
             var reservs = [];
             for (var r of results['reservations']) {
-                var room = self._hcalendar.getRoom(r[0]);
+                var room = self._hcalendar.getRoom(r[0], r[15] === 'overbooking');
                 var nreserv = new HReservation({
                   'id': r[1],
                   'room': room,
