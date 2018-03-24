@@ -86,6 +86,10 @@ class TestHotelWubook(TestHotel):
         cls.env['wubook']._patch_method('rename_rplan', wubook_ommit)
         cls.env['wubook']._patch_method('delete_rplan', wubook_ommit)
         cls.env['wubook']._patch_method('import_channels_info', wubook_ommit)
+        cls.env['wubook']._patch_method('push_changes', wubook_ommit)
+        cls.env['wubook']._patch_method('push_availability', wubook_ommit)
+        cls.env['wubook']._patch_method('push_priceplans', wubook_ommit)
+        cls.env['wubook']._patch_method('push_restrictions', wubook_ommit)
 
     def create_wubook_booking(self, creator, checkin, partner, rinfo,
                               channel=0, notes=''):

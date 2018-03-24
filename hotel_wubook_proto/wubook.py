@@ -1351,33 +1351,13 @@ class WuBook(models.TransientModel):
                         virtual_room_id=vroom.id,
                         notthis=used_rooms)
                     if any(free_rooms):
-                        num_free_rooms = len(free_rooms)
-                        # Can use rooms?
-                        if num_free_rooms > customer_room_index:
-                            vals.update({
-                                'product_id': free_rooms[
-                                    customer_room_index].product_id.id,
-                                'name': free_rooms[
-                                            customer_room_index].name,
-                            })
-                            reservations.append((0, False, vals))
-                            used_rooms.append(
-                                    free_rooms[customer_room_index].id)
-                            customer_room_index += 1
-                        else:
-                            vals.update({
-                                'product_id':
-                                    free_rooms[0].product_id.id,
-                                'name': free_rooms[0].name,
-                                'state': 'overbooking',
-                            })
-                            reservations.append((0, False, vals))
-                            # failed_reservations.append(crcode)
-                            # self.create_wubook_issue(
-                            #     'reservation',
-                            #     "Can't found a free room for \
-                            #             reservation from wubook (#B)",
-                            #     '', wid=rcode)
+                        vals.update({
+                            'product_id': free_rooms[0].product_id.id,
+                            'name': free_rooms[0].name,
+                        })
+                        reservations.append((0, False, vals))
+                        used_rooms.append(free_rooms[0].id)
+
                         if split_booking:
                             if not split_booking_parent:
                                 split_booking_parent = len(
@@ -1397,20 +1377,32 @@ class WuBook(models.TransientModel):
                                         hour=0, minute=0, second=0,
                                         microsecond=0)).days
                         if date_diff <= 0:
+                            # Can't found space for reservation
+                            vals = self._generate_booking_vals(
+                                broom,
+                                checkin,
+                                checkout,
+                                is_cancellation,
+                                wchannel_info,
+                                bstatus,
+                                crcode,
+                                rcode,
+                                vroom,
+                                False,
+                                dates_checkin,
+                                dates_checkout
+                            )
                             vals.update({
-                                'checkout': checkout,
                                 'product_id':
                                     vroom.room_ids[0].product_id.id,
                                 'name': vroom.name,
                                 'state': 'overbooking',
                             })
                             reservations.append((0, False, vals))
-                            # failed_reservations.append(crcode)
-                            # self.create_wubook_issue(
-                            #     'reservation',
-                            #     "Can't found free rooms for \
-                            #                         reservation from wubook",
-                            #     '', wid=rcode)
+                            self.create_wubook_issue(
+                                'reservation',
+                                "Reservation imported with overbooking state",
+                                '', wid=rcode)
                             dates_checkin = [False, False]
                             dates_checkout = [False, False]
                             split_booking = False
