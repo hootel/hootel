@@ -980,6 +980,7 @@ class HotelReservation(models.Model):
                                                     tz=tz_hotel)
         reservations = self.env['hotel.reservation'].search([
             ('reservation_lines.date', 'in', dates_list),
-            ('state', '!=', 'cancelled')
+            ('state', '!=', 'cancelled'),
+            ('state', '!=', 'overbooking')
         ])
         return reservations
