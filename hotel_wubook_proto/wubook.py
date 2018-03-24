@@ -1223,12 +1223,12 @@ class WuBook(models.TransientModel):
             # Can't process failed reservations
             #  (for example set a invalid new reservation and receive in
             # the same transaction an cancellation)
-            # if crcode in failed_reservations:
-            #     self.create_wubook_issue(
-            #         'reservation',
-            #         "Can't process a reservation that previusly failed!",
-            #         '', wid=book['reservation_code'])
-            #     continue
+            if crcode in failed_reservations:
+                self.create_wubook_issue(
+                    'reservation',
+                    "Can't process a reservation that previusly failed!",
+                    '', wid=book['reservation_code'])
+                continue
 
             # Get dates for the reservation (localize them)
             arr_hour = book['arrival_hour'] == "--" and \
@@ -1368,7 +1368,7 @@ class WuBook(models.TransientModel):
                             vals.update({
                                 'product_id':
                                     free_rooms[0].product_id.id,
-                                'name': "OB-%s" % free_rooms[0].name,
+                                'name': free_rooms[0].name,
                                 'state': 'overbooking',
                             })
                             reservations.append((0, False, vals))
@@ -1401,7 +1401,7 @@ class WuBook(models.TransientModel):
                                 'checkout': checkout,
                                 'product_id':
                                     vroom.room_ids[0].product_id.id,
-                                'name': "OB-%s" % vroom.name,
+                                'name': vroom.name,
                                 'state': 'overbooking',
                             })
                             reservations.append((0, False, vals))

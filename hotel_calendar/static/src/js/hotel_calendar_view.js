@@ -300,11 +300,18 @@ var HotelCalendarView = View.extend({
                         close: true,
                         disabled: !newReservation.id,
                         click: function () {
+                            var nstate = (oldReservation.room.overbooking && !newReservation.room.overbooking)?'draft':'overbooking';
+                            var roomId = newReservation.room.id;
+                            if (newReservation.room.overbooking) {
+                              roomId = +newReservation.room.id.substr(newReservation.room.id.indexOf('@')+1);
+                            }
                             var write_values = {
                                 'checkin': newReservation.startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
                                 'checkout': newReservation.endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
-                                'product_id': newReservation.room.id
+                                'product_id': roomId,
+                                'state': nstate
                             };
+                            console.log(write_values);
                             new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
                                 self._hcalendar.swapReservation(newReservation, oldReservation);
                             });
@@ -334,7 +341,12 @@ var HotelCalendarView = View.extend({
 	        	var last_cell = ev.detail.cells[ev.detail.cells.length-1];
 	        	var date_cell_start = HotelCalendar.toMoment(self._hcalendar.etable.querySelector(`#${ev.detail.cells[0].dataset.hcalParentCell}`).dataset.hcalDate);
 	        	var date_cell_end = HotelCalendar.toMoment(self._hcalendar.etable.querySelector(`#${last_cell.dataset.hcalParentCell}`).dataset.hcalDate);
-	        	var nights = date_cell_end.diff(date_cell_start, 'days');
+            var parentRow = document.querySelector(`#${ev.detail.cells[0].dataset.hcalParentRow}`);
+            var room = self._hcalendar.getRoom(parentRow.dataset.hcalRoomObjId);
+            if (room.overbooking) {
+              return;
+            }
+            var nights = date_cell_end.diff(date_cell_start, 'days');
 	        	var qdict = {
 	        		'total_price': Number(ev.detail.totalPrice).toLocaleString(),
 	        		'nights': nights
@@ -354,6 +366,9 @@ var HotelCalendarView = View.extend({
             var startDate = HotelCalendar.toMoment(parentCellStart.dataset.hcalDate);
             var endDate = HotelCalendar.toMoment(parentCellEnd.dataset.hcalDate);
             var room = self._hcalendar.getRoom(parentRow.dataset.hcalRoomObjId);
+            if (room.overbooking) {
+              return;
+            }
             var numBeds = (room.shared || self._hcalendar.getOptions('divideRoomsByCapacity'))?(ev.detail.cellEnd.dataset.hcalBedNum - ev.detail.cellStart.dataset.hcalBedNum)+1:room.capacity;
             var HotelFolioObj = new Model('hotel.folio');
 
