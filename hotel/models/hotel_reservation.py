@@ -949,20 +949,21 @@ class HotelReservation(models.Model):
         if chkin_utc_dt >= chkout_utc_dt:
                 raise ValidationError(_('Room line Check In Date Should be \
                 less than the Check Out Date!'))
-        # Reservation end day count as free day. Not check it
-        chkout_utc_dt -= timedelta(days=1)
-        occupied = self.env['hotel.reservation'].occupied(
-            self.checkin,
-            chkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
-        occupied = occupied.filtered(
-            lambda r: r.product_id.id == self.product_id.id
-            and r.id != self.id)
-        occupied_name = ','.join(str(x.folio_id.name) for x in occupied)
-        if occupied:
-            warning_msg = _('You tried to change/confirm \
-               reservation with room those already reserved in this \
-               reservation period: %s') % occupied_name
-            raise ValidationError(warning_msg)
+        if self.state != 'overbooking':
+            # Reservation end day count as free day. Not check it
+            chkout_utc_dt -= timedelta(days=1)
+            occupied = self.env['hotel.reservation'].occupied(
+                self.checkin,
+                chkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
+            occupied = occupied.filtered(
+                lambda r: r.product_id.id == self.product_id.id
+                and r.id != self.id)
+            occupied_name = ','.join(str(x.folio_id.name) for x in occupied)
+            if occupied:
+                warning_msg = _('You tried to change/confirm \
+                   reservation with room those already reserved in this \
+                   reservation period: %s') % occupied_name
+                raise ValidationError(warning_msg)
 
     @api.multi
     def unlink(self):
