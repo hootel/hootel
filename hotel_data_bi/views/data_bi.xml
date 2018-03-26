@@ -12,7 +12,7 @@
         id="menu_data_bi"
         name="MyDataBI Conexion"
         parent="hotel.configuration_others"
-        sequence="26"
+        sequence="5"
         action="action_data_bi"
       />
 
@@ -39,9 +39,9 @@
                               </group>
                           </group>
 	                    </group>
-	                    <div>
+	                    <!-- <div>
 	                           <button name="export_data_bi" class="oe_form_button_save btn btn-primary btn-sm" type="object" string="Generate Conexion"/>
-	                    </div>
+	                    </div> -->
 	                </sheet>
 	            </form>
 	        </field>
