@@ -20,11 +20,12 @@
 #
 ##############################################################################
 from openerp import models, fields, api
-from openerp.exceptions import ValidationError
 
 
 class HotelVirtualRoom(models.Model):
     _inherit = 'hotel.virtual.room'
+
+    hcal_sequence = fields.Integer('Calendar Sequence', default=0)
 
     @api.multi
     def unlink(self):

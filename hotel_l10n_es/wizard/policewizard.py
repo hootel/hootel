@@ -46,28 +46,39 @@ class Wizard(models.TransientModel):
             content = "1|"+compa.police+"|"+compa.property_name.upper()[0:40]+"|"
             content += datetime.datetime.now().strftime("%Y%m%d|%H%M")
             content += "|"+str(len(lines))+ """
-    """
+"""
 
             for line in lines :
-                if  line.partner_id.documenttype in ["D","P","C"]:
-                    content += "2|"+line.partner_id.poldocument + "||"
+                if ((line.partner_id.documenttype <> False)
+                    and (line.partner_id.poldocument <> False)
+                    and (line.partner_id.firstname <> False)
+                    and (line.partner_id.lastname <> False)):
+
+                    if  line.partner_id.documenttype in ["D","P","C"]:
+                        content += "2|"+line.partner_id.poldocument + "||"
+                    else:
+                        content += "2||"+line.partner_id.poldocument + "|"
+                    content += line.partner_id.documenttype + "|"
+                    content += datetime.datetime.strptime(line.partner_id.polexpedition, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
+                    content += line.partner_id.firstname.upper() + "|"
+                    apellidos = line.partner_id.lastname.split(" ", 1)
+                    if len(apellidos) == 2:
+                        content += apellidos[0].upper() + "|"
+                        content += apellidos[1].upper() + "|"
+                    else:
+                        content += "|"+apellidos[0].upper() + "|"
+                    content += line.partner_id.gender.upper()[0] + "|"
+                    content += datetime.datetime.strptime(line.partner_id.birthdate_date, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
+                    content += line.partner_id.code_ine.name.upper()[0:21] + "|"
+                    content += datetime.datetime.strptime(line.enter_date, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
+                    content += """
+"""
                 else:
-                    content += "2||"+line.partner_id.poldocument + "|"
-                content += line.partner_id.documenttype + "|"
-                content += datetime.datetime.strptime(line.partner_id.polexpedition, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
-                content += line.partner_id.firstname.upper() + "|"
-                apellidos = line.partner_id.lastname.split(" ", 1)
-                if len(apellidos) == 2:
-                    content += apellidos[0].upper() + "|"
-                    content += apellidos[1].upper() + "|"
-                else:
-                    content += "|"+apellidos[0].upper() + "|"
-                content += line.partner_id.gender.upper()[0] + "|"
-                content += datetime.datetime.strptime(line.partner_id.birthdate_date, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
-                content += line.partner_id.code_ine.name.upper()[0:21] + "|"
-                content += datetime.datetime.strptime(line.enter_date, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
-                content += """
-    """
+                    _logger.info('---- Problema generando el fichero. Checkin Saltado ----')
+                    return self.write({
+                    'txt_message': _('Problem generating the file. Checkin without data, or incorrect data.')
+                    })
+
 
             return self.write({
                 'txt_filename': compa.police +'.'+ self.download_num,

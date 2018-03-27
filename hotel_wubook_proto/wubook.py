@@ -198,13 +198,51 @@ class WuBook(models.TransientModel):
                                                 DEFAULT_SERVER_DATE_FORMAT),
         })
 
-    def close_day(day_str):
+    def set_clousure_today(self, status):
+        hotel_tz = self.env['ir.values'].get_default('hotel.config.settings',
+                                                     'tz_hotel')
+        now_utc_dt = date_utils.now()
+        now_dt = date_utils.dt_as_timezone(now_utc_dt, hotel_tz)
+        now_str = now_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
         vrooms = self.env['hotel.virtual.room'].search([])
-        return True
 
-    def open_day(day_str):
-        vrooms = self.env['hotel.virtual.room'].search([])
-        return True
+        restriction_parity_id = self.env['ir.values'].sudo().get_default(
+                            'hotel.config.settings', 'parity_restrictions_id')
+        if restriction_parity_id:
+            restriction_parity_id = int(restriction_parity_id)
+
+        vroom_restr_obj = self.env['hotel.virtual.room.restriction.item']
+        vroom_obj = self.env['hotel.virtual.room']
+
+        vrooms = vroom_obj.search([('wrid', '!=', False), ('wrid', '!=', '')])
+        for vroom in vrooms:
+            restr = vroom_restr_obj.search([
+                ('restriction_id', '=', restriction_parity_id),
+                ('virtual_room_id', '=', vroom.id),
+                ('date_start', '>=', now_str),
+                ('date_end', '<=', now_str),
+                ('applied_on', '=', '0_virtual_room'),
+            ], limit=1)
+            if restr:
+                restr.write({'closed': status})
+            else:
+                restr = vroom_restr_obj.create({
+                    'date_start': now_str,
+                    'date_end': now_str,
+                    'virtual_room_id': vroom.id,
+                    'applied_on': '0_virtual_room',
+                    'restriction_id': restriction_parity_id,
+                    'min_stay': 0,
+                    'min_stay_arrival': 0,
+                    'max_stay': 0,
+                    'closed': status,
+                    'closed_departure': False,
+                    'closed_arrival': False,
+                    'wpushed': False,
+                })
+                if not restr:
+                    raise ValidationError("Can't close rooms!")
+        return self.push_restrictions()
 
     # === ROOMS
     @api.model
@@ -1499,7 +1537,9 @@ class WuBook(models.TransientModel):
 
     @api.model
     def push_restrictions(self):
-        unpushed = self.env['hotel.virtual.room.restriction.item'].search([
+        vroom_rest_obj = self.env['hotel.virtual.room.restriction']
+        rest_item_obj = self.env['hotel.virtual.room.restriction.item']
+        unpushed = rest_item_obj.search([
             ('wpushed', '=', False),
             ('date_start', '>=', datetime.strftime(fields.datetime.now(),
                                                    DEFAULT_SERVER_DATE_FORMAT))
@@ -1509,11 +1549,11 @@ class WuBook(models.TransientModel):
                                            DEFAULT_SERVER_DATE_FORMAT)
             date_end = datetime.strptime(unpushed[-1].date_start,
                                          DEFAULT_SERVER_DATE_FORMAT)
-            days_diff = abs((date_end-date_start).days) + 1
-
+            days_diff = date_utils.date_diff(
+                date_start,
+                date_end,
+                hours=False) + 1
             restrictions = {}
-            vroom_rest_obj = self.env['hotel.virtual.room.restriction']
-            rest_item_obj = self.env['hotel.virtual.room.restriction.item']
             restriction_plan_ids = vroom_rest_obj.search([
                 ('wpid', '!=', False),
                 ('active', '=', True)
@@ -1528,16 +1568,20 @@ class WuBook(models.TransientModel):
                 for vroom in virtual_room_ids:
                     restrictions[rp.wpid].update({vroom.wrid: []})
                     for i in range(0, days_diff):
+                        ndate_dt = date_start + timedelta(days=i)
                         restr = vroom.get_restrictions(
-                            date_start.strftime(DEFAULT_SERVER_DATE_FORMAT))
-                        restrictions[rp.wpid][vroom.wrid].append({
-                            'min_stay': restr and restr.min_stay or 0,
-                            'min_stay_arrival': restr and restr.min_stay_arrival or 0,
-                            'max_stay': restr and restr.max_stay or 0,
-                            'closed': (restr and restr.closed) and 1 or 0,
-                            'closed_arrival': (restr and restr.closed_arrival) and 1 or 0,
-                            'closed_departure': (restr and restr.closed_departure) and 1 or 0,
-                        })
+                            ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
+                        if restr:
+                            restrictions[rp.wpid][vroom.wrid].append({
+                                'min_stay': restr.min_stay or 0,
+                                'min_stay_arrival': restr.min_stay_arrival or 0,
+                                'max_stay': restr.max_stay or 0,
+                                'closed': restr.closed and 1 or 0,
+                                'closed_arrival': restr.closed_arrival and 1 or 0,
+                                'closed_departure': restr.closed_departure and 1 or 0,
+                            })
+                        else:
+                            restrictions[rp.wpid][vroom.wrid].append({})
             _logger.info("UPDATING RESTRICTIONS...")
             _logger.info(restrictions)
             for k_res, v_res in restrictions.iteritems():

@@ -28,7 +28,8 @@ from ..wubook import (
     WUBOOK_STATUS_REFUSED,
     WUBOOK_STATUS_ACCEPTED,
     WUBOOK_STATUS_CANCELLED,
-    WUBOOK_STATUS_CANCELLED_PENALTY)
+    WUBOOK_STATUS_CANCELLED_PENALTY,
+    WUBOOK_STATUS_BAD)
 from odoo.addons.hotel import date_utils
 import logging
 _logger = logging.getLogger(__name__)
@@ -147,27 +148,40 @@ class HotelReservation(models.Model):
 
     @api.multi
     def action_cancel(self):
+        waction = self._context.get('wubook_action', True)
+        if waction:
+            for record in self:
+                # Can't cancel in Odoo
+                if record.wis_from_channel:
+                    raise ValidationError(_("Can't cancel reservations \
+                                            from OTA's"))
+
         res = super(HotelReservation, self).action_cancel()
-        if self._context.get('wubook_action', True) and \
-                self.env['wubook'].is_valid_account():
+        if waction and self.env['wubook'].is_valid_account():
             partner_id = self.env['res.users'].browse(self.env.uid).partner_id
             wubook_obj = self.env['wubook']
             for record in self:
-                    # Only can cancel reservations created directly in wubook
-                    if record.wrid and record.wrid != '' and \
-                            not record.wchannel_id and \
-                            record.wstatus in ['1', '2', '4']:
-                        wres = wubook_obj.cancel_reservation(
-                            record.wrid,
-                            'Cancelled by %s' % partner_id.name)
-                        if not wres:
-                            raise ValidationError(_("Can't cancel reservation \
-                                                                    on WuBook"))
+                # Only can cancel reservations created directly in wubook
+                if record.wrid and record.wrid != '' and \
+                        not record.wchannel_id and \
+                        record.wstatus in ['1', '2', '4']:
+                    wres = wubook_obj.cancel_reservation(
+                        record.wrid,
+                        'Cancelled by %s' % partner_id.name)
+                    if not wres:
+                        raise ValidationError(_("Can't cancel reservation \
+                                                                on WuBook"))
         return res
 
     @api.multi
     def confirm(self):
         self.mark_as_readed()
+        can_confirm = True
+        for record in self:
+            if record.wis_from_channel and int(record.wstatus) in WUBOOK_STATUS_BAD:
+                can_confirm = False
+        if not can_confirm:
+            raise ValidationError(_("Can't confirm cancelled reservations"))
         return super(HotelReservation, self).confirm()
 
     @api.multi
@@ -177,7 +191,7 @@ class HotelReservation(models.Model):
                                             checkin=checkin, checkout=checkout)
         res.update({
             'wrid': self.wrid,
-            'wchannel_id': self.wchannel_id,
+            'wchannel_id': self.wchannel_id and self.wchannel_id.id or False,
             'wchannel_reservation_code': self.wchannel_reservation_code,
             'wis_from_channel': self.wis_from_channel,
             'to_read': self.to_read,
@@ -196,6 +210,35 @@ class HotelReservation(models.Model):
             else:
                 return super(HotelReservation, record).\
                                                 action_reservation_checkout()
+
+    @api.multi
+    def send_bus_notification(self, naction, ntype, ntitle=''):
+        hotel_cal_obj = self.env['bus.hotel.calendar']
+        for record in self:
+            if not record.wis_from_channel:
+                continue
+            hotel_cal_obj.send_reservation_notification(
+                naction,
+                ntype,
+                ntitle,
+                record.product_id.id,
+                record.id,
+                record.partner_id.name,
+                record.adults,
+                record.children,
+                record.checkin,
+                record.checkout,
+                record.folio_id.id,
+                record.reserve_color,
+                record.reserve_color_text,
+                record.splitted,
+                record.parent_reservation and
+                record.parent_reservation.id or 0,
+                record.product_id.name,
+                record.partner_id.mobile
+                or record.partner_id.phone or _('Undefined'),
+                record.state,
+                record.splitted)
 
     @api.multi
     def mark_as_readed(self):

@@ -9,7 +9,7 @@ odoo.define('hotel_calendar.HotelCalendarManagementView', function (require) {
  */
 
 var Core = require('web.core'),
-    //Bus = require('bus.bus').bus,
+    Bus = require('bus.bus').bus,
     //Data = require('web.data'),
     Time = require('web.time'),
     Model = require('web.DataModel'),
@@ -89,7 +89,7 @@ var HotelCalendarManagementView = View.extend({
         this._model = new Model(this.dataset.model);
         this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
 
-        //Bus.on("notification", this, this._on_bus_signal);
+        Bus.on("notification", this, this._on_bus_signal);
     },
 
     start: function () {
@@ -104,18 +104,18 @@ var HotelCalendarManagementView = View.extend({
     },
 
     do_show: function() {
-        var $widget = this.$el.find("#hcal_management_widget");
-        if ($widget) {
-            $widget.show();
+        if (this.$ehcal) {
+          this.$ehcal.show();
+          $('.o_content').css('overflow', 'hidden');
         }
         this.do_push_state({});
         this.shown.resolve();
         return this._super();
     },
     do_hide: function () {
-        var $widget = this.$el.find("#hcal_management_widget");
-        if ($widget) {
-            $widget.hide();
+        if (this.$ehcal) {
+            this.$ehcal.hide();
+            $('.o_content').css('overflow', '');
         }
         return this._super();
     },
@@ -136,11 +136,13 @@ var HotelCalendarManagementView = View.extend({
         var restrictions = this._hcalendar.getRestrictions(true);
         var availability = this._hcalendar.getAvailability(true);
 
+        debugger;
+
         var params = this.generate_params();
         var oparams = [false, params['prices'], params['restrictions'], pricelist, restrictions, availability];
         this._model.call('save_changes', oparams).then(function(results){
             btn_save.removeClass('need-save');
-            self._hcalendar.setData(results[0], results[1], results[2]);
+            $('.hcal-management-input-changed').removeClass('hcal-management-input-changed');
         });
     },
 
@@ -150,12 +152,10 @@ var HotelCalendarManagementView = View.extend({
         if (this._hcalendar) {
             delete this._hcalendar;
         }
-        var $widget = this.$el.find("#hcal_management_widget");
-        var $hcal = $widget.find('#hcalendar_management');
-        if ($hcal) { $hcal.remove(); }
-        $widget.append("<div id='hcalendar_management'></div>");
 
-        this._hcalendar = new HotelCalendarManagement('#hcalendar_management', options, this.$el[0]);
+        this.$ehcal.empty();
+
+        this._hcalendar = new HotelCalendarManagement('#hcal_management_widget', options, this.$el[0]);
         this._hcalendar.addEventListener('hcOnChangeDate', function(ev){
             var date_begin = moment(ev.detail.newDate);
             var days = self._hcalendar.getOptions('days')-1;
@@ -173,6 +173,26 @@ var HotelCalendarManagementView = View.extend({
             var btn_save = self.$el.find('#btn_save_changes');
             btn_save.addClass('need-save');
         });
+
+        this.$CalendarHeaderDays = this.$el.find("div.table-vroom-data-header");
+
+        // Sticky Header Days
+        this.$ehcal.scroll(this._on_scroll.bind(this));
+    },
+
+    _on_scroll: function() {
+        var curScrollPos = this.$ehcal.scrollTop();
+        if (curScrollPos > 0) {
+            this.$CalendarHeaderDays.css({
+                top: `${curScrollPos}px`,
+                position: 'sticky'
+            });
+        } else {
+            this.$CalendarHeaderDays.css({
+                top: '0px',
+                position: 'initial'
+            });
+        }
     },
 
     generate_hotel_calendar: function(){
@@ -215,7 +235,7 @@ var HotelCalendarManagementView = View.extend({
                 var $list = self.$el.find('#mpms-search #restriction_list');
                 $list.html('');
                 resultsRestrictions.forEach(function(item, index){
-                    $list.append(`<option value="${item.id}">${item.name}</option>`);
+                    $list.append(`<option value="${item.id}" ${item.id==self._restriction_id?'selected':''}>${item.name}</option>`);
                 });
                 $list.select2();
                 $list.on('change', function(ev){
@@ -242,6 +262,8 @@ var HotelCalendarManagementView = View.extend({
     init_calendar_view: function(){
         var self = this;
 
+        this.$ehcal = this.$el.find("div#hcal_management_widget");
+
         /** VIEW CONTROLS INITIALIZATION **/
         // DATE TIME PICKERS
         var l10nn = _t.database.parameters
@@ -255,6 +277,7 @@ var HotelCalendarManagementView = View.extend({
                },
             language : moment.locale(),
             format : L10N_DATE_MOMENT_FORMAT,
+            disabledHours: true // TODO: Odoo uses old datetimepicker version
         };
         var $dateTimePickerBegin = this.$el.find('#mpms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#mpms-search #date_end');
@@ -263,10 +286,12 @@ var HotelCalendarManagementView = View.extend({
         $dateTimePickerBegin.on("dp.change", function (e) {
             $dateTimePickerEnd.data("DateTimePicker").setMinDate(e.date.add(3,'d'));
             $dateTimePickerEnd.data("DateTimePicker").setMaxDate(e.date.add(2,'M'));
+            $dateTimePickerBegin.data("DateTimePicker").hide(); // TODO: Odoo uses old datetimepicker version
             self.on_change_filter_date(e, true);
         });
         $dateTimePickerEnd.on("dp.change", function (e) {
             self.on_change_filter_date(e, false);
+            $dateTimePickerEnd.data("DateTimePicker").hide(); // TODO: Odoo uses old datetimepicker version
         });
 
         var date_begin = moment().startOf('day');
@@ -281,8 +306,9 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(15, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(15, 'd');
+            var days = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).clone().local().daysInMonth();
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(days, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(days, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -305,8 +331,9 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(15, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(15, 'd');
+            var days = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).clone().local().daysInMonth();
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(days, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(days, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -385,9 +412,65 @@ var HotelCalendarManagementView = View.extend({
         }
     },
 
-    /*_on_bus_signal: function(notifications) {
-
-    },*/
+    _on_bus_signal: function(notifications) {
+        for (var notif of notifications) {
+            if (notif[0][1] === 'hotel.reservation') {
+                switch (notif[1]['type']) {
+                    case 'availability':
+                        var avail = notif[1]['availability'];
+                        var vroom = Object.keys(avail)[0];
+                        var day = Object.keys(avail[vroom])[0];
+                        var dt = HotelCalendarManagement.toMoment(day);
+                        var availability = {};
+                        availability[vroom] = [{
+                            'date': dt.format(ODOO_DATE_MOMENT_FORMAT),
+                            'avail': avail[vroom][day][0],
+                            'no_ota': avail[vroom][day][1],
+                            'id': avail[vroom][day][2]
+                        }];
+                        this._hcalendar.addAvailability(availability);
+                        break;
+                    case 'pricelist':
+                        var prices = notif[1]['price'];
+                        var pricelist_id = Object.keys(prices)[0];
+                        var pr = {};
+                        for (var price of prices[pricelist_id]) {
+                            pr[price['room']] = [];
+                            var days = Object.keys(price['days']);
+                            for (var day of days) {
+                                var dt = HotelCalendarManagement.toMoment(day);
+                                pr[price['room']].push({
+                                    'date': dt.format(ODOO_DATE_MOMENT_FORMAT),
+                                    'price':  price['days'][day],
+                                    'id': price['id']
+                                });
+                            }
+                        }
+                        this._hcalendar.addPricelist(pr);
+                        break;
+                    case 'restriction':
+                        // FIXME: Expected one day and one vroom
+                        var restriction = notif[1]['restriction'];
+                        var vroom = Object.keys(restriction)[0];
+                        var day = Object.keys(restriction[vroom])[0];
+                        var dt = HotelCalendarManagement.toMoment(day);
+                        var rest = {};
+                        rest[vroom] = [{
+                            'date': dt.format(ODOO_DATE_MOMENT_FORMAT),
+                            'min_stay': restriction[vroom][day][0],
+                            'min_stay_arrival': restriction[vroom][day][1],
+                            'max_stay': restriction[vroom][day][2],
+                            'closed': restriction[vroom][day][3],
+                            'closed_arrival': restriction[vroom][day][4],
+                            'closed_departure': restriction[vroom][day][5],
+                            'id': restriction[vroom][day][6]
+                        }];
+                        this._hcalendar.addRestrictions(rest);
+                        break;
+                }
+            }
+        }
+    },
 
     reload_hcalendar_management: function() {
         var self = this;
@@ -397,6 +480,8 @@ var HotelCalendarManagementView = View.extend({
             self._hcalendar.setData(results['prices'], results['restrictions'], results['availability'], results['count_reservations']);
         });
         this._last_dates = params['dates'];
+        this.$CalendarHeaderDays = this.$el.find("div.table-vroom-data-header");
+        this._on_scroll(); // FIXME: Workaround for update sticky header
     },
 
     generate_params: function() {

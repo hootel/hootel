@@ -12,4 +12,14 @@
         </field>
     </record>
 
+    <record id="view_hotel_folio1_form" model="ir.ui.view">
+        <field name="model">hotel.folio</field>
+        <field name="inherit_id" ref="hotel.view_hotel_folio1_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page/field[@name='room_lines']/tree/field[@name='state']" position="before">
+                    <field name="wchannel_id" />
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

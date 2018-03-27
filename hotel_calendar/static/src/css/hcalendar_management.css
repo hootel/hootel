@@ -13,10 +13,24 @@
 	max-height: 50vh;
 	overflow: scroll;
 }
-.hcal-management-table td {
+.hcal-management-table > thead > tr > td {
 	/*text-align: center !important;*/
-	width: 50px;
-	min-width: 50px;
+	width: 160px !important;
+	vertical-align: center;
+	min-width: 160px;
+	height: 1.5em;
+	min-height: 1.5em;
+	white-space: nowrap;
+	overflow: hidden;
+	border: 1px solid #cecece !important;
+}
+.hcal-management-table > tbody > tr > td {
+	/*text-align: center !important;*/
+	width: 160px !important;
+	vertical-align: center;
+	min-width: 160px;
+	height: 115px;
+	min-height: 100px;
 	white-space: nowrap;
 	overflow: hidden;
 	border: 1px solid #cecece !important;
@@ -45,14 +59,9 @@
 	font-size: 9px;
 }
 
-.hcal-management-table td.hcal-cell-room-type-group-item-day {
-	width: 150px !important;
-}
-
 .hcal-management-table-day td {
 	border: 0px !important;
 }
-
 
 .hcal-management-table-day {
 	height: 100%;
@@ -69,6 +78,21 @@
 	background-color: #FCFEE1 !important;
 }
 
+.table-vrooms {
+	float: left;
+	margin-top: 1.5em;
+}
+
+#hcal_management_widget {
+	overflow: auto;
+	height: 84vh;
+}
+
+#hcal-management-container-dd {
+	overflow: auto;
+	position: relative;
+}
+
 #btn_save_changes.need-save {
 	color: yellow;
 	background: orange;
@@ -78,6 +102,11 @@
 }
 #btn_save_changes i, #btn_massive_changes i {
 	top: 22%;
+}
+
+.hcal-management-input-changed {
+	background-color: rgb(237,110,110);
+	border: 1px solid gray;
 }
 
 button.hcal-management-input {

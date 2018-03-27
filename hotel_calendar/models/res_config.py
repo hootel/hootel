@@ -26,27 +26,6 @@ from odoo.addons.hotel import date_utils
 class HotelConfiguration(models.TransientModel):
     _inherit = 'hotel.config.settings'
 
-    divide_rooms_by_capacity = fields.Boolean('Divide rooms by capacity')
-    end_day_week = fields.Selection([
-        ('0', 'Monday'),
-        ('1', 'Tuesday'),
-        ('2', 'Wednesday'),
-        ('3', 'Thursday'),
-        ('4', 'Friday'),
-        ('5', 'Saturday'),
-        ('6', 'Sunday')
-    ], string='End day of week', default='6')
-    type_move = fields.Selection([
-        ('normal', 'Normal'),
-        ('assisted', 'Assisted'),
-        ('allow_invalid', 'Allow Invalid')
-    ], string='Reservation move mode', default='normal')
-    default_num_days = fields.Selection([
-        ('month', '1 Month'),
-        ('21', '3 Weeks'),
-        ('14', '2 Weeks'),
-        ('7', '1 Week')
-    ], string='Default number of days', default='month')
     color_pre_reservation = fields.Char('Pre-reservation', default='#A4A4A4')
     color_reservation = fields.Char('Confirmed Reservation ',
                                     default='#4E9DC4')
@@ -54,12 +33,23 @@ class HotelConfiguration(models.TransientModel):
     color_stay = fields.Char('Checkin', default='#b40606')
     color_stay_pay = fields.Char('Paid Checkin', default='#54d12b')
     color_checkout = fields.Char('Checkout', default='#FF0000')
-    color_checkout_pay = fields.Char('Paid Checkout', default='#66FF33')
     color_dontsell = fields.Char('Dont Sell', default='#000000')
     color_staff = fields.Char('Staff', default='#FF9933')
     color_to_assign = fields.Char('Ota Reservation to Assign',
                                   default='#DFFF00')
-    color_payment_pending = fields.Char('Payment Pending', default='#f70f0f')
+    color_payment_pending = fields.Char('Letter Payment Pending', default='#f70f0f')
+    color_letter_pre_reservation = fields.Char('Letter  Pre-reservation', default='#000000')
+    color_letter_reservation = fields.Char('Letter  Confirmed Reservation ',
+                                    default='#000000')
+    color_letter_reservation_pay = fields.Char('Letter Paid Reservation', default='#000000')
+    color_letter_stay = fields.Char('Letter Checkin', default='#FFFFFF')
+    color_letter_stay_pay = fields.Char('Letter Stay Pay', default='#000000')
+    color_letter_checkout = fields.Char('Letter Checkout', default='#FFFFFF')
+    color_letter_dontsell = fields.Char('Letter Dont Sell', default='#FFFFFF')
+    color_letter_staff = fields.Char('Letter Staff', default='#000000')
+    color_letter_to_assign = fields.Char('Letter Ota to Assign',
+                                  default='#000000')
+    color_letter_payment_pending = fields.Char('Letter Payment Pending', default='#000000')
 
     @api.multi
     def set_parity_pricelist_id(self):
@@ -122,12 +112,6 @@ class HotelConfiguration(models.TransientModel):
             'hotel.config.settings', 'color_checkout', self.color_checkout)
 
     @api.multi
-    def set_color_checkout_pay(self):
-        return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings',
-            'color_checkout_pay', self.color_checkout_pay)
-
-    @api.multi
     def set_color_dontsell(self):
         return self.env['ir.values'].sudo().set_default(
             'hotel.config.settings', 'color_dontsell', self.color_dontsell)
@@ -138,7 +122,7 @@ class HotelConfiguration(models.TransientModel):
             'hotel.config.settings', 'color_staff', self.color_staff)
 
     @api.multi
-    def set_to_assign(self):
+    def set_color_to_assign(self):
         return self.env['ir.values'].sudo().set_default(
             'hotel.config.settings', 'color_to_assign', self.color_to_assign)
 
@@ -149,28 +133,61 @@ class HotelConfiguration(models.TransientModel):
             'color_payment_pending', self.color_payment_pending)
 
     @api.multi
+    def set_color_letter_pre_reservation(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings',
+            'color_letter_pre_reservation', self.color_letter_pre_reservation)
+
+    @api.multi
+    def set_color_letter_reservation(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings',
+            'color_letter_reservation', self.color_letter_reservation)
+
+    @api.multi
+    def set_color_letter_reservation_pay(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings',
+            'color_letter_reservation_pay', self.color_letter_reservation_pay)
+
+    @api.multi
+    def set_color_letter_stay(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings', 'color_letter_stay', self.color_letter_stay)
+
+    @api.multi
+    def set_color_letter_stay_pay(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings', 'color_letter_stay_pay', self.color_letter_stay_pay)
+
+    @api.multi
+    def set_color_letter_checkout(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings', 'color_letter_checkout', self.color_letter_checkout)
+
+    @api.multi
+    def set_color_letter_dontsell(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings', 'color_letter_dontsell', self.color_letter_dontsell)
+
+    @api.multi
+    def set_color_letter_staff(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings', 'color_letter_staff', self.color_letter_staff)
+
+    @api.multi
+    def set_color_letter_to_assign(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings', 'color_letter_to_assign', self.color_letter_to_assign)
+
+    @api.multi
+    def set_color_letter_payment_pending(self):
+        return self.env['ir.values'].sudo().set_default(
+            'hotel.config.settings',
+            'color_letter_payment_pending', self.color_letter_payment_pending)
+
+    @api.multi
     def set_default_arrival_hour(self):
         return self.env['ir.values'].sudo().set_default(
             'hotel.config.settings',
             'default_arrival_hour', self.default_arrival_hour)
-
-    @api.multi
-    def set_divide_rooms_by_capacity(self):
-        return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings',
-            'divide_rooms_by_capacity', self.divide_rooms_by_capacity)
-
-    @api.multi
-    def set_end_day_week(self):
-        return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings', 'end_day_week', self.end_day_week)
-
-    @api.multi
-    def set_type_move(self):
-        return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings', 'type_move', self.type_move)
-
-    @api.multi
-    def set_default_num_days(self):
-        return self.env['ir.values'].sudo().set_default(
-            'hotel.config.settings', 'default_num_days', self.default_num_days)

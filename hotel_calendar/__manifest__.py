@@ -42,11 +42,14 @@
         'views/actions.xml',
         'views/res_config_views.xml',
         'views/inherited_res_users_views.xml',
+        'views/inherited_hotel_virtual_room_views.xml',
+        'views/inherited_hotel_room_views.xml',
         'views/virtual_room_pricelist_cached_views.xml',
         'data/views.xml',
         'data/menus.xml',
 	    'security/ir.model.access.csv',
         'data/records.xml',
+        'wizard/wizard_reservation.xml'
     ],
     'qweb': [
         'static/src/xml/*.xml',

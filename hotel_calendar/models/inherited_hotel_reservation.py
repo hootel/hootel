@@ -48,8 +48,10 @@ class HotelReservation(models.Model):
                 reserv.checkout,
                 reserv.folio_id.id,
                 reserv.reserve_color,
+                reserv.reserve_color_text,
                 reserv.splitted,
-                reserv.parent_reservation.id,
+                reserv.parent_reservation and reserv.parent_reservation.id
+                or False,
                 False,  # Read-Only
                 reserv.splitted,   # Fix Days
                 False))  # Fix Rooms
@@ -63,12 +65,13 @@ class HotelReservation(models.Model):
                     ('splitted', '=', True),
                 ])
             json_reservation_tooltips.update({
-                reserv.id: (
+                reserv.id: [
                     reserv.folio_id.partner_id.name,
                     reserv.folio_id.partner_id.mobile or
                     reserv.folio_id.partner_id.phone or _('Undefined'),
                     reserv.checkin,
-                    num_split)
+                    num_split,
+                    reserv.folio_id.amount_total]
             })
         return (json_reservations, json_reservation_tooltips)
 
@@ -87,7 +90,8 @@ class HotelReservation(models.Model):
             ], limit=1)
             vrooms = vroom_obj.search([
                 '|', ('room_ids', 'in', room.id),
-                     ('room_type_ids.id', '=', room.categ_id.id)])
+                     ('room_type_ids.id', '=', room.categ_id.id)],
+                order='hcal_sequence ASC')
             json_rooms.append((
                 room.product_id.id,
                 room.name,
@@ -145,7 +149,9 @@ class HotelReservation(models.Model):
         date_diff = date_utils.date_diff(date_start, dto, hours=False) + 1
         # Get Prices
         json_rooms_prices = {pricelist_id: []}
-        vrooms = self.env['hotel.virtual.room'].search([])
+        vrooms = self.env['hotel.virtual.room'].search(
+            [],
+            order='hcal_sequence ASC')
         vroom_pr_cached_obj = self.env['virtual.room.pricelist.cached']
 
         for vroom in vrooms:
@@ -182,7 +188,9 @@ class HotelReservation(models.Model):
         date_diff = date_utils.date_diff(dfrom, dto, hours=False) + 1
         # Get Prices
         json_rooms_rests = {}
-        vrooms = self.env['hotel.virtual.room'].search([])
+        vrooms = self.env['hotel.virtual.room'].search(
+            [],
+            order='hcal_sequence ASC')
         vroom_rest_obj = self.env['hotel.virtual.room.restriction.item']
         for vroom in vrooms:
             days = {}
@@ -210,23 +218,23 @@ class HotelReservation(models.Model):
 
     @api.multi
     def get_hcalendar_settings(self):
-        type_move = self.env['ir.values'].get_default(
-                                        'hotel.config.settings', 'type_move')
         user_id = self.env['res.users'].browse(self.env.uid)
+        type_move = user_id.pms_type_move
         return {
-            'divide_rooms_by_capacity': self.env['ir.values'].get_default(
-                    'hotel.config.settings', 'divide_rooms_by_capacity'),
-            'eday_week': self.env['ir.values'].get_default(
-                        'hotel.config.settings', 'end_day_week'),
-            'days': self.env['ir.values'].get_default(
-                    'hotel.config.settings', 'default_num_days') or 'month',
+            'divide_rooms_by_capacity': user_id.pms_divide_rooms_by_capacity,
+            'eday_week': user_id.pms_end_day_week,
+            'eday_week_offset': user_id.pms_end_day_week_offset,
+            'days': user_id.pms_default_num_days,
             'allow_invalid_actions': type_move == 'allow_invalid',
             'assisted_movement': type_move == 'assisted',
-            'default_arrival_hour': self.env['ir.values'].get_default(
+            'default_arrival_hour': self.env['ir.values'].sudo().get_default(
                     'hotel.config.settings', 'default_arrival_hour'),
-            'default_departure_hour': self.env['ir.values'].get_default(
+            'default_departure_hour': self.env['ir.values'].sudo().get_default(
                     'hotel.config.settings', 'default_departure_hour'),
             'show_notifications': user_id.pms_show_notifications,
+            'show_pricelist': user_id.pms_show_pricelist,
+            'show_availability': user_id.pms_show_availability,
+            'show_num_rooms': user_id.pms_show_num_rooms,
         }
 
     @api.multi
@@ -239,7 +247,8 @@ class HotelReservation(models.Model):
         domainRooms = domainRooms or []
         domainReservations = domainReservations or []
 
-        rooms = self.env['hotel.room'].search(domainRooms)
+        rooms = self.env['hotel.room'].search(domainRooms,
+                                              order='hcal_sequence ASC')
         json_res, json_res_tooltips = self.get_hcalendar_reservations_data(
             dfrom, dto, domainReservations, rooms)
 
@@ -277,6 +286,7 @@ class HotelReservation(models.Model):
                 record.checkout,
                 record.folio_id.id,
                 record.reserve_color,
+                record.reserve_color_text,
                 record.splitted,
                 record.parent_reservation and
                 record.parent_reservation.id or 0,

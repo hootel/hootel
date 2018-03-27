@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
-#                       Alexandre Díaz <dev@redneboa.es>
+#    Copyright (C) 2018 Alexandre Díaz <dev@redneboa.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,25 +18,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp.http import request
-from openerp.addons.web.controllers.main import content_disposition
-from odoo import api, fields, models
-
-
-# WUBOOK
-class GlassofExporterWizard(models.TransientModel):
-    FILENAME = 'glassof.xls'
-    _name = 'glassof.exporter.wizard'
-
-    @api.model
-    def export(self, filename=False):
-        filecontent = False
-        if not filecontent:
-            return request.not_found()
-        return request.make_response(
-            filecontent,
-            [
-                ('Content-Type', 'application/octet-stream'),
-                ('Content-Disposition', content_disposition(self.FILENAME))
-            ]
-        )
+from . import wizard

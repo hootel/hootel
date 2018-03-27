@@ -8,33 +8,26 @@
         <field name="inherit_id" ref="hotel.view_hotel_config_settings" />
         <field name="arch" type="xml">
         	<xpath expr="//group[@name='default_hours']" position="after">
-                <notebook colspan="4" col="1">
-                    <page string="calendar">
-                        <group colspan="4">
-                            <field name="divide_rooms_by_capacity" />
-                            <field name="end_day_week" required="True" />
-                            <field name="type_move" required="True" />
-                            <field name="default_num_days" required="True" />
-                        </group>
-                        <group string="Calendar colors" colspan="4">
-                            <group>
-                                <field name="color_pre_reservation" required="True"  widget="color"/>
-                                <field name="color_reservation" required="True"  widget="color"/>
-                                <field name="color_reservation_pay" required="True"  widget="color"/>
-                                <field name="color_stay" required="True"  widget="color"/>
-                                <field name="color_stay_pay" required="True"  widget="color"/>
-                            </group>
-                            <group>
-                                <field name="color_checkout" required="True"  widget="color"/>
-                                <field name="color_checkout_pay" required="True"  widget="color"/>
-                                <field name="color_dontsell" required="True"  widget="color"/>
-                                <field name="color_staff" required="True"  widget="color"/>
-                                <field name="color_to_assign" required="True"  widget="color"/>
-                                <field name="color_payment_pending" required="True"  widget="color"/>
-                            </group>                            
-                        </group>
-                    </page>
-                </notebook>
+                        <notebook>
+                            <page string="calendar">
+                                <group string="Calendar colors" colspan="4" cols="4">
+                                        <group cols="2">
+                                                <field name="color_pre_reservation" required="True"  widget="color"/><field name="color_letter_pre_reservation" required="True"  widget="color" />
+                                                <field name="color_reservation" required="True"  widget="color"/><field name="color_letter_reservation" required="True"  widget="color" />
+                                                <field name="color_reservation_pay" required="True"  widget="color"/><field name="color_letter_reservation_pay" required="True"  widget="color" />
+                                                <field name="color_stay" required="True"  widget="color"/><field name="color_letter_stay" required="True"  widget="color" />
+                                                <field name="color_stay_pay" required="True"  widget="color"/><field name="color_letter_stay_pay" required="True"  widget="color" />
+                                        </group>
+                                        <group cols="2">
+                                                <field name="color_checkout" required="True"  widget="color"/><field name="color_letter_checkout" required="True"  widget="color" />
+                                                <field name="color_dontsell" required="True"  widget="color"/><field name="color_letter_dontsell" required="True"  widget="color" />
+                                                <field name="color_staff" required="True"  widget="color"/><field name="color_letter_staff" required="True"  widget="color" />
+                                                <field name="color_to_assign" required="True"  widget="color"/><field name="color_letter_to_assign" required="True"  widget="color" />
+                                                <field name="color_payment_pending" required="True"  widget="color"/><field name="color_letter_payment_pending" required="True"  widget="color" />
+                                        </group>
+                                </group>
+                            </page>
+                        </notebook>
         	</xpath>
         </field>
     </record>

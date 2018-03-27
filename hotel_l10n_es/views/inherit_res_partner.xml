@@ -12,11 +12,10 @@
                         <group>
                             <field name="documenttype"/>
                             <field name="poldocument"/> 
-                            <field name="polexpedition"/>
                         </group>
                         <group> 
-                            <field name="code_ine"/> 
-                            <field name="poldocument"/>                         
+                            <field name="code_ine"/>
+                            <field name="polexpedition"/>                  
                         </group>
                     </group>
                 </xpath>

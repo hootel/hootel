@@ -2,8 +2,8 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
-#                       Alexandre Díaz <dev@redneboa.es>
+#    Copyright (C) 2018 Alda Hotels <informatica@aldahotels.com>
+#                       Jose Luis Algara <osotranquilo@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,23 +21,20 @@
 ##############################################################################
 
 {
-    'name': 'Glassof Exporter',
+    'name': 'Hotel MyDataBI Exporter',
     'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
-    'website': 'https://www.eiqui.com',
-    'category': 'eiqui/glassof',
-    'summary': "Export Odoo Data to xls compatible with Glassof",
-    'description': "Glassof Exporter",
-    'depends': [],
-    'external_dependencies': {
-        'python': ['xlsxwriter']
-    },
-    'data': [],
-    'qweb': [],
-    'test': [
+    'author': "Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>",
+    'website': 'https://www.aldahotels.com',
+    'category': 'hotel/revenue',
+    'summary': "Revenue system and export Odoo Data to MyDataBI",
+    'description': "Revenue MyDataBI Exporter",
+    'depends': ['hotel', 'hotel_l10n_es'],
+    'data': [
+        'views/data_bi.xml',
+        'views/inherit_res_company.xml',
+        'security/ir.model.access.csv',
     ],
-
-    'installable': False,
+    'installable': True,
     'auto_install': False,
     'application': False,
     'license': 'AGPL-3',

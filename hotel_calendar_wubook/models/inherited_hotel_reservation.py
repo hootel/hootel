@@ -35,14 +35,14 @@ class HotelReservation(models.Model):
     def _generate_reservation_notif(self, action, ntype, title,
                                     product_id, reserv_id, partner_name,
                                     adults, children, checkin, checkout,
-                                    folio_id, color, splitted,
+                                    folio_id, color, color_text, splitted,
                                     parent_reservation, room_name,
                                     partner_phone, state, fix_days):
         vals = super(HotelReservation, self)._generate_reservation_notif(
             action, ntype, title, product_id,
             reserv_id, partner_name, adults,
             children, checkin, checkout,
-            folio_id, color, splitted, parent_reservation,
+            folio_id, color, color_text, splitted, parent_reservation,
             room_name, partner_phone, state, fix_days)
         reserv = self.env['hotel.reservation'].browse(vals['reserv_id'])
         vals['reservation'].update({
@@ -57,8 +57,8 @@ class HotelReservation(models.Model):
                                                                 reservations)
         hotel_reservation_obj = self.env['hotel.reservation']
         json_reservations = []
-        for reserv_vals in vals[0]:
-            reserv = hotel_reservation_obj.browse(reserv_vals[1])
+        for v_rval in vals[0]:
+            reserv = hotel_reservation_obj.browse(v_rval[1])
             json_reservations.append((
                 reserv.product_id.id,
                 reserv.id,
@@ -69,6 +69,7 @@ class HotelReservation(models.Model):
                 reserv.checkout,
                 reserv.folio_id.id,
                 reserv.reserve_color,
+                reserv.reserve_color_text,
                 reserv.splitted,
                 reserv.parent_reservation.id,
                 # Read-Only
@@ -77,4 +78,6 @@ class HotelReservation(models.Model):
                 (reserv.wrid and reserv.wrid != '') or reserv.splitted,
                 # Fix Rooms
                 False))
+            # Update tooltips
+            vals[1][reserv.id].append(reserv.wchannel_id.name)
         return (json_reservations, vals[1])

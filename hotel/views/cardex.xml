@@ -31,7 +31,7 @@
                         <sheet>
                             <group name="group_top">
                                 <group name="group_left">
-                                    <field name="partner_id"/>
+                                    <field name="partner_id" required="True"/>
                                     <field name="enter_date"/>
                                     <field name="exit_date"/>
                                 </group>

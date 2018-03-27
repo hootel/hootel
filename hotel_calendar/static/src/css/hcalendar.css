@@ -27,6 +27,15 @@
     }
 }
 
+#pms-search {
+	position: fixed;
+	z-index: 9;
+}
+
+#pms-menu {
+	background-color: white;
+	height: 100%;
+}
 
 #hcalendar {
 	display: flex;
@@ -44,7 +53,7 @@
 	flex-grow: 2;
   overflow-y: scroll;
   position: relative;
-  max-height: 40vh;
+  max-height: 57vh;
 }
 .table-calcs-header {
 	order: 3;
@@ -55,7 +64,7 @@
 	order: 4;
 	flex-grow: 2;
   overflow-y: scroll;
-  max-height: 21vh;
+  max-height: 20vh;
 }
 
 
@@ -101,12 +110,17 @@
 	text-decoration: none;
 }
 .hcal-table tr:hover td:not(.hcal-unused-zone):not(.hcal-cell-highlight):not(.hcal-cell-current-day):not(.hcal-cell-end-week):not(.btn-hcal):not(.hcal-cell-invalid) {
-	background-color: #F6F6F6;
+	/*background-color: #F6F6F6;
+	border: 5px solid red;*/
 }
 
 .hcal-table tr:hover td.hcal-cell-room-type-group-item {
   background-color: #7c7bad80;
 	color: white;
+}
+
+.hcal-restriction-room-day {
+	background-color: #b3218366 !important;
 }
 
 .hcal-table-day {
@@ -216,7 +230,7 @@
 	color: white;
 	white-space: nowrap;
 	overflow: hidden;
-	z-index:999;
+	z-index:8;
 }
 .hcal-reservation:hover {
 	background-color: #4e97bf;
@@ -255,7 +269,7 @@
 	border: 2px dashed #3465a4;
 	opacity: 0.9;
 	pointer-events: none;
-	z-index:9999;
+	z-index:10;
 }
 
 .hcal-reservation-readonly:not(.hcal-unused-zone) {

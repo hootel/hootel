@@ -29,8 +29,9 @@
                         <button name="action_done" type="object" string="Set to Done"
                             states="sale" attrs="{'invisible': [('invoice_status', '!=', 'invoiced')]}"
                             help="If a Hotel Folio is done, you cannot modify it manually anymore. However, you will still be able to invoice or deliver. This is used to freeze the Hotel Folio." />
+                        <button name="print_quotation" string="Print" type="object" states="sent,sale"/>
                         <field name="state" select="2" widget="statusbar"
-                            statusbar_visible="draft,sent,sale,done" />
+                            statusbar_visible="draft,sent,sale,done" invisible="1"/>
                     </header>
 
                     <sheet>
@@ -140,6 +141,7 @@
                                         <field name="name" invisible="1"/>
                                         <field name="checkin" />
                                         <field name="checkout" />
+                                        <field name="nights" /> 
                                         <field name="adults" />
                                         <field name="children" />
                                         <field name="price_unit" />

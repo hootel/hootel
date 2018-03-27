@@ -1,6 +1,4 @@
-<openerp>
-    <data noupdate="1">
-
+<odoo noupdate="1">
           <record id="wubook_push_avail" model="ir.cron">
             <field name="name">WuBook Push Availability</field>
             <field name="active" eval="True" />
@@ -14,7 +12,7 @@
             <field name="args" eval="" />
           </record>
 
-<!--          <record id="wubook_corporate_fetch" model="ir.cron">
+          <!--          <record id="wubook_corporate_fetch" model="ir.cron">
             <field name="name">WuBook Corporate Fetchable Properties</field>
             <field name="active" eval="True" />
             <field name="user_id" ref="base.user_root" />
@@ -27,7 +25,5 @@
             <field name="function" eval="'corporate_fetch'" />
             <field name="args" eval="" />
             <field name="priority" eval="5" />
-        </record> -->
-
-    </data>
-</openerp>
+          </record> -->
+</odoo>

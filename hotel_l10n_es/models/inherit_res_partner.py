@@ -92,3 +92,9 @@ class ResPartner(models.Model):
             if partner_ids:
                 result += self.browse(partner_ids).name_get()
         return result
+
+    @api.onchange('poldocument')
+    def onchange_poldocument(self):
+        for partner in self:
+            if partner.poldocument and partner.documenttype == 'D':
+                partner.vat = 'ES' + partner.poldocument
