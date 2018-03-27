@@ -50,6 +50,7 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
     showPricelist: options.showPricelist || false,
     showAvailability: options.showAvailability || false,
     showNumRooms: options.showNumRooms || 0,
+    showOverbookings: options.showOverbookings || false
   };
 
   // Check correct values
@@ -66,7 +67,7 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
   this.tableCreated = false;
   this.cellSelection = {start:false, end:false, current:false};
   /** Constants **/
-  this.ACTION = { NONE: -1, MOVE_ALL: 0, MOVE_LEFT: 1, MOVE_RIGHT: 2 };
+  this.ACTION = { NONE: -1, MOVE_ALL: 0, MOVE_LEFT: 1, MOVE_RIGHT: 2, SWAP: 3 };
 
   /***/
   this._reset_action_reservation();
@@ -77,6 +78,7 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
   /** Main Events **/
   document.addEventListener('mouseup', this.onMainMouseUp.bind(this), false);
   document.addEventListener('touchend', this.onMainMouseUp.bind(this), false);
+  document.addEventListener('keyup', this.onMainKeyUp.bind(this), false);
   window.addEventListener('resize', this.onMainResize.bind(this), false);
 
   return this;
@@ -178,7 +180,7 @@ HotelCalendar.prototype = {
           if (reserv.state === 'overbooking') {
             // Need new room line?
             var row = this.createOBRoomRow(reserv.room);
-            var room = this.getRoom(row.dataset.hcalRoomObjId);
+            var room = this.getRoom(row.dataset.hcalRoomObjId, true);
             reserv.room = room;
           }
           var limits = this.getReservationCellLimits(reserv);
@@ -480,7 +482,7 @@ HotelCalendar.prototype = {
         // Create Overbooking Room
         var ob_room = new HRoom(
             `${obr.length}@${room.id}`,
-            `OB-${room.number}`, // Name
+            `OB-${room.number}/#${obr.length}`, // Name
             room.capacity, // Capacity
             room.type, // Category
             room.shared, // Shared Room
@@ -517,18 +519,32 @@ HotelCalendar.prototype = {
     return 0.0;
   },
 
+  removeOBRoomRow: function(/*String*/room) {
+    if (!(room instanceof HRoom)) { room = this.getRoom(id); }
+    console.log(room);
+    var obRoomRow = this.e.querySelector(`#${this._sanitizeId(`ROW_${room.number}_${room.type}`)}`);
+  },
+
   createOBRoomRow: function(/*Int,HRoomObject*/room) {
     if (!(room instanceof HRoom)) { room = this.getRoom(id); }
     var ob_room = this.getRoom(room.id, true);
 
-    var mainRoomRow = this.e.querySelector(`#${this._sanitizeId(`ROW_${room.number}_${room.type}`)}`);
+    // Obtain the real room number
+    var cnumber = room.number;
+    var isf = cnumber.search('OB-');
+    var isfb = cnumber.search('/#');
+    if (isf != -1 && isfb != -1) {
+      cnumber = cnumber.substr(isf+3, isfb-(isf+3));
+    }
+    // Obtain the original room row
+    var mainRoomRow = this.e.querySelector(`#${this._sanitizeId(`ROW_${cnumber}_${room.type}`)}`);
     if (!mainRoomRow) {
       console.warn("Can't found room row!!");
       return false;
     }
 
     var row = document.createElement("TR");
-    row.setAttribute('id', this._sanitizeId(`ROW_${room.number}_${room.type}_OVER${this.getOBRooms(room.id).length}`));
+    row.setAttribute('id', this._sanitizeId(`ROW_${cnumber}_${room.type}_OVER${this.getOBRooms(room.id).length}`));
     row.classList.add('hcal-row-room-type-group-item');
     row.classList.add('hcal-row-room-type-group-overbooking-item');
     row.dataset.hcalRoomObjId = ob_room.id;
@@ -1222,6 +1238,27 @@ HotelCalendar.prototype = {
     this._updateCellSelection();
   },
 
+  _updateHighlightSwapReservations: function(/*HReservation*/reserv) {
+    if (typeof reserv === 'undefined' || !reserv) {
+      var elms = this.e.querySelectorAll("div.hcal-reservation-invalid-swap");
+      for (var elm of elms) {
+        elm.classList.remove('hcal-reservation-invalid-swap');
+      }
+    } else {
+      var diff_date = this.getDateDiffDays(reserv.startDate, reserv.endDate);
+      for (var nreserv of this._reservations) {
+        if (nreserv === reserv) {
+          continue;
+        }
+
+        var cdiff = this.getDateDiffDays(nreserv.startDate, nreserv.endDate);
+        if (cdiff > diff_date) {
+          this.getReservationDiv(nreserv).classList.add('hcal-reservation-invalid-swap');
+        }
+      }
+    }
+  },
+
   _updateHighlightInvalidZones: function(/*HReservation*/reserv) {
     if (typeof reserv === 'undefined') {
       var elms = this.etable.querySelectorAll("td[data-hcal-date] table td");
@@ -1465,11 +1502,12 @@ HotelCalendar.prototype = {
       }, false);
       var _funcEvent = function(ev){
         if (!$this.reservationAction.reservation && $this._isLeftButtonPressed(ev)) {
-          $this.reservationAction = {
-            action: $this._getRerservationPositionAction(this, ev.layerX, ev.layerY),
-            reservation: this,
-            mousePos: [ev.x, ev.y]
-          };
+          $this.reservationAction.reservation = this;
+          $this.reservationAction.mousePos = [ev.x, ev.y];
+
+          if ($this.reservationAction.action != $this.ACTION.SWAP) {
+            $this.reservationAction.action = $this._getRerservationPositionAction(this, ev.layerX, ev.layerY, ev.ctrlKey);
+          }
 
           var reserv = $this.getReservation(this.dataset.hcalReservationObjId);
           $this._updateHighlightInvalidZones(reserv);
@@ -1521,7 +1559,11 @@ HotelCalendar.prototype = {
     }
   },
 
-  _getRerservationPositionAction: function(/*HTMLObject*/elm, /*Int*/posX, /*Int*/posY) {
+  _getRerservationPositionAction: function(/*HTMLObject*/elm, /*Int*/posX, /*Int*/posY, /*Boolan*/specialMode) {
+    if (specialMode) {
+      return this.ACTION.SWAP;
+    }
+
     var bounds = elm.getBoundingClientRect();
     if (posX <= 5) { return this.ACTION.MOVE_LEFT; }
     else if (posX >= bounds.width-10) { return this.ACTION.MOVE_RIGHT; }
@@ -1739,8 +1781,16 @@ HotelCalendar.prototype = {
   },
 
   //==== EVENT FUNCTIONS
+  onMainKeyUp: function(/*EventObject*/ev) {
+    if (ev.keyCode === 27 && this.reservationAction.action === this.ACTION.SWAP) {
+      this._reset_action_reservation();
+      this._updateHighlightSwapReservations(false);
+    }
+  },
+
   onMainMouseUp: function(/*EventObject*/ev) {
     if (this.reservationAction.reservation) {
+        var needResetAction = true;
         var reservDiv = this.reservationAction.reservation;
         reservDiv.classList.remove('hcal-reservation-action');
         this._updateHighlightInvalidZones();
@@ -1793,6 +1843,22 @@ HotelCalendar.prototype = {
             this._updateReservationOccupation();
           }
           reservDiv.classList.remove('hcal-reservation-invalid');
+        } else if (this.reservationAction.action === this.ACTION.SWAP) {
+          if (this.reservationAction.oldReservationObj) {
+            if (!reservDiv.classList.contains('hcal-reservation-invalid-swap')) {
+              this.reservationAction.newReservationObj =  _.clone(reserv);
+              console.log("SE HA CLICKADO EN MODO SWAP FIN");
+              this._updateHighlightSwapReservations(false);
+            } else {
+              needResetAction = false;
+            }
+          } else {
+            this.reservationAction.oldReservationObj = _.clone(reserv);
+            this.reservationAction.reservation = null;
+            console.log("SE HA CLICKADO EN MODO SWAP START");
+            this._updateHighlightSwapReservations(reserv);
+            needResetAction = false;
+          }
         } else {
           this.e.dispatchEvent(new CustomEvent(
             'hcalOnClickReservation',
@@ -1803,7 +1869,9 @@ HotelCalendar.prototype = {
               }
             }));
         }
-        this._reset_action_reservation();
+        if (needResetAction) {
+          this._reset_action_reservation();
+        }
     }
     this._resetCellSelection();
     this._updateCellSelection();
