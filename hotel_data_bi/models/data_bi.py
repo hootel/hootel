@@ -63,7 +63,7 @@ class Data_Bi(models.Model):
     def export_data_bi(self,
                        archivo=False,
                        fechafoto=date.today().strftime('%Y-%m-%d')):
-        """Prepare a Json Objet to export data for MyDataBI.
+        u"""Prepare a Json Objet to export data for MyDataBI.
 
         Generate a dicctionary to by send in JSON
         archivo = response file type
@@ -148,7 +148,7 @@ class Data_Bi(models.Model):
             dic_capacidad.append({
                 'ID_Hotel': compan.id_hotel,
                 'Hasta_Fecha':
-                (date.today()+timedelta(days=365*3)).strftime("%Y-%m-%d"),
+                (date.today() + timedelta(days=365 * 3)).strftime("%Y-%m-%d"),
                 'ID_Tipo_Habitacion': i['product_id'][0],
                 'Nro_Habitaciones': len(room.room_ids)})
 
@@ -170,8 +170,8 @@ class Data_Bi(models.Model):
         dic_budget = []  # Diccionario con las previsiones Budget
         for budget in budgets:
             dic_budget.append({'ID_Hotel': compan.id_hotel,
-                               'Fecha': str(budget.year) + '-'
-                               + str(budget.month).zfill(2) + '-01',
+                               'Fecha': str(budget.year) + '-' +
+                               str(budget.month).zfill(2) + '-01',
                                # 'ID_Tarifa': 0,
                                # 'ID_Canal': 0,
                                # 'ID_Pais': 0,
@@ -209,8 +209,7 @@ class Data_Bi(models.Model):
                 'ID_Tipo_Habitacion':
                 linea.reservation_id.virtual_room_id.product_id.id,
                 'ID_Motivo_Bloqueo': id_m_b,
-                'Nro_Habitaciones': 1,
-                })
+                'Nro_Habitaciones': 1})
 
         lineas = self.env['res.partner.category'].search([])
         dic_segmentos = []  # Diccionario con Segmentación
