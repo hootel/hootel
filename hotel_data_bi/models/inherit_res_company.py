@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Alda Hotels <informatica@aldahotels.com>
+#    Copyright (C) 2018 Alda Hotels <informatica@aldahotels.com>
 #                       Jose Luis Algara <osotranquilo@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -19,23 +19,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
 from openerp import models, fields, api
 
 
-class IneCode(models.Model):
-    _name = 'code_ine'
+class Inherit_res_company(models.Model):
+    _inherit = 'res.company'
 
-    name = fields.Char('Place', required=True)
-    code = fields.Char('Code', required=True)
-
-    @api.multi
-    def name_get(self):
-        data = []
-        for record in self:
-            subcode = record.code
-            if len(record.code) > 3:
-                subcode = 'ESP'
-            display_value = record.name + " (" + subcode + ")"
-            data.append((record.id, display_value))
-        return data
+    id_hotel = fields.Integer(
+        'Unique ID for Revenue', default=0,
+        help='It must be unique to be able to identify the hotel, \
+        within a hotel group.')
