@@ -8,6 +8,7 @@
   - [x] hotel: Base module (a fork of SerpentCS Hotel Module)
   - [x] hotel_calendar: Adds calendar for manage hotel reservations and rooms configuration
   - [x] hotel_calendar_wubook: Unify 'hotel_wubook_prototype' and 'hotel_calendar' modules
+  - [x] hotel_data_bi: Export reservations data for Revenue to MyDataBI
   - [x] hotel_l10n_es: Procedures for check-in process in Spain
   - [ ] hotel_wubook: NOTHING... the idea is use Odoo Connector
   - [x] hotel_wubook_prototype: Current implementation of Wubook Connector... sync data with wubook.net account.
