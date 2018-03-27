@@ -56,8 +56,13 @@ WUBOOK_STATUS_BAD = [
     WUBOOK_STATUS_CANCELLED_PENALTY,
 ]
 
+
 def _partner_split_comma_name(partner_name):
-    return [' '.join(partner_name.split(',')[:-1]), ' '.join(partner_name.split(',')[-1:])]
+    return [
+        ' '.join(partner_name.split(',')[:-1]),
+        ' '.join(partner_name.split(',')[-1:]),
+    ]
+
 
 # WUBOOK
 class WuBook(models.TransientModel):
@@ -934,7 +939,12 @@ class WuBook(models.TransientModel):
     @api.model
     def generate_room_values(self, dfrom, dto, values, set_wmax_avail=False):
         virtual_room_avail_obj = self.env['hotel.virtual.room.availability']
+        virtual_room_restr_obj = self.env['hotel.virtual.room.restriction']
+        vroom_restr_item_obj = self.env['hotel.virtual.room.restriction.item']
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
+        def_wubook_restr = virtual_room_restr_obj.search([('wpid', '=', '0')])
+        _logger.info("==== ROOM VALUES")
+        _logger.info(values)
         for k_rid, v_rid in values.iteritems():
             vroom = hotel_virtual_room_obj.search([
                 ('wrid', '=', k_rid)
@@ -943,6 +953,7 @@ class WuBook(models.TransientModel):
                 date_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
                 for day_vals in v_rid:
                     date_str = date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                    # Get Availability
                     vroom_avail = virtual_room_avail_obj.search([
                         ('virtual_room_id', '=', vroom.id),
                         ('date', '=', date_str)
@@ -968,8 +979,47 @@ class WuBook(models.TransientModel):
                             'wubook_action': False,
                             'mail_create_nosubscribe': True,
                         }).create(vals)
-                    date_dt = date_dt + timedelta(days=1)
 
+                    # Get Restrictions
+                    if def_wubook_restr:
+                        vroom_restr = vroom_restr_item_obj.search([
+                            ('virtual_room_id', '=', vroom.id),
+                            ('applied_on', '=', '0_virtual_room'),
+                            ('date_start', '=', date_str),
+                            ('date_end', '=', date_str),
+                            ('restriction_id', '=', '0'),
+                        ])
+                        vals = {
+                            'min_stay': day_vals.get('min_stay', 0),
+                            'min_stay_arrival': day_vals.get(
+                                'min_stay_arrival',
+                                0),
+                            'max_stay': day_vals.get('max_stay', 0),
+                            'closed': day_vals.get('closed', False),
+                            'closed_departure': day_vals.get(
+                                'closed_departure',
+                                False),
+                            'closed_arrival': day_vals.get(
+                                'closed_arrival',
+                                False),
+                            'wpushed': True,
+                        }
+                        if vroom_restr:
+                            vroom_restr_item_obj.with_context({
+                                'wubook_action': False,
+                            }).write(vals)
+                        else:
+                            vals.update({
+                                'restriction_id': def_wubook_restr.id,
+                                'virtual_room_id': vroom.id,
+                                'date_start': date_str,
+                                'date_end': date_str,
+                                'applied_on': '0_virtual_room',
+                            })
+                            vroom_restr_item_obj.with_context({
+                                'wubook_action': False,
+                            }).create(vals)
+                    date_dt = date_dt + timedelta(days=1)
         return True
 
     @api.model
