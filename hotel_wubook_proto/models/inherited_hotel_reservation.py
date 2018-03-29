@@ -215,8 +215,6 @@ class HotelReservation(models.Model):
     def send_bus_notification(self, naction, ntype, ntitle=''):
         hotel_cal_obj = self.env['bus.hotel.calendar']
         for record in self:
-            if not record.wis_from_channel:
-                continue
             hotel_cal_obj.send_reservation_notification(
                 naction,
                 ntype,
