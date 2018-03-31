@@ -40,13 +40,17 @@
 											attrs="{'readonly':[('edit_room','=',False)]}"/>
 										</h2>
 									</td>
-								</tr>								
-							</table>   
-                             <group colspan="4" col="4">			  
+								</tr>
+							</table>
+                             <group colspan="4" col="4">
                                 <field name="checkin"/>
                                 <field name="adults"/>
                                 <field name="checkout"/>
                                 <field name="children"/>
+                                <!-- cardex_pending is a computed field and it is required here
+                                    for being using in hotel_folio cardex_smart_button domain
+                                    when adding new reservations lines -->
+                                <field name="cardex_pending" invisible="1"/>
                             </group>
                             <group>
                                 <field name="pricelist_id" invisible="1"/>
@@ -123,12 +127,12 @@
                     <field name="folio_id"/>
                     <field name="checkin"/>
                     <field name="checkout"/>
-		    <field name="nights" /> 
+		    <field name="nights" />
                     <field name="price_unit" />
                     <field name="discount" groups="sale.group_discount_per_so_line"/>
                     <field name="price_subtotal" />
                     <field name="adults"/>
-                    <field name="children"/>                    
+                    <field name="children"/>
                      <field name="state" />
                     <field name="cardex_ids" invisible ="1"/>
                     <field name="to_assign" invisible="True"/>
