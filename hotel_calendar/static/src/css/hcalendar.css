@@ -91,6 +91,17 @@
  	border: 1px solid #cfcfdd;
 }
 
+.hcal-warn-ob-indicator {
+	position: absolute;
+	background-color: red;
+	color: yellow;
+	border: 1px solid black;
+	z-index: 9;
+	width: 25px;
+	height: 20px;
+	text-align: center;
+}
+
 .table-calcs-header .hcal-table, .table-reservations-header .hcal-table {
 	height: 46px;
 }
