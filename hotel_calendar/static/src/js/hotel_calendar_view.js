@@ -266,6 +266,39 @@ var HotelCalendarView = View.extend({
                 });
             });
         });
+        this._hcalendar.addEventListener('hcalOnSwapReservations', function(ev){
+          var fromIds = _.pluck(ev.detail.inReservs, 'id');
+          var toIds = _.pluck(ev.detail.outReservs, 'id');
+          var fromRoom = ev.detail.inReservs[0].room;
+          var toRoom = ev.detail.outReservs[0].room;
+          var fromReservDiv = self._hcalendar.getReservationDiv(ev.detail.inReservs[0]);
+          var toReservDiv = self._hcalendar.getReservationDiv(ev.detail.outReservs[0]);
+          var fromBounds = fromReservDiv.style.top;
+          var toBounds = toReservDiv.style.top;
+
+          for (var nreserv of ev.detail.inReservs) {
+            nreserv.room = toRoom;
+            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
+            $(reservDiv).animate({'top': toBounds});
+          }
+          for (var nreserv of ev.detail.outReservs) {
+            nreserv.room = fromRoom;
+            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
+            $(reservDiv).animate({'top': fromBounds});
+          }
+          self._model.call('swap_reservations', [false, fromIds, toIds]).fail(function(result){
+            for (var nreserv of ev.detail.inReservs) {
+              nreserv.room = toRoom;
+              var reservDiv = self._hcalendar.getReservationDiv(nreserv);
+              $(reservDiv).animate({'top': fromBounds});
+            }
+            for (var nreserv of ev.detail.outReservs) {
+              nreserv.room = fromRoom;
+              var reservDiv = self._hcalendar.getReservationDiv(nreserv);
+              $(reservDiv).animate({'top': toBounds});
+            }
+          });
+        });
         this._hcalendar.addEventListener('hcalOnChangeReservation', function(ev){
             var newReservation = ev.detail.newReserv;
             var oldReservation = ev.detail.oldReserv;
@@ -300,7 +333,6 @@ var HotelCalendarView = View.extend({
                         close: true,
                         disabled: !newReservation.id,
                         click: function () {
-                            var nstate = (oldReservation.room.overbooking && !newReservation.room.overbooking)?'draft':'overbooking';
                             var roomId = newReservation.room.id;
                             if (newReservation.room.overbooking) {
                               roomId = +newReservation.room.id.substr(newReservation.room.id.indexOf('@')+1);
@@ -309,11 +341,11 @@ var HotelCalendarView = View.extend({
                                 'checkin': newReservation.startDate.format(ODOO_DATETIME_MOMENT_FORMAT),
                                 'checkout': newReservation.endDate.format(ODOO_DATETIME_MOMENT_FORMAT),
                                 'product_id': roomId,
-                                'state': nstate
+                                'overbooking': newReservation.room.overbooking
                             };
                             console.log(write_values);
                             new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
-                                self._hcalendar.swapReservation(newReservation, oldReservation);
+                                self._hcalendar.changeReservation(newReservation, oldReservation);
                             });
                             // Workarround for dispatch room lines regeneration
                             new Model('hotel.reservation').call('on_change_checkin_checkout_product_id', [[newReservation.id], false]);
@@ -329,7 +361,7 @@ var HotelCalendarView = View.extend({
             }).open();
             dialog.$modal.on('hide.bs.modal', function(e){
               if (!hasChanged) {
-                self._hcalendar.swapReservation(newReservation, oldReservation);
+                self._hcalendar.changeReservation(newReservation, oldReservation);
               }
             });
         });
@@ -556,7 +588,7 @@ var HotelCalendarView = View.extend({
 
             var reservs = [];
             for (var r of results['reservations']) {
-                var room = self._hcalendar.getRoom(r[0]);
+                var room = self._hcalendar.getRoom(r[0], r[15], r[1]);
                 var nreserv = new HReservation({
                   'id': r[1],
                   'room': room,
@@ -573,7 +605,7 @@ var HotelCalendarView = View.extend({
                   'fixRooms': r[14],
                   'unusedZone': false,
                   'linkedId': false,
-                  'state': r[15],
+                  'overbooking': r[15],
                 });
                 nreserv.addUserData({'folio_id': r[7]});
                 nreserv.addUserData({'parent_reservation': r[11]});
@@ -994,10 +1026,10 @@ var HotelCalendarView = View.extend({
 
                 // Create/Update/Delete reservation
                 if (notif[1]['action'] === 'unlink' || reserv['state'] === 'cancelled') {
-                  this._hcalendar.removeReservation(reserv['reserv_id']);
+                  this._hcalendar.removeReservation(reserv['reserv_id'], true);
                   this._reserv_tooltips = _.pick(this._reserv_tooltips, function(value, key, obj){ return key != reserv['reserv_id']; });
                 } else {
-                  var room = this._hcalendar.getRoom(reserv['product_id'], reserv['state'] === 'overbooking');
+                  var room = this._hcalendar.getRoom(reserv['product_id'], reserv['overbooking'], reserv['reserv_id']);
                   if (room) {
                     var nreserv = new HReservation({
                       'id': reserv['reserv_id'],
@@ -1015,7 +1047,7 @@ var HotelCalendarView = View.extend({
                       'fixRooms': reserv['fix_rooms'],
                       'unusedZone': false,
                       'linkedId': false,
-                      'state': reserv['state'],
+                      'overbooking': reserv['overbooking'],
                     });
                     nreserv.addUserData({'folio_id': reserv['folio_id']});
                     nreserv.addUserData({'parent_reservation': reserv['parent_reservation']});
@@ -1070,7 +1102,7 @@ var HotelCalendarView = View.extend({
             self._reserv_tooltips = _.extend(self._reserv_tooltips, results['tooltips']);
             var reservs = [];
             for (var r of results['reservations']) {
-                var room = self._hcalendar.getRoom(r[0], r[15] === 'overbooking');
+                var room = self._hcalendar.getRoom(r[0], r[15], r[1]);
                 var nreserv = new HReservation({
                   'id': r[1],
                   'room': room,
@@ -1087,7 +1119,7 @@ var HotelCalendarView = View.extend({
                   'fixRooms': r[14] || false,
                   'unusedZone': false,
                   'linkedId': false,
-                  'state': r[15],
+                  'overbooking': r[15],
                 });
                 nreserv.addUserData({'folio_id': r[7]});
                 nreserv.addUserData({'parent_reservation': r[11]});

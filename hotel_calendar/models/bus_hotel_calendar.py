@@ -46,7 +46,8 @@ class BusHotelCalendar(models.TransientModel):
                                     adults, children, checkin, checkout,
                                     folio_id, color, color_text, splitted,
                                     parent_reservation, room_name,
-                                    partner_phone, state, fix_days):
+                                    partner_phone, state, fix_days,
+                                    overbooking):
         user_id = self.env['res.users'].browse(self.env.uid)
         master_reserv = parent_reservation or reserv_id
         num_split = self.env['hotel.reservation'].search_count([
@@ -80,6 +81,7 @@ class BusHotelCalendar(models.TransientModel):
                 'only_read': False,
                 'fix_days': fix_days,
                 'fix_rooms': False,
+                'overbooking': overbooking,
             },
             'tooltip': [
                 partner_name,
@@ -148,7 +150,8 @@ class BusHotelCalendar(models.TransientModel):
                                       children, checkin, checkout, folio_id,
                                       color, color_text, splitted,
                                       parent_reservation, room_name,
-                                      partner_phone, state, fix_days):
+                                      partner_phone, state, fix_days,
+                                      overbooking):
         notif = self._generate_reservation_notif(action, ntype, title,
                                                  product_id, reserv_id,
                                                  partner_name, adults,
@@ -157,7 +160,7 @@ class BusHotelCalendar(models.TransientModel):
                                                  color, color_text, splitted,
                                                  parent_reservation,
                                                  room_name, partner_phone,
-                                                 state, fix_days)
+                                                 state, fix_days, overbooking)
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
                                      HOTEL_BUS_CHANNEL_ID), notif)
 
