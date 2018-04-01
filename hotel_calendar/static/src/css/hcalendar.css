@@ -299,6 +299,16 @@
 	background: -moz-repeating-radial-gradient(circle farthest-corner at right center, #ffee00 0%, #2c2c2c 5%, #ffff00 10%, #2c2c2c 20%, #2c2c2c 100%);
 }
 
+.hcal-reservation-swap-in-selected {
+	background-color: #005B96 !important;
+	border-color: #99bdd5 !important;
+}
+
+.hcal-reservation-swap-out-selected {
+	border-color: #005B96 !important;
+	background-color: #99bdd5 !important;
+}
+
 .hcal-row-room-type-group-item {
 	text-align: center;
 }

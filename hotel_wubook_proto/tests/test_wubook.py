@@ -404,9 +404,8 @@ class TestWubook(TestHotelWubook):
         self.assertEqual(nreservs[0].state,
                          'draft',
                          "Overbooking don't handled")
-        self.assertEqual(nreservs[1].state,
-                         'overbooking',
-                         "Overbooking don't handled")
+        self.assertTrue(nreservs[1].overbooking,
+                        "Overbooking don't handled")
 
         # No Real Rooms Avail
         wbooks = [
@@ -455,9 +454,8 @@ class TestWubook(TestHotelWubook):
             ('wrid', 'in', processed_rids)
         ])
         for nreserv in nreservs:
-            self.assertEqual(nreservs[0].state,
-                             'overbooking',
-                             "Overbooking don't handled")
+            self.assertTrue(nreservs[0].overbooking,
+                            "Overbooking don't handled")
 
     def test_overbooking(self):
         now_utc_dt = date_utils.now()
@@ -510,12 +508,9 @@ class TestWubook(TestHotelWubook):
         nreservs = self.env['hotel.reservation'].search([
             ('wrid', 'in', processed_rids)
         ])
-        self.assertEqual(nreservs[0].state,
-                         'draft',
-                         "Overbooking don't handled")
-        self.assertEqual(nreservs[1].state,
-                         'draft',
-                         "Overbooking don't handled")
-        self.assertEqual(nreservs[2].state,
-                         'overbooking',
-                         "Overbooking don't handled")
+        self.assertTrue(nreservs[0].overbooking,
+                        "Overbooking don't handled")
+        self.assertTrue(nreservs[1].overbooking,
+                        "Overbooking don't handled")
+        self.assertTrue(nreservs[2].overbooking,
+                        "Overbooking don't handled")

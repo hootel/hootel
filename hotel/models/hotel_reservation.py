@@ -242,8 +242,7 @@ class HotelReservation(models.Model):
     to_assign = fields.Boolean('To Assign')
     state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirm'),
                               ('booking', 'Booking'), ('done', 'Done'),
-                              ('cancelled', 'Cancelled'),
-                              ('overbooking', 'OverBooking')],
+                              ('cancelled', 'Cancelled')],
                              'State', readonly=True,
                              default=lambda *a: 'draft',
                              track_visibility='always')
@@ -303,6 +302,7 @@ class HotelReservation(models.Model):
     splitted = fields.Boolean('Splitted', default=False)
     parent_reservation = fields.Many2one('hotel.reservation',
                                          'Parent Reservation')
+    overbooking = fields.Boolean('Is Overbooking', default=False)
     # To show de total amount line in read_only mode
     amount_reservation = fields.Float('Total',
                                       compute='_computed_amount_reservation')
@@ -536,6 +536,7 @@ class HotelReservation(models.Model):
             'product_id': self.product_id.id,
             'parent_reservation': self.parent_reservation.id,
             'state': self.state,
+            'overbooking': self.overbooking,
         }
 
     @api.model
@@ -596,10 +597,11 @@ class HotelReservation(models.Model):
     def write(self, vals):
         datesChanged = ('checkin' in vals or 'checkout' in vals)
         if datesChanged:
-            checkin = vals.get('checkin', self.checkin)
-            checkout = vals.get('checkout', self.checkout)
-            days_diff = date_utils.date_diff(checkin,
-                                             checkout, hours=False) + 1
+            for record in self:
+                checkin = vals.get('checkin', record.checkin)
+                checkout = vals.get('checkout', record.checkout)
+                days_diff = date_utils.date_diff(checkin,
+                                                 checkout, hours=False) + 1
             rlines = self.prepare_reservation_lines(checkin, days_diff)
             vals.update({
                 'reservation_lines': rlines['commands'],
@@ -942,7 +944,7 @@ class HotelReservation(models.Model):
         if chkin_utc_dt >= chkout_utc_dt:
                 raise ValidationError(_('Room line Check In Date Should be \
                 less than the Check Out Date!'))
-        if self.state != 'overbooking':
+        if not self.overbooking and not self._context.get("ignore_avail_restrictions", False):
             # Reservation end day count as free day. Not check it
             chkout_utc_dt -= timedelta(days=1)
             occupied = self.env['hotel.reservation'].occupied(
@@ -982,6 +984,6 @@ class HotelReservation(models.Model):
         reservations = self.env['hotel.reservation'].search([
             ('reservation_lines.date', 'in', dates_list),
             ('state', '!=', 'cancelled'),
-            ('state', '!=', 'overbooking')
+            ('overbooking', '=', False)
         ])
         return reservations

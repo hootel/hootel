@@ -78,7 +78,7 @@ class HotelReservation(models.Model):
                 (reserv.wrid and reserv.wrid != '') or reserv.splitted,
                 # Fix Rooms
                 False,
-                reserv.state))
+                reserv.overbooking))
             # Update tooltips
             vals[1][reserv.id].append(reserv.wchannel_id.name)
         return (json_reservations, vals[1])

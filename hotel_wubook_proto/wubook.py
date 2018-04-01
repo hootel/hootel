@@ -1446,7 +1446,7 @@ class WuBook(models.TransientModel):
                                 'product_id':
                                     vroom.room_ids[0].product_id.id,
                                 'name': vroom.name,
-                                'state': 'overbooking',
+                                'overbooking': True,
                             })
                             reservations.append((0, False, vals))
                             self.create_wubook_issue(
