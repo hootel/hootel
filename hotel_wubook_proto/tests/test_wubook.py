@@ -508,7 +508,7 @@ class TestWubook(TestHotelWubook):
         nreservs = self.env['hotel.reservation'].search([
             ('wrid', 'in', processed_rids)
         ])
-        self.assertTrue(nreservs[0].overbooking,
+        self.assertFalse(nreservs[0].overbooking,
                         "Overbooking don't handled")
         self.assertTrue(nreservs[1].overbooking,
                         "Overbooking don't handled")
