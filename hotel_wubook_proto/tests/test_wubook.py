@@ -509,8 +509,8 @@ class TestWubook(TestHotelWubook):
             ('wrid', 'in', processed_rids)
         ])
         self.assertFalse(nreservs[0].overbooking,
-                        "Overbooking don't handled")
-        self.assertTrue(nreservs[1].overbooking,
-                        "Overbooking don't handled")
+                         "Overbooking don't handled")
+        self.assertFalse(nreservs[1].overbooking,
+                         "Overbooking don't handled")
         self.assertTrue(nreservs[2].overbooking,
                         "Overbooking don't handled")
