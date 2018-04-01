@@ -466,8 +466,6 @@ HotelCalendar.prototype = {
 
       var ob_room = _.find(this.options.rooms, function(item){ return item.id === `${reservId}@${id}` && item.overbooking; });
       if (!ob_room && overb) {
-        console.log("=== DATA ROOM");
-        console.log(id);
         var room = _.find(this.options.rooms, function(item){ return item.id === id; });
         var obr = this.getOBRooms(room.id);
         // Create Overbooking Room
@@ -1909,9 +1907,6 @@ HotelCalendar.prototype = {
       if (reservs.length != 0) { break; }
       freeDates[1] = ndate;
     }
-
-    console.log(freeDates[0].format(this.DATE_FORMAT_SHORT_));
-    console.log(freeDates[1].format(this.DATE_FORMAT_SHORT_));
 
     return freeDates;
   },

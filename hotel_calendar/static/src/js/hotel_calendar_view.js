@@ -343,7 +343,6 @@ var HotelCalendarView = View.extend({
                                 'product_id': roomId,
                                 'overbooking': newReservation.room.overbooking
                             };
-                            console.log(write_values);
                             new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
                                 self._hcalendar.changeReservation(newReservation, oldReservation);
                             });
