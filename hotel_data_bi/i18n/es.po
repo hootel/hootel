@@ -1,0 +1,275 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* hotel_data_bi
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-03-20 18:11+0000\n"
+"PO-Revision-Date: 2018-03-20 19:16+0100\n"
+"Last-Translator: Jose Luis Algara <osotranquilo@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2018"
+msgstr "2018"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2019"
+msgstr "2019"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2020"
+msgstr "2020"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2021"
+msgstr "2021"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2022"
+msgstr "2022"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2023"
+msgstr "2023"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2024"
+msgstr "2024"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2025"
+msgstr "2025"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2026"
+msgstr "2026"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2027"
+msgstr "2027"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2028"
+msgstr "2028"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2029"
+msgstr "2029"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2030"
+msgstr "2030"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2031"
+msgstr "2031"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2032"
+msgstr "2032"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2033"
+msgstr "2033"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2034"
+msgstr "2034"
+
+#. module: hotel_data_bi
+#: selection:data_bi,year:0
+msgid "2035"
+msgstr "2035"
+
+#. module: hotel_data_bi
+#: model:ir.actions.act_window,name:hotel_data_bi.action_data_bi
+msgid "Action REVENUE Conexion"
+msgstr "Accion de Conexión de REVENUE"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "April"
+msgstr "Abril"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "August"
+msgstr "Agosto"
+
+#. module: hotel_data_bi
+#: model:ir.ui.view,arch_db:hotel_data_bi.view_data_bi
+msgid "CONECTAR CON MOP-SOLUTION."
+msgstr "CONECTAR CON MOP-SOLUTION."
+
+#. module: hotel_data_bi
+#: model:ir.model,name:hotel_data_bi.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "December"
+msgstr "Diciembre"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_display_name
+msgid "Display Name"
+msgstr "Nombre a mostrar"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_Estancias
+msgid "Estancias"
+msgstr "Estancias"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "February"
+msgstr "Febrero"
+
+#. module: hotel_data_bi
+#: model:ir.ui.view,arch_db:hotel_data_bi.view_data_bi
+msgid "Generate Conexion"
+msgstr "Generar Conexión"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_id
+msgid "ID"
+msgstr "ID"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,help:hotel_data_bi.field_res_company_id_hotel
+msgid "It must be unique to be able to identify the hotel, within a hotel group."
+msgstr "Debe ser único para poder identificar el hotel, dentro de un grupo hotelero."
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "January"
+msgstr "Enero"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "July"
+msgstr "Julio"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "June"
+msgstr "Junio"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi___last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "March"
+msgstr "Marzo"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "May"
+msgstr "Mayo"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_month
+#: model:ir.ui.view,arch_db:hotel_data_bi.view_data_bi
+msgid "Month"
+msgstr "Mes"
+
+#. module: hotel_data_bi
+#: model:ir.ui.menu,name:hotel_data_bi.menu_data_bi
+msgid "MyDataBI Conexion"
+msgstr "MyDataBI Conexion"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "November"
+msgstr "Noviembre"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "October"
+msgstr "Octubre"
+
+#. module: hotel_data_bi
+#: code:addons/hotel_data_bi/models/data_bi.py:156
+#, python-format
+msgid "Out of Service"
+msgstr "Fuera de Servicio"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_Room_Nights
+msgid "Room Nights"
+msgstr "Room Nights"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_Room_Revenue
+msgid "Room Revenue"
+msgstr "Room Revenue"
+
+#. module: hotel_data_bi
+#: selection:data_bi,month:0
+msgid "September"
+msgstr "Septiembre"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_res_company_id_hotel
+msgid "Unique ID for Revenue"
+msgstr "Unico ID para Revenue"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_year
+msgid "Year"
+msgstr "Año"
+
+#. module: hotel_data_bi
+#: model:ir.model,name:hotel_data_bi.model_data_bi
+msgid "data_bi"
+msgstr "Budget"
