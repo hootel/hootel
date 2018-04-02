@@ -277,12 +277,10 @@ var HotelCalendarView = View.extend({
           var toBounds = toReservDiv.style.top;
 
           for (var nreserv of ev.detail.inReservs) {
-            nreserv.room = toRoom;
             var reservDiv = self._hcalendar.getReservationDiv(nreserv);
             $(reservDiv).animate({'top': toBounds});
           }
           for (var nreserv of ev.detail.outReservs) {
-            nreserv.room = fromRoom;
             var reservDiv = self._hcalendar.getReservationDiv(nreserv);
             $(reservDiv).animate({'top': fromBounds});
           }
@@ -297,6 +295,8 @@ var HotelCalendarView = View.extend({
               var reservDiv = self._hcalendar.getReservationDiv(nreserv);
               $(reservDiv).animate({'top': toBounds});
             }
+
+            self._hcalendar.swapReservations(ev.detail.outReservs, ev.detail.inReservs);
           });
         });
         this._hcalendar.addEventListener('hcalOnChangeReservation', function(ev){

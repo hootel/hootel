@@ -128,15 +128,15 @@ HotelCalendar.prototype = {
   },
 
   getReservations: function(/*Boolean*/noovers, /*HReservation*/ignoreThis) {
-    return _.reject(this._reservations, function(item){ return item===ignoreThis || (noovers && item.overbooking); });
+    return _.reject(this._reservations, function(item){ return item===ignoreThis || (noovers && item.overbooking) || item.unusedZone; });
   },
 
-  getReservation: function(/*Int*/id) {
-    return _.find(this._reservations, {'id': +id});
+  getReservation: function(/*Int,String*/id) {
+    return _.find(this._reservations, function(item){ return item.id == id; });
   },
 
   getReservationDiv: function(/*HReservationObject*/reservationObj) {
-    var reservDiv = this.e.querySelector(`.hcal-reservation[data-hcal-reservation-obj-id='${reservationObj.id}']`);
+    var reservDiv = this.e.querySelector(`div.hcal-reservation[data-hcal-reservation-obj-id='${reservationObj.id}']`);
     return reservDiv;
   },
 
@@ -210,7 +210,7 @@ HotelCalendar.prototype = {
   removeReservation: function(/*Int/HReservationObject*/reservation, /*Boolean?*/noupdate) {
     var reserv = reservation;
     if (!(reserv instanceof HReservation)) {
-      reserv = _.find(this._reservations, {'id': +reservation});
+      reserv = _.find(this._reservations, function(item){ item.id == reservation.id});
     }
     if (reserv) {
       var resDiv = this.getReservationDiv(reserv);
@@ -261,7 +261,7 @@ HotelCalendar.prototype = {
 
   getReservationsByRoom: function(/*Int,HRoomObject*/room) {
     if (!(room instanceof HRoom)) { room = this.getRoom(room); }
-    return _.filter(this._reservations, function(item){ return item.room === room; });
+    return _.filter(this._reservations, function(item){ return item.room.id === room.id; });
   },
 
   getReservationCellLimits: function(/*HReservationObject*/reservation, /*Int?*/nbed, /*Bool?*/notCheck) {
@@ -270,11 +270,9 @@ HotelCalendar.prototype = {
     	return limits;
     }
 
-    var bedNum = 0;
+    var bedNum = nbed;
     if (typeof nbed === 'undefined') {
       bedNum = (reservation.beds_&&reservation.beds_.length)?reservation.beds_[0]:0;
-    } else {
-      bedNum = nbed;
     }
 
     var diff_date = this.getDateDiffDays(reservation.startDate, reservation.endDate);
@@ -354,6 +352,9 @@ HotelCalendar.prototype = {
           var reservs = this.getReservationsByDay(ndate, false, reservation.room.number, +limits.left.dataset.hcalBedNum+b, reservation);
           reservs = _.reject(reservs, function(item){ return item.id===reservation.id; });
           if (reservs.length) {
+            console.log("=== EXIST TT");
+            console.log(reservation);
+            console.log(reservs);
             return this.getReservationCellLimits(reservation, nbed?nbed+1:1); // Recursive: Search best place
           }
         }
@@ -792,7 +793,6 @@ HotelCalendar.prototype = {
     this.edivc.appendChild(this.edtable);
 
     var observer = new MutationObserver(function(mutationsList){
-      console.log("PASA POR AI!");
       $this._updateOBIndicators();
     });
     observer.observe(this.edivr, { childList: true });
@@ -1252,7 +1252,6 @@ HotelCalendar.prototype = {
   },
 
   _updateOBIndicators: function() {
-    console.log("PASA POR AKI!!");
     var mainBounds = this.edivr.getBoundingClientRect();
     for (var reserv of this._reservations) {
       if (!reserv.overbooking) {
@@ -1535,8 +1534,8 @@ HotelCalendar.prototype = {
       // Change some critical values
       var refFromReservs = this.reservationAction.inReservations[0];
       var refToReservs = this.reservationAction.outReservations[0];
-      var refFromRoom = refFromReservs.room;
-      var refToRoom = refToReservs.room;
+      var refFromRoom = this.getRoom(refFromReservs.room.id);
+      var refToRoom = this.getRoom(refToReservs.room.id);
 
       if (refFromRoom.overbooking) {
         var fromRoomRow = this.getOBRoomRow(refFromReservs);
@@ -1553,11 +1552,6 @@ HotelCalendar.prototype = {
         fromRoomRow.setAttribute('id', `${newRowId}`);
         fromRoomRow.dataset.hcalRoomObjId = refFromRoom.id;
       }
-      for (var nreserv of this.reservationAction.inReservations) {
-        nreserv.overbooking = refToReservs.room.overbooking;
-        nreserv.room = refToRoom;
-        this._cleanUnusedZones(nreserv);
-      }
       if (refToRoom.overbooking) {
         var toRoomRow = this.getOBRoomRow(refToReservs);
         // Obtain real id
@@ -1573,24 +1567,26 @@ HotelCalendar.prototype = {
         toRoomRow.setAttribute('id', `${newRowId}`);
         toRoomRow.dataset.hcalRoomObjId = refToRoom.id;
       }
+
+      for (var nreserv of this.reservationAction.inReservations) {
+        nreserv.overbooking = refToReservs.room.overbooking;
+        nreserv.room = refToRoom;
+      }
       for (var nreserv of this.reservationAction.outReservations) {
         nreserv.overbooking = refFromReservs.room.overbooking;
         nreserv.room = refFromRoom;
-        this._cleanUnusedZones(nreserv);
       }
 
-      this.e.dispatchEvent(new CustomEvent(
-        'hcalOnSwapReservations',
-        { 'detail': {
-            'inReservs': this.reservationAction.inReservations,
-            'outReservs': this.reservationAction.outReservations,
-          }
-        }));
-      this._reset_action_reservation();
-      this._updateHighlightSwapReservations();
+      if (this.options.divideRoomsByCapacity) {
+        var allReservs = this.reservationAction.outReservations.concat(this.reservationAction.inReservations);
+        for (var nreserv of allReservs) { this._updateUnusedZones(nreserv); }
+      }
     } else {
       console.warn("[HotelCalendar] Invalid Swap Operation!");
+      return false;
     }
+
+    return true;
   },
 
   changeReservation: function(/*HReservationObject*/reservationObj, /*HReservationObject*/newReservationObj) {
@@ -1642,6 +1638,7 @@ HotelCalendar.prototype = {
     } else {
       console.warn(`[Hotel Calendar][_updateReservation] Can't place reservation ID@${reservationObj.id}`);
       this.removeReservation(reservationObj, true);
+      console.log(this._reservations);
     }
   },
 
@@ -1782,7 +1779,7 @@ HotelCalendar.prototype = {
 
   _cleanUnusedZones: function(/*HReservationObject*/reserv) {
     var reservs = _.filter(this._reservations, function(item){ return item.linkedId === reserv.id; });
-    for (var reserv of reservs) { this.removeReservation(reserv.id, true); }
+    for (var creserv of reservs) { this.removeReservation(creserv, true); }
   },
 
   _updateUnusedZones: function(/*HReservationObject*/reserv) {
@@ -1794,7 +1791,7 @@ HotelCalendar.prototype = {
     var numBeds = reserv.getTotalPersons();
   	for (var e=numBeds; e<reserv.room.capacity; e++) {
   		nreservs.push(new HReservation({
-        'id': --unused_id,
+        'id': `${reserv.id}@${--unused_id}`,
         'room': reserv.room,
         'title': '',
         'adults': 1,
@@ -1811,6 +1808,8 @@ HotelCalendar.prototype = {
         'linkedId': reserv.id,
         'state': 'draft',
       }));
+      console.log("=== TO ROOM");
+      console.log(reserv.room);
   	}
   	this.addReservations(nreservs, true);
   },
@@ -2013,7 +2012,17 @@ HotelCalendar.prototype = {
         this._updateHighlightSwapReservations();
       }
       else if (ev.keyCode === 13) {
-        this.swapReservations(this.reservationAction.inReservations, this.reservationAction.outReservations);
+        if (this.swapReservations(this.reservationAction.inReservations, this.reservationAction.outReservations)) {
+          this.e.dispatchEvent(new CustomEvent(
+            'hcalOnSwapReservations',
+            { 'detail': {
+                'inReservs': this.reservationAction.inReservations,
+                'outReservs': this.reservationAction.outReservations,
+              }
+            }));
+          this._reset_action_reservation();
+          this._updateHighlightSwapReservations();
+        }
       }
     }
   },
@@ -2270,6 +2279,7 @@ function HReservation(/*Dictionary*/rValues) {
   this.userData_ = {};
 }
 HReservation.prototype = {
+  setRoom: function(/*HRoomObject*/room) { this.room = room; },
   setStartDate: function(/*String,MomentObject*/date) { this.startDate = HotelCalendar.toMomentUTC(date); },
   setEndDate: function(/*String,MomentObject*/date) { this.endDate = HotelCalendar.toMomentUTC(date); },
 
