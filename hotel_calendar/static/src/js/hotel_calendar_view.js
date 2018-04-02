@@ -253,18 +253,24 @@ var HotelCalendarView = View.extend({
         });
         this._hcalendar.addEventListener('hcalOnClickReservation', function(ev){
             var res_id = ev.detail.reservationObj.getUserData('folio_id');
-            self._model.call('get_formview_id', [res_id, Session.user_context]).then(function(view_id){
-                var pop = new Common.FormViewDialog(self, {
-                    res_model: 'hotel.folio',
-                    res_id: res_id,
-                    title: _t("Open: ") + ev.detail.reservationObj.title,
-                    view_id: view_id
-                    //readonly: false
-                }).open();
-                pop.on('write_completed', self, function(){
-                    self.trigger('changed_value');
-                });
+            self.call_action({
+              type: 'ir.actions.act_window',
+              res_model: 'hotel.folio',
+              res_id: res_id,
+              views: [[false, 'form']]
             });
+            // self._model.call('get_formview_id', [res_id, Session.user_context]).then(function(view_id){
+            //     var pop = new Common.FormViewDialog(self, {
+            //         res_model: 'hotel.folio',
+            //         res_id: res_id,
+            //         title: _t("Open: ") + ev.detail.reservationObj.title,
+            //         view_id: view_id
+            //         //readonly: false
+            //     }).open();
+            //     pop.on('write_completed', self, function(){
+            //         self.trigger('changed_value');
+            //     });
+            // });
         });
         this._hcalendar.addEventListener('hcalOnSwapReservations', function(ev){
           var fromIds = _.pluck(ev.detail.inReservs, 'id');
