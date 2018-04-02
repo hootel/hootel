@@ -104,6 +104,18 @@
                                 </div>
                             </button>
 
+                            <button type="object" class="oe_stat_button" id="invoice_button"
+                                icon="fa-pencil-square-o" name="open_invoices_folio"
+                                attrs="{'invisible': [('num_invoices', '=', 0)]}"
+                                context="{'default_folio_id': active_id}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="num_invoices"/>
+                                    </span>
+                                    <span class="o_stat_text">Invoices</span>
+                                </div>
+                             </button>
+
                         </div>
 <!--
                         <field name="image" widget="image" class="oe_avatar" options="{&quot;preview_image&quot;: &quot;image_medium&quot;, &quot;size&quot;: [90, 90]}"/>
@@ -125,9 +137,10 @@
                             <field name="project_id" invisible="1"/>
                             <field name="partner_shipping_id" invisible="1" domain="[('parent_id','=',partner_id)]" />
                             <field name="warehouse_id" string="Branch" invisible="1"/>
+                            <field name="invoice_ids" invisible="1"/>
                             <field name="invoice_status" invisible="1" />
                             <field name="hotel_invoice_id" states='progress,done,cancel'
-                                readonly="1" />
+                                readonly="1" invisible="1" />
                         </group>
                         <group colspan="1">
                             <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancel'))]}"/>
@@ -192,10 +205,6 @@
                                     <field name="hotel_policy" attrs="{'readonly':[('state','not in',('draft'))]}" />
                                     <field name="client_order_ref" />
                                 </group>
-                            </page>
-                            <page string="Invoices">
-                                <separator string="Related invoices" colspan="4" />
-                                <field name="invoice_ids" colspan="4" nolabel="1" />
                             </page>
                             <page string="Foreign Exchange" name="foreign exchange" invisible="1">
                                 <separator string="Foreign Exchange" colspan="4" />

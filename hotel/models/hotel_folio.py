@@ -168,6 +168,12 @@ class HotelFolio(models.Model):
         ('mail', 'Mail'),
         ('phone', 'Phone'),
         ('web','Web'),], 'Sales Channel')
+    num_invoices = fields.Integer(compute='_compute_num_invoices')
+
+    @api.multi
+    def _compute_num_invoices(self):
+        for fol in self:
+            fol.num_invoices =  len(self.mapped('invoice_ids.id'))
 
     @api.model
     def daily_plan(self):
@@ -258,6 +264,19 @@ class HotelFolio(models.Model):
             'domain': [('id', 'in', payment_ids)],
         }
 
+    @api.multi
+    def open_invoices_folio(self):
+        invoices = self.mapped('invoice_ids')
+        action = self.env.ref('account.action_invoice_tree1').read()[0]
+        if len(invoices) > 1:
+            action['domain'] = [('id', 'in', invoices.ids)]
+        elif len(invoices) == 1:
+            action['views'] = [(self.env.ref('account.invoice_form').id, 'form')]
+            action['res_id'] = invoices.ids[0]
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+        return action
+        
     @api.multi
     def action_refunds_invoices(self):
         self.ensure_one()
