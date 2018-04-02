@@ -163,6 +163,11 @@ class HotelFolio(models.Model):
         ('staff', 'Staff'),
         ('out', 'Out of Service')], 'Type',
         default=lambda *a: 'normal')
+    channel_type = fields.Selection([
+        ('door', 'Door'),
+        ('mail', 'Mail'),
+        ('phone', 'Phone'),
+        ('web','Web'),], 'Sales Channel')
 
     @api.model
     def daily_plan(self):

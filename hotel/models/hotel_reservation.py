@@ -296,6 +296,7 @@ class HotelReservation(models.Model):
     amount_reservation = fields.Float('Total',compute='_computed_amount_reservation') #To show de total amount line in read_only mode
     edit_room = fields.Boolean(default=True)
     nights = fields.Integer('Nights',computed='_computed_nights')
+    channel_type = fields.Selection(related='folio_id.channel_type')
 
     @api.depends('checkin','checkout')
     def _computed_nights(self):

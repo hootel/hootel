@@ -53,8 +53,8 @@
                             </group>
                             <group colspan="6" col="6">
                                 <field name="virtual_room_id" on_change="1" options="{'no_create': True}" attrs="{'readonly':[('state','not in',('draft'))]}"/>
-                                <field name="room_type_id" options="{'no_create': True}"/>
                                 <field name="check_rooms"/>
+                                <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>
                             </group>
                             <group>
                                 <field name="product_uom_qty"

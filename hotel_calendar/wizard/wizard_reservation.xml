@@ -8,27 +8,27 @@
 			<form string="Reservation Wizard" >
 				<sheet>
 					<group colspan="4" col="4">
-						<field name="virtual_room_id" attrs="{'readonly':[('checkin','=', False)]}" options="{'no_create': True}"/>
-						<field name="partner_id"/>
+						<field name="virtual_room_id" attrs="{'readonly':[('checkin','=', False)]}" options="{'no_create': True}"/>                        
+						<field name="partner_id"/>                        
 						<field name="checkin" required="1" colspan="1"/>
-						<field name="checkout" required="1" colspan="1"/>
-						
+						<field name="checkout" required="1" colspan="1"/>						
 					</group>
 					<group col="3" colspan="3" attrs="{'invisible':[('virtual_room_id', '=', False)]}">
-						<table class="oe_form_group">
-							<thead>
-								<th width="40%"></th>
-								<th></th>
-							</thead>
-							<tbody>
-								<tr class="oe_form_group_row">
-									<td class="oe_form_group_cell oe_form_group_cell_label"> <field name="rooms_num" /></td>
-									<td class="oe_form_group_cell" colspan="3"><strong> Max(<field name="max_rooms"/>)</strong></td>
-								</tr>							
-							</tbody>
-						</table>						
-					</group>
-					<group colspan="4" col="4">
+                            <table class="oe_form_group">
+                                <thead>
+                                    <th width="40%"></th>
+                                    <th></th>
+                                </thead>
+                                <tbody>
+                                    <tr class="oe_form_group_row">
+                                        <td class="oe_form_group_cell oe_form_group_cell_label"> <field name="rooms_num" /></td>
+                                        <td class="oe_form_group_cell" colspan="3"><strong> Max(<field name="max_rooms"/>)</strong></td>
+                                    </tr>							
+                                </tbody>
+                            </table>						
+                        </group>
+					<group colspan="6" col="6">
+                        <field name="channel_type" required="1"/>
 						<field name="total"/>
 						<field name="confirm"/>
 					</group>
@@ -36,7 +36,7 @@
 						<field name="reservation_wizard_ids" colspan="4" string="Room Lines"
 							nolabel="1">
 							<tree string="Room Line" editable="bottom">
-								<field name="product_id" string="Room No" options="{'no_create': True}"/>
+								<field name="product_id" string="Room No" options="{'no_create': True}"/>                                
 								<field name="virtual_room_id" options="{'no_create': True}" />
 								<field name="checkin" />
 								<field name="checkout" />

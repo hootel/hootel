@@ -1398,6 +1398,7 @@ class WuBook(models.TransientModel):
                     vals = {
                         'room_lines': reservations,
                         'wcustomer_notes': book['customer_notes'],
+                        'channel_type':'web',
                     }
                     if folio_id:
                         folio_id.with_context({
