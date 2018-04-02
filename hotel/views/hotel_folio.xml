@@ -116,9 +116,10 @@
                         </div>
                         <group colspan="4" col="4">
 							<field name="email" placeholder="email"/>
-                            <field name="date_order" />
-							<field name="mobile" placeholder="mobile"/>
+                            <field name="date_order" />                            						
+							<field name="mobile" placeholder="mobile"/> 
                             <field name="reservation_type" attrs="{'readonly':[('state','not in',('draft'))]}"/>
+                            <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>                            	                      
                             <field name="partner_invoice_id" domain="[('parent_id','=',partner_id)]" invisible="1"/>
                             <field name="pricelist_id" domain="[('type','=','sale')]" invisible="1"/>
                             <field name="project_id" invisible="1"/>
