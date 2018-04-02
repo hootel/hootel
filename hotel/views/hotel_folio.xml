@@ -39,9 +39,10 @@
                             <button type="action" class="oe_stat_button"
                                 id="cardex_smart_button"
                                 icon="fa-user-plus"
-                                name="%(launch_checkin_wizard)d"
+                                name="%(launch_checkin_wizard_add)d"
                                 attrs="{'invisible': [('cardex_pending_num','&lt;=',0)]}"
-                                context="{'reservation_ids': room_lines, 'hidden_cardex': True, 'folio': active_id}">
+                                context="{'partner_id': partner_id,'reservation_ids': room_lines,
+                                            'hidden_cardex': True, 'folio': active_id}">
                                 <div class="o_form_field o_stat_info">
                                     <span class="o_stat_value"><field name="cardex_pending_num"
                                     widget="statinfo" nolabel="1"/></span>

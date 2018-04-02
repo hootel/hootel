@@ -48,7 +48,7 @@
                                 <field name="checkout"/>
                                 <field name="children"/>
                                 <!-- cardex_pending is a computed field and it is required here
-                                    for being using in hotel_folio cardex_smart_button domain
+                                    for being used in hotel_folio cardex_smart_button domain
                                     when adding new reservations lines -->
                                 <field name="cardex_pending" invisible="1"/>
                             </group>

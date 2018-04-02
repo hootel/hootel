@@ -9,13 +9,16 @@
                     <form string="Add Checkin">
                     <sheet>
                         <group col="4">
-                        <field name="reservation_id" nolabel="1" domain="[('folio_id','=',context.get('folio'))]" style="max-width: 95%; width: 32.2em"/>
+                        <field options="{'no_quick_create': True, 'no_create_edit' : True}"
+                               name="reservation_id" nolabel="1"
+                               domain="[('folio_id','=',context.get('folio'))]"
+                               style="max-width: 95%; width: 32.2em"/>
                         </group>
                         <group col="4">
                             <field name="cardex_ids" readonly="1" invisible="context.get('hidden_cardex',True)" />
                         </group>
                         <group>
-                          <field name="partner_id" string="Client name" style="max-width: 95%; width: 20em"/>
+                          <field options="{'no_quick_create': True, 'no_create_edit' : True}" name="partner_id" string="Client name" style="max-width: 95%; width: 20em"/>
                         </group>
                         <group col="4">
                             <field name="enter_date" colspan="2"/>

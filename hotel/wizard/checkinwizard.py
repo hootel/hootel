@@ -4,6 +4,8 @@ from openerp import models, fields, api
 from openerp.exceptions import UserError
 from openerp.tools.translate import _
 
+import logging
+_logger = logging.getLogger(__name__)
 
 class Wizard(models.TransientModel):
     _name = 'checkin.wizard'
@@ -33,13 +35,18 @@ class Wizard(models.TransientModel):
             ids = [item[1] for item in self.env.context['reservation_ids']]
             reservations = self.env['hotel.reservation'].browse(ids)
             if len(reservations) == 1:
+                _logger.info('reservation id: %d', reservations)
                 return reservations
             for res in reservations:
-                if res.cardex_count == 0:
+                _logger.info('res.cardex_count: %d', res.cardex_count)
+                # return the first room line with free space for a cardex
+                if res.cardex_count < (res.adults + res.children):
                     return res
         elif 'reservation_id' in self.env.context:
             return self.env['hotel.reservation'].browse(
                 self.env.context['reservation_id'])
+
+        _logger.info('default_reservation_id is FALSE')
         return False
 
     def default_partner_id(self):
@@ -136,3 +143,11 @@ class Wizard(models.TransientModel):
           'enter_date': self.enter_date,
           'exit_date': self.exit_date})
         return {'type': 'ir.actions.act_window_close'}
+
+    @api.onchange('reservation_id')
+    def change_enter_exit_date(self):
+        record_id = self.env['hotel.reservation'].browse(
+            self.reservation_id.id)
+        _logger.info('change_enter_exit_date for resertation id: %d', record_id)
+        self.enter_date = record_id.checkin
+        self.exit_date = record_id.checkout
