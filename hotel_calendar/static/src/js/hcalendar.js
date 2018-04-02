@@ -352,9 +352,6 @@ HotelCalendar.prototype = {
           var reservs = this.getReservationsByDay(ndate, false, reservation.room.number, +limits.left.dataset.hcalBedNum+b, reservation);
           reservs = _.reject(reservs, function(item){ return item.id===reservation.id; });
           if (reservs.length) {
-            console.log("=== EXIST TT");
-            console.log(reservation);
-            console.log(reservs);
             return this.getReservationCellLimits(reservation, nbed?nbed+1:1); // Recursive: Search best place
           }
         }
@@ -1014,9 +1011,19 @@ HotelCalendar.prototype = {
     for (var itemRoom of this.options.rooms) {
       // Room Number
       row = tbody.insertRow();
-      row.setAttribute('id', $this._sanitizeId(`ROW_${itemRoom.number}_${itemRoom.type}`));
       row.dataset.hcalRoomObjId = itemRoom.id;
       row.classList.add('hcal-row-room-type-group-item');
+      if (itemRoom.overbooking) {
+        var reservId = itemRoom.id.substr(0, itemRoom.id.indexOf('@'));
+        var cnumber = itemRoom.number;
+        var isf = cnumber.search('OB-');
+        var isfb = cnumber.search('/#');
+        if (isf != -1 && isfb != -1) { cnumber = cnumber.substr(isf+3, isfb-(isf+3)); }
+        row.setAttribute('id', this._sanitizeId(`ROW_${cnumber}_${itemRoom.type}_OVER${reservId}`));
+        row.classList.add('hcal-row-room-type-group-overbooking-item');
+      } else {
+        row.setAttribute('id', $this._sanitizeId(`ROW_${itemRoom.number}_${itemRoom.type}`));
+      }
       cell = row.insertCell();
       cell.textContent = itemRoom.number;
       cell.classList.add('hcal-cell-room-type-group-item');
@@ -1638,7 +1645,6 @@ HotelCalendar.prototype = {
     } else {
       console.warn(`[Hotel Calendar][_updateReservation] Can't place reservation ID@${reservationObj.id}`);
       this.removeReservation(reservationObj, true);
-      console.log(this._reservations);
     }
   },
 
@@ -1808,8 +1814,6 @@ HotelCalendar.prototype = {
         'linkedId': reserv.id,
         'state': 'draft',
       }));
-      console.log("=== TO ROOM");
-      console.log(reserv.room);
   	}
   	this.addReservations(nreservs, true);
   },
