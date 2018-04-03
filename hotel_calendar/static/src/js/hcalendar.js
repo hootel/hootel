@@ -515,10 +515,30 @@ HotelCalendar.prototype = {
     return 0.0;
   },
 
-  removeOBRoomRow: function(/*String*/room) {
-    if (!(room instanceof HRoom)) { room = this.getRoom(id); }
-    console.log(room);
-    var obRoomRow = this.e.querySelector(`#${this._sanitizeId(`ROW_${room.number}_${room.type}`)}`);
+  removeOBRoomRow: function(/*HReservationObject*/ob_reserv) {
+    if (!ob_reserv.room.overbooking || this.getReservationsByRoom(ob_reserv.room).length > 0) {
+      console.warn(`[HotelCalendar] Can't remove the row for room ${ob_reserv.room.id}`);
+      return false;
+    }
+
+    var obRoomRow = this.getOBRoomRow(ob_reserv);
+
+    // Update Reservations Position
+    var bounds = obRoomRow.getBoundingClientRect();
+    var cheight = bounds.bottom-bounds.top;
+    var start_index = _.indexOf(this.options.rooms, ob_reserv.room) + 1;
+    for (var i=start_index; i<this.options.rooms.length; i++) {
+      var reservs = this.getReservationsByRoom(this.options.rooms[i]);
+      for (var reserv of reservs) {
+        var div = this.getReservationDiv(reserv);
+        var top = parseInt(div.style.top, 10);
+        div.style.top = `${top - cheight}px`;
+      }
+    }
+
+    obRoomRow.parentNode.removeChild(obRoomRow);
+    this.options.rooms.pop(ob_reserv.room);
+    ob_reserv.room = false;
   },
 
   getOBRealRoomInfo: function(/*HRoomObject*/room) {
@@ -599,10 +619,9 @@ HotelCalendar.prototype = {
       }
     }
 
+    // Update Reservations Position
     var bounds = row.getBoundingClientRect();
     var cheight = bounds.bottom-bounds.top;
-
-    // Update Reservations Position
     var start_index = _.indexOf(this.options.rooms, ob_room) + 1;
     for (var i=start_index; i<this.options.rooms.length; i++) {
       var reservs = this.getReservationsByRoom(this.options.rooms[i]);
@@ -1331,11 +1350,7 @@ HotelCalendar.prototype = {
       var refInReservation = this.reservationAction.inReservations[0];
       var realDateLimits = this.getFreeDatesByRoom(dateLimits[0], dateLimits[1], refInReservation.room.number);
       var iterReservs = _.reject(this._reservations, function(item){
-        var found = false;
-        for (var creserv of $this.reservationAction.inReservations) {
-          if (creserv.id === item.id) { found = true; }
-        }
-        return found;
+        return _.find($this.reservationAction.inReservations, {'id': item.id});
       });
       for (var nreserv of iterReservs) {
         if (this.reservationAction.inReservations.length !== 0 && this.reservationAction.inReservations[0].room != nreserv.room && this.reservationAction.outReservations.length !== 0 && this.reservationAction.outReservations[0].room != nreserv.room) {
@@ -1346,7 +1361,6 @@ HotelCalendar.prototype = {
             this.getReservationDiv(nreserv).classList.add('hcal-reservation-invalid-swap');
           }
         } else {
-
           var isValid = true;
           var freservs = this.getReservationsByDay(nreserv.endDate, true, nreserv.room.number);
           while (freservs.length > 1 && isValid) {
@@ -1553,46 +1567,48 @@ HotelCalendar.prototype = {
       // Change some critical values
       var refFromReservs = fromReservations[0];
       var refToReservs = toReservations[0];
-      var refFromRoom = this.getRoom(refFromReservs.room.id);
-      var refToRoom = this.getRoom(refToReservs.room.id);
+      var refFromRoom = refFromReservs.room;
+      var refToRoom = refToReservs.room;
+      var fromRoomRow = this.getOBRoomRow(refFromReservs);
+      var toRoomRow = this.getOBRoomRow(refToReservs);
+      var refFromRoomNewId = `${refToReservs.id}@${refFromRoom.id.substr(refFromRoom.id.indexOf('@')+1)}`;
+      var refToRoomNewId = `${refFromReservs.id}@${refToRoom.id.substr(refToRoom.id.indexOf('@')+1)}`;
 
       if (refFromRoom.overbooking) {
-        var fromRoomRow = this.getOBRoomRow(refFromReservs);
         // Obtain real id
         var isf = refFromReservs.room.number.search('OB-');
         var isfb = refFromReservs.room.number.search('/#');
         var cnumber = refFromReservs.room.number;
         if (isf != -1 && isfb != -1) { cnumber = cnumber.substr(isf+3, isfb-(isf+3)); }
 
-        refFromRoom.id = `${refToReservs.id}@${refFromRoom.id.substr(refFromRoom.id.indexOf('@')+1)}`;
-        var newRowId = `${this._sanitizeId(`ROW_${cnumber}_${refToReservs.room.type}_OVER${refToReservs.id}`)}`;
-        var elms = this.etable.querySelectorAll(`td[data-hcal-parent-row='${fromRoomRow.id}']`);
+        refFromRoom.id = refFromRoomNewId;
+        var newRowId = `${this._sanitizeId(`ROW_${cnumber}_${refToRoom.type}_OVER${refToReservs.id}`)}`;
+        var elms = fromRoomRow.querySelectorAll(`td[data-hcal-parent-row='${fromRoomRow.id}']`);
         for (var elm of elms) { elm.dataset.hcalParentRow = newRowId; }
         fromRoomRow.setAttribute('id', `${newRowId}`);
         fromRoomRow.dataset.hcalRoomObjId = refFromRoom.id;
       }
       if (refToRoom.overbooking) {
-        var toRoomRow = this.getOBRoomRow(refToReservs);
         // Obtain real id
         var isf = refToReservs.room.number.search('OB-');
         var isfb = refToReservs.room.number.search('/#');
         var cnumber = refToReservs.room.number;
         if (isf != -1 && isfb != -1) { cnumber = cnumber.substr(isf+3, isfb-(isf+3)); }
 
-        refToRoom.id = `${refFromReservs.id}@${refToRoom.id.substr(refToRoom.id.indexOf('@')+1)}`;
-        var newRowId = `${this._sanitizeId(`ROW_${cnumber}_${refFromReservs.room.type}_OVER${refFromReservs.id}`)}`;
-        var elms = this.etable.querySelectorAll(`td[data-hcal-parent-row='${toRoomRow.id}']`);
+        refToRoom.id = refToRoomNewId;
+        var newRowId = `${this._sanitizeId(`ROW_${cnumber}_${refFromRoom.type}_OVER${refFromReservs.id}`)}`;
+        var elms = toRoomRow.querySelectorAll(`td[data-hcal-parent-row='${toRoomRow.id}']`);
         for (var elm of elms) { elm.dataset.hcalParentRow = newRowId; }
         toRoomRow.setAttribute('id', `${newRowId}`);
         toRoomRow.dataset.hcalRoomObjId = refToRoom.id;
       }
 
       for (var nreserv of fromReservations) {
-        nreserv.overbooking = refToReservs.room.overbooking;
+        nreserv.overbooking = refToRoom.overbooking;
         nreserv.room = refToRoom;
       }
       for (var nreserv of toReservations) {
-        nreserv.overbooking = refFromReservs.room.overbooking;
+        nreserv.overbooking = refToRoom.overbooking;
         nreserv.room = refFromRoom;
       }
 
@@ -1697,25 +1713,30 @@ HotelCalendar.prototype = {
           // MODE SWAP RESERVATIONS
           if ($this.reservationAction.action === HotelCalendar.ACTION.SWAP) {
             var reserv = $this.getReservation(this.dataset.hcalReservationObjId);
+            var refFromReserv = ($this.reservationAction.inReservations.length > 0)?$this.reservationAction.inReservations[0]:false;
+            var refToReserv = ($this.reservationAction.outReservations.length > 0)?$this.reservationAction.outReservations[0]:false;
+
             if (ev.ctrlKey || $this._modeSwap === HotelCalendar.MODE.SWAP_FROM) {
+              var canAdd = !((!refFromReserv && refToReserv && reserv.room.id === refToReserv.room.id) || (refFromReserv && reserv.room.id !== refFromReserv.room.id));
               // Can unselect
               if ($this.reservationAction.inReservations.indexOf(reserv) != -1) {
                 $this.reservationAction.inReservations.pop(reserv);
                 this.classList.remove('hcal-reservation-swap-in-selected');
               }
               // Can't add a 'out' reservation in 'in' list
-              else if ($this.reservationAction.outReservations.indexOf(reserv) == -1) {
+              else if ($this.reservationAction.outReservations.indexOf(reserv) == -1 && canAdd) {
                 $this.reservationAction.inReservations.push(reserv);
                 this.classList.add('hcal-reservation-swap-in-selected');
               }
             } else if (!ev.ctrlKey || $this._modeSwap === HotelCalendar.MODE.SWAP_TO) {
+              var canAdd = !((!refToReserv && refFromReserv && reserv.room.id === refFromReserv.room.id) || (refToReserv && reserv.room.id !== refToReserv.room.id));
               // Can unselect
               if ($this.reservationAction.outReservations.indexOf(reserv) != -1) {
                 $this.reservationAction.outReservations.pop(reserv);
                 this.classList.remove('hcal-reservation-swap-out-selected');
               }
               // Can't add a 'in' reservation in 'out' list
-              else if ($this.reservationAction.inReservations.indexOf(reserv) == -1) {
+              else if ($this.reservationAction.inReservations.indexOf(reserv) == -1 && canAdd) {
                 $this.reservationAction.outReservations.push(reserv);
                 this.classList.add('hcal-reservation-swap-out-selected');
               }
@@ -2033,14 +2054,20 @@ HotelCalendar.prototype = {
   //==== EVENT FUNCTIONS
   onMainKeyUp: function(/*EventObject*/ev) {
     if (this.reservationAction.action === HotelCalendar.ACTION.SWAP || this.getSwapMode() !== HotelCalendar.MODE.NONE) {
+      var needReset = false;
       if (ev.keyCode === 27) {
-        this._reset_action_reservation();
-        this._updateHighlightSwapReservations();
-        this._modeSwap = HotelCalendar.MODE.NONE;
         this.e.dispatchEvent(new CustomEvent('hcalOnCancelSwapReservations', {}));
+        needReset = true;
       }
       else if (ev.keyCode === 13) {
         this.dispatchSwapReservations();
+        needReset = true;
+      }
+
+      if (needReset) {
+        this._reset_action_reservation();
+        this._updateHighlightSwapReservations();
+        this._modeSwap = HotelCalendar.MODE.NONE; // FIXME
       }
     }
   },

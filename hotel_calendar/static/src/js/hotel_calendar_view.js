@@ -284,35 +284,28 @@ var HotelCalendarView = View.extend({
                     close: true,
                     click: function () {
                       if (self._hcalendar.swapReservations(ev.detail.inReservs, ev.detail.outReservs)) {
-                        self._hcalendar._reset_action_reservation();
-                        self._hcalendar._updateHighlightSwapReservations();
-                        self._hcalendar._modeSwap = HotelCalendar.MODE.NONE; // FIXME
-
                         var fromIds = _.pluck(ev.detail.inReservs, 'id');
                         var toIds = _.pluck(ev.detail.outReservs, 'id');
-                        var fromRoom = ev.detail.inReservs[0].room;
-                        var toRoom = ev.detail.outReservs[0].room;
-                        var fromReservDiv = self._hcalendar.getReservationDiv(ev.detail.inReservs[0]);
-                        var toReservDiv = self._hcalendar.getReservationDiv(ev.detail.outReservs[0]);
-                        var fromBounds = fromReservDiv.style.top;
-                        var toBounds = toReservDiv.style.top;
+                        var refFromReservDiv = self._hcalendar.getReservationDiv(ev.detail.inReservs[0]);
+                        var refToReservDiv = self._hcalendar.getReservationDiv(ev.detail.outReservs[0]);
 
+                        // Animate Movement
                         for (var nreserv of ev.detail.inReservs) {
                           var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                          $(reservDiv).animate({'top': toBounds});
+                          $(reservDiv).animate({'top': refToReservDiv.style.top}, 'slow');
                         }
                         for (var nreserv of ev.detail.outReservs) {
                           var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                          $(reservDiv).animate({'top': fromBounds});
+                          $(reservDiv).animate({'top': refFromReservDiv.style.top}, 'slow');
                         }
-                        self._model.call('swap_reservations', [false, fromIds, toIds]).fail(function(result){
+                        self._model.call('swap_reservations', [false, fromIds, toIds]).fail(function(err, ev){
                           for (var nreserv of ev.detail.inReservs) {
                             var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                            $(reservDiv).animate({'top': fromBounds});
+                            $(reservDiv).animate({'top': refFromReservDiv.style.top}, 'fast');
                           }
                           for (var nreserv of ev.detail.outReservs) {
                             var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                            $(reservDiv).animate({'top': toBounds});
+                            $(reservDiv).animate({'top': refToReservDiv.style.top}, 'fast');
                           }
 
                           self._hcalendar.swapReservations(ev.detail.outReservs, ev.detail.inReservs);
@@ -322,12 +315,7 @@ var HotelCalendarView = View.extend({
                   },
                   {
                     text: _t("No"),
-                    close: true,
-                    click: function() {
-                      self._hcalendar._reset_action_reservation();
-                      self._hcalendar._updateHighlightSwapReservations();
-                      self._hcalendar._modeSwap = HotelCalendar.MODE.NONE; // FIXME
-                    }
+                    close: true
                   }
               ],
               $content: QWeb.render('HotelCalendar.ConfirmSwapOperation', qdict)
@@ -384,7 +372,12 @@ var HotelCalendarView = View.extend({
                                 'product_id': roomId,
                                 'overbooking': newReservation.room.overbooking
                             };
-                            new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).fail(function(err, ev){
+                            new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).then(function(result){
+                              // Remove OB Room Row?
+                              if (oldReservation.room.overbooking && newReservation.room.id !== oldReservation.room.id) {
+                                self._hcalendar.removeOBRoomRow(oldReservation);
+                              }
+                            }).fail(function(err, ev){
                                 self._hcalendar.changeReservation(newReservation, oldReservation);
                             });
                             // Workarround for dispatch room lines regeneration
@@ -561,14 +554,14 @@ var HotelCalendarView = View.extend({
                         }).open();
                         popCreate.opened().then(function () {
                           popCreate.view_form.on('on_button_cancel', popCreate, function(){
-                          	HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
+                          	HotelFolioObj.call('unlink', [[folio_id]]).fail(function(err, ev){
 
                           	});
                           });
                         });
                         popCreate.on('closed', popCreate, function(){
                         	if (!this.dataset.ids.length) {
-                        		HotelFolioObj.call('unlink', [[folio_id]]).fail(function(){
+                        		HotelFolioObj.call('unlink', [[folio_id]]).fail(function(err, ev){
 
                             });
                         	}
