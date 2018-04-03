@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<odoo>
+
+        <record id="invoice_form" model="ir.ui.view">
+                <field name="model">account.invoice</field>
+                <field name="inherit_id" ref="account.invoice_form" />
+                <field name="arch" type="xml">
+                    <xpath expr="//header" position="after">
+                         <div class="alert alert-danger" role="alert" style="margin-bottom:0px;"
+                         attrs="{'invisible': [('dif_customer_payment','=',False)]}">
+                             You have payments on the related folio associated with other customers than the current one on the invoice.
+                             Make sure to <bold><button class="alert-link" type="object" name="action_folio_payments" string="modify the payment"/></bold> from the folio if necessary before paying this invoice
+                        </div>
+                        <field name="dif_customer_payment" invisible="1"/>
+                    </xpath>
+                </field>
+        </record>
+
+
+</odoo>

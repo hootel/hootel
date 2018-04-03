@@ -36,6 +36,24 @@ class AccountInvoice(models.Model):
             vals.update({'origin': context['invoice_origin']})
         return super(AccountInvoice, self).create(vals)
 
+    @api.multi
+    def action_folio_payments(self):
+        self.ensure_one()
+        sales = self.mapped('invoice_line_ids.sale_line_ids.order_id')
+        folios = self.env['hotel.folio'].search([('id','in',sales.ids)])
+        payments_obj = self.env['account.payment']
+        payments = payments_obj.search([('folio_id','in',folios.ids)])
+        payment_ids = payments.mapped('id')
+        return{
+            'name': _('Payments'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'account.payment',
+            'target': 'new',
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', payment_ids)],
+        }
+        
     # ~ @api.one
     # ~ @api.depends(
     #     ~ 'amount_total',
@@ -49,12 +67,23 @@ class AccountInvoice(models.Model):
     #         ~ _logger.info("FOLIOS CAMBIADOS DESDE LA FACTURA:")
     #         ~ _logger.info(folios)
 
+
+    dif_customer_payment = fields.Boolean(compute='_compute_dif_customer_payment')
     sale_ids = fields.Many2many(
             'sale.order', 'sale_order_invoice_rel', 'invoice_id',
             'order_id', 'Sale Orders', readonly=True,
             help="This is the list of sale orders related to this invoice.")
 
-
+    def _compute_dif_customer_payment(self):
+        sales = self.mapped('invoice_line_ids.sale_line_ids.order_id')
+        folios = self.env['hotel.folio'].search([('id','in',sales.ids)])
+        payments_obj = self.env['account.payment']
+        payments = payments_obj.search([('folio_id','in',folios.ids)])
+        for pay in payments:
+            if pay.partner_id <> self.partner_id:
+                self.dif_customer_payment = True
+                return
+        
     # ~ @api.multi
     # ~ def confirm_paid(self):
     #     ~ '''
@@ -68,3 +97,4 @@ class AccountInvoice(models.Model):
     #     ~ pos_odr_rec = pos_order_obj.search([('invoice_id', 'in', self._ids)])
     #     ~ pos_odr_rec and pos_odr_rec.write({'state': 'done'})
     #     ~ return res
+    
