@@ -292,11 +292,11 @@ var HotelCalendarView = View.extend({
                         // Animate Movement
                         for (var nreserv of ev.detail.inReservs) {
                           var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                          $(reservDiv).animate({'top': refToReservDiv.style.top}, 'slow');
+                          $(reservDiv).animate({'top': refToReservDiv.style.top});
                         }
                         for (var nreserv of ev.detail.outReservs) {
                           var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                          $(reservDiv).animate({'top': refFromReservDiv.style.top}, 'slow');
+                          $(reservDiv).animate({'top': refFromReservDiv.style.top});
                         }
                         self._model.call('swap_reservations', [false, fromIds, toIds]).fail(function(err, ev){
                           for (var nreserv of ev.detail.inReservs) {
