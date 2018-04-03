@@ -121,6 +121,9 @@ HotelCalendar.prototype = {
       this._modeSwap = mode;
       if (this._modeSwap === HotelCalendar.MODE.NONE) {
         this.dispatchSwapReservations();
+        this._reset_action_reservation();
+        this._updateHighlightSwapReservations();
+        this._modeSwap = HotelCalendar.MODE.NONE; // FIXME
       }
     }
   },
