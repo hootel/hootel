@@ -672,7 +672,7 @@ HotelCalendar.prototype = {
             var date_str = dd.format(HotelCalendar.DATE_FORMAT_SHORT_);
             if (date_str in this._restrictions[room.price[1]]) {
               var restr = this._restrictions[room.price[1]][date_str];
-              if (restr && (restr[0] > 0 || restr[1] > 0 || restr[2] > 0 || restr[3] || restr[4] || restr[5])) {
+              if (restr) {
                 var cell = this.getMainCell(dd, room.type, room.number);
                 if (cell) {
                   cell.classList.add('hcal-restriction-room-day');
@@ -680,15 +680,17 @@ HotelCalendar.prototype = {
                   if (restr[0] > 0)
                     humantext += `Min. Stay: ${restr[0]}\n`;
                   if (restr[1] > 0)
-                    humantext += `Max. Stay: ${restr[1]}\n`;
+                    humantext += `Min. Stay Arrival: ${restr[1]}\n`;
                   if (restr[2] > 0)
-                    humantext += `Max. Stay Arrival: ${restr[2]}\n`;
-                  if (restr[3])
-                    humantext += `Closed: ${restr[3]}\n`;
+                    humantext += `Max. Stay: ${restr[2]}\n`;
+                  if (restr[3] > 0)
+                    humantext += `Max. Stay Arrival: ${restr[3]}\n`;
                   if (restr[4])
-                    humantext += `Closed Arrival: ${restr[4]}\n`;
+                    humantext += `Closed: ${restr[4]}\n`;
                   if (restr[5])
-                    humantext += `Closed Departure: ${restr[5]}`;
+                    humantext += `Closed Arrival: ${restr[5]}\n`;
+                  if (restr[6])
+                    humantext += `Closed Departure: ${restr[6]}`;
                   cell.title = humantext;
                 }
               }

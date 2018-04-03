@@ -118,6 +118,7 @@ class BusHotelCalendar(models.TransientModel):
                         vals['min_stay'],
                         vals['min_stay_arrival'],
                         vals['max_stay'],
+                        vals['max_stay_arrival'],
                         vals['closed'],
                         vals['closed_arrival'],
                         vals['closed_departure'],
