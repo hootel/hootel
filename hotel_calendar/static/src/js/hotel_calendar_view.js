@@ -944,8 +944,8 @@ var HotelCalendarView = View.extend({
             self._hcalendar.setSwapMode(HotelCalendar.MODE.NONE);
             $("#btn_swap span.ntext").html("START SWAP");
             $("#btn_swap").css({
-              'backgroundColor': 'inital',
-              'fontWeight': 'inital'
+              'backgroundColor': '',
+              'fontWeight': ''
             });
           }
         });
