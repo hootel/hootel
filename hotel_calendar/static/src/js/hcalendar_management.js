@@ -41,6 +41,7 @@ function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options,
     days: options.days || moment(options.startDate || new Date()).daysInMonth(),
     rooms: options.rooms || [],
     endOfWeek: options.endOfWeek || 6,
+    endOfWeekOffset: options.endOfWeekOffset || 0,
     currencySymbol: options.currencySymbol || '€',
     dateFormatLong: options.dateFormat || 'YYYY-MM-DD HH:mm:ss',
     dateFormatShort: options.dateFormat || 'YYYY-MM-DD'
@@ -334,6 +335,7 @@ HotelCalendarManagement.prototype = {
     var now = moment().local();
     for (var i=0; i<=this.options.days; i++) {
       var dd = this.options.startDate.clone().add(i,'d');
+      var dd_local = dd.clone().local();
       var cell = row.insertCell();
       cell.setAttribute('id', this._sanitizeId(`hday_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`));
       cell.classList.add('hcal-cell-header-day');
@@ -342,13 +344,13 @@ HotelCalendarManagement.prototype = {
       cell.dataset.hcalDate = dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT);
       cell.textContent = dd.format('D') + ' ' + dd.format('ddd') + ' (' + dd.format('MMM') + "'" + dd.format('YY') + ')';
       cell.setAttribute('title', dd.format('dddd'))
-      var day = +dd.format('D');
+      var day = +dd_local.format('D');
       if (day == 1) {
         cell.classList.add('hcal-cell-start-month');
       }
-      if (dd.isSame(now, 'day')) {
+      if (dd_local.isSame(now, 'day')) {
         cell.classList.add('hcal-cell-current-day');
-      } else if (dd.format('e') == this.options.endOfWeek) {
+      } else if (dd_local.format('e') >= this.options.endOfWeek-this.options.endOfWeekOffset && dd_local.format('e') <= this.options.endOfWeek) {
         cell.classList.add('hcal-cell-end-week');
       }
     }
@@ -377,6 +379,7 @@ HotelCalendarManagement.prototype = {
       row.classList.add('hcal-row-room-type-group-item');
       for (var i=0; i<=$this.options.days; i++) {
         var dd = $this.options.startDate.clone().add(i,'d');
+        var dd_local = dd.clone().local();
         cell = row.insertCell();
         cell.setAttribute('id', $this._sanitizeId(`${itemRoom.name}_${indexRoom}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`));
         cell.classList.add('hcal-cell-room-type-group-item-day');
@@ -385,13 +388,13 @@ HotelCalendarManagement.prototype = {
         // Generate Interactive Table
         cell.appendChild($this._generateTableDay(cell));
         //cell.innerHTML = dd.format("DD");
-        var day = +dd.format("D");
+        var day = +dd_local.format("D");
         if (day == 1) {
           cell.classList.add('hcal-cell-start-month');
         }
-        if (dd.isSame(now, 'day')) {
+        if (dd_local.isSame(now, 'day')) {
           cell.classList.add('hcal-cell-current-day');
-        } else if (dd.format('e') == $this.options.endOfWeek) {
+        } else if (dd_local.format('e') >= $this.options.endOfWeek-$this.options.endOfWeekOffset && dd_local.format('e') <= $this.options.endOfWeek) {
           cell.classList.add('hcal-cell-end-week');
         }
       }
@@ -429,7 +432,6 @@ HotelCalendarManagement.prototype = {
         if (input && !input.classList.contains('hcal-management-input-changed')) {
           input.dataset.orgValue = price.price;
           input.value = price.price;
-          input.classList.remove('hcal-management-input-changed');
         }
       }
     }
@@ -491,7 +493,7 @@ HotelCalendarManagement.prototype = {
           var inputItem = this.etable.querySelector(`#${inputIds[i]}`);
           if (inputItem && !inputItem.classList.contains('hcal-management-input-changed')) {
             inputItem.dataset.orgValue = inputItem.value = inputIds[i+1];
-            inputItem.classList.remove('hcal-management-input-changed');
+            inputItem.style.backgroundColor = (inputItem.value!=0)?'#f9d70b':'';
           }
         }
 
@@ -555,8 +557,7 @@ HotelCalendarManagement.prototype = {
           var inputId = this._sanitizeId(inputIds[i]);
           var input = this.etable.querySelector(`#${inputId}`);
           if (input) {
-            input.dataset.orgValue = inputIds[i+1];
-            input.value = inputIds[i+1];
+            input.dataset.orgValue = input.value = inputIds[i+1];
           }
         }
       }
@@ -610,8 +611,8 @@ HotelCalendarManagement.prototype = {
               }
             }
             else {
-              input.classList.remove('hcal-management-input-changed');
               input.value = inputIds[i+1];
+              input.style.backgroundColor = (i == 0 && input.value == 0)?'#f31d1d':'';
             }
           }
         }

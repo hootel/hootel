@@ -295,3 +295,14 @@ class HotelCalendarManagement(models.TransientModel):
             vals.update({'rooms': json_rooms or []})
 
         return vals
+
+    @api.multi
+    def get_hcalendar_settings(self):
+        user_id = self.env['res.users'].browse(self.env.uid)
+        return {
+            'eday_week': user_id.npms_end_day_week,
+            'eday_week_offset': user_id.npms_end_day_week_offset,
+            'days': user_id.npms_default_num_days,
+            'show_notifications': user_id.pms_show_notifications,
+            'show_num_rooms': user_id.pms_show_num_rooms,
+        }

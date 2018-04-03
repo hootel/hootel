@@ -22,6 +22,13 @@
 									<field name="pms_default_num_days" required="True" />
 							</group>
 						</group>
+						<group string="Calendar Management (Revenue PMS)" name="calendar">
+							<group colspan="4">
+									<field name="npms_end_day_week" required="True" />
+									<field name="npms_end_day_week_offset" required="True" />
+									<field name="npms_default_num_days" required="True" />
+							</group>
+						</group>
 					</xpath>
         </field>
     </record>

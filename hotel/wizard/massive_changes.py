@@ -256,7 +256,19 @@ class MassiveChangesWizard(models.TransientModel):
                 }).create(vals)
 
     @api.multi
+    def massive_change_close(self):
+        self._do_massive_change()
+        return True
+
+    @api.multi
     def massive_change(self):
+        self._do_massive_change()
+        return {
+            "type": "ir.actions.do_nothing",
+        }
+
+    @api.multi
+    def _do_massive_change(self):
         hotel_vroom_obj = self.env['hotel.virtual.room']
         for record in self:
             date_start_dt = date_utils.get_datetime(record.date_start,

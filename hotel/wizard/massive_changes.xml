@@ -86,6 +86,8 @@
 				<footer>
 					<button name="massive_change" string="Massive Change" type="object"
 						class="oe_highlight" />
+					<button name="massive_change_close" string="Massive Change &amp; Close" type="object"
+						class="oe_highlight" />
 					or
 					<button string="Cancel" class="oe_link" special="cancel" />
 				</footer>
