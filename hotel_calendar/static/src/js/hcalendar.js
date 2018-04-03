@@ -271,9 +271,9 @@ HotelCalendar.prototype = {
     return reservs;
   },
 
-  getReservationsByRoom: function(/*Int,HRoomObject*/room) {
+  getReservationsByRoom: function(/*Int,HRoomObject*/room, /*Boolean*/includeUnusedZones) {
     if (!(room instanceof HRoom)) { room = this.getRoom(room); }
-    return _.filter(this._reservations, function(item){ return item.room.id === room.id; });
+    return _.filter(this._reservations, function(item){ return item.room.id === room.id && (includeUnusedZones || (!includeUnusedZones && !item.unusedZone)); });
   },
 
   getReservationCellLimits: function(/*HReservationObject*/reservation, /*Int?*/nbed, /*Bool?*/notCheck) {
@@ -471,26 +471,26 @@ HotelCalendar.prototype = {
       }
 
       var ob_room = _.find(this.options.rooms, function(item){ return item.id === `${reservId}@${id}` && item.overbooking; });
+      // TODO: Change to better place
       if (!ob_room && overb) {
         var room = _.find(this.options.rooms, function(item){ return item.id === id; });
         var obr = this.getOBRooms(room.id);
         // Create Overbooking Room
-        var ob_room = new HRoom(
-            `${reservId}@${room.id}`,
-            `OB-${room.number}/#${obr.length}`, // Name
-            room.capacity, // Capacity
-            room.type, // Category
-            room.shared, // Shared Room
-            room.price  // Price
-        );
+        var ob_room = room.clone();
+        ob_room.id = `${reservId}@${room.id}`;
+        ob_room.number = `OB-${room.number}/#${obr.length}`;
         ob_room.overbooking = true;
-        this.options.rooms.splice(_.indexOf(this.options.rooms, room)+1, 0, ob_room);
+        this._insertRoomAt(room, ob_room, true);
         this.createOBRoomRow(ob_room, reservId);
       }
       return ob_room;
     }
 
     return _.find(this.options.rooms, function(item){ return item.id == id; });
+  },
+
+  _insertRoomAt: function(/*HRoomObject*/roomI, /*HRoomObject*/newRoom, /*Boolean*/isAfter) {
+    this.options.rooms.splice(_.indexOf(this.options.rooms, roomI)+(isAfter?1:0), 0, newRoom);
   },
 
   getRoomPrice: function(/*String,HRoom*/id, /*String,MomentObject*/day) {
@@ -624,7 +624,7 @@ HotelCalendar.prototype = {
     var cheight = bounds.bottom-bounds.top;
     var start_index = _.indexOf(this.options.rooms, ob_room) + 1;
     for (var i=start_index; i<this.options.rooms.length; i++) {
-      var reservs = this.getReservationsByRoom(this.options.rooms[i]);
+      var reservs = this.getReservationsByRoom(this.options.rooms[i], true);
       for (var reserv of reservs) {
         var div = this.getReservationDiv(reserv);
         var top = parseInt(div.style.top, 10);
@@ -1573,8 +1573,10 @@ HotelCalendar.prototype = {
       var refToRoom = refToReservs.room;
       var fromRoomRow = this.getOBRoomRow(refFromReservs);
       var toRoomRow = this.getOBRoomRow(refToReservs);
-      var refFromRoomNewId = `${refToReservs.id}@${refFromRoom.id.substr(refFromRoom.id.indexOf('@')+1)}`;
-      var refToRoomNewId = `${refFromReservs.id}@${refToRoom.id.substr(refToRoom.id.indexOf('@')+1)}`;
+      var refFromRoomNewId = refFromRoom.overbooking?refFromRoom.id.substr(refFromRoom.id.indexOf('@')+1):refFromRoom.id;
+      refFromRoomNewId = `${refToReservs.id}@${refFromRoomNewId}`;
+      var refToRoomNewId = refToRoom.overbooking?refToRoom.id.substr(refToRoom.id.indexOf('@')+1):refToRoom.id;
+      refToRoomNewId = `${refFromReservs.id}@${refToRoomNewId}`;
 
       if (refFromRoom.overbooking) {
         // Obtain real id
@@ -2300,6 +2302,19 @@ HRoom.prototype = {
       this.userData_ = _.extend(this.userData_, data);
     }
   },
+  clone: function() {
+    var nroom = new HRoom(
+        this.id,
+        this.number, // Name
+        this.capacity, // Capacity
+        this.type, // Category
+        this.shared, // Shared Room
+        this.price  // Price
+    );
+    nroom.overbooking = this.overbooking;
+    nroom.addUserData(this.getUserData());
+    return nroom;
+  }
 };
 
 /** RESERVATION OBJECT **/
