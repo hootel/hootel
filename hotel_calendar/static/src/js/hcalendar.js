@@ -1538,7 +1538,7 @@ HotelCalendar.prototype = {
   },
 
   swapReservations: function(/*List HReservationObject*/fromReservations, /*List HReservationObject*/toReservations) {
-    if (this.reservationAction.inReservations.length === 0 || this.reservationAction.outReservations.length === 0) {
+    if (fromReservations.length === 0 || toReservations.length === 0) {
       console.warn("[HotelCalendar] Invalid Swap Operation!");
       return false;
     }
@@ -1551,8 +1551,8 @@ HotelCalendar.prototype = {
         toDateLimits[0].isSameOrAfter(fromRealDateLimits[0], 'd') &&  toDateLimits[1].isSameOrBefore(fromRealDateLimits[1], 'd'))
     {
       // Change some critical values
-      var refFromReservs = this.reservationAction.inReservations[0];
-      var refToReservs = this.reservationAction.outReservations[0];
+      var refFromReservs = fromReservations[0];
+      var refToReservs = toReservations[0];
       var refFromRoom = this.getRoom(refFromReservs.room.id);
       var refToRoom = this.getRoom(refToReservs.room.id);
 
@@ -1587,17 +1587,17 @@ HotelCalendar.prototype = {
         toRoomRow.dataset.hcalRoomObjId = refToRoom.id;
       }
 
-      for (var nreserv of this.reservationAction.inReservations) {
+      for (var nreserv of fromReservations) {
         nreserv.overbooking = refToReservs.room.overbooking;
         nreserv.room = refToRoom;
       }
-      for (var nreserv of this.reservationAction.outReservations) {
+      for (var nreserv of toReservations) {
         nreserv.overbooking = refFromReservs.room.overbooking;
         nreserv.room = refFromRoom;
       }
 
       if (this.options.divideRoomsByCapacity) {
-        var allReservs = this.reservationAction.outReservations.concat(this.reservationAction.inReservations);
+        var allReservs = toReservations.concat(fromReservations);
         for (var nreserv of allReservs) { this._updateUnusedZones(nreserv); }
       }
     } else {
@@ -1609,18 +1609,13 @@ HotelCalendar.prototype = {
   },
 
   dispatchSwapReservations: function() {
-    if (this.swapReservations(this.reservationAction.inReservations, this.reservationAction.outReservations)) {
-      this.e.dispatchEvent(new CustomEvent(
-        'hcalOnSwapReservations',
-        { 'detail': {
-            'inReservs': this.reservationAction.inReservations,
-            'outReservs': this.reservationAction.outReservations,
-          }
-        }));
-      this._reset_action_reservation();
-      this._updateHighlightSwapReservations();
-      this._modeSwap = HotelCalendar.MODE.NONE;
-    }
+    this.e.dispatchEvent(new CustomEvent(
+      'hcalOnSwapReservations',
+      { 'detail': {
+          'inReservs': this.reservationAction.inReservations,
+          'outReservs': this.reservationAction.outReservations,
+        }
+      }));
   },
 
   changeReservation: function(/*HReservationObject*/reservationObj, /*HReservationObject*/newReservationObj) {
