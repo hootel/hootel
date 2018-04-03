@@ -517,7 +517,7 @@ HotelCalendar.prototype = {
 
   removeOBRoomRow: function(/*HReservationObject*/ob_reserv) {
     if (!ob_reserv.room.overbooking || this.getReservationsByRoom(ob_reserv.room).length > 0) {
-      console.warn(`[HotelCalendar] Can't remove the row for room ${ob_reserv.room.id}`);
+      console.warn(`[HotelCalendar][removeOBRoomRow] Can't remove the row for room ${ob_reserv.room.id}`);
       return false;
     }
 
@@ -537,7 +537,7 @@ HotelCalendar.prototype = {
     }
 
     obRoomRow.parentNode.removeChild(obRoomRow);
-    this.options.rooms.pop(ob_reserv.room);
+    this.options.rooms = _.reject(this.options.rooms, function(item){ return item === ob_reserv.room; });
     ob_reserv.room = false;
   },
 
@@ -571,7 +571,7 @@ HotelCalendar.prototype = {
   createOBRoomRow: function(/*Int,HRoomObject*/ob_room, /*Int*/reservId) {
     var mainRoomInfo = this.getOBRealRoomInfo(ob_room);
     if (!mainRoomInfo) {
-      console.warn(`Can't found room row: ${mainRoomRowId}`);
+      console.warn(`[HotelCalendar][createOBRoomRow] Can't found room row: ${mainRoomRowId}`);
       return false;
     }
     var mainRoom = mainRoomInfo[0];
@@ -782,7 +782,7 @@ HotelCalendar.prototype = {
   	}
 
     if (this.tableCreated) {
-      console.warn("[Hotel Calendar] Already created!");
+      console.warn("[Hotel Calendar][_create] Already created!");
       return false;
     }
 
@@ -1553,7 +1553,7 @@ HotelCalendar.prototype = {
 
   swapReservations: function(/*List HReservationObject*/fromReservations, /*List HReservationObject*/toReservations) {
     if (fromReservations.length === 0 || toReservations.length === 0) {
-      console.warn("[HotelCalendar] Invalid Swap Operation!");
+      console.warn("[HotelCalendar][swapReservations] Invalid Swap Operation!");
       return false;
     }
     var fromDateLimits = this.getDateLimits(fromReservations);
@@ -1617,7 +1617,7 @@ HotelCalendar.prototype = {
         for (var nreserv of allReservs) { this._updateUnusedZones(nreserv); }
       }
     } else {
-      console.warn("[HotelCalendar] Invalid Swap Operation!");
+      console.warn("[HotelCalendar][swapReservations] Invalid Swap Operation!");
       return false;
     }
 
@@ -1634,7 +1634,7 @@ HotelCalendar.prototype = {
       }));
   },
 
-  changeReservation: function(/*HReservationObject*/reservationObj, /*HReservationObject*/newReservationObj) {
+  replaceReservation: function(/*HReservationObject*/reservationObj, /*HReservationObject*/newReservationObj) {
     var reservationDiv = this.getReservationDiv(reservationObj);
     if (!reservationDiv) {
       console.warn("[Hotel Calendar][updateReservation_] Invalid Reservation Object");
@@ -1720,7 +1720,7 @@ HotelCalendar.prototype = {
               var canAdd = !((!refFromReserv && refToReserv && reserv.room.id === refToReserv.room.id) || (refFromReserv && reserv.room.id !== refFromReserv.room.id));
               // Can unselect
               if ($this.reservationAction.inReservations.indexOf(reserv) != -1) {
-                $this.reservationAction.inReservations.pop(reserv);
+                $this.reservationAction.inReservations = _.reject($this.reservationAction.inReservations, function(item){ return item === reserv});
                 this.classList.remove('hcal-reservation-swap-in-selected');
               }
               // Can't add a 'out' reservation in 'in' list
@@ -1732,7 +1732,7 @@ HotelCalendar.prototype = {
               var canAdd = !((!refToReserv && refFromReserv && reserv.room.id === refFromReserv.room.id) || (refToReserv && reserv.room.id !== refToReserv.room.id));
               // Can unselect
               if ($this.reservationAction.outReservations.indexOf(reserv) != -1) {
-                $this.reservationAction.outReservations.pop(reserv);
+                $this.reservationAction.outReservations = _.reject($this.reservationAction.outReservations, function(item){ return item === reserv; });
                 this.classList.remove('hcal-reservation-swap-out-selected');
               }
               // Can't add a 'in' reservation in 'out' list
@@ -2095,7 +2095,7 @@ HotelCalendar.prototype = {
 
         if (this.reservationAction.oldReservationObj && this.reservationAction.newReservationObj) {
           if (!this.options.allowInvalidActions && (reservDiv.classList.contains('hcal-reservation-invalid') || hasInvalidLink)) {
-            this.changeReservation(this.reservationAction.newReservationObj, this.reservationAction.oldReservationObj);
+            this.replaceReservation(this.reservationAction.newReservationObj, this.reservationAction.oldReservationObj);
           } else {
             var oldReservation = this.reservationAction.oldReservationObj;
             var newReservation = this.reservationAction.newReservationObj;

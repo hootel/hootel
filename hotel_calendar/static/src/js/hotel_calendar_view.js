@@ -378,7 +378,7 @@ var HotelCalendarView = View.extend({
                                 self._hcalendar.removeOBRoomRow(oldReservation);
                               }
                             }).fail(function(err, ev){
-                                self._hcalendar.changeReservation(newReservation, oldReservation);
+                                self._hcalendar.replaceReservation(newReservation, oldReservation);
                             });
                             // Workarround for dispatch room lines regeneration
                             new Model('hotel.reservation').call('on_change_checkin_checkout_product_id', [[newReservation.id], false]);
@@ -394,7 +394,7 @@ var HotelCalendarView = View.extend({
             }).open();
             dialog.$modal.on('hide.bs.modal', function(e){
               if (!hasChanged) {
-                self._hcalendar.changeReservation(newReservation, oldReservation);
+                self._hcalendar.replaceReservation(newReservation, oldReservation);
               }
             });
         });
