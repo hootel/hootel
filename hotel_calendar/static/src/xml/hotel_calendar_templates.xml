@@ -57,6 +57,14 @@
 	</div>
 </t>
 
+<t t-name="HotelCalendar.ConfirmSwapOperation">
+	<div class="content">
+		<p>The following changes will be made...</p>
+		<span><strong>Swap Reservations</strong></span><br/>
+		<p>Are you sure you want to make this changes?</p>
+	</div>
+</t>
+
 <t t-name="HotelCalendar.TooltipReservation">
 	<div class="oe_tooltip_string"><t t-esc="name"/></div>
 	<ul class="oe_tooltip_technical">

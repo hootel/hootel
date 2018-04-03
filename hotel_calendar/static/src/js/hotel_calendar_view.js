@@ -273,37 +273,65 @@ var HotelCalendarView = View.extend({
             // });
         });
         this._hcalendar.addEventListener('hcalOnSwapReservations', function(ev){
-          var fromIds = _.pluck(ev.detail.inReservs, 'id');
-          var toIds = _.pluck(ev.detail.outReservs, 'id');
-          var fromRoom = ev.detail.inReservs[0].room;
-          var toRoom = ev.detail.outReservs[0].room;
-          var fromReservDiv = self._hcalendar.getReservationDiv(ev.detail.inReservs[0]);
-          var toReservDiv = self._hcalendar.getReservationDiv(ev.detail.outReservs[0]);
-          var fromBounds = fromReservDiv.style.top;
-          var toBounds = toReservDiv.style.top;
+          var qdict = {};
+          var hasChanged = false;
+          var dialog = new Dialog(self, {
+              title: _t("Confirm Reservation Swap"),
+              buttons: [
+                  {
+                    text: _t("Yes, swap it"),
+                    classes: 'btn-primary',
+                    close: true,
+                    click: function () {
+                      if (self._hcalendar.swapReservations(ev.detail.inReservs, ev.detail.outReservs)) {
+                        self._hcalendar._reset_action_reservation();
+                        self._hcalendar._updateHighlightSwapReservations();
+                        self._hcalendar._modeSwap = HotelCalendar.MODE.NONE; // FIXME
 
-          for (var nreserv of ev.detail.inReservs) {
-            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-            $(reservDiv).animate({'top': toBounds});
-          }
-          for (var nreserv of ev.detail.outReservs) {
-            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-            $(reservDiv).animate({'top': fromBounds});
-          }
-          self._model.call('swap_reservations', [false, fromIds, toIds]).fail(function(result){
-            for (var nreserv of ev.detail.inReservs) {
-              nreserv.room = toRoom;
-              var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-              $(reservDiv).animate({'top': fromBounds});
-            }
-            for (var nreserv of ev.detail.outReservs) {
-              nreserv.room = fromRoom;
-              var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-              $(reservDiv).animate({'top': toBounds});
-            }
+                        var fromIds = _.pluck(ev.detail.inReservs, 'id');
+                        var toIds = _.pluck(ev.detail.outReservs, 'id');
+                        var fromRoom = ev.detail.inReservs[0].room;
+                        var toRoom = ev.detail.outReservs[0].room;
+                        var fromReservDiv = self._hcalendar.getReservationDiv(ev.detail.inReservs[0]);
+                        var toReservDiv = self._hcalendar.getReservationDiv(ev.detail.outReservs[0]);
+                        var fromBounds = fromReservDiv.style.top;
+                        var toBounds = toReservDiv.style.top;
 
-            self._hcalendar.swapReservations(ev.detail.outReservs, ev.detail.inReservs);
-          });
+                        for (var nreserv of ev.detail.inReservs) {
+                          var reservDiv = self._hcalendar.getReservationDiv(nreserv);
+                          $(reservDiv).animate({'top': toBounds});
+                        }
+                        for (var nreserv of ev.detail.outReservs) {
+                          var reservDiv = self._hcalendar.getReservationDiv(nreserv);
+                          $(reservDiv).animate({'top': fromBounds});
+                        }
+                        self._model.call('swap_reservations', [false, fromIds, toIds]).fail(function(result){
+                          for (var nreserv of ev.detail.inReservs) {
+                            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
+                            $(reservDiv).animate({'top': fromBounds});
+                          }
+                          for (var nreserv of ev.detail.outReservs) {
+                            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
+                            $(reservDiv).animate({'top': toBounds});
+                          }
+
+                          self._hcalendar.swapReservations(ev.detail.outReservs, ev.detail.inReservs);
+                        });
+                      }
+                    }
+                  },
+                  {
+                    text: _t("No"),
+                    close: true,
+                    click: function() {
+                      self._hcalendar._reset_action_reservation();
+                      self._hcalendar._updateHighlightSwapReservations();
+                      self._hcalendar._modeSwap = HotelCalendar.MODE.NONE; // FIXME
+                    }
+                  }
+              ],
+              $content: QWeb.render('HotelCalendar.ConfirmSwapOperation', qdict)
+          }).open();
         });
         this._hcalendar.addEventListener('hcalOnCancelSwapReservations', function(ev){
           $("#btn_swap span.ntext").html("START SWAP");
