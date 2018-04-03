@@ -240,6 +240,7 @@ class WuBook(models.TransientModel):
                     'min_stay': 0,
                     'min_stay_arrival': 0,
                     'max_stay': 0,
+                    'max_stay_arrival': 0,
                     'closed': status,
                     'closed_departure': False,
                     'closed_arrival': False,
@@ -995,6 +996,9 @@ class WuBook(models.TransientModel):
                                 'min_stay_arrival',
                                 0),
                             'max_stay': day_vals.get('max_stay', 0),
+                            'max_stay_arrival': day_vals.get(
+                                'max_stay_arrival',
+                                0),
                             'closed': day_vals.get('closed', False),
                             'closed_departure': day_vals.get(
                                 'closed_departure',
@@ -1081,6 +1085,7 @@ class WuBook(models.TransientModel):
                                 'min_stay': item['min_stay'],
                                 'closed_departure': item['closed_departure'],
                                 'max_stay': item['max_stay'],
+                                'max_stay_arrival': item['max_stay_arrival'],
                                 'min_stay_arrival': item['min_stay_arrival'],
                                 'wpushed': True,
                             }
@@ -1657,6 +1662,7 @@ class WuBook(models.TransientModel):
                                 'min_stay': restr.min_stay or 0,
                                 'min_stay_arrival': restr.min_stay_arrival or 0,
                                 'max_stay': restr.max_stay or 0,
+                                'max_stay_arrival': restr.max_stay_arrival or 0,
                                 'closed': restr.closed and 1 or 0,
                                 'closed_arrival': restr.closed_arrival and 1 or 0,
                                 'closed_departure': restr.closed_departure and 1 or 0,

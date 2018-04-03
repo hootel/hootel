@@ -109,6 +109,20 @@
 	border: 1px solid gray;
 }
 
+table.hcal-management-table  input {
+	border: 1px solid lightgray;
+}
+
+.hcal-border-radius-right {
+	border-top-right-radius: 25px;
+	border-bottom-right-radius: 25px;
+}
+
+.hcal-border-radius-left {
+	border-top-left-radius: 25px;
+	border-bottom-left-radius: 25px;
+}
+
 button.hcal-management-input {
 	font-size: 9px;
 	border: 1px solid gray;

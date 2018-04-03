@@ -56,12 +56,16 @@
 								<td class="oe_form_group_cell" colspan="3"><field name="min_stay" attrs="{'readonly':[('change_min_stay', '=', False)]}" /></td>
 							</tr>
 							<tr class="oe_form_group_row">
+								<td class="oe_form_group_cell oe_form_group_cell_label"><field name="change_max_stay" /> <strong> Stay Max.</strong></td>
+								<td class="oe_form_group_cell"><field name="max_stay" attrs="{'readonly':[('change_max_stay', '=', False)]}" /></td>
+							</tr>
+							<tr class="oe_form_group_row">
 								<td class="oe_form_group_cell oe_form_group_cell_label"><field name="change_min_stay_arrival" /> <strong> Stay Min. Arrival</strong></td>
 								<td class="oe_form_group_cell"><field name="min_stay_arrival" attrs="{'readonly':[('change_min_stay_arrival', '=', False)]}" /></td>
 							</tr>
 							<tr class="oe_form_group_row">
-								<td class="oe_form_group_cell oe_form_group_cell_label"><field name="change_max_stay" /> <strong> Stay Max.</strong></td>
-								<td class="oe_form_group_cell"><field name="max_stay" attrs="{'readonly':[('change_max_stay', '=', False)]}" /></td>
+								<td class="oe_form_group_cell oe_form_group_cell_label"><field name="change_max_stay_arrival" /> <strong> Stay Max. Arrival</strong></td>
+								<td class="oe_form_group_cell"><field name="max_stay_arrival" attrs="{'readonly':[('change_max_stay_arrival', '=', False)]}" /></td>
 							</tr>
 							<tr class="oe_form_group_row">
 								<td class="oe_form_group_cell oe_form_group_cell_label"><field name="change_closed" /> <strong> Closed</strong></td>
