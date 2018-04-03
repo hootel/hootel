@@ -63,10 +63,9 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
   this._pricelist_id = -1;
   this._restrictions = restrictions || {};
   this._reservations = [];
+  this._modeSwap = HotelCalendar.MODE.NONE;
   this.tableCreated = false;
   this.cellSelection = {start:false, end:false, current:false};
-  /** Constants **/
-  this.ACTION = { NONE: -1, MOVE_ALL: 0, MOVE_LEFT: 1, MOVE_RIGHT: 2, SWAP: 3 };
 
   /***/
   this._reset_action_reservation();
@@ -115,6 +114,19 @@ HotelCalendar.prototype = {
       return this.options[key];
     }
     return this.options;
+  },
+
+  setSwapMode: function(/*Int*/mode) {
+    if (mode !== this._modeSwap) {
+      this._modeSwap = mode;
+      if (this._modeSwap === HotelCalendar.MODE.NONE) {
+        this.dispatchSwapReservations();
+      }
+    }
+  },
+
+  getSwapMode: function() {
+    return this._modeSwap;
   },
 
   //==== RESERVATIONS
@@ -721,7 +733,7 @@ HotelCalendar.prototype = {
   //==== MAIN FUNCTIONS
   _reset_action_reservation: function() {
     this.reservationAction = {
-      action: this.ACTION.NONE,
+      action: HotelCalendar.ACTION.NONE,
       reservation: null,
       oldReservationObj: null,
       newReservationObj: null,
@@ -832,7 +844,7 @@ HotelCalendar.prototype = {
             var a = $this.reservationAction.mousePos[0] - ev.x;
             var b = $this.reservationAction.mousePos[1] - ev.y;
             var dist = Math.sqrt(a*a + b*b);
-            if ($this.reservationAction.action == $this.ACTION.MOVE_RIGHT) {
+            if ($this.reservationAction.action == HotelCalendar.ACTION.MOVE_RIGHT) {
               reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
               if (reserv.fixDays) {
                 $this._reset_action_reservation();
@@ -849,7 +861,7 @@ HotelCalendar.prototype = {
               reserv.endDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
               $this.reservationAction.newReservationObj = reserv;
               needUpdate = true;
-            } else if ($this.reservationAction.action == $this.ACTION.MOVE_LEFT) {
+            } else if ($this.reservationAction.action == HotelCalendar.ACTION.MOVE_LEFT) {
               reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
               if (reserv.fixDays) {
                 $this._reset_action_reservation();
@@ -867,7 +879,7 @@ HotelCalendar.prototype = {
               reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
               $this.reservationAction.newReservationObj = reserv;
               needUpdate = true;
-            } else if ($this.reservationAction.action == $this.ACTION.MOVE_ALL && dist > 0) {
+            } else if ($this.reservationAction.action == HotelCalendar.ACTION.MOVE_ALL && dist > 0) {
               reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
               if (!$this.reservationAction.oldReservationObj) {
                 $this.reservationAction.oldReservationObj = _.clone(reserv);
@@ -1596,6 +1608,21 @@ HotelCalendar.prototype = {
     return true;
   },
 
+  dispatchSwapReservations: function() {
+    if (this.swapReservations(this.reservationAction.inReservations, this.reservationAction.outReservations)) {
+      this.e.dispatchEvent(new CustomEvent(
+        'hcalOnSwapReservations',
+        { 'detail': {
+            'inReservs': this.reservationAction.inReservations,
+            'outReservs': this.reservationAction.outReservations,
+          }
+        }));
+      this._reset_action_reservation();
+      this._updateHighlightSwapReservations();
+      this._modeSwap = HotelCalendar.MODE.NONE;
+    }
+  },
+
   changeReservation: function(/*HReservationObject*/reservationObj, /*HReservationObject*/newReservationObj) {
     var reservationDiv = this.getReservationDiv(reservationObj);
     if (!reservationDiv) {
@@ -1667,15 +1694,15 @@ HotelCalendar.prototype = {
       var bounds = rdiv.getBoundingClientRect();
       rdiv.addEventListener('mousemove', function(ev){
         var posAction = $this._getRerservationPositionAction(this, ev.layerX, ev.layerY);
-        this.style.cursor = (posAction == $this.ACTION.MOVE_LEFT || posAction == $this.ACTION.MOVE_RIGHT)?'col-resize':'pointer';
+        this.style.cursor = (posAction == HotelCalendar.ACTION.MOVE_LEFT || posAction == HotelCalendar.ACTION.MOVE_RIGHT)?'col-resize':'pointer';
       }, false);
       var _funcEvent = function(ev){
         if ($this._isLeftButtonPressed(ev)) {
-          if (ev.ctrlKey) { $this.reservationAction.action = $this.ACTION.SWAP; }
+          if (ev.ctrlKey || $this._modeSwap === HotelCalendar.MODE.SWAP_FROM) { $this.reservationAction.action = HotelCalendar.ACTION.SWAP; }
           // MODE SWAP RESERVATIONS
-          if ($this.reservationAction.action === $this.ACTION.SWAP) {
+          if ($this.reservationAction.action === HotelCalendar.ACTION.SWAP) {
             var reserv = $this.getReservation(this.dataset.hcalReservationObjId);
-            if (ev.ctrlKey) {
+            if (ev.ctrlKey || $this._modeSwap === HotelCalendar.MODE.SWAP_FROM) {
               // Can unselect
               if ($this.reservationAction.inReservations.indexOf(reserv) != -1) {
                 $this.reservationAction.inReservations.pop(reserv);
@@ -1686,7 +1713,7 @@ HotelCalendar.prototype = {
                 $this.reservationAction.inReservations.push(reserv);
                 this.classList.add('hcal-reservation-swap-in-selected');
               }
-            } else {
+            } else if (!ev.ctrlKey || $this._modeSwap === HotelCalendar.MODE.SWAP_TO) {
               // Can unselect
               if ($this.reservationAction.outReservations.indexOf(reserv) != -1) {
                 $this.reservationAction.outReservations.pop(reserv);
@@ -1712,9 +1739,9 @@ HotelCalendar.prototype = {
 
             var reserv = $this.getReservation(this.dataset.hcalReservationObjId);
             $this._updateHighlightInvalidZones(reserv);
-            if (reserv.readOnly || (reserv.fixDays && ($this.reservationAction.action == $this.ACTION.MOVE_LEFT ||
-                  $this.reservationAction.action == $this.ACTION.MOVE_RIGHT))) {
-              $this.reservationAction.action = $this.ACTION.NONE;
+            if (reserv.readOnly || (reserv.fixDays && ($this.reservationAction.action == HotelCalendar.ACTION.MOVE_LEFT ||
+                  $this.reservationAction.action == HotelCalendar.ACTION.MOVE_RIGHT))) {
+              $this.reservationAction.action = HotelCalendar.ACTION.NONE;
               return false;
             }
             var linkedReservations = $this.getLinkedReservations(reserv);
@@ -1763,9 +1790,9 @@ HotelCalendar.prototype = {
 
   _getRerservationPositionAction: function(/*HTMLObject*/elm, /*Int*/posX, /*Int*/posY) {
     var bounds = elm.getBoundingClientRect();
-    if (posX <= 5) { return this.ACTION.MOVE_LEFT; }
-    else if (posX >= bounds.width-10) { return this.ACTION.MOVE_RIGHT; }
-    return this.ACTION.MOVE_ALL;
+    if (posX <= 5) { return HotelCalendar.ACTION.MOVE_LEFT; }
+    else if (posX >= bounds.width-10) { return HotelCalendar.ACTION.MOVE_RIGHT; }
+    return HotelCalendar.ACTION.MOVE_ALL;
   },
 
   // _getRerservationPositionAction: function(/*HTMLObject*/elm, /*Int*/posX, /*Int*/posY) {
@@ -1778,9 +1805,9 @@ HotelCalendar.prototype = {
   //   console.log(posX);
   //   var mouseActMarginV = (10*bounds.width)/100;
   //   //debugger;
-  //   if (posX <= mouseActMargin) { return this.ACTION.MOVE_LEFT; }
-  //   else if (posX >= bounds.width-mouseActMargin) { return this.ACTION.MOVE_RIGHT; }
-  //   return this.ACTION.MOVE_ALL;
+  //   if (posX <= mouseActMargin) { return HotelCalendar.ACTION.MOVE_LEFT; }
+  //   else if (posX >= bounds.width-mouseActMargin) { return HotelCalendar.ACTION.MOVE_RIGHT; }
+  //   return HotelCalendar.ACTION.MOVE_ALL;
   // },
 
   _cleanUnusedZones: function(/*HReservationObject*/reserv) {
@@ -2010,23 +2037,15 @@ HotelCalendar.prototype = {
 
   //==== EVENT FUNCTIONS
   onMainKeyUp: function(/*EventObject*/ev) {
-    if (this.reservationAction.action === this.ACTION.SWAP) {
+    if (this.reservationAction.action === HotelCalendar.ACTION.SWAP || this.getSwapMode() !== HotelCalendar.MODE.NONE) {
       if (ev.keyCode === 27) {
         this._reset_action_reservation();
         this._updateHighlightSwapReservations();
+        this._modeSwap = HotelCalendar.MODE.NONE;
+        this.e.dispatchEvent(new CustomEvent('hcalOnCancelSwapReservations', {}));
       }
       else if (ev.keyCode === 13) {
-        if (this.swapReservations(this.reservationAction.inReservations, this.reservationAction.outReservations)) {
-          this.e.dispatchEvent(new CustomEvent(
-            'hcalOnSwapReservations',
-            { 'detail': {
-                'inReservs': this.reservationAction.inReservations,
-                'outReservs': this.reservationAction.outReservations,
-              }
-            }));
-          this._reset_action_reservation();
-          this._updateHighlightSwapReservations();
-        }
+        this.dispatchSwapReservations();
       }
     }
   },
@@ -2104,6 +2123,7 @@ HotelCalendar.prototype = {
 
   onMainResize: function(/*EventObject*/ev) {
     this._updateReservations();
+    this._updateOBIndicators();
   },
 
   onClickSelectorDate: function(/*EventObject*/ev, /*HTMLObject*/elm) {
@@ -2193,9 +2213,12 @@ HotelCalendar.prototype = {
   }
 };
 
-/** STATIC METHODS **/
+/** CONSTANTS **/
+HotelCalendar.ACTION = { NONE: -1, MOVE_ALL: 0, MOVE_LEFT: 1, MOVE_RIGHT: 2, SWAP: 3 };
+HotelCalendar.MODE = { NONE: -1, SWAP_FROM: 0, SWAP_TO: 1 };
 HotelCalendar.DATE_FORMAT_SHORT_ = 'DD/MM/YYYY';
 HotelCalendar.DATE_FORMAT_LONG_ = HotelCalendar.DATE_FORMAT_SHORT_ + ' HH:mm:ss';
+/** STATIC METHODS **/
 HotelCalendar.toMoment = function(/*String,MomentObject*/ndate, /*String*/format) {
   if (moment.isMoment(ndate)) {
     return ndate;

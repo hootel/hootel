@@ -26,6 +26,10 @@
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_control">
                     WIZARD
                 </button>
+                <button class="btn btn-default col-xs-12 col-md-12" id="btn_swap">
+                    <div class="ninfo"><span class="badge badge-danger">0</span></div>
+                    <span class="ntext">START SWAP</span>
+                </button>
                 <!--button class="btn btn-default col-xs-12 col-md-12" id="btn_action_refresh">
                     <i class="fa fa-4x fa-refresh"> </i>
                 </button-->
@@ -117,7 +121,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                </td>                                
+                                </td>
                             </tr>
                         </tbody>
                     </table>

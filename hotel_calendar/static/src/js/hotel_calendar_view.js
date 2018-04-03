@@ -305,6 +305,13 @@ var HotelCalendarView = View.extend({
             self._hcalendar.swapReservations(ev.detail.outReservs, ev.detail.inReservs);
           });
         });
+        this._hcalendar.addEventListener('hcalOnCancelSwapReservations', function(ev){
+          $("#btn_swap span.ntext").html("START SWAP");
+          $("#btn_swap").css({
+            'backgroundColor': '',
+            'fontWeight': 'normal'
+          });
+        });
         this._hcalendar.addEventListener('hcalOnChangeReservation', function(ev){
             var newReservation = ev.detail.newReserv;
             var oldReservation = ev.detail.oldReserv;
@@ -664,29 +671,29 @@ var HotelCalendarView = View.extend({
          //~ // Checkouts Button
         domain = [['checkouts_reservations', '>', 0]];
         HotelFolioObj.call('search_count', [domain]).then(function(count){
-            var $ninfo = self.$el.find('#pms-menu #btn_action_checkout div.ninfo');
-            var $badge_checkout = $ninfo.find('.badge');
-            if (count > 0) {
-                $badge_checkout.text(count);
-                $badge_checkout.parent().show();
-                $ninfo.show();
-            } else {
-                $ninfo.hide();
-            }
+          var $ninfo = self.$el.find('#pms-menu #btn_action_checkout div.ninfo');
+          var $badge_checkout = $ninfo.find('.badge');
+          if (count > 0) {
+              $badge_checkout.text(count);
+              $badge_checkout.parent().show();
+              $ninfo.show();
+          } else {
+              $ninfo.hide();
+          }
         });
 
         // Checkins Button
         domain = [['checkins_reservations', '>', 0]];
         HotelFolioObj.call('search_count', [domain]).then(function(count){
-            var $ninfo = self.$el.find('#pms-menu #btn_action_checkin div.ninfo');
-            var $badge_checkin = $ninfo.find('.badge');
-            if (count > 0) {
-                $badge_checkin.text(count);
-                $badge_checkin.parent().show();
-                $ninfo.show();
-            } else {
-                $ninfo.hide();
-            }
+          var $ninfo = self.$el.find('#pms-menu #btn_action_checkin div.ninfo');
+          var $badge_checkin = $ninfo.find('.badge');
+          if (count > 0) {
+              $badge_checkin.text(count);
+              $badge_checkin.parent().show();
+              $ninfo.show();
+          } else {
+              $ninfo.hide();
+          }
         });
 
         //~ // Charges Button
@@ -702,6 +709,20 @@ var HotelCalendarView = View.extend({
             	//~ $ninfo.hide();
             //~ }
        //~ });
+
+        // OverBookings
+        domain = [['overbooking', '=', true]];
+        this._model.call('search_count', [domain]).then(function(count){
+          var $ninfo = self.$el.find('#pms-menu #btn_swap div.ninfo');
+          var $badge_swap = $ninfo.find('.badge');
+          if (count > 0) {
+              $badge_swap.text(count);
+              $badge_swap.parent().show();
+              $ninfo.show();
+          } else {
+              $ninfo.hide();
+          }
+        });
     },
 
     init_calendar_view: function(){
@@ -881,6 +902,31 @@ var HotelCalendarView = View.extend({
         });
         this.$el.find("#btn_action_control").on('click', function(ev){
             self.call_action('hotel_calendar.open_wizard_reservations');
+        });
+        this.$el.find("#btn_swap").on('click', function(ev){
+          var hcalSwapMode = self._hcalendar.getSwapMode();
+          if (hcalSwapMode === HotelCalendar.MODE.NONE) {
+            self._hcalendar.setSwapMode(HotelCalendar.MODE.SWAP_FROM);
+            $("#btn_swap span.ntext").html("CONTINUE");
+            $("#btn_swap").css({
+              'backgroundColor': 'rgb(145, 255, 0)',
+              'fontWeight': 'bold'
+            });
+          } else if (hcalSwapMode === HotelCalendar.MODE.SWAP_FROM) {
+            self._hcalendar.setSwapMode(HotelCalendar.MODE.SWAP_TO);
+            $("#btn_swap span.ntext").html("END");
+            $("#btn_swap").css({
+              'backgroundColor': 'orange',
+              'fontWeight': 'bold'
+            });
+          } else {
+            self._hcalendar.setSwapMode(HotelCalendar.MODE.NONE);
+            $("#btn_swap span.ntext").html("START SWAP");
+            $("#btn_swap").css({
+              'backgroundColor': 'inital',
+              'fontWeight': 'inital'
+            });
+          }
         });
 //        this.$el.find("#btn_action_refresh").on('click', function(ev){
 //            window.location.reload();
