@@ -298,7 +298,13 @@ var HotelCalendarView = View.extend({
                           var reservDiv = self._hcalendar.getReservationDiv(nreserv);
                           $(reservDiv).animate({'top': refFromReservDiv.style.top});
                         }
-                        self._model.call('swap_reservations', [false, fromIds, toIds]).fail(function(err, ev){
+                        self._model.call('swap_reservations', [false, fromIds, toIds]).then(function(results){
+                          var allReservs = ev.detail.inReservs.concat(ev.detail.outReservs);
+                          for (nreserv of allReservs) {
+                            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
+                            $(reservDiv).stop(true);
+                          }
+                        }).fail(function(err, ev){
                           for (var nreserv of ev.detail.inReservs) {
                             var reservDiv = self._hcalendar.getReservationDiv(nreserv);
                             $(reservDiv).animate({'top': refFromReservDiv.style.top}, 'fast');
