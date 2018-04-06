@@ -133,15 +133,6 @@ HotelCalendar.prototype = {
   },
 
   //==== RESERVATIONS
-  clearReservationDivs: function(/*Boolean*/onlyUnused) {
-    var reservs = this.e.querySelectorAll('.hcal-reservation') || [];
-    for (var r of reservs) {
-      if ((onlyUnused && r.unusedZone) || !onlyUnused) {
-    	this.e.removeChild(r);
-      }
-    }
-  },
-
   getReservations: function(/*Boolean*/noovers, /*HReservation*/ignoreThis) {
     return _.reject(this._reservations, function(item){ return item===ignoreThis || (noovers && item.overbooking) || item.unusedZone; });
   },
@@ -182,7 +173,7 @@ HotelCalendar.prototype = {
           this._cleanUnusedZones(reserv);
 
         var divRes = this.getReservationDiv(reserv);
-        if (divRes) {
+        if (reserv._html) {
           divRes.innerText = reserv.title;
           // this._updateDivReservation(divRes, limits);
           if (reserv.readOnly) {
@@ -259,13 +250,13 @@ HotelCalendar.prototype = {
     	  if ((day.isBetween(sdate, edate, 'day') || day.isSame(sdate, 'day'))
     	    && !day.isSame(edate, 'day')
 	        && (typeof nroom === 'undefined' || r.room.number == nroom)
-	        && (typeof nbed === 'undefined' || r.beds_.includes(nbed))) {
+	        && (typeof nbed === 'undefined' || r._beds.includes(nbed))) {
 	           reservs.push(r);
 	      }
       } else {
 		     if ((day.isBetween(sdate, edate) || (day.isSame(sdate) || day.isSame(edate)))
 	        && (typeof nroom === 'undefined' || r.room.number == nroom)
-	        && (typeof nbed === 'undefined' || r.beds_.includes(nbed))) {
+	        && (typeof nbed === 'undefined' || r._beds.includes(nbed))) {
 	           reservs.push(r);
 	      }
       }
@@ -287,7 +278,7 @@ HotelCalendar.prototype = {
 
     var bedNum = nbed;
     if (typeof nbed === 'undefined') {
-      bedNum = (reservation.beds_&&reservation.beds_.length)?reservation.beds_[0]:0;
+      bedNum = (reservation._beds&&reservation._beds.length)?reservation._beds[0]:0;
     }
 
     var diff_date = this.getDateDiffDays(reservation.startDate, reservation.endDate);
@@ -531,7 +522,7 @@ HotelCalendar.prototype = {
     var cheight = bounds.bottom-bounds.top;
     var start_index = _.indexOf(this.options.rooms, ob_reserv.room) + 1;
     for (var i=start_index; i<this.options.rooms.length; i++) {
-      var reservs = this.getReservationsByRoom(this.options.rooms[i]);
+      var reservs = this.getReservationsByRoom(this.options.rooms[i], true);
       for (var reserv of reservs) {
         var div = this.getReservationDiv(reserv);
         var top = parseInt(div.style.top, 10);
@@ -1506,8 +1497,8 @@ HotelCalendar.prototype = {
 
     var reserv = this.getReservation(divRes.dataset.hcalReservationObjId);
     var numBeds = (+limits.right.dataset.hcalBedNum)-(+limits.left.dataset.hcalBedNum);
-    reserv.beds_ = [];
-    for (var i=0; i<=numBeds; reserv.beds_.push(+limits.left.dataset.hcalBedNum+i++));
+    reserv._beds = [];
+    for (var i=0; i<=numBeds; reserv._beds.push(+limits.left.dataset.hcalBedNum+i++));
 
     var boundsInit = limits.left.getBoundingClientRect();
     var boundsEnd = limits.right.getBoundingClientRect();
@@ -2030,7 +2021,7 @@ HotelCalendar.prototype = {
 
   checkReservationPlace: function(/*HReservationObject*/reservationObj) {
     var persons = reservationObj.getTotalPersons();
-    if (((reservationObj.room.shared || this.options.divideRoomsByCapacity) && reservationObj.beds_.length < persons)
+    if (((reservationObj.room.shared || this.options.divideRoomsByCapacity) && reservationObj._beds.length < persons)
       || (!(reservationObj.room.shared || this.options.divideRoomsByCapacity) && persons > reservationObj.room.capacity)) {
       return false;
     }
@@ -2041,7 +2032,7 @@ HotelCalendar.prototype = {
     	   continue;
       }
       if ((reservationObj.room.number == r.room.number)
-        && (_.difference(reservationObj.beds_, r.beds_).length != reservationObj.beds_.length
+        && (_.difference(reservationObj._beds, r._beds).length != reservationObj._beds.length
         		|| this.options.divideRoomsByCapacity)
         && (!reservationObj.startDate.isSame(r.endDate, 'day'))
         && (!reservationObj.endDate.isSame(r.startDate, 'day'))
@@ -2288,21 +2279,22 @@ function HRoom(/*Int*/id, /*String*/number, /*Int*/capacity, /*String*/type, /*B
   this.price = price || false;
   this.overbooking = false;
 
-  this.userData_ = {};
+  this._html = false;
+  this._userData = {};
 }
 HRoom.prototype = {
-  clearUserData: function() { this.userData_ = {}; },
+  clearUserData: function() { this._userData = {}; },
   getUserData: function(/*String?*/key) {
     if (typeof key === 'undefined') {
-      return this.userData_;
+      return this._userData;
     }
-    return this.userData_[key];
+    return this._userData[key];
   },
   addUserData: function(/*Dictionary*/data) {
     if (!_.isObject(data)) {
       console.warn("[Hotel Calendar][HRoom][setUserData] Invalid Data! Need be a object!");
     } else {
-      this.userData_ = _.extend(this.userData_, data);
+      this._userData = _.extend(this._userData, data);
     }
   },
   clone: function() {
@@ -2344,26 +2336,27 @@ function HReservation(/*Dictionary*/rValues) {
   this.splitted = rValues.splitted || false;
   this.overbooking = rValues.overbooking || false;
 
-  this.beds_ = [];
-  this.userData_ = {};
+  this._html = false;
+  this._beds = [];
+  this._userData = {};
 }
 HReservation.prototype = {
   setRoom: function(/*HRoomObject*/room) { this.room = room; },
   setStartDate: function(/*String,MomentObject*/date) { this.startDate = HotelCalendar.toMomentUTC(date); },
   setEndDate: function(/*String,MomentObject*/date) { this.endDate = HotelCalendar.toMomentUTC(date); },
 
-  clearUserData: function() { this.userData_ = {}; },
+  clearUserData: function() { this._userData = {}; },
   getUserData: function(/*String?*/key) {
     if (typeof key === 'undefined') {
-      return this.userData_;
+      return this._userData;
     }
-    return this.userData_[key];
+    return this._userData[key];
   },
   addUserData: function(/*Dictionary*/data) {
     if (!_.isObject(data)) {
       console.warn("[Hotel Calendar][HReservation][setUserData] Invalid Data! Need be a object!");
     } else {
-      this.userData_ = _.extend(this.userData_, data);
+      this._userData = _.extend(this._userData, data);
     }
   },
   getTotalPersons: function() {
