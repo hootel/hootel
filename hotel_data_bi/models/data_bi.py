@@ -20,11 +20,8 @@
 #
 ##############################################################################
 from openerp import models, fields, api, _
-# from openerp.exceptions import except_orm, ValidationError
-# from odoo.addons.hotel import date_utils
 from datetime import date, datetime, timedelta
 import json
-import requests
 
 
 def get_years():
@@ -62,20 +59,45 @@ class Data_Bi(models.Model):
     # ID_Cliente numérico Código del Cliente
     # Pension_Revenue numérico con dos decimales Ingresos por Pensión
 
-    @api.multi
-    def export_data_bi(self, lugar, fechafoto=date.today()):
-        """Prepare a Json Objet to export data for MyDataBI.
+    @api.model
+    def export_data_bi(self,
+                       archivo=False,
+                       fechafoto=date.today().strftime('%Y-%m-%d')):
+        u"""Prepare a Json Objet to export data for MyDataBI.
 
         Generate a dicctionary to by send in JSON
+        archivo = response file type
+            archivo == 1 'Tarifa'
+            archivo == 2 'Canal'
+            archivo == 3 'Hotel'
+            archivo == 4 'Pais'
+            archivo == 5 'Regimen'
+            archivo == 6 'Reservas'
+            archivo == 7 'Capacidad'
+            archivo == 8 'Tipo Habitación'
+            archivo == 9 'Budget'
+            archivo == 10 'Bloqueos'
+            archivo == 11 'Motivo Bloqueo'
+            archivo == 12 'Segmentos'
+            archivo == 13 'Clientes'
+            archivo == 14 'Estado Reservas'
+        fechafoto = start date to take data
         """
-        self.ensure_one()
+        fechafoto = datetime.strptime(fechafoto, '%Y-%m-%d').date()
+
+        if not isinstance(archivo, int):
+            archivo = 0
+        dic_param = []
+        dic_param.append({'Archivo': archivo,
+                          'Fechafoto': fechafoto.strftime('%Y-%m-%d')})
         compan = self.env.user.company_id
         dic_tarifa = []  # Diccionario con las tarifas
         tarifas = self.env['product.pricelist'].search_read([], ['name'])
         for tarifa in tarifas:
             dic_tarifa.append({'ID_Hotel': compan.id_hotel,
                                'ID_Tarifa': tarifa['id'],
-                               'Descripcion': tarifa['name']})
+                               'Descripcion': tarifa['name'].encode(
+                                   'ascii', 'xmlcharrefreplace')})
 
         dic_canal = []  # TODO Diccionario con los Canales
         dic_canal.append({'ID_Hotel': compan.id_hotel,
@@ -84,7 +106,8 @@ class Data_Bi(models.Model):
 
         dic_hotel = []  # Diccionario con el/los nombre de los hoteles
         dic_hotel.append({'ID_Hotel': compan.id_hotel,
-                          'Descripcion': compan.property_name})
+                          'Descripcion': compan.property_name.encode(
+                              'ascii', 'xmlcharrefreplace')})
 
         dic_pais = []
         # Diccionario con los nombre de los Paises usando los del INE
@@ -92,12 +115,14 @@ class Data_Bi(models.Model):
         for pais in paises:
             dic_pais.append({'ID_Hotel': compan.id_hotel,
                              'ID_Pais': pais['code'],
-                             'Descripcion': pais['name']})
+                             'Descripcion': pais['name'].encode(
+                                 'ascii', 'xmlcharrefreplace')})
 
         dic_regimen = []  # TODO Diccionario con los diccRegimen
         dic_regimen.append({'ID_Hotel': compan.id_hotel,
                             'ID_Regimen': 0,
-                            'Descripcion': 'Sin régimen'})
+                            'Descripcion': u'Sin régimen'.encode(
+                                'ascii', 'xmlcharrefreplace')})
 
         dic_estados = []  # Diccionario con los Estados Reserva
         estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
@@ -113,7 +138,8 @@ class Data_Bi(models.Model):
             dic_tipo_habitacion.append({
                 'ID_Hotel': compan.id_hotel,
                 'ID_Tipo_Habitacion': i['product_id'][0],
-                'Descripcion': i['product_id'][1]})
+                'Descripcion': i['product_id'][1].encode(
+                    'ascii', 'xmlcharrefreplace')})
 
         dic_capacidad = []  # Diccionario con las capacidades
         for i in tipo:
@@ -122,7 +148,7 @@ class Data_Bi(models.Model):
             dic_capacidad.append({
                 'ID_Hotel': compan.id_hotel,
                 'Hasta_Fecha':
-                (date.today()+timedelta(days=365*3)).strftime("%Y-%m-%d"),
+                (date.today() + timedelta(days=365 * 3)).strftime("%Y-%m-%d"),
                 'ID_Tipo_Habitacion': i['product_id'][0],
                 'Nro_Habitaciones': len(room.room_ids)})
 
@@ -144,8 +170,8 @@ class Data_Bi(models.Model):
         dic_budget = []  # Diccionario con las previsiones Budget
         for budget in budgets:
             dic_budget.append({'ID_Hotel': compan.id_hotel,
-                               'Fecha': str(budget.year) + '-'
-                               + str(budget.month).zfill(2) + '-01',
+                               'Fecha': str(budget.year) + '-' +
+                               str(budget.month).zfill(2) + '-01',
                                # 'ID_Tarifa': 0,
                                # 'ID_Canal': 0,
                                # 'ID_Pais': 0,
@@ -162,7 +188,8 @@ class Data_Bi(models.Model):
         for i in range(0, len(bloqeo_array)):
             dic_moti_bloq.append({'ID_Hotel': compan.id_hotel,
                                   'ID_Motivo_Bloqueo': i,
-                                  'Descripcion': bloqeo_array[i]})
+                                  'Descripcion': bloqeo_array[i].encode(
+                                      'ascii', 'xmlcharrefreplace')})
 
         dic_bloqueos = []  # Diccionario con Bloqueos
         lineas = self.env['hotel.reservation.line'].search(
@@ -182,8 +209,7 @@ class Data_Bi(models.Model):
                 'ID_Tipo_Habitacion':
                 linea.reservation_id.virtual_room_id.product_id.id,
                 'ID_Motivo_Bloqueo': id_m_b,
-                'Nro_Habitaciones': 1,
-                })
+                'Nro_Habitaciones': 1})
 
         lineas = self.env['res.partner.category'].search([])
         dic_segmentos = []  # Diccionario con Segmentación
@@ -192,7 +218,8 @@ class Data_Bi(models.Model):
                 seg_desc = linea.parent_id.name + " / " + linea.name
                 dic_segmentos.append({'ID_Hotel': compan.id_hotel,
                                       'ID_Segmento': linea.id,
-                                      'Descripcion': seg_desc})
+                                      'Descripcion': seg_desc.encode(
+                                          'ascii', 'xmlcharrefreplace')})
 
 # Clientes
 # ID_Hotel numérico Código del Hotel
@@ -260,20 +287,34 @@ class Data_Bi(models.Model):
                 'ID_Pais': id_codeine})
 
         dic_export = []  # Diccionario con todo lo necesario para exportar.
-        dic_export.append({'Tarifa': dic_tarifa})
-        dic_export.append({'Canal': dic_canal})
-        dic_export.append({'Hotel': dic_hotel})
-        dic_export.append({'Pais': dic_pais})
-        dic_export.append({'Regimen': dic_regimen})
-        dic_export.append({'Reservas': dic_reservas})
-        dic_export.append({'Tipo Habitación': dic_tipo_habitacion})
-        dic_export.append({'Capacidad': dic_capacidad})
-        dic_export.append({'Budget': dic_budget})
-        dic_export.append({'Bloqueos': dic_bloqueos})
-        dic_export.append({'Motivo Bloqueo': dic_moti_bloq})
-        dic_export.append({'Segmentos': dic_segmentos})
-        dic_export.append({'Clientes': dic_clientes})
-        dic_export.append({'Estado Reservas': dic_estados})
+        if (archivo == 0) or (archivo == 1):
+            dic_export.append({'Tarifa': dic_tarifa})
+        if (archivo == 0) or (archivo == 2):
+            dic_export.append({'Canal': dic_canal})
+        if (archivo == 0) or (archivo == 3):
+            dic_export.append({'Hotel': dic_hotel})
+        if (archivo == 0) or (archivo == 4):
+            dic_export.append({'Pais': dic_pais})
+        if (archivo == 0) or (archivo == 5):
+            dic_export.append({'Regimen': dic_regimen})
+        if (archivo == 0) or (archivo == 6):
+            dic_export.append({'Reservas': dic_reservas})
+        if (archivo == 0) or (archivo == 7):
+            dic_export.append({'Capacidad': dic_capacidad})
+        if (archivo == 0) or (archivo == 8):
+            dic_export.append({'Tipo Habitación': dic_tipo_habitacion})
+        if (archivo == 0) or (archivo == 9):
+            dic_export.append({'Budget': dic_budget})
+        if (archivo == 0) or (archivo == 10):
+            dic_export.append({'Bloqueos': dic_bloqueos})
+        if (archivo == 0) or (archivo == 11):
+            dic_export.append({'Motivo Bloqueo': dic_moti_bloq})
+        if (archivo == 0) or (archivo == 12):
+            dic_export.append({'Segmentos': dic_segmentos})
+        if (archivo == 0) or (archivo == 13):
+            dic_export.append({'Clientes': dic_clientes})
+        if (archivo == 0) or (archivo == 14):
+            dic_export.append({'Estado Reservas': dic_estados})
 
         dictionaryToJson = json.dumps(dic_export)
         # Debug Stop -------------------

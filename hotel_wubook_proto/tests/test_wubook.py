@@ -224,7 +224,7 @@ class TestWubook(TestHotelWubook):
                     'occupancy': [2],   # 2 Reservation Line
                     'dayprices': [15.0, 15.0]   # 2 Days
                 }
-            })
+            }, channel=self.wubook_channel_test.wid)
         wbooks = [nbook]
         processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
             self.env['wubook'].sudo().generate_reservations(wbooks)
@@ -238,6 +238,12 @@ class TestWubook(TestHotelWubook):
         self.assertEqual(len(processed_rids), 1, "Reservation not found")
         self.assertFalse(errors, "Reservation errors")
         check_state(processed_rids, 'cancelled')
+        # Can't confirm cancelled bookings
+        reserv = self.env['hotel.reservation'].sudo().search([
+            ('wrid', 'in', processed_rids)
+        ], limit=1)
+        with self.assertRaises(ValidationError):
+            reserv.confirm()
 
         # Create Reservation and Cancel It
         nbook = self.create_wubook_booking(

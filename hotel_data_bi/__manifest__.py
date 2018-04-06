@@ -26,12 +26,19 @@
     'author': "Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>",
     'website': 'https://www.aldahotels.com',
     'category': 'hotel/revenue',
-    'summary': "Revenue system and export Odoo Data to MyDataBI",
-    'description': "Revenue MyDataBI Exporter",
+    'summary': "Revenue system and export reservation Data to MyDataBI",
+    'description': """
+    Revenue MyDataBI Exporter
+
+    To use this module you need to:
+
+    Create a user and give the 'Hotel Management/Export data BI' permission.
+    """,
     'depends': ['hotel', 'hotel_l10n_es'],
     'data': [
         'views/data_bi.xml',
         'views/inherit_res_company.xml',
+        'security/data_bi.xml',
         'security/ir.model.access.csv',
     ],
     'installable': True,

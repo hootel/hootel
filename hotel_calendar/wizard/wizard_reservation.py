@@ -97,6 +97,12 @@ class FolioWizard(models.TransientModel):
                                         string="Resevations")
     total = fields.Float('Total',compute='_computed_total')
     confirm = fields.Boolean('Confirm Reservations', default="1")
+    channel_type = fields.Selection([
+        ('door', 'Door'),
+        ('mail', 'Mail'),
+        ('phone', 'Phone'),
+        ('web','Web'),
+        ('ota','OTA'),], 'Sales Channel')
 
     @api.multi
     @api.onchange('checkin', 'checkout')
@@ -244,7 +250,8 @@ class FolioWizard(models.TransientModel):
                         'virtual_room_id': line.virtual_room_id.id,
                     }))
         vals = {
-                'partner_id': line.partner_id.id,
+                'partner_id': self.partner_id.id,
+                'channel_type': self.channel_type,
                 'room_lines': reservations,
             }
         newfol = self.env['hotel.folio'].create(vals)

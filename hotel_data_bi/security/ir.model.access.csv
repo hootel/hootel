@@ -1,3 +1,10 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 ir_model_hotel_data_bi,hoteldatabi.data_bi.manager,hotel_data_bi.model_data_bi,hotel.group_hotel_manager,1,1,1,1
-ir_model_hotel_data_bi_user,hoteldatabi.data_bi.user,hotel_data_bi.model_data_bi,hotel.group_hotel_user,1,0,0,0
+ir_model_hotel_data_bi_user,hoteldatabi.data_bi.user,hotel_data_bi.model_data_bi,hotel.group_hotel_user,0,0,0,0
+ir_model_hotel_data_bi_export_data,hoteldatabi.data_bi.export_data,hotel_data_bi.model_data_bi,hotel_data_bi.group_hotel_export_data,1,0,0,0
+access_hotel_l10n_es.code_ine_export_data,hotell10n.code_ine.export_data,hotel_l10n_es.model_code_ine,hotel_data_bi.group_hotel_export_data,1,0,0,0
+access_hotel_l10n_es.category_export_data,hotell10n.category_ine.export_data,hotel_l10n_es.model_category,hotel_data_bi.group_hotel_export_data,1,0,0,0
+access_hotel.virtual_room_export_data,hotel.virtual.room.export_data,hotel.model_hotel_virtual_room,hotel_data_bi.group_hotel_export_data,1,0,0,0
+access_folio_room_line_export_data,hotel.folio_room_line.export_data,hotel.model_hotel_reservation_line,hotel_data_bi.group_hotel_export_data,1,0,0,0
+access_hotel_folio_line_export_data,hotel_folio_line.export_data,hotel.model_hotel_reservation,hotel_data_bi.group_hotel_export_data,1,0,0,0
+access_hotel_folio_export_data,hotel_folio.export_data,hotel.model_hotel_folio,hotel_data_bi.group_hotel_export_data,1,0,0,0
