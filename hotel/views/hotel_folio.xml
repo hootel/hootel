@@ -18,7 +18,7 @@
                        <button name="send_cancel_mail" type="object" string="Send Cancel Email"
                            states="cancel" class="oe_highlight"/>
                          <button name="send_exit_mail" type="object" string="Send Exit Email"
-                           states="cancel" class="oe_highlight"/>
+                           states="done" class="oe_highlight"/>
                         <button name="%(sale.action_view_sale_advance_payment_inv)d"
                             string="Create Invoice" type="action" class="btn-primary" states="sale"
                             attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
