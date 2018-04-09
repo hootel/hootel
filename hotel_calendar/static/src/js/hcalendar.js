@@ -173,7 +173,7 @@ HotelCalendar.prototype = {
           this._cleanUnusedZones(reserv);
 
         var divRes = this.getReservationDiv(reserv);
-        if (reserv._html) {
+        if (divRes) {
           divRes.innerText = reserv.title;
           // this._updateDivReservation(divRes, limits);
           if (reserv.readOnly) {
@@ -1241,7 +1241,7 @@ HotelCalendar.prototype = {
         row = tbody.insertRow();
         row.setAttribute('id', this._sanitizeId(`ROW_DETAIL_PRICE_ROOM_${key}_${listitem.room}`));
         row.dataset.hcalPricelist = key;
-        row.dataset.hcalRoom = listitem.room
+        row.dataset.hcalVRoomId = listitem.room
         row.classList.add('hcal-row-detail-room-price-group-item');
         cell = row.insertCell();
         cell.innerHTML = "<marquee behavior='alternate' scrollamount='1' scrolldelay='100'>"+listitem.title + ' ' + this.options.currencySymbol+ '</marquee>';
@@ -1267,8 +1267,29 @@ HotelCalendar.prototype = {
             cell.classList.add('hcal-cell-end-week');
           }
 
+          var input = document.createElement('input');
+          input.setAttribute('id', this._sanitizeId(`INPUT_PRICE_${key}_${listitem.room}_${dd_local.format(HotelCalendar.DATE_FORMAT_SHORT_)}`));
+          input.setAttribute('type', 'edit');
+          input.setAttribute('title', 'Price');
+          input.dataset.hcalParentCell = cell.getAttribute('id');
           var dd_fmrt = dd_local.format(HotelCalendar.DATE_FORMAT_SHORT_);
-          cell.textContent = _.has(listitem['days'], dd_fmrt)?listitem['days'][dd_fmrt]:'...';
+          input.dataset.orgValue = input.value = _.has(listitem['days'], dd_fmrt)?Number(listitem['days'][dd_fmrt]).toLocaleString():'...';
+          input.addEventListener('change', function(ev){
+            var parentCell = $this.edtable.querySelector(`#${this.dataset.hcalParentCell}`);
+            var parentRow = $this.edtable.querySelector(`#${parentCell.dataset.hcalParentRow}`);
+            var vals = {
+              'vroom_id': +parentRow.dataset.hcalVRoomId,
+              'date': HotelCalendar.toMoment(parentCell.dataset.hcalDate),
+              'price': this.value,
+              'old_price': this.dataset.orgValue,
+              'pricelist_id': +parentRow.dataset.hcalPricelist
+            };
+            $this.updateVRoomPrice(vals['pricelist_id'], vals['vroom_id'], vals['date'], vals['price']);
+            $this.e.dispatchEvent(new CustomEvent(
+              'hcalOnPricelistChanged',
+                { 'detail': vals }));
+          });
+          cell.appendChild(input);
         }
       }
       //}
@@ -1660,13 +1681,6 @@ HotelCalendar.prototype = {
     this._updateReservationOccupation();
   },
 
-  setDetailPrice: function(/*String*/room_type, /*String*/date, /*Float*/price) {
-    var dd = HotelCalendar.toMoment(date);
-    var selector = this._sanitizeId(`CELL_PRICE_${room_type}_${dd.format(HotelCalendar.DATE_FORMAT_SHORT_)}`);
-    var cell_input = this.edtable.querySelector('#'+`${selector} input`);
-    cell_input.value = price;
-  },
-
   getLinkedReservations: function(/*HReservationObject*/reservationObj) {
     return _.reject(this._reservations, function(item){ return item === reservationObj || item.linkedId !== reservationObj.id; });
   },
@@ -1940,6 +1954,17 @@ HotelCalendar.prototype = {
     this._updatePriceList();
   },
 
+  updateVRoomPrice: function(pricelist_id, vroom_id, date, price) {
+    var strDate = date.format(HotelCalendar.DATE_FORMAT_SHORT_);
+    var cellId = this._sanitizeId(`CELL_PRICE_${pricelist_id}_${vroom_id}_${strDate}`);
+    var input = this.edtable.querySelector(`#${cellId} input`);
+    if (input) {
+      input.dataset.orgValue = input.value = price;
+      var pr_fk = _.findKey(this._pricelist[pricelist_id], {'room': vroom_id});
+      this._pricelist[pricelist_id][pr_fk].days[strDate] = price;
+    }
+  },
+
   _updatePriceList: function() {
     if (!this.options.showPricelist) {
       return;
@@ -1951,9 +1976,10 @@ HotelCalendar.prototype = {
         var pr_keys = _.keys(pr_item['days']);
         for (var prk of pr_keys) {
           var price = pr_item['days'][prk];
-          var cell = this.edtable.querySelector('#'+this._sanitizeId(`CELL_PRICE_${k}_${pr_item['room']}_${prk}`));
-          if (cell) {
-            cell.textContent = price;
+          var inputId = this._sanitizeId(`INPUT_PRICE_${k}_${pr_item['room']}_${prk}`);
+          var input = this.edtable.querySelector(`#${inputId}`);
+          if (input) {
+            input.value = Number(price).toLocaleString();
           }
         }
       }

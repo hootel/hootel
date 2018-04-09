@@ -30,3 +30,4 @@ from . import inherited_hotel_virtual_room
 from . import inherited_hotel_room
 from . import inherited_hotel_virtual_room_restriction_item
 from . import inherited_hotel_virtual_room_availability
+from . import inherited_product_pricelist

@@ -112,6 +112,8 @@ class Wizard(models.TransientModel):
 
     @api.multi
     def action_save_check(self):
+        import wdb
+        wdb.set_trace()
         cardex_val = {
           'partner_id': self.partner_id.id,
           'enter_date': self.enter_date,
