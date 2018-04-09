@@ -35,10 +35,10 @@ class Wizard(models.TransientModel):
             ids = [item[1] for item in self.env.context['reservation_ids']]
             reservations = self.env['hotel.reservation'].browse(ids)
             if len(reservations) == 1:
-                _logger.info('reservation id: %d', reservations)
+                # _logger.info('reservation id: %d', reservations)
                 return reservations
             for res in reservations:
-                _logger.info('res.cardex_count: %d', res.cardex_count)
+                # _logger.info('res.cardex_count: %d', res.cardex_count)
                 # return the first room line with free space for a cardex
                 if res.cardex_count < (res.adults + res.children):
                     return res
@@ -50,19 +50,7 @@ class Wizard(models.TransientModel):
         return False
 
     def default_partner_id(self):
-        if 'reservation_ids' and 'folio' in self.env.context:
-            ids = [item[1] for item in self.env.context['reservation_ids']]
-            reservations = self.env['hotel.reservation'].browse(ids)
-            for res in reservations:
-                if res.partner_id not in \
-                        res.mapped('cardex_ids.partner_id.id'):
-                    return res.partner_id
-        if 'partner_id' and 'reservation_id' in self.env.context:
-            if not self.env.context['partner_id'] in \
-                    self.env['hotel.reservation'].browse(
-                        self.env.context['reservation_id']
-                    ).mapped('cardex_ids.partner_id.id'):
-                return self.env.context['partner_id']
+        # no partner by default. User must search and choose one
         return False
 
     def default_cardex_ids(self):
@@ -86,11 +74,12 @@ class Wizard(models.TransientModel):
             for res in reservations:
                 return res.adults + res.children - res.cardex_count
 
+    ''' TODO: clean-up - list of checkins on smart button clean is not used anymore
     def comp_checkin_list_visible(self):
         if 'partner_id' in self.env.context:
             self.list_checkin_cardex = False
         return
-
+    '''
     def comp_checkin_edit(self):
         if 'edit_cardex' in self.env.context:
             return True
@@ -98,8 +87,8 @@ class Wizard(models.TransientModel):
 
     cardex_ids = fields.Many2many('cardex', 'reservation_id',
                                   default=default_cardex_ids)
-    count_cardex = fields.Integer('Cardex counter',
-                                  default=default_count_cardex)
+    # count_cardex = fields.Integer('Cardex counter',
+    #                              default=default_count_cardex)
     pending_cardex = fields.Integer('Cardex pending',
                                     default=default_pending_cardex)
     partner_id = fields.Many2one('res.partner',
@@ -109,13 +98,20 @@ class Wizard(models.TransientModel):
                                      default=default_reservation_id)
     enter_date = fields.Date(default=default_enter_date,
                              required=True)
-    exit_date = fields.Date(default=default_exit_date, required=True)
-    email_cardex = fields.Char('E-mail', related='partner_id.email')
-    mobile_cardex = fields.Char('Mobile', related='partner_id.mobile',
-                                store=True)
+    exit_date = fields.Date(default=default_exit_date,
+                            required=True)
+
+    email_cardex = fields.Char('E-mail',
+                               related='partner_id.email')
+    mobile_cardex = fields.Char('Mobile',
+                                related='partner_id.mobile', store=True)
+
+    ''' TODO: clean-up - list of checkins on smart button clean is not used anymore
     list_checkin_cardex = fields.Boolean(compute=comp_checkin_list_visible,
                                          default=True, store=True)
-    edit_checkin_cardex = fields.Boolean(default=comp_checkin_edit, store=True)
+    '''
+    edit_checkin_cardex = fields.Boolean(default=comp_checkin_edit,
+                                         store=True)
 
     @api.multi
     def action_save_check(self):
@@ -134,6 +130,7 @@ class Wizard(models.TransientModel):
             folio.checkins_reservations -= 1
         return
 
+    ''' TODO: clean-up - update checkin is not used ?
     @api.multi
     def action_update_check(self):
         record_id = self.env['hotel.reservation'].browse(
@@ -143,11 +140,29 @@ class Wizard(models.TransientModel):
           'enter_date': self.enter_date,
           'exit_date': self.exit_date})
         return {'type': 'ir.actions.act_window_close'}
-
+    '''
     @api.onchange('reservation_id')
     def change_enter_exit_date(self):
         record_id = self.env['hotel.reservation'].browse(
             self.reservation_id.id)
-        _logger.info('change_enter_exit_date for resertation id: %d', record_id)
+        # _logger.info('change_enter_exit_date for resertation id: %d', record_id)
         self.enter_date = record_id.checkin
         self.exit_date = record_id.checkout
+
+        ''' trying to filter the reservations only to pending checkins ... 
+        if 'reservation_ids' and 'folio' in self.env.context:
+            ids = [item[1] for item in self.env.context['reservation_ids']]
+            reservations = self.env['hotel.reservation'].browse(ids)
+            for res in reservations:
+                _logger.info('reservation cardex_count %d', res.cardex_count)
+        '''
+
+        # return {
+            # 'domain': {'reservation_id': [('folio_id','=', self.env.context['folio']), 'count_cardex','=','2']},
+            # 'warning': {'title': "Warning", 'message': self.env.context['cardex_count']},
+        # }
+
+#    @api.onchange('partner_id')
+#    def update_partner_fields(self):
+#        self.email_cardex = self.partner_id.email;
+#        self.mobile_cardex = self.partner_id.mobile;

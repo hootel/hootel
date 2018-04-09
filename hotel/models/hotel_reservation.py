@@ -281,6 +281,9 @@ class HotelReservation(models.Model):
                                    related='folio_id.pricelist_id',
                                    readonly="1")
     cardex_ids = fields.One2many('cardex', 'reservation_id')
+    # TODO: As cardex_count is a computed field, it can't not be used in a domain filer
+    # Non-stored field hotel.reservation.cardex_count cannot be searched
+    # So, let's return its value here and use the function in the checkinwizard view ?
     cardex_count = fields.Integer('Cardex counter',
                                   compute='_compute_cardex_count')
     cardex_pending = fields.Boolean('Cardex Pending',
@@ -327,11 +330,6 @@ class HotelReservation(models.Model):
                 res.cardex_pending = False
             else:
                 res.cardex_pending = True
-        # TODO: As cardex_count is a computed field, it can't not be used in a domain filer
-        # Non-stored field hotel.reservation.cardex_count cannot be searched
-        # So, let's return its value here and use the function in the checkinwizard view
-        # return res.cardex_count
-
 
     @api.model
     def daily_plan(self):
