@@ -153,4 +153,12 @@
 		<li><a href="#" data-action="toggle_show_availability"><span t-if="manager._show_availability" class="fa fa-check"/> Show Availability</a></li>
 </t>
 
+<t t-name="HotelCalendar.ConfirmPriceChange">
+	<div class="content">
+		<p>The following changes will be made...</p>
+		<span><strong>Price Change...</strong></span><br/>
+		<p>Are you sure you want to make this changes?</p>
+	</div>
+</t>
+
 </template>
