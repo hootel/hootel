@@ -310,20 +310,21 @@ class HotelFolio(models.Model):
         for fol in self:
             num_cardex = 0
             pending = False
-            vals = {}
             if fol.reservation_type == 'normal':
-                for reserv in fol.room_lines:
-                    if reserv.state != 'cancelled':
-                        num_cardex += len(reserv.cardex_ids)
+                for reser in fol.room_lines:
+                    if reser.state != 'cancelled':
+                        num_cardex += len(reser.cardex_ids)
+                fol.cardex_count = num_cardex
                 pending = 0
-                for reserv in fol.room_lines:
-                    if reserv.state != 'cancelled':
-                        pending += (reserv.adults + reserv.children) - len(reserv.cardex_ids)
-            fol.write({
-                'cardex_amount': num_cardex,
-                'cardex_pending': (pending > 0),
-                'cardex_pending_num': pending,
-            })
+                for reser in fol.room_lines:
+                    if reser.state != 'cancelled':
+                        pending += (reser.adults + reser.children) \
+                                          - len(reser.cardex_ids)
+                if pending <= 0:
+                    fol.cardex_pending = False
+                else:
+                    fol.cardex_pending = True
+        fol.cardex_pending_num = pending
 
     @api.multi
     def go_to_currency_exchange(self):
