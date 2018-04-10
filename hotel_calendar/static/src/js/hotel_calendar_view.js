@@ -170,6 +170,9 @@ var HotelCalendarView = View.extend({
     _action_manager: null,
     _last_dates: [false, false],
 
+    // Custom Constants
+    SOUNDS: { NONE: 0, BELL:1 },
+
     /** VIEW METHODS **/
     init: function(parent, dataset, fields_view, options) {
         this._super.apply(this, arguments);
@@ -181,6 +184,9 @@ var HotelCalendarView = View.extend({
         this.mutex = new Utils.Mutex();
         this._model = new Model(this.dataset.model);
         this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
+
+        this._sounds = [];
+        this._sounds[this.SOUNDS.BELL] = new Audio('hotel_calendar/static/src/sfx/bell_ringing.mp3');
 
         Bus.on("notification", this, this._on_bus_signal);
     },
@@ -1157,6 +1163,7 @@ var HotelCalendarView = View.extend({
                     nreserv.addUserData({'parent_reservation': reserv['parent_reservation']});
                     this._reserv_tooltips[reserv['reserv_id']] = notif[1]['tooltip'];
                     this._hcalendar.addReservations([nreserv]);
+                    this._sounds[this.SOUNDS.BELL].play();
                   }
                 }
 
