@@ -915,52 +915,38 @@ HotelCalendar.prototype = {
           }
 
           if (needUpdate) {
-            var linkedReservations = $this.getLinkedReservations($this.reservationAction.newReservationObj);
-            linkedReservations.push(reserv);
+            var mainReservationDiv = $this.getReservationDiv(reserv);
+            $this._updateScroll(mainReservationDiv);
 
-            for (var lr of linkedReservations) {
-              if (lr!==reserv) {
-                lr.startDate = reserv.startDate.clone();
-                lr.endDate = reserv.endDate.clone();
+            var affectedReservations = [reserv].concat($this.getLinkedReservations($this.reservationAction.newReservationObj));
+            for (var areserv of affectedReservations) {
+              if (areserv !== reserv) {
+                areserv.startDate = reserv.startDate.clone();
+                areserv.endDate = reserv.endDate.clone();
               }
 
-              var reservationDiv = $this.getReservationDiv(lr);
+              var reservationDiv = $this.getReservationDiv(areserv);
               if (reservationDiv) {
-
-                // AUTO-SCROLL
-                var reservBounds = reservationDiv.getBoundingClientRect();
-                var mainBounds = $this.edivr.getBoundingClientRect();
-                var eOffset = $this.e.getBoundingClientRect();
-                var bottom = mainBounds.bottom - eOffset.top;
-                var top = mainBounds.top + eOffset.top;
-                if (reservBounds.bottom >= bottom-30.0) {
-                  $this.edivr.scrollBy(0, 30);
-                }
-                else if (reservBounds.top <= top+30.0) {
-                  $this.edivr.scrollBy(0, -30);
-                }
-                // END AUTO-SCROLL
-
-                if (lr.unusedZone) {
+                if (areserv.unusedZone) {
                   reservationDiv.style.visibility = 'hidden';
                   continue;
                 }
                 var limits = $this.getReservationCellLimits(
-                  lr,
-                  lr===reserv?toRoom:undefined,
+                  areserv,
+                  areserv===reserv?toRoom:undefined,
                   !$this.options.assistedMovement);
                 $this._updateDivReservation(reservationDiv, limits);
 
-                if (!$this.checkReservationPlace(lr) || !limits) {
+                if (!$this.checkReservationPlace(areserv) || !limits) {
                   reservationDiv.classList.add('hcal-reservation-invalid');
                 } else {
                   reservationDiv.classList.remove('hcal-reservation-invalid');
                 }
 
-                if (lr.fixRooms && $this.reservationAction.oldReservationObj.room.id != lr.room.id) {
+                if (areserv.fixRooms && $this.reservationAction.oldReservationObj.room.id != areserv.room.id) {
                   reservationDiv.classList.add('hcal-reservation-invalid');
                 }
-                if (lr.fixDays && !$this.reservationAction.oldReservationObj.startDate.isSame(lr.startDate, 'day')) {
+                if (areserv.fixDays && !$this.reservationAction.oldReservationObj.startDate.isSame(areserv.startDate, 'day')) {
                   reservationDiv.classList.add('hcal-reservation-invalid');
                 }
               }
@@ -1454,6 +1440,22 @@ HotelCalendar.prototype = {
     }
   },
 
+  _updateScroll: function(/*HTMLObject*/reservationDiv) {
+    var reservBounds = reservationDiv.getBoundingClientRect();
+    var mainBounds = this.edivr.getBoundingClientRect();
+    var eOffset = this.e.getBoundingClientRect();
+    var bottom = mainBounds.bottom - eOffset.top;
+    var top = mainBounds.top + eOffset.top;
+    var offset = 10.0;
+    var scrollDisp = 30.0;
+    if (reservBounds.bottom >= bottom-offset) {
+      this.edivr.scrollBy(0, scrollDisp);
+    }
+    else if (reservBounds.top <= top+offset) {
+      this.edivr.scrollBy(0, -scrollDisp);
+    }
+  },
+
   //==== SELECTION
   _updateCellSelection: function() {
       // Clear all
@@ -1787,18 +1789,17 @@ HotelCalendar.prototype = {
               $this.reservationAction.action = HotelCalendar.ACTION.NONE;
               return false;
             }
-            var linkedReservations = $this.getLinkedReservations(reserv);
-            linkedReservations.push(reserv);
-            for (var lr of linkedReservations) {
-              var reservationDiv = $this.getReservationDiv(lr);
+            var affectedReservations = [reserv].concat($this.getLinkedReservations(reserv));
+            for (var areserv of affectedReservations) {
+              var reservationDiv = $this.getReservationDiv(areserv);
               if (reservationDiv) {
                 reservationDiv.classList.add('hcal-reservation-action');
               }
             }
 
-            var otherReservs = _.difference($this._reservations, linkedReservations);
-            for (var or of otherReservs) {
-              var reservationDiv = $this.getReservationDiv(or);
+            var otherReservs = _.difference($this._reservations, affectedReservations);
+            for (var oreserv of otherReservs) {
+              var reservationDiv = $this.getReservationDiv(oreserv);
               if (reservationDiv) {
                 reservationDiv.classList.add('hcal-reservation-foreground');
               }
