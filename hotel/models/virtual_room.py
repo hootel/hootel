@@ -123,5 +123,13 @@ class VirtualRoom(models.Model):
     @api.multi
     def unlink(self):
         for record in self:
+            # Set fixed price to rooms with price from this virtual rooms
+            rooms = self.env['hotel.room'].search([
+                ('sale_price_type', '=', 'vroom'),
+                ('price_virtual_room', '=', record.id)
+            ])
+            for room in rooms:
+                room.sale_price_type = 'fixed'
+            # Remove product.product
             record.product_id.unlink()
         return super(VirtualRoom, self).unlink()
