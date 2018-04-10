@@ -27,6 +27,17 @@
     }
 }
 
+#hcal_load {
+	height: 90vh;
+  text-align: center;
+  line-height: 90vh;
+}
+#hcal_load > span {
+	line-height: 24px;
+	display: inline-block;
+	vertical-align: middle;
+}
+
 #pms-search {
 	position: fixed;
 	z-index: 9;

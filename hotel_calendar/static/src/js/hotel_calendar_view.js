@@ -244,7 +244,8 @@ var HotelCalendarView = View.extend({
         var $widget = this.$el.find("#hcal_widget");
         var $hcal = $widget.find('#hcalendar');
         if ($hcal) { $hcal.remove(); }
-        $widget.append("<div id='hcalendar'></div>");
+        $widget.empty();
+        $widget.append("<div id='hcalendar'></div>"); // FIXME: Use 'hcal_widget'
 
         this._hcalendar = new HotelCalendar('#hcalendar', options, pricelist, restrictions, this.$el[0]);
         this._hcalendar.addEventListener('hcalOnPricelistChanged', function(ev){
