@@ -157,7 +157,7 @@ HotelCalendar.prototype = {
 
   addReservations: function(/*List*/reservations, /*Boolean*/noUnusedZones) {
     if (reservations.length > 0 && !(reservations[0] instanceof HReservation)) {
-      console.warn("[HotelCalendar][setReservations] Invalid Reservation definition!");
+      console.warn("[HotelCalendar][addReservations] Invalid Reservation definition!");
     } else {
       // Merge
       for (var reserv of reservations) {
@@ -926,6 +926,21 @@ HotelCalendar.prototype = {
 
               var reservationDiv = $this.getReservationDiv(lr);
               if (reservationDiv) {
+
+                // AUTO-SCROLL
+                var reservBounds = reservationDiv.getBoundingClientRect();
+                var mainBounds = $this.edivr.getBoundingClientRect();
+                var eOffset = $this.e.getBoundingClientRect();
+                var bottom = mainBounds.bottom - eOffset.top;
+                var top = mainBounds.top + eOffset.top;
+                if (reservBounds.bottom >= bottom-30.0) {
+                  $this.edivr.scrollBy(0, 30);
+                }
+                else if (reservBounds.top <= top+30.0) {
+                  $this.edivr.scrollBy(0, -30);
+                }
+                // END AUTO-SCROLL
+
                 if (lr.unusedZone) {
                   reservationDiv.style.visibility = 'hidden';
                   continue;
