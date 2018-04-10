@@ -248,7 +248,10 @@ var HotelCalendarView = View.extend({
 
         this._hcalendar = new HotelCalendar('#hcalendar', options, pricelist, restrictions, this.$el[0]);
         this._hcalendar.addEventListener('hcalOnPricelistChanged', function(ev){
-          var qdict = {};
+          var qdict = {
+            'old_price': ev.detail.old_price,
+            'new_price': ev.detail.price
+          };
           var hasChanged = false;
           var price = ev.detail.price.replace(',', '.'); // FIXME: Found best method to replace comma separator
           var dialog = new Dialog(self, {
@@ -259,10 +262,10 @@ var HotelCalendarView = View.extend({
                     classes: 'btn-primary',
                     close: true,
                     click: function () {
-                      hasChanged = true;
                       new Model('product.pricelist').call('update_price', [ev.detail.pricelist_id, ev.detail.vroom_id, ev.detail.date.format(ODOO_DATETIME_MOMENT_FORMAT), ev.detail.price]).fail(function(err, ev){
                         self._hcalendar.updateVRoomPrice(ev.detail.pricelist_id, ev.detail.vroom_id, ev.detail.date, ev.detail.old_price);
                       });
+                      hasChanged = true;
                     }
                   },
                   {
@@ -272,6 +275,11 @@ var HotelCalendarView = View.extend({
               ],
               $content: QWeb.render('HotelCalendar.ConfirmPriceChange', qdict)
           }).open();
+          dialog.$modal.on('hide.bs.modal', function(e){
+            if (!hasChanged) {
+              self._hcalendar.updateVRoomPrice(ev.detail.pricelist_id, ev.detail.vroom_id, ev.detail.date, ev.detail.old_price);
+            }
+          });
         });
         this._hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){
             var tp = self._reserv_tooltips[ev.detail.reservationObj.id];
@@ -306,7 +314,6 @@ var HotelCalendarView = View.extend({
         });
         this._hcalendar.addEventListener('hcalOnSwapReservations', function(ev){
           var qdict = {};
-          var hasChanged = false;
           var dialog = new Dialog(self, {
               title: _t("Confirm Reservation Swap"),
               buttons: [
