@@ -293,6 +293,7 @@ var HotelCalendarView = View.extend({
         });
         this._hcalendar.addEventListener('hcalOnClickReservation', function(ev){
             var res_id = ev.detail.reservationObj.getUserData('folio_id');
+            $(ev.detail.reservationDiv).tooltip('hide');
             self.call_action({
               type: 'ir.actions.act_window',
               res_model: 'hotel.folio',
