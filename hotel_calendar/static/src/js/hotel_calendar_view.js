@@ -108,19 +108,19 @@ var CalendarMenu = Widget.extend({
 
     toggle_show_adv_controls: function() {
       var $pms_search = $(document).find('#pms-search');
-      if ($pms_search[0]) {
-        if ($pms_search.position().top < 0)
-        {
-          $pms_search.animate({
-            'top': `${$('.main-nav').height()}px`,
-            'opacity': 1.0,
-          }, 'fast');
-        } else {
-          $pms_search.animate({
-            'top': `-${$pms_search.height()}px`,
-            'opacity': 0.0,
-          }, 'slow');
-        }
+      if ($pms_search.position().top < 0)
+      {
+        var $navbar = $('.navbar');
+        var toPos = $navbar.height() + parseInt($navbar.css('border-top-width'), 10) + parseInt($navbar.css('border-bottom-width'), 10);
+        $pms_search.animate({
+          'top': `${toPos}px`,
+          'opacity': 1.0,
+        }, 'fast');
+      } else {
+        $pms_search.animate({
+          'top': `-${$pms_search.height()}px`,
+          'opacity': 0.0,
+        }, 'slow');
       }
     },
 
@@ -1078,7 +1078,6 @@ var HotelCalendarView = View.extend({
       var $pms_search = this.$el.find('#pms-search');
       if ($pms_search.position().top < 0)
       {
-        console.log("=== PASA POR AKI!!");
         var $navbar = $('.navbar');
         var toPos = $navbar.height() + parseInt($navbar.css('border-top-width'), 10) + parseInt($navbar.css('border-bottom-width'), 10);
         $pms_search.animate({
@@ -1086,7 +1085,6 @@ var HotelCalendarView = View.extend({
           'opacity': 1.0,
         }, 'fast');
       } else {
-        console.log("=== TAMBIEN PASASASASASASSA PASA POR AKI!!");
         $pms_search.animate({
           'top': `-${$pms_search.height()}px`,
           'opacity': 0.0,
