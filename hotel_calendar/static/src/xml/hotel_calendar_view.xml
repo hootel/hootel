@@ -133,8 +133,8 @@
                 <div id="hcal_widget" class="col-xs-12 col-md-12 nopadding">
                     <div id="hcal_load">
                         <span>
-                            <i class="fa fa-refresh fa-spin fa-3x fa-fw"></i><br/>
-                            <span><strong>Loading...</strong></span>
+                            <i class="fa fa-refresh fa-spin fa-5x fa-fw"></i><br/>
+                            <h1>Loading Calendar...</h1>
                         </span>
                     </div>
                 </div>
