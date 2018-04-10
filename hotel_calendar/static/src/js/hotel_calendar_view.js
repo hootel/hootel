@@ -367,7 +367,7 @@ var HotelCalendarView = View.extend({
           }).open();
         });
         this._hcalendar.addEventListener('hcalOnCancelSwapReservations', function(ev){
-          $("#btn_swap span.ntext").html("START SWAP");
+          $("#btn_swap span.ntext").html(_t("START SWAP"));
           $("#btn_swap").css({
             'backgroundColor': '',
             'fontWeight': 'normal'
@@ -973,21 +973,21 @@ var HotelCalendarView = View.extend({
           var hcalSwapMode = self._hcalendar.getSwapMode();
           if (hcalSwapMode === HotelCalendar.MODE.NONE) {
             self._hcalendar.setSwapMode(HotelCalendar.MODE.SWAP_FROM);
-            $("#btn_swap span.ntext").html("CONTINUE");
+            $("#btn_swap span.ntext").html(_t("CONTINUE"));
             $("#btn_swap").css({
               'backgroundColor': 'rgb(145, 255, 0)',
               'fontWeight': 'bold'
             });
           } else if (hcalSwapMode === HotelCalendar.MODE.SWAP_FROM) {
             self._hcalendar.setSwapMode(HotelCalendar.MODE.SWAP_TO);
-            $("#btn_swap span.ntext").html("END");
+            $("#btn_swap span.ntext").html(_t("END"));
             $("#btn_swap").css({
               'backgroundColor': 'orange',
               'fontWeight': 'bold'
             });
           } else {
             self._hcalendar.setSwapMode(HotelCalendar.MODE.NONE);
-            $("#btn_swap span.ntext").html("START SWAP");
+            $("#btn_swap span.ntext").html(_t("START SWAP"));
             $("#btn_swap").css({
               'backgroundColor': '',
               'fontWeight': ''
@@ -1002,7 +1002,7 @@ var HotelCalendarView = View.extend({
         this._model.call('get_hcalendar_settings', [false]).then(function(results){
         	self._view_options = results;
           var date_begin = moment().startOf('day');
-          if (['xs', 'md'].indexOf(self._findBootstrapEnvironment()) >= 0) {
+          if (['xs', 'md'].indexOf(self._find_bootstrap_environment()) >= 0) {
             self._view_options['days'] = 7;
           } else {
             self._view_options['days'] = (self._view_options['days'] !== 'month')?parseInt(self._view_options['days']):date_begin.daysInMonth();
@@ -1076,11 +1076,15 @@ var HotelCalendarView = View.extend({
       var $pms_search = this.$el.find('#pms-search');
       if ($pms_search.position().top < 0)
       {
+        console.log("=== PASA POR AKI!!");
+        var $navbar = $('.navbar');
+        var toPos = $navbar.height() + parseInt($navbar.css('border-top-width'), 10) + parseInt($navbar.css('border-bottom-width'), 10);
         $pms_search.animate({
-          'top': `${$('.main-nav').height()}px`,
+          'top': `${toPos}px`,
           'opacity': 1.0,
         }, 'fast');
       } else {
+        console.log("=== TAMBIEN PASASASASASASSA PASA POR AKI!!");
         $pms_search.animate({
           'top': `-${$pms_search.height()}px`,
           'opacity': 0.0,
@@ -1146,6 +1150,9 @@ var HotelCalendarView = View.extend({
                   this._hcalendar.removeReservation(reserv['reserv_id'], true);
                   this._reserv_tooltips = _.pick(this._reserv_tooltips, function(value, key, obj){ return key != reserv['reserv_id']; });
                 } else {
+                  if (!this._hcalendar.getReservation(reserv['product_id'])) {
+                    this._play_sound(this.SOUNDS.BELL);
+                  }
                   var room = this._hcalendar.getRoom(reserv['product_id'], reserv['overbooking'], reserv['reserv_id']);
                   if (room) {
                     var nreserv = new HReservation({
@@ -1170,7 +1177,6 @@ var HotelCalendarView = View.extend({
                     nreserv.addUserData({'parent_reservation': reserv['parent_reservation']});
                     this._reserv_tooltips[reserv['reserv_id']] = notif[1]['tooltip'];
                     this._hcalendar.addReservations([nreserv]);
-                    this._sounds[this.SOUNDS.BELL].play();
                   }
                 }
 
@@ -1300,7 +1306,11 @@ var HotelCalendarView = View.extend({
         };
     },
 
-    _findBootstrapEnvironment: function() {
+    _play_sound: function(/*int*/SoundID) {
+      this._sounds[SoundID].play();
+    },
+
+    _find_bootstrap_environment: function() {
         var envs = ['xs', 'sm', 'md', 'lg'];
 
         var $el = $('<div>');
