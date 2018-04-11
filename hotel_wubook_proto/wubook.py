@@ -1395,10 +1395,12 @@ class WuBook(models.TransientModel):
             # Create Folio
             if not any(failed_reservations) and any(reservations):
                 try:
+                    # TODO: Improve 'addons_list'
                     vals = {
                         'room_lines': reservations,
-                        'wcustomer_notes': book['customer_notes'],
-                        'channel_type':'web',
+                        'wcustomer_notes': "%s\n%s" % (
+                            book['customer_notes'], any(book['addons_list']) and str(book['addons_list']) or ''),
+                        'channel_type': 'web',
                     }
                     if folio_id:
                         folio_id.with_context({
