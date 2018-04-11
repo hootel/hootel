@@ -219,8 +219,12 @@ HotelCalendar.prototype = {
       reserv = _.find(this._reservations, function(item){ item.id == reservation.id});
     }
     if (reserv) {
-      if (reserv._html) {
-        reserv._html.parentNode.removeChild(reserv._html);
+      // Remove all realted content...
+      var elms = [reserv._html].concat(this.e.querySelector(`.hcal-warn-ob-indicator[data-hcalReservationObjId=${reserv.id}]`));
+      for (elm of elms) {
+        if (elm) {
+          elm.parentNode.removeChild(elm);
+        }
       }
       this._reservations = _.without(this._reservations, reserv);
 
