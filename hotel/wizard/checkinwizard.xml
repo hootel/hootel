@@ -28,18 +28,24 @@
                                     attrs="{'invisible':[('partner_id', '=', 0)]}" />
 -->
                         </group>
+                          <group col="4">
+                            <field name="firstname_cardex" colspan="2"/>
+                            <field name="lastname_cardex" colspan="2"/>
+                          </group>
+
                         <group col="4">
                             <field name="email_cardex" colspan="2"/>
                             <field name="mobile_cardex" colspan="2"/>
                         </group>
 
                         <footer>
-<!--                             <button name="write" type="object" string="Save new line" class="btn-primary"/> -->
-
+                        <group col="2">
+                            <!-- TODO: clean-up
                             <button name="action_save_check"
                                 string="Save New Checkin" type="object"
                                 attrs="{'invisible': [('edit_checkin_cardex','=',True)]}"
                                 />
+                            -->
                             <!-- TODO: clean-up
                             <button name="action_update_check"
                                 string="Update Checkin" type="object"
@@ -49,6 +55,7 @@
                             <button name="cancel" string="Cancel" special="cancel"/>
 
                             <field name="edit_checkin_cardex" invisible="True"/>
+                        </group>
                         </footer>
                         <group col="4">
                             <field name="cardex_ids" readonly="1" invisible="context.get('hidden_cardex',True)" />
@@ -58,14 +65,12 @@
                 </field>
             </record>
 
-            <!-- TODO: clean-up
             <record id="launch_checkin_wizard_add" model="ir.actions.act_window">
                 <field name="name">Add Check</field>
                 <field name="res_model">checkin.wizard</field>
                 <field name="view_id" ref="checkin_wizard_form_2"/>
                 <field name="target">new</field>
             </record>
-            -->
 
             <!-- TODO: clean-up
             <record id="checkin_wizard_form_view" model="ir.ui.view">

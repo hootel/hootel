@@ -60,20 +60,22 @@ class Wizard(models.TransientModel):
             for res in reservations:
                 return res.cardex_ids
 
+    ''' TODO: clean-up
     def default_count_cardex(self):
         if 'reservation_ids' and 'folio' in self.env.context:
             ids = [item[1] for item in self.env.context['reservation_ids']]
             reservations = self.env['hotel.reservation'].browse(ids)
             for res in reservations:
                 return res.cardex_count
-
+    '''
+    ''' TODO: clean-up
     def default_pending_cardex(self):
         if 'reservation_ids' and 'folio' in self.env.context:
             ids = [item[1] for item in self.env.context['reservation_ids']]
             reservations = self.env['hotel.reservation'].browse(ids)
             for res in reservations:
                 return res.adults + res.children - res.cardex_count
-
+    '''
     ''' TODO: clean-up - list of checkins on smart button clean is not used anymore
     def comp_checkin_list_visible(self):
         if 'partner_id' in self.env.context:
@@ -89,8 +91,8 @@ class Wizard(models.TransientModel):
                                   default=default_cardex_ids)
     # count_cardex = fields.Integer('Cardex counter',
     #                              default=default_count_cardex)
-    pending_cardex = fields.Integer('Cardex pending',
-                                    default=default_pending_cardex)
+    # pending_cardex = fields.Integer('Cardex pending',
+    #                                 default=default_pending_cardex)
     partner_id = fields.Many2one('res.partner',
                                  default=default_partner_id,
                                  required=True)
@@ -101,10 +103,16 @@ class Wizard(models.TransientModel):
     exit_date = fields.Date(default=default_exit_date,
                             required=True)
 
-    email_cardex = fields.Char('E-mail',
-                               related='partner_id.email')
-    mobile_cardex = fields.Char('Mobile',
-                                related='partner_id.mobile', store=True)
+    firstname_cardex = fields.Char('Firstname',
+                                   required=True)
+    lastname_cardex = fields.Char('Lastname',
+                                  required=True)
+
+    email_cardex = fields.Char('E-mail')
+
+    mobile_cardex = fields.Char('Mobile')
+
+
 
     ''' TODO: clean-up - list of checkins on smart button clean is not used anymore
     list_checkin_cardex = fields.Boolean(compute=comp_checkin_list_visible,
@@ -115,20 +123,27 @@ class Wizard(models.TransientModel):
 
     @api.multi
     def action_save_check(self):
+        # prepare checkin values
         cardex_val = {
           'partner_id': self.partner_id.id,
           'enter_date': self.enter_date,
-          'exit_date': self.exit_date}
+          'exit_date': self.exit_date
+        }
         record_id = self.env['hotel.reservation'].browse(
             self.reservation_id.id)
+        # save the cardex for this reservation
         record_id.write({'cardex_ids': [(0, False, cardex_val)]})
-        if record_id.cardex_count > 0:
-            record_id.state = 'booking'
-            record_id.is_checkin = False
-            folio = self.env['hotel.folio'].browse(
-                self.reservation_id.folio_id.id)
-            folio.checkins_reservations -= 1
-        return
+
+        # prepare partner values
+        partner_val = {
+            'id':           self.partner_id.id,
+            'email':        self.email_cardex,
+            'mobile':       self.mobile_cardex,
+            'firstname':    self.firstname_cardex,
+            'lastname':     self.lastname_cardex,
+        }
+        # update the partner values for this reservation
+        self.partner_id.sudo().write(partner_val);
 
     ''' TODO: clean-up - update checkin is not used ?
     @api.multi
@@ -155,14 +170,17 @@ class Wizard(models.TransientModel):
             reservations = self.env['hotel.reservation'].browse(ids)
             for res in reservations:
                 _logger.info('reservation cardex_count %d', res.cardex_count)
-        '''
 
         # return {
             # 'domain': {'reservation_id': [('folio_id','=', self.env.context['folio']), 'count_cardex','=','2']},
             # 'warning': {'title': "Warning", 'message': self.env.context['cardex_count']},
         # }
+        '''
 
-#    @api.onchange('partner_id')
-#    def update_partner_fields(self):
-#        self.email_cardex = self.partner_id.email;
-#        self.mobile_cardex = self.partner_id.mobile;
+    @api.onchange('partner_id')
+    def update_partner_fields(self):
+        self.firstname_cardex = self.partner_id.firstname;
+        self.lastname_cardex = self.partner_id.lastname;
+        self.email_cardex  = self.partner_id.email;
+        self.mobile_cardex = self.partner_id.mobile;
+

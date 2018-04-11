@@ -8,10 +8,6 @@
             <field name="arch" type="xml">
               <!-- <xpath expr="//field[@name='partner_id']/group" position="after"> -->
                 <xpath expr="//sheet/group[3]" position="after">
-                  <group col="4">
-                    <field name="firstname_cardex" colspan="2"/>
-                    <field name="lastname_cardex" colspan="2"/>
-                  </group>
                 </xpath>
                   <xpath expr="//footer" position="before">
                     <group col="4">
@@ -24,13 +20,15 @@
                         <field name="gender_cardex" colspan="2" required="True"/>
                         <field name="birthdate_date_cardex" colspan="2" required="True"/>
                     </group>
-                    <group>
-                        <field name="code_ine_cardex" placeholder="Code in INE" options="{'no_create': True,'no_open': True}" colspan="2" required="True"/>
-                        <newline/>
-                        <field name="category_id_cardex" widget="many2many_tags" placeholder="Tags..." colspan="2" options="{'no_create': True,'no_open': True}"/>
+                    <group col="4">
+                        <field name="code_ine_cardex" placeholder="Code in INE"
+                               options="{'no_create': True,'no_open': True}" required="True"/>
+
+                        <field name="category_id_cardex" widget="many2many_tags" placeholder="Tags..."
+                               options="{'no_create': True,'no_open': True}" />
                     </group>
                 </xpath>
-                <xpath expr="//footer">
+                <xpath expr="//footer" position="before">
                         <button name="action_save_check" string="Save Checkin and Print" type="object"/>
                 </xpath>
             </field>
