@@ -100,7 +100,7 @@ class Wizard(models.TransientModel):
                                 required=True, related='partner_id.gender')
     firstname_cardex = fields.Char('Firstname', required=True, related='partner_id.firstname')
     lastname_cardex = fields.Char('Lastname', required=True, related='partner_id.lastname')
-    mobile_cardex = fields.Char('Mobile', related='partner_id.mobile', store=True)
+    mobile_cardex = fields.Char('Mobile', related='partner_id.mobile', required=True)
     code_ine_cardex = fields.Many2one('code_ine',
             help=_('Country or province of origin. Used for INE statistics.'),
             required=True,
@@ -158,6 +158,7 @@ class Wizard(models.TransientModel):
 #             'hidden_cardex': True,
 #             'edit_cardex': True
 #         }
+
         # FIXME: Hackish solution for close & print (https://www.odoo.com/es_ES/forum/ayuda-1/question/close-wizard-after-print-report-86786)
         action_report = self.pdf_viajero(cardex.id)
         del action_report['report_type']
