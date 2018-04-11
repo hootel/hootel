@@ -862,7 +862,7 @@ HotelCalendar.prototype = {
                 $this._reset_action_reservation();
                 return true;
               }
-              if (!date_cell.isAfter(reserv.startDate.clone().startOf('day'))) {
+              if (!date_cell.isAfter(reserv.startDate, 'd')) {
                 date_cell = reserv.startDate.clone().startOf('day').add(1, 'd');
               }
               if (!$this.reservationAction.oldReservationObj) {
