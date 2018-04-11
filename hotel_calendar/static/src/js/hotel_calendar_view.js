@@ -327,32 +327,27 @@ var HotelCalendarView = View.extend({
                       if (self._hcalendar.swapReservations(ev.detail.inReservs, ev.detail.outReservs)) {
                         var fromIds = _.pluck(ev.detail.inReservs, 'id');
                         var toIds = _.pluck(ev.detail.outReservs, 'id');
-                        var refFromReservDiv = self._hcalendar.getReservationDiv(ev.detail.inReservs[0]);
-                        var refToReservDiv = self._hcalendar.getReservationDiv(ev.detail.outReservs[0]);
+                        var refFromReservDiv = ev.detail.inReservs[0]._html;
+                        var refToReservDiv = ev.detail.outReservs[0]._html;
 
                         // Animate Movement
                         for (var nreserv of ev.detail.inReservs) {
-                          var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                          $(reservDiv).animate({'top': refToReservDiv.style.top});
+                          $(nreserv._html).animate({'top': refToReservDiv.style.top});
                         }
                         for (var nreserv of ev.detail.outReservs) {
-                          var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                          $(reservDiv).animate({'top': refFromReservDiv.style.top});
+                          $(nreserv._html).animate({'top': refFromReservDiv.style.top});
                         }
                         self._model.call('swap_reservations', [false, fromIds, toIds]).then(function(results){
                           var allReservs = ev.detail.inReservs.concat(ev.detail.outReservs);
                           for (nreserv of allReservs) {
-                            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                            $(reservDiv).stop(true);
+                            $(nreserv._html).stop(true);
                           }
                         }).fail(function(err, ev){
                           for (var nreserv of ev.detail.inReservs) {
-                            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                            $(reservDiv).animate({'top': refFromReservDiv.style.top}, 'fast');
+                            $(nreserv._html).animate({'top': refFromReservDiv.style.top}, 'fast');
                           }
                           for (var nreserv of ev.detail.outReservs) {
-                            var reservDiv = self._hcalendar.getReservationDiv(nreserv);
-                            $(reservDiv).animate({'top': refToReservDiv.style.top}, 'fast');
+                            $(nreserv._html).animate({'top': refToReservDiv.style.top}, 'fast');
                           }
 
                           self._hcalendar.swapReservations(ev.detail.outReservs, ev.detail.inReservs);
