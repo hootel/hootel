@@ -1395,11 +1395,13 @@ class WuBook(models.TransientModel):
             # Create Folio
             if not any(failed_reservations) and any(reservations):
                 try:
-                    # TODO: Improve 'addons_list'
+                    # TODO: Improve 'addons_list' & discounts
+                    addons = any(book['addons_list']) and str(book['addons_list']) or ''
+                    discounts = any(book['discount']) and str(book['discount']) or ''
                     vals = {
                         'room_lines': reservations,
-                        'wcustomer_notes': "%s\n%s" % (
-                            book['customer_notes'], any(book['addons_list']) and str(book['addons_list']) or ''),
+                        'wcustomer_notes': "%s\nADDONS:\n%s\nDISCOUNT:\n%s" % (
+                            book['customer_notes'], addons, discounts),
                         'channel_type': 'web',
                     }
                     if folio_id:
