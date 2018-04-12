@@ -1397,7 +1397,7 @@ class WuBook(models.TransientModel):
                 try:
                     # TODO: Improve 'addons_list' & discounts
                     addons = any(book['addons_list']) and str(book['addons_list']) or ''
-                    discounts = any(book['discount']) and str(book['discount']) or ''
+                    discounts = book.get('discount', '')
                     vals = {
                         'room_lines': reservations,
                         'wcustomer_notes': "%s\nADDONS:\n%s\nDISCOUNT:\n%s" % (
