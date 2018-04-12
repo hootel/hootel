@@ -41,6 +41,7 @@ function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options,
     days: options.days || moment(options.startDate || new Date()).daysInMonth(),
     rooms: options.rooms || [],
     endOfWeek: options.endOfWeek || 6,
+    endOfWeekOffset: options.endOfWeekOffset || 0,
     currencySymbol: options.currencySymbol || '€',
     dateFormatLong: options.dateFormat || 'YYYY-MM-DD HH:mm:ss',
     dateFormatShort: options.dateFormat || 'YYYY-MM-DD'
@@ -137,7 +138,7 @@ HotelCalendarManagement.prototype = {
     row = table.insertRow();
 
     cell = row.insertCell();
-    cell.setAttribute('colspan', '2');
+    cell.setAttribute('colspan', '3');
     telm = document.createElement("input");
     telm.setAttribute('id', this._sanitizeId(`PRICE_${roomId}_${dateShortStr}`));
     telm.setAttribute('name', 'price');
@@ -171,17 +172,7 @@ HotelCalendarManagement.prototype = {
     telm.dataset.orgValue = telm.value = 0;
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     telm.classList.add('hcal-management-input');
-    telm.addEventListener('change', function(ev){ $this.onInputChange(ev, this); }, false);
-    cell.appendChild(telm);
-    cell = row.insertCell();
-    telm = document.createElement("input");
-    telm.setAttribute('id', this._sanitizeId(`MIN_STAY_ARRIVAL_${roomId}_${dateShortStr}`));
-    telm.setAttribute('name', 'min_stay_arrival');
-    telm.setAttribute('type', 'edit');
-    telm.setAttribute('title', 'Min. Stay Arrival');
-    telm.dataset.orgValue = telm.value = 0;
-    telm.dataset.hcalParentCell = parentCell.getAttribute('id');
-    telm.classList.add('hcal-management-input');
+    telm.classList.add('hcal-border-radius-left');
     telm.addEventListener('change', function(ev){ $this.onInputChange(ev, this); }, false);
     cell.appendChild(telm);
     cell = row.insertCell();
@@ -193,13 +184,38 @@ HotelCalendarManagement.prototype = {
     telm.dataset.orgValue = telm.value = 0;
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     telm.classList.add('hcal-management-input');
+    telm.classList.add('hcal-border-radius-right');
+    telm.addEventListener('change', function(ev){ $this.onInputChange(ev, this); }, false);
+    cell.appendChild(telm);
+    cell = row.insertCell();
+    telm = document.createElement("input");
+    telm.setAttribute('id', this._sanitizeId(`MIN_STAY_ARRIVAL_${roomId}_${dateShortStr}`));
+    telm.setAttribute('name', 'min_stay_arrival');
+    telm.setAttribute('type', 'edit');
+    telm.setAttribute('title', 'Min. Stay Arrival');
+    telm.dataset.orgValue = telm.value = 0;
+    telm.dataset.hcalParentCell = parentCell.getAttribute('id');
+    telm.classList.add('hcal-management-input');
+    telm.classList.add('hcal-border-radius-left');
+    telm.addEventListener('change', function(ev){ $this.onInputChange(ev, this); }, false);
+    cell.appendChild(telm);
+    cell = row.insertCell();
+    telm = document.createElement("input");
+    telm.setAttribute('id', this._sanitizeId(`MAX_STAY_ARRIVAL_${roomId}_${dateShortStr}`));
+    telm.setAttribute('name', 'max_stay_arrival');
+    telm.setAttribute('type', 'edit');
+    telm.setAttribute('title', 'Max. Stay Arrival');
+    telm.dataset.orgValue = telm.value = 0;
+    telm.dataset.hcalParentCell = parentCell.getAttribute('id');
+    telm.classList.add('hcal-management-input');
+    telm.classList.add('hcal-border-radius-right');
     telm.addEventListener('change', function(ev){ $this.onInputChange(ev, this); }, false);
     cell.appendChild(telm);
 
     row = table.insertRow();
 
     cell = row.insertCell();
-    cell.setAttribute('colspan', '2');
+    cell.setAttribute('colspan', '3');
     telm = document.createElement("select");
     telm.classList.add('hcal-management-input');
     telm.addEventListener('change', function(ev){ $this.onInputChange(ev, this); }, false);
@@ -240,7 +256,7 @@ HotelCalendarManagement.prototype = {
     row = table.insertRow();
     cell = row.insertCell();
     cell.style.textAlign = 'center';
-    cell.setAttribute('colspan', '3');
+    cell.setAttribute('colspan', '4');
     telm = document.createElement("button");
     telm.setAttribute('id', this._sanitizeId(`NO_OTA_${roomId}_${dateShortStr}`));
     telm.setAttribute('name', 'no_ota');
@@ -334,6 +350,7 @@ HotelCalendarManagement.prototype = {
     var now = moment().local();
     for (var i=0; i<=this.options.days; i++) {
       var dd = this.options.startDate.clone().add(i,'d');
+      var dd_local = dd.clone().local();
       var cell = row.insertCell();
       cell.setAttribute('id', this._sanitizeId(`hday_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`));
       cell.classList.add('hcal-cell-header-day');
@@ -342,13 +359,13 @@ HotelCalendarManagement.prototype = {
       cell.dataset.hcalDate = dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT);
       cell.textContent = dd.format('D') + ' ' + dd.format('ddd') + ' (' + dd.format('MMM') + "'" + dd.format('YY') + ')';
       cell.setAttribute('title', dd.format('dddd'))
-      var day = +dd.format('D');
+      var day = +dd_local.format('D');
       if (day == 1) {
         cell.classList.add('hcal-cell-start-month');
       }
-      if (dd.isSame(now, 'day')) {
+      if (dd_local.isSame(now, 'day')) {
         cell.classList.add('hcal-cell-current-day');
-      } else if (dd.format('e') == this.options.endOfWeek) {
+      } else if (dd_local.format('e') >= this.options.endOfWeek-this.options.endOfWeekOffset && dd_local.format('e') <= this.options.endOfWeek) {
         cell.classList.add('hcal-cell-end-week');
       }
     }
@@ -377,6 +394,7 @@ HotelCalendarManagement.prototype = {
       row.classList.add('hcal-row-room-type-group-item');
       for (var i=0; i<=$this.options.days; i++) {
         var dd = $this.options.startDate.clone().add(i,'d');
+        var dd_local = dd.clone().local();
         cell = row.insertCell();
         cell.setAttribute('id', $this._sanitizeId(`${itemRoom.name}_${indexRoom}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`));
         cell.classList.add('hcal-cell-room-type-group-item-day');
@@ -385,13 +403,13 @@ HotelCalendarManagement.prototype = {
         // Generate Interactive Table
         cell.appendChild($this._generateTableDay(cell));
         //cell.innerHTML = dd.format("DD");
-        var day = +dd.format("D");
+        var day = +dd_local.format("D");
         if (day == 1) {
           cell.classList.add('hcal-cell-start-month');
         }
-        if (dd.isSame(now, 'day')) {
+        if (dd_local.isSame(now, 'day')) {
           cell.classList.add('hcal-cell-current-day');
-        } else if (dd.format('e') == $this.options.endOfWeek) {
+        } else if (dd_local.format('e') >= $this.options.endOfWeek-$this.options.endOfWeekOffset && dd_local.format('e') <= $this.options.endOfWeek) {
           cell.classList.add('hcal-cell-end-week');
         }
       }
@@ -429,7 +447,6 @@ HotelCalendarManagement.prototype = {
         if (input && !input.classList.contains('hcal-management-input-changed')) {
           input.dataset.orgValue = price.price;
           input.value = price.price;
-          input.classList.remove('hcal-management-input-changed');
         }
       }
     }
@@ -485,13 +502,14 @@ HotelCalendarManagement.prototype = {
         var inputIds = [
           this._sanitizeId(`MIN_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`), restriction.min_stay,
           this._sanitizeId(`MIN_STAY_ARRIVAL_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`), restriction.min_stay_arrival,
-          this._sanitizeId(`MAX_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`), restriction.max_stay
+          this._sanitizeId(`MAX_STAY_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`), restriction.max_stay,
+          this._sanitizeId(`MAX_STAY_ARRIVAL_${vroomId}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`), restriction.max_stay_arrival,
         ];
         for (var i=0; i<inputIds.length; i+=2) {
           var inputItem = this.etable.querySelector(`#${inputIds[i]}`);
           if (inputItem && !inputItem.classList.contains('hcal-management-input-changed')) {
             inputItem.dataset.orgValue = inputItem.value = inputIds[i+1];
-            inputItem.classList.remove('hcal-management-input-changed');
+            inputItem.style.backgroundColor = (inputItem.value!=0)?'#f9d70b':'';
           }
         }
 
@@ -518,12 +536,15 @@ HotelCalendarManagement.prototype = {
         var inputMinStayArrival = this.etable.querySelector(`#${inputMinStayArrivalId}`);
         var inputMaxStayId = this._sanitizeId(`MAX_STAY_${room.id}_${ndateStr}`);
         var inputMaxStay = this.etable.querySelector(`#${inputMaxStayId}`);
+        var inputMaxStayArrivalId = this._sanitizeId(`MAX_STAY_ARRIVAL_${room.id}_${ndateStr}`);
+        var inputMaxStayArrival = this.etable.querySelector(`#${inputMaxStayArrivalId}`);
         var inputClousureId = this._sanitizeId(`CLOUSURE_${room.id}_${ndateStr}`);
         var inputClousure = this.etable.querySelector(`#${inputClousureId}`);
 
         if (!onlyNew || (onlyNew && (inputMinStay.value !== inputMinStay.dataset.orgValue ||
                                       inputMinStayArrival.value !== inputMinStayArrival.dataset.orgValue ||
                                       inputMaxStay.value !== inputMaxStay.dataset.orgValue ||
+                                      inputMaxStayArrival.value !== inputMaxStayArrival.dataset.orgValue ||
                                       inputClousure.value !== inputClousure.dataset.orgValue))) {
           if (!(room.id in data)) { data[room.id] = []; }
           data[room.id].push({
@@ -531,6 +552,7 @@ HotelCalendarManagement.prototype = {
             'min_stay': inputMinStay.value,
             'min_stay_arrival': inputMinStayArrival.value,
             'max_stay': inputMaxStay.value,
+            'max_stay_arrival': inputMaxStayArrival.value,
             'closed': inputClousure.value === 'closed',
             'closed_arrival': inputClousure.value === 'closed_arrival',
             'closed_departure': inputClousure.value === 'closed_departure'
@@ -555,8 +577,7 @@ HotelCalendarManagement.prototype = {
           var inputId = this._sanitizeId(inputIds[i]);
           var input = this.etable.querySelector(`#${inputId}`);
           if (input) {
-            input.dataset.orgValue = inputIds[i+1];
-            input.value = inputIds[i+1];
+            input.dataset.orgValue = input.value = inputIds[i+1];
           }
         }
       }
@@ -610,8 +631,8 @@ HotelCalendarManagement.prototype = {
               }
             }
             else {
-              input.classList.remove('hcal-management-input-changed');
               input.value = inputIds[i+1];
+              input.style.backgroundColor = (i == 0 && input.value == 0)?'rgb(255, 174, 174)':'';
             }
           }
         }
@@ -676,7 +697,7 @@ HotelCalendarManagement.prototype = {
       value = elm.checked;
     }
     else if (name === 'min_stay' || name === 'min_stay_arrival' || name === 'max_stay' ||
-              name === 'price' || name === 'avail') {
+              name === 'price' || name === 'avail' || name === 'max_stay_arrival') {
       if (!this._isNumeric(value)) {
         elm.style.backgroundColor = 'red';
       } else if (elm.dataset.orgValue !== elm.value) {

@@ -380,7 +380,6 @@ class HotelFolio(models.Model):
 
         return folio_id
 
-
     @api.onchange('partner_id')
     def onchange_partner_id(self):
         '''
@@ -539,8 +538,12 @@ class HotelFolio(models.Model):
 
     @api.multi
     def print_quotation(self):
-        self.order_id.filtered(lambda s: s.state == 'draft').write({'state': 'sent'})
-        return self.env['report'].get_action(self.order_id, 'sale.report_saleorder')
+        self.order_id.filtered(lambda s: s.state == 'draft').write({
+            'state': 'sent',
+        })
+        return self.env['report'].get_action(
+            self.order_id,
+            'sale.report_saleorder')
 
     @api.multi
     def action_cancel_draft(self):

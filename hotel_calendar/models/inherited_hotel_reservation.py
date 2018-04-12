@@ -54,7 +54,8 @@ class HotelReservation(models.Model):
                 or False,
                 False,  # Read-Only
                 reserv.splitted,   # Fix Days
-                False))  # Fix Rooms
+                False,  # Fix Rooms
+                reserv.overbooking))
             num_split = 0
             if reserv.splitted:
                 master_reserv = reserv.parent_reservation or reserv
@@ -294,7 +295,34 @@ class HotelReservation(models.Model):
                 record.partner_id.mobile
                 or record.partner_id.phone or _('Undefined'),
                 record.state,
-                record.splitted)
+                record.splitted,
+                record.overbooking)
+
+    @api.multi
+    def swap_reservations(self, fromReservsIds, toReservsIds):
+        fromReservs = self.env['hotel.reservation'].browse(fromReservsIds)
+        toReservs = self.env['hotel.reservation'].browse(toReservsIds)
+
+        if not any(fromReservs) or not any(toReservs):
+            raise ValidationError(_("Invalid swap parameters"))
+
+        fromRoomProduct = fromReservs[0].product_id
+        toRoomProduct = toReservs[0].product_id
+        fromOverbooking = fromReservs[0].overbooking
+        toOverbooking = toReservs[0].overbooking
+
+        for record in fromReservs:
+            record.with_context({'ignore_avail_restrictions': True}).write({
+                'product_id': toRoomProduct.id,
+                'overbooking': toOverbooking,
+            })
+        for record in toReservs:
+            record.with_context({'ignore_avail_restrictions': True}).write({
+                'product_id': fromRoomProduct.id,
+                'overbooking': fromOverbooking,
+            })
+
+        return True
 
     @api.model
     def create(self, vals):

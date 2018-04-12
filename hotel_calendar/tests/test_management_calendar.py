@@ -227,6 +227,7 @@ class TestManagementCalendar(TestHotelCalendar):
             'min_stay': (3, 2, 4, 1),
             'max_stay': (5, 8, 9, 3),
             'min_stay_arrival': (2, 3, 6, 2),
+            'max_stay_arrival': (4, 7, 7, 4),
             'closed_departure': (False, True, False, True),
             'closed_arrival': (True, False, False, False),
             'closed': (False, False, True, True),
@@ -242,6 +243,7 @@ class TestManagementCalendar(TestHotelCalendar):
                 'closed_departure': restrictions['closed_departure'][i],
                 'closed': restrictions['closed'][i],
                 'min_stay_arrival': restrictions['min_stay_arrival'][i],
+                'max_stay_arrival': restrictions['max_stay_arrival'][i],
             })
 
         # Generate new availability
@@ -294,6 +296,11 @@ class TestManagementCalendar(TestHotelCalendar):
                         self.assertEqual(
                             v_info['min_stay_arrival'],
                             restrictions['min_stay_arrival'][k_info],
+                            "Hotel Calendar Management Restrictions \
+                                                            doesn't match!")
+                        self.assertEqual(
+                            v_info['max_stay_arrival'],
+                            restrictions['max_stay_arrival'][k_info],
                             "Hotel Calendar Management Restrictions \
                                                             doesn't match!")
                         self.assertEqual(

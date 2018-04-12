@@ -68,6 +68,8 @@ class MassiveChangesWizard(models.TransientModel):
     min_stay_arrival = fields.Integer("Min. Stay Arrival")
     change_max_stay = fields.Boolean(default=False)
     max_stay = fields.Integer("Max. Stay")
+    change_max_stay_arrival = fields.Boolean(default=False)
+    max_stay_arrival = fields.Integer("Max. Stay Arrival")
     change_closed = fields.Boolean(default=False)
     closed = fields.Boolean('Closed')
     change_closed_departure = fields.Boolean(default=False)
@@ -175,6 +177,8 @@ class MassiveChangesWizard(models.TransientModel):
             vals.update({'min_stay_arrival': record.min_stay_arrival})
         if record.change_max_stay:
             vals.update({'max_stay': record.max_stay})
+        if record.change_max_stay_arrival:
+            vals.update({'max_stay_arrival': record.max_stay_arrival})
         if record.change_closed:
             vals.update({'closed': record.closed})
         if record.change_closed_departure:
@@ -256,7 +260,19 @@ class MassiveChangesWizard(models.TransientModel):
                 }).create(vals)
 
     @api.multi
+    def massive_change_close(self):
+        self._do_massive_change()
+        return True
+
+    @api.multi
     def massive_change(self):
+        self._do_massive_change()
+        return {
+            "type": "ir.actions.do_nothing",
+        }
+
+    @api.multi
+    def _do_massive_change(self):
         hotel_vroom_obj = self.env['hotel.virtual.room']
         for record in self:
             date_start_dt = date_utils.get_datetime(record.date_start,

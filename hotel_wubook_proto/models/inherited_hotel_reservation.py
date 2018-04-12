@@ -236,7 +236,8 @@ class HotelReservation(models.Model):
                 record.partner_id.mobile
                 or record.partner_id.phone or _('Undefined'),
                 record.state,
-                record.splitted)
+                record.splitted,
+                record.overbooking)
 
     @api.multi
     def mark_as_readed(self):
