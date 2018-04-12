@@ -1374,7 +1374,7 @@ HotelCalendar.prototype = {
       var dateLimits = this.getDateLimits(this.reservationAction.inReservations);
       var refInReservation = this.reservationAction.inReservations[0];
       var refOutReservation = this.reservationAction.outReservations[0];
-      var realDateLimits = this.getFreeDatesByRoom(dateLimits[0], dateLimits[1], refInReservation.room.number);
+      var realDateLimits = this.getFreeDatesByRoom(dateLimits[0], dateLimits[1], refInReservation?refInReservation.room.number:refOutReservation.room.number);
       for (var nreserv of this._reservations) {
         if (nreserv._html.classList.contains('hcal-reservation-swap-in-selected') || nreserv._html.classList.contains('hcal-reservation-swap-out-selected')) {
           continue;
@@ -1601,8 +1601,8 @@ HotelCalendar.prototype = {
     var toDateLimits = this.getDateLimits(toReservations);
     var toRealDateLimits = this.getFreeDatesByRoom(toDateLimits[0], toDateLimits[1], toReservations[0].room.number);
 
-    if (fromDateLimits[0].isSameOrAfter(toRealDateLimits[0], 'd') &&  fromDateLimits[1].isSameOrBefore(toRealDateLimits[1], 'd') &&
-        toDateLimits[0].isSameOrAfter(fromRealDateLimits[0], 'd') &&  toDateLimits[1].isSameOrBefore(fromRealDateLimits[1], 'd'))
+    if (fromDateLimits[0].isSameOrAfter(toRealDateLimits[0], 'd') && fromDateLimits[1].isSameOrBefore(toRealDateLimits[1], 'd') &&
+        toDateLimits[0].isSameOrAfter(fromRealDateLimits[0], 'd') && toDateLimits[1].isSameOrBefore(fromRealDateLimits[1], 'd'))
     {
       // Change some critical values
       var refFromReservs = fromReservations[0];
@@ -1754,7 +1754,7 @@ HotelCalendar.prototype = {
             if (ev.ctrlKey || $this._modeSwap === HotelCalendar.MODE.SWAP_FROM) {
               var canAdd = !((!refFromReserv && refToReserv && reserv.room.id === refToReserv.room.id) || (refFromReserv && reserv.room.id !== refFromReserv.room.id));
               // Can unselect
-              if ($this.reservationAction.inReservations.indexOf(reserv) != -1) {
+              if ($this.reservationAction.inReservations.indexOf(reserv) != -1 && (($this.reservationAction.outReservations.length > 0 && $this.reservationAction.inReservations.length > 1) || $this.reservationAction.outReservations.length === 0)) {
                 $this.reservationAction.inReservations = _.reject($this.reservationAction.inReservations, function(item){ return item === reserv});
                 this.classList.remove('hcal-reservation-swap-in-selected');
               }

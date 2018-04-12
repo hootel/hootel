@@ -1155,7 +1155,7 @@ var HotelCalendarView = View.extend({
                   this._hcalendar.removeReservation(reserv['reserv_id'], true);
                   this._reserv_tooltips = _.pick(this._reserv_tooltips, function(value, key, obj){ return key != reserv['reserv_id']; });
                 } else {
-                  if (!this._hcalendar.getReservation(reserv['product_id'])) {
+                  if (!this._hcalendar.getReservation(reserv['reserv_id'])) {
                     this._play_sound(this.SOUNDS.BELL);
                   }
                   var room = this._hcalendar.getRoom(reserv['product_id'], reserv['overbooking'], reserv['reserv_id']);
