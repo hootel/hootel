@@ -1419,7 +1419,6 @@ HotelCalendar.prototype = {
         tdCell.classList.add('hcal-cell-invalid');
       }
     } else if (reserv.fixDays) {
-      console.log("=== LOLOLO");
       var limitLeftDate = this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`).dataset.hcalDate;
       var limitRightDate = this.etable.querySelector(`#${limits.right.dataset.hcalParentCell}`).dataset.hcalDate;
       var limitLeftDateMoment = HotelCalendar.toMoment(limitLeftDate);
