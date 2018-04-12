@@ -416,7 +416,7 @@ var HotelCalendarView = View.extend({
                             };
                             new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).then(function(result){
                               // Remove OB Room Row?
-                              if (oldReservation.room.overbooking && newReservation.room.id !== oldReservation.room.id) {
+                              if (oldReservation.room.overbooking && newReservation.room.id !== oldReservation.room.id && self._hcalendar.getReservationsByRoom(oldReservation.room).length === 0) {
                                 self._hcalendar.removeOBRoomRow(oldReservation);
                               }
                             }).fail(function(err, ev){
@@ -661,9 +661,19 @@ var HotelCalendarView = View.extend({
                 endOfWeekOffset: self._view_options['eday_week_offset'] || 0
             }, results['pricelist'], results['restrictions']);
 
+            // TODO: Not read this... do the change!!
             var reservs = [];
             for (var r of results['reservations']) {
                 var room = self._hcalendar.getRoom(r[0], r[15], r[1]);
+                // need create a overbooking row?
+                if (!room && r[15]) {
+                  room = self._hcalendar.createOBRoom(self._hcalendar.getRoom(r[0]), r[1]);
+                  self._hcalendar.createOBRoomRow(room);
+                }
+                if (!room) {
+                  console.warn(`Can't found a room for the reservation '${r[0]}'!`);
+                  continue;
+                }
                 var nreserv = new HReservation({
                   'id': r[1],
                   'room': room,
@@ -1149,6 +1159,15 @@ var HotelCalendarView = View.extend({
                     this._play_sound(this.SOUNDS.BELL);
                   }
                   var room = this._hcalendar.getRoom(reserv['product_id'], reserv['overbooking'], reserv['reserv_id']);
+                  // need create a overbooking row?
+                  if (!room && reserv['overbooking']) {
+                    room = self._hcalendar.createOBRoom(self._hcalendar.getRoom(reserv['product_id']), reserv['reserv_id']);
+                    self._hcalendar.createOBRoomRow(room);
+                  }
+                  if (!room) {
+                    console.warn(`Can't found a room for the reservation '${reserv['reserv_id']}'!`);
+                    continue;
+                  }
                   if (room) {
                     var nreserv = new HReservation({
                       'id': reserv['reserv_id'],
@@ -1221,28 +1240,37 @@ var HotelCalendarView = View.extend({
             self._reserv_tooltips = _.extend(self._reserv_tooltips, results['tooltips']);
             var reservs = [];
             for (var r of results['reservations']) {
-                var room = self._hcalendar.getRoom(r[0], r[15], r[1]);
-                var nreserv = new HReservation({
-                  'id': r[1],
-                  'room': room,
-                  'title': r[2],
-                  'adults': r[3],
-                  'childrens': r[4],
-                  'startDate': HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT),
-                  'endDate': HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT),
-                  'color': r[8],
-                  'colorText': r[9],
-                  'splitted': r[10],
-                  'readOnly': r[12] || false,
-                  'fixDays': r[13] || false,
-                  'fixRooms': r[14] || false,
-                  'unusedZone': false,
-                  'linkedId': false,
-                  'overbooking': r[15],
-                });
-                nreserv.addUserData({'folio_id': r[7]});
-                nreserv.addUserData({'parent_reservation': r[11]});
-                reservs.push(nreserv);
+              var room = self._hcalendar.getRoom(r[0], r[15], r[1]);
+              // need create a overbooking row?
+              if (!room && r[15]) {
+                room = self._hcalendar.createOBRoom(self._hcalendar.getRoom(r[0]), r[1]);
+                self._hcalendar.createOBRoomRow(room);
+              }
+              if (!room) {
+                console.warn(`Can't found a room for the reservation '${r[0]}'!`);
+                continue;
+              }
+              var nreserv = new HReservation({
+                'id': r[1],
+                'room': room,
+                'title': r[2],
+                'adults': r[3],
+                'childrens': r[4],
+                'startDate': HotelCalendar.toMomentUTC(r[5], ODOO_DATETIME_MOMENT_FORMAT),
+                'endDate': HotelCalendar.toMomentUTC(r[6], ODOO_DATETIME_MOMENT_FORMAT),
+                'color': r[8],
+                'colorText': r[9],
+                'splitted': r[10],
+                'readOnly': r[12] || false,
+                'fixDays': r[13] || false,
+                'fixRooms': r[14] || false,
+                'unusedZone': false,
+                'linkedId': false,
+                'overbooking': r[15],
+              });
+              nreserv.addUserData({'folio_id': r[7]});
+              nreserv.addUserData({'parent_reservation': r[11]});
+              reservs.push(nreserv);
             }
 
             if (withPricelist) {

@@ -1,7 +1,7 @@
 /* global _, moment */
 'use strict';
 /*
- * Hotel Calendar JS v0.0.1a - 2017-2018
+ * Hotel Calendar JS v0.1b - 2017-2018
  * GNU Public License
  * Aloxa Solucions S.L. <info@aloxa.eu>
  *     Alexandre Díaz <alex@aloxa.eu>
@@ -28,10 +28,10 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
     this.e = querySelector;
   } else {
     return {
-      Version: '0.0.1a',
+      Version: '0.1b',
       Author: "Alexandre Díaz",
       Created: "20/04/2017",
-      Updated: ""
+      Updated: "11/04/2018"
     };
   }
 
@@ -223,8 +223,14 @@ HotelCalendar.prototype = {
       // Remove all related content...
       var elms = [reserv._html].concat(this.e.querySelector(`.hcal-warn-ob-indicator[data-hcal-reservation-obj-id='${reserv.id}']`));
       for (var elm of elms) {
-        if (elm) {
+        if (elm && elm.parentNode) {
           elm.parentNode.removeChild(elm);
+        }
+      }
+      // Remove OB Row
+      if (reserv.overbooking) {
+        if (this.getReservationsByRoom(reserv.room).length === 1) {
+          this.removeOBRoomRow(reserv);
         }
       }
       this._reservations = _.without(this._reservations, reserv);
@@ -457,33 +463,16 @@ HotelCalendar.prototype = {
   },
 
   getOBRooms: function(/*Int*/parentRoomId) {
+    var $this = this;
     return _.filter(this.options.rooms, function(item) {
-      return (item.overbooking && +item.id.substr(item.id.indexOf('@')+1) === +parentRoomId);
+      return (item.overbooking && +$this.parseOBRoomId(item.id)[1] === +parentRoomId);
     });
   },
 
-  getRoom: function(/*String,Int*/id, /*Boolean*/overb, /*Int?*/reservId) {
-    if (overb) {
-      if (typeof id !== "number") {
-        id = id.substr(id.indexOf('@')+1);
-      }
-
-      var ob_room = _.find(this.options.rooms, function(item){ return item.id === `${reservId}@${id}` && item.overbooking; });
-      // TODO: Change to better place
-      if (!ob_room && overb) {
-        var room = _.find(this.options.rooms, function(item){ return item.id === id; });
-        var obr = this.getOBRooms(room.id);
-        // Create Overbooking Room
-        var ob_room = room.clone();
-        ob_room.id = `${reservId}@${room.id}`;
-        ob_room.number = `OB-${room.number}/#${obr.length}`;
-        ob_room.overbooking = true;
-        this._insertRoomAt(room, ob_room, true);
-        this.createOBRoomRow(ob_room, reservId);
-      }
-      return ob_room;
+  getRoom: function(/*String,Int*/id, /*Boolean?*/isOverbooking, /*Int?*/reservId) {
+    if (isOverbooking) {
+      return _.find(this.options.rooms, function(item){ return item.id === `${reservId}@${id}` && item.overbooking; });
     }
-
     return _.find(this.options.rooms, function(item){ return item.id == id; });
   },
 
@@ -514,7 +503,7 @@ HotelCalendar.prototype = {
   },
 
   removeOBRoomRow: function(/*HReservationObject*/ob_reserv) {
-    if (!ob_reserv.room.overbooking || this.getReservationsByRoom(ob_reserv.room).length > 0) {
+    if (!ob_reserv.room.overbooking) {
       console.warn(`[HotelCalendar][removeOBRoomRow] Can't remove the row for room ${ob_reserv.room.id}`);
       return false;
     }
@@ -565,8 +554,27 @@ HotelCalendar.prototype = {
     return this.e.querySelector(`#${this._sanitizeId(`ROW_${cnumber}_${ob_reserv.room.type}_OVER${ob_reserv.id}`)}`);
   },
 
-  createOBRoomRow: function(/*Int,HRoomObject*/ob_room, /*Int*/reservId) {
+  parseOBRoomId: function(/*String*/id) {
+    if (typeof id !== 'number') {
+      return id.split('@');
+    }
+    return id;
+  },
+
+  createOBRoom: function(/*HRoomObject*/mainRoom, /*Int*/reservId) {
+    var obr = this.getOBRooms(mainRoom.id);
+    // Create Overbooking Room
+    var ob_room = mainRoom.clone();
+    ob_room.id = `${reservId}@${mainRoom.id}`;
+    ob_room.number = `OB-${mainRoom.number}/#${obr.length}`;
+    ob_room.overbooking = true;
+    this._insertRoomAt(mainRoom, ob_room, true);
+    return ob_room;
+  },
+
+  createOBRoomRow: function(/*Int,HRoomObject*/ob_room) {
     var mainRoomInfo = this.getOBRealRoomInfo(ob_room);
+    var obRoomId = this.parseOBRoomId(ob_room.id);
     if (!mainRoomInfo) {
       console.warn(`[HotelCalendar][createOBRoomRow] Can't found room row: ${mainRoomRowId}`);
       return false;
@@ -575,7 +583,7 @@ HotelCalendar.prototype = {
     var mainRoomRow = mainRoomInfo[1];
 
     var row = document.createElement("TR");
-    row.setAttribute('id', this._sanitizeId(`ROW_${mainRoom.number}_${ob_room.type}_OVER${reservId}`));
+    row.setAttribute('id', this._sanitizeId(`ROW_${mainRoom.number}_${ob_room.type}_OVER${obRoomId[0]}`));
     row.classList.add('hcal-row-room-type-group-item');
     row.classList.add('hcal-row-room-type-group-overbooking-item');
     row.dataset.hcalRoomObjId = ob_room.id;
@@ -1042,7 +1050,7 @@ HotelCalendar.prototype = {
       row.dataset.hcalRoomObjId = itemRoom.id;
       row.classList.add('hcal-row-room-type-group-item');
       if (itemRoom.overbooking) {
-        var reservId = itemRoom.id.substr(0, itemRoom.id.indexOf('@'));
+        var reservId = this.parseOBRoomId(itemRoom.id)[0];
         var cnumber = itemRoom.number;
         var isf = cnumber.search('OB-');
         var isfb = cnumber.search('/#');
@@ -1599,9 +1607,9 @@ HotelCalendar.prototype = {
       var refToRoom = refToReservs.room;
       var fromRoomRow = this.getOBRoomRow(refFromReservs);
       var toRoomRow = this.getOBRoomRow(refToReservs);
-      var refFromRoomNewId = refFromRoom.overbooking?refFromRoom.id.substr(refFromRoom.id.indexOf('@')+1):refFromRoom.id;
+      var refFromRoomNewId = refFromRoom.overbooking?this.parseOBRoomId(refFromRoom.id)[1]:refFromRoom.id;
       refFromRoomNewId = `${refToReservs.id}@${refFromRoomNewId}`;
-      var refToRoomNewId = refToRoom.overbooking?refToRoom.id.substr(refToRoom.id.indexOf('@')+1):refToRoom.id;
+      var refToRoomNewId = refToRoom.overbooking?this.parseOBRoomId(refToRoom.id)[1]:refToRoom.id;
       refToRoomNewId = `${refFromReservs.id}@${refToRoomNewId}`;
 
       if (refFromRoom.overbooking) {
