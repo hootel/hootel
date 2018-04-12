@@ -20,6 +20,8 @@
 #
 # ---------------------------------------------------------------------------
 from openerp import models, fields, api, _
+from openerp.exceptions import UserError, ValidationError
+
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -83,6 +85,15 @@ class AccountInvoice(models.Model):
             if pay.partner_id <> self.partner_id:
                 self.dif_customer_payment = True
                 return
+    @api.multi
+    def action_invoice_open(self):
+        to_open_invoices_without_vat = self.filtered(lambda inv: inv.state != 'open' and inv.partner_id.vat == False)
+        if to_open_invoices_without_vat:
+            vat_error = _("We need the VAT of the following companies")
+            for invoice in to_open_invoices_without_vat:
+                vat_error += ", " + invoice.partner_id.name
+            raise ValidationError(vat_error)
+        return super(AccountInvoice, self).action_invoice_open()
         
     # ~ @api.multi
     # ~ def confirm_paid(self):
