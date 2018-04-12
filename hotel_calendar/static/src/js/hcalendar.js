@@ -1381,9 +1381,13 @@ HotelCalendar.prototype = {
         }
 
         if (this._modeSwap === HotelCalendar.MODE.SWAP_FROM && this.reservationAction.inReservations.length !== 0 && refInReservation.room.id !== nreserv.room.id) {
-          nreserv._html.classList.add('hcal-reservation-invalid-swap');
+          if (!_.find(this.reservationAction.outReservations, {'id': nreserv.linkedId})) {
+            nreserv._html.classList.add('hcal-reservation-invalid-swap');
+          }
         } else if (this._modeSwap === HotelCalendar.MODE.SWAP_TO && this.reservationAction.outReservations.length !== 0 && refOutReservation.room.id !== nreserv.room.id) {
-          nreserv._html.classList.add('hcal-reservation-invalid-swap');
+          if (!_.find(this.reservationAction.inReservations, {'id': nreserv.linkedId})) {
+            nreserv._html.classList.add('hcal-reservation-invalid-swap');
+          }
         }
         // Invalid reservations out of dates
         else if (!(nreserv.startDate.isSameOrAfter(realDateLimits[0], 'day') && nreserv.endDate.isSameOrBefore(realDateLimits[1], 'day'))) {
