@@ -38,7 +38,7 @@ class HotelReservation(models.Model):
         json_reservations = []
         json_reservation_tooltips = {}
         for reserv in reservations:
-            json_reservations.append((
+            json_reservations.append([
                 reserv.product_id.id,
                 reserv.id,
                 reserv.folio_id.partner_id.name,
@@ -55,7 +55,7 @@ class HotelReservation(models.Model):
                 False,  # Read-Only
                 reserv.splitted,   # Fix Days
                 False,  # Fix Rooms
-                reserv.overbooking))
+                reserv.overbooking])
             num_split = 0
             if reserv.splitted:
                 master_reserv = reserv.parent_reservation or reserv

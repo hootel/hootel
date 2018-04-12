@@ -1419,6 +1419,7 @@ HotelCalendar.prototype = {
         tdCell.classList.add('hcal-cell-invalid');
       }
     } else if (reserv.fixDays) {
+      console.log("=== LOLOLO");
       var limitLeftDate = this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`).dataset.hcalDate;
       var limitRightDate = this.etable.querySelector(`#${limits.right.dataset.hcalParentCell}`).dataset.hcalDate;
       var limitLeftDateMoment = HotelCalendar.toMoment(limitLeftDate);
@@ -2388,6 +2389,7 @@ function HReservation(/*Dictionary*/rValues) {
   this.colorText = rValues.colorText || '#FFF';
   this.readOnly = rValues.readOnly || false;
   this.fixRooms = rValues.fixRooms || false;
+  this.fixDays = rValues.fixDays || false;
   this.unusedZone = rValues.unusedZone || false;
   this.linkedId = rValues.linkedId || -1;
   this.splitted = rValues.splitted || false;

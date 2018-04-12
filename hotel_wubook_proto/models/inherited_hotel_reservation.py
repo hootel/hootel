@@ -211,6 +211,19 @@ class HotelReservation(models.Model):
                 return super(HotelReservation, record).\
                                                 action_reservation_checkout()
 
+    @api.model
+    def _hcalendar_reservation_data(self, reservations):
+        json_reservs, json_tooltips = super(
+            HotelReservation,
+            self)._hcalendar_reservation_data(reservations)
+
+        reserv_obj = self.env['hotel.reservation']
+        for reserv in json_reservs:
+            reservation = reserv_obj.browse(reserv[1])
+            reserv[13] = reservation.splitted or reservation.wis_from_channel
+
+        return (json_reservs, json_tooltips)
+
     @api.multi
     def send_bus_notification(self, naction, ntype, ntitle=''):
         hotel_cal_obj = self.env['bus.hotel.calendar']
@@ -236,7 +249,7 @@ class HotelReservation(models.Model):
                 record.partner_id.mobile
                 or record.partner_id.phone or _('Undefined'),
                 record.state,
-                record.splitted,
+                record.splitted or record.wis_from_channel,
                 record.overbooking)
 
     @api.multi

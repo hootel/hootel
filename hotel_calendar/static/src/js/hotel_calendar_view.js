@@ -674,6 +674,7 @@ var HotelCalendarView = View.extend({
                   console.warn(`Can't found a room for the reservation '${r[0]}'!`);
                   continue;
                 }
+
                 var nreserv = new HReservation({
                   'id': r[1],
                   'room': room,
