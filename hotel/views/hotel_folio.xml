@@ -15,8 +15,10 @@
                             class="btn-primary" type="object" />
                         <button name="send_reservation_mail" type="object" string="Send Confirmation Email"
                            states="sale" class="oe_highlight"/>
-                        <button name="send_cancel_mail" type="object" string="Send Cancel Email"
-                              states="cancel" class="oe_highlight"/>
+                       <button name="send_cancel_mail" type="object" string="Send Cancel Email"
+                           states="cancel" class="oe_highlight"/>
+                         <button name="send_exit_mail" type="object" string="Send Exit Email"
+                           states="done" class="oe_highlight"/>
                         <button name="%(sale.action_view_sale_advance_payment_inv)d"
                             string="Create Invoice" type="action" class="btn-primary" states="sale"
                             attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
@@ -142,7 +144,7 @@
                                         <field name="name" invisible="1"/>
                                         <field name="checkin" />
                                         <field name="checkout" />
-                                        <field name="nights" /> 
+                                        <field name="nights" />
                                         <field name="adults" />
                                         <field name="children" />
                                         <field name="price_unit" />
