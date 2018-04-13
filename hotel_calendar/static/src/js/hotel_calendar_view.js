@@ -205,8 +205,16 @@ var HotelCalendarView = View.extend({
       this._super();
 
       if (this._hcalendar) {
-        // FIXME: Use an MutationObserver. This make slow navigation but fix calendar changes when hidden.
-        setTimeout(function(){ self._hcalendar._updateReservations(); }, 300);
+        // FIXME: Workaround for restore "lost" reservations (Drawn when the view is hidden)
+        setTimeout(function(){
+          var reservations = self._hcalendar.getReservations();
+          for (var reserv of reservations) {
+            var style = window.getComputedStyle(reserv._html, null);
+            if (parseInt(style.width, 10) < 15 || parseInt(style.height, 10) < 15) {
+              self._hcalendar._updateReservation(reserv);
+            }
+          }
+        }, 300);
       }
     },
 
