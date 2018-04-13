@@ -170,8 +170,6 @@ var HotelCalendarView = View.extend({
     _action_manager: null,
     _last_dates: [false, false],
 
-    // Custom Constants
-    SOUNDS: { NONE: 0, BELL:1 },
 
     /** VIEW METHODS **/
     init: function(parent, dataset, fields_view, options) {
@@ -184,9 +182,6 @@ var HotelCalendarView = View.extend({
       this.mutex = new Utils.Mutex();
       this._model = new Model(this.dataset.model);
       this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
-
-      this._sounds = [];
-      this._sounds[this.SOUNDS.BELL] = new Audio('hotel_calendar/static/src/sfx/bell_ringing.mp3');
 
       Bus.on("notification", this, this._on_bus_signal);
     },
@@ -1155,9 +1150,6 @@ var HotelCalendarView = View.extend({
                   this._hcalendar.removeReservation(reserv['reserv_id'], true);
                   this._reserv_tooltips = _.pick(this._reserv_tooltips, function(value, key, obj){ return key != reserv['reserv_id']; });
                 } else {
-                  if (!this._hcalendar.getReservation(reserv['reserv_id'])) {
-                    this._play_sound(this.SOUNDS.BELL);
-                  }
                   var room = this._hcalendar.getRoom(reserv['product_id'], reserv['overbooking'], reserv['reserv_id']);
                   // need create a overbooking row?
                   if (!room && reserv['overbooking']) {
@@ -1327,10 +1319,6 @@ var HotelCalendarView = View.extend({
             'reservations': domainReservations,
             'dates': [date_begin, date_end]
         };
-    },
-
-    _play_sound: function(/*int*/SoundID) {
-      this._sounds[SoundID].play();
     },
 
     _find_bootstrap_environment: function() {

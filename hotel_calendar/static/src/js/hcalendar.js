@@ -120,12 +120,12 @@ HotelCalendar.prototype = {
   setSwapMode: function(/*Int*/mode) {
     if (mode !== this._modeSwap) {
       this._modeSwap = mode;
-      this._updateHighlightSwapReservations();
       if (this._modeSwap === HotelCalendar.MODE.NONE) {
         this.dispatchSwapReservations();
         this._reset_action_reservation();
-        this._modeSwap = HotelCalendar.MODE.NONE; // FIXME
       }
+
+      this._updateHighlightSwapReservations();
     }
   },
 

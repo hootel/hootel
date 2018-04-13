@@ -26,6 +26,11 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
   ];
 
   var HotelCalendarViewWuBook = HotelCalendarView.include({
+    _sounds: [],
+
+    // Custom Constants
+    SOUNDS: { NONE: 0, BELL:1 },
+
     update_buttons_counter: function () {
       this._super();
       var self = this;
@@ -56,6 +61,12 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
           $ninfo.hide();
         }
       });
+    },
+
+    init: function(parent, dataset, fields_view, options) {
+      this._super.apply(this, arguments);
+
+      this._sounds[this.SOUNDS.BELL] = new Audio('hotel_calendar/static/src/sfx/bell_ringing.mp3');
     },
 
     init_calendar_view: function () {
@@ -113,8 +124,19 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
               this.do_warn(notif[1]['title'], msg, true);
             }
           }
+          else if (notif[1]['type'] === 'reservation') {
+            if (!(notif[1]['action'] === 'unlink' || reserv['state'] === 'cancelled')) {
+              if (!this._hcalendar.getReservation(reserv['reserv_id']) && reserv['wrid'] && reserv['wrid'] !== '') {
+                this._play_sound(this.SOUNDS.BELL);
+              }
+            }
+          }
         }
       }
+    },
+
+    _play_sound: function(/*int*/SoundID) {
+      this._sounds[SoundID].play();
     },
 
     _generate_reservation_tooltip_dict: function(tp) {
