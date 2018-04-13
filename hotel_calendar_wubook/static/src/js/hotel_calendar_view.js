@@ -66,7 +66,7 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
     init: function(parent, dataset, fields_view, options) {
       this._super.apply(this, arguments);
 
-      this._sounds[this.SOUNDS.BELL] = new Audio('hotel_calendar/static/src/sfx/bell_ringing.mp3');
+      this._sounds[this.SOUNDS.BELL] = new Audio('hotel_calendar_wubook/static/src/sfx/bell_ringing.mp3');
     },
 
     init_calendar_view: function () {
