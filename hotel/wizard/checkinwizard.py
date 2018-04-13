@@ -94,8 +94,7 @@ class Wizard(models.TransientModel):
     # pending_cardex = fields.Integer('Cardex pending',
     #                                 default=default_pending_cardex)
     partner_id = fields.Many2one('res.partner',
-                                 default=default_partner_id,
-                                 required=True)
+                                 default=default_partner_id)
     reservation_id = fields.Many2one('hotel.reservation',
                                      default=default_reservation_id)
     enter_date = fields.Date(default=default_enter_date,
@@ -112,17 +111,46 @@ class Wizard(models.TransientModel):
 
     mobile_cardex = fields.Char('Mobile')
 
-
-
     ''' TODO: clean-up - list of checkins on smart button clean is not used anymore
     list_checkin_cardex = fields.Boolean(compute=comp_checkin_list_visible,
                                          default=True, store=True)
     '''
-    edit_checkin_cardex = fields.Boolean(default=comp_checkin_edit,
-                                         store=True)
+    # edit_checkin_cardex = fields.Boolean(default=comp_checkin_edit,
+    #                                     store=True)
+
+    op_select_partner = fields.Selection([
+        ('S', 'Select a partner for checkin'),
+        ('C', 'Create a new partner for checkin')],
+        default='S',
+        string=_('Partner for checkin'))
+    # checkin mode:
+    #   0 - no selection made by the user, so hide the client fields
+    #   1 - select a client for update his values and do the checkin
+    #   2 - create a new client with the values and do the checkin
+    checkin_mode = fields.Integer(default=0)
 
     @api.multi
     def action_save_check(self):
+        # prepare partner values
+        if self.op_select_partner == 'S':
+            partner_vals = {
+                'id': self.partner_id.id,
+                'firstname': self.firstname_cardex,
+                'lastname': self.lastname_cardex,
+                'email': self.email_cardex,
+                'mobile': self.mobile_cardex,
+            }
+            self.partner_id.sudo().write(partner_vals);
+        elif self.op_select_partner == 'C':
+            partner_vals = {
+                'firstname': self.firstname_cardex,
+                'lastname': self.lastname_cardex,
+                'email': self.email_cardex,
+                'mobile': self.mobile_cardex,
+            }
+            new_partner = self.env['res.partner'].create(partner_vals)
+            self.partner_id = self.env['res.partner'].browse(new_partner.id)
+
         # prepare checkin values
         cardex_val = {
           'partner_id': self.partner_id.id,
@@ -134,33 +162,18 @@ class Wizard(models.TransientModel):
         # save the cardex for this reservation
         record_id.write({'cardex_ids': [(0, False, cardex_val)]})
 
-        # prepare partner values
-        partner_val = {
-            'id':           self.partner_id.id,
-            'email':        self.email_cardex,
-            'mobile':       self.mobile_cardex,
-            'firstname':    self.firstname_cardex,
-            'lastname':     self.lastname_cardex,
-        }
-        # update the partner values for this reservation
-        self.partner_id.sudo().write(partner_val);
+        # update the state of the current reservation
+        if record_id.cardex_count > 0:
+            record_id.state = 'booking'
+            record_id.is_checkin = False
+            folio = self.env['hotel.folio'].browse(self.reservation_id.folio_id.id)
+            folio.checkins_reservations -= 1
 
-    ''' TODO: clean-up - update checkin is not used ?
-    @api.multi
-    def action_update_check(self):
-        record_id = self.env['hotel.reservation'].browse(
-            self.reservation_id.id)
-        record_id.write({
-          'partner_id': self.partner_id.id,
-          'enter_date': self.enter_date,
-          'exit_date': self.exit_date})
-        return {'type': 'ir.actions.act_window_close'}
-    '''
     @api.onchange('reservation_id')
     def change_enter_exit_date(self):
         record_id = self.env['hotel.reservation'].browse(
             self.reservation_id.id)
-        # _logger.info('change_enter_exit_date for resertation id: %d', record_id)
+
         self.enter_date = record_id.checkin
         self.exit_date = record_id.checkout
 
@@ -178,9 +191,19 @@ class Wizard(models.TransientModel):
         '''
 
     @api.onchange('partner_id')
-    def update_partner_fields(self):
+    def onchange_partner_id(self):
+        # update partner fields
         self.firstname_cardex = self.partner_id.firstname;
         self.lastname_cardex = self.partner_id.lastname;
         self.email_cardex  = self.partner_id.email;
         self.mobile_cardex = self.partner_id.mobile;
+
+    @api.onchange('op_select_partner')
+    def onchange_op_select_partner(self):
+        # field one2many return false is record does not exist
+        if self.op_select_partner == 'S' and self.partner_id.id != False:
+            self.checkin_mode = 1;
+        # field one2many return 0 on empty record (nothing typed)
+        elif self.op_select_partner == 'C' and self.partner_id.id == 0:
+            self.checkin_mode = 2;
 

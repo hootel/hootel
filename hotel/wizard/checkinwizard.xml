@@ -18,48 +18,32 @@
                             <field name="enter_date" colspan="2"/>
                             <field name="exit_date" colspan="2"/>
                         </group>
-                        <group>
+                        <group attrs="{'invisible':[('checkin_mode', '>', 0)]}">
+                            <field name="op_select_partner" widget="radio" options="{'horizontal': true}"/>
                             <field options="{'no_quick_create': True, 'no_create_edit' : True, 'no_open': True}"
                                    name="partner_id" string="Client name"
                                    style="max-width: 95%; width: 20em"/>
-<!--
-                            <button name="bt_create_partner" string="New partner for checkin" type="object" />
-                            <button name="bt_update_partner" type="object" string="Update partner for checkin" class="oe_highlight"
-                                    attrs="{'invisible':[('partner_id', '=', 0)]}" />
--->
                         </group>
-                          <group col="4">
+
+                          <group col="4" attrs="{'invisible':[('checkin_mode', '=', 0)]}" >
                             <field name="firstname_cardex" colspan="2"/>
                             <field name="lastname_cardex" colspan="2"/>
                           </group>
 
-                        <group col="4">
+                        <group col="4" attrs="{'invisible':[('checkin_mode', '=', 0)]}" >
                             <field name="email_cardex" colspan="2"/>
                             <field name="mobile_cardex" colspan="2"/>
                         </group>
 
                         <footer>
-                        <group col="2">
-                            <!-- TODO: clean-up
-                            <button name="action_save_check"
-                                string="Save New Checkin" type="object"
-                                attrs="{'invisible': [('edit_checkin_cardex','=',True)]}"
-                                />
-                            -->
-                            <!-- TODO: clean-up
-                            <button name="action_update_check"
-                                string="Update Checkin" type="object"
-                                attrs="{'invisible': [('edit_checkin_cardex','=',False)]}"
-                                />
-                             -->
+                            <button name="action_save_check" string="Save Checkin and Print" type="object"
+                                    attrs="{'invisible':[('checkin_mode', '=', 0)]}" />
                             <button name="cancel" string="Cancel" special="cancel"/>
 
-                            <field name="edit_checkin_cardex" invisible="True"/>
-                        </group>
+                            <field name="checkin_mode" invisible="True"/>
+                            <!-- <field name="checkin_show" invisible="True"/> -->
+                            <!-- <field name="edit_checkin_cardex" invisible="True"/> -->
                         </footer>
-                        <group col="4">
-                            <field name="cardex_ids" readonly="1" invisible="context.get('hidden_cardex',True)" />
-                        </group>
                     </sheet>
                     </form>
                 </field>

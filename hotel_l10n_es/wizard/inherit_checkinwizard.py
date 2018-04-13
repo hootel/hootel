@@ -80,6 +80,10 @@ class Wizard(models.TransientModel):
     # @api.onchange('x')
     # Pendiente
 
+    # NOTE: All the fields are required but they are set required=True in the .xml
+    # The reason is found in the bt_select_partner and bt_create_partner buttons to bypass the ORM null constraint
+    # when the buttons are clicked to show the hidden fields
+
     documenttype_cardex = fields.Selection([
         ('D', 'DNI'),
         ('P', 'Pasaporte'),
@@ -88,25 +92,22 @@ class Wizard(models.TransientModel):
         ('N', 'Permiso Residencia Español'),
         ('X', 'Permiso Residencia Europeo')],
         help=_('Select a valid document type'),
-        required=True,
         default='D',
         string=_('Doc. type'))
 
-    poldocument_cardex = fields.Char('Doc. number',
-                                     required=True)
-    polexpedition_cardex = fields.Date('Expedition date',
-                                       required=True)
+    poldocument_cardex = fields.Char('Doc. number')
 
-    gender_cardex = fields.Selection([('male', 'Male'), ('female', 'Female')],
-                                     required=True)
-    birthdate_date_cardex = fields.Date("Birthdate",
-                                        required=True)
+    polexpedition_cardex = fields.Date('Expedition date')
+
+    gender_cardex = fields.Selection([('male', 'Male'), ('female', 'Female')])
+
+    birthdate_date_cardex = fields.Date("Birthdate")
+
     code_ine_cardex = fields.Many2one('code_ine',
-            help=_('Country or province of origin. Used for INE statistics.'),
-            required=True)
+            help=_('Country or province of origin. Used for INE statistics.'))
+
     # TODO: Add tags in the cardex not in the partner anb move this field to out of localization
-    category_id_cardex = fields.Many2many('res.partner.category', 'id',
-                                          required=True)
+    category_id_cardex = fields.Many2many('res.partner.category', 'id')
 
     @api.multi
     def pdf_viajero(self, cardex_id):
@@ -125,7 +126,7 @@ class Wizard(models.TransientModel):
         super(Wizard, self).action_save_check()
 
         # prepare localization partner values
-        partner_val = {
+        partner_vals = {
             'documenttype': self.documenttype_cardex,
             'poldocument': self.poldocument_cardex,
             'polexpedition': self.polexpedition_cardex,
@@ -139,16 +140,10 @@ class Wizard(models.TransientModel):
         # Are you templed to merge the following write with the super() ?
         # Be warned: Premature optimization is the root of all evil -- DonaldKnuth
         # This TransientModel inherit from checkin.wizard and it is intended for localization
+        # So, if you need to write something here must be _after_ the super()
 
         # update the localization partner values for this reservation
-        self.partner_id.sudo().write(partner_val);
-
-        # update the state of the current reservation
-        if record_id.cardex_count > 0:
-            record_id.state = 'booking'
-            record_id.is_checkin = False
-            folio = self.env['hotel.folio'].browse(self.reservation_id.folio_id.id)
-            folio.checkins_reservations -= 1
+        self.partner_id.sudo().write(partner_vals);
 
         # get the last cardex in this reservation (set difference theory)
         cardex = self.env['cardex'].search([('reservation_id', '=', record_id.id)]) - old_cardex
@@ -160,16 +155,10 @@ class Wizard(models.TransientModel):
         del action_report['report_type']
         return action_report
 
-        #return {'type': 'ir.actions.act_window_close'}
-
-        # Debug Stop -------------------
-        #    import wdb; wdb.set_trace()
-        # Debug Stop -------------------
-
     @api.onchange('partner_id')
-    def update_partner_fields(self):
+    def onchange_partner_id(self):
         # call the super update_partner_fields
-        super(Wizard, self).update_partner_fields()
+        super(Wizard, self).onchange_partner_id()
         # update local fields
         self.documenttype_cardex = self.partner_id.documenttype;
         self.poldocument_cardex = self.partner_id.poldocument;

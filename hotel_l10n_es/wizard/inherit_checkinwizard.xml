@@ -6,21 +6,18 @@
             <field name="model">checkin.wizard</field>
             <field name="inherit_id" ref="hotel.checkin_wizard_form_2" />
             <field name="arch" type="xml">
-              <!-- <xpath expr="//field[@name='partner_id']/group" position="after"> -->
-                <xpath expr="//sheet/group[3]" position="after">
-                </xpath>
                   <xpath expr="//footer" position="before">
-                    <group col="4">
+                    <group col="4" attrs="{'invisible':[('checkin_mode', '=', 0)]}" >
                         <field name="documenttype_cardex" colspan="2" required="True"/>
                         <newline/>
                         <field name="poldocument_cardex" colspan="2" required="True"/>
                         <field name="polexpedition_cardex" colspan="2" required="True"/>
                     </group>
-                    <group col="4">
+                    <group col="4" attrs="{'invisible':[('checkin_mode', '=', 0)]}" >
                         <field name="gender_cardex" colspan="2" required="True"/>
                         <field name="birthdate_date_cardex" colspan="2" required="True"/>
                     </group>
-                    <group col="4">
+                    <group col="4" attrs="{'invisible':[('checkin_mode', '=', 0)]}" >
                         <field name="code_ine_cardex" placeholder="Code in INE"
                                options="{'no_create': True,'no_open': True}" required="True"/>
 
@@ -28,8 +25,9 @@
                                options="{'no_create': True,'no_open': True}" />
                     </group>
                 </xpath>
-                <xpath expr="//footer" position="before">
-                        <button name="action_save_check" string="Save Checkin and Print" type="object"/>
+                <xpath expr="//button[@name='action_save_check']" position="replace">
+                        <button name="action_save_check" string="Save Checkin and Print" type="object"
+                            attrs="{'invisible':[('checkin_mode', '=', 0)]}"/>
                 </xpath>
             </field>
         </record>
