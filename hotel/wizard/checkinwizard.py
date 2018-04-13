@@ -197,6 +197,9 @@ class Wizard(models.TransientModel):
         self.lastname_cardex = self.partner_id.lastname;
         self.email_cardex  = self.partner_id.email;
         self.mobile_cardex = self.partner_id.mobile;
+        # show the checkin fields if a partner is selected
+        if self.op_select_partner == 'S' and self.partner_id.id != False:
+            self.checkin_mode = 1;
 
     @api.onchange('op_select_partner')
     def onchange_op_select_partner(self):
