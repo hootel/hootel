@@ -122,7 +122,7 @@ class Wizard(models.TransientModel):
         ('S', 'Select a partner for checkin'),
         ('C', 'Create a new partner for checkin')],
         default='S',
-        string=_('Partner for checkin'))
+        string='Partner for checkin')
     # checkin mode:
     #   0 - no selection made by the user, so hide the client fields
     #   1 - select a client for update his values and do the checkin

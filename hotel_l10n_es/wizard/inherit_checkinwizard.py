@@ -107,7 +107,7 @@ class Wizard(models.TransientModel):
             help=_('Country or province of origin. Used for INE statistics.'))
 
     # TODO: Add tags in the cardex not in the partner anb move this field to out of localization
-    category_id_cardex = fields.Many2many('res.partner.category', 'id')
+    category_id_cardex = fields.Many2many('res.partner.category', 'id', required=True)
 
     @api.multi
     def pdf_viajero(self, cardex_id):
