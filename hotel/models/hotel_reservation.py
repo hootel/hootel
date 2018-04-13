@@ -478,8 +478,10 @@ class HotelReservation(models.Model):
 
         splitted_reservs = self.env['hotel.reservation'].search([
             ('splitted', '=', True),
-            ('parent_reservation', '=', master_reservation.id),
             ('folio_id', '=', self.folio_id.id),
+            '|',
+            ('parent_reservation', '=', master_reservation.id),
+            ('id', '=', master_reservation.id)
         ])
 
         rooms_products = splitted_reservs.mapped('product_id.id')
@@ -492,32 +494,37 @@ class HotelReservation(models.Model):
         # Search checkout
         last_checkout = splitted_reservs[0].checkout
         for reserv in splitted_reservs:
-            if last_checkout > reserv.checkout:
+            if last_checkout < reserv.checkout:
                 last_checkout = reserv.checkout
 
         # Agrupate reservation lines
         reservation_lines = splitted_reservs.mapped('reservation_lines')
         reservation_lines.sorted(key=lambda r: r.date)
-        rlines = []
+        rlines = [(5, False, False)]
+        tprice = 0.0
         for rline in reservation_lines:
             rlines.append((0, False, {
                 'date': rline.date,
                 'price': rline.price,
             }))
+            tprice += rline.price
 
         # Unify
         folio = self.folio_id   # FIX: To Allow Unify confirm reservations
         state = folio.state     # FIX
         folio.state = 'draft'   # FIX
-        splitted_reservs.unlink()
+        osplitted_reservs = splitted_reservs - master_reservation
+        osplitted_reservs.unlink()
         folio.state = state  #FIX
 
         # FIXME: Two writes because checkout regenerate reservation lines
-        master_reservation.checkout = last_checkout
+        master_reservation.write({
+            'checkout': last_checkout,
+            'splitted': False,
+        })
         master_reservation.write({
             'reservation_lines': rlines,
-            # 'checkout': last_checkout,
-            'splitted': False,
+            'unit_price': tprice,
         })
 
         if not self_is_master:
@@ -544,6 +551,9 @@ class HotelReservation(models.Model):
             'parent_reservation': self.parent_reservation.id,
             'state': self.state,
             'overbooking': self.overbooking,
+            'price_unit': self.price_unit,
+            'splitted': self.splitted,
+            'virtual_room_id': self.virtual_room_id.id,
         }
 
     @api.model

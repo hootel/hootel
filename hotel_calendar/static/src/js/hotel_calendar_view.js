@@ -175,49 +175,48 @@ var HotelCalendarView = View.extend({
 
     /** VIEW METHODS **/
     init: function(parent, dataset, fields_view, options) {
-        this._super.apply(this, arguments);
-        this.shown = $.Deferred();
-        this.dataset = dataset;
-        this.model = dataset.model;
-        this.view_type = 'pms';
-        this.selected_filters = [];
-        this.mutex = new Utils.Mutex();
-        this._model = new Model(this.dataset.model);
-        this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
+      this._super.apply(this, arguments);
+      this.shown = $.Deferred();
+      this.dataset = dataset;
+      this.model = dataset.model;
+      this.view_type = 'pms';
+      this.selected_filters = [];
+      this.mutex = new Utils.Mutex();
+      this._model = new Model(this.dataset.model);
+      this._action_manager = this.findAncestor(function(ancestor){ return ancestor instanceof ActionManager; });
 
-        this._sounds = [];
-        this._sounds[this.SOUNDS.BELL] = new Audio('hotel_calendar/static/src/sfx/bell_ringing.mp3');
+      this._sounds = [];
+      this._sounds[this.SOUNDS.BELL] = new Audio('hotel_calendar/static/src/sfx/bell_ringing.mp3');
 
-        Bus.on("notification", this, this._on_bus_signal);
+      Bus.on("notification", this, this._on_bus_signal);
     },
 
     start: function () {
-        this.shown.done(this._do_show_init.bind(this));
-        return this._super();
+      this.shown.done(this._do_show_init.bind(this));
+      return this._super();
     },
 
     _do_show_init: function () {
-        this.init_calendar_view().then(function() {
-            $(window).trigger('resize');
-        });
+      this.init_calendar_view().then(function() {
+        $(window).trigger('resize');
+      });
     },
 
     do_show: function() {
-        var $widget = this.$el.find("#hcal_management_widget");
-        if ($widget) {
-            $widget.show();
-        }
-        this.do_push_state({});
-        this.shown.resolve();
-        return this._super();
+      var self = this;
+      this.do_push_state({});
+      this.shown.resolve();
+
+      this._super();
+
+      if (this._hcalendar) {
+        // FIXME: Use an MutationObserver. This make slow navigation but fix calendar changes when hidden.
+        setTimeout(function(){ self._hcalendar._updateReservations(); }, 300);
+      }
     },
 
     do_hide: function () {
-        var $widget = this.$el.find("#hcal_widget");
-        if ($widget) {
-            $widget.hide();
-        }
-        return this._super();
+      this._super();
     },
 
     destroy: function () {

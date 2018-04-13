@@ -61,16 +61,11 @@ class SplitReservationWizard(models.TransientModel):
                 div_dt = date_utils.dt_no_hours(new_start_date_dt)
                 for rline in reservation_id.reservation_lines:
                     rline_dt = date_utils.get_datetime(rline.date, hours=False)
-                    _logger.info("----AAAAAA")
-                    _logger.info(rline_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
-                    _logger.info(div_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
                     if rline_dt >= div_dt:
                         reservation_lines[1].append((0, False, {
                             'date': rline.date,
                             'price': rline.price
                         }))
-                        _logger.info("PASA AAA")
-                        _logger.info(reservation_lines[1])
                         tprice[1] += rline.price
                         reservation_lines[0].append((2, rline.id, False))
                     else:
@@ -80,17 +75,14 @@ class SplitReservationWizard(models.TransientModel):
                     'checkout': new_start_date_dt.strftime(
                                             DEFAULT_SERVER_DATETIME_FORMAT),
                     'price_unit': tprice[0],
-                    'reservation_lines': reservation_lines[0],
                     'splitted': True,
                 })
+                reservation_id.reservation_lines = reservation_lines[0]
                 parent_res = reservation_id.parent_reservation or \
                     reservation_id
-                _logger.info("PASA BBB")
-                _logger.info(reservation_lines[1])
                 vals.update({
                     'splitted': True,
                     'price_unit': tprice[1],
-                    'reservation_lines': reservation_lines[1],
                     'parent_reservation': parent_res.id,
                     'virtual_room_id': parent_res.virtual_room_id.id,
                 })
@@ -98,6 +90,7 @@ class SplitReservationWizard(models.TransientModel):
                 if not reservation_copy:
                     raise ValidationError(_("Unexpected error copying record. \
                                             Can't split reservation!"))
+                reservation_copy.reservation_lines = reservation_lines[1]
             # return {
             #     'type': 'ir.actions.act_window',
             #     'res_model': 'hotel.folio',

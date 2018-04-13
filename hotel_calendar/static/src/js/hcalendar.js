@@ -176,12 +176,6 @@ HotelCalendar.prototype = {
 
         if (reserv._html) {
           reserv._html.innerText = reserv.title;
-          // this._updateDivReservation(divRes, limits);
-          if (reserv.readOnly) {
-            reserv._html.classList.add('hcal-reservation-readonly');
-          } else {
-            reserv._html.classList.remove('hcal-reservation-readonly');
-          }
         } else {
           var limits = this.getReservationCellLimits(reserv);
           if (limits.isValid()) {
@@ -193,9 +187,6 @@ HotelCalendar.prototype = {
             // this._updateDivReservation(divRes, limits);
             this.edivr.appendChild(reserv._html);
 
-            if (reserv.readOnly) {
-              reserv._html.classList.add('hcal-reservation-readonly');
-            }
             if (reserv.unusedZone) {
             	reserv._html.classList.add('hcal-unused-zone');
             } else {
@@ -217,11 +208,11 @@ HotelCalendar.prototype = {
   removeReservation: function(/*Int/HReservationObject*/reservation, /*Boolean?*/noupdate) {
     var reserv = reservation;
     if (!(reserv instanceof HReservation)) {
-      reserv = _.find(this._reservations, function(item){ item.id == reservation.id});
+      reserv = _.find(this._reservations, {'id': reservation});
     }
     if (reserv) {
       // Remove all related content...
-      var elms = [reserv._html].concat(this.e.querySelector(`.hcal-warn-ob-indicator[data-hcal-reservation-obj-id='${reserv.id}']`));
+      var elms = [reserv._html, this.e.querySelector(`.hcal-warn-ob-indicator[data-hcal-reservation-obj-id='${reserv.id}']`)];
       for (var elm of elms) {
         if (elm && elm.parentNode) {
           elm.parentNode.removeChild(elm);
@@ -238,6 +229,8 @@ HotelCalendar.prototype = {
       if (!noupdate) {
         this._updateReservations();
       }
+    } else {
+      console.warn(`[HotelCalendar][removeReservation] Can't remove '${reservation}' reservation!`);
     }
   },
 
@@ -1547,7 +1540,7 @@ HotelCalendar.prototype = {
     var boundsInit = limits.left.getBoundingClientRect();
     var boundsEnd = limits.right.getBoundingClientRect();
 
-    divRes.style = {}; // FIXME: Reset Style. Good method?
+    divRes.removeAttribute('style');
 
     if (reserv.splitted) {
       //divRes.classList.add('hcal-reservation-splitted');
@@ -1558,6 +1551,12 @@ HotelCalendar.prototype = {
     }
     divRes.style.backgroundColor = reserv.color;
     divRes.style.color = reserv.colorText;
+
+    if (reserv.readOnly) {
+      divRes.classList.add('hcal-reservation-readonly');
+    } else {
+      divRes.classList.remove('hcal-reservation-readonly');
+    }
 
     divRes.style.top = `${boundsInit.top-etableOffset.top}px`;
     var divHeight = (boundsEnd.bottom-etableOffset.top)-(boundsInit.top-etableOffset.top);
