@@ -31,7 +31,6 @@ class Wizard(models.TransientModel):
     _inherit = 'checkin.wizard'
 
     # Birthdate validation
-    @api.onchange('birthdate_date_cardex')
     def validation_under_age(self):
         if self.birthdate_date_cardex <> False:
             years = str(datetime.now().date() - timedelta(days=365*16+4))
@@ -42,7 +41,7 @@ class Wizard(models.TransientModel):
                 return {'warning': {'title': _('Error in Birthdate'), 'message': _('Does the client have less than 16 years?. Data collection is not performed for those born before %s.' % (limite)),},}
             if self.polexpedition_cardex <> False:
                 if self.birthdate_date_cardex > self.polexpedition_cardex:
-                    return {'warning': {'title': _('Error in Birthdate or Expedition date'), 'message': _('Date of document shipment, prior to birth date'),},}
+                    raise ValidationError(_('Date of document shipment, prior to birth date'))
 
     # Expedition validation
     @api.onchange('polexpedition_cardex')
@@ -116,6 +115,8 @@ class Wizard(models.TransientModel):
 
     @api.multi
     def action_save_check(self):
+        # Check dates
+        self.validation_under_age()
         # take a 'snapshot' of the current cardexes in this reservation
         record_id = self.env['hotel.reservation'].browse(self.reservation_id.id)
         old_cardex = self.env['cardex'].search([('reservation_id', '=', record_id.id)])
