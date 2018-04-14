@@ -9,35 +9,40 @@
                     <form string="Add Checkin">
                     <sheet>
                         <group col="4">
-                        <field name="reservation_id" nolabel="1" domain="[('folio_id','=',context.get('folio'))]" style="max-width: 95%; width: 32.2em"/>
-                        </group>
-                        <group col="4">
-                            <field name="cardex_ids" readonly="1" invisible="context.get('hidden_cardex',True)" />
-                        </group>
-                        <group>
-                          <field name="partner_id" string="Client name" style="max-width: 95%; width: 20em"/>
+                        <field options="{'no_quick_create': True, 'no_create_edit' : True, 'no_open': True}"
+                               name="reservation_id" nolabel="1"
+                               domain="[('folio_id','=',context.get('folio'))]"
+                               style="max-width: 95%; width: 32.2em"/>
                         </group>
                         <group col="4">
                             <field name="enter_date" colspan="2"/>
                             <field name="exit_date" colspan="2"/>
                         </group>
-                        <group col="4">
+                        <group attrs="{'invisible':[('checkin_mode', '>', 0)]}">
+                            <field name="op_select_partner" widget="radio" options="{'horizontal': true}"/>
+                            <field options="{'no_quick_create': True, 'no_create_edit' : True, 'no_open': True}"
+                                   name="partner_id" string="Client name"
+                                   style="max-width: 95%; width: 20em"/>
+                        </group>
+
+                          <group col="4" attrs="{'invisible':[('checkin_mode', '=', 0)]}" >
+                            <field name="firstname_cardex" colspan="2"/>
+                            <field name="lastname_cardex" colspan="2"/>
+                          </group>
+
+                        <group col="4" attrs="{'invisible':[('checkin_mode', '=', 0)]}" >
                             <field name="email_cardex" colspan="2"/>
                             <field name="mobile_cardex" colspan="2"/>
                         </group>
-                        <footer>
-<!--                             <button name="write" type="object" string="Save new line" class="btn-primary"/> -->
 
-                            <button name="action_save_check"
-                                string="Save New Checkin" type="object"
-                                attrs="{'invisible': [('edit_checkin_cardex','=',True)]}"
-                                />
-                            <button name="action_update_check"
-                                string="Update Checkin" type="object"
-                                attrs="{'invisible': [('edit_checkin_cardex','=',False)]}"
-                                />
+                        <footer>
+                            <button name="action_save_check" string="Save Checkin and Print" type="object"
+                                    attrs="{'invisible':[('checkin_mode', '=', 0)]}" />
                             <button name="cancel" string="Cancel" special="cancel"/>
-                            <field name="edit_checkin_cardex" invisible="True"/>
+
+                            <field name="checkin_mode" invisible="True"/>
+                            <!-- <field name="checkin_show" invisible="True"/> -->
+                            <!-- <field name="edit_checkin_cardex" invisible="True"/> -->
                         </footer>
                     </sheet>
                     </form>
@@ -51,7 +56,8 @@
                 <field name="target">new</field>
             </record>
 
-        <record id="checkin_wizard_form_view" model="ir.ui.view">
+            <!-- TODO: clean-up
+            <record id="checkin_wizard_form_view" model="ir.ui.view">
                 <field name="name">wizard.form</field>
                 <field name="model">checkin.wizard</field>
                 <field name="arch" type="xml">
@@ -76,8 +82,8 @@
                     </form>
                 </field>
             </record>
-
-
+            -->
+            <!-- TODO: clean-up
             <act_window id="launch_checkin_wizard_list"
                         name="List Checks"
                         res_model="checkin.wizard"
@@ -85,14 +91,16 @@
                         view_id="checkin_wizard_form_view"
                         target="new"
                         key2="client_action_multi"/>
+            -->
 
+            <!-- TODO: clean-up
             <act_window id="launch_checkin_wizard"
                         name="List Checkin"
                         res_model="checkin.wizard"
                         view_mode="form"
                         target="new"
                         key2="client_action_multi"/>
-
+            -->
 
         </data>
 

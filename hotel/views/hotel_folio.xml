@@ -41,9 +41,10 @@
                             <button type="action" class="oe_stat_button"
                                 id="cardex_smart_button"
                                 icon="fa-user-plus"
-                                name="%(launch_checkin_wizard)d"
+                                name="%(launch_checkin_wizard_add)d"
                                 attrs="{'invisible': [('cardex_pending_num','&lt;=',0)]}"
-                                context="{'reservation_ids': room_lines, 'hidden_cardex': True, 'folio': active_id}">
+                                context="{'partner_id': partner_id,'reservation_ids': room_lines,
+                                            'hidden_cardex': True, 'folio': active_id}">
                                 <div class="o_form_field o_stat_info">
                                     <span class="o_stat_value"><field name="cardex_pending_num"
                                     widget="statinfo" nolabel="1"/></span>
@@ -140,6 +141,16 @@
                                 <field name="room_lines" colspan="4" string="Room Line"
                                     nolabel="1" context="{'room_lines':room_lines,'folio_id': id}">
                                     <tree string="Room Line" colors="red:state == 'cancelled'">
+										<!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
+										<field name="cardex_pending" invisible="1"/>
+                                        <button type="action" class="oe_stat_button"
+                                        id="cardex_smart_button" icon="fa-user-plus"
+                                        name="%(launch_checkin_wizard_add)d"
+                                        context="{'partner_id': partner_id,'enter_date': checkin,
+                                            'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True}"
+                                        attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
+                                                             ('cardex_pending','=', False)]}"
+                                        />
                                         <field name="product_id" string="Room No" />
                                         <field name="name" invisible="1"/>
                                         <field name="checkin" />
@@ -151,13 +162,6 @@
                                         <field name="discount" groups="sale.group_discount_per_so_line"/>
                                         <field name="price_subtotal" invisible="1" />
                                         <field name="state" />
-                                        <button type="action" class="oe_stat_button"
-                                        id="cardex_smart_button" icon="fa-user-plus"
-                                        name="%(launch_checkin_wizard_add)d"
-                                        context="{'partner_id': partner_id,'enter_date': checkin,
-                                            'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True}"
-                                        attrs="{'invisible':[('state','not in',('confirm','booking'))]}"
-                                        />
                                         <field name="partner_id" invisible="1"/>
                                     </tree>
                                 </field>

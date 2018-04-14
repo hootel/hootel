@@ -47,12 +47,17 @@
                                 <field name="adults"/>
                                 <field name="checkout"/>
                                 <field name="children"/>
+-                                <!-- cardex_pending is a computed field and it is required here
+-                                    for being used in hotel_folio cardex_smart_button domain
+-                                    when adding new reservations lines -->
+-                                <field name="cardex_pending" invisible="1"/>
                             </group>
                             <group>
                                 <field name="pricelist_id" invisible="1"/>
                             </group>
                             <group colspan="6" col="6">
-                                <field name="virtual_room_id" on_change="1" options="{'no_create': True}" attrs="{'readonly':[('state','not in',('draft'))]}"/>
+                                <field name="virtual_room_id" on_change="1" options="{'no_create': True}"
+                                       attrs="{'readonly':[('state','not in',('draft'))]}"/>
                                 <field name="check_rooms"/>
                                 <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>
                             </group>
@@ -63,7 +68,7 @@
                                 <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>
                                 <field name="amount_reservation" readonly="1"/>
                                 <field name="price_unit" invisible="1"/>
-				<field name="nights" invisible="1"/>
+				                <field name="nights" invisible="1"/>
                                 <field name="name" invisible="1" />
                                 <label for="discount" groups="sale.group_discount_per_so_line"/>
                                 <div name="discount" groups="sale.group_discount_per_so_line">
@@ -99,7 +104,8 @@
                                 <page name="others" string="Others">
                                     <group colspan="4" col="4">
                                         <field name="reservation_type" />
-                                        <field name="out_service_description" attrs="{'invisible':[('reservation_type','not in',('out'))]}"/>
+                                        <field name="out_service_description"
+                                               attrs="{'invisible':[('reservation_type','not in',('out'))]}"/>
                                     </group>
                                     <group>
                                       <field name="overbooking" />
@@ -126,7 +132,7 @@
                     <field name="folio_id"/>
                     <field name="checkin"/>
                     <field name="checkout"/>
-		    <field name="nights" />
+                    <field name="nights" />
                     <field name="price_unit" />
                     <field name="discount" groups="sale.group_discount_per_so_line"/>
                     <field name="price_subtotal" />
@@ -135,15 +141,16 @@
                      <field name="state" />
                     <field name="cardex_ids" invisible ="1"/>
                     <field name="to_assign" invisible="True"/>
+                    <!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
+                    <field name="cardex_pending" invisible="1"/>
                     <button type="action" class="oe_stat_button"
                     id="cardex_smart_button" icon="fa-user-plus"
                     name="%(launch_checkin_wizard_add)d"
                     context="{'partner_id': partner_id,'enter_date': checkin,
                         'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
-                    attrs="{'invisible':[('state','not in',('confirm','booking')),
-                            ('cardex_ids','!=',False)]}"
+                    attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
+                        ('cardex_pending','=', False)]}"
                     />
-
                 </tree>
             </field>
         </record>
