@@ -91,9 +91,9 @@ class Wizard(models.TransientModel):
         ('I', 'Carta o Doc. de Identidad'),
         ('N', 'Permiso Residencia Español'),
         ('X', 'Permiso Residencia Europeo')],
-        help=_('Select a valid document type'),
+        help='Select a valid document type',
         default='D',
-        string=_('Doc. type'))
+        string='Doc. type')
 
     poldocument_cardex = fields.Char('Doc. number')
 
@@ -104,7 +104,7 @@ class Wizard(models.TransientModel):
     birthdate_date_cardex = fields.Date("Birthdate")
 
     code_ine_cardex = fields.Many2one('code_ine',
-            help=_('Country or province of origin. Used for INE statistics.'))
+            help='Country or province of origin. Used for INE statistics.')
 
     # TODO: Add tags in the cardex not in the partner anb move this field to out of localization
     category_id_cardex = fields.Many2many('res.partner.category', 'id', required=True)
@@ -148,7 +148,7 @@ class Wizard(models.TransientModel):
         # get the last cardex in this reservation (set difference theory)
         cardex = self.env['cardex'].search([('reservation_id', '=', record_id.id)]) - old_cardex
 
-        # Print the report
+        # FIXME: Hackish solution for close & print (https://www.odoo.com/es_ES/forum/ayuda-1/question/close-wizard-after-print-report-86786)
         action_report = self.pdf_viajero(cardex.id)
         # FIXME: Hackish solution for close & print
         # (https://www.odoo.com/es_ES/forum/ayuda-1/question/close-wizard-after-print-report-86786)

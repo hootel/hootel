@@ -1,5 +1,5 @@
 /*
- * Hotel Calendar JS v0.0.1a - 2017
+ * Hotel Calendar JS v0.0.1a - 2017-2018
  * GNU Public License
  * Aloxa Solucions S.L. <info@aloxa.eu>
  *     Alexandre Díaz <alex@aloxa.eu>
@@ -27,6 +27,18 @@
     }
 }
 
+#hcal_load {
+	height: 90vh;
+  text-align: center;
+  line-height: 90vh;
+	color: darkgray;
+}
+#hcal_load > span {
+	line-height: 24px;
+	display: inline-block;
+	vertical-align: middle;
+}
+
 #pms-search {
 	position: fixed;
 	z-index: 9;
@@ -47,11 +59,13 @@
 	order: 1;
 	flex-grow: 1;
 	overflow-y: scroll;
+	overflow-x: hidden;
 }
 .table-reservations {
 	order: 2;
 	flex-grow: 2;
   overflow-y: scroll;
+	overflow-x: hidden;
   position: relative;
   max-height: 57vh;
 }
@@ -59,11 +73,13 @@
 	order: 3;
 	flex-grow: 1;
 	overflow-y: scroll;
+	overflow-x: hidden;
 }
 .table-calcs {
 	order: 4;
 	flex-grow: 2;
   overflow-y: scroll;
+	overflow-x: hidden;
   max-height: 20vh;
 }
 
@@ -85,6 +101,17 @@
 .btn-hcal-flat {
 	background-color: #cfcfdd;
  	border: 1px solid #cfcfdd;
+}
+
+.hcal-warn-ob-indicator {
+	position: absolute;
+	background-color: red;
+	color: yellow;
+	border: 1px solid black;
+	z-index: 9;
+	width: 25px;
+	height: 20px;
+	text-align: center;
 }
 
 .table-calcs-header .hcal-table, .table-reservations-header .hcal-table {
@@ -265,6 +292,19 @@
 	);
 }
 
+.hcal-reservation-invalid-swap {
+	pointer-events: none;
+	opacity: 0.9;
+	color: transparent !important;
+	background: repeating-linear-gradient(
+	  45deg,
+	  #BA6359,
+	  #BA6359 10px,
+	  #dfe066 10px,
+	  #dfe066 20px
+	);
+}
+
 .hcal-reservation-action {
 	border: 2px dashed #3465a4;
 	opacity: 0.9;
@@ -282,8 +322,22 @@
 	background: -moz-repeating-radial-gradient(circle farthest-corner at right center, #ffee00 0%, #2c2c2c 5%, #ffff00 10%, #2c2c2c 20%, #2c2c2c 100%);
 }
 
+.hcal-reservation-swap-in-selected {
+	background-color: #005B96 !important;
+	border-color: #99bdd5 !important;
+}
+
+.hcal-reservation-swap-out-selected {
+	border-color: #005B96 !important;
+	background-color: #99bdd5 !important;
+}
+
 .hcal-row-room-type-group-item {
 	text-align: center;
+}
+
+tr.hcal-row-room-type-group-overbooking-item td {
+	background-color: #c78585;
 }
 
 .hcal-cell-month-day {

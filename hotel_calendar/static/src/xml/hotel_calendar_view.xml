@@ -3,13 +3,17 @@
 
     <t t-name="hotel_calendar.HotelCalendarView">
         <div class="col-xs-12 col-md-12 nopadding">
-            <div class="col-xs-1 hidden-xs hidden-sm nopadding" id="pms-menu">
+            <div class="col-lg-1 hidden-xs hidden-sm nopadding" id="pms-menu">
                 <div class="col-xs-12 col-md-12 btn" id="pms-search-cal-pag">
-                    <button id="cal-pag-prev-plus" class="btn"><i class="fa fa-2x fa-angle-double-left"></i></button>
-                    <button id="cal-pag-prev" class="btn"><i class="fa fa-2x fa-angle-left"></i></button>
-                    <button id="cal-pag-selector" class="btn"><i class="fa fa-2x fa-calendar"></i></button>
-                    <button id="cal-pag-next" class="btn"><i class="fa fa-2x fa-angle-right"></i></button>
-                    <button id="cal-pag-next-plus" class="btn"><i class="fa fa-2x fa-angle-double-right"></i></button>
+                    <div class="col-xs-12 col-md-12 nopadding">
+                      <button id="cal-pag-selector" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-calendar"></i></button>
+                    </div>
+                    <div class="col-xs-12 col-md-12 nopadding">
+                        <button id="cal-pag-prev-plus" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-angle-double-left"></i></button>
+                        <button id="cal-pag-prev" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-angle-left"></i></button>
+                        <button id="cal-pag-next" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-angle-right"></i></button>
+                        <button id="cal-pag-next-plus" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-angle-double-right"></i></button>
+                    </div>
                 </div>
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_checkout">
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
@@ -25,6 +29,10 @@
                 </button>
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_control">
                     WIZARD
+                </button>
+                <button class="btn btn-default col-xs-12 col-md-12" id="btn_swap">
+                    <div class="ninfo"><span class="badge badge-danger">0</span></div>
+                    <span class="ntext">START SWAP</span>
                 </button>
                 <!--button class="btn btn-default col-xs-12 col-md-12" id="btn_action_refresh">
                     <i class="fa fa-4x fa-refresh"> </i>
@@ -117,12 +125,19 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                </td>                                
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <div id="hcal_widget" class="col-xs-12 col-md-12 nopadding"></div>
+                <div id="hcal_widget" class="col-xs-12 col-md-12 nopadding">
+                    <div id="hcal_load">
+                        <span>
+                            <i class="fa fa-refresh fa-spin fa-5x fa-fw"></i><br/>
+                            <h1>Loading Calendar...</h1>
+                        </span>
+                    </div>
+                </div>
                 <div style="clear:both;" />
             </div>
         </div>

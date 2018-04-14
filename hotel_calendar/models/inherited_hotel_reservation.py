@@ -38,7 +38,7 @@ class HotelReservation(models.Model):
         json_reservations = []
         json_reservation_tooltips = {}
         for reserv in reservations:
-            json_reservations.append((
+            json_reservations.append([
                 reserv.product_id.id,
                 reserv.id,
                 reserv.folio_id.partner_id.name,
@@ -54,7 +54,8 @@ class HotelReservation(models.Model):
                 or False,
                 False,  # Read-Only
                 reserv.splitted,   # Fix Days
-                False))  # Fix Rooms
+                False,  # Fix Rooms
+                reserv.overbooking])
             num_split = 0
             if reserv.splitted:
                 master_reserv = reserv.parent_reservation or reserv
@@ -273,28 +274,56 @@ class HotelReservation(models.Model):
     def send_bus_notification(self, naction, ntype, ntitle=''):
         hotel_cal_obj = self.env['bus.hotel.calendar']
         for record in self:
-            hotel_cal_obj.send_reservation_notification(
-                naction,
-                ntype,
-                ntitle,
-                record.product_id.id,
-                record.id,
-                record.partner_id.name,
-                record.adults,
-                record.children,
-                record.checkin,
-                record.checkout,
-                record.folio_id.id,
-                record.reserve_color,
-                record.reserve_color_text,
-                record.splitted,
-                record.parent_reservation and
+            hotel_cal_obj.send_reservation_notification({
+                'action': naction,
+                'type': ntype,
+                'title': ntitle,
+                'product_id': record.product_id.id,
+                'reserv_id': record.id,
+                'partner_name': record.partner_id.name,
+                'adults': record.adults,
+                'children': record.children,
+                'checkin': record.checkin,
+                'checkout': record.checkout,
+                'folio_id': record.folio_id.id,
+                'reserve_color': record.reserve_color,
+                'reserve_color_text': record.reserve_color_text,
+                'splitted': record.splitted,
+                'parent_reservation': record.parent_reservation and
                 record.parent_reservation.id or 0,
-                record.product_id.name,
-                record.partner_id.mobile
+                'room_name': record.product_id.name,
+                'partner_phone': record.partner_id.mobile
                 or record.partner_id.phone or _('Undefined'),
-                record.state,
-                record.splitted)
+                'state': record.state,
+                'fix_days': record.splitted,
+                'overbooking': record.overbooking
+            })
+
+    @api.multi
+    def swap_reservations(self, fromReservsIds, toReservsIds):
+        fromReservs = self.env['hotel.reservation'].browse(fromReservsIds)
+        toReservs = self.env['hotel.reservation'].browse(toReservsIds)
+
+        if not any(fromReservs) or not any(toReservs):
+            raise ValidationError(_("Invalid swap parameters"))
+
+        fromRoomProduct = fromReservs[0].product_id
+        toRoomProduct = toReservs[0].product_id
+        fromOverbooking = fromReservs[0].overbooking
+        toOverbooking = toReservs[0].overbooking
+
+        for record in fromReservs:
+            record.with_context({'ignore_avail_restrictions': True}).write({
+                'product_id': toRoomProduct.id,
+                'overbooking': toOverbooking,
+            })
+        for record in toReservs:
+            record.with_context({'ignore_avail_restrictions': True}).write({
+                'product_id': fromRoomProduct.id,
+                'overbooking': fromOverbooking,
+            })
+
+        return True
 
     @api.model
     def create(self, vals):

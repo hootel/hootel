@@ -28,7 +28,6 @@ from odoo.addons.hotel_calendar.controllers.bus import HOTEL_BUS_CHANNEL_ID
 class BusHotelCalendar(models.TransientModel):
     _name = 'bus.hotel.calendar'
 
-    # FIXME: Too many parameters... perhaps best use kargs?
     '''
     action:
         - create
@@ -41,50 +40,46 @@ class BusHotelCalendar(models.TransientModel):
         - noshow : Don't show any notification
     '''
     @api.model
-    def _generate_reservation_notif(self, action, ntype, title,
-                                    product_id, reserv_id, partner_name,
-                                    adults, children, checkin, checkout,
-                                    folio_id, color, color_text, splitted,
-                                    parent_reservation, room_name,
-                                    partner_phone, state, fix_days):
+    def _generate_reservation_notif(self, vals):
         user_id = self.env['res.users'].browse(self.env.uid)
-        master_reserv = parent_reservation or reserv_id
+        master_reserv = vals['parent_reservation'] or vals['reserv_id']
         num_split = self.env['hotel.reservation'].search_count([
-            ('folio_id', '=', folio_id),
+            ('folio_id', '=', vals['folio_id']),
             '|', ('parent_reservation', '=', master_reserv),
                  ('id', '=', master_reserv),
             ('splitted', '=', True),
         ])
         return {
             'type': 'reservation',
-            'action': action,
-            'subtype': ntype,
-            'title': title,
+            'action': vals['action'],
+            'subtype': vals['type'],
+            'title': vals['title'],
             'username': user_id.partner_id.name,
             'userid': user_id.id,
             'reservation': {
-                'product_id': product_id,
-                'reserv_id': reserv_id,
-                'partner_name': partner_name,
-                'adults': adults,
-                'childer': children,
-                'checkin': checkin,
-                'checkout': checkout,
-                'folio_id': folio_id,
-                'reserve_color': color,
-                'reserve_color_text': color_text,
-                'splitted': splitted,
-                'parent_reservation': parent_reservation,
-                'room_name': room_name,
-                'state': state,
+                'product_id': vals['product_id'],
+                'reserv_id': vals['reserv_id'],
+                'partner_name': vals['partner_name'],
+                'adults': vals['adults'],
+                'childer': vals['children'],
+                'checkin': vals['checkin'],
+                'checkout': vals['checkout'],
+                'folio_id': vals['folio_id'],
+                'reserve_color': vals['reserve_color'],
+                'reserve_color_text': vals['reserve_color_text'],
+                'splitted': vals['splitted'],
+                'parent_reservation': vals['parent_reservation'],
+                'room_name': vals['room_name'],
+                'state': vals['state'],
                 'only_read': False,
-                'fix_days': fix_days,
+                'fix_days': vals['fix_days'],
                 'fix_rooms': False,
+                'overbooking': vals['overbooking'],
             },
             'tooltip': [
-                partner_name,
-                partner_phone,
-                checkin,
+                vals['partner_name'],
+                vals['partner_phone'],
+                vals['checkin'],
                 num_split,
             ]
         }
@@ -116,6 +111,7 @@ class BusHotelCalendar(models.TransientModel):
                         vals['min_stay'],
                         vals['min_stay_arrival'],
                         vals['max_stay'],
+                        vals['max_stay_arrival'],
                         vals['closed'],
                         vals['closed_arrival'],
                         vals['closed_departure'],
@@ -141,23 +137,9 @@ class BusHotelCalendar(models.TransientModel):
             },
         }
 
-    # FIXME: Too many parameters... perhaps best use kargs?
     @api.model
-    def send_reservation_notification(self, action, ntype, title, product_id,
-                                      reserv_id, partner_name, adults,
-                                      children, checkin, checkout, folio_id,
-                                      color, color_text, splitted,
-                                      parent_reservation, room_name,
-                                      partner_phone, state, fix_days):
-        notif = self._generate_reservation_notif(action, ntype, title,
-                                                 product_id, reserv_id,
-                                                 partner_name, adults,
-                                                 children, checkin,
-                                                 checkout, folio_id,
-                                                 color, color_text, splitted,
-                                                 parent_reservation,
-                                                 room_name, partner_phone,
-                                                 state, fix_days)
+    def send_reservation_notification(self, vals):
+        notif = self._generate_reservation_notif(vals)
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
                                      HOTEL_BUS_CHANNEL_ID), notif)
 

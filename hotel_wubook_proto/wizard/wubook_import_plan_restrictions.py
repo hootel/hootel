@@ -39,10 +39,15 @@ class ImportPlanRestrictionsWizard(models.TransientModel):
             for record in self:
                 date_start_dt = date_utils.get_datetime(record.date_start)
                 date_end_dt = date_utils.get_datetime(record.date_end)
-                wres = self.env['wubook'].fetch_rplan_restrictions(
-                    date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                    date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                    restriction_id.wpid)
+                if int(restriction_id.wpid) == 0:
+                    wres = self.env['wubook'].fetch_rooms_values(
+                        date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT))
+                else:
+                    wres = self.env['wubook'].fetch_rplan_restrictions(
+                        date_start_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        date_end_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+                        restriction_id.wpid)
                 if not wres:
                     raise ValidationError(_("Can't fetch restrictions \
                                                                 from WuBook"))

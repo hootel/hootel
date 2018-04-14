@@ -30,7 +30,6 @@ var Core = require('web.core'),
     QWeb = Core.qweb,
     l10n = _t.database.parameters,
 
-    CALENDAR_DAYS = 5,
     ODOO_DATETIME_MOMENT_FORMAT = "YYYY-MM-DD HH:mm:ss",
     ODOO_DATE_MOMENT_FORMAT = "YYYY-MM-DD",
     L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY", //FIXME: Time.strftime_to_moment_format(l10n.date_format);
@@ -135,8 +134,6 @@ var HotelCalendarManagementView = View.extend({
         var pricelist = this._hcalendar.getPricelist(true);
         var restrictions = this._hcalendar.getRestrictions(true);
         var availability = this._hcalendar.getAvailability(true);
-
-        debugger;
 
         var params = this.generate_params();
         var oparams = [false, params['prices'], params['restrictions'], pricelist, restrictions, availability];
@@ -247,7 +244,9 @@ var HotelCalendarManagementView = View.extend({
 
             self.create_calendar({
                 rooms: rooms,
-                days: CALENDAR_DAYS,
+                days: self._view_options['days'],
+                endOfWeek: parseInt(self._view_options['eday_week']) || 6,
+                endOfWeekOffset: self._view_options['eday_week_offset'] || 0,
                 dateFormatLong: ODOO_DATETIME_MOMENT_FORMAT,
                 dateFormatShort: ODOO_DATE_MOMENT_FORMAT
             });
@@ -294,21 +293,21 @@ var HotelCalendarManagementView = View.extend({
             $dateTimePickerEnd.data("DateTimePicker").hide(); // TODO: Odoo uses old datetimepicker version
         });
 
-        var date_begin = moment().startOf('day');
-        var date_end = date_begin.clone().add(CALENDAR_DAYS, 'd').endOf('day');
-        $dateTimePickerBegin.data("ignore_onchange", true);
-        $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
-        $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-        this._last_dates = this.generate_params()['dates'];
+        // var date_begin = moment().startOf('day');
+        // var date_end = date_begin.clone().add(this._view_options['days'], 'd').endOf('day');
+        // $dateTimePickerBegin.data("ignore_onchange", true);
+        // $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+        // $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+        // this._last_dates = this.generate_params()['dates'];
 
         // View Events
         this.$el.find("#mpms-search #cal-pag-prev-plus").on('click', function(ev){
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var days = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).clone().local().daysInMonth();
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(days, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(days, 'd');
+            //var days = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).clone().local().daysInMonth();
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(14, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(14, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -319,8 +318,8 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(1, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(1, 'd');
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(7, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(7, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -331,9 +330,9 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var days = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).clone().local().daysInMonth();
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(days, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(days, 'd');
+            //var days = moment($dateTimePickerBegin.data("DateTimePicker").getDate()).clone().local().daysInMonth();
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(14, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(14, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -344,8 +343,8 @@ var HotelCalendarManagementView = View.extend({
             // FIXME: Ugly repeated code. Change place.
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(1, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(1, 'd');
+            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(7, 'd');
+            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(7, 'd');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -357,7 +356,7 @@ var HotelCalendarManagementView = View.extend({
             var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
             var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
             var date_begin = moment().startOf('day');
-            var date_end = date_begin.clone().add(CALENDAR_DAYS, 'd').endOf('day');
+            var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
             $dateTimePickerBegin.data("ignore_onchange", true);
             $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
             $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
@@ -376,7 +375,25 @@ var HotelCalendarManagementView = View.extend({
         });
 
         /** RENDER CALENDAR **/
-        this.generate_hotel_calendar();
+        this._model.call('get_hcalendar_settings', [false]).then(function(results){
+            self._view_options = results;
+            var date_begin = moment().startOf('day');
+            if (['xs', 'md'].indexOf(self._findBootstrapEnvironment()) >= 0) {
+                self._view_options['days'] = 7;
+            } else {
+                self._view_options['days'] = (self._view_options['days'] !== 'month')?parseInt(self._view_options['days']):date_begin.daysInMonth();
+            }
+            var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
+            var $dateTimePickerBegin = self.$el.find('#mpms-search #date_begin');
+            var $dateTimePickerEnd = self.$el.find('#mpms-search #date_end');
+            //$dateTimePickerBegin.data("ignore_onchange", true);
+            $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
+            //$dateTimePickerEnd.data("ignore_onchange", true);
+            $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
+            self._last_dates = self.generate_params()['dates'];
+
+            self.generate_hotel_calendar();
+        });
 
         return $.when();
     },
@@ -398,7 +415,7 @@ var HotelCalendarManagementView = View.extend({
 
         if (this._hcalendar && date_begin) {
             if (isStartDate) {
-                var ndate_end = date_begin.clone().add(CALENDAR_DAYS, 'd');
+                var ndate_end = date_begin.clone().add(this._view_options['days'], 'd');
                 $dateTimePickerEnd.data("ignore_onchange", true);
                 $dateTimePickerEnd.data("DateTimePicker").setDate(ndate_end.local());
             }
@@ -460,10 +477,11 @@ var HotelCalendarManagementView = View.extend({
                             'min_stay': restriction[vroom][day][0],
                             'min_stay_arrival': restriction[vroom][day][1],
                             'max_stay': restriction[vroom][day][2],
-                            'closed': restriction[vroom][day][3],
-                            'closed_arrival': restriction[vroom][day][4],
-                            'closed_departure': restriction[vroom][day][5],
-                            'id': restriction[vroom][day][6]
+                            'max_stay_arrival': restriction[vroom][day][3],
+                            'closed': restriction[vroom][day][4],
+                            'closed_arrival': restriction[vroom][day][5],
+                            'closed_departure': restriction[vroom][day][6],
+                            'id': restriction[vroom][day][7]
                         }];
                         this._hcalendar.addRestrictions(rest);
                         break;
@@ -534,6 +552,23 @@ var HotelCalendarManagementView = View.extend({
             ],
             $content: QWeb.render('HotelCalendarManagement.UnsavedChanges', {})
         }).open();
+    },
+
+    _findBootstrapEnvironment: function() {
+        var envs = ['xs', 'sm', 'md', 'lg'];
+
+        var $el = $('<div>');
+        $el.appendTo($('body'));
+
+        for (var i = envs.length - 1; i >= 0; i--) {
+            var env = envs[i];
+
+            $el.addClass('hidden-'+env);
+            if ($el.is(':hidden')) {
+                $el.remove();
+                return env;
+            }
+        }
     }
 });
 

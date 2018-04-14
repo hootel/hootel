@@ -19,17 +19,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import res_config
-from . import inherited_hotel_virtual_room
-from . import inherited_product_pricelist
-from . import inherited_product_pricelist_item
-from . import inherited_reservation_restriction
-from . import inherited_reservation_restriction_item
-from . import inherited_virtual_room_availability
-from . import inherited_hotel_reservation
-from . import inherited_hotel_folio
-from . import inherited_hotel_calendar_management
-from . import inherited_res_partner
-from . import inherited_bus_hotel_calendar
-from . import wubook_channel_info
-from . import wubook_issue
+from openerp import models, api
+
+
+class BusHotelCalendar(models.TransientModel):
+    _inherit = 'bus.hotel.calendar'
+
+    @api.model
+    def _generate_reservation_notif(self, vals):
+        json = super(BusHotelCalendar, self)._generate_reservation_notif(vals)
+        json['reservation'].update({
+            'wrid': vals['wrid'],
+        })
+        return json

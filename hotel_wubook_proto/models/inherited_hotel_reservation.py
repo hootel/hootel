@@ -211,32 +211,48 @@ class HotelReservation(models.Model):
                 return super(HotelReservation, record).\
                                                 action_reservation_checkout()
 
+    @api.model
+    def _hcalendar_reservation_data(self, reservations):
+        json_reservs, json_tooltips = super(
+            HotelReservation,
+            self)._hcalendar_reservation_data(reservations)
+
+        reserv_obj = self.env['hotel.reservation']
+        for reserv in json_reservs:
+            reservation = reserv_obj.browse(reserv[1])
+            reserv[13] = reservation.splitted or reservation.wis_from_channel
+
+        return (json_reservs, json_tooltips)
+
     @api.multi
     def send_bus_notification(self, naction, ntype, ntitle=''):
         hotel_cal_obj = self.env['bus.hotel.calendar']
         for record in self:
-            hotel_cal_obj.send_reservation_notification(
-                naction,
-                ntype,
-                ntitle,
-                record.product_id.id,
-                record.id,
-                record.partner_id.name,
-                record.adults,
-                record.children,
-                record.checkin,
-                record.checkout,
-                record.folio_id.id,
-                record.reserve_color,
-                record.reserve_color_text,
-                record.splitted,
-                record.parent_reservation and
+            hotel_cal_obj.send_reservation_notification({
+                'action': naction,
+                'type': ntype,
+                'title': ntitle,
+                'product_id': record.product_id.id,
+                'reserv_id': record.id,
+                'partner_name': record.partner_id.name,
+                'adults': record.adults,
+                'children': record.children,
+                'checkin': record.checkin,
+                'checkout': record.checkout,
+                'folio_id': record.folio_id.id,
+                'reserve_color': record.reserve_color,
+                'reserve_color_text': record.reserve_color_text,
+                'splitted': record.splitted,
+                'parent_reservation': record.parent_reservation and
                 record.parent_reservation.id or 0,
-                record.product_id.name,
-                record.partner_id.mobile
+                'room_name': record.product_id.name,
+                'partner_phone': record.partner_id.mobile
                 or record.partner_id.phone or _('Undefined'),
-                record.state,
-                record.splitted)
+                'state': record.state,
+                'fix_days': record.splitted or record.wis_from_channel,
+                'overbooking': record.overbooking,
+                'wrid': record.wrid,
+            })
 
     @api.multi
     def mark_as_readed(self):

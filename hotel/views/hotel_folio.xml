@@ -15,8 +15,10 @@
                             class="btn-primary" type="object" />
                         <button name="send_reservation_mail" type="object" string="Send Confirmation Email"
                            states="sale" class="oe_highlight"/>
-                        <button name="send_cancel_mail" type="object" string="Send Cancel Email"
-                              states="cancel" class="oe_highlight"/>
+                       <button name="send_cancel_mail" type="object" string="Send Cancel Email"
+                           states="cancel" class="oe_highlight"/>
+                         <button name="send_exit_mail" type="object" string="Send Exit Email"
+                           states="done" class="oe_highlight"/>
                         <button name="%(sale.action_view_sale_advance_payment_inv)d"
                             string="Create Invoice" type="action" class="btn-primary" states="sale"
                             attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
@@ -117,9 +119,10 @@
                         </div>
                         <group colspan="4" col="4">
 							<field name="email" placeholder="email"/>
-                            <field name="date_order" />
-							<field name="mobile" placeholder="mobile"/>
+                            <field name="date_order" />                            						
+							<field name="mobile" placeholder="mobile"/> 
                             <field name="reservation_type" attrs="{'readonly':[('state','not in',('draft'))]}"/>
+                            <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>                            	                      
                             <field name="partner_invoice_id" domain="[('parent_id','=',partner_id)]" invisible="1"/>
                             <field name="pricelist_id" domain="[('type','=','sale')]" invisible="1"/>
                             <field name="project_id" invisible="1"/>

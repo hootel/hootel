@@ -36,6 +36,12 @@
                                     <field name="txt_message" readonly="1"/>
                                 </div>
                             </group>
+                            <group>
+                              <div><!-- site-exportine -->
+                                <p>Abrir web de la Polícia para entregar el fichero generado: <a href="https://webpol.policia.es/e-hotel" target="_blank">Policia <i class="fa fa-flag"></i></a></p>
+                                <p>Abrir web de la Guardia Civil para entregar el fichero generado: <a href="https://hospederias.guardiacivil.es" target="_blank">Guardia Civil <i class="fa fa-tree"></i></a></p>
+                              </div>
+                            </group>
                         </sheet>
                     </form>
                 </field>
