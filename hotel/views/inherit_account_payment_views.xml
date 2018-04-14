@@ -63,6 +63,8 @@
                         attrs="{'invisible': [('state','!=','draft')]}"/>
                         <button string="Modify" name="modify" type="object" class="btn-primary"
                         attrs="{'invisible': [('state','=','draft')]}"/>
+                        <button string="Return" name="return_payment_folio" type="object" class="btn-primary"
+                        attrs="{'invisible': [('state','=','draft')]}"/>
                         <button string="Cancel" class="btn-default" special="cancel"/>
                     </footer>
                 </form>

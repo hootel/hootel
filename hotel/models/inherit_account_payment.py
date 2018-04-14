@@ -42,6 +42,33 @@ class AccountPayment(models.Model):
     )
 
     @api.multi
+    def return_payment_folio(self):
+        journal = self.journal_id
+        partner = self.partner_id
+        amount = self.amount
+        reference = self.communication
+        account_move_lines = self.move_line_ids.filtered(lambda x: (
+            x.account_id.internal_type == 'receivable'))
+        return_line_vals = {
+            'move_line_ids': [(6, False, [x.id for x in account_move_lines])],
+            'partner_id': partner.id,
+            'amount': amount,
+            'reference': reference,
+            }
+        return_vals = {
+            'journal_id': journal.id,
+            'line_ids': [(0,0,return_line_vals)],
+            }
+        return_pay = self.env['payment.return'].create(return_vals)
+        return {
+            'name': 'Folio Payment Return',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'payment.return',
+            'type': 'ir.actions.act_window',
+            'res_id': return_pay.id,
+        }
+    @api.multi
     def modify(self):
         self.cancel()
         self.post()
