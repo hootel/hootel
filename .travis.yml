@@ -36,6 +36,7 @@ install:
   - travis_install_nightly
   - git clone -b ${VERSION} https://github.com/OCA/web.git ${HOME}/dependencies/web --depth=1
   - git clone -b ${VERSION} https://github.com/OCA/partner-contact.git ${HOME}/dependencies/partner-contact --depth=1
+  - git clone -b ${VERSION} https://github.com/OCA/account-payment.git ${HOME}/dependencies/account_payment_return --depth=1
 
 script:
   - travis_wait travis_run_tests
