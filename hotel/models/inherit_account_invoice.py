@@ -76,15 +76,17 @@ class AccountInvoice(models.Model):
             'order_id', 'Sale Orders', readonly=True,
             help="This is the list of sale orders related to this invoice.")
 
+    @api.multi
     def _compute_dif_customer_payment(self):
-        sales = self.mapped('invoice_line_ids.sale_line_ids.order_id')
-        folios = self.env['hotel.folio'].search([('id','in',sales.ids)])
-        payments_obj = self.env['account.payment']
-        payments = payments_obj.search([('folio_id','in',folios.ids)])
-        for pay in payments:
-            if pay.partner_id <> self.partner_id:
-                self.dif_customer_payment = True
-                return
+        for inv in self:
+            sales = inv.mapped('invoice_line_ids.sale_line_ids.order_id')
+            folios = inv.env['hotel.folio'].search([('id','in',sales.ids)])
+            payments_obj = inv.env['account.payment']
+            payments = payments_obj.search([('folio_id','in',folios.ids)])
+            for pay in payments:
+                if pay.partner_id <> inv.partner_id:
+                    inv.dif_customer_payment = True
+
     @api.multi
     def action_invoice_open(self):
         to_open_invoices_without_vat = self.filtered(lambda inv: inv.state != 'open' and inv.partner_id.vat == False)
