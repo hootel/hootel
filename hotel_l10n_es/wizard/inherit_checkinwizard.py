@@ -138,6 +138,14 @@ class Wizard(models.TransientModel):
             # (6, 0, [IDs]) replace the list of linked IDs ...
             'category_id': [(6, False, [x.id for x in self.category_id_cardex])],
         }
+
+        #Update Accounting VAT number on customer
+        if self.documenttype_cardex in ('D','C'):
+                partner_vat = 'ES' + self.poldocument_cardex
+                partner_vals.update({
+                    'vat': partner_vat
+                    })
+
         # Are you templed to merge the following write with the super() ?
         # Be warned: Premature optimization is the root of all evil -- DonaldKnuth
         # This TransientModel inherit from checkin.wizard and it is intended for localization
