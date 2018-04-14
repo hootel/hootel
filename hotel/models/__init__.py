@@ -46,4 +46,4 @@ from . import hotel_virtual_room_availability
 from . import inherit_product_pricelist
 from . import res_config
 from . import inherit_res_partner
-from . import hotel_dashboard
+#~ from . import hotel_dashboard

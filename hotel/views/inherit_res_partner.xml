@@ -37,7 +37,7 @@
         </record>
 
         <menuitem name="Customers" id="menu_hotel_customer"
-            action="base.action_partner_form" sequence="1"
+            action="base.action_partner_form" sequence="500"
             parent="menu_all_folio"/>
 
     </data>

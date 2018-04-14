@@ -232,7 +232,7 @@
             <field name="name">hotel.folio.tree</field>
             <field name="model">hotel.folio</field>
             <field name="arch" type="xml">
-                <tree string="Hotel Folio" colors="blue:state == 'draft';gray:state == 'done'">
+                <tree string="Hotel Folio" colors="blue:state == 'draft';gray:state == 'done'" limit="80">
                     <field name="name" />
                     <field name="partner_id" select="1" />
                     <field name="date_order" select="1" />
@@ -248,7 +248,7 @@
             <field name="name">hotel.folio.kanban</field>
             <field name="model">hotel.folio</field>
             <field name="arch" type="xml">
-                <kanban class="o_res_partner_kanban">
+                <kanban class="o_res_partner_kanban" limit="80">
                     <field name="name"/>
                     <field name="partner_id"/>
                     <field name="room_lines"/>
@@ -312,10 +312,9 @@
             <field name="name">Hotel- Folios Calendar</field>
             <field name="model">hotel.folio</field>
             <field name="arch" type="xml">
-                <calendar string="Folios" color="user_id">
+                <calendar string="Folios" color="user_id" date_start="date_order">
                     <field name="name" />
                     <field name="partner_id" />
-                    <field name="duration" />
                 </calendar>
             </field>
         </record>
