@@ -96,7 +96,7 @@ class AccountInvoice(models.Model):
                 vat_error += ", " + invoice.partner_id.name
             raise ValidationError(vat_error)
         return super(AccountInvoice, self).action_invoice_open()
-        
+
     # ~ @api.multi
     # ~ def confirm_paid(self):
     #     ~ '''

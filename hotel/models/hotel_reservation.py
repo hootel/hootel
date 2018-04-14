@@ -681,16 +681,18 @@ class HotelReservation(models.Model):
         if self.state == 'confirm' and self.checkin_is_today():
                 self.is_checkin = True
                 folio = self.env['hotel.folio'].browse(self.folio_id.id)
-                folio.checkins_reservations = folio.room_lines.search_count([
-                    ('folio_id', '=', folio.id), ('is_checkin', '=', True)
-                ])
+                if folio:
+                    folio.checkins_reservations = folio.room_lines.search_count([
+                        ('folio_id', '=', folio.id), ('is_checkin', '=', True)
+                    ])
 
         if self.state == 'booking' and self.checkout_is_today():
                 self.is_checkout = False
                 folio = self.env['hotel.folio'].browse(self.folio_id.id)
-                folio.checkouts_reservations = folio.room_lines.search_count([
-                    ('folio_id', '=', folio.id), ('is_checkout', '=', True)
-                ])
+                if folio:
+                    folio.checkouts_reservations = folio.room_lines.search_count([
+                        ('folio_id', '=', folio.id), ('is_checkout', '=', True)
+                    ])
 
         days_diff = date_utils.date_diff(
                                 self.checkin, self.checkout, hours=False) + 1

@@ -213,12 +213,14 @@ class HotelFolio(models.Model):
                 ('folio_id', '=', record.id)
             ])
             total_paid = sum(pay.amount for pay in payments)
+            return_lines = self.env['payment.return.line'].search([('move_line_ids','in',payments.mapped('move_line_ids.id'))])
+            total_inv_refund = sum(pay_return.amount for pay_return in return_lines)
             for inv in record.invoice_ids:
                 if inv.type == 'out_refund':
                     total_inv_refund += inv.amount_total
             vals = {
-                'invoices_amount': record.amount_total - total_paid,
-                'invoices_paid': total_paid,
+                'invoices_amount': record.amount_total - total_paid + total_inv_refund,
+                'invoices_paid': total_paid - total_inv_refund,
                 'refund_amount': total_inv_refund,
             }
             record.update(vals)
@@ -278,16 +280,30 @@ class HotelFolio(models.Model):
         return action
         
     @api.multi
-    def action_refunds_invoices(self):
+    def action_return_payments(self):
         self.ensure_one()
-        invoices = self.mapped('invoice_ids.id')
+        return_move_ids = []
+        acc_pay_obj = self.env['account.payment']
+        payments = acc_pay_obj.search([
+                '|',
+                ('invoice_ids', 'in', self.invoice_ids.ids),
+                ('folio_id', '=', self.id)
+            ])
+        return_move_ids += self.invoice_ids.filtered(
+            lambda invoice: invoice.type == 'out_refund').mapped(
+            'payment_move_line_ids.move_id.id')
+        return_lines = self.env['payment.return.line'].search([(
+            'move_line_ids','in',payments.mapped(
+            'move_line_ids.id'))])
+        return_move_ids += return_lines.mapped('return_id.move_id.id')
+        
         return{
-            'name': _('Invoices'),
+            'name': _('Returns'),
             'view_type': 'form',
             'view_mode': 'tree,form',
-            'res_model': 'account.invoice',
+            'res_model': 'account.move',
             'type': 'ir.actions.act_window',
-            'domain': [('id', 'in', invoices), ('type', '=', 'out_refund')],
+            'domain': [('id', 'in', return_move_ids)],
         }
 
     @api.multi

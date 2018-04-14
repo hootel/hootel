@@ -22,6 +22,7 @@
 
 from . import currency_exchange
 #~ from . import folio_room_line
+from . import inherit_payment_return
 from . import hotel_floor
 from . import hotel_folio
 from . import hotel_reservation
@@ -47,3 +48,4 @@ from . import inherit_product_pricelist
 from . import res_config
 from . import inherit_res_partner
 from . import hotel_dashboard
+

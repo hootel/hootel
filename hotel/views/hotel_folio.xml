@@ -93,7 +93,7 @@
                             <button type="object" class="oe_stat_button"
                                 id="refunds_smart_button"
                                 icon="fa-undo"
-                                name="action_refunds_invoices"
+                                name="action_return_payments"
                                 attrs="{'invisible': [('refund_amount','&lt;=',0)]}">
                                 <div class="o_form_field o_stat_info">
                                     <span class="o_stat_value">
