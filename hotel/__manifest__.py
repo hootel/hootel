@@ -34,6 +34,7 @@
     'depends': [
         'sale_stock',
         'report',
+        'account_payment_return',
     ],
     'license': "",
     'demo': ['data/hotel_data.xml'],
@@ -46,6 +47,7 @@
         'views/res_config.xml',
         'data/menus.xml',
         'views/inherit_account_payment_views.xml',
+        'views/inherit_account_invoice_views.xml',
         'wizard/hotel_wizard.xml',
         'wizard/checkinwizard.xml',
         'views/hotel_sequence.xml',
