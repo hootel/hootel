@@ -46,6 +46,7 @@ class HotelCalendarManagement(models.TransientModel):
             'min_stay': restriction['min_stay'],
             'min_stay_arrival': restriction['min_stay_arrival'],
             'max_stay': restriction['max_stay'],
+            'max_stay_arrival': restriction['max_stay_arrival'],
             'closed': restriction['closed'],
             'closed_arrival': restriction['closed_arrival'],
             'closed_departure': restriction['closed_departure'],
@@ -182,6 +183,7 @@ class HotelCalendarManagement(models.TransientModel):
                 'min_stay': rec.min_stay,
                 'min_stay_arrival': rec.min_stay_arrival,
                 'max_stay': rec.max_stay,
+                'max_stay_arrival': rec.max_stay_arrival,
                 'closed': rec.closed,
                 'closed_departure': rec.closed_departure,
                 'closed_arrival': rec.closed_arrival,
@@ -295,3 +297,14 @@ class HotelCalendarManagement(models.TransientModel):
             vals.update({'rooms': json_rooms or []})
 
         return vals
+
+    @api.multi
+    def get_hcalendar_settings(self):
+        user_id = self.env['res.users'].browse(self.env.uid)
+        return {
+            'eday_week': user_id.npms_end_day_week,
+            'eday_week_offset': user_id.npms_end_day_week_offset,
+            'days': user_id.npms_default_num_days,
+            'show_notifications': user_id.pms_show_notifications,
+            'show_num_rooms': user_id.pms_show_num_rooms,
+        }

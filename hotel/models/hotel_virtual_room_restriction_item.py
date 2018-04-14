@@ -44,18 +44,24 @@ class HotelVirtualRoomRestrictionItem(models.Model):
     min_stay = fields.Integer("Min. Stay")
     min_stay_arrival = fields.Integer("Min. Stay Arrival")
     max_stay = fields.Integer("Max. Stay")
+    max_stay_arrival = fields.Integer("Max. Stay Arrival")
     closed = fields.Boolean('Closed')
     closed_departure = fields.Boolean('Closed Departure')
     closed_arrival = fields.Boolean('Closed Arrival')
 
-    @api.constrains('min_stay', 'min_stay_arrival', 'max_stay')
+    @api.constrains('min_stay', 'min_stay_arrival', 'max_stay',
+                    'max_stay_arrival')
     def _check_min_stay_min_stay_arrival_max_stay(self):
         if self.min_stay < 0:
             raise ValidationError(_("Min. Stay can't be less than zero"))
         elif self.min_stay_arrival < 0:
-            raise ValidationError(_("Min. Stay Arrival can't be less than zero"))
+            raise ValidationError(
+                                _("Min. Stay Arrival can't be less than zero"))
         elif self.max_stay < 0:
             raise ValidationError(_("Max. Stay can't be less than zero"))
+        elif self.max_stay_arrival < 0:
+            raise ValidationError(
+                                _("Max. Stay Arrival can't be less than zero"))
 
     @api.constrains('date_start', 'date_end')
     def _check_date_start_date_end(self):

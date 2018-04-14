@@ -23,15 +23,14 @@
 from openerp import models, fields, api
 from openerp.exceptions import UserError
 from openerp.tools.translate import _
-import logging
 from datetime import datetime, timedelta
+import logging
 _logger=logging.getLogger(__name__)
 
 class Wizard(models.TransientModel):
     _inherit = 'checkin.wizard'
 
     # Birthdate validation
-    @api.onchange('birthdate_date_cardex')
     def validation_under_age(self):
         if self.birthdate_date_cardex <> False:
             years = str(datetime.now().date() - timedelta(days=365*16+4))
@@ -42,7 +41,7 @@ class Wizard(models.TransientModel):
                 return {'warning': {'title': _('Error in Birthdate'), 'message': _('Does the client have less than 16 years?. Data collection is not performed for those born before %s.' % (limite)),},}
             if self.polexpedition_cardex <> False:
                 if self.birthdate_date_cardex > self.polexpedition_cardex:
-                    return {'warning': {'title': _('Error in Birthdate or Expedition date'), 'message': _('Date of document shipment, prior to birth date'),},}
+                    raise ValidationError(_('Date of document shipment, prior to birth date'))
 
     # Expedition validation
     @api.onchange('polexpedition_cardex')
@@ -80,6 +79,10 @@ class Wizard(models.TransientModel):
     # @api.onchange('x')
     # Pendiente
 
+    # NOTE: All the fields are required but they are set required=True in the .xml
+    # The reason is found in the bt_select_partner and bt_create_partner buttons to bypass the ORM null constraint
+    # when the buttons are clicked to show the hidden fields
+
     documenttype_cardex = fields.Selection([
         ('D', 'DNI'),
         ('P', 'Pasaporte'),
@@ -87,84 +90,89 @@ class Wizard(models.TransientModel):
         ('I', 'Carta o Doc. de Identidad'),
         ('N', 'Permiso Residencia Español'),
         ('X', 'Permiso Residencia Europeo')],
-        help=_('Select a valid document type'),
-        required=True,
+        help='Select a valid document type',
         default='D',
-        string=_('Doc. type'),
-        related='partner_id.documenttype')
-    poldocument_cardex = fields.Char('Doc. number', required=True, related='partner_id.poldocument')
-    polexpedition_cardex = fields.Date('Expedition date', required=True, related='partner_id.polexpedition')
-    birthdate_date_cardex = fields.Date("Birthdate", required=True, related='partner_id.birthdate_date')
-    gender_cardex = fields.Selection([('male', 'Male'),
-                               ('female', 'Female')],
-                                required=True, related='partner_id.gender')
-    firstname_cardex = fields.Char('Firstname', required=True, related='partner_id.firstname')
-    lastname_cardex = fields.Char('Lastname', required=True, related='partner_id.lastname')
-    mobile_cardex = fields.Char('Mobile', related='partner_id.mobile', store=True)
+        string='Doc. type')
+
+    poldocument_cardex = fields.Char('Doc. number')
+
+    polexpedition_cardex = fields.Date('Expedition date')
+
+    gender_cardex = fields.Selection([('male', 'Male'), ('female', 'Female')])
+
+    birthdate_date_cardex = fields.Date("Birthdate")
+
     code_ine_cardex = fields.Many2one('code_ine',
-            help=_('Country or province of origin. Used for INE statistics.'),
-            required=True,
-            related='partner_id.code_ine')
-    category_id_cardex = fields.Many2many('res.partner.category', 'id', related='partner_id.category_id', required=True)
+            help='Country or province of origin. Used for INE statistics.')
+
+    # TODO: Add tags in the cardex not in the partner anb move this field to out of localization
+    category_id_cardex = fields.Many2many('res.partner.category', 'id', required=True)
 
     @api.multi
     def pdf_viajero(self, cardex_id):
         cardex = self.env['cardex'].search([('id', '=', cardex_id)])
-#         data['cardex'] = cardex_id
-#         datas = {
-#              'ids': cardex_ids,
-#              'model': 'cardex',
-#              'form': data
-#         }
         return self.env['report'].get_action(cardex, 'report.viajero')
 
     @api.multi
     def action_save_check(self):
-        cardex_val = {
-            'partner_id': self.partner_id.id,
-            'enter_date': self.enter_date,
-            'exit_date': self.exit_date,
-        }
+        # Check dates
+        self.validation_under_age()
+        # take a 'snapshot' of the current cardexes in this reservation
         record_id = self.env['hotel.reservation'].browse(self.reservation_id.id)
         old_cardex = self.env['cardex'].search([('reservation_id', '=', record_id.id)])
-        record_id.write({
-            'cardex_ids': [(0, False, cardex_val)]
-        })
-        if record_id.cardex_count > 0:
-            record_id.state = 'booking'
-            record_id.is_checkin = False
-            folio = self.env['hotel.folio'].browse(self.reservation_id.folio_id.id)
-            folio.checkins_reservations -= 1
-        cardex = self.env['cardex'].search([('reservation_id', '=', record_id.id)]) - old_cardex
-        # now_cardex = self.env['cardex'].search([("reservation_id","=",record_id.id),
-        #     ("partner_id","=",self.partner_id.id),
-        #     ("enter_date","=",self.enter_date),
-        #     ("exit_date","=",self.exit_date),
-        #     ],limit=1)
 
-        #context = { 'ids': now_cardex.id,
-            # 'partner_id': record_id.partner_id,
-            # 'enter_date': record_id.cardex_ids.enter_date,
-            # 'exit_date': record_id.cardex_ids.exit_date,
-            # 'reserva_id': record_id.cardex_ids.reservation_id,
-            # 'hidden_cardex': True,
-            # 'edit_cardex': True
-        #    }
-#         context = {
-#             'partner_id': cardex.partner_id,
-#             'enter_date': cardex.enter_date,
-#             'exit_date': cardex.exit_date,
-#             'reserva_id': cardex.id,
-#             'hidden_cardex': True,
-#             'edit_cardex': True
-#         }
+        # the above lines must be executed before call the super().action_save_check()
+
+        # call the super action_save_check() for checkin
+        super(Wizard, self).action_save_check()
+
+        # prepare localization partner values
+        partner_vals = {
+            'documenttype': self.documenttype_cardex,
+            'poldocument': self.poldocument_cardex,
+            'polexpedition': self.polexpedition_cardex,
+            'gender': self.gender_cardex,
+            'birthdate_date': self.birthdate_date_cardex,
+            # (4, ID) link to existing record with id = ID (adds a relationship) ...
+            'code_ine': self.code_ine_cardex.id,
+            # (6, 0, [IDs]) replace the list of linked IDs ...
+            'category_id': [(6, False, [x.id for x in self.category_id_cardex])],
+        }
+
+        #Update Accounting VAT number on customer
+        if self.documenttype_cardex in ('D','C'):
+                partner_vat = 'ES' + self.poldocument_cardex
+                partner_vals.update({
+                    'vat': partner_vat
+                    })
+
+        # Are you templed to merge the following write with the super() ?
+        # Be warned: Premature optimization is the root of all evil -- DonaldKnuth
+        # This TransientModel inherit from checkin.wizard and it is intended for localization
+        # So, if you need to write something here must be _after_ the super()
+
+        # update the localization partner values for this reservation
+        self.partner_id.sudo().write(partner_vals);
+
+        # get the last cardex in this reservation (set difference theory)
+        cardex = self.env['cardex'].search([('reservation_id', '=', record_id.id)]) - old_cardex
+
         # FIXME: Hackish solution for close & print (https://www.odoo.com/es_ES/forum/ayuda-1/question/close-wizard-after-print-report-86786)
         action_report = self.pdf_viajero(cardex.id)
+        # FIXME: Hackish solution for close & print
+        # (https://www.odoo.com/es_ES/forum/ayuda-1/question/close-wizard-after-print-report-86786)
         del action_report['report_type']
         return action_report
-        #return {'type': 'ir.actions.act_window_close'}
 
-
-        # Debug Stop -------------------
-        #    import wdb; wdb.set_trace()
-        # Debug Stop -------------------
+    @api.onchange('partner_id')
+    def onchange_partner_id(self):
+        # call the super update_partner_fields
+        super(Wizard, self).onchange_partner_id()
+        # update local fields
+        self.documenttype_cardex = self.partner_id.documenttype;
+        self.poldocument_cardex = self.partner_id.poldocument;
+        self.polexpedition_cardex = self.partner_id.polexpedition;
+        self.gender_cardex = self.partner_id.gender;
+        self.birthdate_date_cardex = self.partner_id.birthdate_date;
+        self.code_ine_cardex = self.partner_id.code_ine;
+        self.category_id_cardex = self.partner_id.category_id;

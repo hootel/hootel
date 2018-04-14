@@ -15,9 +15,9 @@
 }
 .hcal-management-table > thead > tr > td {
 	/*text-align: center !important;*/
-	width: 160px !important;
+	width: 110px !important;
 	vertical-align: center;
-	min-width: 160px;
+	min-width: 110px;
 	height: 1.5em;
 	min-height: 1.5em;
 	white-space: nowrap;
@@ -26,9 +26,9 @@
 }
 .hcal-management-table > tbody > tr > td {
 	/*text-align: center !important;*/
-	width: 160px !important;
+	width: 110px !important;
 	vertical-align: center;
-	min-width: 160px;
+	min-width: 110px;
 	height: 115px;
 	min-height: 100px;
 	white-space: nowrap;
@@ -107,6 +107,20 @@
 .hcal-management-input-changed {
 	background-color: rgb(237,110,110);
 	border: 1px solid gray;
+}
+
+table.hcal-management-table  input {
+	border: 1px solid lightgray;
+}
+
+.hcal-border-radius-right {
+	border-top-right-radius: 25px;
+	border-bottom-right-radius: 25px;
+}
+
+.hcal-border-radius-left {
+	border-top-left-radius: 25px;
+	border-bottom-left-radius: 25px;
 }
 
 button.hcal-management-input {

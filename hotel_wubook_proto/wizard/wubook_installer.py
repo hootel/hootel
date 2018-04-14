@@ -70,10 +70,24 @@ class WuBookInstaller(models.TransientModel):
             'wubook_push_security_token',
             binascii.hexlify(os.urandom(16)).decode())
         self.env.cr.commit()    # FIXME: Need do this
+
+        # Create Wubook Base Restrictions
+        restr_obj = self.env['hotel.virtual.room.restriction'].with_context({
+            'wubook_action': False
+        })
+        nrest = restr_obj.create({
+            'name': 'Base WuBook Restrictions',
+            'wpid': '0',
+        })
+        if not nrest:
+            raise ValidationError(_("Can't create base wubook restrictions"))
+
+        # Initialize WuBook
         wres = self.env['wubook'].initialize(activate_push)
         if not wres:
             raise ValidationError("Can't finish installation!")
 
+        # Open Next Step
         v_id = 'hotel_wubook_proto.view_wubook_configuration_installer_parity'
         return {
             'name': _("Configure Hotel Parity"),

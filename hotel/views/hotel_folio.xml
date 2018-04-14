@@ -15,8 +15,10 @@
                             class="btn-primary" type="object" />
                         <button name="send_reservation_mail" type="object" string="Send Confirmation Email"
                            states="sale" class="oe_highlight"/>
-                        <button name="send_cancel_mail" type="object" string="Send Cancel Email"
-                              states="cancel" class="oe_highlight"/>
+                       <button name="send_cancel_mail" type="object" string="Send Cancel Email"
+                           states="cancel" class="oe_highlight"/>
+                         <button name="send_exit_mail" type="object" string="Send Exit Email"
+                           states="done" class="oe_highlight"/>
                         <button name="%(sale.action_view_sale_advance_payment_inv)d"
                             string="Create Invoice" type="action" class="btn-primary" states="sale"
                             attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
@@ -39,9 +41,10 @@
                             <button type="action" class="oe_stat_button"
                                 id="cardex_smart_button"
                                 icon="fa-user-plus"
-                                name="%(launch_checkin_wizard)d"
+                                name="%(launch_checkin_wizard_add)d"
                                 attrs="{'invisible': [('cardex_pending_num','&lt;=',0)]}"
-                                context="{'reservation_ids': room_lines, 'hidden_cardex': True, 'folio': active_id}">
+                                context="{'partner_id': partner_id,'reservation_ids': room_lines,
+                                            'hidden_cardex': True, 'folio': active_id}">
                                 <div class="o_form_field o_stat_info">
                                     <span class="o_stat_value"><field name="cardex_pending_num"
                                     widget="statinfo" nolabel="1"/></span>
@@ -151,24 +154,27 @@
                                 <field name="room_lines" colspan="4" string="Room Line"
                                     nolabel="1" context="{'room_lines':room_lines,'folio_id': id}">
                                     <tree string="Room Line" colors="red:state == 'cancelled'">
+										<!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
+										<field name="cardex_pending" invisible="1"/>
+                                        <button type="action" class="oe_stat_button"
+                                        id="cardex_smart_button" icon="fa-user-plus"
+                                        name="%(launch_checkin_wizard_add)d"
+                                        context="{'partner_id': partner_id,'enter_date': checkin,
+                                            'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True}"
+                                        attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
+                                                             ('cardex_pending','=', False)]}"
+                                        />
                                         <field name="product_id" string="Room No" />
                                         <field name="name" invisible="1"/>
                                         <field name="checkin" />
                                         <field name="checkout" />
-                                        <field name="nights" /> 
+                                        <field name="nights" />
                                         <field name="adults" />
                                         <field name="children" />
                                         <field name="price_unit" />
                                         <field name="discount" groups="sale.group_discount_per_so_line"/>
                                         <field name="price_subtotal" invisible="1" />
                                         <field name="state" />
-                                        <button type="action" class="oe_stat_button"
-                                        id="cardex_smart_button" icon="fa-user-plus"
-                                        name="%(launch_checkin_wizard_add)d"
-                                        context="{'partner_id': partner_id,'enter_date': checkin,
-                                            'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True}"
-                                        attrs="{'invisible':[('state','not in',('confirm','booking'))]}"
-                                        />
                                         <field name="partner_id" invisible="1"/>
                                     </tree>
                                 </field>
@@ -235,7 +241,7 @@
             <field name="name">hotel.folio.tree</field>
             <field name="model">hotel.folio</field>
             <field name="arch" type="xml">
-                <tree string="Hotel Folio" colors="blue:state == 'draft';gray:state == 'done'">
+                <tree string="Hotel Folio" colors="blue:state == 'draft';gray:state == 'done'" limit="80">
                     <field name="name" />
                     <field name="partner_id" select="1" />
                     <field name="date_order" select="1" />
@@ -251,7 +257,7 @@
             <field name="name">hotel.folio.kanban</field>
             <field name="model">hotel.folio</field>
             <field name="arch" type="xml">
-                <kanban class="o_res_partner_kanban">
+                <kanban class="o_res_partner_kanban" limit="80">
                     <field name="name"/>
                     <field name="partner_id"/>
                     <field name="room_lines"/>
@@ -315,10 +321,9 @@
             <field name="name">Hotel- Folios Calendar</field>
             <field name="model">hotel.folio</field>
             <field name="arch" type="xml">
-                <calendar string="Folios" color="user_id">
+                <calendar string="Folios" color="user_id" date_start="date_order">
                     <field name="name" />
                     <field name="partner_id" />
-                    <field name="duration" />
                 </calendar>
             </field>
         </record>

@@ -122,6 +122,7 @@ class TestWubook(TestHotelWubook):
         self.assertEqual(len(nreservs), 2, "Reservations not found")
 
         for nreserv in nreservs:
+            # Check State
             self.assertEqual(nreserv.state, 'draft',
                              "Invalid reservation state")
 
@@ -260,7 +261,6 @@ class TestWubook(TestHotelWubook):
         wbooks = [nbook, cbook]
         processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
             self.env['wubook'].sudo().generate_reservations(wbooks)
-        _logger.info(processed_rids)
         self.assertEqual(len(processed_rids), 2, "Reservation not found")
         self.assertFalse(errors, "Reservation errors")
         check_state(processed_rids, 'cancelled')
@@ -400,8 +400,18 @@ class TestWubook(TestHotelWubook):
         )]
         processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
             self.env['wubook'].sudo().generate_reservations(wbooks)
-        self.assertTrue(errors, "Invalid reservation created")
-        self.assertFalse(any(processed_rids), "Invalid reservation created")
+        self.assertFalse(errors, "Invalid reservation created")
+        self.assertTrue(any(processed_rids), "Invalid reservation created")
+
+        nreservs = self.env['hotel.reservation'].search([
+            ('wrid', 'in', processed_rids)
+        ])
+
+        self.assertEqual(nreservs[0].state,
+                         'draft',
+                         "Overbooking don't handled")
+        self.assertTrue(nreservs[1].overbooking,
+                        "Overbooking don't handled")
 
         # No Real Rooms Avail
         wbooks = [
@@ -441,7 +451,72 @@ class TestWubook(TestHotelWubook):
                 }
             ),
         ]
+
         processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
             self.env['wubook'].sudo().generate_reservations(wbooks)
-        self.assertEqual(len(processed_rids), 1, "Invalid Reservation created")
-        self.assertTrue(errors, "Invalid Reservation created")
+        self.assertEqual(len(processed_rids), 3, "Invalid Reservation created")
+        self.assertFalse(errors, "Invalid Reservation created")
+        nreservs = self.env['hotel.reservation'].search([
+            ('wrid', 'in', processed_rids)
+        ])
+        for nreserv in nreservs:
+            self.assertTrue(nreservs[0].overbooking,
+                            "Overbooking don't handled")
+
+    def test_overbooking(self):
+        now_utc_dt = date_utils.now()
+        checkin_utc_dt = now_utc_dt + timedelta(days=3)
+        checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
+                                               self.tz_hotel)
+        checkout_utc_dt = checkin_utc_dt + timedelta(days=2)
+        date_diff = date_utils.date_diff(checkin_utc_dt, checkout_utc_dt,
+                                         hours=False) + 1
+
+        # Invalid Occupancy
+        wbooks = [
+            self.create_wubook_booking(
+                self.user_hotel_manager,
+                checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                self.partner_2,
+                {
+                    self.hotel_vroom_budget.wrid: {
+                        'occupancy': [1],
+                        'dayprices': [15.0, 15.0]
+                    }
+                }
+            ),
+            self.create_wubook_booking(
+                self.user_hotel_manager,
+                checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                self.partner_2,
+                {
+                    self.hotel_vroom_budget.wrid: {
+                        'occupancy': [1],
+                        'dayprices': [15.0, 15.0]
+                    }
+                }
+            ),
+            self.create_wubook_booking(
+                self.user_hotel_manager,
+                checkin_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                self.partner_2,
+                {
+                    self.hotel_vroom_budget.wrid: {
+                        'occupancy': [1],
+                        'dayprices': [15.0, 15.0]
+                    }
+                }
+            )]
+        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+            self.env['wubook'].sudo().generate_reservations(wbooks)
+        self.assertFalse(errors, "Overbooking don't handled")
+        self.assertTrue(any(processed_rids), "Overbooking don't handled")
+        nreservs = self.env['hotel.reservation'].search([
+            ('wrid', 'in', processed_rids)
+        ])
+        self.assertFalse(nreservs[0].overbooking,
+                         "Overbooking don't handled")
+        self.assertFalse(nreservs[1].overbooking,
+                         "Overbooking don't handled")
+        self.assertTrue(nreservs[2].overbooking,
+                        "Overbooking don't handled")
