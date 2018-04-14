@@ -20,6 +20,12 @@
             <field name="arch" type="xml">
                 <form string="Register Payment" version="7">
                     <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" name="button_journal_entries" string="Journal Items" type="object" groups="account.group_account_manager" attrs="{'invisible':[('move_line_ids','=',[])]}" icon="fa-bars"/>
+                            <field name="move_line_ids" invisible="1"/>
+                            <button class="oe_stat_button" name="button_invoices" string="Invoices" type="object" attrs="{'invisible':[('has_invoices','=',False)]}" icon="fa-bars"/>
+                            <field name="has_invoices" invisible="1"/>
+                        </div>
                         <group>
                             <field name="payment_type" invisible="1"/>
                             <field name="partner_type" invisible="1"/>
@@ -53,7 +59,10 @@
                         </group>
                     </sheet>
                     <footer>
-                        <button string='Validate' name="post" type="object" class="btn-primary"/>
+                        <button string="Validate" name="post" type="object" class="btn-primary"
+                        attrs="{'invisible': [('state','!=','draft')]}"/>
+                        <button string="Modify" name="modify" type="object" class="btn-primary"
+                        attrs="{'invisible': [('state','=','draft')]}"/>
                         <button string="Cancel" class="btn-default" special="cancel"/>
                     </footer>
                 </form>
