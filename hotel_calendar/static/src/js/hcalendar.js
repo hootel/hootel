@@ -208,7 +208,7 @@ HotelCalendar.prototype = {
   removeReservation: function(/*Int/HReservationObject*/reservation, /*Boolean?*/noupdate) {
     var reserv = reservation;
     if (!(reserv instanceof HReservation)) {
-      reserv = _.find(this._reservations, {'id': reservation});
+      reserv = this.getReservation(reservation);
     }
     if (reserv) {
       // Remove all related content...
@@ -230,7 +230,7 @@ HotelCalendar.prototype = {
         this._updateReservations();
       }
     } else {
-      console.warn(`[HotelCalendar][removeReservation] Can't remove '${reservation}' reservation!`);
+      console.warn(`[HotelCalendar][removeReservation] Can't remove '${reservation.id}' reservation!`);
     }
   },
 
@@ -872,7 +872,7 @@ HotelCalendar.prototype = {
                 date_cell = reserv.startDate.clone().startOf('day').add(1, 'd');
               }
               if (!$this.reservationAction.oldReservationObj) {
-                $this.reservationAction.oldReservationObj = _.clone(reserv);
+                $this.reservationAction.oldReservationObj = reserv.clone();
                 $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
                 $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
               }
@@ -890,7 +890,7 @@ HotelCalendar.prototype = {
                 date_cell = ndate;
               }
               if (!$this.reservationAction.oldReservationObj) {
-                $this.reservationAction.oldReservationObj = _.clone(reserv);
+                $this.reservationAction.oldReservationObj = reserv.clone();
                 $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
                 $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
               }
@@ -900,7 +900,7 @@ HotelCalendar.prototype = {
             } else if ($this.reservationAction.action == HotelCalendar.ACTION.MOVE_ALL && dist > 0) {
               reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
               if (!$this.reservationAction.oldReservationObj) {
-                $this.reservationAction.oldReservationObj = _.clone(reserv);
+                $this.reservationAction.oldReservationObj = reserv.clone();
                 $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
                 $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
               }
@@ -2419,6 +2419,30 @@ HReservation.prototype = {
   getTotalPersons: function() {
     return this.adults+this.childrens;
   },
+  clone: function() {
+    var nreserv = new HReservation({
+      'id': this.id,
+      'room': this.room,
+      'adults': this.adults,
+      'childrens': this.childrens,
+      'title': this.title,
+      'startDate': this.startDate,
+      'endDate': this.endDate,
+      'color': this.color,
+      'colorText': this.colorText,
+      'readOnly': this.readOnly,
+      'fixRooms': this.fixRooms,
+      'fixDays': this.fixDays,
+      'unusedZone': this.unusedZone,
+      'linkedId': this.linkedId,
+      'splitted': this.splitted,
+      'overbooking': this.overbooking
+    });
+    nreserv._beds = this._beds;
+    nreserv._html = this._html;
+    nreserv.addUserData(this.getUserData());
+    return nreserv;
+  }
 };
 
 /** LIMIT OBJECT **/
