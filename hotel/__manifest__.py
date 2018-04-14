@@ -34,6 +34,7 @@
     'depends': [
         'sale_stock',
         'report',
+        'account_payment_return',
     ],
     'license': "",
     'demo': ['data/hotel_data.xml'],
