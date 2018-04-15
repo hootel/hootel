@@ -46,7 +46,7 @@ class ResPartner(models.Model):
             'name': partner_id.name,
             'city': partner_id.city,
             'company_type': 'person',
-            'parent_id': master_user_id.parent_id[0]
+            'parent_id': master_user_id.parent_id[0],
             'address_type': 'contact',
             'city': partner_id.city,
             'street': partner_id.street,
