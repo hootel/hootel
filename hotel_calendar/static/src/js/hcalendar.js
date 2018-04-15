@@ -873,8 +873,6 @@ HotelCalendar.prototype = {
               }
               if (!$this.reservationAction.oldReservationObj) {
                 $this.reservationAction.oldReservationObj = reserv.clone();
-                $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
-                $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
               }
               reserv.endDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
               $this.reservationAction.newReservationObj = reserv;
@@ -891,8 +889,6 @@ HotelCalendar.prototype = {
               }
               if (!$this.reservationAction.oldReservationObj) {
                 $this.reservationAction.oldReservationObj = reserv.clone();
-                $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
-                $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
               }
               reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
               $this.reservationAction.newReservationObj = reserv;
@@ -901,8 +897,6 @@ HotelCalendar.prototype = {
               reserv = $this.getReservation($this.reservationAction.reservation.dataset.hcalReservationObjId);
               if (!$this.reservationAction.oldReservationObj) {
                 $this.reservationAction.oldReservationObj = reserv.clone();
-                $this.reservationAction.oldReservationObj.startDate = reserv.startDate.clone();
-                $this.reservationAction.oldReservationObj.endDate = reserv.endDate.clone();
               }
               var parentRow = $this.$base.querySelector(`#${this.dataset.hcalParentRow}`);
               var room = $this.getRoom(parentRow.dataset.hcalRoomObjId);
