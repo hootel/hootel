@@ -44,7 +44,7 @@ class NodeSlaveInstaller(models.TransientModel):
     def execute(self):
         super(NodeSlaveInstaller, self).execute()
         self.execute_simple()
-        self._check_connection():
+        self._check_connection()
         return True
 
     @api.multi
