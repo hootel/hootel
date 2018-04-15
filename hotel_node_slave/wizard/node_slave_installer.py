@@ -69,7 +69,7 @@ class NodeSlaveInstaller(models.TransientModel):
             raise ValidationError(_("ERROR: Can't connect with master node!"))
         master_ver_info = common.version()['server_version_info']
         if not master_ver_info == version_info:
-            raise ValidationError(_("ERROR: Master node uses a different Odoo version (%d.%d)") % (master_ver_info[0], master_ver_info[1])))
+            raise ValidationError(_("ERROR: Master node uses a different Odoo version (%d.%d)") % (master_ver_info[0], master_ver_info[1]))
         uid = common.authenticate(master_db, master_user, master_passwd, {})
         self.env['ir.config_parameter'].sudo().set_param(NODE_MASTER_UID_KEY, uid, groups=self.GROUPS)
         return uid
