@@ -1001,7 +1001,7 @@ var HotelCalendarView = View.extend({
               'backgroundColor': 'rgb(145, 255, 0)',
               'fontWeight': 'bold'
             });
-          } else if (hcalSwapMode === HotelCalendar.MODE.SWAP_FROM) {
+          } else if (self._hcalendar.getReservationAction().inReservations.length > 0 && hcalSwapMode === HotelCalendar.MODE.SWAP_FROM) {
             self._hcalendar.setSwapMode(HotelCalendar.MODE.SWAP_TO);
             $("#btn_swap span.ntext").html(_t("END"));
             $("#btn_swap").css({

@@ -134,6 +134,10 @@ HotelCalendar.prototype = {
   },
 
   //==== RESERVATIONS
+  getReservationAction: function() {
+    return this.reservationAction;
+  },
+
   getReservations: function(/*Boolean*/noovers, /*HReservation*/ignoreThis) {
     return _.reject(this._reservations, function(item){ return item===ignoreThis || (noovers && item.overbooking) || item.unusedZone; });
   },
@@ -1684,13 +1688,15 @@ HotelCalendar.prototype = {
   },
 
   _dispatchSwapReservations: function() {
-    this._dispatchEvent(
-      'hcalOnSwapReservations',
-      {
-        'inReservs': this.reservationAction.inReservations,
-        'outReservs': this.reservationAction.outReservations,
-      }
-    );
+    if (this.reservationAction.inReservations.length > 0 && this.reservationAction.outReservations.length > 0) {
+      this._dispatchEvent(
+        'hcalOnSwapReservations',
+        {
+          'inReservs': this.reservationAction.inReservations,
+          'outReservs': this.reservationAction.outReservations,
+        }
+      );
+    }
   },
 
   replaceReservation: function(/*HReservationObject*/reservationObj, /*HReservationObject*/newReservationObj) {
