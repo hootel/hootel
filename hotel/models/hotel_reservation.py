@@ -276,13 +276,9 @@ class HotelReservation(models.Model):
                                         readonly=True,
                                         states={
                                             'draft': [('readonly', False)],
-                                            'sent': [('readonly', False)],
-                                            '''TODO: Caution When change
-                                             delegation relation between
-                                             hotel.reservation
-                                             and sale.order.line'''
+                                            'sent': [('readonly', False)],                                           
                                             'confirm': [('readonly', False)],
-                                            'booking': [('readonly', False)]
+                                            'booking': [('readonly', False)],
                                         })
     reserve_color = fields.Char(compute='_compute_color', string='Color',
                                 store=True)
