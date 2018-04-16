@@ -316,6 +316,20 @@ var HotelCalendarView = View.extend({
             //     });
             // });
         });
+        this._hcalendar.addEventListener('hcalOnSwapInvalid', function(ev){
+          var qdict = {};
+          var dialog = new Dialog(self, {
+            title: _t("Invalid Reservation Swap"),
+            buttons: [
+              {
+                text: _t("Oops, Ok!"),
+                classes: 'btn-primary',
+                close: true
+              }
+            ],
+            $content: QWeb.render('HotelCalendar.InvalidSwapOperation', qdict)
+          }).open();
+        });
         this._hcalendar.addEventListener('hcalOnSwapReservations', function(ev){
           var qdict = {};
           var dialog = new Dialog(self, {

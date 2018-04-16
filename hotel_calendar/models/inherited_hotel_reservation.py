@@ -307,10 +307,25 @@ class HotelReservation(models.Model):
         if not any(fromReservs) or not any(toReservs):
             raise ValidationError(_("Invalid swap parameters"))
 
+        maxFromPersons = max(
+            fromReservs.mapped(lambda x: x.adults + x.children))
+        maxToPersons = max(
+            toReservs.mapped(lambda x: x.adults + x.children))
+
         fromRoomProduct = fromReservs[0].product_id
         toRoomProduct = toReservs[0].product_id
         fromOverbooking = fromReservs[0].overbooking
         toOverbooking = toReservs[0].overbooking
+
+        hotel_room_obj = self.env['hotel.room']
+        fromRoom = hotel_room_obj.search([
+            ('product_id', '=', fromRoomProduct.id)])
+        toRoom = hotel_room_obj.search([
+            ('product_id', '=', fromRoomProduct.id)])
+
+        if maxFromPersons > toRoom.capacity or \
+                maxToPersons > fromRoom.capacity:
+            raise ValidationError("Invalid swap operation: wrong capacity")
 
         for record in fromReservs:
             record.with_context({'ignore_avail_restrictions': True}).write({
@@ -340,7 +355,8 @@ class HotelReservation(models.Model):
                 vals.get('checkout') or vals.get('product_id') or \
                 vals.get('adults') or vals.get('children') or \
                 vals.get('state') or vals.get('splitted') or \
-                vals.get('reserve_color') or vals.get('product_id'):
+                vals.get('reserve_color') or vals.get('product_id') or \
+                vals.get('unit_price'):
             for record in self:
                 record.send_bus_notification(
                     'write',

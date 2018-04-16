@@ -276,7 +276,7 @@ class HotelReservation(models.Model):
                                         readonly=True,
                                         states={
                                             'draft': [('readonly', False)],
-                                            'sent': [('readonly', False)],                                           
+                                            'sent': [('readonly', False)],
                                             'confirm': [('readonly', False)],
                                             'booking': [('readonly', False)],
                                         })
