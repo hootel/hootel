@@ -1611,7 +1611,6 @@ HotelCalendar.prototype = {
   swapReservations: function(/*List HReservationObject*/fromReservations, /*List HReservationObject*/toReservations) {
     if (fromReservations.length === 0 || toReservations.length === 0) {
       console.warn("[HotelCalendar][swapReservations] Invalid Swap Operation!");
-      this._dispatchEvent('hcalOnSwapInvalid');
       return false;
     }
     var fromDateLimits = this.getDateLimits(fromReservations);
@@ -1678,7 +1677,6 @@ HotelCalendar.prototype = {
       }
     } else {
       console.warn("[HotelCalendar][swapReservations] Invalid Swap Operation!");
-      this._dispatchEvent('hcalOnSwapInvalid');
       return false;
     }
 
