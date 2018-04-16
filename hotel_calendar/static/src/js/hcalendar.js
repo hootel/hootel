@@ -608,7 +608,7 @@ HotelCalendar.prototype = {
       cell.dataset.hcalParentRow = row.getAttribute('id');
       cell.dataset.hcalDate = dd_local.format(HotelCalendar.DATE_FORMAT_SHORT_);
       // Generate Interactive Table
-      cell.appendChild(this._generateTableDay(cell));
+      cell.appendChild(this._generateTableDay(cell, ob_room));
       //cell.innerHTML = dd.format("DD");
       var day = +dd_local.format("D");
       if (day == 1) {
@@ -834,15 +834,13 @@ HotelCalendar.prototype = {
     return true;
   },
 
-  _generateTableDay: function(/*HTMLObject*/parentCell) {
+  _generateTableDay: function(/*HTMLObject*/parentCell, /*HRoomObject*/room) {
     var $this = this;
     var table = document.createElement("table");
     table.classList.add('hcal-table-day');
     table.classList.add('noselect');
     var row = false;
     var cell = false;
-    var roomNumber = $this.$base.querySelector(`#${parentCell.dataset.hcalParentRow}`).dataset.hcalRoomObjId;
-    var room = $this.getRoom(roomNumber);
     var num = ((room.shared || this.options.divideRoomsByCapacity)?room.capacity:1);
     for (var i=0; i<num; i++) {
       row = table.insertRow();
@@ -1074,7 +1072,7 @@ HotelCalendar.prototype = {
         cell.dataset.hcalParentRow = row.getAttribute('id');
         cell.dataset.hcalDate = dd_local.format(HotelCalendar.DATE_FORMAT_SHORT_);
         // Generate Interactive Table
-        cell.appendChild($this._generateTableDay(cell));
+        cell.appendChild($this._generateTableDay(cell, itemRoom));
         //cell.innerHTML = dd.format("DD");
         var day = +dd_local.format("D");
         if (day == 1) {

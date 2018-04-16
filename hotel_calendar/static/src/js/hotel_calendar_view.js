@@ -819,7 +819,6 @@ var HotelCalendarView = View.extend({
 
         /** VIEW CONTROLS INITIALIZATION **/
         // DATE TIME PICKERS
-        var l10nn = _t.database.parameters
         var DTPickerOptions = {
             viewMode: 'months',
             icons : {
