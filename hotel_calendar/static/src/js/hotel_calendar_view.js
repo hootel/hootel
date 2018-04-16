@@ -980,18 +980,10 @@ var HotelCalendarView = View.extend({
 
         /* BUTTONS */
         this.update_buttons_counter();
-        this.$el.find("#btn_action_checkout").on('click', function(ev){
-            self.call_action('hotel_calendar.hotel_reservation_action_checkout');
+        this.$el.find("button[data-action]").on('click', function(ev){
+          self.call_action(this.dataset.action);
         });
-        this.$el.find("#btn_action_checkin").on('click', function(ev){
-            self.call_action('hotel_calendar.hotel_reservation_action_checkin');
-        });
-        this.$el.find("#btn_action_paydue").on('click', function(ev){
-            self.call_action('hotel_calendar.hotel_reservation_action_paydue');
-        });
-        this.$el.find("#btn_action_control").on('click', function(ev){
-            self.call_action('hotel_calendar.open_wizard_reservations');
-        });
+
         this.$el.find("#btn_swap").on('click', function(ev){
           var hcalSwapMode = self._hcalendar.getSwapMode();
           if (hcalSwapMode === HotelCalendar.MODE.NONE) {

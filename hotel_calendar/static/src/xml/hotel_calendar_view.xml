@@ -15,19 +15,19 @@
                         <button id="cal-pag-next-plus" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-angle-double-right"></i></button>
                     </div>
                 </div>
-                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_checkout">
+                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_checkout" data-action="hotel_calendar.hotel_reservation_action_checkout">
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
                     CHECK-OUT
                 </button>
-                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_checkin">
+                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_checkin" data-action="hotel_calendar.hotel_reservation_action_checkin">
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
                     CHECK-IN
                 </button>
-                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_paydue">
+                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_paydue" data-action="hotel_calendar.hotel_reservation_action_paydue">
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
                     CHARGES
                 </button>
-                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_control">
+                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_control" data-action="hotel_calendar.open_wizard_reservations">
                     WIZARD
                 </button>
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_swap">

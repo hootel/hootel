@@ -99,10 +99,6 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
           }).open();
         });
 
-        self.$el.find('#btn_action_issues').on('click', function (ev) {
-          self.call_action('hotel_calendar_wubook.calendar_wubook_issues_action');
-        });
-
         return $.when.apply($, deferredPromises);
       });
     },

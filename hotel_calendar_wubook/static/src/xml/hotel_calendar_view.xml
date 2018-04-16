@@ -11,7 +11,7 @@
 			</button>
 		</t>
 		<t t-jquery="button#btn_action_paydue" t-operation="after">
-			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_issues">
+			<button class="btn btn-default col-xs-12 col-lg-12" id="btn_action_issues" data-action="hotel_calendar_wubook.calendar_wubook_issues_action">
 				<div class="ninfo"><span class="badge badge-danger">0</span></div>
 				ISSUES
 			</button>
