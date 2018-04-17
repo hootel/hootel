@@ -913,7 +913,7 @@ HotelCalendar.prototype = {
             }
           }
 
-          if (needUpdate) {
+          if (needUpdate && reserv) {
             $this._updateScroll(reserv._html);
 
             var affectedReservations = [reserv].concat($this.getLinkedReservations($this.reservationAction.newReservationObj));
@@ -2192,7 +2192,7 @@ HotelCalendar.prototype = {
               newPrice += this.getRoomPrice(newReservation.room, ndate);
             }
 
-            this_.dispatchEvent(
+            this._dispatchEvent(
               'hcalOnChangeReservation',
               {
                 'oldReserv': oldReservation,
