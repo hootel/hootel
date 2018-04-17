@@ -21,11 +21,11 @@
 #
 ##############################################################################
 from datetime import timedelta
-from .common import TestHotel
+from odoo.addons.hotel_calendar.tests.common import TestHotelCalendar
 from odoo.addons.hotel import date_utils
 
 
-class TestHotelReservations(TestHotel):
+class TestHotelReservations(TestHotelCalendar):
 
     def test_cancel_folio(self):
         now_utc_dt = date_utils.now()
