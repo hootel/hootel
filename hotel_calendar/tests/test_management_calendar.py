@@ -366,16 +366,6 @@ class TestManagementCalendar(TestHotelCalendar):
                                              1,
                                              "Hotel Calendar Management \
                                                 Availability doesn't match!")
-            # for k_pr, v_pr in hcal_data['availability'].iteritems():
-            #     if k_pr == vroom.id:    # Only Check Test Cases
-            #         for k_info, v_info in enumerate(v_pr):
-            #             ndate = date_utils.get_datetime(v_info['date'],
-            #                                             tz=self.tz_hotel)
-            #             if ndate >= reserv_start_dt and ndate <= reserv_end_dt:
-            #                 self.assertEqual(v_info['avail'],
-            #                                  vroom.total_rooms_count-1,
-            #                                  "Hotel Calendar Management \
-            #                                     Availability doesn't match!")
 
     def test_invalid_input_calendar_data(self):
         now_utc_dt = date_utils.now()
@@ -413,3 +403,25 @@ class TestManagementCalendar(TestHotelCalendar):
             True)
         self.assertTrue(any(hcal_data), "Hotel Calendar invalid default \
                                                     management parity models!")
+
+    def test_calendar_settings(self):
+        hotel_cal_mngt_obj = self.env['hotel.calendar.management'].sudo(
+                                                    self.user_hotel_manager)
+        settings = hotel_cal_mngt_obj.get_hcalendar_settings()
+        self.assertTrue(settings, "Hotel Calendar invalid settings")
+
+        self.assertEqual(settings['eday_week'],
+                         self.user_hotel_manager.npms_end_day_week,
+                         "Hotel Calendar invalid settings")
+        self.assertEqual(settings['eday_week_offset'],
+                         self.user_hotel_manager.npms_end_day_week_offset,
+                         "Hotel Calendar invalid settings")
+        self.assertEqual(settings['days'],
+                         self.user_hotel_manager.npms_default_num_days,
+                         "Hotel Calendar invalid settings")
+        self.assertEqual(settings['show_notifications'],
+                         self.user_hotel_manager.pms_show_notifications,
+                         "Hotel Calendar invalid settings")
+        self.assertEqual(settings['show_num_rooms'],
+                         self.user_hotel_manager.pms_show_num_rooms,
+                         "Hotel Calendar invalid settings")

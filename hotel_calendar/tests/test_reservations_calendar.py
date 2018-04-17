@@ -249,3 +249,47 @@ class TestReservationsCalendar(TestHotelCalendar):
         self.assertEqual(hcal_options['show_availability'],
                          self.user_hotel_manager.pms_show_availability,
                          "Hotel Calendar Invalid Options!")
+
+    def test_swap_reservation(self):
+        hcal_reserv_obj = self.env['hotel.reservation'].sudo(
+                            self.user_hotel_manager)
+        now_utc_dt = date_utils.now()
+
+        # CREATE RESERVATIONS
+        reserv_start_utc_dt = now_utc_dt + timedelta(days=3)
+        reserv_end_utc_dt = reserv_start_utc_dt + timedelta(days=3)
+        folio_a = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation_a = self.create_reservation(
+            self.user_hotel_manager,
+            folio_a,
+            reserv_start_utc_dt,
+            reserv_end_utc_dt,
+            self.hotel_room_double_200,
+            "Reservation Test #1")
+        self.assertTrue(reservation_a,
+                        "Hotel Calendar create test reservation!")
+        folio_a.sudo(self.user_hotel_manager).action_confirm()
+
+        folio_b = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation_b = self.create_reservation(
+            self.user_hotel_manager,
+            folio_b,
+            reserv_start_utc_dt,
+            reserv_end_utc_dt,
+            self.hotel_room_simple_101,
+            "Reservation Test #2")
+        self.assertTrue(reservation_b,
+                        "Hotel Calendar can't create test reservation!")
+        folio_b.sudo(self.user_hotel_manager).action_confirm()
+
+        self.assertTrue(
+            hcal_reserv_obj.swap_reservations(reservation_a.ids,
+                                              reservation_b.ids),
+            "Hotel Calendar invalid swap operation"
+        )
+        self.assertEqual(reservation_a.product_id.id,
+                         self.hotel_room_simple_101.product_id.id,
+                         "Hotel Calendar wrong swap operation")
+        self.assertEqual(reservation_b.product_id.id,
+                         self.hotel_room_double_200.product_id.id,
+                         "Hotel Calendar wrong swap operation")
