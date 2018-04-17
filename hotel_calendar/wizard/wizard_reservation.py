@@ -91,17 +91,18 @@ class FolioWizard(models.TransientModel):
     rooms_num = fields.Integer('Number of Rooms')
     max_rooms = fields.Integer('Max', readonly=True)
     virtual_room_id = fields.Many2one('hotel.virtual.room',
-                                        string="Virtual Rooms")
-    reservation_wizard_ids = fields.One2many('hotel.reservation.wizard',                                        
-                                        'folio_wizard_id',
-                                        string="Resevations")
-    total = fields.Float('Total',compute='_computed_total')
+                                      string="Virtual Rooms")
+    reservation_wizard_ids = fields.One2many('hotel.reservation.wizard',
+                                             'folio_wizard_id',
+                                             string="Resevations")
+    total = fields.Float('Total', compute='_computed_total')
     confirm = fields.Boolean('Confirm Reservations', default="1")
     channel_type = fields.Selection([
         ('door', 'Door'),
         ('mail', 'Mail'),
         ('phone', 'Phone'),
-        ('web','Web'),], 'Sales Channel')
+        ('web', 'Web'),
+    ], 'Sales Channel')
 
     @api.multi
     @api.onchange('checkin', 'checkout')
@@ -142,7 +143,9 @@ class FolioWizard(models.TransientModel):
             self.checkin,
             checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
         rooms_occupied = occupied.mapped('product_id.id')
-        free_rooms = self.env['hotel.room'].search([('product_id.id','not in',rooms_occupied)])
+        free_rooms = self.env['hotel.room'].search([
+            ('product_id.id', 'not in', rooms_occupied)
+        ])
         free_virtual_ids = free_rooms.mapped('price_virtual_room.id')
         domain_rooms = [('id', 'in', free_virtual_ids)]
         return {'domain': {'virtual_room_id': domain_rooms}}
@@ -175,21 +178,27 @@ class FolioWizard(models.TransientModel):
                 self.checkin,
                 checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
             rooms_occupied = occupied.mapped('product_id.id')
-            free_rooms = self.env['hotel.room'].search([('product_id.id','not in',rooms_occupied),
-                                        ('price_virtual_room.id','=',self.virtual_room_id.id)],
-                                        order='sequence', limit=self.rooms_num)
+            free_rooms = self.env['hotel.room'].search([
+                ('product_id.id', 'not in', rooms_occupied),
+                ('price_virtual_room.id', '=', self.virtual_room_id.id)],
+                order='sequence', limit=self.rooms_num)
             room_ids = free_rooms.mapped('product_id.id')
-            product_list = self.env['product.product'].search([('id','in',room_ids)])
+            product_list = self.env['product.product'].search([
+                ('id', 'in', room_ids)
+            ])
             nights = days_diff = date_utils.date_diff(self.checkin,
-                                             self.checkout, hours=False)
+                                                      self.checkout,
+                                                      hours=False)
             hotel_tz = self.env['ir.values'].sudo().get_default(
-            'hotel.config.settings', 'hotel_tz')
+                'hotel.config.settings',
+                'hotel_tz')
             start_date_utc_dt = date_utils.get_datetime(self.checkin)
-            start_date_dt = date_utils.dt_as_timezone(start_date_utc_dt, hotel_tz)
+            start_date_dt = date_utils.dt_as_timezone(start_date_utc_dt,
+                                                      hotel_tz)
             for line in self.reservation_wizard_ids:
                 line.amount_reservation = line.price
-                cmds.append((4,line.id))
-                total += line.price 
+                cmds.append((4, line.id))
+                total += line.price
             for room in product_list:
                 pricelist_id = self.env['ir.values'].sudo().get_default(
                     'hotel.config.settings', 'parity_pricelist_id')
@@ -208,8 +217,10 @@ class FolioWizard(models.TransientModel):
                         pricelist=pricelist_id,
                         uom=room.uom_id.id)
                     res_price += prod.price
-                adults =  self.env['hotel.room'].search([('product_id.id','=',room.id)]).capacity
-                total += res_price      
+                adults = self.env['hotel.room'].search([
+                    ('product_id.id', '=', room.id)
+                ]).capacity
+                total += res_price
                 cmds.append((0, False, {
                             'checkin': self.checkin,
                             'checkout': self.checkout,
@@ -237,7 +248,7 @@ class FolioWizard(models.TransientModel):
     def create_folio(self):
         self.ensure_one()
         if not self.partner_id:
-               raise ValidationError(_("We need know the customer!")) 
+               raise ValidationError(_("We need know the customer!"))
         reservations = [(5, False, False)]
         for line in self.reservation_wizard_ids:
             reservations.append((0, False, {
@@ -266,9 +277,9 @@ class ReservationWizard(models.TransientModel):
 
     product_id = fields.Many2one('product.product',
                                 string="Virtual Rooms")
-    
-    folio_wizard_id = fields.Many2one('hotel.folio.wizard') 
-    
+
+    folio_wizard_id = fields.Many2one('hotel.folio.wizard')
+
     adults = fields.Integer('Adults',
                             help='List of adults there in guest list. ')
     children = fields.Integer('Children',
@@ -301,43 +312,47 @@ class ReservationWizard(models.TransientModel):
                     checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
                 rooms_occupied = occupied.mapped('product_id.id')
                 if line.product_id.id in rooms_occupied:
-                     raise ValidationError(_("This room is occupied!, please, choice other room or change the reservation date"))
-            
+                    raise ValidationError(_("This room is occupied!, please, choice other room or change the reservation date"))
+
     @api.multi
-    @api.onchange('checkin','checkout','virtual_room_id')
+    @api.onchange('checkin', 'checkout', 'virtual_room_id')
     def onchange_dates(self):
         for line in self:
             if not self.checkin:
                 self.checkin = self.folio_wizard_id.checkin
             if not self.checkout:
                 self.checkout = self.folio_wizard_id.checkout
-                
+
             hotel_tz = self.env['ir.values'].sudo().get_default(
                 'hotel.config.settings', 'hotel_tz')
             start_date_utc_dt = date_utils.get_datetime(line.checkin)
-            start_date_dt = date_utils.dt_as_timezone(start_date_utc_dt, hotel_tz)
-            
-            if line.virtual_room_id:                
+            start_date_dt = date_utils.dt_as_timezone(start_date_utc_dt,
+                                                      hotel_tz)
+
+            if line.virtual_room_id:
                 pricelist_id = self.env['ir.values'].sudo().get_default(
                     'hotel.config.settings', 'parity_pricelist_id')
                 if pricelist_id:
                     pricelist_id = int(pricelist_id)
                 nights = days_diff = date_utils.date_diff(line.checkin,
-                                                    line.checkout, hours=False)
+                                                          line.checkout,
+                                                          hours=False)
                 res_price = 0
                 res_partner = self.partner_id or self.env['res.partner'].browse('1')
                 for i in range(0, nights):
                     ndate = start_date_dt + timedelta(days=i)
                     ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
                     prod = line.virtual_room_id.product_id.with_context(
-                        lang = self.partner_id.lang,
-                        partner = self.partner_id.id,
-                        quantity = 1,
-                        date = ndate_str,
-                        pricelist = pricelist_id,
-                        uom = line.product_id.uom_id.id)
+                        lang=self.partner_id.lang,
+                        partner=self.partner_id.id,
+                        quantity=1,
+                        date=ndate_str,
+                        pricelist=pricelist_id,
+                        uom=line.product_id.uom_id.id)
                     res_price += prod.price
-                adults =  self.env['hotel.room'].search([('product_id.id','=',line.product_id.id)]).capacity
+                adults = self.env['hotel.room'].search([
+                    ('product_id.id', '=', line.product_id.id)
+                ]).capacity
                 line.amount_reservation = res_price
                 line.price = res_price
             checkout_dt = date_utils.get_datetime(self.checkout)
@@ -351,4 +366,3 @@ class ReservationWizard(models.TransientModel):
                 ('id', 'not in', rooms_occupied)
             ]
             return {'domain': {'product_id': domain_rooms}}
-                

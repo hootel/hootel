@@ -75,12 +75,14 @@ class WuBookInstaller(models.TransientModel):
         restr_obj = self.env['hotel.virtual.room.restriction'].with_context({
             'wubook_action': False
         })
-        nrest = restr_obj.create({
-            'name': 'Base WuBook Restrictions',
-            'wpid': '0',
-        })
-        if not nrest:
-            raise ValidationError(_("Can't create base wubook restrictions"))
+        base_rest = restr_obj.search([('wpid', '=', '0')], limit=1)
+        if not base_rest:
+            nrest = restr_obj.create({
+                'name': 'Base WuBook Restrictions',
+                'wpid': '0',
+            })
+            if not nrest:
+                raise ValidationError(_("Can't create base wubook restrictions"))
 
         # Initialize WuBook
         wres = self.env['wubook'].initialize(activate_push)
