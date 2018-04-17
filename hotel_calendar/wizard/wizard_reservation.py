@@ -101,8 +101,7 @@ class FolioWizard(models.TransientModel):
         ('door', 'Door'),
         ('mail', 'Mail'),
         ('phone', 'Phone'),
-        ('web','Web'),
-        ('ota','OTA'),], 'Sales Channel')
+        ('web','Web'),], 'Sales Channel')
 
     @api.multi
     @api.onchange('checkin', 'checkout')
