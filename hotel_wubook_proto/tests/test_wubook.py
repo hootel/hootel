@@ -24,6 +24,7 @@ from datetime import datetime, timedelta
 from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT,
     DEFAULT_SERVER_DATE_FORMAT)
+from odoo.addons.hotel_wubook_proto.wubook import DEFAULT_WUBOOK_DATE_FORMAT
 from openerp.exceptions import ValidationError
 from .common import TestHotelWubook
 from odoo.addons.hotel import date_utils
@@ -520,3 +521,88 @@ class TestWubook(TestHotelWubook):
                          "Overbooking don't handled")
         self.assertTrue(nreservs[2].overbooking,
                         "Overbooking don't handled")
+
+    def test_generate_room_values(self):
+        now_utc_dt = date_utils.now()
+        checkin_utc_dt = now_utc_dt + timedelta(days=3)
+        checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt,
+                                               self.tz_hotel)
+        checkout_utc_dt = checkin_utc_dt + timedelta(days=1)
+        checkout_dt = date_utils.dt_as_timezone(checkout_utc_dt,
+                                                self.tz_hotel)
+        vroom_restr_item_obj = self.env['hotel.virtual.room.restriction.item']
+
+        vrooms = [self.hotel_vroom_budget, self.hotel_vroom_special]
+        values = self.create_wubook_rooms_values(
+            vrooms,
+            [{
+                'closed_arrival': 0,
+                'booked': 0,
+                'max_stay_arrival': 9,
+                'max_stay': 0,
+                'price': 150.0,
+                'min_stay': 0,
+                'closed_departure': '1',
+                'avail': 0,
+                'closed': 0,
+                'min_stay_arrival': 0,
+                'no_ota': 0,
+            }, {
+                'closed_arrival': 0,
+                'booked': 0,
+                'max_stay_arrival': 9,
+                'max_stay': 0,
+                'price': 50.0,
+                'min_stay': 0,
+                'closed_departure': '1',
+                'avail': 0,
+                'closed': 0,
+                'min_stay_arrival': 0,
+                'no_ota': 0,
+            }])
+        self.env['wubook'].sudo().generate_room_values(
+            checkin_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+            checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
+            values)
+
+        for vroom in vrooms:
+            items = vroom_restr_item_obj.search([
+                ('virtual_room_id', '=', vroom.id),
+                ('date_start',
+                 '>=', checkin_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                ('date_end',
+                 '<=', checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                ('restriction_id', '=', self.restriction_default.id)
+            ])
+            self.assertTrue(any(items),
+                            "Hotel Wubook Invalid fetch room values")
+            for item in items:
+                self.assertTrue(
+                    item.closed_departure,
+                    "Hotel Wubook Invalid fetch room values")
+                self.assertEqual(
+                    item.max_stay_arrival,
+                    9,
+                    "Hotel Wubook Invalid fetch room values")
+            items = vroom_restr_item_obj.search([
+                ('virtual_room_id', '=', vroom.id),
+                ('date_start', '>=',
+                 (checkin_dt - timedelta(days=15)).strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
+                ('date_end', '<',
+                 checkin_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                ('restriction_id', '=', self.restriction_default.id)
+            ])
+            self.assertFalse(any(items),
+                             "Hotel Wubook Invalid fetch room values")
+            items = vroom_restr_item_obj.search([
+                ('virtual_room_id', '=', vroom.id),
+                ('date_start', '>',
+                 checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
+                ('date_end', '<=',
+                 (checkout_dt + timedelta(days=15)).strftime(
+                                                DEFAULT_SERVER_DATE_FORMAT)),
+                ('restriction_id', '=', self.restriction_default.id)
+            ])
+            self.assertFalse(any(items),
+                             "Hotel Wubook Invalid fetch room values")

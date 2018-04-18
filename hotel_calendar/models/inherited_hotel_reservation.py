@@ -301,7 +301,8 @@ class HotelReservation(models.Model):
                 or record.partner_id.phone or _('Undefined'),
                 'state': record.state,
                 'fix_days': record.splitted,
-                'overbooking': record.overbooking
+                'overbooking': record.overbooking,
+                'price': record.folio_id.amount_total,
             })
 
     @api.multi
@@ -360,8 +361,7 @@ class HotelReservation(models.Model):
                 vals.get('checkout') or vals.get('product_id') or \
                 vals.get('adults') or vals.get('children') or \
                 vals.get('state') or vals.get('splitted') or \
-                vals.get('reserve_color') or vals.get('product_id') or \
-                vals.get('unit_price'):
+                vals.get('reserve_color') or vals.get('product_id'):
             for record in self:
                 record.send_bus_notification(
                     'write',
