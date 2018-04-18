@@ -573,7 +573,7 @@ class TestWubook(TestHotelWubook):
                  '>=', checkin_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
                 ('date_end',
                  '<=', checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                ('restriction_id', '=', self.restriction_default.id)
+                ('restriction_id', '=', self.restriction_default_id)
             ])
             self.assertTrue(any(items),
                             "Hotel Wubook Invalid fetch room values")
@@ -595,7 +595,7 @@ class TestWubook(TestHotelWubook):
                                                 DEFAULT_SERVER_DATE_FORMAT)),
                 ('date_end', '<',
                  checkin_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)),
-                ('restriction_id', '=', self.restriction_default.id)
+                ('restriction_id', '=', self.restriction_default_id)
             ])
             self.assertFalse(any(items),
                              "Hotel Wubook Invalid fetch room values")
@@ -606,7 +606,7 @@ class TestWubook(TestHotelWubook):
                 ('date_end', '<=',
                  (checkout_dt + timedelta(days=15)).strftime(
                                                 DEFAULT_SERVER_DATE_FORMAT)),
-                ('restriction_id', '=', self.restriction_default.id)
+                ('restriction_id', '=', self.restriction_default_id)
             ])
             self.assertFalse(any(items),
                              "Hotel Wubook Invalid fetch room values")
