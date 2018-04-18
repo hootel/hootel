@@ -943,7 +943,11 @@ class WuBook(models.TransientModel):
         virtual_room_restr_obj = self.env['hotel.virtual.room.restriction']
         vroom_restr_item_obj = self.env['hotel.virtual.room.restriction.item']
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
-        def_wubook_restr = virtual_room_restr_obj.search([('wpid', '=', '0')])
+        restriction_parity_id = self.env['ir.values'].sudo().get_default(
+                            'hotel.config.settings', 'parity_restrictions_id')
+        if restriction_parity_id:
+            restriction_parity_id = int(restriction_parity_id)
+        def_wubook_restr = virtual_room_restr_obj.browse(restriction_parity_id)
         _logger.info("==== ROOM VALUES")
         _logger.info(values)
         for k_rid, v_rid in values.iteritems():
@@ -988,7 +992,7 @@ class WuBook(models.TransientModel):
                             ('applied_on', '=', '0_virtual_room'),
                             ('date_start', '=', date_str),
                             ('date_end', '=', date_str),
-                            ('restriction_id', '=', '0'),
+                            ('restriction_id', '=', def_wubook_restr.id),
                         ])
                         vals = {
                             'min_stay': day_vals.get('min_stay', 0),
