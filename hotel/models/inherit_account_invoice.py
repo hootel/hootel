@@ -42,7 +42,7 @@ class AccountInvoice(models.Model):
     def action_folio_payments(self):
         self.ensure_one()
         sales = self.mapped('invoice_line_ids.sale_line_ids.order_id')
-        folios = self.env['hotel.folio'].search([('id','in',sales.ids)])
+        folios = self.env['hotel.folio'].search([('order_id.id','in',sales.ids)])
         payments_obj = self.env['account.payment']
         payments = payments_obj.search([('folio_id','in',folios.ids)])
         payment_ids = payments.mapped('id')
@@ -80,8 +80,8 @@ class AccountInvoice(models.Model):
     def _compute_dif_customer_payment(self):
         for inv in self:
             sales = inv.mapped('invoice_line_ids.sale_line_ids.order_id')
-            folios = inv.env['hotel.folio'].search([('id','in',sales.ids)])
-            payments_obj = inv.env['account.payment']
+            folios = self.env['hotel.folio'].search([('order_id.id','in',sales.ids)])
+            payments_obj = self.env['account.payment']
             payments = payments_obj.search([('folio_id','in',folios.ids)])
             for pay in payments:
                 if pay.partner_id <> inv.partner_id:
