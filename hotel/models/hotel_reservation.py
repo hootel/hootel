@@ -678,7 +678,7 @@ class HotelReservation(models.Model):
         else:
             self.price_unit = rlines['total_price']
 
-    @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type')
+    @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type', 'virtual_room_id')
     def on_change_checkin_checkout_product_id(self):
         _logger.info('on_change_checkin_checkout_product_id')
         if not self.checkin:
@@ -692,10 +692,10 @@ class HotelReservation(models.Model):
         chkin_utc_dt = date_utils.get_datetime(self.checkin)
         chkout_utc_dt = date_utils.get_datetime(self.checkout)
 
-        if self.product_id:
+        if self.virtual_room_id:
             checkin_str = chkin_utc_dt.strftime('%d/%m/%Y')
             checkout_str = chkout_utc_dt.strftime('%d/%m/%Y')
-            self.name = self.product_id.name + ': ' + checkin_str + ' - '\
+            self.name = self.virtual_room_id.name + ': ' + checkin_str + ' - '\
                 + checkout_str
             self.product_uom = self.product_id.uom_id
 
