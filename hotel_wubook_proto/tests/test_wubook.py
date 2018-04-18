@@ -565,6 +565,7 @@ class TestWubook(TestHotelWubook):
             checkout_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
             values)
 
+        _logger.info("==== DATAAAA")
         for vroom in vrooms:
             items = vroom_restr_item_obj.search([
                 ('virtual_room_id', '=', vroom.id),
@@ -577,6 +578,9 @@ class TestWubook(TestHotelWubook):
             self.assertTrue(any(items),
                             "Hotel Wubook Invalid fetch room values")
             for item in items:
+                _logger.info(item.closed_departure)
+                _logger.info(item.date_start)
+                _logger.info(item.max_stay_arrival)
                 self.assertTrue(
                     item.closed_departure,
                     "Hotel Wubook Invalid fetch room values")
