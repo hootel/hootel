@@ -84,6 +84,8 @@ class Data_Bi(models.Model):
         fechafoto = start date to take data
         """
         fechafoto = datetime.strptime(fechafoto, '%Y-%m-%d').date()
+        # Change this to local
+        # fechafoto=date.today()
 
         if not isinstance(archivo, int):
             archivo = 0
@@ -99,10 +101,12 @@ class Data_Bi(models.Model):
                                'Descripcion': tarifa['name'].encode(
                                    'ascii', 'xmlcharrefreplace')})
 
-        dic_canal = []  # TODO Diccionario con los Canales
-        dic_canal.append({'ID_Hotel': compan.id_hotel,
-                          'ID_Canal': 0,
-                          'Descripcion': 'Sin Canal'})
+        dic_canal = []  # Diccionario con los Canales
+        canal_array = ['door', 'mail', 'phone', 'web']
+        for i in range(0, len(canal_array)):
+            dic_canal.append({'ID_Hotel': compan.id_hotel,
+                              'ID_Canal': i,
+                              'Descripcion': canal_array[i]})
 
         dic_hotel = []  # Diccionario con el/los nombre de los hoteles
         dic_hotel.append({'ID_Hotel': compan.id_hotel,
@@ -221,15 +225,15 @@ class Data_Bi(models.Model):
                                       'Descripcion': seg_desc.encode(
                                           'ascii', 'xmlcharrefreplace')})
 
-# Clientes
-# ID_Hotel numérico Código del Hotel
-# ID_Cliente numérico Código del Cliente de la reserva
-# Descripción texto(50) Descripción del Cliente
-        dic_clientes = []  # TODO Diccionario con Clientes
+        lineas = self.env['wubook.channel.info'].search([])
+        dic_clientes = []  # Diccionario con Clientes (OTAs)
         dic_clientes.append({'ID_Hotel': compan.id_hotel,
-                             'ID_Cliente': 'xxxxx',
-                             'Descripcion': 'xxxxx'})
-
+                             'ID_Cliente': u'0',
+                             'Descripcion': 'Ninguno'})
+        for linea in lineas:
+            dic_clientes.append({'ID_Hotel': compan.id_hotel,
+                                 'ID_Cliente': linea.wid,
+                                 'Descripcion': linea.name})
 # ID_Reserva numérico Código único de la reserva
 # ID_Hotel numérico Código del Hotel
 # ID_EstadoReserva numérico Código del estado de la reserva
@@ -263,14 +267,22 @@ class Data_Bi(models.Model):
             id_segmen = 0
             if linea.reservation_id.partner_id.category_id.id:
                 id_segmen = linea.reservation_id.partner_id.category_id.id
+            if linea.reservation_id.channel_type is False:
+                chanel_r = 0
+            else:
+                chanel_r = canal_array.index(linea.reservation_id.channel_type)
+            if linea.reservation_id.wchannel_id.wid is False:
+                channel_c = u'0'
+            else:
+                channel_c = linea.reservation_id.wchannel_id.wid
             dic_reservas.append({
                 'ID_Reserva': linea.reservation_id.folio_id.id,
                 'ID_Hotel': compan.id_hotel,
                 'ID_EstadoReserva': estado_array.index(id_estado_r),
                 'FechaVenta': linea.reservation_id.create_date[0:10],
                 'ID_Segmento': id_segmen,
-                'ID_Cliente': 0,
-                'ID_Canal': 0,
+                'ID_Cliente': channel_c,
+                'ID_Canal': chanel_r,
                 'FechaExtraccion': date.today().strftime('%Y-%m-%d'),
                 'Entrada': linea.date,
                 'Salida': (datetime.strptime(linea.date, "%Y-%m-%d") +
