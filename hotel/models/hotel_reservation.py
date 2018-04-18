@@ -794,9 +794,9 @@ class HotelReservation(models.Model):
         cmds = [(5, False, False)]
         # TO-DO: Redesign relation between hotel.reservation
         # and sale.order.line to allow manage days by units in order
-        if self.invoice_status == 'invoiced' and not self.splitted:
-            raise ValidationError(_("This reservation is already invoiced. \
-                        To expand it you must create a new reservation."))
+        #~ if self.invoice_status == 'invoiced' and not self.splitted:
+            #~ raise ValidationError(_("This reservation is already invoiced. \
+                        #~ To expand it you must create a new reservation."))
         hotel_tz = self.env['ir.values'].sudo().get_default(
             'hotel.config.settings', 'hotel_tz')
         start_date_utc_dt = date_utils.get_datetime(str_start_date_utc)
