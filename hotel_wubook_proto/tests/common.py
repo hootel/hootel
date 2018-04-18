@@ -254,6 +254,11 @@ class TestHotelWubook(TestHotel):
         cls.restriction_default = vroom_restr_obj.search([
             ('wpid', '=', '0')
         ], limit=1)
+        if not cls.restriction_default:
+            cls.restriction_1.write({
+                'wpid': '0'
+            })
+            cls.restriction_default = cls.restriction_1
 
         # Create Some Wubook Info
         cls.wubook_channel_test = cls.env['wubook.channel.info'].create({
