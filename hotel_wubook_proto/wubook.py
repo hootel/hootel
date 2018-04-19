@@ -1010,7 +1010,7 @@ class WuBook(models.TransientModel):
                         }
                         if vroom_restr:
                             _logger.info("=== ESCRIBE %s EN ID %d: %d" % (date_str, vroom.id, def_wubook_restr.id))
-                            vroom_restr_item_obj.with_context({
+                            vroom_restr.with_context({
                                 'wubook_action': False,
                             }).write(vals)
                         else:
