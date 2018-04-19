@@ -84,16 +84,8 @@ class TestReservationRestriction(TestHotelWubook):
         restriction.sudo(self.user_hotel_manager).import_restriction_plans()
 
     def test_name_get(self):
-        vroo_restriction_obj = self.env['hotel.virtual.room.restriction']
-        # Restriction Plan
-        restriction = vroo_restriction_obj.sudo(self.user_hotel_manager).\
-            create({
-                'name': 'Restriction Test #1',
-                'active': True,
-            })
-        self.assertTrue(restriction, "Can't create new restriction")
-        rest_name = restriction.sudo(self.user_hotel_manager).name_get()
+        rest_name = self.restriction_1.sudo(self.user_hotel_manager).name_get()
         self.assertTrue('WuBook' in rest_name[0][1], 'Invalid Name')
-        restriction.sudo(self.user_hotel_manager).write({'wpid': ''})
-        rest_name = restriction.sudo(self.user_hotel_manager).name_get()
+        self.restriction_1.sudo(self.user_hotel_manager).write({'wpid': ''})
+        rest_name = self.restriction_1.sudo(self.user_hotel_manager).name_get()
         self.assertFalse('WuBook' in rest_name[0][1], 'Invalid Name')
