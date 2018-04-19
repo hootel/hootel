@@ -260,9 +260,9 @@ class TestHotelWubook(TestHotel):
         ], limit=1)
         if default_restriction:
             default_restriction.wactive = True
+            cls.restriction_default_id = default_restriction.id
         else:
-            default_restriction = cls.restriction_1
-        cls.restriction_default_id = default_restriction.id
+            cls.restriction_default_id = cls.restriction_1.id
 
         # Update Pricelist
         cls.pricelist_1.write({
