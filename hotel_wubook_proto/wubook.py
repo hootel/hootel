@@ -983,7 +983,6 @@ class WuBook(models.TransientModel):
 
                     # Get Restrictions
                     if def_wubook_restr:
-                        _logger.info("=== ESCRIBE EN ID: %d" % def_wubook_restr.id)
                         vroom_restr = vroom_restr_item_obj.search([
                             ('virtual_room_id', '=', vroom.id),
                             ('applied_on', '=', '0_virtual_room'),
@@ -1010,10 +1009,12 @@ class WuBook(models.TransientModel):
                             'wpushed': True,
                         }
                         if vroom_restr:
+                            _logger.info("=== ESCRIBE EN ID: %d" % def_wubook_restr.id)
                             vroom_restr_item_obj.with_context({
                                 'wubook_action': False,
                             }).write(vals)
                         else:
+                            _logger.info("=== CREA EN ID: %d" % def_wubook_restr.id)
                             vals.update({
                                 'restriction_id': def_wubook_restr.id,
                                 'virtual_room_id': vroom.id,
@@ -1024,6 +1025,7 @@ class WuBook(models.TransientModel):
                             vroom_restr_item_obj.with_context({
                                 'wubook_action': False,
                             }).create(vals)
+                        _logger.info(vals)
                     date_dt = date_dt + timedelta(days=1)
         return True
 
