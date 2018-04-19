@@ -23,5 +23,6 @@ from . import wubook_installer
 from . import wubook_import_plan_prices
 from . import wubook_import_plan_restrictions
 from . import wubook_import_availability
-from . import inherit_massive_changes
-from . import inherit_duplicate_reservation
+from . import inherited_massive_changes
+from . import inherited_duplicate_reservation
+from . import inherited_massive_price_reservation_days
