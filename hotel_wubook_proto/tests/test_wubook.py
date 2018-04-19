@@ -532,6 +532,8 @@ class TestWubook(TestHotelWubook):
                                                 self.tz_hotel)
         vroom_restr_item_obj = self.env['hotel.virtual.room.restriction.item']
 
+        _logger.info("=== ESCRIBE EN ID MMMM: %d" % self.restriction_default_id)
+
         vrooms = [self.hotel_vroom_budget, self.hotel_vroom_special]
         values = self.create_wubook_rooms_values(
             vrooms,

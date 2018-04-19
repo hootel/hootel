@@ -983,6 +983,7 @@ class WuBook(models.TransientModel):
 
                     # Get Restrictions
                     if def_wubook_restr:
+                        _logger.info("=== ESCRIBE EN ID: %d" % def_wubook_restr.id)
                         vroom_restr = vroom_restr_item_obj.search([
                             ('virtual_room_id', '=', vroom.id),
                             ('applied_on', '=', '0_virtual_room'),
