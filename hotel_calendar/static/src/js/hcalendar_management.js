@@ -702,8 +702,14 @@ HotelCalendarManagement.prototype = {
         elm.style.backgroundColor = 'red';
       } else if (elm.dataset.orgValue !== elm.value) {
         elm.classList.add('hcal-management-input-changed');
+        if (name === 'avail') {
+          elm.style.backgroundColor = '';
+        }
       } else {
         elm.classList.remove('hcal-management-input-changed');
+        if (name === 'avail' && elm.value == 0) {
+          elm.style.backgroundColor = 'rgb(255, 174, 174)';
+        }
       }
     }
     else if (elm.tagName.toLowerCase() === 'button') {
