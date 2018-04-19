@@ -262,6 +262,7 @@ class TestHotelWubook(TestHotel):
             default_restriction.wactive = True
             cls.restriction_default_id = default_restriction.id
         else:
+            cls.restriction_1.wpid = '0'
             cls.restriction_default_id = cls.restriction_1.id
 
         # Update Pricelist
