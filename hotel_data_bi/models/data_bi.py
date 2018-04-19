@@ -83,9 +83,10 @@ class Data_Bi(models.Model):
             archivo == 14 'Estado Reservas'
         fechafoto = start date to take data
         """
-        fechafoto = datetime.strptime(fechafoto, '%Y-%m-%d').date()
+        # fechafoto = datetime.strptime(fechafoto, '%Y-%m-%d').date()
         # Change this to local
-        # fechafoto=date.today()
+        #fechafoto=date.today()
+        fechafoto=date(2002, 12, 26)
 
         if not isinstance(archivo, int):
             archivo = 0
@@ -265,16 +266,25 @@ class Data_Bi(models.Model):
             if linea.reservation_id.partner_id.code_ine.code:
                 id_codeine = linea.reservation_id.partner_id.code_ine.code
             id_segmen = 0
-            if linea.reservation_id.partner_id.category_id.id:
-                id_segmen = linea.reservation_id.partner_id.category_id.id
+            if len(linea.reservation_id.partner_id.category_id) > 0:
+                id_segmen = linea.reservation_id.partner_id.category_id[0].id
             if linea.reservation_id.channel_type is False:
                 chanel_r = 0
             else:
                 chanel_r = canal_array.index(linea.reservation_id.channel_type)
-            if linea.reservation_id.wchannel_id.wid is False:
+
+
+
+
+            if len(linea.reservation_id.wchannel_id) == 0:
                 channel_c = u'0'
-            else:
+            elif linea.reservation_id.wchannel_id.wid is not False:
                 channel_c = linea.reservation_id.wchannel_id.wid
+            else:
+                channel_c = u'999'
+                        # Debug Stop -------------------
+                import wdb; wdb.set_trace()
+                        # Debug Stop -------------------
             dic_reservas.append({
                 'ID_Reserva': linea.reservation_id.folio_id.id,
                 'ID_Hotel': compan.id_hotel,
@@ -330,6 +340,6 @@ class Data_Bi(models.Model):
 
         dictionaryToJson = json.dumps(dic_export)
         # Debug Stop -------------------
-        # import wdb; wdb.set_trace()
+        import wdb; wdb.set_trace()
         # Debug Stop -------------------
         return dictionaryToJson
