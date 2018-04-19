@@ -1009,12 +1009,12 @@ class WuBook(models.TransientModel):
                             'wpushed': True,
                         }
                         if vroom_restr:
-                            _logger.info("=== ESCRIBE EN ID: %d" % def_wubook_restr.id)
+                            _logger.info("=== ESCRIBE %s EN ID %d: %d" % (date_str, vroom.id, def_wubook_restr.id))
                             vroom_restr_item_obj.with_context({
                                 'wubook_action': False,
                             }).write(vals)
                         else:
-                            _logger.info("=== CREA EN ID: %d" % def_wubook_restr.id)
+                            _logger.info("=== CREA %s EN ID %d: %d" % (date_str, vroom.id, def_wubook_restr.id))
                             vals.update({
                                 'restriction_id': def_wubook_restr.id,
                                 'virtual_room_id': vroom.id,
