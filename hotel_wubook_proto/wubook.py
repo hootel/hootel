@@ -1593,7 +1593,8 @@ class WuBook(models.TransientModel):
             prices = {}
             pricelist_ids = self.env['product.pricelist'].search([
                 ('wpid', '!=', False),
-                ('active', '=', True)
+                ('active', '=', True),
+                ('wactive', '=', True),
             ])
             for pr in pricelist_ids:
                 prices.update({pr.wpid: {}})
@@ -1646,7 +1647,8 @@ class WuBook(models.TransientModel):
             restrictions = {}
             restriction_plan_ids = vroom_rest_obj.search([
                 ('wpid', '!=', False),
-                ('active', '=', True)
+                ('active', '=', True),
+                ('wactive', '=', True),
             ])
             for rp in restriction_plan_ids:
                 restrictions.update({rp.wpid: {}})

@@ -23,6 +23,7 @@ from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, timedelta
+from odoo.addons.hotel import date_utils
 
 
 class ReservationRestriction(models.Model):
@@ -30,6 +31,7 @@ class ReservationRestriction(models.Model):
 
     wpid = fields.Char("WuBook Restriction Plan ID", readonly=True)
     wdaily = fields.Boolean("Plan Daily", default=True, readonly=True)
+    wactive = fields.Boolean("Active in WuBook", default=False)
 
     @api.multi
     def get_wubook_restrictions(self):
@@ -69,11 +71,12 @@ class ReservationRestriction(models.Model):
     def create(self, vals):
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
-            wpid = self.env['wubook'].create_rplan(vals['name'])
-            if not wpid:
-                raise ValidationError(_("Can't create restriction plan on \
-                                WuBook"))
-            vals.update({'wpid': wpid})
+            if vals.get('wactive'):
+                wpid = self.env['wubook'].create_rplan(vals['name'])
+                if not wpid:
+                    raise ValidationError(_("Can't create restriction plan on \
+                                    WuBook"))
+                vals.update({'wpid': wpid})
 
         rules = self._context.get('rules')
         if rules:
@@ -91,6 +94,7 @@ class ReservationRestriction(models.Model):
                 'closed_departure': rules['closed_departure'],
                 'max_stay': rules['max_stay'],
                 'min_stay_arrival': rules['min_stay_arrival'],
+                'max_stay_arrival': rules['max_stay_arrival'],
                 'restriction_id': restriction.id,
                 'applied_on': '1_global',
             })
@@ -99,30 +103,72 @@ class ReservationRestriction(models.Model):
 
     @api.multi
     def write(self, vals):
-        nname = vals.get('name')
-        if self._context.get('wubook_action', True) and nname and \
-                self.env['wubook'].is_valid_account():
+        wubook_obj = self.env['wubook'].with_context({
+            'init_connection': False
+        })
+        if self._context.get('wubook_action', True) and \
+                wubook_obj.init_connection():
+            nname = vals.get('name')
+            vroom_restr_it_obj = self.env['hotel.virtual.room.restriction.item']
             for record in self:
-                if record.wpid and record.wpid != '':
-                    wres = self.env['wubook'].rename_rplan(
+                need_update = True
+                is_active = vals.get('wactive', record.wactive)
+                if is_active and not record.wpid:
+                    wpid = wubook_obj.create_rplan(
+                        vals.get('name', record.name))
+                    if not wpid:
+                        raise ValidationError(
+                            _("Can't create restriction plan on WuBook"))
+                    vals.update({'wpid': wpid})
+                    # Upload current restrictions
+                    now_utc_dt = date_utils.now()
+                    now_utc_str = now_utc_dt.strftime(
+                                                    DEFAULT_SERVER_DATE_FORMAT)
+                    restriction_item_ids = vroom_restr_it_obj.search([
+                        ('applied_on', '=', '0_virtual_room'),
+                        ('date_start', '>=', now_utc_str),
+                        ('wpushed', '=', False),
+                        ('restriction_id', '=', record.id),
+                    ])
+                    if any(restriction_item_ids):
+                        restriction_item_ids.write({
+                            'wpushed': False,
+                        })
+                    need_update = False
+                elif not is_active and record.wpid and record.wpid != '0':
+                    wres = wubook_obj.delete_rplan(record.wpid)
+                    if not wres:
+                        raise ValidationError(_("Can't delete restriction plan \
+                        on WuBook"))
+                    vals.update({'wpid': False})
+                    need_update = False
+                if need_update and is_active and record.wpid and \
+                        record.wpid != '':
+                    wres = wubook_obj.rename_rplan(
                         vals.get('wpid', record.wpid),
                         nname)
                     if not wres:
                         raise ValidationError(_("Can't rename restriction plan \
                         on WuBook"))
-        updated = super(ReservationRestriction, self).write(vals)
-        return updated
+
+            wubook_obj.push_restrictions()
+            wubook_obj.close_connection()
+        return super(ReservationRestriction, self).write(vals)
 
     @api.multi
     def unlink(self):
+        wubook_obj = self.env['wubook'].with_context({
+            'init_connection': False
+        })
         if self._context.get('wubook_action', True) and \
-                self.env['wubook'].is_valid_account():
+                wubook_obj.init_connection():
             for record in self:
                 if record.wpid and record.wpid != '':
-                    wres = self.env['wubook'].delete_rplan(record.wpid)
+                    wres = wubook_obj.delete_rplan(record.wpid)
                     if not wres:
                         raise ValidationError(_("Can't delete restriction plan \
                         on WuBook"))
+            wubook_obj.close_connection()
         return super(ReservationRestriction, self).unlink()
 
     @api.multi

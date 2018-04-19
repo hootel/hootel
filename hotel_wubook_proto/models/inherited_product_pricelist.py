@@ -23,6 +23,7 @@ from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 from datetime import datetime, timedelta
+from odoo.addons.hotel import date_utils
 
 
 class ProductPricelist(models.Model):
@@ -30,6 +31,7 @@ class ProductPricelist(models.Model):
 
     wpid = fields.Char("WuBook Plan ID", readonly=True)
     wdaily = fields.Boolean("WuBook Daily Plan", default=True)
+    wactive = fields.Boolean("Active in WuBook", default=True)
 
     @api.multi
     def get_wubook_prices(self):
@@ -98,40 +100,82 @@ class ProductPricelist(models.Model):
     def create(self, vals):
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
-            wpid = self.env['wubook'].create_plan(vals['name'],
-                                                  vals.get('wdaily') and
-                                                  1 or 0)
-            if not wpid:
-                raise ValidationError(_("Can't create plan on WuBook"))
-            vals.update({'wpid': wpid})
-        pricelist = super(ProductPricelist, self).create(vals)
-        return pricelist
+            if vals.get('wactive', False):
+                wpid = self.env['wubook'].create_plan(vals.get('name'),
+                                                      vals.get('wdaily') and
+                                                      1 or 0)
+                if not wpid:
+                    raise ValidationError(_("Can't create plan on WuBook"))
+                vals.update({'wpid': wpid})
+        return super(ProductPricelist, self).create(vals)
 
     @api.multi
     def write(self, vals):
-        nname = vals.get('name')
-        if self._context.get('wubook_action', True) and nname and \
-                self.env['wubook'].is_valid_account():
+        wubook_obj = self.env['wubook'].with_context({
+            'init_connection': False
+        })
+        if self._context.get('wubook_action', True) and \
+                wubook_obj.init_connection():
+            nname = vals.get('name')
+            product_pricelist_obj = self.env['product.pricelist.item']
             for record in self:
-                if record.wpid and record.wpid != '':
-                    wres = self.env['wubook'].update_plan_name(
+                is_active = vals.get('wactive', record.wactive)
+                need_update = True
+                if not record.wpid and is_active:
+                    wpid = wubook_obj.create_plan(
+                        vals.get('name', record.name),
+                        vals.get('wdaily') and
+                        1 or 0)
+                    if not wpid:
+                        raise ValidationError(_("Can't create plan on WuBook"))
+                    vals.update({'wpid': wpid})
+                    # Upload current prices
+                    now_utc_dt = date_utils.now()
+                    now_utc_str = now_utc_dt.strftime(
+                                                    DEFAULT_SERVER_DATE_FORMAT)
+                    pricelist_item_ids = product_pricelist_obj.search([
+                        ('pricelist_id', '=', record.id),
+                        ('applied_on', '=', '1_product'),
+                        ('compute_price', '=', 'fixed'),
+                        ('wpushed', '=', False),
+                        ('date_start', '>=', now_utc_str),
+                    ])
+                    if any(pricelist_item_ids):
+                        pricelist_item_ids.write({
+                            'wpushed': True,
+                        })
+                    need_update = False
+                elif record.wpid and record.wpid != '0' and not is_active:
+                    wres = wubook_obj.delete_plan(record.wpid)
+                    if not wres:
+                        raise ValidationError(_("Can't delete plan on WuBook"))
+                    vals.update({'wpid': False})
+                    need_update = False
+                if need_update and is_active and record.wpid and \
+                        record.wpid != '' and nname:
+                    wres = wubook_obj.update_plan_name(
                         vals.get('wpid', record.wpid),
                         nname)
                     if not wres:
                         raise ValidationError(_("Can't update plan name \
-                                                                    on WuBook"))
-        updated = super(ProductPricelist, self).write(vals)
-        return updated
+                                                                on WuBook"))
+            wubook_obj.push_priceplans()
+            wubook_obj.close_connection()
+        return super(ProductPricelist, self).write(vals)
 
     @api.multi
     def unlink(self):
+        wubook_obj = self.env['wubook'].with_context({
+            'init_connection': False
+        })
         if self._context.get('wubook_action', True) and \
-                self.env['wubook'].is_valid_account():
+                wubook_obj.init_connection():
             for record in self:
                 if record.wpid and record.wpid != '':
-                    wres = self.env['wubook'].delete_plan(record.wpid)
+                    wres = wubook_obj.delete_plan(record.wpid)
                     if not wres:
                         raise ValidationError(_("Can't delete plan on WuBook"))
+            wubook_obj.close_connection()
         return super(ProductPricelist, self).unlink()
 
     @api.multi
