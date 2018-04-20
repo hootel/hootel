@@ -267,7 +267,9 @@ var HotelCalendarManagementView = View.extend({
                     'Max. Stay Arrival': _t('Max. Stay Arrival'),
                     'Clousure': _t('Clousure'),
                     'Free Rooms': _t('Free Rooms'),
-                    'No OTA': _t('No OTA')
+                    'No OTA': _t('No OTA'),
+                    'Options': _t('Options'),
+                    'Reset Values': _t('Reset Values')
                 }
             });
             self._hcalendar.setData(results['prices'], results['restrictions'], results['availability'], results['count_reservations']);

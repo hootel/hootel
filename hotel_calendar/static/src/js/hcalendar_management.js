@@ -48,7 +48,9 @@ function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options,
     'Max. Stay Arrival': 'Max. Stay Arrival',
     'Clousure': 'Clousure',
     'Free Rooms': 'Free Rooms',
-    'No OTA': 'No OTA'
+    'No OTA': 'No OTA',
+    'Options': 'Options',
+    'Reset Values': 'Reset Values'
   };
 
   /** Options **/
@@ -305,7 +307,7 @@ HotelCalendarManagement.prototype = {
     telm.innerHTML = `
       <a href='#' data-toggle='dropdown' class='dropdown-toggle'><i class='fa fa-2x fa-ellipsis-v'> </i></a>
       <ul class='dropdown-menu'>
-        <li><a href='#' class='hcal-record-option-reset' data-hcal-parent-cell='${parentCell.getAttribute('id')}'>Reset Values</a></li>
+        <li><a href='#' class='hcal-record-option-reset' data-hcal-parent-cell='${parentCell.getAttribute('id')}'>${this._t('Reset Values')}</a></li>
       </ul>`;
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     cell.appendChild(telm);
