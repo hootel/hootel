@@ -96,6 +96,10 @@ HotelCalendarManagement.prototype = {
     this.e.addEventListener(event, callback);
   },
 
+  hasChangesToSave: function() {
+    return this.e.querySelector('.hcal-management-record-changed') !== null;
+  },
+
   //==== CALENDAR
   setStartDate: function(/*String,MomentObject*/date, /*Int?*/days) {
     var curDate = this.options.startDate;
@@ -286,10 +290,27 @@ HotelCalendarManagement.prototype = {
     telm.setAttribute('name', 'no_ota');
     telm.setAttribute('title', this._t('No OTA'));
     telm.innerHTML = "<strong>No OTA</strong>";
+    telm.dataset.orgValue = telm.dataset.state = 'false';
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     telm.classList.add('hcal-management-input');
     telm.addEventListener('click', function(ev){ $this.onInputChange(ev, this); }, false);
     cell.appendChild(telm);
+
+    telm = document.createElement("span");
+    telm.setAttribute('id', this._sanitizeId(`OPTIONS_${roomId}_${dateShortStr}`));
+    telm.setAttribute('name', 'options');
+    telm.setAttribute('title', this._t('Options'));
+    telm.classList.add('dropdown');
+    telm.classList.add('pull-right');
+    telm.innerHTML = `
+      <a href='#' data-toggle='dropdown' class='dropdown-toggle'><i class='fa fa-2x fa-ellipsis-v'> </i></a>
+      <ul class='dropdown-menu'>
+        <li><a href='#' class='hcal-record-option-reset' data-hcal-parent-cell='${parentCell.getAttribute('id')}'>Reset Values</a></li>
+      </ul>`;
+    telm.dataset.hcalParentCell = parentCell.getAttribute('id');
+    cell.appendChild(telm);
+
+    cell.querySelector('.hcal-record-option-reset').addEventListener('click', function(ev){ $this.onOptionsRecord(ev, this); }, false);
 
 
     parentCell.appendChild(table);
@@ -772,6 +793,40 @@ HotelCalendarManagement.prototype = {
     this.e.dispatchEvent(new CustomEvent(
       'hcmOnInputChanged',
       {'detail': {'date': dateCell, 'room': room, 'name': name, 'value': value}}));
+  },
+
+  onOptionsRecord: function(/*EventObject*/ev, /*HTMLObject*/elm) {
+    var parentCell = this.$base.querySelector(`#${elm.dataset.hcalParentCell}`);
+    var parentRow = this.$base.querySelector(`#${parentCell.dataset.hcalParentRow}`);
+    var dateCell = HotelCalendarManagement.toMoment(parentCell.dataset.hcalDate);
+    var room = this.getRoom(parentRow.dataset.hcalRoomObjId);
+
+    if (elm.classList.contains('hcal-record-option-reset')) {
+      var inputs = parentCell.querySelectorAll(".hcal-management-input");
+      for (var cinput of inputs) {
+        var need_dispatch = false;
+        var name = cinput.getAttribute('name');
+        if (name === "min_stay" || name === "max_stay" || name === "min_stay_arrival" || name === "max_stay_arrival" ||
+              name === "avail" || name === "price" || name === "clousure") {
+          cinput.value = (name === "clousure")?cinput.dataset.orgValue:parseInt(cinput.dataset.orgValue, 10);
+          var event = new UIEvent('change', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+          });
+          cinput.dispatchEvent(event);
+        }
+        else if (name === 'no_ota') {
+          cinput.dataset.state = Boolean(!(cinput.dataset.orgValue === 'true'));
+          var event = new UIEvent('click', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': true
+          });
+          cinput.dispatchEvent(event);
+        }
+      }
+    }
   }
 };
 

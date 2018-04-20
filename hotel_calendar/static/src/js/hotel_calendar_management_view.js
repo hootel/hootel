@@ -169,7 +169,11 @@ var HotelCalendarManagementView = View.extend({
         });
         this._hcalendar.addEventListener('hcmOnInputChanged', function(ev){
             var btn_save = self.$el.find('#btn_save_changes');
-            btn_save.addClass('need-save');
+            if (self._hcalendar.hasChangesToSave()) {
+                btn_save.addClass('need-save');
+            } else {
+                btn_save.removeClass('need-save');
+            }
         });
 
         this.$CalendarHeaderDays = this.$el.find("div.table-vroom-data-header");
