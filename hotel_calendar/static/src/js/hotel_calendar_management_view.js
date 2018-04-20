@@ -139,6 +139,7 @@ var HotelCalendarManagementView = View.extend({
         var oparams = [false, params['prices'], params['restrictions'], pricelist, restrictions, availability];
         this._model.call('save_changes', oparams).then(function(results){
             btn_save.removeClass('need-save');
+            $('.hcal-management-record-changed').removeClass('hcal-management-record-changed');
             $('.hcal-management-input-changed').removeClass('hcal-management-input-changed');
         });
     },
@@ -248,7 +249,22 @@ var HotelCalendarManagementView = View.extend({
                 endOfWeek: parseInt(self._view_options['eday_week']) || 6,
                 endOfWeekOffset: self._view_options['eday_week_offset'] || 0,
                 dateFormatLong: ODOO_DATETIME_MOMENT_FORMAT,
-                dateFormatShort: ODOO_DATE_MOMENT_FORMAT
+                dateFormatShort: ODOO_DATE_MOMENT_FORMAT,
+                translations: {
+                    'Open': _t('Open'),
+                    'Closed': _t('Closed'),
+                    'C. Departure': _t('C. Departure'),
+                    'C. Arrival': _t('C. Arrival'),
+                    'Price': _t('Price'),
+                    'Availability': _t('Availability'),
+                    'Min. Stay': _t('Min. Stay'),
+                    'Max. Stay': _t('Max. Stay'),
+                    'Min. Stay Arrival': _t('Min. Stay Arrival'),
+                    'Max. Stay Arrival': _t('Max. Stay Arrival'),
+                    'Clousure': _t('Clousure'),
+                    'Free Rooms': _t('Free Rooms'),
+                    'No OTA': _t('No OTA')
+                }
             });
             self._hcalendar.setData(results['prices'], results['restrictions'], results['availability'], results['count_reservations']);
         });

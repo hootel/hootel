@@ -22,7 +22,7 @@
 	min-height: 1.5em;
 	white-space: nowrap;
 	overflow: hidden;
-	border: 1px solid #cecece !important;
+	border: 1px solid black !important;
 }
 .hcal-management-table > tbody > tr > td {
 	/*text-align: center !important;*/
@@ -105,6 +105,10 @@
 .hcal-management-input-changed {
 	background-color: rgb(237,110,110);
 	border: 1px solid gray;
+}
+
+.hcal-management-record-changed {
+	background-color: #FFFF66 !important;
 }
 
 table.hcal-management-table  input {
