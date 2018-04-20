@@ -6,7 +6,7 @@
  */
 
 .hcal-management-table, .hcal-management-table-day {
-	border-collapse: initial !important;
+	border-collapse: collapse !important;
 	table-layout: fixed;
 }
 .hcal-management-table > tbody {
@@ -33,7 +33,8 @@
 	min-height: 100px;
 	white-space: nowrap;
 	overflow: hidden;
-	border: 1px solid #cecece !important;
+	padding: 5px !important;
+	border: 1px solid black;
 }
 .hcal-management-table thead td {
 	text-align: center !important;
@@ -59,12 +60,9 @@
 	font-size: 9px;
 }
 
-.hcal-management-table-day td {
-	border: 0px !important;
-}
-
 .hcal-management-table-day {
 	height: 100%;
+	border-collapse: collapse !important;
 }
 .hcal-management-table-day td {
 	padding: 2px;
@@ -80,7 +78,7 @@
 
 .table-vrooms {
 	float: left;
-	margin-top: 1.5em;
+	margin-top: 1.6em;
 }
 
 #hcal_management_widget {

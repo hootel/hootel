@@ -297,6 +297,7 @@ HotelCalendarManagement.prototype = {
     var inputs = this.e.querySelectorAll('pinput.hcal-management-input-changed');
     for (input of inputs) {
       input.classList.remove('hcal-management-input-changed');
+      input.parentNode.parentNode.parentNode.parentNode.parentNode.classList.remove('hcal-management-record-changed');
     }
   },
 
@@ -700,14 +701,14 @@ HotelCalendarManagement.prototype = {
               name === 'price' || name === 'avail' || name === 'max_stay_arrival') {
       if (!this._isNumeric(value)) {
         elm.style.backgroundColor = 'red';
-      } else if (elm.dataset.orgValue !== elm.value) {
+      } else if (orgValue !== value) {
         elm.classList.add('hcal-management-input-changed');
         if (name === 'avail') {
           elm.style.backgroundColor = '';
         }
       } else {
         elm.classList.remove('hcal-management-input-changed');
-        if (name === 'avail' && elm.value == 0) {
+        if (name === 'avail' && value == 0) {
           elm.style.backgroundColor = 'rgb(255, 174, 174)';
         }
       }
@@ -723,6 +724,12 @@ HotelCalendarManagement.prototype = {
           elm.classList.remove('hcal-management-input-active');
         }
       }
+    }
+
+    if (value.toString() !== orgValue) {
+      elm.parentNode.parentNode.parentNode.parentNode.parentNode.classList.add('hcal-management-record-changed');
+    } else {
+      elm.parentNode.parentNode.parentNode.parentNode.parentNode.classList.remove('hcal-management-record-changed');
     }
 
     this.e.dispatchEvent(new CustomEvent(
