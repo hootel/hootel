@@ -55,7 +55,9 @@ function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options,
     'Options': 'Options',
     'Reset': 'Reset',
     'Copy': 'Copy',
-    'Paste': 'Paste'
+    'Paste': 'Paste',
+    'Clone': 'Clone',
+    'Cancel': 'Cancel'
   };
 
   /** Options **/
@@ -897,7 +899,7 @@ HotelCalendarManagement.prototype = {
           </table>`,
         buttons: {
           confirm : {
-            label: 'Clone',
+            label: $this._t('Clone'),
             className: "btn-success",
             callback: function() {
               var date_begin = $('table#hcal-management-clone-dates #date_begin').data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone();
@@ -931,7 +933,7 @@ HotelCalendarManagement.prototype = {
             }
           },
           cancel: {
-            label: 'Cancel',
+            label: $this._t('Cancel'),
             className: 'btn-danger'
           }
         }
