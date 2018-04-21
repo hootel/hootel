@@ -269,7 +269,9 @@ var HotelCalendarManagementView = View.extend({
                     'Free Rooms': _t('Free Rooms'),
                     'No OTA': _t('No OTA'),
                     'Options': _t('Options'),
-                    'Reset Values': _t('Reset Values')
+                    'Reset': _t('Reset'),
+                    'Copy': _t('Copy'),
+                    'Paste': _t('Paste')
                 }
             });
             self._hcalendar.setData(results['prices'], results['restrictions'], results['availability'], results['count_reservations']);

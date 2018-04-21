@@ -1,7 +1,7 @@
 /* global _, moment */
 'use strict';
 /*
- * Hotel Calendar Management JS v0.0.1a - 2017
+ * Hotel Calendar Management JS v0.0.1a - 2017-2018
  * GNU Public License
  * Aloxa Solucions S.L. <info@aloxa.eu>
  *     Alexandre Díaz <alex@aloxa.eu>
@@ -9,6 +9,9 @@
  * Dependencies:
  *     - moment
  *     - underscore
+ *     - jquery
+ *     - bootbox
+ *     - bootstrap
  */
 
 function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options, /*HTMLObject?*/_base) {
@@ -30,7 +33,7 @@ function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options,
       Version: '0.0.1a',
       Author: "Alexandre Díaz",
       Created: "24/09/2017",
-      Updated: ""
+      Updated: "21/04/2018"
     };
   }
 
@@ -50,7 +53,9 @@ function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options,
     'Free Rooms': 'Free Rooms',
     'No OTA': 'No OTA',
     'Options': 'Options',
-    'Reset Values': 'Reset Values'
+    'Reset': 'Reset',
+    'Copy': 'Copy',
+    'Paste': 'Paste'
   };
 
   /** Options **/
@@ -83,6 +88,7 @@ function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options,
   this._pricelist = {};
   this._restrictions = {};
   this._availability = {};
+  this._copy_values = {};
 
   /***/
   if (!this._create()) {
@@ -304,20 +310,33 @@ HotelCalendarManagement.prototype = {
     telm.setAttribute('title', this._t('Options'));
     telm.classList.add('dropdown');
     telm.classList.add('pull-right');
+    telm.classList.add('hcal-management-record-options');
     telm.innerHTML = `
       <a href='#' data-toggle='dropdown' class='dropdown-toggle'><i class='fa fa-2x fa-ellipsis-v'> </i></a>
-      <ul class='dropdown-menu'>
-        <li><a href='#' class='hcal-record-option-reset' data-hcal-parent-cell='${parentCell.getAttribute('id')}'>${this._t('Reset Values')}</a></li>
+      <ul class='dropdown-menu' style='min-width: 80px'>
+        <li><a href='#' class='hcal-record-option-clone' data-hcal-parent-cell='${parentCell.getAttribute('id')}'>${this._t('Clone')}</a></li>
+        <li role='separator' class='divider'></li>
+        <li><a href='#' class='hcal-record-option-copy' data-hcal-parent-cell='${parentCell.getAttribute('id')}'>${this._t('Copy')}</a></li>
+        <li><a href='#' class='hcal-record-option-paste' data-hcal-parent-cell='${parentCell.getAttribute('id')}'>${this._t('Paste')}</a></li>
+        <li role='separator' class='divider'></li>
+        <li><a href='#' class='hcal-record-option-reset' data-hcal-parent-cell='${parentCell.getAttribute('id')}'>${this._t('Reset')}</a></li>
       </ul>`;
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
     cell.appendChild(telm);
 
+    cell.querySelector('.hcal-record-option-clone').addEventListener('click', function(ev){ $this.onOptionsRecord(ev, this); }, false);
     cell.querySelector('.hcal-record-option-reset').addEventListener('click', function(ev){ $this.onOptionsRecord(ev, this); }, false);
+    cell.querySelector('.hcal-record-option-copy').addEventListener('click', function(ev){ $this.onOptionsRecord(ev, this); }, false);
+    cell.querySelector('.hcal-record-option-paste').addEventListener('click', function(ev){ $this.onOptionsRecord(ev, this); }, false);
 
 
     parentCell.appendChild(table);
 
     return table;
+  },
+
+  _getCell: function(/*HRoomObject*/room, /*DateTimeObject*/sdate) {
+    return this.e.querySelector(`#${this._sanitizeId(`${room.name}_${room.id}_${sdate.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`)}`);
   },
 
   setData: function(prices, restrictions, avail, count_free_rooms) {
@@ -429,14 +448,14 @@ HotelCalendarManagement.prototype = {
     this.options.rooms.forEach(function(itemRoom, indexRoom){
       // Room Number
       row = tbody.insertRow();
-      row.setAttribute('id', $this._sanitizeId(`ROW_${itemRoom.name}_${indexRoom}`));
+      row.setAttribute('id', $this._sanitizeId(`ROW_${itemRoom.name}_${itemRoom.id}`));
       row.dataset.hcalRoomObjId = itemRoom.id;
       row.classList.add('hcal-row-room-type-group-item');
       for (var i=0; i<=$this.options.days; i++) {
         var dd = $this.options.startDate.clone().add(i,'d');
         var dd_local = dd.clone().local();
         cell = row.insertCell();
-        cell.setAttribute('id', $this._sanitizeId(`${itemRoom.name}_${indexRoom}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`));
+        cell.setAttribute('id', $this._sanitizeId(`${itemRoom.name}_${itemRoom.id}_${dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT)}`));
         cell.classList.add('hcal-cell-room-type-group-item-day');
         cell.dataset.hcalParentRow = row.getAttribute('id');
         cell.dataset.hcalDate = dd.format(HotelCalendarManagement._DATE_FORMAT_SHORT);
@@ -549,7 +568,7 @@ HotelCalendarManagement.prototype = {
           var inputItem = this.etable.querySelector(`#${inputIds[i]}`);
           if (inputItem && !inputItem.classList.contains('hcal-management-input-changed')) {
             inputItem.dataset.orgValue = inputItem.value = inputIds[i+1];
-            inputItem.style.backgroundColor = (inputItem.value!=0)?'#f9d70b':'';
+            inputItem.style.backgroundColor = inputIds[i+1]!=0?'#f9d70b':'';
           }
         }
 
@@ -749,13 +768,13 @@ HotelCalendarManagement.prototype = {
         elm.style.backgroundColor = 'red';
       } else if (orgValue !== value) {
         elm.classList.add('hcal-management-input-changed');
-        if (name === 'avail') {
-          elm.style.backgroundColor = '';
-        }
+        elm.style.backgroundColor = '';
       } else {
         elm.classList.remove('hcal-management-input-changed');
         if (name === 'avail' && value == 0) {
           elm.style.backgroundColor = 'rgb(255, 174, 174)';
+        } else if (value != 0 && (name === 'min_stay' || name === 'max_stay' || name === 'min_stay_arrival' || name === 'max_stay_arrival')) {
+          elm.style.backgroundColor = '#f9d70b';
         }
       }
     }
@@ -798,12 +817,145 @@ HotelCalendarManagement.prototype = {
   },
 
   onOptionsRecord: function(/*EventObject*/ev, /*HTMLObject*/elm) {
+    var $this = this;
     var parentCell = this.$base.querySelector(`#${elm.dataset.hcalParentCell}`);
     var parentRow = this.$base.querySelector(`#${parentCell.dataset.hcalParentRow}`);
     var dateCell = HotelCalendarManagement.toMoment(parentCell.dataset.hcalDate);
     var room = this.getRoom(parentRow.dataset.hcalRoomObjId);
 
-    if (elm.classList.contains('hcal-record-option-reset')) {
+    var copy_values = {};
+    var inputs = parentCell.querySelectorAll(".hcal-management-input");
+    for (var cinput of inputs) {
+      var name = cinput.getAttribute('name');
+
+      if (name === 'no_ota') {
+        copy_values[name] = cinput.dataset.state;
+      } else {
+        copy_values[name] = cinput.value;
+      }
+    }
+
+    var eventChange = new UIEvent('change', {
+      'view': window,
+      'bubbles': true,
+      'cancelable': true
+    });
+    var eventClick = new UIEvent('click', {
+      'view': window,
+      'bubbles': true,
+      'cancelable': true
+    });
+
+    if (elm.classList.contains('hcal-record-option-clone')) {
+      var dialog = bootbox.dialog({
+        size: 'medium',
+        title: "Clone " + parentCell.dataset.hcalDate + " values in '" + room.name + "' room",
+        message: `
+          <table style="margin: 0 auto" id="hcal-management-clone-dates">
+              <tbody>
+                  <tr>
+                      <td colspan='2'>
+                        <div class="well">
+                          <b>Price:</b> ${copy_values['price']}<br/>
+                          <b>Availability:</b> ${copy_values['avail']}<br/>
+                          <b>Min. Stay:</b> ${copy_values['min_stay']}<br/>
+                          <b>Max. Stay:</b> ${copy_values['max_stay']}<br/>
+                          <b>Min. Stay Arrival:</b> ${copy_values['min_stay_arrival']}<br/>
+                          <b>Max. Stay Arrival:</b> ${copy_values['max_stay_arrival']}<br/>
+                          <b>Clousure:</b> ${copy_values['clousure']}<br/>
+                          <b>No OTA:</b> ${copy_values['no_ota']}<br/>
+                        </div>
+                      </td>
+                  </tr>
+                  <tr>
+                      <td>
+                          FROM<br/>
+                          <div class="input-group date" id="date_begin">
+                              <input type="text" class="form-control" name="date_begin" required="required" readonly="1"/>
+                              <span class="input-group-addon">
+                                  <span class="fa fa-calendar"></span>
+                              </span>
+                          </div>
+                      </td>
+                      <td>
+                          TO<br/>
+                          <div class="input-group date" id="date_end">
+                              <input type="text" class="form-control" name="date_end" required="required" readonly="1"/>
+                              <span class="input-group-addon">
+                                  <span class="fa fa-calendar"></span>
+                              </span>
+                          </div>
+                      </td>
+                  </tr>
+                  <tr>
+                    <td colspan="2">
+                      <input type="checkbox" id="same_day" />
+                      <label for="same_day">Same day of week</label>
+                    </td>
+                  </tr>
+              </tbody>
+          </table>`,
+        buttons: {
+          confirm : {
+            label: 'Clone',
+            className: "btn-success",
+            callback: function() {
+              var date_begin = $('table#hcal-management-clone-dates #date_begin').data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone();
+              var date_end = $('table#hcal-management-clone-dates #date_end').data("DateTimePicker").getDate().set({'hour': 0, 'minute': 0, 'second': 0}).clone();
+              var diff_days = $this.getDateDiffDays(date_begin, date_end) + 1;
+              var same_day = $('table#hcal-management-clone-dates #same_day').is(':checked');
+              var cell_date = HotelCalendarManagement.toMoment(parentCell.dataset.hcalDate);
+
+              var ndate = date_begin.clone();
+              for (var i=0; i<diff_days; ++i) {
+                if (same_day && ndate.weekday() !== cell_date.weekday()) {
+                  ndate.add(1, 'd');
+                  continue;
+                }
+                var cell = $this._getCell(room, ndate);
+
+                var inputs = cell.querySelectorAll(".hcal-management-input");
+                for (var cinput of inputs) {
+                  var name = cinput.getAttribute('name');
+
+                  if (name === 'no_ota') {
+                    cinput.dataset.state = Boolean(!(copy_values[name] === 'true'));
+                    cinput.dispatchEvent(eventClick);
+                  } else {
+                    cinput.value = copy_values[name];
+                    cinput.dispatchEvent(eventChange);
+                  }
+                }
+                ndate.add(1, 'd');
+              }
+            }
+          },
+          cancel: {
+            label: 'Cancel',
+            className: 'btn-danger'
+          }
+        }
+      });
+      dialog.init(function(){
+        var DTPickerOptions = {
+          icons : {
+            time: 'fa fa-clock-o',
+            date: 'fa fa-calendar',
+            up: 'fa fa-chevron-up',
+            down: 'fa fa-chevron-down'
+          },
+          minDate: $this.options.startDate,
+          maxDate: $this.options.startDate.clone().add($this.options.days, 'd'),
+          language : moment.locale(),
+          format : HotelCalendarManagement._DATE_FORMAT_SHORT,
+          disabledHours: true // TODO: Odoo uses old datetimepicker version
+        };
+
+        $('table#hcal-management-clone-dates #date_begin').datetimepicker(DTPickerOptions);
+        $('table#hcal-management-clone-dates #date_end').datetimepicker(DTPickerOptions);
+      });
+    }
+    else if (elm.classList.contains('hcal-record-option-reset')) {
       var inputs = parentCell.querySelectorAll(".hcal-management-input");
       for (var cinput of inputs) {
         var need_dispatch = false;
@@ -811,21 +963,53 @@ HotelCalendarManagement.prototype = {
         if (name === "min_stay" || name === "max_stay" || name === "min_stay_arrival" || name === "max_stay_arrival" ||
               name === "avail" || name === "price" || name === "clousure") {
           cinput.value = (name === "clousure")?cinput.dataset.orgValue:parseInt(cinput.dataset.orgValue, 10);
-          var event = new UIEvent('change', {
-            'view': window,
-            'bubbles': true,
-            'cancelable': true
-          });
-          cinput.dispatchEvent(event);
+          cinput.dispatchEvent(eventChange);
         }
         else if (name === 'no_ota') {
           cinput.dataset.state = Boolean(!(cinput.dataset.orgValue === 'true'));
-          var event = new UIEvent('click', {
-            'view': window,
-            'bubbles': true,
-            'cancelable': true
-          });
-          cinput.dispatchEvent(event);
+          cinput.dispatchEvent(eventClick);
+        }
+      }
+    }
+    else if (elm.classList.contains('hcal-record-option-copy')) {
+      this._copy_values = {};
+      var inputs = parentCell.querySelectorAll(".hcal-management-input");
+      for (var cinput of inputs) {
+        var name = cinput.getAttribute('name');
+
+        if (name === 'no_ota') {
+          this._copy_values[name] = cinput.dataset.state;
+        } else {
+          this._copy_values[name] = cinput.value;
+        }
+      }
+    }
+    else if (elm.classList.contains('hcal-record-option-paste')) {
+      if (_.isEmpty(this._copy_values)) {
+        return;
+      }
+
+      var eventChange = new UIEvent('change', {
+        'view': window,
+        'bubbles': true,
+        'cancelable': true
+      });
+      var eventClick = new UIEvent('click', {
+        'view': window,
+        'bubbles': true,
+        'cancelable': true
+      });
+
+      var inputs = parentCell.querySelectorAll(".hcal-management-input");
+      for (var cinput of inputs) {
+        var name = cinput.getAttribute('name');
+
+        if (name === 'no_ota') {
+          cinput.dataset.state = Boolean(!(this._copy_values[name] === 'true'));
+          cinput.dispatchEvent(eventClick);
+        } else {
+          cinput.value = this._copy_values[name];
+          cinput.dispatchEvent(eventChange);
         }
       }
     }
@@ -833,6 +1017,7 @@ HotelCalendarManagement.prototype = {
 };
 
 /** STATIC METHODS **/
+HotelCalendarManagement.MODE = { NONE:0, COPY:1, PASTE:2 }
 HotelCalendarManagement._DATE_FORMAT_LONG = "DD/MM/YYYY HH:mm:ss";
 HotelCalendarManagement._DATE_FORMAT_SHORT = "DD/MM/YYYY";
 HotelCalendarManagement.toMoment = function(/*String,MomentObject*/ndate, /*String*/format) {

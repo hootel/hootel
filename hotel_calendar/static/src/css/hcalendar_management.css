@@ -125,6 +125,10 @@ table.hcal-management-table  input {
 	border-bottom-left-radius: 25px;
 }
 
+.hcal-management-record-options {
+	padding: 0.5em;
+}
+
 button.hcal-management-input {
 	font-size: 9px;
 	border: 1px solid gray;
