@@ -49,6 +49,7 @@ class BusHotelCalendar(models.TransientModel):
                  ('id', '=', master_reserv),
             ('splitted', '=', True),
         ])
+
         return {
             'type': 'reservation',
             'action': vals['action'],
@@ -81,6 +82,7 @@ class BusHotelCalendar(models.TransientModel):
                 vals['partner_phone'],
                 vals['checkin'],
                 num_split,
+                vals['price'],
             ]
         }
 

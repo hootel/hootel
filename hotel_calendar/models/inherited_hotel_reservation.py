@@ -202,14 +202,19 @@ class HotelReservation(models.Model):
                     ('virtual_room_id', '=', vroom.id),
                     ('date_start', '>=', ndate_str),
                     ('date_end', '<=', ndate_str),
-                    ('applied_on', '=', '0_virtual_room')
+                    ('applied_on', '=', '0_virtual_room'),
+                    ('restriction_id', '=', restriction_id)
                 ], limit=1)
-                if rest_id:
+                if rest_id and (rest_id.min_stay or rest_id.min_stay_arrival or
+                                rest_id.max_stay or rest_id.max_stay_arrival or
+                                rest_id.closed or rest_id.closed_arrival or
+                                rest_id.closed_departure):
                     days.update({
                         ndate.strftime("%d/%m/%Y"): (
                             rest_id.min_stay,
                             rest_id.min_stay_arrival,
                             rest_id.max_stay,
+                            rest_id.max_stay_arrival,
                             rest_id.closed,
                             rest_id.closed_arrival,
                             rest_id.closed_departure)
@@ -296,7 +301,8 @@ class HotelReservation(models.Model):
                 or record.partner_id.phone or _('Undefined'),
                 'state': record.state,
                 'fix_days': record.splitted,
-                'overbooking': record.overbooking
+                'overbooking': record.overbooking,
+                'price': record.folio_id.amount_total,
             })
 
     @api.multi
@@ -355,8 +361,7 @@ class HotelReservation(models.Model):
                 vals.get('checkout') or vals.get('product_id') or \
                 vals.get('adults') or vals.get('children') or \
                 vals.get('state') or vals.get('splitted') or \
-                vals.get('reserve_color') or vals.get('product_id') or \
-                vals.get('unit_price'):
+                vals.get('reserve_color') or vals.get('product_id'):
             for record in self:
                 record.send_bus_notification(
                     'write',

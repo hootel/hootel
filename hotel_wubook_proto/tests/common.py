@@ -208,6 +208,27 @@ class TestHotelWubook(TestHotel):
             'customer_language_iso': 'es'
         }
 
+    def create_wubook_rooms_values(self, rooms, values):
+        json_data = {}
+        _logger.info("=== PASA AAA")
+        _logger.info(values)
+        for room in rooms:
+            for cvalue in values:
+                json_data.setdefault(room.wrid, []).append({
+                    'closed_arrival': cvalue['closed_arrival'],
+                    'booked': cvalue['booked'],
+                    'max_stay_arrival': cvalue['max_stay_arrival'],
+                    'max_stay': cvalue['max_stay'],
+                    'price': cvalue['price'],
+                    'min_stay': cvalue['min_stay'],
+                    'closed_departure': cvalue['closed_departure'],
+                    'avail': cvalue['avail'],
+                    'closed': cvalue['closed'],
+                    'min_stay_arrival': cvalue['min_stay_arrival'],
+                    'no_ota': cvalue['no_ota'],
+                })
+        return json_data
+
     def cancel_booking(self, wbooking):
         wbooking['status'] = WUBOOK_STATUS_CANCELLED
         return wbooking
@@ -227,6 +248,19 @@ class TestHotelWubook(TestHotel):
             'wrid': 3001,
             'wscode': 'T002',
         })
+
+        # Update Restriction
+        vroom_restr_obj = cls.env['hotel.virtual.room.restriction']
+        default_restriction = vroom_restr_obj.search([
+            ('wpid', '=', '0')
+        ], limit=1)
+        if default_restriction:
+            cls.restriction_default_id = default_restriction.id
+        else:
+            cls.restriction_1.write({
+                'wpid': '0'
+            })
+            cls.restriction_default_id = cls.restriction_1.id
 
         # Create Some Wubook Info
         cls.wubook_channel_test = cls.env['wubook.channel.info'].create({

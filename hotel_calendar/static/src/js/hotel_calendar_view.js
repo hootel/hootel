@@ -287,8 +287,8 @@ var HotelCalendarView = View.extend({
         this._hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){
             var tp = self._reserv_tooltips[ev.detail.reservationObj.id];
             var qdict = self._generate_reservation_tooltip_dict(tp);
-            $(ev.detail.reservationDiv).tooltip({
-              animation: true,
+            $(ev.detail.reservationDiv).tooltip('destroy').tooltip({
+              animation: false,
               html: true,
               placement: 'bottom',
               title: QWeb.render('HotelCalendar.TooltipReservation', qdict)

@@ -513,8 +513,8 @@ class HotelReservation(models.Model):
         state = folio.state     # FIX
         folio.state = 'draft'   # FIX
         osplitted_reservs = splitted_reservs - master_reservation
-        osplitted_reservs.unlink()
-        folio.state = state  #FIX
+        osplitted_reservs.sudo().unlink()
+        folio.state = state  # FIX
 
         # FIXME: Two writes because checkout regenerate reservation lines
         master_reservation.write({
