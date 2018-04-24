@@ -1890,6 +1890,7 @@ HotelCalendar.prototype = {
   },
 
   _updateUnusedZones: function(/*HReservationObject*/reserv) {
+    return
     if (reserv.unusedZone) { return; }
     this._cleanUnusedZones(reserv);
 
