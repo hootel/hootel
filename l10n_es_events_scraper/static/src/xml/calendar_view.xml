@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+	<t t-extend="CalendarView.buttons">
+			<t t-jquery="div.btn-group" t-operation="after">
+					<button type="button" class="o_calendar_button_import_events btn btn-sm btn-default">Import Events</button>
+			</t>
+	</t>
+
+</templates>
