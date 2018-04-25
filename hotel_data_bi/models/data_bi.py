@@ -83,10 +83,10 @@ class Data_Bi(models.Model):
             archivo == 14 'Estado Reservas'
         fechafoto = start date to take data
         """
-        # fechafoto = datetime.strptime(fechafoto, '%Y-%m-%d').date()
-        # Change this to local
-        #fechafoto=date.today()
-        fechafoto=date(2002, 12, 26)
+        fechafoto = datetime.strptime(fechafoto, '%Y-%m-%d').date()
+        # Change this to local test
+        # fechafoto=date.today()
+        # fechafoto=date(2018, 03, 01)
 
         if not isinstance(archivo, int):
             archivo = 0
@@ -262,29 +262,57 @@ class Data_Bi(models.Model):
              ], order="date")
         for linea in lineas:
             id_estado_r = linea.reservation_id.state
+
             id_codeine = 0
             if linea.reservation_id.partner_id.code_ine.code:
                 id_codeine = linea.reservation_id.partner_id.code_ine.code
+
             id_segmen = 0
             if len(linea.reservation_id.partner_id.category_id) > 0:
                 id_segmen = linea.reservation_id.partner_id.category_id[0].id
-            if linea.reservation_id.channel_type is False:
-                chanel_r = 0
-            else:
+
+            chanel_r = 0
+            if linea.reservation_id.channel_type:
                 chanel_r = canal_array.index(linea.reservation_id.channel_type)
 
-
-
-
-            if len(linea.reservation_id.wchannel_id) == 0:
-                channel_c = u'0'
-            elif linea.reservation_id.wchannel_id.wid is not False:
-                channel_c = linea.reservation_id.wchannel_id.wid
+            channel_c = 0
+            precio_comision = 0
+            precio_neto = linea.price
+            if linea.reservation_id.wrid:
+                if linea.reservation_id.wchannel_id.wid:
+                    channel_c = int(linea.reservation_id.wchannel_id.wid)
+                    if channel_c == 1:
+                        # Expedia.
+                        precio_iva = (precio_neto*10/100)
+                        precio_neto -= precio_iva
+                        precio_comision = (precio_neto*18/100)
+                        precio_neto -= precio_comision
+                    elif channel_c == 2:
+                        # Booking.
+                        precio_comision = (precio_neto*15/100)
+                        precio_neto -= precio_comision
+                        precio_iva = (precio_neto*10/100)
+                        precio_neto -= precio_iva
+                    elif channel_c == 9:
+                        # Hotelbeds
+                        precio_comision = (precio_neto*20/100)
+                        precio_neto -= precio_comision
+                        precio_iva = (precio_neto*10/100)
+                        precio_neto -= precio_iva
+                    elif channel_c == 11:
+                        # HRS
+                        precio_comision = (precio_neto*20/100)
+                        precio_neto -= precio_comision
+                        precio_iva = (precio_neto*10/100)
+                        precio_neto -= precio_iva
+                else:
+                    # Direct From Wubook (Web)
+                    channel_c = 999
+                    precio_iva = (precio_neto*10/100)
+                    precio_neto -= precio_iva
             else:
-                channel_c = u'999'
-                        # Debug Stop -------------------
-                import wdb; wdb.set_trace()
-                        # Debug Stop -------------------
+                precio_iva = (precio_neto*10/100)
+                precio_neto -= precio_iva
             dic_reservas.append({
                 'ID_Reserva': linea.reservation_id.folio_id.id,
                 'ID_Hotel': compan.id_hotel,
@@ -304,7 +332,9 @@ class Data_Bi(models.Model):
                 'Adultos': linea.reservation_id.adults,
                 'Menores': linea.reservation_id.children,
                 'Cunas': 0,
-                'PrecioDiario': linea.price,
+                'PrecioDiario': precio_neto,
+                'PrecioComision': precio_comision,
+                'PrecioIva': precio_iva,
                 'ID_Tarifa': linea.reservation_id.pricelist_id.id,
                 'ID_Pais': id_codeine})
 
@@ -340,6 +370,6 @@ class Data_Bi(models.Model):
 
         dictionaryToJson = json.dumps(dic_export)
         # Debug Stop -------------------
-        import wdb; wdb.set_trace()
+        # import wdb; wdb.set_trace()
         # Debug Stop -------------------
         return dictionaryToJson
