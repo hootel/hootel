@@ -1397,8 +1397,8 @@ class WuBook(models.TransientModel):
                         rcode,
                         vroom,
                         split_booking,
-                        [checkin, false],
-                        [checkout, false]
+                        dates_checkin,
+                        dates_checkout
                     )
                     free_rooms = hotel_vroom_obj.check_availability_virtual_room(
                         checkin_str,
@@ -1438,8 +1438,8 @@ class WuBook(models.TransientModel):
                             # Can't found space for reservation
                             vals = self._generate_booking_vals(
                                 broom,
-                                checkin,
-                                checkout,
+                                checkin_utc_dt,
+                                checkout_utc_dt,
                                 is_cancellation,
                                 wchannel_info,
                                 bstatus,
@@ -1447,8 +1447,8 @@ class WuBook(models.TransientModel):
                                 rcode,
                                 vroom,
                                 False,
-                                dates_checkin,
-                                dates_checkout
+                                (checkin_utc_dt, false),
+                                (checkout_utc_dt, false)
                             )
                             vals.update({
                                 'product_id':
