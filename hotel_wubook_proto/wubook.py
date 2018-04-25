@@ -1447,8 +1447,8 @@ class WuBook(models.TransientModel):
                                 rcode,
                                 vroom,
                                 False,
-                                (checkin_utc_dt, false),
-                                (checkout_utc_dt, false)
+                                (checkin_utc_dt, False),
+                                (checkout_utc_dt, False)
                             )
                             vals.update({
                                 'product_id':
