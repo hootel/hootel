@@ -1397,8 +1397,8 @@ class WuBook(models.TransientModel):
                         rcode,
                         vroom,
                         split_booking,
-                        dates_checkin,
-                        dates_checkout
+                        [checkin, false],
+                        [checkout, false]
                     )
                     free_rooms = hotel_vroom_obj.check_availability_virtual_room(
                         checkin_str,
