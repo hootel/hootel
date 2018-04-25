@@ -242,11 +242,9 @@ HotelCalendar.prototype = {
     }
   },
 
-  getReservationsByDay: function(/*String,MomentObject*/day, /*Bool*/noStrict, /*Int?*/nroom, /*Int?*/nbed, /*HReservation?*/ignoreThis) {
-    var oday = day;
+  getReservationsByDay: function(/*MomentObject*/day, /*Bool*/noStrict, /*Int?*/nroom, /*Int?*/nbed, /*HReservation?*/ignoreThis) {
 	  var day = HotelCalendar.toMoment(day);
     if (!day) {
-    	//console.log(oday);
         return false;
     }
 
@@ -255,8 +253,8 @@ HotelCalendar.prototype = {
     var reservs = [];
     for (var r of stored_reservs) {
       // Forced hours
-      var sdate = r.startDate.clone().local();
-      var edate = r.endDate.clone().local();
+      var sdate = r.startDate.clone().set({'hour': 12, 'minute': 0, 'second': 0});
+      var edate = r.endDate.clone().set({'hour': 10, 'minute': 0, 'second': 0});
       if (noStrict) {
     	  if ((day.isBetween(sdate, edate, 'day') || day.isSame(sdate, 'day'))
     	    && !day.isSame(edate, 'day')
@@ -265,7 +263,7 @@ HotelCalendar.prototype = {
 	           reservs.push(r);
 	      }
       } else {
-        edate.subtract(1, 'd'); // Last day count as a free day
+        //edate.subtract(1, 'd'); // Last day count as a free day
 		    if ((day.isBetween(sdate, edate) || (day.isSame(sdate) || day.isSame(edate)))
 	        && (typeof nroom === 'undefined' || r.room.number == nroom)
 	        && (typeof nbed === 'undefined' || r._beds.includes(nbed))) {
@@ -342,6 +340,15 @@ HotelCalendar.prototype = {
         var parentRow = this.etable.querySelector(`#${limits.left.dataset.hcalParentCell}`);
         var ndate = HotelCalendar.toMoment(parentRow.dataset.hcalDate).utc();
         for (var i=0; i<=diff_date; ++i) {
+          if (i === 0) {
+            // hours are forced because no one cares about them
+            ndate = reservation.startDate.clone().set({'hour': 12, 'minute': 0, 'second': 0});
+          }
+          else if (i === diff_date) {
+            // hours are forced because no one cares about them
+            ndate = reservation.endDate.clone().set({'hour': 10, 'minute': 0, 'second': 0});
+          }
+
           for (var b=0; b<=numBeds; ++b) {
             var reservs = this.getReservationsByDay(ndate, false, reservation.room.number, +limits.left.dataset.hcalBedNum+b, reservation);
             if (reservs.length) {
