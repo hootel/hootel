@@ -676,23 +676,29 @@ HotelCalendar.prototype = {
               if (restr) {
                 var cell = this.getMainCell(dd, room.type, room.number);
                 if (cell) {
-                  cell.classList.add('hcal-restriction-room-day');
-                  var humantext = "Restrictions:\n";
-                  if (restr[0] > 0)
-                    humantext += `Min. Stay: ${restr[0]}\n`;
-                  if (restr[1] > 0)
-                    humantext += `Min. Stay Arrival: ${restr[1]}\n`;
-                  if (restr[2] > 0)
-                    humantext += `Max. Stay: ${restr[2]}\n`;
-                  if (restr[3] > 0)
-                    humantext += `Max. Stay Arrival: ${restr[3]}\n`;
-                  if (restr[4])
-                    humantext += `Closed: ${restr[4]}\n`;
-                  if (restr[5])
-                    humantext += `Closed Arrival: ${restr[5]}\n`;
-                  if (restr[6])
-                    humantext += `Closed Departure: ${restr[6]}`;
-                  cell.title = humantext;
+                  if (restr[0] || restr[1] || restr[2] || restr[3] || restr[4] || restr[5] || restr[6]) {
+                    cell.classList.add('hcal-restriction-room-day');
+                    var humantext = "Restrictions:\n";
+                    if (restr[0] > 0)
+                      humantext += `Min. Stay: ${restr[0]}\n`;
+                    if (restr[1] > 0)
+                      humantext += `Min. Stay Arrival: ${restr[1]}\n`;
+                    if (restr[2] > 0)
+                      humantext += `Max. Stay: ${restr[2]}\n`;
+                    if (restr[3] > 0)
+                      humantext += `Max. Stay Arrival: ${restr[3]}\n`;
+                    if (restr[4])
+                      humantext += `Closed: ${restr[4]}\n`;
+                    if (restr[5])
+                      humantext += `Closed Arrival: ${restr[5]}\n`;
+                    if (restr[6])
+                      humantext += `Closed Departure: ${restr[6]}`;
+                    cell.title = humantext;
+                  }
+                  else {
+                    cell.classList.remove('hcal-restriction-room-day');
+                    cell.title = '';
+                  }
                 }
               }
             }
@@ -731,7 +737,7 @@ HotelCalendar.prototype = {
     var num_rooms = this.getRoomsCapacityTotal();
     for (var r of reservs) {
       if (r.unusedZone || r.overbooking) {
-    	continue;
+    	   continue;
       }
       num_rooms -= (r.room && r.room.shared)?r.getTotalPersons():1;
     }
@@ -1884,6 +1890,7 @@ HotelCalendar.prototype = {
   },
 
   _updateUnusedZones: function(/*HReservationObject*/reserv) {
+    return
     if (reserv.unusedZone) { return; }
     this._cleanUnusedZones(reserv);
 
@@ -1923,7 +1930,6 @@ HotelCalendar.prototype = {
       this.edtable.querySelectorAll('td.hcal-cell-detail-room-perc-occup-group-item-day')
     ];
     var num_cells = cells[0].length;
-    var num_rooms = this.getRoomsCapacityTotal();
     for (var i=0; i<num_cells; ++i) {
       var cell = false;
       // Occupation by Type
@@ -1932,19 +1938,19 @@ HotelCalendar.prototype = {
         var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
         var cell_date = cell.dataset.hcalDate;
         var num_rooms = this.getRoomsCapacityByType(parentRow.dataset.hcalRoomType);
-        var occup = this.calcDayRoomTypeReservations(cell_date, parentRow.dataset.hcalRoomType);
-        cell.innerText = occup;
-        cell.style.backgroundColor = this._generateColor(occup, num_rooms, 0.35, true, true);
+        var num_free = this.calcDayRoomTypeReservations(cell_date, parentRow.dataset.hcalRoomType);
+        cell.innerText = num_free;
+        cell.style.backgroundColor = this._generateColor(num_free, num_rooms, 0.35, true, true);
       }
 
       // Occupation Total
       cell = cells[1][i];
       if (cell) {
-        var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
         var cell_date = cell.dataset.hcalDate;
-        var occup = this.calcDayRoomTotalReservations(cell_date);
-        cell.innerText = occup;
-        cell.style.backgroundColor = this._generateColor(occup, num_rooms, 0.35, true, true);
+        var num_rooms = this.getRoomsCapacityTotal();
+        var num_free = this.calcDayRoomTotalReservations(cell_date);
+        cell.innerText = num_free;
+        cell.style.backgroundColor = this._generateColor(num_free, num_rooms, 0.35, true, true);
       }
 
       // Occupation Total Percentage
@@ -1952,8 +1958,9 @@ HotelCalendar.prototype = {
       if (cell) {
         var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
         var cell_date = cell.dataset.hcalDate;
-        var occup = this.calcDayRoomTotalReservations(cell_date);
-        var perc = 100.0 - (occup * 100.0 / num_rooms);
+        var num_rooms = this.getRoomsCapacityTotal();
+        var num_free = this.calcDayRoomTotalReservations(cell_date);
+        var perc = 100.0 - (num_free * 100.0 / num_rooms);
         cell.innerText = perc.toFixed(0);
         cell.style.backgroundColor = this._generateColor(perc, 100.0, 0.35, false, true);
       }

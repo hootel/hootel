@@ -251,6 +251,7 @@ class HotelReservation(models.Model):
                 'state': record.state,
                 'fix_days': record.splitted or record.wis_from_channel,
                 'overbooking': record.overbooking,
+                'price': record.folio_id.amount_total,
                 'wrid': record.wrid,
             })
 

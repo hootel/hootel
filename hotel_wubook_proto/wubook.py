@@ -944,7 +944,7 @@ class WuBook(models.TransientModel):
         vroom_restr_item_obj = self.env['hotel.virtual.room.restriction.item']
         hotel_virtual_room_obj = self.env['hotel.virtual.room']
         def_wubook_restr = virtual_room_restr_obj.search([('wpid', '=', '0')])
-        _logger.info("==== ROOM VALUES")
+        _logger.info("==== ROOM VALUES (%s -- %s)" % (dfrom, dto))
         _logger.info(values)
         for k_rid, v_rid in values.iteritems():
             vroom = hotel_virtual_room_obj.search([
@@ -988,28 +988,28 @@ class WuBook(models.TransientModel):
                             ('applied_on', '=', '0_virtual_room'),
                             ('date_start', '=', date_str),
                             ('date_end', '=', date_str),
-                            ('restriction_id', '=', '0'),
+                            ('restriction_id', '=', def_wubook_restr.id),
                         ])
                         vals = {
-                            'min_stay': day_vals.get('min_stay', 0),
-                            'min_stay_arrival': day_vals.get(
+                            'min_stay': int(day_vals.get('min_stay', 0)),
+                            'min_stay_arrival': int(day_vals.get(
                                 'min_stay_arrival',
-                                0),
-                            'max_stay': day_vals.get('max_stay', 0),
-                            'max_stay_arrival': day_vals.get(
+                                0)),
+                            'max_stay': int(day_vals.get('max_stay', 0)),
+                            'max_stay_arrival': int(day_vals.get(
                                 'max_stay_arrival',
-                                0),
-                            'closed': day_vals.get('closed', False),
-                            'closed_departure': day_vals.get(
+                                0)),
+                            'closed': int(day_vals.get('closed', False)),
+                            'closed_departure': int(day_vals.get(
                                 'closed_departure',
-                                False),
-                            'closed_arrival': day_vals.get(
+                                False)),
+                            'closed_arrival': int(day_vals.get(
                                 'closed_arrival',
-                                False),
+                                False)),
                             'wpushed': True,
                         }
                         if vroom_restr:
-                            vroom_restr_item_obj.with_context({
+                            vroom_restr.with_context({
                                 'wubook_action': False,
                             }).write(vals)
                         else:
@@ -1424,7 +1424,6 @@ class WuBook(models.TransientModel):
                         dates_checkin = [dates_checkin[1], False]
                         dates_checkout = [dates_checkout[1], False]
                     else:
-                        split_booking = True
                         date_diff = (dates_checkout[0].replace(
                                         hour=0, minute=0, second=0,
                                         microsecond=0) -
@@ -1432,11 +1431,15 @@ class WuBook(models.TransientModel):
                                         hour=0, minute=0, second=0,
                                         microsecond=0)).days
                         if date_diff <= 0:
+                            if split_booking:
+                                if split_booking_parent:
+                                    del reservations[split_booking_parent-1:]
+                                splitted_map.clear()
                             # Can't found space for reservation
                             vals = self._generate_booking_vals(
                                 broom,
-                                checkin,
-                                checkout,
+                                checkin_utc_dt,
+                                checkout_utc_dt,
                                 is_cancellation,
                                 wchannel_info,
                                 bstatus,
@@ -1444,8 +1447,8 @@ class WuBook(models.TransientModel):
                                 rcode,
                                 vroom,
                                 False,
-                                dates_checkin,
-                                dates_checkout
+                                (checkin_utc_dt, False),
+                                (checkout_utc_dt, False)
                             )
                             vals.update({
                                 'product_id':
@@ -1462,6 +1465,7 @@ class WuBook(models.TransientModel):
                             dates_checkout = [False, False]
                             split_booking = False
                         else:
+                            split_booking = True
                             dates_checkin = [
                                 dates_checkin[0],
                                 dates_checkin[0] + timedelta(days=date_diff-1)
