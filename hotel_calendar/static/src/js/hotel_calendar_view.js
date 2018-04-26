@@ -207,8 +207,7 @@ var HotelCalendarView = View.extend({
       if (this._hcalendar) {
         // FIXME: Workaround for restore "lost" reservations (Drawn when the view is hidden)
         setTimeout(function(){
-          var reservations = self._hcalendar.getReservations();
-          for (var reserv of reservations) {
+          for (var reserv of self._hcalendar._reservations) {
             var style = window.getComputedStyle(reserv._html, null);
             if (parseInt(style.width, 10) < 15 || parseInt(style.height, 10) < 15) {
               self._hcalendar._updateReservation(reserv);
@@ -392,8 +391,7 @@ var HotelCalendarView = View.extend({
             var newPrice = ev.detail.newPrice;
             var folio_id = newReservation.getUserData('folio_id');
 
-            var reservs = self._hcalendar.getReservations(newReservation);
-            var linkedReservs = _.find(reservs, function(item){
+            var linkedReservs = _.find(this._hcalendar._reservations, function(item){
                 return (item.getUserData('folio_id') === folio_id);
             });
 
@@ -1179,8 +1177,8 @@ var HotelCalendarView = View.extend({
                       'title': reserv['partner_name'],
                       'adults': reserv['adults'],
                       'childrens': reserv['children'],
-                      'startDate': HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
-                      'endDate': HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
+                      'startDate': HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT),
+                      'endDate': HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT),
                       'color': reserv['reserve_color'],
                       'colorText': reserv['reserve_color_text'],
                       'splitted': reserv['splitted'],
