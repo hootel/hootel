@@ -84,6 +84,9 @@ class Data_Bi(models.Model):
         fechafoto = start date to take data
         """
         fechafoto = datetime.strptime(fechafoto, '%Y-%m-%d').date()
+        # Change this to local test
+        # fechafoto=date.today()
+        # fechafoto=date(2018, 03, 01)
 
         if not isinstance(archivo, int):
             archivo = 0
@@ -99,10 +102,12 @@ class Data_Bi(models.Model):
                                'Descripcion': tarifa['name'].encode(
                                    'ascii', 'xmlcharrefreplace')})
 
-        dic_canal = []  # TODO Diccionario con los Canales
-        dic_canal.append({'ID_Hotel': compan.id_hotel,
-                          'ID_Canal': 0,
-                          'Descripcion': 'Sin Canal'})
+        dic_canal = []  # Diccionario con los Canales
+        canal_array = ['door', 'mail', 'phone', 'web']
+        for i in range(0, len(canal_array)):
+            dic_canal.append({'ID_Hotel': compan.id_hotel,
+                              'ID_Canal': i,
+                              'Descripcion': canal_array[i]})
 
         dic_hotel = []  # Diccionario con el/los nombre de los hoteles
         dic_hotel.append({'ID_Hotel': compan.id_hotel,
@@ -221,15 +226,15 @@ class Data_Bi(models.Model):
                                       'Descripcion': seg_desc.encode(
                                           'ascii', 'xmlcharrefreplace')})
 
-# Clientes
-# ID_Hotel numérico Código del Hotel
-# ID_Cliente numérico Código del Cliente de la reserva
-# Descripción texto(50) Descripción del Cliente
-        dic_clientes = []  # TODO Diccionario con Clientes
+        lineas = self.env['wubook.channel.info'].search([])
+        dic_clientes = []  # Diccionario con Clientes (OTAs)
         dic_clientes.append({'ID_Hotel': compan.id_hotel,
-                             'ID_Cliente': 'xxxxx',
-                             'Descripcion': 'xxxxx'})
-
+                             'ID_Cliente': u'0',
+                             'Descripcion': 'Ninguno'})
+        for linea in lineas:
+            dic_clientes.append({'ID_Hotel': compan.id_hotel,
+                                 'ID_Cliente': linea.wid,
+                                 'Descripcion': linea.name})
 # ID_Reserva numérico Código único de la reserva
 # ID_Hotel numérico Código del Hotel
 # ID_EstadoReserva numérico Código del estado de la reserva
@@ -257,20 +262,65 @@ class Data_Bi(models.Model):
              ], order="date")
         for linea in lineas:
             id_estado_r = linea.reservation_id.state
+
             id_codeine = 0
             if linea.reservation_id.partner_id.code_ine.code:
                 id_codeine = linea.reservation_id.partner_id.code_ine.code
+
             id_segmen = 0
-            if linea.reservation_id.partner_id.category_id.id:
-                id_segmen = linea.reservation_id.partner_id.category_id.id
+            if len(linea.reservation_id.partner_id.category_id) > 0:
+                id_segmen = linea.reservation_id.partner_id.category_id[0].id
+
+            chanel_r = 0
+            if linea.reservation_id.channel_type:
+                chanel_r = canal_array.index(linea.reservation_id.channel_type)
+
+            channel_c = 0
+            precio_comision = 0
+            precio_neto = linea.price
+            if linea.reservation_id.wrid:
+                if linea.reservation_id.wchannel_id.wid:
+                    channel_c = int(linea.reservation_id.wchannel_id.wid)
+                    if channel_c == 1:
+                        # Expedia.
+                        precio_iva = (precio_neto*10/100)
+                        precio_neto -= precio_iva
+                        precio_comision = (precio_neto*18/100)
+                        precio_neto -= precio_comision
+                    elif channel_c == 2:
+                        # Booking.
+                        precio_comision = (precio_neto*15/100)
+                        precio_neto -= precio_comision
+                        precio_iva = (precio_neto*10/100)
+                        precio_neto -= precio_iva
+                    elif channel_c == 9:
+                        # Hotelbeds
+                        precio_comision = (precio_neto*20/100)
+                        precio_neto -= precio_comision
+                        precio_iva = (precio_neto*10/100)
+                        precio_neto -= precio_iva
+                    elif channel_c == 11:
+                        # HRS
+                        precio_comision = (precio_neto*20/100)
+                        precio_neto -= precio_comision
+                        precio_iva = (precio_neto*10/100)
+                        precio_neto -= precio_iva
+                else:
+                    # Direct From Wubook (Web)
+                    channel_c = 999
+                    precio_iva = (precio_neto*10/100)
+                    precio_neto -= precio_iva
+            else:
+                precio_iva = (precio_neto*10/100)
+                precio_neto -= precio_iva
             dic_reservas.append({
                 'ID_Reserva': linea.reservation_id.folio_id.id,
                 'ID_Hotel': compan.id_hotel,
                 'ID_EstadoReserva': estado_array.index(id_estado_r),
                 'FechaVenta': linea.reservation_id.create_date[0:10],
                 'ID_Segmento': id_segmen,
-                'ID_Cliente': 0,
-                'ID_Canal': 0,
+                'ID_Cliente': channel_c,
+                'ID_Canal': chanel_r,
                 'FechaExtraccion': date.today().strftime('%Y-%m-%d'),
                 'Entrada': linea.date,
                 'Salida': (datetime.strptime(linea.date, "%Y-%m-%d") +
@@ -282,7 +332,9 @@ class Data_Bi(models.Model):
                 'Adultos': linea.reservation_id.adults,
                 'Menores': linea.reservation_id.children,
                 'Cunas': 0,
-                'PrecioDiario': linea.price,
+                'PrecioDiario': precio_neto,
+                'PrecioComision': precio_comision,
+                'PrecioIva': precio_iva,
                 'ID_Tarifa': linea.reservation_id.pricelist_id.id,
                 'ID_Pais': id_codeine})
 

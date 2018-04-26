@@ -1,8 +1,6 @@
 REVENUE EXPORTER
 =============
 
-** UNDER DEVELOPMENT: NOT USE IN PRODUCTION **
-
 Export Odoo data for Revenue  MyDataBI
 
 Usage
