@@ -41,7 +41,7 @@
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                     Expedition date</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.partner_id.polexpedition" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                    <strong> <span t-field="o.partner_id.polexpedition" t-options='{"format": "d MMMM y"}'/></strong></td>
                               </tr>
                             </table><br/>
                         </div>
@@ -77,7 +77,7 @@
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                     Birthdate</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.partner_id.birthdate_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                    <strong> <span t-field="o.partner_id.birthdate_date" t-options='{"format": "d MMMM y"}'/></strong></td>
                               </tr>
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -95,13 +95,13 @@
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                     Entry date</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong> <span t-field="o.enter_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                    <strong> <span t-field="o.enter_date" t-options='{"format": "d MMMM y"}'/></strong></td>
                               </tr>
                               <tr>
                                 <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                     Exit date</td>
                                 <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                    <strong><span t-field="o.exit_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                    <strong><span t-field="o.exit_date" t-options='{"format": "d MMMM y"}'/></strong></td>
                               </tr>
                             </table><br/>
                         </div>
@@ -159,7 +159,7 @@
                                             <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                                 Expedition date</td>
                                             <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                                <strong> <span t-field="o.partner_id.polexpedition" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                                <strong> <span t-field="o.partner_id.polexpedition" t-options='{"format": "d MMMM y"}'/></strong></td>
                                           </tr>
                                         </table><br/>
                                     </div>
@@ -195,7 +195,7 @@
                                             <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                                 Birthdate</td>
                                             <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                                <strong> <span t-field="o.partner_id.birthdate_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                                <strong> <span t-field="o.partner_id.birthdate_date" t-options='{"format": "d MMMM y"}'/></strong></td>
                                           </tr>
                                           <tr>
                                             <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
@@ -213,13 +213,13 @@
                                             <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                                 Entry date</td>
                                             <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                                <strong> <span t-field="o.enter_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                                <strong> <span t-field="o.enter_date" t-options='{"format": "d MMMM y"}'/></strong></td>
                                           </tr>
                                           <tr>
                                             <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                                                 Exit date</td>
                                             <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
-                                                <strong><span t-field="o.exit_date" t-field-options='{"format": "d MMMM y"}'/></strong></td>
+                                                <strong><span t-field="o.exit_date" t-options='{"format": "d MMMM y"}'/></strong></td>
                                           </tr>
                                         </table><br/>
                                     </div>
