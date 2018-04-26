@@ -686,6 +686,15 @@ class HotelReservation(models.Model):
         if not self.checkout:
             self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
+        if self.product_id:
+            room = self.env['hotel.room'].search([
+                ('product_id', '=', self.product_id.id)
+            ])
+            if self.adults == 0:
+                self.adults = room.capacity
+            if not self.virtual_room_id and room.price_virtual_room:
+                self.virtual_room_id = room.price_virtual_room.id
+
         # UTC -> Hotel tz
         tz = self.env['ir.values'].get_default('hotel.config.settings',
                                                'tz_hotel')
@@ -739,14 +748,7 @@ class HotelReservation(models.Model):
             self.cardex_pending = 0
         else:
             self.price_unit = rlines['total_price']
-        if self.product_id:
-            room = self.env['hotel.room'].search([
-                ('product_id', '=', self.product_id.id)
-            ])
-            if self.adults == 0:
-                self.adults = room.capacity
-            if not self.virtual_room_id and room.price_virtual_room:
-                self.virtual_room_id = room.price_virtual_room.id
+        
 
     @api.model
     def get_availability(self, checkin, checkout, product_id, dbchanged=True,
