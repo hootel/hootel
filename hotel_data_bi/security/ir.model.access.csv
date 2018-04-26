@@ -8,3 +8,4 @@ access_hotel.virtual_room_export_data,hotel.virtual.room.export_data,hotel.model
 access_folio_room_line_export_data,hotel.folio_room_line.export_data,hotel.model_hotel_reservation_line,hotel_data_bi.group_hotel_export_data,1,0,0,0
 access_hotel_folio_line_export_data,hotel_folio_line.export_data,hotel.model_hotel_reservation,hotel_data_bi.group_hotel_export_data,1,0,0,0
 access_hotel_folio_export_data,hotel_folio.export_data,hotel.model_hotel_folio,hotel_data_bi.group_hotel_export_data,1,0,0,0
+access_wubook_channel_info,wubook_channel_info,hotel_wubook_proto.model_wubook_channel_info,hotel_data_bi.group_hotel_export_data,1,0,0,0
