@@ -34,7 +34,7 @@
 
     Create a user and give the 'Hotel Management/Export data BI' permission.
     """,
-    'depends': ['hotel', 'hotel_l10n_es'],
+    'depends': ['hotel', 'hotel_l10n_es','hotel_wubook_proto'],
     'data': [
         'views/data_bi.xml',
         'views/inherit_res_company.xml',
