@@ -391,7 +391,7 @@ var HotelCalendarView = View.extend({
             var newPrice = ev.detail.newPrice;
             var folio_id = newReservation.getUserData('folio_id');
 
-            var linkedReservs = _.find(this._hcalendar._reservations, function(item){
+            var linkedReservs = _.find(self._hcalendar._reservations, function(item){
                 return (item.getUserData('folio_id') === folio_id);
             });
 
@@ -1133,6 +1133,7 @@ var HotelCalendarView = View.extend({
     _on_bus_signal: function(notifications) {
         var need_reload_pricelists = false;
         var need_update_counters = false;
+        var nreservs = []
         for (var notif of notifications) {
           if (notif[0][1] === 'hotel.reservation') {
             switch (notif[1]['type']) {
@@ -1192,7 +1193,7 @@ var HotelCalendarView = View.extend({
                     nreserv.addUserData({'folio_id': reserv['folio_id']});
                     nreserv.addUserData({'parent_reservation': reserv['parent_reservation']});
                     this._reserv_tooltips[reserv['reserv_id']] = notif[1]['tooltip'];
-                    this._hcalendar.addReservations([nreserv]);
+                    nreservs.push(nreserv);
                   }
                 }
 
@@ -1209,6 +1210,7 @@ var HotelCalendarView = View.extend({
             }
           }
         }
+        this._hcalendar.addReservations(nreservs);
         if (need_update_counters) {
           this.update_buttons_counter();
         }
