@@ -167,45 +167,57 @@ HotelCalendar.prototype = {
       // Merge
       var local_start_date = this.options.startDate.clone().local();
       var local_end_date = this._endDate.clone().local();
-      for (var reserv of reservations) {
-        var index =  false;
-        if (!forced) {
-          index = _.findKey(this._reservations, {'id': reserv.id});
-        }
-        if (index) {
-          reserv._html = this._reservations[index]._html;
-          this._reservations[index] = reserv;
-        } else {
-          this._reservations.push(reserv);
-          index = this._reservations.length - 1;
-        }
 
-        _.defer(function(r){
-          this._calcReservationCellLimits(r);
-          if (r._html) {
-            r._html.innerText = r.title;
+      var uzr = this._createUnusedZones(reservations);
+
+      // Two phases (1. Reservations, 2. Unused Zones)
+      for (var i=0; i<2; ++i) {
+        if (i === 1) {
+          reservations = uzr;
+        }
+        for (var reserv of reservations) {
+          if ((i===0 && reserv.unusedZone) || (i===1 && !reserv.unusedZone)) {
+            continue;
+          }
+          var index =  false;
+          if (!forced) {
+            index = _.findKey(this._reservations, {'id': reserv.id});
+          }
+          if (index) {
+            reserv._html = this._reservations[index]._html;
+            this._reservations[index] = reserv;
           } else {
-            if (r._limits.isValid()) {
-              r._html = document.createElement('div');
-              r._html.dataset.hcalReservationObjId = r.id;
-              r._html.classList.add('hcal-reservation');
-              r._html.classList.add('noselect');
-              r._html.innerText = r.title;
-              // this._updateDivReservation(divRes, limits);
-              this.edivr.appendChild(r._html);
+            this._reservations.push(reserv);
+            index = this._reservations.length - 1;
+          }
 
-              if (r.unusedZone) {
-              	r._html.classList.add('hcal-unused-zone');
-              } else {
-              	this._assignReservationsEvents([r._html]);
+          _.defer(function(r){
+            this._calcReservationCellLimits(r);
+            if (r._html) {
+              r._html.innerText = r.title;
+            } else {
+              if (r._limits.isValid()) {
+                r._html = document.createElement('div');
+                r._html.dataset.hcalReservationObjId = r.id;
+                r._html.classList.add('hcal-reservation');
+                r._html.classList.add('noselect');
+                r._html.innerText = r.title;
+                // this._updateDivReservation(divRes, limits);
+                this.edivr.appendChild(r._html);
+
+                if (r.unusedZone) {
+                	r._html.classList.add('hcal-unused-zone');
+                } else {
+                	this._assignReservationsEvents([r._html]);
+                }
               }
             }
-          }
-          this._updateReservation(r);
-          if (this.options.divideRoomsByCapacity && r._limits.isValid()) {
-            this._updateUnusedZones(r);
-          }
-        }.bind(this, reserv));
+            this._updateReservation(r);
+            //if (this.options.divideRoomsByCapacity && r._limits.isValid()) {
+            //  this._updateUnusedZones(r);
+            //}
+          }.bind(this, reserv));
+        }
       }
 
       this._updateReservationOccupation();
@@ -754,6 +766,8 @@ HotelCalendar.prototype = {
       return false;
     }
 
+    var scrollThrottle = _.throttle(this._updateOBIndicators.bind(this), 100);
+
     // Reservations Table
     this.edivrh = document.createElement("div");
     this.edivrh.classList.add('table-reservations-header');
@@ -769,9 +783,7 @@ HotelCalendar.prototype = {
     this.etable.classList.add('hcal-table');
     this.etable.classList.add('noselect');
     this.edivr.appendChild(this.etable);
-    this.edivr.addEventListener("scroll", function(ev){
-      $this._updateOBIndicators();
-    }, false);
+    this.edivr.addEventListener("scroll", scrollThrottle, false);
     // Detail Calcs Table
     this.edivch = document.createElement("div");
     this.edivch.classList.add('table-calcs-header');
@@ -1722,34 +1734,42 @@ HotelCalendar.prototype = {
     for (var creserv of reservs) { this.removeReservation(creserv); }
   },
 
-  _updateUnusedZones: function(/*HReservationObject*/reserv) {
-    if (reserv.unusedZone) { return; }
-    this._cleanUnusedZones(reserv);
-
-    var unused_id = 0;
+  _createUnusedZones: function(/*Array*/reservs) {
     var nreservs = [];
-    var numBeds = reserv.getTotalPersons();
-  	for (var e=numBeds; e<reserv.room.capacity; e++) {
-  		nreservs.push(new HReservation({
-        'id': `${reserv.id}@${--unused_id}`,
-        'room': reserv.room,
-        'title': '',
-        'adults': 1,
-        'childrens': 0,
-        'startDate': reserv.startDate.clone(),
-        'endDate': reserv.endDate.clone(),
-        'color': '#c2c2c2',
-        'colorText': '#c2c2c2',
-        'splitted': false,
-        'readOnly': true,
-        'fixDays': true,
-        'fixRooms': true,
-        'unusedZone': true,
-        'linkedId': reserv.id,
-        'state': 'draft',
-      }));
-  	}
-  	this.addReservations(nreservs, true);
+    for (var reserv of reservs) {
+      if (!reserv.unusedZone) {
+        var unused_id = 0;
+        var numBeds = reserv.getTotalPersons();
+      	for (var e=numBeds; e<reserv.room.capacity; ++e) {
+      		nreservs.push(new HReservation({
+            'id': `${reserv.id}@${--unused_id}`,
+            'room': reserv.room,
+            'title': '',
+            'adults': 1,
+            'childrens': 0,
+            'startDate': reserv.startDate.clone(),
+            'endDate': reserv.endDate.clone(),
+            'color': '#c2c2c2',
+            'colorText': '#c2c2c2',
+            'splitted': false,
+            'readOnly': true,
+            'fixDays': true,
+            'fixRooms': true,
+            'unusedZone': true,
+            'linkedId': reserv.id,
+            'state': 'draft',
+          }));
+      	}
+      }
+    }
+    return nreservs;
+  },
+
+  _updateUnusedZones: function(/*HReservationObject*/reserv) {
+    if (!reserv.unusedZone) {
+      this._cleanUnusedZones(reserv);
+    	this.addReservations(this._createUnusedZones([reserv]), true);
+    }
   },
 
   _updateReservationOccupation: function() {
