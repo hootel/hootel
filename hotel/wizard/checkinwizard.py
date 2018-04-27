@@ -111,7 +111,8 @@ class Wizard(models.TransientModel):
 
     mobile_cardex = fields.Char('Mobile')
 
-    segmentation_id = fields.Many2many(related='reservation_id.folio_id.segmentation_id')
+    segmentation_id = fields.Many2many(
+        related='reservation_id.folio_id.segmentation_id')
 
 
     ''' TODO: clean-up - list of checkins on smart button clean is not used anymore
