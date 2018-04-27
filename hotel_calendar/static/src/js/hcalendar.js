@@ -170,10 +170,7 @@ HotelCalendar.prototype = {
       console.warn("[HotelCalendar][addReservations] Invalid Reservation definition!");
     } else {
       // Merge
-      var local_start_date = this.options.startDate.clone().local();
-      var local_end_date = this._endDate.clone().local();
-
-      var uzr = this._createUnusedZones(reservations);
+      var uzr = [];
 
       // Two phases (1. Reservations, 2. Unused Zones)
       for (var i=0; i<2; ++i) {
@@ -193,8 +190,10 @@ HotelCalendar.prototype = {
           if (rindex) {
             reserv._html = this._reservations[rindex]._html;
             this._reservations[rindex] = reserv;
+            this._updateUnusedZones(reserv);
           } else {
             rindex = this._reservations.push(reserv) - 1;
+            uzr = uzr.concat(this._createUnusedZones([reserv]));
           }
 
           _.defer(function(r){

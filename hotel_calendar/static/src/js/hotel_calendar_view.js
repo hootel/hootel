@@ -1161,6 +1161,7 @@ var HotelCalendarView = View.extend({
                   this._hcalendar.removeReservation(reserv['reserv_id'], true);
                   this._reserv_tooltips = _.pick(this._reserv_tooltips, function(value, key, obj){ return key != reserv['reserv_id']; });
                 } else {
+                  nreservs = _.reject(nreservs, {'id': reserv['reserv_id']}); // Only like last changes
                   var room = this._hcalendar.getRoom(reserv['product_id'], reserv['overbooking'], reserv['reserv_id']);
                   // need create a overbooking row?
                   if (!room && reserv['overbooking']) {
