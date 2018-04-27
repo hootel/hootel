@@ -112,7 +112,9 @@ class HotelReservation(models.Model):
 
     @api.multi
     def get_hcalendar_reservations_data(self, dfrom, dto, domain, rooms):
-        domain = domain or []
+        date_start = date_utils.get_datetime(dfrom, hours=False) \
+            - timedelta(days=1)
+        date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         room_product_ids = rooms.mapped('product_id.id')
         reservations_raw = self.env['hotel.reservation'].search(
             [
@@ -123,10 +125,10 @@ class HotelReservation(models.Model):
             order="checkin DESC, checkout ASC, adults DESC, children DESC")
         reservations_ll = self.env['hotel.reservation'].search([
             ('checkin', '<=', dto),
-            ('checkout', '>=', dfrom)
+            ('checkout', '>=', date_start_str)
         ])
         reservations_lr = self.env['hotel.reservation'].search([
-            ('checkin', '>=', dfrom),
+            ('checkin', '>=', date_start_str),
             ('checkout', '<=', dto)
         ])
         reservations = (reservations_ll | reservations_lr) & reservations_raw

@@ -180,31 +180,32 @@ HotelCalendar.prototype = {
           index = this._reservations.length - 1;
         }
 
-        this._calcReservationCellLimits(reserv);
-        if (reserv._html) {
-          reserv._html.innerText = reserv.title;
-        } else {
-          if (reserv._limits.isValid()) {
-            reserv._html = document.createElement('div');
-            reserv._html.dataset.hcalReservationObjId = reserv.id;
-            reserv._html.classList.add('hcal-reservation');
-            reserv._html.classList.add('noselect');
-            reserv._html.innerText = reserv.title;
-            // this._updateDivReservation(divRes, limits);
-            this.edivr.appendChild(reserv._html);
+        _.defer(function(r){
+          this._calcReservationCellLimits(r);
+          if (r._html) {
+            r._html.innerText = r.title;
+          } else {
+            if (r._limits.isValid()) {
+              r._html = document.createElement('div');
+              r._html.dataset.hcalReservationObjId = r.id;
+              r._html.classList.add('hcal-reservation');
+              r._html.classList.add('noselect');
+              r._html.innerText = r.title;
+              // this._updateDivReservation(divRes, limits);
+              this.edivr.appendChild(r._html);
 
-            if (reserv.unusedZone) {
-            	reserv._html.classList.add('hcal-unused-zone');
-            } else {
-            	this._assignReservationsEvents([reserv._html]);
+              if (r.unusedZone) {
+              	r._html.classList.add('hcal-unused-zone');
+              } else {
+              	this._assignReservationsEvents([r._html]);
+              }
             }
           }
-        }
-
-        this._updateReservation(reserv);
-        if (this.options.divideRoomsByCapacity && reserv._limits.isValid()) {
-          this._updateUnusedZones(reserv);
-        }
+          this._updateReservation(r);
+          if (this.options.divideRoomsByCapacity && r._limits.isValid()) {
+            this._updateUnusedZones(r);
+          }
+        }.bind(this, reserv));
       }
 
       this._updateReservationOccupation();
@@ -277,7 +278,7 @@ HotelCalendar.prototype = {
       }
 
       // Search Initial Cell
-      if (reservation.startDate.clone().local().startOf('day').isSameOrAfter(this.options.startDate.clone().local().startOf('day'), 'd')) {
+      if (reservation.startDate.isSameOrAfter(this.options.startDate, 'd')) {
         reservation._drawModes[0] = 'hard-start';
         limits.left = this.getCell(reservation.startDate.clone().local(),
                                    reservation.room,
@@ -298,7 +299,7 @@ HotelCalendar.prototype = {
       }
 
       // Search End Cell
-      if (reservation.endDate.clone().local().startOf('day').isSameOrBefore(this._endDate.clone().local().startOf('day'), 'd')) {
+      if (reservation.endDate.isSameOrBefore(this._endDate, 'd')) {
         reservation._drawModes[1] = 'hard-end';
         limits.right = this.getCell(reservation.endDate.clone().local(),
                                    reservation.room,
@@ -333,8 +334,6 @@ HotelCalendar.prototype = {
     } while (notFound && nbed <= reservation.room.capacity);
 
     reservation._limits = limits;
-
-    return limits;
   },
 
   //==== CELLS
