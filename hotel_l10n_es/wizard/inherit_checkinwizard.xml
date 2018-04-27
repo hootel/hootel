@@ -21,8 +21,10 @@
                         <field name="code_ine_cardex" placeholder="Code in INE"
                                options="{'no_create': True,'no_open': True}" required="True"/>
 
-                        <field name="category_id_cardex" widget="many2many_tags" placeholder="Tags..."
-                               options="{'no_create': True,'no_open': True}" />
+                        <!-- <field name="category_id_cardex" widget="many2many_tags" placeholder="Tags..."
+                               options="{'no_create': True,'no_open': True}" /> -->
+                        <field name="segmentation_id" widget="many2many_tags" placeholder="Segmentation..."
+                               options="{'no_create': True,'no_open': True}" required="True"/>
                     </group>
                 </xpath>
                 <xpath expr="//button[@name='action_save_check']" position="replace">
