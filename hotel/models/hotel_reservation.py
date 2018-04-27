@@ -311,6 +311,7 @@ class HotelReservation(models.Model):
     edit_room = fields.Boolean(default=True)
     nights = fields.Integer('Nights',computed='_computed_nights')
     channel_type = fields.Selection(related='folio_id.channel_type')
+    segmentation_id = fields.Many2many(related='folio_id.segmentation_id')
 
     @api.depends('checkin', 'checkout')
     def _computed_nights(self):
@@ -748,7 +749,7 @@ class HotelReservation(models.Model):
             self.cardex_pending = 0
         else:
             self.price_unit = rlines['total_price']
-        
+
 
     @api.model
     def get_availability(self, checkin, checkout, product_id, dbchanged=True,
