@@ -1303,6 +1303,10 @@ class WuBook(models.TransientModel):
                                                                     pytz.utc)
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
+            _logger.info("----------- PASA AAAA")
+            _logger.info(arr_hour)
+            _logger.info(checkin_utc_dt.strfime(DEFAULT_WUBOOK_TIME_FORMAT))
+
             # Search Folio. If exists.
             folio_id = False
             if crcode != 'undefined':
