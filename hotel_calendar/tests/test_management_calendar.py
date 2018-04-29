@@ -357,7 +357,7 @@ class TestManagementCalendar(TestHotelCalendar):
                     for k_info, v_info in enumerate(v_pr):
                         ndate = date_utils.get_datetime(v_info['date'])
                         if ndate >= reserv_start_utc_dt and \
-                                ndate <= reserv_end_dt:
+                                ndate <= reserv_end_utc_dt:
                             self.assertEqual(v_info['num'],
                                              1,
                                              "Hotel Calendar Management \
