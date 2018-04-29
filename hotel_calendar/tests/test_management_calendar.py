@@ -351,17 +351,13 @@ class TestManagementCalendar(TestHotelCalendar):
             self.parity_restrictions_id,
             True)
 
-        reserv_start_dt = date_utils.dt_as_timezone(reserv_start_utc_dt,
-                                                    self.tz_hotel)
-        reserv_end_dt = date_utils.dt_as_timezone(reserv_end_utc_dt,
-                                                  self.tz_hotel)
         for vroom in vrooms:
             for k_pr, v_pr in hcal_data['count_reservations'].iteritems():
                 if k_pr == vroom.id:    # Only Check Test Cases
                     for k_info, v_info in enumerate(v_pr):
-                        ndate = date_utils.get_datetime(v_info['date'],
-                                                        stz=self.tz_hotel)
-                        if ndate >= reserv_start_dt and ndate <= reserv_end_dt:
+                        ndate = date_utils.get_datetime(v_info['date'])
+                        if ndate >= reserv_start_utc_dt and \
+                                ndate <= reserv_end_dt:
                             self.assertEqual(v_info['num'],
                                              1,
                                              "Hotel Calendar Management \
