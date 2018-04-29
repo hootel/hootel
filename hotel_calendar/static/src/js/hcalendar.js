@@ -94,7 +94,7 @@ HotelCalendar.prototype = {
   },
 
   //==== CALENDAR
-  setStartDate: function(/*String,MomentObject*/date, /*Int?*/days) {
+  setStartDate: function(/*String,MomentObject*/date, /*Int?*/days, /*Bool*/fullUpdate, /*Functions*/callback) {
     if (moment.isMoment(date)) {
       this.options.startDate = date.subtract('1','d');
     } else if (typeof date === 'string'){
@@ -113,7 +113,7 @@ HotelCalendar.prototype = {
     /*this.e.dispatchEvent(new CustomEvent(
             'hcOnChangeDate',
             {'detail': {'prevDate':curDate, 'newDate': $this.options.startDate}}));*/
-    this._updateView();
+    this._updateView(!fullUpdate, callback);
   },
 
   getOptions: function(/*String?*/key) {
@@ -1152,19 +1152,24 @@ HotelCalendar.prototype = {
   },
 
   //==== UPDATE FUNCTIONS
-  _updateView: function() {
+  _updateView: function(/*Bool*/notData, /*function*/callback) {
     this._createTableReservationDays();
+    if (typeof callback !== 'undefined') {
+      callback();
+    }
+    this._updateCellSelection();
     this._createTableDetailDays();
 
     _.defer(function(){
-      for (var reservation of this._reservations){
-        this._calcReservationCellLimits(reservation);
-      }
-
-      this._updateReservations();
-      this._updateRestrictions();
-      this._updateCellSelection();
+      this._updateReservations(true);
     }.bind(this));
+    if (!notData) {
+      _.defer(function(){
+        this._updateRestrictions();
+        this._updatePriceList();
+        this._updateReservationOccupation();
+      }.bind(this));
+    }
   },
 
   _updateOBIndicators: function() {
@@ -1599,8 +1604,11 @@ HotelCalendar.prototype = {
     }
   },
 
-  _updateReservations: function() {
+  _updateReservations: function(/*Bool*/updateLimits) {
       for (var reservation of this._reservations){
+        if (updateLimits) {
+          this._calcReservationCellLimits(reservation);
+        }
         this._updateReservation(reservation);
       }
       //this._assignReservationsEvents();

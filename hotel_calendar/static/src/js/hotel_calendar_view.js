@@ -1124,9 +1124,9 @@ var HotelCalendarView = View.extend({
             }
 
             var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc();
-
-            this._hcalendar.setStartDate(date_begin, this._hcalendar.getDateDiffDays(date_begin, date_end));
-            this.reload_hcalendar_reservations(false, true, true);
+            this._hcalendar.setStartDate(date_begin, this._hcalendar.getDateDiffDays(date_begin, date_end), false, function(){
+              _.defer(function(){ this.reload_hcalendar_reservations(false, true, true); }.bind(this));
+            }.bind(this));
         }
     },
 

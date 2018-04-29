@@ -360,7 +360,7 @@ class TestManagementCalendar(TestHotelCalendar):
                 if k_pr == vroom.id:    # Only Check Test Cases
                     for k_info, v_info in enumerate(v_pr):
                         ndate = date_utils.get_datetime(v_info['date'],
-                                                        tz=self.tz_hotel)
+                                                        stz=self.tz_hotel)
                         if ndate >= reserv_start_dt and ndate <= reserv_end_dt:
                             self.assertEqual(v_info['num'],
                                              1,

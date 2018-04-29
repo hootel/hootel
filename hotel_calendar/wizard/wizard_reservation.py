@@ -57,7 +57,7 @@ class FolioWizard(models.TransientModel):
             ndate = "%s %s:00" % \
                 (now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                  default_arrival_hour)
-            ndate_dt = date_utils.get_datetime(ndate, tz=tz_hotel)
+            ndate_dt = date_utils.get_datetime(ndate, stz=tz_hotel)
             ndate_dt = date_utils.dt_as_timezone(ndate_dt, 'UTC')
             return ndate_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
@@ -79,7 +79,7 @@ class FolioWizard(models.TransientModel):
             ndate = "%s %s:00" % \
                 (now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                  default_departure_hour)
-            ndate_dt = date_utils.get_datetime(ndate, tz=tz_hotel)
+            ndate_dt = date_utils.get_datetime(ndate, stz=tz_hotel)
             ndate_dt = date_utils.dt_as_timezone(ndate_dt, 'UTC')
             return ndate_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
@@ -132,11 +132,11 @@ class FolioWizard(models.TransientModel):
             checkout_str = (chkin_utc_dt + timedelta(days=1)).strftime(
                                                     DEFAULT_SERVER_DATE_FORMAT)
             checkout_str = "%s %s:00" % (checkout_str, dpt_hour)
-            checkout_dt = date_utils.get_datetime(checkout_str, tz=tz)
+            checkout_dt = date_utils.get_datetime(checkout_str, stz=tz)
             checkout_utc_dt = date_utils.dt_as_timezone(checkout_dt, 'UTC')
             self.checkout = checkout_utc_dt.strftime(
                                                 DEFAULT_SERVER_DATETIME_FORMAT)
-        checkout_dt = date_utils.get_datetime(self.checkout, tz=tz)
+        checkout_dt = date_utils.get_datetime(self.checkout, stz=tz)
         # Reservation end day count as free day. Not check it
         checkout_dt -= timedelta(days=1)
         occupied = self.env['hotel.reservation'].occupied(

@@ -20,7 +20,7 @@
 #
 ##############################################################################
 from datetime import datetime, timedelta
-import pytz
+from dateutil import tz
 from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT,
     DEFAULT_SERVER_DATE_FORMAT)
@@ -29,11 +29,11 @@ from openerp.exceptions import ValidationError
 
 
 # Generate a 'datetime' object from 'str_date' string with 'dtformat' format.
-def _generate_datetime(str_date, dtformat, tz=False):
+def _generate_datetime(str_date, dtformat, stz=False):
     ndate = False
     try:
         ndate = datetime.strptime(str_date, dtformat)
-        ndate = ndate.replace(tzinfo=pytz.timezone(tz and str(tz) or 'UTC'))
+        ndate = ndate.replace(tzinfo=tz.gettz(stz and str(stz) or 'UTC'))
     except ValueError:
         return False
 
@@ -42,16 +42,20 @@ def _generate_datetime(str_date, dtformat, tz=False):
 
 # Try generate a 'datetime' object from 'str_date' string
 # using all odoo formats
-def get_datetime(str_date, hours=True, end_day=False, tz=False):
-    date_dt = _generate_datetime(
-        str_date,
-        DEFAULT_SERVER_DATETIME_FORMAT,
-        tz=tz)
-    if not date_dt:
+def get_datetime(str_date, dtformat=False, hours=True, end_day=False,
+                 stz=False):
+    if dtformat:
+        date_dt = _generate_datetime(str_date, dtformat, stz=stz)
+    else:
         date_dt = _generate_datetime(
             str_date,
-            DEFAULT_SERVER_DATE_FORMAT,
-            tz=tz)
+            DEFAULT_SERVER_DATETIME_FORMAT,
+            stz=stz)
+        if not date_dt:
+            date_dt = _generate_datetime(
+                str_date,
+                DEFAULT_SERVER_DATE_FORMAT,
+                stz=stz)
 
     if date_dt:
         if end_day:
@@ -86,7 +90,7 @@ def dt_no_hours(new_start_date_dt, end_day=False):
 
 # Get now 'datetime' object
 def now(hours=False):
-    now_utc_dt = fields.datetime.now().replace(tzinfo=pytz.utc)
+    now_utc_dt = fields.datetime.now().replace(tzinfo=tz.tzutc())
 
     if not hours:
         now_utc_dt = now_utc_dt.replace(hour=0, minute=0, second=0,
@@ -96,13 +100,13 @@ def now(hours=False):
 
 
 # Get the difference in days between 'str_date_start' and 'str_date_end'
-def date_diff(date_start, date_end, hours=True, tz=False):
+def date_diff(date_start, date_end, hours=True, stz=False):
     if not isinstance(date_start, datetime):
-        date_start_dt = get_datetime(date_start, tz=tz)
+        date_start_dt = get_datetime(date_start, stz=stz)
     else:
         date_start_dt = date_start
     if not isinstance(date_end, datetime):
-        date_end_dt = get_datetime(date_end, tz=tz)
+        date_end_dt = get_datetime(date_end, stz=stz)
     else:
         date_end_dt = date_end
 
@@ -117,15 +121,15 @@ def date_diff(date_start, date_end, hours=True, tz=False):
 
 
 # Get a new 'datetime' object from 'date_dt' usign the 'tz' timezone
-def dt_as_timezone(date_dt, tz):
-    return date_dt.astimezone(pytz.timezone(tz and str(tz) or 'UTC'))
+def dt_as_timezone(date_dt, stz):
+    return date_dt.astimezone(tz.gettz(stz and str(stz) or 'UTC'))
 
 
 # Generate a tuple of days start in 'cdate'
 def generate_dates_list(cdate,
                         num_days,
-                        outformat=DEFAULT_SERVER_DATE_FORMAT, tz=False):
-    ndate = get_datetime(cdate, tz=tz) if not isinstance(cdate, datetime) \
+                        outformat=DEFAULT_SERVER_DATE_FORMAT, stz=False):
+    ndate = get_datetime(cdate, stz=stz) if not isinstance(cdate, datetime) \
         else cdate
     return [(ndate + timedelta(days=i)).strftime(outformat)
             for i in range(0, num_days)]
@@ -135,17 +139,17 @@ def generate_dates_list(cdate,
 #   0   Inside
 #   -1  'str_date' is before 'str_start_date'
 #   1   'str_date' is after 'str_end_date'
-def date_in(str_date, str_start_date, str_end_date, hours=True, tz=False):
+def date_in(str_date, str_start_date, str_end_date, hours=True, stz=False):
     if not isinstance(str_date, datetime):
-        date_dt = get_datetime(str_date, tz=tz)
+        date_dt = get_datetime(str_date, stz=stz)
     else:
         date_dt = str_date
     if not isinstance(str_start_date, datetime):
-        date_start_dt = get_datetime(str_date_start, tz=tz)
+        date_start_dt = get_datetime(str_date_start, stz=stz)
     else:
         date_start_dt = str_start_date
     if not isinstance(str_end_date, datetime):
-        date_end_dt = get_datetime(str_end_date, tz=tz)
+        date_end_dt = get_datetime(str_end_date, stz=stz)
     else:
         date_end_dt = str_end_date
 
@@ -176,11 +180,11 @@ def range_dates_in(str_start_date_a,
                    str_end_date_a,
                    str_start_date_b,
                    str_end_date_b,
-                   hours=True, tz=False):
-    date_start_dt_a = get_datetime(str_start_date_a, tz=tz)
-    date_end_dt_a = get_datetime(str_end_date_a, tz=tz)
-    date_start_dt_b = get_datetime(str_start_date_b, tz=tz)
-    date_end_dt_b = get_datetime(str_end_date_b, tz=tz)
+                   hours=True, stz=False):
+    date_start_dt_a = get_datetime(str_start_date_a, stz=stz)
+    date_end_dt_a = get_datetime(str_end_date_a, stz=stz)
+    date_start_dt_b = get_datetime(str_start_date_b, stz=stz)
+    date_end_dt_b = get_datetime(str_end_date_b, stz=stz)
 
     if not date_start_dt_a or not date_end_dt_a \
             or not date_start_dt_b or not date_end_dt_b:
