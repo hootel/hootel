@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<odoo>
+
+	<record model="ir.ui.view" id="view_import_events_wizard">
+		<field name="name">wizard.import.events</field>
+		<field name="model">wizard.import.events</field>
+		<field name="arch" type="xml">
+			<form string="Import City Events" >
+				<group>
+					<field name="city" required="1" />
+					<field name="year" required="1" />
+				</group>
+				<footer>
+					<button name="import_events" string="Import" type="object"
+						class="oe_highlight" />
+					or
+					<button string="Cancel" class="oe_link" special="cancel" />
+				</footer>
+			</form>
+		</field>
+	</record>
+
+	<record id="action_import_city_events" model="ir.actions.act_window">
+		<field name="name">Import City Events</field>
+		<field name="type">ir.actions.act_window</field>
+		<field name="res_model">wizard.import.events</field>
+		<field name="view_id" ref="view_import_events_wizard"/>
+		<field name="view_type">form</field>
+		<field name="view_mode">form</field>
+		<field name="target">new</field>
+	</record>
+
+</odoo>
