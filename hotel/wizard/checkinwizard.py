@@ -35,12 +35,12 @@ class Wizard(models.TransientModel):
             ids = [item[1] for item in self.env.context['reservation_ids']]
             reservations = self.env['hotel.reservation'].browse(ids)
             if len(reservations) == 1:
-                # _logger.info('reservation id: %d', reservations)
+                # return current room line (onlyone in this case)
                 return reservations
             for res in reservations:
-                # _logger.info('res.cardex_count: %d', res.cardex_count)
                 # return the first room line with free space for a cardex
-                if res.cardex_count < (res.adults + res.children):
+                # TODO: add 'done' to res.state condition... Maybe too restrictive right now
+                if res.cardex_count < (res.adults + res.children) and res.state not in ["cancelled"]:
                     return res
         elif 'reservation_id' in self.env.context:
             return self.env['hotel.reservation'].browse(
