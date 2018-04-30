@@ -2006,110 +2006,106 @@ HotelCalendar.prototype = {
   },
 
   _onCellMouseEnter: function(ev) {
-    _.defer(function(ev){
-      var date_cell = HotelCalendar.toMoment(this.etable.querySelector(`#${ev.target.dataset.hcalParentCell}`).dataset.hcalDate);
-      if (this._isLeftButtonPressed(ev)) {
-        var reserv = null;
-        var toRoom = undefined;
-        var needUpdate = false;
-        if (!this.reservationAction.reservation) {
-          if (this.cellSelection.start && this.cellSelection.start.dataset.hcalParentRow === ev.target.dataset.hcalParentRow) {
-            this.cellSelection.current = ev.target;
-          }
-          this._updateCellSelection();
-        } else if (this.reservationAction.mousePos) {
-          // workarround for not trigger reservation change
-          var a = this.reservationAction.mousePos[0] - ev.x;
-          var b = this.reservationAction.mousePos[1] - ev.y;
-          var dist = Math.sqrt(a*a + b*b);
-          if (this.reservationAction.action == HotelCalendar.ACTION.MOVE_RIGHT) {
-            reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
-            if (reserv.fixDays) {
-              this._reset_action_reservation();
-              return true;
-            }
-            if (!date_cell.isAfter(reserv.startDate, 'd')) {
-              date_cell = reserv.startDate.clone().startOf('day').add(1, 'd');
-            }
-            if (!this.reservationAction.oldReservationObj) {
-              this.reservationAction.oldReservationObj = reserv.clone();
-            }
-            reserv.endDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
-            this.reservationAction.newReservationObj = reserv;
-            needUpdate = true;
-          } else if (this.reservationAction.action == HotelCalendar.ACTION.MOVE_LEFT) {
-            reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
-            if (reserv.fixDays) {
-              this._reset_action_reservation();
-              return true;
-            }
-            var ndate = reserv.endDate.clone().endOf('day').subtract(1, 'd');
-            if (!date_cell.isBefore(ndate, 'd')) {
-              date_cell = ndate;
-            }
-            if (!this.reservationAction.oldReservationObj) {
-              this.reservationAction.oldReservationObj = reserv.clone();
-            }
-            reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
-            this.reservationAction.newReservationObj = reserv;
-            needUpdate = true;
-          } else if (this.reservationAction.action == HotelCalendar.ACTION.MOVE_ALL && dist > 0) {
-            reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
-            if (!this.reservationAction.oldReservationObj) {
-              this.reservationAction.oldReservationObj = reserv.clone();
-            }
-            var parentRow = this.$base.querySelector(`#${ev.target.dataset.hcalParentRow}`);
-            var room = this.getRoom(parentRow.dataset.hcalRoomObjId);
-            reserv.room = room;
-            var diff_date = this.getDateDiffDays(reserv.startDate, reserv.endDate);
-            reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
-            var date_end = reserv.startDate.clone().add(diff_date, 'd');
-            reserv.endDate.set({'date': date_end.date(), 'month': date_end.month(), 'year': date_end.year()});
-            this.reservationAction.newReservationObj = reserv;
-            toRoom = +ev.target.dataset.hcalBedNum;
-            needUpdate = true;
-          }
+    var date_cell = HotelCalendar.toMoment(this.etable.querySelector(`#${ev.target.dataset.hcalParentCell}`).dataset.hcalDate);
+    if (this._isLeftButtonPressed(ev)) {
+      var reserv = null;
+      var toRoom = undefined;
+      var needUpdate = false;
+      if (!this.reservationAction.reservation) {
+        if (this.cellSelection.start && this.cellSelection.start.dataset.hcalParentRow === ev.target.dataset.hcalParentRow) {
+          this.cellSelection.current = ev.target;
         }
+        this._updateCellSelection();
+      } else if (this.reservationAction.mousePos) {
+        // workarround for not trigger reservation change
+        var a = this.reservationAction.mousePos[0] - ev.x;
+        var b = this.reservationAction.mousePos[1] - ev.y;
+        var dist = Math.sqrt(a*a + b*b);
+        if (this.reservationAction.action == HotelCalendar.ACTION.MOVE_RIGHT) {
+          reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
+          if (reserv.fixDays) {
+            this._reset_action_reservation();
+            return true;
+          }
+          if (!date_cell.isAfter(reserv.startDate, 'd')) {
+            date_cell = reserv.startDate.clone().startOf('day').add(1, 'd');
+          }
+          if (!this.reservationAction.oldReservationObj) {
+            this.reservationAction.oldReservationObj = reserv.clone();
+          }
+          reserv.endDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
+          this.reservationAction.newReservationObj = reserv;
+          needUpdate = true;
+        } else if (this.reservationAction.action == HotelCalendar.ACTION.MOVE_LEFT) {
+          reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
+          if (reserv.fixDays) {
+            this._reset_action_reservation();
+            return true;
+          }
+          var ndate = reserv.endDate.clone().endOf('day').subtract(1, 'd');
+          if (!date_cell.isBefore(ndate, 'd')) {
+            date_cell = ndate;
+          }
+          if (!this.reservationAction.oldReservationObj) {
+            this.reservationAction.oldReservationObj = reserv.clone();
+          }
+          reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
+          this.reservationAction.newReservationObj = reserv;
+          needUpdate = true;
+        } else if (this.reservationAction.action == HotelCalendar.ACTION.MOVE_ALL && dist > 0) {
+          reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
+          if (!this.reservationAction.oldReservationObj) {
+            this.reservationAction.oldReservationObj = reserv.clone();
+          }
 
-        if (needUpdate && reserv) {
-          this._updateScroll(reserv._html);
+          var parentRow = ev.target.parentNode.parentNode.parentNode.parentNode;
+          var room = this.getRoom(parentRow.dataset.hcalRoomObjId);
+          reserv.room = room;
+          var diff_date = this.getDateDiffDays(reserv.startDate, reserv.endDate);
+          reserv.startDate.set({'date': date_cell.date(), 'month': date_cell.month(), 'year': date_cell.year()});
+          var date_end = reserv.startDate.clone().add(diff_date, 'd');
+          reserv.endDate.set({'date': date_end.date(), 'month': date_end.month(), 'year': date_end.year()});
+          this.reservationAction.newReservationObj = reserv;
+          toRoom = +ev.target.dataset.hcalBedNum;
+          needUpdate = true;
+        }
+      }
 
-          var affectedReservations = [reserv].concat(this.getLinkedReservations(this.reservationAction.newReservationObj));
-          for (var areserv of affectedReservations) {
-            if (areserv !== reserv) {
-              areserv.startDate = reserv.startDate.clone();
-              areserv.endDate = reserv.endDate.clone();
+      if (needUpdate && reserv) {
+        _.defer(function(r){ this._updateScroll(r._html); }.bind(this), reserv)
+
+        var affectedReservations = [reserv].concat(this.getLinkedReservations(this.reservationAction.newReservationObj));
+        for (var areserv of affectedReservations) {
+          if (areserv !== reserv) {
+            areserv.startDate = reserv.startDate.clone();
+            areserv.endDate = reserv.endDate.clone();
+          }
+
+          if (areserv._html) {
+            if (areserv.unusedZone) {
+              areserv._html.style.visibility = 'hidden';
+              continue;
             }
-
-            if (areserv._html) {
-              if (areserv.unusedZone) {
-                areserv._html.style.visibility = 'hidden';
-                continue;
-              }
-
+            _.defer(function(ro, r, tro){
               this._calcReservationCellLimits(
-                areserv,
-                areserv===reserv?toRoom:undefined,
+                r,
+                r===ro?tro:undefined,
                 !this.options.assistedMovement);
-              this._updateDivReservation(areserv);
+              this._updateDivReservation(r);
 
-              if (!this.checkReservationPlace(areserv) || !areserv._limits.isValid()) {
-                areserv._html.classList.add('hcal-reservation-invalid');
-              } else {
-                areserv._html.classList.remove('hcal-reservation-invalid');
+              if (!r._limits.isValid() || !this.checkReservationPlace(r) ||
+                  (r.fixRooms && this.reservationAction.oldReservationObj.room.id != r.room.id) ||
+                  (r.fixDays && !this.reservationAction.oldReservationObj.startDate.isSame(r.startDate, 'day'))) {
+                r._html.classList.add('hcal-reservation-invalid');
               }
-
-              if (areserv.fixRooms && this.reservationAction.oldReservationObj.room.id != areserv.room.id) {
-                areserv._html.classList.add('hcal-reservation-invalid');
+              else {
+                r._html.classList.remove('hcal-reservation-invalid');
               }
-              if (areserv.fixDays && !this.reservationAction.oldReservationObj.startDate.isSame(areserv.startDate, 'day')) {
-                areserv._html.classList.add('hcal-reservation-invalid');
-              }
-            }
+            }.bind(this), reserv, areserv, toRoom);
           }
         }
       }
-    }.bind(this), ev);
+    }
   },
 
   onMainKeyUp: function(/*EventObject*/ev) {
