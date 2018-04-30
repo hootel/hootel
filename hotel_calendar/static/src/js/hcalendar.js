@@ -341,10 +341,6 @@ HotelCalendar.prototype = {
                                    bedNum);
       }
 
-      if (reservation.getUserData('folio_id') == 38) {
-        console.log(reservation);
-      }
-
       // Exists other reservation in the same place?
       if (!notCheck && limits.isValid()) {
         var diff_date = this.getDateDiffDays(reservation.startDate, reservation.endDate);
@@ -1622,7 +1618,6 @@ HotelCalendar.prototype = {
   },
 
   _updateReservations: function(/*Bool*/updateLimits) {
-      console.log(this._reservations);
       for (var reservation of this._reservations){
         if (updateLimits) {
           this._calcReservationCellLimits(reservation);
