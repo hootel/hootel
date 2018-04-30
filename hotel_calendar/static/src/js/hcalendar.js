@@ -64,6 +64,7 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
   this._pricelist_id = -1;
   this._restrictions = restrictions || {};
   this._reservations = [];
+  this._reservationsMap = {};
   this._modeSwap = HotelCalendar.MODE.NONE;
   this._endDate = this.options.startDate.clone().add(this.options.days, 'd');
   this.tableCreated = false;
@@ -172,53 +173,49 @@ HotelCalendar.prototype = {
     } else {
       // Merge
       var uzr = [];
+      for (var r of reservations) {
+        var rindex = !forced?_.findKey(this._reservations, {'id': r.id}):false;
+        if (rindex) {
+          r._html = this._reservations[rindex]._html;
+          this._reservations[rindex] = r;
+          this._cleanUnusedZones(r);
+        } else {
+          this._reservations.push(r);
+        }
+      }
 
       // Two phases (1. Reservations, 2. Unused Zones)
-      _.defer(function(){
-        for (var i=0; i<2; ++i) {
-          if (i === 1) {
-            if (uzr && uzr.length > 0) {
-              reservations = uzr;
-            } else { break; }
-          }
-          for (var r of reservations) {
-            if ((i===0 && r.unusedZone) || (i===1 && !r.unusedZone)) {
-              continue;
-            }
+      _.defer(function(reservs){
+        var unusedZones = this._createUnusedZones(reservs);
+        // Add Unused Zones
+        this._reservations = this._reservations.concat(unusedZones);
+        // Create Map2
+        this._updateReservationsMap();
 
-            var rindex = !forced?_.findKey(this._reservations, {'id': r.id}):false;
-            if (rindex) {
-              r._html = this._reservations[rindex]._html;
-              this._reservations[rindex] = r;
-              this._cleanUnusedZones(r);
-            } else {
-              rindex = this._reservations.push(r) - 1;
-            }
-
-            uzr = uzr.concat(this._createUnusedZones([r]));
-            this._calcReservationCellLimits(r);
-            if (r._html) {
+        reservs = reservs.concat(unusedZones);
+        for (var r of reservs) {
+          this._calcReservationCellLimits(r);
+          if (r._html) {
+            r._html.innerText = r.title;
+          } else {
+            if (r._limits.isValid()) {
+              r._html = document.createElement('div');
+              r._html.dataset.hcalReservationObjId = r.id;
+              r._html.classList.add('hcal-reservation');
+              r._html.classList.add('noselect');
               r._html.innerText = r.title;
-            } else {
-              if (r._limits.isValid()) {
-                r._html = document.createElement('div');
-                r._html.dataset.hcalReservationObjId = r.id;
-                r._html.classList.add('hcal-reservation');
-                r._html.classList.add('noselect');
-                r._html.innerText = r.title;
-                this.edivr.appendChild(r._html);
+              this.edivr.appendChild(r._html);
 
-                if (r.unusedZone) {
-                	r._html.classList.add('hcal-unused-zone');
-                } else {
-                	this._assignReservationsEvents([r._html]);
-                }
+              if (r.unusedZone) {
+              	r._html.classList.add('hcal-unused-zone');
+              } else {
+              	this._assignReservationsEvents([r._html]);
               }
             }
-            this._updateReservation(r);
           }
+          this._updateReservation(r);
         }
-      }.bind(this));
+      }.bind(this), reservations);
 
       _.defer(function(){ this._updateReservationOccupation(); }.bind(this));
     }
@@ -244,6 +241,7 @@ HotelCalendar.prototype = {
         }
       }
       this._reservations = _.without(this._reservations, reserv);
+      this._updateReservationsMap();
     } else {
       console.warn(`[HotelCalendar][removeReservation] Can't remove '${reservation.id}' reservation!`);
     }
@@ -251,21 +249,39 @@ HotelCalendar.prototype = {
 
   getReservationsByDay: function(/*MomentObject*/day, /*Bool?*/noCheckouts, /*Bool?*/includeUnusedZones, /*Int?*/nroom, /*Int?*/nbed, /*HReservation?*/ignoreThis) {
     var inclusivity = noCheckouts?'[)':'[]';
-    return _.filter(this._reservations, function(item){
-      return day.isBetween(item.startDate, item.endDate, 'day', inclusivity) &&
-              (typeof nroom === 'undefined' || item.room.number == nroom) &&
-              (typeof nbed === 'undefined' || item._beds.includes(nbed)) &&
-              ((includeUnusedZones && item.unusedZone) || !item.unusedZone) &&
-              item !== ignoreThis;
-    });
+
+    if (typeof nroom !== 'undefined') {
+      return _.filter(this._reservationsMap[nroom], function(item){
+        return day.isBetween(item.startDate, item.endDate, 'day', inclusivity) &&
+                (typeof nbed === 'undefined' || item._beds.includes(nbed)) &&
+                ((includeUnusedZones && item.unusedZone) || !item.unusedZone) &&
+                item !== ignoreThis;
+      });
+    } else {
+      return _.filter(this._reservations, function(item){
+        return day.isBetween(item.startDate, item.endDate, 'day', inclusivity) &&
+                (typeof nbed === 'undefined' || item._beds.includes(nbed)) &&
+                ((includeUnusedZones && item.unusedZone) || !item.unusedZone) &&
+                item !== ignoreThis;
+      });
+    }
   },
 
   getReservationsByRoom: function(/*Int,HRoomObject*/room, /*Boolean*/includeUnusedZones) {
     if (!(room instanceof HRoom)) { room = this.getRoom(room); }
-    return _.filter(this._reservations, function(item){
-      return item.room.id === room.id &&
-              (includeUnusedZones || (!includeUnusedZones && !item.unusedZone));
+    return _.filter(this._reservationsMap[room.id], function(item){
+      return (includeUnusedZones || (!includeUnusedZones && !item.unusedZone));
     });
+  },
+
+  _updateReservationsMap: function() {
+    this._reservationsMap = {};
+    for (var r of this._reservations) {
+      if (!(r.room.id in this._reservationsMap)) {
+        this._reservationsMap[r.room.id] = [];
+      }
+      this._reservationsMap[r.room.id].push(r);
+    }
   },
 
   _calcReservationCellLimits: function(/*HReservationObject*/reservation, /*Int?*/nbed, /*Bool?*/notCheck) {
@@ -336,7 +352,7 @@ HotelCalendar.prototype = {
         var ndate = reservation.startDate.clone();
         for (var i=0; i<diff_date; ++i) {
           for (var b=0; b<=numBeds; ++b) {
-            var reservs = this.getReservationsByDay(ndate, true, true, reservation.room.number, +limits.left.dataset.hcalBedNum+b, reservation);
+            var reservs = this.getReservationsByDay(ndate, true, true, reservation.room.id, +limits.left.dataset.hcalBedNum+b, reservation);
             if (reservs.length) {
               notFound = true;
               nbed = nbed?nbed+1:+limits.left.dataset.hcalBedNum+b+1;
@@ -1230,7 +1246,7 @@ HotelCalendar.prototype = {
       var outMaxPersons = this.reservationAction.outReservations.length>0?_.max(this.reservationAction.outReservations, function(item) { return item.getTotalPersons(); }).getTotalPersons():false;
       var refInReservation = this.reservationAction.inReservations[0];
       var refOutReservation = this.reservationAction.outReservations[0];
-      var realDateLimits = this.getFreeDatesByRoom(dateLimits[0], dateLimits[1], refInReservation?refInReservation.room.number:refOutReservation.room.number);
+      var realDateLimits = this.getFreeDatesByRoom(dateLimits[0], dateLimits[1], refInReservation?refInReservation.room.id:refOutReservation.room.id);
       for (var nreserv of this._reservations) {
         if (nreserv._html.classList.contains('hcal-reservation-swap-in-selected') || nreserv._html.classList.contains('hcal-reservation-swap-out-selected')) {
           continue;
@@ -1407,7 +1423,7 @@ HotelCalendar.prototype = {
 
   //==== RESERVATIONS
   _updateDivReservation: function(/*HReservationObject*/reserv) {
-    if (!reserv._limits.isValid()) {
+    if (!reserv._limits.isValid() || !reserv._html) {
       return;
     }
 
@@ -1484,9 +1500,9 @@ HotelCalendar.prototype = {
       return false;
     }
     var fromDateLimits = this.getDateLimits(fromReservations);
-    var fromRealDateLimits = this.getFreeDatesByRoom(fromDateLimits[0], fromDateLimits[1], fromReservations[0].room.number);
+    var fromRealDateLimits = this.getFreeDatesByRoom(fromDateLimits[0], fromDateLimits[1], fromReservations[0].room.id);
     var toDateLimits = this.getDateLimits(toReservations);
-    var toRealDateLimits = this.getFreeDatesByRoom(toDateLimits[0], toDateLimits[1], toReservations[0].room.number);
+    var toRealDateLimits = this.getFreeDatesByRoom(toDateLimits[0], toDateLimits[1], toReservations[0].room.id);
 
     if (fromDateLimits[0].isSameOrAfter(toRealDateLimits[0], 'd') && fromDateLimits[1].isSameOrBefore(toRealDateLimits[1], 'd') &&
         toDateLimits[0].isSameOrAfter(fromRealDateLimits[0], 'd') && toDateLimits[1].isSameOrBefore(fromRealDateLimits[1], 'd'))
@@ -1575,6 +1591,7 @@ HotelCalendar.prototype = {
     delete this._reservations[index];
     this._reservations[index] = newReservationObj;
     reservationObj._html.dataset.hcalReservationObjId = newReservationObj.id;
+    this._updateReservationsMap();
     this._updateDivReservation(newReservationObj);
 
     var linkedReservations = this.getLinkedReservations(newReservationObj);
@@ -1605,6 +1622,7 @@ HotelCalendar.prototype = {
   },
 
   _updateReservations: function(/*Bool*/updateLimits) {
+      console.log(this._reservations);
       for (var reservation of this._reservations){
         if (updateLimits) {
           this._calcReservationCellLimits(reservation);
@@ -1922,20 +1940,20 @@ HotelCalendar.prototype = {
     return [start_date, end_date];
   },
 
-  getFreeDatesByRoom: function(/*MomentObject*/dateStart, /*MomentObject*/dateEnd, /*Int*/roomNumber) {
+  getFreeDatesByRoom: function(/*MomentObject*/dateStart, /*MomentObject*/dateEnd, /*Int*/roomId) {
     var daysLeft = this.getDateDiffDays(this.options.startDate, dateStart);
     var daysRight = this.getDateDiffDays(dateEnd, this._endDate);
     var freeDates = [dateStart, dateEnd];
 
     for (var i=1; i<daysLeft; i++) {
       var ndate = dateStart.clone().subtract(i, 'd');
-      var reservs = this.getReservationsByDay(ndate, false, false, roomNumber);
+      var reservs = this.getReservationsByDay(ndate, false, false, roomId);
       if (reservs.length != 0) { break; }
       freeDates[0] = ndate;
     }
     for (var i=1; i<daysRight; i++) {
       var ndate = dateEnd.clone().add(i, 'd');
-      var reservs = this.getReservationsByDay(ndate, false, false, roomNumber);
+      var reservs = this.getReservationsByDay(ndate, false, false, roomId);
       if (reservs.length != 0) { break; }
       freeDates[1] = ndate;
     }
@@ -1970,7 +1988,7 @@ HotelCalendar.prototype = {
       return false;
     }
 
-    for (var r of this._reservations) {
+    for (var r of this._reservationsMap[reservationObj.room.id]) {
       if (r !== reservationObj && reservationObj.room.number == r.room.number &&
           (_.difference(reservationObj._beds, r._beds).length != reservationObj._beds.length || this.options.divideRoomsByCapacity) &&
           (r.startDate.isBetween(reservationObj.startDate, reservationObj.endDate, 'day', '[)') ||
