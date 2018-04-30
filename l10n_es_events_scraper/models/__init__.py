@@ -2,10 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
-#                       Dario Lodeiros <>
-#                       Alexandre Díaz <dev@redneboa.es>
-#
+#    Copyright (C) 2018 Alexandre Díaz <dev@redneboa.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,10 +18,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import hotel_wizard
-from . import sale_make_invoice_advance
-from . import checkinwizard
-from . import massive_changes
-from . import split_reservation
-from . import duplicate_reservation
-from . import massive_price_reservation_days
+from . import inherited_calendar_event

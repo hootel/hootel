@@ -6,7 +6,7 @@
  */
 
 .hcal-management-table, .hcal-management-table-day {
-	border-collapse: initial !important;
+	border-collapse: collapse !important;
 	table-layout: fixed;
 }
 .hcal-management-table > tbody {
@@ -21,8 +21,8 @@
 	height: 1.5em;
 	min-height: 1.5em;
 	white-space: nowrap;
-	overflow: hidden;
-	border: 1px solid #cecece !important;
+	/*overflow: hidden;*/
+	border: 1px solid black !important;
 }
 .hcal-management-table > tbody > tr > td {
 	/*text-align: center !important;*/
@@ -32,8 +32,9 @@
 	height: 115px;
 	min-height: 100px;
 	white-space: nowrap;
-	overflow: hidden;
-	border: 1px solid #cecece !important;
+	/*overflow: hidden;*/
+	padding: 5px !important;
+	border: 1px solid black;
 }
 .hcal-management-table thead td {
 	text-align: center !important;
@@ -59,12 +60,9 @@
 	font-size: 9px;
 }
 
-.hcal-management-table-day td {
-	border: 0px !important;
-}
-
 .hcal-management-table-day {
 	height: 100%;
+	border-collapse: collapse !important;
 }
 .hcal-management-table-day td {
 	padding: 2px;
@@ -80,7 +78,7 @@
 
 .table-vrooms {
 	float: left;
-	margin-top: 1.5em;
+	margin-top: 1.6em;
 }
 
 #hcal_management_widget {
@@ -109,6 +107,10 @@
 	border: 1px solid gray;
 }
 
+.hcal-management-record-changed {
+	background-color: #FFFF66 !important;
+}
+
 table.hcal-management-table  input {
 	border: 1px solid lightgray;
 }
@@ -123,11 +125,16 @@ table.hcal-management-table  input {
 	border-bottom-left-radius: 25px;
 }
 
+.hcal-management-record-options {
+	padding: 0.5em;
+}
+
 button.hcal-management-input {
 	font-size: 9px;
 	border: 1px solid gray;
 	padding: 0.5em 2em 0.2em 2em;
 	border-radius: 3px;
+	margin: 0.2em;
 
 	background: rgba(255,255,255,1);
 	background: -moz-linear-gradient(top, rgba(255,255,255,1) 0%, rgba(227,227,227,1) 47%, rgba(194,194,194,1) 100%);

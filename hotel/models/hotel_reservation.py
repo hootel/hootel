@@ -180,7 +180,7 @@ class HotelReservation(models.Model):
             ndate = "%s %s:00" % \
                 (now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                  default_arrival_hour)
-            ndate_dt = date_utils.get_datetime(ndate, tz=tz_hotel)
+            ndate_dt = date_utils.get_datetime(ndate, stz=tz_hotel)
             ndate_dt = date_utils.dt_as_timezone(ndate_dt, 'UTC')
             return ndate_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
@@ -202,7 +202,7 @@ class HotelReservation(models.Model):
             ndate = "%s %s:00" % \
                 (now_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
                  default_departure_hour)
-            ndate_dt = date_utils.get_datetime(ndate, tz=tz_hotel)
+            ndate_dt = date_utils.get_datetime(ndate, stz=tz_hotel)
             ndate_dt = date_utils.dt_as_timezone(ndate_dt, 'UTC')
             return ndate_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
@@ -686,6 +686,15 @@ class HotelReservation(models.Model):
         if not self.checkout:
             self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
+        if self.product_id:
+            room = self.env['hotel.room'].search([
+                ('product_id', '=', self.product_id.id)
+            ])
+            if self.adults == 0:
+                self.adults = room.capacity
+            if not self.virtual_room_id and room.price_virtual_room:
+                self.virtual_room_id = room.price_virtual_room.id
+
         # UTC -> Hotel tz
         tz = self.env['ir.values'].get_default('hotel.config.settings',
                                                'tz_hotel')
@@ -705,7 +714,7 @@ class HotelReservation(models.Model):
             checkout_str = (chkin_utc_dt + timedelta(days=1)).strftime(
                                                     DEFAULT_SERVER_DATE_FORMAT)
             checkout_str = "%s %s:00" % (checkout_str, dpt_hour)
-            checkout_dt = date_utils.get_datetime(checkout_str, tz=tz)
+            checkout_dt = date_utils.get_datetime(checkout_str, stz=tz)
             checkout_utc_dt = date_utils.dt_as_timezone(checkout_dt, 'UTC')
             self.checkout = checkout_utc_dt.strftime(
                                                 DEFAULT_SERVER_DATETIME_FORMAT)
@@ -739,14 +748,7 @@ class HotelReservation(models.Model):
             self.cardex_pending = 0
         else:
             self.price_unit = rlines['total_price']
-        if self.product_id:
-            room = self.env['hotel.room'].search([
-                ('product_id', '=', self.product_id.id)
-            ])
-            if self.adults == 0:
-                self.adults = room.capacity
-            if not self.virtual_room_id and room.price_virtual_room:
-                self.virtual_room_id = room.price_virtual_room.id
+        
 
     @api.model
     def get_availability(self, checkin, checkout, product_id, dbchanged=True,
@@ -998,7 +1000,7 @@ class HotelReservation(models.Model):
         days_diff = date_utils.date_diff(str_checkin_utc, str_checkout_utc,
                                          hours=False) + 1
         dates_list = date_utils.generate_dates_list(checkin_dt, days_diff,
-                                                    tz=tz_hotel)
+                                                    stz=tz_hotel)
         reservations = self.env['hotel.reservation'].search([
             ('reservation_lines.date', 'in', dates_list),
             ('state', '!=', 'cancelled'),

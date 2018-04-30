@@ -207,8 +207,7 @@ var HotelCalendarView = View.extend({
       if (this._hcalendar) {
         // FIXME: Workaround for restore "lost" reservations (Drawn when the view is hidden)
         setTimeout(function(){
-          var reservations = self._hcalendar.getReservations();
-          for (var reserv of reservations) {
+          for (var reserv of self._hcalendar._reservations) {
             var style = window.getComputedStyle(reserv._html, null);
             if (parseInt(style.width, 10) < 15 || parseInt(style.height, 10) < 15) {
               self._hcalendar._updateReservation(reserv);
@@ -392,8 +391,7 @@ var HotelCalendarView = View.extend({
             var newPrice = ev.detail.newPrice;
             var folio_id = newReservation.getUserData('folio_id');
 
-            var reservs = self._hcalendar.getReservations(newReservation);
-            var linkedReservs = _.find(reservs, function(item){
+            var linkedReservs = _.find(self._hcalendar._reservations, function(item){
                 return (item.getUserData('folio_id') === folio_id);
             });
 
@@ -1126,15 +1124,16 @@ var HotelCalendarView = View.extend({
             }
 
             var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc();
-
-            this._hcalendar.setStartDate(date_begin, this._hcalendar.getDateDiffDays(date_begin, date_end));
-            this.reload_hcalendar_reservations(false, true, true);
+            this._hcalendar.setStartDate(date_begin, this._hcalendar.getDateDiffDays(date_begin, date_end), false, function(){
+              _.defer(function(){ this.reload_hcalendar_reservations(false, true, true); }.bind(this));
+            }.bind(this));
         }
     },
 
     _on_bus_signal: function(notifications) {
         var need_reload_pricelists = false;
         var need_update_counters = false;
+        var nreservs = []
         for (var notif of notifications) {
           if (notif[0][1] === 'hotel.reservation') {
             switch (notif[1]['type']) {
@@ -1162,6 +1161,7 @@ var HotelCalendarView = View.extend({
                   this._hcalendar.removeReservation(reserv['reserv_id'], true);
                   this._reserv_tooltips = _.pick(this._reserv_tooltips, function(value, key, obj){ return key != reserv['reserv_id']; });
                 } else {
+                  nreservs = _.reject(nreservs, {'id': reserv['reserv_id']}); // Only like last changes
                   var room = this._hcalendar.getRoom(reserv['product_id'], reserv['overbooking'], reserv['reserv_id']);
                   // need create a overbooking row?
                   if (!room && reserv['overbooking']) {
@@ -1179,8 +1179,8 @@ var HotelCalendarView = View.extend({
                       'title': reserv['partner_name'],
                       'adults': reserv['adults'],
                       'childrens': reserv['children'],
-                      'startDate': HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
-                      'endDate': HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT).clone(),
+                      'startDate': HotelCalendar.toMomentUTC(reserv['checkin'], ODOO_DATETIME_MOMENT_FORMAT),
+                      'endDate': HotelCalendar.toMomentUTC(reserv['checkout'], ODOO_DATETIME_MOMENT_FORMAT),
                       'color': reserv['reserve_color'],
                       'colorText': reserv['reserve_color_text'],
                       'splitted': reserv['splitted'],
@@ -1194,7 +1194,7 @@ var HotelCalendarView = View.extend({
                     nreserv.addUserData({'folio_id': reserv['folio_id']});
                     nreserv.addUserData({'parent_reservation': reserv['parent_reservation']});
                     this._reserv_tooltips[reserv['reserv_id']] = notif[1]['tooltip'];
-                    this._hcalendar.addReservations([nreserv]);
+                    nreservs.push(nreserv);
                   }
                 }
 
@@ -1211,6 +1211,7 @@ var HotelCalendarView = View.extend({
             }
           }
         }
+        this._hcalendar.addReservations(nreservs);
         if (need_update_counters) {
           this.update_buttons_counter();
         }

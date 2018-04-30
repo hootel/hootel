@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="calendar_event_view_form" model="ir.ui.view">
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='allday']" position="before">
+                    <field name="cancelled" />
+                    <field name="web_id" readonly="True" attrs="{'invisible':[('web_id', '=', False)]}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

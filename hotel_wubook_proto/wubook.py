@@ -1247,16 +1247,15 @@ class WuBook(models.TransientModel):
     # FIXME: Super big method!!! O_o
     @api.model
     def generate_reservations(self, bookings):
-        default_arrival_hour = self.env['ir.values'].get_default(
+        default_arrival_hour = self.env['ir.values'].sudo().get_default(
                             'hotel.config.settings', 'default_arrival_hour')
-        default_departure_hour = self.env['ir.values'].get_default(
+        default_departure_hour = self.env['ir.values'].sudo().get_default(
                             'hotel.config.settings', 'default_departure_hour')
 
         # Get user timezone
         user_id = self.env['res.users'].browse(self.env.uid)
         tz_hotel = self.env['ir.values'].sudo().get_default(
                                         'hotel.config.settings', 'tz_hotel')
-        local = pytz.timezone(tz_hotel and str(tz_hotel) or 'UTC')
         res_partner_obj = self.env['res.partner']
         hotel_reserv_obj = self.env['hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
@@ -1285,22 +1284,24 @@ class WuBook(models.TransientModel):
                     '', wid=book['reservation_code'])
                 continue
 
-            # Get dates for the reservation (localize them)
+            # Get dates for the reservation (GMT->UTC)
             arr_hour = book['arrival_hour'] == "--" and \
                 default_arrival_hour or book['arrival_hour']
             checkin = "%s %s" % (book['date_arrival'], arr_hour)
-            checkin_dt = datetime.strptime(checkin,
-                                           DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkin_utc_dt = checkin_dt.replace(tzinfo=local).astimezone(
-                                                                    pytz.utc)
+            checkin_dt = date_utils.get_datetime(
+                checkin,
+                dtformat=DEFAULT_WUBOOK_DATETIME_FORMAT,
+                stz=tz_hotel)
+            checkin_utc_dt = date_utils.dt_as_timezone(checkin_dt, 'UTC')
             checkin = checkin_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             checkout = "%s %s" % (book['date_departure'],
                                   default_departure_hour)
-            checkout_dt = datetime.strptime(checkout,
-                                            DEFAULT_WUBOOK_DATETIME_FORMAT)
-            checkout_utc_dt = checkout_dt.replace(tzinfo=local).astimezone(
-                                                                    pytz.utc)
+            checkout_dt = date_utils.get_datetime(
+                checkout,
+                dtformat=DEFAULT_WUBOOK_DATETIME_FORMAT,
+                stz=tz_hotel)
+            checkout_utc_dt = date_utils.dt_as_timezone(checkout_dt, 'UTC')
             checkout = checkout_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
             # Search Folio. If exists.
