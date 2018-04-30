@@ -22,7 +22,7 @@
 
 {
     'name': 'Hotel MyDataBI Exporter',
-    'version': '1.0',
+    'version': '1.1',
     'author': "Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>",
     'website': 'https://www.aldahotels.com',
     'category': 'hotel/revenue',
@@ -34,7 +34,7 @@
 
     Create a user and give the 'Hotel Management/Export data BI' permission.
     """,
-    'depends': ['hotel', 'hotel_l10n_es'],
+    'depends': ['hotel', 'hotel_l10n_es','hotel_wubook_proto'],
     'data': [
         'views/data_bi.xml',
         'views/inherit_res_company.xml',

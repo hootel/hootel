@@ -513,8 +513,8 @@ class HotelReservation(models.Model):
         state = folio.state     # FIX
         folio.state = 'draft'   # FIX
         osplitted_reservs = splitted_reservs - master_reservation
-        osplitted_reservs.unlink()
-        folio.state = state  #FIX
+        osplitted_reservs.sudo().unlink()
+        folio.state = state  # FIX
 
         # FIXME: Two writes because checkout regenerate reservation lines
         master_reservation.write({
@@ -678,7 +678,7 @@ class HotelReservation(models.Model):
         else:
             self.price_unit = rlines['total_price']
 
-    @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type')
+    @api.onchange('checkin', 'checkout', 'product_id', 'reservation_type', 'virtual_room_id')
     def on_change_checkin_checkout_product_id(self):
         _logger.info('on_change_checkin_checkout_product_id')
         if not self.checkin:
@@ -686,16 +686,25 @@ class HotelReservation(models.Model):
         if not self.checkout:
             self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
+        if self.product_id:
+            room = self.env['hotel.room'].search([
+                ('product_id', '=', self.product_id.id)
+            ])
+            if self.adults == 0:
+                self.adults = room.capacity
+            if not self.virtual_room_id and room.price_virtual_room:
+                self.virtual_room_id = room.price_virtual_room.id
+
         # UTC -> Hotel tz
         tz = self.env['ir.values'].get_default('hotel.config.settings',
                                                'tz_hotel')
         chkin_utc_dt = date_utils.get_datetime(self.checkin)
         chkout_utc_dt = date_utils.get_datetime(self.checkout)
 
-        if self.product_id:
+        if self.virtual_room_id:
             checkin_str = chkin_utc_dt.strftime('%d/%m/%Y')
             checkout_str = chkout_utc_dt.strftime('%d/%m/%Y')
-            self.name = self.product_id.name + ': ' + checkin_str + ' - '\
+            self.name = self.virtual_room_id.name + ': ' + checkin_str + ' - '\
                 + checkout_str
             self.product_uom = self.product_id.uom_id
 
@@ -739,14 +748,7 @@ class HotelReservation(models.Model):
             self.cardex_pending = 0
         else:
             self.price_unit = rlines['total_price']
-        if self.product_id:
-            room = self.env['hotel.room'].search([
-                ('product_id', '=', self.product_id.id)
-            ])
-            if self.adults == 0:
-                self.adults = room.capacity
-            if not self.virtual_room_id and room.price_virtual_room:
-                self.virtual_room_id = room.price_virtual_room.id
+        
 
     @api.model
     def get_availability(self, checkin, checkout, product_id, dbchanged=True,
@@ -794,9 +796,9 @@ class HotelReservation(models.Model):
         cmds = [(5, False, False)]
         # TO-DO: Redesign relation between hotel.reservation
         # and sale.order.line to allow manage days by units in order
-        if self.invoice_status == 'invoiced' and not self.splitted:
-            raise ValidationError(_("This reservation is already invoiced. \
-                        To expand it you must create a new reservation."))
+        #~ if self.invoice_status == 'invoiced' and not self.splitted:
+            #~ raise ValidationError(_("This reservation is already invoiced. \
+                        #~ To expand it you must create a new reservation."))
         hotel_tz = self.env['ir.values'].sudo().get_default(
             'hotel.config.settings', 'hotel_tz')
         start_date_utc_dt = date_utils.get_datetime(str_start_date_utc)
