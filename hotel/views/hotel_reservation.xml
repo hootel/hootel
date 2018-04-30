@@ -85,6 +85,8 @@
                                             <field name="price" />
                                         </tree>
                                     </field>
+                                    <button name="%(action_hotel_massive_price_change_reservation_days)d" string="Massive Change" type="action"
+                          						class="oe_highlight pull-right oe_edit_only" icon="fa-bolt"/>
                                 </page>
                                 <page name="services" string="Services">
                                     <separator string="Related services" />
