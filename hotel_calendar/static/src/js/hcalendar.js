@@ -1985,7 +1985,7 @@ HotelCalendar.prototype = {
 
     if (reservationObj.room.id in this._reservationsMap) {
       for (var r of this._reservationsMap[reservationObj.room.id]) {
-        if (r !== reservationObj && reservationObj.room.number == r.room.number &&
+        if (!r.unusedZone && r !== reservationObj && reservationObj.room.number == r.room.number &&
             (_.difference(reservationObj._beds, r._beds).length != reservationObj._beds.length || this.options.divideRoomsByCapacity) &&
             (r.startDate.isBetween(reservationObj.startDate, reservationObj.endDate, 'day', '[)') ||
               r.endDate.isBetween(reservationObj.startDate, reservationObj.endDate, 'day', '(]') ||
