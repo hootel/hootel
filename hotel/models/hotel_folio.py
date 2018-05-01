@@ -200,12 +200,13 @@ class HotelFolio(models.Model):
             fol.write({'checkouts_reservations': count_checkout})
         return True
 
-    @api.depends('amount_total', 'room_lines', 'service_lines')
+    @api.depends('order_line.price_total')
     @api.multi
     def compute_invoices_amount(self):
         _logger.info('compute_invoices_amount')
         acc_pay_obj = self.env['account.payment']
         for record in self:
+            record.order_id._amount_all()
             total_inv_refund = 0
             payments = acc_pay_obj.search([
                 '|',
@@ -216,7 +217,7 @@ class HotelFolio(models.Model):
             return_lines = self.env['payment.return.line'].search([('move_line_ids','in',payments.mapped('move_line_ids.id'))])
             total_inv_refund = sum(pay_return.amount for pay_return in return_lines)
             for inv in record.invoice_ids:
-                if inv.type == 'out_refund':
+                if inv.type == 'out_refund' and inv.state != 'cancel':
                     total_inv_refund += inv.amount_total
             vals = {
                 'invoices_amount': record.amount_total - total_paid + total_inv_refund,
