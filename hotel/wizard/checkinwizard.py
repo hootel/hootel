@@ -11,8 +11,8 @@ class Wizard(models.TransientModel):
     _name = 'checkin.wizard'
 
     def default_enter_date(self):
-        if 'reservation_ids' and 'folio' in self.env.context:
-            ids = [item[1] for item in self.env.context['reservation_ids']]
+        if ('reservation_ids' and 'folio') in self.env.context:
+            ids = [item[1] for item in self.env.context.get('reservation_ids')]
             reservations = self.env['hotel.reservation'].browse(ids)
             for res in reservations:
                 return res.checkin
@@ -21,8 +21,8 @@ class Wizard(models.TransientModel):
         return False
 
     def default_exit_date(self):
-        if 'reservation_ids' and 'folio' in self.env.context:
-            ids = [item[1] for item in self.env.context['reservation_ids']]
+        if ('reservation_ids' and 'folio') in self.env.context:
+            ids = [item[1] for item in self.env.context.get('reservation_ids')]
             reservations = self.env['hotel.reservation'].browse(ids)
             for res in reservations:
                 return res.checkout
@@ -31,8 +31,8 @@ class Wizard(models.TransientModel):
         return False
 
     def default_reservation_id(self):
-        if 'reservation_ids' and 'folio' in self.env.context:
-            ids = [item[1] for item in self.env.context['reservation_ids']]
+        if ('reservation_ids' and 'folio') in self.env.context:
+            ids = [item[1] for item in self.env.context.get('reservation_ids')]
             reservations = self.env['hotel.reservation'].browse(ids)
             if len(reservations) == 1:
                 # return current room line (onlyone in this case)
@@ -54,8 +54,8 @@ class Wizard(models.TransientModel):
         return False
 
     def default_cardex_ids(self):
-        if 'reservation_ids' and 'folio' in self.env.context:
-            ids = [item[1] for item in self.env.context['reservation_ids']]
+        if ('reservation_ids' and 'folio') in self.env.context:
+            ids = [item[1] for item in self.env.context.get('reservation_ids')]
             reservations = self.env['hotel.reservation'].browse(ids)
             for res in reservations:
                 return res.cardex_ids
