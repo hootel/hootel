@@ -206,6 +206,15 @@ class HotelReservation(models.Model):
             ndate_dt = date_utils.dt_as_timezone(ndate_dt, 'UTC')
             return ndate_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
+    @api.constrains('checkin', 'checkout') #Why dont run api.depends?¿? 
+    def _computed_nights(self):
+        for res in self:
+            if res.checkin and res.checkout:
+                nights = days_diff = date_utils.date_diff(
+                    self.checkin,
+                    self.checkout, hours=False)
+            res.nights = nights
+
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
         if args is None:
@@ -309,18 +318,8 @@ class HotelReservation(models.Model):
     amount_reservation = fields.Float('Total',
                                       compute='_computed_amount_reservation')
     edit_room = fields.Boolean(default=True)
-    nights = fields.Integer('Nights',computed='_computed_nights')
+    nights = fields.Integer('Nights',computed='_computed_nights', store=True)
     channel_type = fields.Selection(related='folio_id.channel_type')
-
-    @api.depends('checkin', 'checkout')
-    def _computed_nights(self):
-        _logger.info('_computed_amount_reservation')
-        for res in self:
-            if res.checkin and res.checkout:
-                nights = days_diff = date_utils.date_diff(
-                    self.checkin,
-                    self.checkout, hours=False)
-            res.nights = nights
 
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
@@ -621,7 +620,6 @@ class HotelReservation(models.Model):
             rlines = self.prepare_reservation_lines(checkin, days_diff)
             vals.update({
                 'reservation_lines': rlines['commands'],
-                'nights': days_diff - 1,
                 'price_unit':  rlines['total_price'],
             })
         vals.update({'edit_room': False,})
