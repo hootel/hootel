@@ -60,6 +60,8 @@
                                        attrs="{'readonly':[('state','not in',('draft'))]}"/>
                                 <field name="check_rooms"/>
                                 <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>
+                                <field name="segmentation_id" widget="many2many_tags" placeholder="Segmentation..."
+                                    options="{'no_create': True,'no_open': True}" />
                             </group>
                             <group>
                                 <field name="product_uom_qty"

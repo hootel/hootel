@@ -169,6 +169,8 @@ class HotelFolio(models.Model):
         ('phone', 'Phone'),
         ('web','Web'),], 'Sales Channel')
     num_invoices = fields.Integer(compute='_compute_num_invoices')
+    segmentation_id = fields.Many2many('res.partner.category',
+                                       string='Segmentation')
 
     @api.multi
     def _compute_num_invoices(self):
@@ -279,7 +281,7 @@ class HotelFolio(models.Model):
         else:
             action = {'type': 'ir.actions.act_window_close'}
         return action
-        
+
     @api.multi
     def action_return_payments(self):
         self.ensure_one()
@@ -297,7 +299,7 @@ class HotelFolio(models.Model):
             'move_line_ids','in',payments.mapped(
             'move_line_ids.id'))])
         return_move_ids += return_lines.mapped('return_id.move_id.id')
-        
+
         return{
             'name': _('Returns'),
             'view_type': 'form',

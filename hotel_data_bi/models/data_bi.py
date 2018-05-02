@@ -268,7 +268,9 @@ class Data_Bi(models.Model):
                 id_codeine = linea.reservation_id.partner_id.code_ine.code
 
             id_segmen = 0
-            if len(linea.reservation_id.partner_id.category_id) > 0:
+            if len(linea.reservation_id.segmentation_id) > 0:
+                id_segmen = linea.reservation_id.segmentation_id[0].id
+            elif len(linea.reservation_id.partner_id.category_id) > 0:
                 id_segmen = linea.reservation_id.partner_id.category_id[0].id
 
             chanel_r = 0
