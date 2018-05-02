@@ -24,7 +24,8 @@
 }
 
 #pms-search {
-	padding: 0.1em !important;
+	padding: 0.5em !important;
+	background-color: white;
 }
 #pms-search fieldset {
 	display: inline-block;
@@ -34,19 +35,13 @@
 	margin: initial !important;
 }
 #pms-search .list {
-	max-height: 25px;
 	overflow-y: auto;
 	text-align: left;
 }
-#pms-search .filter-title {
-	line-height: 25px;
+#pms-search label {
+	font-size: 12px;
 }
-#pms-search .input-group > input {
-	height: 24px;
-}
-#pms-search .input-group > span {
-	padding: 2px 4px !important;
-}
+
 #pms-search-table > tbody > tr > td {
 	background-color: white;
 	padding: 0.1em;

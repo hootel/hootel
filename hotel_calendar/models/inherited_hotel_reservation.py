@@ -107,7 +107,10 @@ class HotelReservation(models.Model):
                 room.sale_price_type == 'vroom'
                 and room.price_virtual_room.name
                 or 'Fixed Price',
-                vrooms.mapped('name')))
+                vrooms.mapped('name'),
+                vrooms.mapped('id'),
+                room.floor_id.id,
+                room.room_amenities.ids))
         return json_rooms
 
     @api.multi
@@ -239,19 +242,14 @@ class HotelReservation(models.Model):
         }
 
     @api.multi
-    def get_hcalendar_all_data(self, dfrom, dto, domainRooms,
-                               domainReservations, withRooms=True,
+    def get_hcalendar_all_data(self, dfrom, dto, withRooms=True,
                                withPricelist=True, withRestrictions=True):
         if not dfrom or not dto:
             raise ValidationError(_('Input Error: No dates defined!'))
 
-        domainRooms = domainRooms or []
-        domainReservations = domainReservations or []
-
-        rooms = self.env['hotel.room'].search(domainRooms,
-                                              order='hcal_sequence ASC')
+        rooms = self.env['hotel.room'].search([], order='hcal_sequence ASC')
         json_res, json_res_tooltips = self.get_hcalendar_reservations_data(
-            dfrom, dto, domainReservations, rooms)
+            dfrom, dto, [], rooms)
 
         json_prices = {}
         if withPricelist:
