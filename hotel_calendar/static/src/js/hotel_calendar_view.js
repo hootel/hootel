@@ -979,6 +979,34 @@ var HotelCalendarView = View.extend({
         });
 
         /* BUTTONS */
+        var $button = this.$el.find('#pms-menu #btn_action_paydue');
+        $button.on('click', function(ev){
+          var $search = $(this).find('#paydue_search');
+          var searchQuery = $search.val();
+          var domain = [];
+          if (searchQuery) {
+            domain.push('|');
+            domain.push(['partner_id.name', 'ilike', searchQuery]);
+            domain.push(['partner_id.mobile', 'ilike', searchQuery]);
+          }
+
+          self.call_action({
+            type: 'ir.actions.act_window',
+            view_mode: 'form',
+            view_type: 'tree,form',
+            res_model: 'hotel.reservation',
+            views: [[false, 'list'], [false, 'form']],
+            domain: domain,
+            name: searchQuery?`Reservations for '${searchQuery}'`:'All Reservations'
+          });
+
+          $search.val('');
+        });
+        var $btnInput = this.$el.find('#pms-menu #btn_action_paydue #paydue_search');
+        $btnInput.on('click', function(ev){
+          // FIXME Workaround: Stop click propagation
+        }, false);
+
         this.update_buttons_counter();
         this.$el.find("button[data-action]").on('click', function(ev){
           self.call_action(this.dataset.action);
@@ -1042,7 +1070,9 @@ var HotelCalendarView = View.extend({
             resultsHotelRoomType.forEach(function(item, index){
                 $list.append(`<option value="${item.cat_id[0]}">${item.name}</option>`);
             });
-            $list.select2();
+            $list.select2({
+              theme: "classic"
+            });
             $list.on('change', function(ev){
               _.defer(function(){
                 this._apply_filters();

@@ -23,9 +23,10 @@
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
                     CHECK-IN
                 </button>
-                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_paydue" data-action="hotel_calendar.hotel_reservation_action_paydue">
+                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_paydue">
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
-                    CHARGES
+                    CHARGES<br/>
+                    <input type="edit" id="paydue_search" style="width:100%" />
                 </button>
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_control" data-action="hotel_calendar.open_wizard_reservations">
                     WIZARD
@@ -43,17 +44,17 @@
                     <table class="col-xs-12 col-md-12 nopadding" id="pms-search-table">
                         <tbody>
                             <tr>
-                                <td class="col-xs-3 col-md-3 container">
+                                <td class="col-xs-3 col-md-4">
                                     <div class="col-xs-12 col-md-12 text-left">
                                         <label for="type_list">SEGMENTATION:</label>
-                                        <select class="list form-control" id="type_list" multiple="multiple"/>
+                                        <select class="form-control" id="type_list" multiple="multiple"/>
                                     </div>
                                     <div class="col-xs-12 col-md-12 text-left">
                                         <label for="floor_list">LOCATION:</label>
                                         <select class="list form-control" id="floor_list" multiple="multiple"/>
                                     </div>
                                 </td>
-                                <td class="col-xs-3 col-md-3">
+                                <td class="col-xs-3 col-md-4">
                                     <div class="col-xs-12 col-md-12 text-left">
                                         <label for="amenities_list">AMENITIES:</label>
                                         <select class="list form-control" id="amenities_list" multiple="multiple"/>
@@ -63,22 +64,13 @@
                                         <select class="list form-control" id="virtual_list" multiple="multiple"/>
                                     </div>
                                 </td>
-                                <td class="col-xs-4 col-md-4">
-                                    <!-- div class="col-xs-3 col-md-3">
-                                        <select id="reservation_type" name="reservation_type" size="5" multiple="multiple">
-                                            <option value="all"> </option>
-                                            <option value="reserva">Reserva</option>
-                                            <option value="entrada">Entrada</option>
-                                            <option value="salida">Salida</option>
-                                            <option value="factura">Factura</option>
-                                        </select>
-                                    </div -->
+                                <td class="col-xs-6 col-md-4">
                                     <div class="col-xs-12 col-md-12">
                                         <table style="margin: 0 auto">
                                             <tbody>
                                                 <tr>
                                                     <td>
-                                                        FROM<br/>
+                                                        <label for="date_begin">FROM</label>
                                                         <div class="input-group date" id="date_begin">
                                                             <input type="text" class="form-control" name="date_begin" required="required" readonly="1"/>
                                                             <span class="input-group-addon">
@@ -87,7 +79,7 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        TO<br/>
+                                                        <label for="date_end">TO</label>
                                                         <div class="input-group date" id="date_end">
                                                             <input type="text" class="form-control" name="date_end" required="required" readonly="1"/>
                                                             <span class="input-group-addon">

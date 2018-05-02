@@ -26,6 +26,7 @@
 #pms-search {
 	padding: 0.5em !important;
 	background-color: white;
+	box-shadow: 10px 1px 12px #333;
 }
 #pms-search fieldset {
 	display: inline-block;
