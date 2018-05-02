@@ -100,15 +100,12 @@ class HotelReservation(models.Model):
                 room.categ_id.id,
                 room_type.code_type,
                 room.shared_room,
-                room.uom_id.id,
                 room.sale_price_type == 'vroom'
-                and ['pricelist', room.price_virtual_room.id, pricelist_id]
+                and ['pricelist', room.price_virtual_room.id, pricelist_id,
+                     room.price_virtual_room.name]
                 or ['fixed', room.list_price],
-                room.sale_price_type == 'vroom'
-                and room.price_virtual_room.name
-                or 'Fixed Price',
                 vrooms.mapped('name'),
-                vrooms.mapped('id'),
+                vrooms.ids,
                 room.floor_id.id,
                 room.room_amenities.ids))
         return json_rooms

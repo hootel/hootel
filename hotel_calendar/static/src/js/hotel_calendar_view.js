@@ -34,7 +34,9 @@ var Core = require('web.core'),
     ODOO_DATE_MOMENT_FORMAT = 'YYYY-MM-DD',
     ODOO_DATETIME_MOMENT_FORMAT = ODOO_DATE_MOMENT_FORMAT + ' HH:mm:ss',
     L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY", //FIXME: Time.strftime_to_moment_format(l10n.date_format);
-    L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format);
+    L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format),
+
+    CURRENCY_SYMBOL = "€";
 
 /* HIDE CONTROL PANEL */
 /* FIXME: Look's like a hackish solution */
@@ -392,7 +394,7 @@ var HotelCalendarView = View.extend({
             var folio_id = newReservation.getUserData('folio_id');
 
             var linkedReservs = _.find(self._hcalendar._reservations, function(item){
-                return (item.getUserData('folio_id') === folio_id);
+                return item.id !== newReservation.id && !item.unusedZone && item.getUserData('folio_id') === folio_id;
             });
 
             var hasChanged = false;
@@ -406,7 +408,7 @@ var HotelCalendarView = View.extend({
                 ocheckout: oldReservation.endDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
                 oroom: oldReservation.room.number,
                 oprice: oldPrice,
-                hasReservesLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
+                hasReservsLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
             };
             var dialog = new Dialog(self, {
                 title: _t("Confirm Reservation Changes"),
@@ -529,6 +531,8 @@ var HotelCalendarView = View.extend({
                 	};
                 	HotelFolioObj.call('create', [data]).then(function(result){
                         var folio_id = result;
+                        var virtual_room_ids = room.getUserData('inside_rooms_ids');
+                        var virtual_room_id = virtual_room_ids?virtual_room_ids[0]:false
                         // Get Unit Price of Virtual Room
                         var popCreate = new Common.FormViewDialog(self, {
                             res_model: 'hotel.reservation',
@@ -539,15 +543,9 @@ var HotelCalendarView = View.extend({
                               'default_checkout': endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
                               'default_adults': numBeds,
                               'default_children': 0,
-                              //'default_order_id.partern_id': partner_id,
                               'default_product_id': room.id,
-                              //'default_product_uom': room.getUserData('uom_id'),
-                              //'default_product_uom_qty': 1,
-                              //'default_state': 'draft',
-                              //'product_uos': 1,
+                              //'default_virtual_room_id': virtual_room_id,
                               'default_name': `${room.number}`,
-                              //'default_reservation_lines': reservation_lines,
-                              //'default_price_unit': result['total_price']
                             },
                             title: _t("Create: ") + _t("Reservation"),
                             initial_view: "form",
@@ -647,16 +645,15 @@ var HotelCalendarView = View.extend({
                     r[2], // Capacity
                     r[4], // Category
                     r[5], // Shared Room
-                    r[7]  // Price
+                    r[6]  // Price
                 );
                 nroom.addUserData({
                     'categ_id': r[3],
-                    'uom_id': r[6],
-                    'price_from': r[8],
-                    'inside_rooms': r[9],
-                    'inside_rooms_ids': r[10],
-                    'floor_id': r[11],
-                    'amenities': r[12]
+                    'price_from': r[6][0] === 'fixed'?`${r[6][1]}${CURRENCY_SYMBOL} (${_t('Fixed Price')})`:r[6][3],
+                    'inside_rooms': r[7],
+                    'inside_rooms_ids': r[8],
+                    'floor_id': r[9],
+                    'amenities': r[10]
                 });
                 rooms.push(nroom);
             }
@@ -1343,10 +1340,10 @@ var HotelCalendarView = View.extend({
 
     _apply_filters: function() {
       // Rooms
-      var category = _.map(this.$el.find('#pms-search #type_list').val(), function(item){ return parseInt(item, 10); });
-      var floor = _.map(this.$el.find('#pms-search #floor_list').val(), function(item){ return parseInt(item, 10); });
-      var amenities = _.map(this.$el.find('#pms-search #amenities_list').val(), function(item){ return parseInt(item, 10); });
-      var virtual = _.map(this.$el.find('#pms-search #virtual_list').val(), function(item){ return parseInt(item, 10); });
+      var category = _.map(this.$el.find('#pms-search #type_list').val(), function(item){ return +item; });
+      var floor = _.map(this.$el.find('#pms-search #floor_list').val(), function(item){ return +item; });
+      var amenities = _.map(this.$el.find('#pms-search #amenities_list').val(), function(item){ return +item; });
+      var virtual = _.map(this.$el.find('#pms-search #virtual_list').val(), function(item){ return +item; });
       this._hcalendar.filterRooms(function(r){
         return (!category || category.length === 0 || r.getUserData('categ_id') in category) &&
                 (!floor || floor.length === 0 || r.getUserData('floor_id') in floor) &&

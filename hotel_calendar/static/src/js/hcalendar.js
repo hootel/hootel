@@ -143,13 +143,13 @@ HotelCalendar.prototype = {
   filterReservations: function(/*Function*/callback) {
     for (var r of this._reservations) {
       if (callback(r)){
-        r._html.style.display = '';
+        r._html.classList.remove('hcal-reservation-unselect');
         this._updateReservation(r);
       } else {
-        r._html.style.display = 'none';
+        r._html.classList.add('hcal-reservation-unselect');
       }
     }
-    
+
     this.calcReservationOccupation();
   },
 
@@ -196,12 +196,12 @@ HotelCalendar.prototype = {
         }
       }
 
-      // Two phases (1. Reservations, 2. Unused Zones)
+      // Create & Render New Reservations
       _.defer(function(reservs){
         var unusedZones = this._createUnusedZones(reservs);
         // Add Unused Zones
         this._reservations = this._reservations.concat(unusedZones);
-        // Create Map2
+        // Create Map
         this._updateReservationsMap();
 
         reservs = reservs.concat(unusedZones);
@@ -252,6 +252,9 @@ HotelCalendar.prototype = {
           this.removeOBRoomRow(reserv);
         }
       }
+      // Remove Unused Zones
+      this._cleanUnusedZones(reserv);
+
       this._reservations = _.without(this._reservations, reserv);
       this._updateReservationsMap();
     } else {
@@ -1389,7 +1392,7 @@ HotelCalendar.prototype = {
     var bottom = mainBounds.bottom - eOffset.top;
     var top = mainBounds.top + eOffset.top;
     var offset = 10.0;
-    var scrollDisp = 30.0;
+    var scrollDisp = 10.0;
     if (reservBounds.bottom >= bottom-offset) {
       this.edivr.scrollBy(0, scrollDisp);
     }
@@ -1480,11 +1483,12 @@ HotelCalendar.prototype = {
     reserv._html.removeAttribute('style');
 
     if (reserv.splitted) {
-      //divRes.classList.add('hcal-reservation-splitted');
-      reserv._html.style.borderWidth = "1px 6px";
+      reserv._html.classList.add('hcal-reservation-splitted');
       var magicNumber = Math.floor(Math.abs(Math.sin((reserv.getUserData('parent_reservation') || reserv.id))) * 100000);
       var bbColor = this._intToRgb(magicNumber);
       reserv._html.style.borderColor = `rgb(${bbColor[0]},${bbColor[1]},${bbColor[2]})`;
+    } else {
+      reserv._html.classList.remove('hcal-reservation-splitted');
     }
     reserv._html.style.backgroundColor = reserv.color;
     reserv._html.style.color = reserv.colorText;
@@ -1500,8 +1504,8 @@ HotelCalendar.prototype = {
     reserv._html.style.top = `${boundsInit.top-etableOffset.top}px`;
     var divHeight = (boundsEnd.bottom-etableOffset.top)-(boundsInit.top-etableOffset.top);
     reserv._html.style.height = `${divHeight}px`;
-    reserv._html.style.lineHeight = `${divHeight-3}px`;
-    var fontHeight = divHeight/1.2;
+    reserv._html.style.lineHeight = `${divHeight}px`;
+    var fontHeight = divHeight/1.3;
     if (fontHeight > 16) {
       fontHeight = 16;
     }
@@ -1814,7 +1818,7 @@ HotelCalendar.prototype = {
   // },
 
   _cleanUnusedZones: function(/*HReservationObject*/reserv) {
-    var reservs = _.filter(this._reservations, function(item){ return item.linkedId === reserv.id; });
+    var reservs = _.filter(this._reservations, function(item){ return item.unusedZone && item.linkedId === reserv.id; });
     for (var creserv of reservs) { this.removeReservation(creserv); }
   },
 
@@ -2425,6 +2429,7 @@ function HRoom(/*Int*/id, /*String*/number, /*Int*/capacity, /*String*/type, /*B
   this.overbooking = false;
 
   this._html = false;
+  this._visible = true;
   this._userData = {};
 }
 HRoom.prototype = {

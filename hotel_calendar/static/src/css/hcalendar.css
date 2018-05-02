@@ -247,6 +247,11 @@
 	/*border: 2px solid #3465a4;*/
 }
 
+.hcal-reservation-unselect {
+	opacity: 0.3;
+	pointer-events: none;
+}
+
 .hcal-reservation {
 	position: absolute;
 	text-align: center;
@@ -267,7 +272,7 @@
 }
 
 .hcal-reservation-splitted {
-	border-width: 1px 10px;
+	border-width: 1px 6px;
 }
 
 .hcal-reservation-invalid {
