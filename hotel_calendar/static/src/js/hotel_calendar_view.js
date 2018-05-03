@@ -1234,8 +1234,8 @@ var HotelCalendarView = View.extend({
                   var room = this._hcalendar.getRoom(reserv['product_id'], reserv['overbooking'], reserv['reserv_id']);
                   // need create a overbooking row?
                   if (!room && reserv['overbooking']) {
-                    room = self._hcalendar.createOBRoom(self._hcalendar.getRoom(reserv['product_id']), reserv['reserv_id']);
-                    self._hcalendar.createOBRoomRow(room);
+                    room = this._hcalendar.createOBRoom(this._hcalendar.getRoom(reserv['product_id']), reserv['reserv_id']);
+                    this._hcalendar.createOBRoomRow(room);
                   }
                   if (!room) {
                     console.warn(`Can't found a room for the reservation '${reserv['reserv_id']}'!`);
