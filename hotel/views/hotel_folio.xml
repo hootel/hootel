@@ -241,13 +241,16 @@
             <field name="name">hotel.folio.tree</field>
             <field name="model">hotel.folio</field>
             <field name="arch" type="xml">
-                <tree string="Hotel Folio" colors="blue:state == 'draft';gray:state == 'done'" limit="80">
+                <tree string="Hotel Folio" decoration-info="state == 'draft'"
+                        decoration-muted="state == 'cancel'"
+                        decoration-danger="invoices_amount &gt; 0" limit="80">
                     <field name="name" />
                     <field name="partner_id" select="1" />
                     <field name="date_order" select="1" />
-                    <field name="state" />
-                    <field name="room_lines" widget="manymany_tags"/>
+                    <field name="rooms_char"/>
                     <field name="amount_total" sum="Total amount" />
+                    <field name="invoices_amount" string="Pending Pay"/>
+                    <field name="state" invisible="1" />
                 </tree>
             </field>
         </record>
@@ -335,7 +338,7 @@
             <field name="arch" type="xml">
                 <search string="Tables Detail">
                     <field name="partner_id" />
-                    <field name="name" />
+                    <field name="name" />                    
 <!--
                     <filter string="Current Booking"
                         domain="[('checkout','&gt;=',datetime.datetime.now().replace(hour=0, minute=0, second=0)),('checkin','&lt;=',datetime.datetime.now().replace(hour=23, minute=59, second=59))]"
@@ -344,8 +347,8 @@
                     <group expand="0" string="Group By">
                         <filter string="Order By Month" domain="[]"
                             context="{'group_by':'date_order'}" />
-                        <filter name="partner_id" string="Customer"
-                            icon="terp-stock_symbol-selection" context="{'group_by':'partner_id'}" />
+                        <filter string="Customer" icon="terp-stock_symbol-selection"
+                            context="{'group_by':'partner_id'}" />
                     </group>
                 </search>
             </field>
@@ -368,7 +371,7 @@
             <field name="name">Hotel Folio</field>
             <field name="res_model">hotel.folio</field>
             <field name="view_type">form</field>
-            <field name="view_mode">kanban,tree,form,calendar,graph</field>
+            <field name="view_mode">tree,form,calendar,graph</field>
         </record>
 
         <menuitem id="menu_all_folio" name="Folio"

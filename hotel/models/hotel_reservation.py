@@ -239,6 +239,7 @@ class HotelReservation(models.Model):
     _name = 'hotel.reservation'
     _description = 'hotel reservation'
     _inherit = ['ir.needaction_mixin', 'mail.thread']
+    _order = "last_updated_res desc, name"
 
     _defaults = {
         'product_id': False
@@ -320,6 +321,8 @@ class HotelReservation(models.Model):
     edit_room = fields.Boolean(default=True)
     nights = fields.Integer('Nights',computed='_computed_nights', store=True)
     channel_type = fields.Selection(related='folio_id.channel_type')
+    last_updated_res = fields.Datetime('Last Updated')
+    folio_pending_amount = fields.Monetary(related='folio_id.invoices_amount')
 
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
@@ -463,6 +466,17 @@ class HotelReservation(models.Model):
             'views': [[False, "form"]],
             'target': 'new',
             'res_id': self.parent_reservation.id,
+        }
+
+    @api.multi
+    def open_folio(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'hotel.folio',
+            'views': [[False, "form"]],
+            'target': 'new',
+            'res_id': self.folio_id.id,
         }
 
     @api.multi
@@ -622,7 +636,7 @@ class HotelReservation(models.Model):
                 'reservation_lines': rlines['commands'],
                 'price_unit':  rlines['total_price'],
             })
-        vals.update({'edit_room': False,})
+        vals.update({'edit_room': False, 'last_updated_res': date_utils.now(hours=True)})
 
         res = super(HotelReservation, self).write(vals)
         if datesChanged:

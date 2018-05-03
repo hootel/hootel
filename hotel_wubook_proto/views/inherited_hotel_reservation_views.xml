@@ -54,14 +54,8 @@
         <field name="inherit_id" ref="hotel.view_hotel_reservation_tree" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='state']" position="before">
-                <field name="virtual_room_id"/>
-                <field name="wchannel_reservation_code"/>
-                <field name="wstatus"/>
-                <field name="wchannel_id"/>
-            </xpath>
-            <xpath expr="//field[@name='state']" position="after">
-                <field name="to_read" invisible="1"/>
-                <button name="mark_as_read" type="object" string="Read &amp; Hide" class="oe_highlight" attrs="{'invisible':['|',('to_assign', '=', True),('to_read', '=', True)]}" />
+                <field name="virtual_room_id" string="Reserved Room Type"/>
+                <field name="origin_sale"/>
             </xpath>
         </field>
     </record>
@@ -74,6 +68,10 @@
             <xpath expr="//field[@name='partner_id']" position="before">
                 <field name="wchannel_reservation_code"/>
                 <field name="virtual_room_id"/>
+            </xpath>
+            <xpath expr="//group[@id='group_by']" position="inside">
+                <filter name="origin" string="Origin" domain="[]"
+                        context="{'group_by':'origin_sale'}"/>
             </xpath>
         </field>
     </record>

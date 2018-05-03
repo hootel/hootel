@@ -169,6 +169,12 @@ class HotelFolio(models.Model):
         ('phone', 'Phone'),
         ('web','Web'),], 'Sales Channel')
     num_invoices = fields.Integer(compute='_compute_num_invoices')
+    rooms_char = fields.Char('Rooms', compute='_computed_rooms_char')
+
+    def _computed_rooms_char(self):
+        for record in self:
+            rooms = ', '.join(record.mapped('room_lines.product_id.name'))
+            record.rooms_char = rooms 
 
     @api.multi
     def _compute_num_invoices(self):
