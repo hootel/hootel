@@ -1002,7 +1002,7 @@ var HotelCalendarView = View.extend({
 
           $search.val('');
         });
-        var $btnInput = this.$el.find('#pms-menu #btn_action_paydue #paydue_search');
+        var $btnInput = this.$el.find('#pms-menu #btn_action_paydue_combo #paydue_search');
         $btnInput.on('click', function(ev){
           // FIXME Workaround: Stop click propagation
         }, false);
@@ -1375,12 +1375,14 @@ var HotelCalendarView = View.extend({
       var floor = _.map(this.$el.find('#pms-search #floor_list').val(), function(item){ return +item; });
       var amenities = _.map(this.$el.find('#pms-search #amenities_list').val(), function(item){ return +item; });
       var virtual = _.map(this.$el.find('#pms-search #virtual_list').val(), function(item){ return +item; });
-      this._hcalendar.filterRooms(function(r){
-        return (!category || category.length === 0 || r.getUserData('categ_id') in category) &&
-                (!floor || floor.length === 0 || r.getUserData('floor_id') in floor) &&
-                (!amenities || amenities.length === 0 || _.every(r.getUserData('amenities'), function(item) { return amenities.indexOf(item) !== -1; })) &&
-                (!virtual || virtual.length === 0 || _.some(r.getUserData('inside_rooms_ids'), function(item) { return virtual.indexOf(item) !== -1; }));
-      });
+      if (category.length > 0 || floor.length > 0 || amenities.length > 0 || virtual.length > 0){
+        this._hcalendar.filterRooms(function(r){
+          return (!category || category.length === 0 || r.getUserData('categ_id') in category) &&
+                  (!floor || floor.length === 0 || r.getUserData('floor_id') in floor) &&
+                  (!amenities || amenities.length === 0 || _.every(r.getUserData('amenities'), function(item) { return amenities.indexOf(item) !== -1; })) &&
+                  (!virtual || virtual.length === 0 || _.some(r.getUserData('inside_rooms_ids'), function(item) { return virtual.indexOf(item) !== -1; }));
+        });
+      }
 
       // Reservations
       var query = $('#pms-search #search_query').val();
