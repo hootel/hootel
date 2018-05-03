@@ -25,7 +25,7 @@
                 </button>
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_paydue">
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
-                    CHARGES<br/>
+                    RESERVATIONS<br/>
                     <input type="edit" id="paydue_search" placeholder="Search..." style="width:100%" />
                 </button>
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_control" data-action="hotel_calendar.open_wizard_reservations">

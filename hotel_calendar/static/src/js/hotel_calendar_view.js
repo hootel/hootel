@@ -1003,6 +1003,31 @@ var HotelCalendarView = View.extend({
         $btnInput.on('click', function(ev){
           // FIXME Workaround: Stop click propagation
         }, false);
+        $btnInput.on('keypress', function(ev){
+          // TODO: Change this to a better place
+          if (ev.keyCode == 13) {
+            var $search = $(this);
+            var searchQuery = $search.val();
+            var domain = [];
+            if (searchQuery) {
+              domain.push('|');
+              domain.push(['partner_id.name', 'ilike', searchQuery]);
+              domain.push(['partner_id.mobile', 'ilike', searchQuery]);
+            }
+
+            self.call_action({
+              type: 'ir.actions.act_window',
+              view_mode: 'form',
+              view_type: 'tree,form',
+              res_model: 'hotel.reservation',
+              views: [[false, 'list'], [false, 'form']],
+              domain: domain,
+              name: searchQuery?`Reservations for '${searchQuery}'`:'All Reservations'
+            });
+
+            $search.val('');
+          }
+        });
 
         this.update_buttons_counter();
         this.$el.find("button[data-action]").on('click', function(ev){
