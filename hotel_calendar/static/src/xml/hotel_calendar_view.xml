@@ -23,11 +23,13 @@
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
                     CHECK-IN
                 </button>
-                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_paydue">
-                    <div class="ninfo"><span class="badge badge-danger">0</span></div>
-                    RESERVATIONS<br/>
+                <div id="btn_action_paydue_combo">
+                    <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_paydue">
+                        <!--div class="ninfo"><span class="badge badge-danger">0</span></div-->
+                        RESERVATIONS<br/>
+                    </button>
                     <input type="edit" id="paydue_search" placeholder="Search..." style="width:100%" />
-                </button>
+                </div>
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_control" data-action="hotel_calendar.open_wizard_reservations">
                     WIZARD
                 </button>

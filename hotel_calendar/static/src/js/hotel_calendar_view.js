@@ -982,9 +982,12 @@ var HotelCalendarView = View.extend({
           var searchQuery = $search.val();
           var domain = [];
           if (searchQuery) {
-            domain.push('|');
+            domain.push('|','|','|','|');
             domain.push(['partner_id.name', 'ilike', searchQuery]);
             domain.push(['partner_id.mobile', 'ilike', searchQuery]);
+            domain.push(['partner_id.vat', 'ilike', searchQuery]);
+            domain.push(['partner_id.email', 'ilike', searchQuery]);
+            domain.push(['partner_id.phone', 'ilike', searchQuery]);
           }
 
           self.call_action({
@@ -1010,9 +1013,12 @@ var HotelCalendarView = View.extend({
             var searchQuery = $search.val();
             var domain = [];
             if (searchQuery) {
-              domain.push('|');
+              domain.push('|','|','|','|');
               domain.push(['partner_id.name', 'ilike', searchQuery]);
               domain.push(['partner_id.mobile', 'ilike', searchQuery]);
+              domain.push(['partner_id.vat', 'ilike', searchQuery]);
+              domain.push(['partner_id.email', 'ilike', searchQuery]);
+              domain.push(['partner_id.phone', 'ilike', searchQuery]);
             }
 
             self.call_action({
@@ -1377,10 +1383,13 @@ var HotelCalendarView = View.extend({
       });
 
       // Reservations
-      var query = $('#pms-search #search_query').val().toLowerCase();
-      this._hcalendar.filterReservations(function(r){
-        return r.title.toLowerCase().search(query) != -1;
-      });
+      var query = $('#pms-search #search_query').val();
+      if (query) {
+        query = query.toLowerCase();
+        this._hcalendar.filterReservations(function(r){
+          return r.title && r.title.toLowerCase().search(query) != -1;
+        });
+      }
     },
 
     generate_domains: function() {
