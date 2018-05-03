@@ -647,7 +647,7 @@ class HotelReservation(models.Model):
                 'reservation_lines': rlines['commands'],
                 'price_unit':  rlines['total_price'],
             })
-        vals.update({'edit_room': False, 'last_updated_res': date_utils.now(hours=True)})
+        vals.update({'edit_room': False, 'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
 
         res = super(HotelReservation, self).write(vals)
         if datesChanged:
