@@ -323,6 +323,17 @@ class HotelReservation(models.Model):
     channel_type = fields.Selection(related='folio_id.channel_type')
     last_updated_res = fields.Datetime('Last Updated')
     folio_pending_amount = fields.Monetary(related='folio_id.invoices_amount')
+    segmentation_id = fields.Many2many(related='folio_id.segmentation_id')
+
+    @api.depends('checkin', 'checkout')
+    def _computed_nights(self):
+        _logger.info('_computed_amount_reservation')
+        for res in self:
+            if res.checkin and res.checkout:
+                nights = days_diff = date_utils.date_diff(
+                    self.checkin,
+                    self.checkout, hours=False)
+            res.nights = nights
 
     @api.onchange('reservation_lines')
     def _computed_amount_reservation(self):
@@ -760,7 +771,7 @@ class HotelReservation(models.Model):
             self.cardex_pending = 0
         else:
             self.price_unit = rlines['total_price']
-        
+
 
     @api.model
     def get_availability(self, checkin, checkout, product_id, dbchanged=True,

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 10.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-20 18:11+0000\n"
-"PO-Revision-Date: 2018-03-20 19:16+0100\n"
+"POT-Creation-Date: 2018-04-27 16:50+0000\n"
+"PO-Revision-Date: 2018-04-27 18:55+0200\n"
 "Last-Translator: Jose Luis Algara <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -123,11 +123,6 @@ msgid "August"
 msgstr "Agosto"
 
 #. module: hotel_data_bi
-#: model:ir.ui.view,arch_db:hotel_data_bi.view_data_bi
-msgid "CONECTAR CON MOP-SOLUTION."
-msgstr "CONECTAR CON MOP-SOLUTION."
-
-#. module: hotel_data_bi
 #: model:ir.model,name:hotel_data_bi.model_res_company
 msgid "Companies"
 msgstr "Compañías"
@@ -140,7 +135,7 @@ msgstr "Creado por"
 #. module: hotel_data_bi
 #: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_create_date
 msgid "Created on"
-msgstr "Creado el"
+msgstr "Creado en"
 
 #. module: hotel_data_bi
 #: selection:data_bi,month:0
@@ -150,12 +145,7 @@ msgstr "Diciembre"
 #. module: hotel_data_bi
 #: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_display_name
 msgid "Display Name"
-msgstr "Nombre a mostrar"
-
-#. module: hotel_data_bi
-#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_Estancias
-msgid "Estancias"
-msgstr "Estancias"
+msgstr "Mostrar Nombre"
 
 #. module: hotel_data_bi
 #: selection:data_bi,month:0
@@ -164,8 +154,13 @@ msgstr "Febrero"
 
 #. module: hotel_data_bi
 #: model:ir.ui.view,arch_db:hotel_data_bi.view_data_bi
-msgid "Generate Conexion"
-msgstr "Generar Conexión"
+msgid "Hotel Budget:"
+msgstr "Hotel Budget:"
+
+#. module: hotel_data_bi
+#: model:res.groups,name:hotel_data_bi.group_hotel_export_data
+msgid "Hotel Management / Export data BI"
+msgstr "Hotel Management / Export data BI"
 
 #. module: hotel_data_bi
 #: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_id
@@ -174,7 +169,7 @@ msgstr "ID"
 
 #. module: hotel_data_bi
 #: model:ir.model.fields,help:hotel_data_bi.field_res_company_id_hotel
-msgid "It must be unique to be able to identify the hotel, within a hotel group."
+msgid "It must be unique to be able to identify the hotel,         within a hotel group."
 msgstr "Debe ser único para poder identificar el hotel, dentro de un grupo hotelero."
 
 #. module: hotel_data_bi
@@ -205,7 +200,7 @@ msgstr "Última actualización por"
 #. module: hotel_data_bi
 #: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_write_date
 msgid "Last Updated on"
-msgstr "Última actualización el"
+msgstr "Última actualización en"
 
 #. module: hotel_data_bi
 #: selection:data_bi,month:0
@@ -219,7 +214,6 @@ msgstr "Mayo"
 
 #. module: hotel_data_bi
 #: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_month
-#: model:ir.ui.view,arch_db:hotel_data_bi.view_data_bi
 msgid "Month"
 msgstr "Mes"
 
@@ -234,23 +228,33 @@ msgid "November"
 msgstr "Noviembre"
 
 #. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_estancias
+msgid "Number of Stays"
+msgstr "Número de estancias"
+
+#. module: hotel_data_bi
 #: selection:data_bi,month:0
 msgid "October"
 msgstr "Octubre"
 
 #. module: hotel_data_bi
-#: code:addons/hotel_data_bi/models/data_bi.py:156
+#: code:addons/hotel_data_bi/models/data_bi.py:192
 #, python-format
 msgid "Out of Service"
 msgstr "Fuera de Servicio"
 
 #. module: hotel_data_bi
-#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_Room_Nights
+#: model:ir.ui.view,arch_db:hotel_data_bi.view_data_bi
+msgid "Period:"
+msgstr "Período:"
+
+#. module: hotel_data_bi
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_room_nights
 msgid "Room Nights"
 msgstr "Room Nights"
 
 #. module: hotel_data_bi
-#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_Room_Revenue
+#: model:ir.model.fields,field_description:hotel_data_bi.field_data_bi_room_revenue
 msgid "Room Revenue"
 msgstr "Room Revenue"
 

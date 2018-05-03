@@ -106,7 +106,7 @@ class Wizard(models.TransientModel):
             help='Country or province of origin. Used for INE statistics.')
 
     # TODO: Add tags in the cardex not in the partner anb move this field to out of localization
-    category_id_cardex = fields.Many2many('res.partner.category', 'id', required=True)
+    #category_id_cardex = fields.Many2many('res.partner.category', 'id', required=True)
 
     @api.multi
     def pdf_viajero(self, cardex_id):
@@ -126,6 +126,10 @@ class Wizard(models.TransientModel):
         # call the super action_save_check() for checkin
         super(Wizard, self).action_save_check()
 
+        # prepare category in partner from category_id
+        the_list = self.segmentation_id - self.partner_id.category_id
+        the_list = self.partner_id.category_id + the_list
+
         # prepare localization partner values
         partner_vals = {
             'documenttype': self.documenttype_cardex,
@@ -136,10 +140,10 @@ class Wizard(models.TransientModel):
             # (4, ID) link to existing record with id = ID (adds a relationship) ...
             'code_ine': self.code_ine_cardex.id,
             # (6, 0, [IDs]) replace the list of linked IDs ...
-            'category_id': [(6, False, [x.id for x in self.category_id_cardex])],
+            'category_id': [(6, False, [x.id for x in the_list])],
         }
 
-        #Update Accounting VAT number on customer
+        # Update Accounting VAT number on customer
         if self.documenttype_cardex in ('D','C'):
                 partner_vat = 'ES' + self.poldocument_cardex
                 partner_vals.update({
@@ -175,4 +179,4 @@ class Wizard(models.TransientModel):
         self.gender_cardex = self.partner_id.gender;
         self.birthdate_date_cardex = self.partner_id.birthdate_date;
         self.code_ine_cardex = self.partner_id.code_ine;
-        self.category_id_cardex = self.partner_id.category_id;
+        #self.category_id_cardex = self.partner_id.category_id;

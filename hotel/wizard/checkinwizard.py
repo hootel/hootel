@@ -11,8 +11,8 @@ class Wizard(models.TransientModel):
     _name = 'checkin.wizard'
 
     def default_enter_date(self):
-        if 'reservation_ids' and 'folio' in self.env.context:
-            ids = [item[1] for item in self.env.context['reservation_ids']]
+        if ('reservation_ids' and 'folio') in self.env.context:
+            ids = [item[1] for item in self.env.context.get('reservation_ids')]
             reservations = self.env['hotel.reservation'].browse(ids)
             for res in reservations:
                 return res.checkin
@@ -21,8 +21,8 @@ class Wizard(models.TransientModel):
         return False
 
     def default_exit_date(self):
-        if 'reservation_ids' and 'folio' in self.env.context:
-            ids = [item[1] for item in self.env.context['reservation_ids']]
+        if ('reservation_ids' and 'folio') in self.env.context:
+            ids = [item[1] for item in self.env.context.get('reservation_ids')]
             reservations = self.env['hotel.reservation'].browse(ids)
             for res in reservations:
                 return res.checkout
@@ -31,8 +31,8 @@ class Wizard(models.TransientModel):
         return False
 
     def default_reservation_id(self):
-        if 'reservation_ids' and 'folio' in self.env.context:
-            ids = [item[1] for item in self.env.context['reservation_ids']]
+        if ('reservation_ids' and 'folio') in self.env.context:
+            ids = [item[1] for item in self.env.context.get('reservation_ids')]
             reservations = self.env['hotel.reservation'].browse(ids)
             if len(reservations) == 1:
                 # return current room line (onlyone in this case)
@@ -54,8 +54,8 @@ class Wizard(models.TransientModel):
         return False
 
     def default_cardex_ids(self):
-        if 'reservation_ids' and 'folio' in self.env.context:
-            ids = [item[1] for item in self.env.context['reservation_ids']]
+        if ('reservation_ids' and 'folio') in self.env.context:
+            ids = [item[1] for item in self.env.context.get('reservation_ids')]
             reservations = self.env['hotel.reservation'].browse(ids)
             for res in reservations:
                 return res.cardex_ids
@@ -110,6 +110,10 @@ class Wizard(models.TransientModel):
     email_cardex = fields.Char('E-mail')
 
     mobile_cardex = fields.Char('Mobile')
+
+    segmentation_id = fields.Many2many(
+        related='reservation_id.folio_id.segmentation_id')
+
 
     ''' TODO: clean-up - list of checkins on smart button clean is not used anymore
     list_checkin_cardex = fields.Boolean(compute=comp_checkin_list_visible,
@@ -177,7 +181,7 @@ class Wizard(models.TransientModel):
         self.enter_date = record_id.checkin
         self.exit_date = record_id.checkout
 
-        ''' trying to filter the reservations only to pending checkins ... 
+        ''' trying to filter the reservations only to pending checkins ...
         if 'reservation_ids' and 'folio' in self.env.context:
             ids = [item[1] for item in self.env.context['reservation_ids']]
             reservations = self.env['hotel.reservation'].browse(ids)
@@ -209,4 +213,3 @@ class Wizard(models.TransientModel):
         # field one2many return 0 on empty record (nothing typed)
         elif self.op_select_partner == 'C' and self.partner_id.id == 0:
             self.checkin_mode = 2;
-
