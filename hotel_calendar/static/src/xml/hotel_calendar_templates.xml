@@ -3,7 +3,7 @@
 <t t-name="HotelCalendar.ConfirmReservationChanges">
 	<div class="content">
 		<p>The following changes will be made...</p>
-		<p t-if="hasReservesLinked" style="color:red">This reservation belongs to a folio with more reservations!</p>
+		<p t-if="hasReservsLinked" style="color:red">This reservation belongs to a folio with more reservations!</p>
 		<div class="row">
 			<div class="col-xl-6 col-lg-6">
 				<strong>Reserve unchanged:</strong>

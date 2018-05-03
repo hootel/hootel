@@ -34,7 +34,9 @@ var Core = require('web.core'),
     ODOO_DATE_MOMENT_FORMAT = 'YYYY-MM-DD',
     ODOO_DATETIME_MOMENT_FORMAT = ODOO_DATE_MOMENT_FORMAT + ' HH:mm:ss',
     L10N_DATE_MOMENT_FORMAT = "DD/MM/YYYY", //FIXME: Time.strftime_to_moment_format(l10n.date_format);
-    L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format);
+    L10N_DATETIME_MOMENT_FORMAT = L10N_DATE_MOMENT_FORMAT + ' ' + Time.strftime_to_moment_format(l10n.time_format),
+
+    CURRENCY_SYMBOL = "€";
 
 /* HIDE CONTROL PANEL */
 /* FIXME: Look's like a hackish solution */
@@ -392,7 +394,7 @@ var HotelCalendarView = View.extend({
             var folio_id = newReservation.getUserData('folio_id');
 
             var linkedReservs = _.find(self._hcalendar._reservations, function(item){
-                return (item.getUserData('folio_id') === folio_id);
+                return item.id !== newReservation.id && !item.unusedZone && item.getUserData('folio_id') === folio_id;
             });
 
             var hasChanged = false;
@@ -406,7 +408,7 @@ var HotelCalendarView = View.extend({
                 ocheckout: oldReservation.endDate.clone().local().format(L10N_DATETIME_MOMENT_FORMAT),
                 oroom: oldReservation.room.number,
                 oprice: oldPrice,
-                hasReservesLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
+                hasReservsLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
             };
             var dialog = new Dialog(self, {
                 title: _t("Confirm Reservation Changes"),
@@ -529,6 +531,8 @@ var HotelCalendarView = View.extend({
                 	};
                 	HotelFolioObj.call('create', [data]).then(function(result){
                         var folio_id = result;
+                        var virtual_room_ids = room.getUserData('inside_rooms_ids');
+                        var virtual_room_id = virtual_room_ids?virtual_room_ids[0]:false
                         // Get Unit Price of Virtual Room
                         var popCreate = new Common.FormViewDialog(self, {
                             res_model: 'hotel.reservation',
@@ -539,15 +543,9 @@ var HotelCalendarView = View.extend({
                               'default_checkout': endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
                               'default_adults': numBeds,
                               'default_children': 0,
-                              //'default_order_id.partern_id': partner_id,
                               'default_product_id': room.id,
-                              //'default_product_uom': room.getUserData('uom_id'),
-                              //'default_product_uom_qty': 1,
-                              //'default_state': 'draft',
-                              //'product_uos': 1,
+                              //'default_virtual_room_id': virtual_room_id,
                               'default_name': `${room.number}`,
-                              //'default_reservation_lines': reservation_lines,
-                              //'default_price_unit': result['total_price']
                             },
                             title: _t("Create: ") + _t("Reservation"),
                             initial_view: "form",
@@ -635,9 +633,7 @@ var HotelCalendarView = View.extend({
         var oparams = [
           false,
           domains['dates'][0].format(ODOO_DATETIME_MOMENT_FORMAT),
-          domains['dates'][1].format(ODOO_DATETIME_MOMENT_FORMAT),
-          domains['rooms'] || [],
-          domains['reservations'] || []
+          domains['dates'][1].format(ODOO_DATETIME_MOMENT_FORMAT)
         ];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
             self._reserv_tooltips = results['tooltips'];
@@ -649,13 +645,15 @@ var HotelCalendarView = View.extend({
                     r[2], // Capacity
                     r[4], // Category
                     r[5], // Shared Room
-                    r[7]  // Price
+                    r[6]  // Price
                 );
                 nroom.addUserData({
                     'categ_id': r[3],
-                    'uom_id': r[6],
-                    'price_from': r[8],
-                    'inside_rooms': r[9]
+                    'price_from': r[6][0] === 'fixed'?`${r[6][1]}${CURRENCY_SYMBOL} (${_t('Fixed Price')})`:r[6][3],
+                    'inside_rooms': r[7],
+                    'inside_rooms_ids': r[8],
+                    'floor_id': r[9],
+                    'amenities': r[10]
                 });
                 rooms.push(nroom);
             }
@@ -884,7 +882,9 @@ var HotelCalendarView = View.extend({
 
         // View Events
         this.$el.find("#pms-search #search_query").on('change', function(ev){
-            self.reload_hcalendar_reservations(true, false, false);
+          _.defer(function(){
+            this._apply_filters();
+          }.bind(self));
         });
         this.$el.find("#cal-pag-prev-plus").on('click', function(ev){
             // FIXME: Ugly repeated code. Change place.
@@ -976,6 +976,59 @@ var HotelCalendarView = View.extend({
         });
 
         /* BUTTONS */
+        var $button = this.$el.find('#pms-menu #btn_action_paydue');
+        $button.on('click', function(ev){
+          var $search = $(this).find('#paydue_search');
+          var searchQuery = $search.val();
+          var domain = [];
+          if (searchQuery) {
+            domain.push('|');
+            domain.push(['partner_id.name', 'ilike', searchQuery]);
+            domain.push(['partner_id.mobile', 'ilike', searchQuery]);
+          }
+
+          self.call_action({
+            type: 'ir.actions.act_window',
+            view_mode: 'form',
+            view_type: 'tree,form',
+            res_model: 'hotel.reservation',
+            views: [[false, 'list'], [false, 'form']],
+            domain: domain,
+            name: searchQuery?`Reservations for '${searchQuery}'`:'All Reservations'
+          });
+
+          $search.val('');
+        });
+        var $btnInput = this.$el.find('#pms-menu #btn_action_paydue #paydue_search');
+        $btnInput.on('click', function(ev){
+          // FIXME Workaround: Stop click propagation
+        }, false);
+        $btnInput.on('keypress', function(ev){
+          // TODO: Change this to a better place
+          if (ev.keyCode == 13) {
+            var $search = $(this);
+            var searchQuery = $search.val();
+            var domain = [];
+            if (searchQuery) {
+              domain.push('|');
+              domain.push(['partner_id.name', 'ilike', searchQuery]);
+              domain.push(['partner_id.mobile', 'ilike', searchQuery]);
+            }
+
+            self.call_action({
+              type: 'ir.actions.act_window',
+              view_mode: 'form',
+              view_type: 'tree,form',
+              res_model: 'hotel.reservation',
+              views: [[false, 'list'], [false, 'form']],
+              domain: domain,
+              name: searchQuery?`Reservations for '${searchQuery}'`:'All Reservations'
+            });
+
+            $search.val('');
+          }
+        });
+
         this.update_buttons_counter();
         this.$el.find("button[data-action]").on('click', function(ev){
           self.call_action(this.dataset.action);
@@ -1039,9 +1092,13 @@ var HotelCalendarView = View.extend({
             resultsHotelRoomType.forEach(function(item, index){
                 $list.append(`<option value="${item.cat_id[0]}">${item.name}</option>`);
             });
-            $list.select2();
+            $list.select2({
+              theme: "classic"
+            });
             $list.on('change', function(ev){
-                self.generate_hotel_calendar();
+              _.defer(function(){
+                this._apply_filters();
+              }.bind(self));
             });
         });
         // Get Floors
@@ -1053,7 +1110,9 @@ var HotelCalendarView = View.extend({
             });
             $list.select2();
             $list.on('change', function(ev){
-                self.generate_hotel_calendar();
+              _.defer(function(){
+                this._apply_filters();
+              }.bind(self));
             });
         });
         // Get Amenities
@@ -1065,7 +1124,9 @@ var HotelCalendarView = View.extend({
             });
             $list.select2();
             $list.on('change', function(ev){
-                self.generate_hotel_calendar();
+              _.defer(function(){
+                this._apply_filters();
+              }.bind(self));
             });
         });
         // Get Virtual Rooms
@@ -1077,7 +1138,9 @@ var HotelCalendarView = View.extend({
             });
             $list.select2();
             $list.on('change', function(ev){
-                self.generate_hotel_calendar();
+              _.defer(function(){
+                this._apply_filters();
+              }.bind(self));
             });
         });
 
@@ -1198,6 +1261,9 @@ var HotelCalendarView = View.extend({
                   }
                 }
 
+                _.defer(function(){
+                  this._apply_filters();
+                }.bind(this));
                 need_update_counters = true;
                 break;
               case 'pricelist':
@@ -1235,8 +1301,6 @@ var HotelCalendarView = View.extend({
           false,
           dfrom.format(ODOO_DATETIME_MOMENT_FORMAT),
           dto.format(ODOO_DATETIME_MOMENT_FORMAT),
-          domains['rooms'] || [],
-          domains['reservations'] || [],
           false,
           withPricelist || false,
           withRestrictions || false,
@@ -1291,36 +1355,35 @@ var HotelCalendarView = View.extend({
             }
 
             self._assign_extra_info();
+            _.defer(function(){
+              this._apply_filters();
+            }.bind(self));
         });
         this._last_dates = domains['dates'];
         this.update_buttons_counter();
     },
 
+    _apply_filters: function() {
+      // Rooms
+      var category = _.map(this.$el.find('#pms-search #type_list').val(), function(item){ return +item; });
+      var floor = _.map(this.$el.find('#pms-search #floor_list').val(), function(item){ return +item; });
+      var amenities = _.map(this.$el.find('#pms-search #amenities_list').val(), function(item){ return +item; });
+      var virtual = _.map(this.$el.find('#pms-search #virtual_list').val(), function(item){ return +item; });
+      this._hcalendar.filterRooms(function(r){
+        return (!category || category.length === 0 || r.getUserData('categ_id') in category) &&
+                (!floor || floor.length === 0 || r.getUserData('floor_id') in floor) &&
+                (!amenities || amenities.length === 0 || _.every(r.getUserData('amenities'), function(item) { return amenities.indexOf(item) !== -1; })) &&
+                (!virtual || virtual.length === 0 || _.some(r.getUserData('inside_rooms_ids'), function(item) { return virtual.indexOf(item) !== -1; }));
+      });
+
+      // Reservations
+      var query = $('#pms-search #search_query').val().toLowerCase();
+      this._hcalendar.filterReservations(function(r){
+        return r.title.toLowerCase().search(query) != -1;
+      });
+    },
+
     generate_domains: function() {
-        var domainRooms = [];
-        var category = this.$el.find('#pms-search #type_list').val();
-        if (category) { domainRooms.push(['categ_id.id', 'in', category]); }
-        var floor = this.$el.find('#pms-search #floor_list').val();
-        if (floor) { domainRooms.push(['floor_id.id', 'in', floor]); }
-        var amenities = this.$el.find('#pms-search #amenities_list').val();
-        if (amenities) {
-        	for (var amenity of amenities) {
-        		domainRooms.push(['room_amenities.id', '=', amenity]);
-        	}
-        }
-        var virtual = this.$el.find('#pms-search #virtual_list').val();
-        if (virtual) { domainRooms.push(['virtual_rooms.id', 'in', virtual]); }
-
-        var domainReservations = [];
-        var search_query = this.$el.find('#pms-search #search_query').val();
-        if (search_query) {
-            domainReservations.push('|');
-            domainReservations.push('|');
-            domainReservations.push(['partner_id.name', 'ilike', search_query]);
-            domainReservations.push(['partner_id.phone', 'ilike', search_query]);
-            domainReservations.push(['partner_id.mobile', 'ilike', search_query]);
-        }
-
         var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
 
@@ -1328,8 +1391,6 @@ var HotelCalendarView = View.extend({
         var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc();
 
         return {
-            'rooms': domainRooms,
-            'reservations': domainReservations,
             'dates': [date_begin, date_end]
         };
     },

@@ -117,10 +117,11 @@ class WubookConfiguration(models.TransientModel):
             vroom_rest_obj = self.env['hotel.virtual.room.restriction']
             restriction_ids = vroom_rest_obj.search([])
             for restriction in restriction_ids:
-                wpid = wubook_obj.create_rplan(restriction.name)
-                restriction.write({
-                    'wpid': wpid or ''
-                })
+                if restriction.wpid != '0':
+                    wpid = wubook_obj.create_rplan(restriction.name)
+                    restriction.write({
+                        'wpid': wpid or ''
+                    })
             # Create Pricelist
             pricelist_ids = self.env['product.pricelist'].search([])
             for pricelist in pricelist_ids:
