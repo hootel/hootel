@@ -56,7 +56,7 @@ class TestHotelFolio(TestHotelWubook):
         self.assertFalse(errors, "Reservation errors")
         nreserv = self.env['hotel.reservation'].search([
             ('wrid', '=', processed_rids[0])
-        ], limit=1)
+        ], order='id ASC', limit=1)
         self.assertTrue(nreserv, "Can't found reservation")
         self.assertTrue(nreserv.folio_id.whas_wubook_reservations,
                         "Can't found reservations from wubook")
@@ -87,7 +87,7 @@ class TestHotelFolio(TestHotelWubook):
         self.assertFalse(errors, "Reservation errors")
         nreserv = self.env['hotel.reservation'].search([
             ('wrid', '=', processed_rids[0])
-        ], limit=1)
+        ], order='id ASC', limit=1)
         self.assertTrue(nreserv, "Can't found reservation")
         nreserv.folio_id.import_reservations()
 
@@ -117,7 +117,7 @@ class TestHotelFolio(TestHotelWubook):
         self.assertFalse(errors, "Reservation errors")
         nreserv = self.env['hotel.reservation'].search([
             ('wrid', '=', processed_rids[0])
-        ], limit=1)
+        ], order='id ASC', limit=1)
         self.assertTrue(nreserv, "Can't found reservation")
         nreserv.folio_id.action_confirm()
         self.assertEqual(nreserv.folio_id.state,

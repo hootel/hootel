@@ -623,6 +623,16 @@ var HotelCalendarView = View.extend({
                 }
             }).open();
         });
+
+        this._hcalendar.addEventListener('hcalOnDateChanged', function(ev){
+          var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
+          var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
+          $dateTimePickerBegin.data("ignore_onchange", true);
+          $dateTimePickerBegin.data("DateTimePicker").setDate(ev.detail.date_begin.local().add(1, 'd'));
+          $dateTimePickerEnd.data("ignore_onchange", true);
+          $dateTimePickerEnd.data("DateTimePicker").setDate(ev.detail.date_end.local());
+          this.reload_hcalendar_reservations(false, true, true);
+        }.bind(this));
     },
 
     generate_hotel_calendar: function(days){
@@ -836,11 +846,11 @@ var HotelCalendarView = View.extend({
             $dateTimePickerEnd.data("DateTimePicker").setMinDate(e.date.add(3,'d'));
             $dateTimePickerEnd.data("DateTimePicker").setMaxDate(e.date.add(2,'M'));
             $dateTimePickerBegin.data("DateTimePicker").hide(); // TODO: Odoo uses old datetimepicker version
-            self.on_change_filter_date(e, true);
+            self.on_change_filter_date(true);
         });
         $dateTimePickerEnd.on("dp.change", function (e) {
             $dateTimePickerEnd.data("DateTimePicker").hide(); // TODO: Odoo uses old datetimepicker version
-            self.on_change_filter_date(e, false);
+            self.on_change_filter_date(false);
         });
         //this.$el.find('#pms-search #cal-pag-selector').datetimepicker($.extend({}, DTPickerOptions, {
         //  'useCurrent': true,
@@ -880,73 +890,6 @@ var HotelCalendarView = View.extend({
           }
         });
 
-        // View Events
-        this.$el.find("#pms-search #search_query").on('change', function(ev){
-          _.defer(function(){
-            this._apply_filters();
-          }.bind(self));
-        });
-        this.$el.find("#cal-pag-prev-plus").on('click', function(ev){
-            // FIXME: Ugly repeated code. Change place.
-            var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
-            var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(15, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(15, 'd');
-            $dateTimePickerBegin.data("ignore_onchange", true);
-            $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
-            $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-
-            ev.preventDefault();
-        });
-        this.$el.find("#cal-pag-prev").on('click', function(ev){
-            // FIXME: Ugly repeated code. Change place.
-            var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
-            var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().subtract(1, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().subtract(1, 'd');
-            $dateTimePickerBegin.data("ignore_onchange", true);
-            $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
-            $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-
-            ev.preventDefault();
-        });
-        this.$el.find("#cal-pag-next-plus").on('click', function(ev){
-            // FIXME: Ugly repeated code. Change place.
-            var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
-            var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(15, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(15, 'd');
-            $dateTimePickerBegin.data("ignore_onchange", true);
-            $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
-            $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-
-            ev.preventDefault();
-        });
-        this.$el.find("#cal-pag-next").on('click', function(ev){
-            // FIXME: Ugly repeated code. Change place.
-            var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
-            var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
-            var date_begin = $dateTimePickerBegin.data("DateTimePicker").getDate().add(1, 'd');
-            var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().add(1, 'd');
-            $dateTimePickerBegin.data("ignore_onchange", true);
-            $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
-            $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-
-            ev.preventDefault();
-        });
-        this.$el.find("#cal-pag-selector").on('click', function(ev){
-            // FIXME: Ugly repeated code. Change place.
-            var $dateTimePickerBegin = self.$el.find('#pms-search #date_begin');
-            var $dateTimePickerEnd = self.$el.find('#pms-search #date_end');
-            var date_begin = moment().startOf('day');
-            var date_end = date_begin.clone().add(self._view_options['days'], 'd').endOf('day');
-            $dateTimePickerBegin.data("ignore_onchange", true);
-            $dateTimePickerBegin.data("DateTimePicker").setDate(date_begin);
-            $dateTimePickerEnd.data("DateTimePicker").setDate(date_end);
-
-            ev.preventDefault();
-        });
-
         /* TOUCH EVENTS */
         this.$el.on('touchstart', function(ev){
           var orgEvent = ev.originalEvent;
@@ -976,62 +919,12 @@ var HotelCalendarView = View.extend({
         });
 
         /* BUTTONS */
-        var $button = this.$el.find('#pms-menu #btn_action_paydue');
-        $button.on('click', function(ev){
-          var $search = $(this).find('#paydue_search');
-          var searchQuery = $search.val();
-          var domain = [];
-          if (searchQuery) {
-            domain.push('|','|','|','|');
-            domain.push(['partner_id.name', 'ilike', searchQuery]);
-            domain.push(['partner_id.mobile', 'ilike', searchQuery]);
-            domain.push(['partner_id.vat', 'ilike', searchQuery]);
-            domain.push(['partner_id.email', 'ilike', searchQuery]);
-            domain.push(['partner_id.phone', 'ilike', searchQuery]);
-          }
-
-          self.call_action({
-            type: 'ir.actions.act_window',
-            view_mode: 'form',
-            view_type: 'tree,form',
-            res_model: 'hotel.reservation',
-            views: [[false, 'list'], [false, 'form']],
-            domain: domain,
-            name: searchQuery?`Reservations for '${searchQuery}'`:'All Reservations'
-          });
-
-          $search.val('');
-        });
-        var $btnInput = this.$el.find('#pms-menu #btn_action_paydue_combo #paydue_search');
-        $btnInput.on('click', function(ev){
-          // FIXME Workaround: Stop click propagation
-        }, false);
+        var $button = this.$el.find('#pms-menu #btn_action_bookings');
+        $button.on('click', function(ev){ self._open_bookings_tree(); });
+        var $btnInput = this.$el.find('#pms-menu #bookings_search');
         $btnInput.on('keypress', function(ev){
-          // TODO: Change this to a better place
-          if (ev.keyCode == 13) {
-            var $search = $(this);
-            var searchQuery = $search.val();
-            var domain = [];
-            if (searchQuery) {
-              domain.push('|','|','|','|');
-              domain.push(['partner_id.name', 'ilike', searchQuery]);
-              domain.push(['partner_id.mobile', 'ilike', searchQuery]);
-              domain.push(['partner_id.vat', 'ilike', searchQuery]);
-              domain.push(['partner_id.email', 'ilike', searchQuery]);
-              domain.push(['partner_id.phone', 'ilike', searchQuery]);
-            }
-
-            self.call_action({
-              type: 'ir.actions.act_window',
-              view_mode: 'form',
-              view_type: 'tree,form',
-              res_model: 'hotel.reservation',
-              views: [[false, 'list'], [false, 'form']],
-              domain: domain,
-              name: searchQuery?`Reservations for '${searchQuery}'`:'All Reservations'
-            });
-
-            $search.val('');
+          if (ev.keyCode === 13) {
+             self._open_bookings_tree();
           }
         });
 
@@ -1171,7 +1064,33 @@ var HotelCalendarView = View.extend({
       }
     },
 
-    on_change_filter_date: function(ev, isStartDate) {
+    _open_bookings_tree: function(tsearch) {
+      var $elm = this.$el.find('#pms-menu #bookings_search');
+      var searchQuery = tsearch || $elm.val();
+      var domain = [];
+      if (searchQuery) {
+        domain.push('|', '|', '|', '|',
+                    ['partner_id.name', 'ilike', searchQuery],
+                    ['partner_id.mobile', 'ilike', searchQuery],
+                    ['partner_id.vat', 'ilike', searchQuery],
+                    ['partner_id.email', 'ilike', searchQuery],
+                    ['partner_id.phone', 'ilike', searchQuery]);
+      }
+
+      this.call_action({
+        type: 'ir.actions.act_window',
+        view_mode: 'form',
+        view_type: 'tree,form',
+        res_model: 'hotel.reservation',
+        views: [[false, 'list'], [false, 'form']],
+        domain: domain,
+        name: searchQuery?'Reservations for ' + searchQuery:'All Reservations'
+      });
+
+      $elm.val('');
+    },
+
+    on_change_filter_date: function(isStartDate) {
         isStartDate = isStartDate || false;
         var $dateTimePickerBegin = this.$el.find('#pms-search #date_begin');
         var $dateTimePickerEnd = this.$el.find('#pms-search #date_end');
@@ -1200,6 +1119,9 @@ var HotelCalendarView = View.extend({
     },
 
     _on_bus_signal: function(notifications) {
+        if (!this._hcalendar) {
+          return;
+        }
         var need_reload_pricelists = false;
         var need_update_counters = false;
         var nreservs = []
@@ -1266,10 +1188,6 @@ var HotelCalendarView = View.extend({
                     nreservs.push(nreserv);
                   }
                 }
-
-                _.defer(function(){
-                  this._apply_filters();
-                }.bind(this));
                 need_update_counters = true;
                 break;
               case 'pricelist':
@@ -1283,7 +1201,12 @@ var HotelCalendarView = View.extend({
             }
           }
         }
-        this._hcalendar.addReservations(nreservs);
+        if (nreservs.length > 0) {
+          this._hcalendar.addReservations(nreservs);
+          _.defer(function(){
+            this._apply_filters();
+          }.bind(this));
+        }
         if (need_update_counters) {
           this.update_buttons_counter();
         }
@@ -1375,23 +1298,16 @@ var HotelCalendarView = View.extend({
       var floor = _.map(this.$el.find('#pms-search #floor_list').val(), function(item){ return +item; });
       var amenities = _.map(this.$el.find('#pms-search #amenities_list').val(), function(item){ return +item; });
       var virtual = _.map(this.$el.find('#pms-search #virtual_list').val(), function(item){ return +item; });
-      if (category.length > 0 || floor.length > 0 || amenities.length > 0 || virtual.length > 0){
-        this._hcalendar.filterRooms(function(r){
-          return (!category || category.length === 0 || r.getUserData('categ_id') in category) &&
-                  (!floor || floor.length === 0 || r.getUserData('floor_id') in floor) &&
-                  (!amenities || amenities.length === 0 || _.every(r.getUserData('amenities'), function(item) { return amenities.indexOf(item) !== -1; })) &&
-                  (!virtual || virtual.length === 0 || _.some(r.getUserData('inside_rooms_ids'), function(item) { return virtual.indexOf(item) !== -1; }));
-        });
-      }
-
-      // Reservations
-      var query = $('#pms-search #search_query').val();
-      if (query) {
-        query = query.toLowerCase();
-        this._hcalendar.filterReservations(function(r){
-          return r.title && r.title.toLowerCase().search(query) != -1;
-        });
-      }
+      this._hcalendar.filterRooms(function(category, floor, amenities, virtual, r){
+        console.log(category);
+        console.log(floor);
+        console.log(amenities);
+        console.log(virtual);
+        return (!category || category.length === 0 || r.getUserData('categ_id') in category) &&
+                (!floor || floor.length === 0 || r.getUserData('floor_id') in floor) &&
+                (!amenities || amenities.length === 0 || _.every(r.getUserData('amenities'), function(item) { return amenities.indexOf(item) !== -1; })) &&
+                (!virtual || virtual.length === 0 || _.some(r.getUserData('inside_rooms_ids'), function(item) { return virtual.indexOf(item) !== -1; }));
+      }.bind(this, category, floor, amenities, virtual));
     },
 
     generate_domains: function() {

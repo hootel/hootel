@@ -456,6 +456,9 @@ var HotelCalendarManagementView = View.extend({
     },
 
     _on_bus_signal: function(notifications) {
+        if (!this._hcalendar) {
+            return;
+        }
         for (var notif of notifications) {
             if (notif[0][1] === 'hotel.reservation') {
                 switch (notif[1]['type']) {

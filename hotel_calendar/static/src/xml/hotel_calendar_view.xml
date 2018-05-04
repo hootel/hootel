@@ -4,17 +4,6 @@
     <t t-name="hotel_calendar.HotelCalendarView">
         <div class="col-xs-12 col-md-12 nopadding">
             <div class="col-lg-1 hidden-xs hidden-sm nopadding" id="pms-menu">
-                <div class="col-xs-12 col-md-12 btn" id="pms-search-cal-pag">
-                    <div class="col-xs-12 col-md-12 nopadding">
-                      <button id="cal-pag-selector" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-calendar"></i></button>
-                    </div>
-                    <div class="col-xs-12 col-md-12 nopadding">
-                        <button id="cal-pag-prev-plus" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-angle-double-left"></i></button>
-                        <button id="cal-pag-prev" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-angle-left"></i></button>
-                        <button id="cal-pag-next" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-angle-right"></i></button>
-                        <button id="cal-pag-next-plus" class="btn nopadding" style="min-height:0"><i class="fa fa-2x fa-angle-double-right"></i></button>
-                    </div>
-                </div>
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_checkout" data-action="hotel_calendar.hotel_reservation_action_checkout">
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
                     CHECK-OUT
@@ -23,13 +12,11 @@
                     <div class="ninfo"><span class="badge badge-danger">0</span></div>
                     CHECK-IN
                 </button>
-                <div id="btn_action_paydue_combo">
-                    <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_paydue">
-                        <!--div class="ninfo"><span class="badge badge-danger">0</span></div-->
-                        RESERVATIONS<br/>
-                    </button>
-                    <input type="edit" id="paydue_search" placeholder="Search..." style="width:100%" />
-                </div>
+                <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_bookings">
+                    <!--div class="ninfo"><span class="badge badge-danger">0</span></div-->
+                    BOOKS<br/>
+                </button>
+                <input type="edit" id="bookings_search" placeholder="Search..." style="width:100%;" />
                 <button class="btn btn-default col-xs-12 col-md-12" id="btn_action_control" data-action="hotel_calendar.open_wizard_reservations">
                     WIZARD
                 </button>
@@ -87,16 +74,6 @@
                                                             <span class="input-group-addon">
                                                                 <span class="fa fa-calendar"></span>
                                                             </span>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="2">
-                                                        <div class="input-group col-xs-12 col-md-12">
-                                                            <span class="input-group-addon">
-                                                                <span class="fa fa-search"></span>
-                                                            </span>
-                                                            <input type="text" class="form-control" id="search_query" name="search_query" required="required" />
                                                         </div>
                                                     </td>
                                                 </tr>

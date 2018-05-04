@@ -41,16 +41,13 @@ class HotelReservation(models.Model):
     @api.model
     def _get_default_origin_sale(self):
         for record in self:
-            if record.channel_type != 'web':
-                record.origin_sale = record.channel_type
-            else:
-                record.oirgin_sale = record.wchannel_id
+            record.origin_sale = record.channel_type != 'web' and \
+                                record.channel_type or record.wchannel_id.name
 
     @api.depends('wrid', 'wchannel_id')
     def _is_from_channel(self):
         for record in self:
-            record.wis_from_channel = (record.wrid and record.wrid != ''
-                                       and record.wchannel_id)
+            record.wis_from_channel = (record.wrid and record.wchannel_id)
 
     wrid = fields.Char("WuBook Reservation ID", readonly=True)
     wchannel_id = fields.Many2one('wubook.channel.info',
@@ -76,7 +73,7 @@ class HotelReservation(models.Model):
     wstatus_reason = fields.Char("WuBook Status Reason", readonly=True)
     wcustomer_notes = fields.Text(related='folio_id.wcustomer_notes')
     origin_sale = fields.Char('Origin', default=_get_default_origin_sale,
-                            readonly=True)
+                              readonly=True)
 
     @api.model
     def create(self, vals):

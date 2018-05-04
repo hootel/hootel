@@ -247,6 +247,15 @@
 	/*border: 2px solid #3465a4;*/
 }
 
+.hcal-cell-pagination {
+	padding: 0.5em;
+}
+
+.hcal-cell-pagination button {
+	margin: 0 0.2em 0.2em 0.2em;
+	padding: 0.2em;
+}
+
 .hcal-reservation-unselect {
 	opacity: 0.3;
 	pointer-events: none;
@@ -433,6 +442,17 @@ td.hcal-cell-month-day-occupied {
 	border-style: none !important;
 	border-radius: 0 !important;
 	text-align: center;
+}
+
+button#btn_action_bookings {
+	margin-bottom: -1px !important;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+input#bookings_search {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	margin-bottom: 0.2em;
 }
 
 .noselect {

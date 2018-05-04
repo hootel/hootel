@@ -63,7 +63,7 @@ class TestWubook(TestHotelWubook):
         self.assertFalse(errors, "Reservation errors")
         nreserv = self.env['hotel.reservation'].search([
             ('wrid', 'in', processed_rids)
-        ])
+        ], order='id ASC')
         self.assertTrue(nreserv, "Reservation not found")
         self.assertEqual(nreserv.state, 'draft', "Invalid reservation state")
         nfolio = self.env['hotel.folio'].search([
@@ -119,7 +119,7 @@ class TestWubook(TestHotelWubook):
         self.assertFalse(errors, "Reservation errors")
         nreservs = self.env['hotel.reservation'].search([
             ('wrid', 'in', processed_rids)
-        ])
+        ], order='id ASC')
         self.assertEqual(len(nreservs), 2, "Reservations not found")
 
         for nreserv in nreservs:
@@ -305,7 +305,7 @@ class TestWubook(TestHotelWubook):
         self.assertFalse(errors, "Reservation errors")
         reserv = self.env['hotel.reservation'].search([
             ('wrid', '=', book_b['reservation_code'])
-        ], limit=1)
+        ], order='id ASC', limit=1)
         self.assertTrue(reserv, "Rervation doesn't exists")
         self.assertEqual(
             reserv.product_id.id,
@@ -335,7 +335,8 @@ class TestWubook(TestHotelWubook):
         # Check Splitted Integrity
         nreservs = self.env['hotel.reservation'].search([
             ('wrid', 'in', processed_rids)
-        ])
+        ], order="id ASC")
+        _logger.info(nreservs)
         self.assertEqual(len(nreservs), 2, "Reservations not found")
         date_dt = date_utils.get_datetime(nreservs[0].checkin)
         self.assertEqual(nreservs[0].reservation_lines[0].date,
@@ -406,7 +407,7 @@ class TestWubook(TestHotelWubook):
 
         nreservs = self.env['hotel.reservation'].search([
             ('wrid', 'in', processed_rids)
-        ])
+        ], order='id ASC')
 
         self.assertEqual(nreservs[0].state,
                          'draft',
@@ -459,7 +460,7 @@ class TestWubook(TestHotelWubook):
         self.assertFalse(errors, "Invalid Reservation created")
         nreservs = self.env['hotel.reservation'].search([
             ('wrid', 'in', processed_rids)
-        ])
+        ], order='id ASC')
         for nreserv in nreservs:
             self.assertTrue(nreservs[0].overbooking,
                             "Overbooking don't handled")
@@ -514,7 +515,7 @@ class TestWubook(TestHotelWubook):
         self.assertTrue(any(processed_rids), "Overbooking don't handled")
         nreservs = self.env['hotel.reservation'].search([
             ('wrid', 'in', processed_rids)
-        ])
+        ], order="id ASC")
         self.assertFalse(nreservs[0].overbooking,
                          "Overbooking don't handled")
         self.assertFalse(nreservs[1].overbooking,

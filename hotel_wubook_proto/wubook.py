@@ -1435,7 +1435,8 @@ class WuBook(models.TransientModel):
                             if split_booking:
                                 if split_booking_parent:
                                     del reservations[split_booking_parent-1:]
-                                splitted_map.clear()
+                                    if split_booking_parent in splitted_map:
+                                        del splitted_map[split_booking_parent]
                             # Can't found space for reservation
                             vals = self._generate_booking_vals(
                                 broom,
@@ -1506,10 +1507,11 @@ class WuBook(models.TransientModel):
                                         'wubook_action': False}).create(vals)
 
                     # Update Reservation Spitted Parents
+                    sorted_rlines = folio_id.room_lines.sorted(key='id')
                     for k_pid, v_pid in splitted_map.iteritems():
-                        preserv = folio_id.room_lines[k_pid-1]
+                        preserv = sorted_rlines[k_pid-1]
                         for pid in v_pid:
-                            creserv = folio_id.room_lines[pid-1]
+                            creserv = sorted_rlines[pid-1]
                             creserv.parent_reservation = preserv.id
 
                     processed_rids.append(rcode)

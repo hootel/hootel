@@ -449,7 +449,7 @@ class HotelFolio(models.Model):
                 _logger.info(line.id)
                 days_diff = date_utils.date_diff(line.checkin,
                                                  line.checkout,
-                                                 hours=False) + 1
+                                                 hours=False)
                 res = line.prepare_reservation_lines(line.checkin, days_diff)
                 line.reservation_lines = res['commands']
                 line.price_unit = res['total_price']

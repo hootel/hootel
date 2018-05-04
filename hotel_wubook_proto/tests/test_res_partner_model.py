@@ -76,7 +76,7 @@ class TestResPartner(TestHotelWubook):
         })
         reservation = self.env['hotel.reservation'].search([
             ('wrid', '=', processed_rids[1])
-        ], limit=1)
+        ], order='id ASC', limit=1)
         self.assertTrue(reservation, "Can't found reservation")
         self.assertFalse(self.partner_1.active, "Uncofirmed user still active")
         self.assertEqual(reservation.partner_id.id,

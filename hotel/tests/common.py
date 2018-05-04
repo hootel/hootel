@@ -67,7 +67,7 @@ class TestHotel(TestMail):
             "Hotel Calendar can't create a new reservation!")
 
         # Create Reservation Lines + Update Reservation Price
-        days_diff = date_utils.date_diff(checkin, checkout, hours=False) + 1
+        days_diff = date_utils.date_diff(checkin, checkout, hours=False)
         res = reservation.sudo(creator).prepare_reservation_lines(
             checkin.strftime(DEFAULT_SERVER_DATETIME_FORMAT), days_diff)
         reservation.sudo(creator).write({

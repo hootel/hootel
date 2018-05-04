@@ -40,6 +40,4 @@ class MassivePriceChangeWizard(models.TransientModel):
             'price': self.new_price,
         })
 
-        reservation_id._computed_amount_reservation()
-
         return True

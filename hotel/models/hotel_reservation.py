@@ -206,14 +206,14 @@ class HotelReservation(models.Model):
             ndate_dt = date_utils.dt_as_timezone(ndate_dt, 'UTC')
             return ndate_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
-    @api.constrains('checkin', 'checkout') #Why dont run api.depends?¿? 
-    def _computed_nights(self):
-        for res in self:
-            if res.checkin and res.checkout:
-                nights = days_diff = date_utils.date_diff(
-                    self.checkin,
-                    self.checkout, hours=False)
-            res.nights = nights
+    # @api.constrains('checkin', 'checkout') #Why dont run api.depends?¿?
+    # def _computed_nights(self):
+    #     for res in self:
+    #         if res.checkin and res.checkout:
+    #             nights = days_diff = date_utils.date_diff(
+    #                 self.checkin,
+    #                 self.checkout, hours=False)
+    #         res.nights = nights
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
@@ -641,13 +641,16 @@ class HotelReservation(models.Model):
                 checkin = vals.get('checkin', record.checkin)
                 checkout = vals.get('checkout', record.checkout)
                 days_diff = date_utils.date_diff(checkin,
-                                                 checkout, hours=False) + 1
+                                                 checkout, hours=False)
             rlines = self.prepare_reservation_lines(checkin, days_diff)
             vals.update({
                 'reservation_lines': rlines['commands'],
                 'price_unit':  rlines['total_price'],
             })
-        vals.update({'edit_room': False, 'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
+        vals.update({
+            'edit_room': False,
+            'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        })
 
         res = super(HotelReservation, self).write(vals)
         if datesChanged:
@@ -688,7 +691,7 @@ class HotelReservation(models.Model):
         if not self.checkout:
             self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         days_diff = date_utils.date_diff(
-                                self.checkin, self.checkout, hours=False) + 1
+                                self.checkin, self.checkout, hours=False)
         rlines = self.prepare_reservation_lines(
             self.checkin,
             days_diff,
@@ -759,7 +762,7 @@ class HotelReservation(models.Model):
                     ])
 
         days_diff = date_utils.date_diff(
-                                self.checkin, self.checkout, hours=False) + 1
+                                self.checkin, self.checkout, hours=False)
         rlines = self.prepare_reservation_lines(
             self.checkin,
             days_diff,
@@ -839,7 +842,7 @@ class HotelReservation(models.Model):
         if pricelist_id:
             pricelist_id = int(pricelist_id)
         old_lines_ids = self.mapped('reservation_lines.id')
-        for i in range(0, days-1):
+        for i in range(0, days):
             ndate = start_date_dt + timedelta(days=i)
             ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
             prod = product_id.with_context(
