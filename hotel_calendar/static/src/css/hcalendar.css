@@ -55,6 +55,11 @@
   max-height: 100%;
   align-items: stretch;
 }
+
+#cal-pag-prev-plus, #cal-pag-prev, #cal-pag-selector, #cal-pag-next, #cal-pag-next-plus {
+	min-height: 0px;
+}
+
 .table-reservations-header {
 	order: 1;
 	flex-grow: 1;

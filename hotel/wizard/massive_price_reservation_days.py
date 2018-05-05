@@ -36,11 +36,30 @@ class MassivePriceChangeWizard(models.TransientModel):
         if not reservation_id:
             return False
 
-        # FIXME: Do this for dispatch change event
+        cmds = []
         for rline in reservation_id.reservation_lines:
-            rline.price = self.new_price
-        # reservation_id.reservation_lines.write({
-        #     'price': self.new_price,
-        # })
+            cmds.append((
+                1,
+                rline.id,
+                {
+                    'price': self.new_price
+                }
+            ))
+        reservation_id.write({
+            'reservation_lines': cmds
+        })
+        # FIXME: For some reason need force reservation price calcs
+        reservation_id._computed_amount_reservation()
+        # FIXME: Workaround for dispatch updated price
+        reservation_id.folio_id.write({
+            'room_lines': [
+                (
+                    1,
+                    reservation_id.id, {
+                        'reservation_lines': cmds
+                    }
+                )
+            ]
+        })
 
         return True

@@ -105,11 +105,12 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
 
     _on_bus_signal: function (notifications) {
       for (var notif of notifications) {
-        if (notif[1]['userid'] === this.dataset.context.uid) {
-          continue;
-        }
         if (notif[0][1] === 'hotel.reservation') {
           if (notif[1]['type'] === 'issue') {
+            if (notif[1]['userid'] === this.dataset.context.uid) {
+              continue;
+            }
+
             var issue = notif[1]['issue'];
             var qdict = issue;
             var msg = QWeb.render('HotelCalendarWuBook.NotificationIssue', qdict);
@@ -129,6 +130,7 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
           }
         }
       }
+      
       this._super(notifications);
     },
 
