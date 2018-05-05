@@ -369,6 +369,12 @@ class HotelReservation(models.Model):
 
         today_str = today_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
         yesterday_str = yesterday_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+        reservations_to_checkout = self.env['hotel.reservation'].search([
+            ('state', 'not in', ['done']),
+            ('checkout', '<', today_str)
+            ])
+        for res in reservations_to_checkout:
+            res.action_reservation_checkout()
 
         reservations = self.env['hotel.reservation'].search([
             ('reservation_lines.date', 'in', [today_str,
