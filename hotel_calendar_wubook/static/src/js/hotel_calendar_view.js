@@ -104,7 +104,6 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
     },
 
     _on_bus_signal: function (notifications) {
-      this._super(notifications);
       for (var notif of notifications) {
         if (notif[1]['userid'] === this.dataset.context.uid) {
           continue;
@@ -130,6 +129,7 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
           }
         }
       }
+      this._super(notifications);
     },
 
     _play_sound: function(/*int*/SoundID) {
