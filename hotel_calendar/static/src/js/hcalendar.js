@@ -922,7 +922,7 @@ HotelCalendar.prototype = {
       this._dispatchEvent('hcalOnDateChanged', { 'date_begin': this.options.startDate.clone(), 'date_end': this._endDate.clone() });
     }.bind(this));
     var buttonIcon = document.createElement('i');
-    buttonIcon.classList.add('fa', 'fa-angle-double-left');
+    buttonIcon.classList.add('fa', 'fa-2x', 'fa-angle-double-left');
     button.appendChild(buttonIcon);
     cell.appendChild(button);
     button = button.cloneNode(true);
