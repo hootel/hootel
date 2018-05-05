@@ -194,9 +194,7 @@ var HotelCalendarView = View.extend({
     },
 
     _do_show_init: function () {
-      this.init_calendar_view().then(function() {
-        $(window).trigger('resize');
-      });
+      this.init_calendar_view();
     },
 
     do_show: function() {
@@ -206,7 +204,7 @@ var HotelCalendarView = View.extend({
 
       this._super();
 
-      if (this._hcalendar) {
+      if (this._hcalendar && !this._is_visible) {
         // FIXME: Workaround for restore "lost" reservations (Drawn when the view is hidden)
         setTimeout(function(){
           for (var reserv of self._hcalendar._reservations) {
@@ -219,12 +217,8 @@ var HotelCalendarView = View.extend({
       }
     },
 
-    do_hide: function () {
-      this._super();
-    },
-
-    destroy: function () {
-        return this._super.apply(this, arguments);
+    do_hide: function() {
+      this._super.apply(this, arguments);
     },
 
     /** CUSTOM METHODS **/
@@ -1203,9 +1197,6 @@ var HotelCalendarView = View.extend({
         }
         if (nreservs.length > 0) {
           this._hcalendar.addReservations(nreservs);
-          _.defer(function(){
-            this._apply_filters();
-          }.bind(this));
         }
         if (need_update_counters) {
           this.update_buttons_counter();
@@ -1284,30 +1275,31 @@ var HotelCalendarView = View.extend({
             }
 
             self._assign_extra_info();
-            _.defer(function(){
-              this._apply_filters();
-            }.bind(self));
         });
         this._last_dates = domains['dates'];
         this.update_buttons_counter();
     },
 
     _apply_filters: function() {
-      // Rooms
       var category = _.map(this.$el.find('#pms-search #type_list').val(), function(item){ return +item; });
       var floor = _.map(this.$el.find('#pms-search #floor_list').val(), function(item){ return +item; });
       var amenities = _.map(this.$el.find('#pms-search #amenities_list').val(), function(item){ return +item; });
       var virtual = _.map(this.$el.find('#pms-search #virtual_list').val(), function(item){ return +item; });
-      this._hcalendar.filterRooms(function(category, floor, amenities, virtual, r){
-        console.log(category);
-        console.log(floor);
-        console.log(amenities);
-        console.log(virtual);
-        return (!category || category.length === 0 || r.getUserData('categ_id') in category) &&
-                (!floor || floor.length === 0 || r.getUserData('floor_id') in floor) &&
-                (!amenities || amenities.length === 0 || _.every(r.getUserData('amenities'), function(item) { return amenities.indexOf(item) !== -1; })) &&
-                (!virtual || virtual.length === 0 || _.some(r.getUserData('inside_rooms_ids'), function(item) { return virtual.indexOf(item) !== -1; }));
-      }.bind(this, category, floor, amenities, virtual));
+      var domain = [];
+      if (category && category.length > 0) {
+        domain.push(['categ_id', 'in', category]);
+      }
+      if (floor && floor.length > 0) {
+        domain.push(['floor_id', 'in', floor]);
+      }
+      if (amenities && amenities.length > 0) {
+        domain.push(['amenities', 'in', amenities]);
+      }
+      if (virtual && virtual.length > 0) {
+        domain.push(['inside_rooms_ids', 'some', virtual]);
+      }
+      
+      this._hcalendar.setDomain(HotelCalendar.DOMAIN.ROOMS, domain);
     },
 
     generate_domains: function() {
