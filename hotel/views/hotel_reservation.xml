@@ -146,7 +146,7 @@
                         name="open_folio"
                     />  
                     <field name="folio_id"/>                      
-                    <field name="checkin"/>
+                    <field name="checkin" widget="date"/>
                     <button type="action" class="oe_stat_button"
                         id="cardex_smart_button" icon="fa-user-plus"
                         name="%(launch_checkin_wizard_add)d"
@@ -155,7 +155,7 @@
                         attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
                             ('cardex_pending','=', False)]}"
                     />
-                    <field name="checkout"/>
+                    <field name="checkout"  widget="date"/>
                     <field name="nights" />
                     <field name="price_unit" string="Reservation Price"/>
                     <field name="discount" groups="sale.group_discount_per_so_line"/>

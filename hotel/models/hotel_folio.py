@@ -103,6 +103,7 @@ class HotelFolio(models.Model):
                        default='New')
     email = fields.Char('E-mail', related='partner_id.email')
     mobile = fields.Char('Mobile', related='partner_id.mobile')
+    phone = fields.Char('Phone', related='partner_id.phone')
     image = fields.Binary('Image', related='partner_id.image')
     order_id = fields.Many2one('sale.order', 'Order', delegate=True,
                                required=True, ondelete='cascade')

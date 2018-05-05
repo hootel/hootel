@@ -133,6 +133,7 @@
 							<field name="email" placeholder="email"/>
                             <field name="date_order" />
 							<field name="mobile" placeholder="mobile"/>
+                            <field name="phone" />
                             <field name="reservation_type" attrs="{'readonly':[('state','not in',('draft'))]}"/>
                             <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>
                             <field name="segmentation_id" widget="many2many_tags" placeholder="Segmentation..."
