@@ -256,6 +256,10 @@
 	padding: 0.2em;
 }
 
+.hcal-hidden {
+	display: none;
+}
+
 .hcal-reservation-unselect {
 	opacity: 0.3;
 	pointer-events: none;

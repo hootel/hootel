@@ -73,6 +73,7 @@ function HotelCalendar(/*String*/querySelector, /*Dictionary*/options, /*List*/p
   this._tableCreated = false; // Store Flag to Know Calendar Creation
   this._cellSelection = {start:false, end:false, current:false}; // Store Info About Selected Cells
   this._lazyModeReservationsSelection = false; // Store Info About Timer for Selection Action
+  this._domains = {}; // Store domains for filter rooms & reservations
 
   /***/
   this._reset_action_reservation();
@@ -143,18 +144,30 @@ HotelCalendar.prototype = {
     return this._modeSwap;
   },
 
-  //==== RESERVATIONS
-  filterReservations: function(/*Function*/callback) {
-    for (var r of this._reservations) {
-      if (callback(r)){
-        r._html.classList.remove('hcal-reservation-unselect');
-        this._updateReservation(r);
-      } else {
-        r._html.classList.add('hcal-reservation-unselect');
+  //==== DOMAINS
+  setDomain: function(/*Int*/section, /*Array*/domain) {
+    if (this._domains[section] !== domain) {
+      this._domains[section] = domain;
+      if (section === HotelCalendar.DOMAIN.RESERVATIONS) {
+        this._filterReservations();
+      } else if (section === HotelCalendar.DOMAIN.ROOMS) {
+        this._filterRooms();
       }
     }
+  },
 
-    _.defer(function(){ this._updateReservationOccupation() }.bind(this));
+  getDomain: function(/*Int*/section) {
+    return this._domains[section];
+  },
+
+  //==== RESERVATIONS
+  _filterReservations: function() {
+    for (var r of this._reservations) {
+      r._active = this._in_domain(r, this._domains[HotelCalendar.DOMAIN.RESERVATIONS]);
+      this._updateReservation(r, true);
+    }
+
+    //_.defer(function(){ this._updateReservationOccupation() }.bind(this));
   },
 
   getReservationAction: function() {
@@ -210,6 +223,7 @@ HotelCalendar.prototype = {
 
         reservs = reservs.concat(unusedZones);
         for (var r of reservs) {
+          r._active = this._in_domain(r, this._domains[HotelCalendar.DOMAIN.RESERVATIONS]);
           this._calcReservationCellLimits(r);
           if (r._html) {
             r._html.innerText = r.title;
@@ -295,12 +309,12 @@ HotelCalendar.prototype = {
 
   _updateReservationsMap: function() {
     this._reservationsMap = {};
-    for (var r of this._reservations) {
-      if (!(r.room.id in this._reservationsMap)) {
-        this._reservationsMap[r.room.id] = [];
+    this._reservations.map(function(current){
+      if (!(current.room.id in this._reservationsMap)) {
+        this._reservationsMap[current.room.id] = [];
       }
-      this._reservationsMap[r.room.id].push(r);
-    }
+      this._reservationsMap[current.room.id].push(current);
+    }.bind(this));
   },
 
   _calcReservationCellLimits: function(/*HReservationObject*/reservation, /*Int?*/nbed, /*Bool?*/notCheck) {
@@ -426,29 +440,23 @@ HotelCalendar.prototype = {
   },
 
   //==== ROOMS
-  filterRooms: function(/*Function*/callback) {
-    for (var room of this.options.rooms) {
-      var selected = callback(room, arguments);
-      var toUpdate = [];
-      room._html.style.display = selected?'':'none';
-      if (room.id in this._reservationsMap) {
-        for (var reserv of this._reservationsMap[room.id]) {
-          if (selected) {
-            toUpdate.push(reserv);
-          } else {
-            reserv._html.style.display = 'none';
-          }
-        }
+  _filterRooms: function() {
+    for (var r of this.options.rooms) {
+      r._active = this._in_domain(r, this._domains[HotelCalendar.DOMAIN.ROOMS]);
+      if (r._active) {
+        r._html.classList.remove('hcal-hidden');
+      } else {
+        r._html.classList.add('hcal-hidden');
       }
-
-      for (var reserv of toUpdate) {
-        reserv._html.style.display = '';
-        this._updateReservation(reserv);
+      if (r.id in this._reservationsMap) {
+        for (var reserv of this._reservationsMap[r.id]) {
+          this._updateReservation(reserv);
+        }
       }
     }
 
     this._calcViewHeight();
-    _.defer(function(){ this._updateReservationOccupation() }.bind(this));
+    //_.defer(function(){ this._updateReservationOccupation() }.bind(this));
   },
 
   getDayRoomTypeReservations: function(/*String,MomentObject*/day, /*String*/room_type) {
@@ -970,9 +978,9 @@ HotelCalendar.prototype = {
     edit.addEventListener('keypress', function(ev){
       if (ev.keyCode === 13) {
         var query = ev.target.value;
-        this.filterReservations(function(r){
-          return !query || (r.title && r.title.toLowerCase().search(query) != -1);
-        });
+        this.setDomain(HotelCalendar.DOMAIN.RESERVATIONS, [
+          ['title', 'ilike', query]
+        ]);
       }
     }.bind(this), false);
 
@@ -1077,6 +1085,7 @@ HotelCalendar.prototype = {
       itemRoom._html = row;
     }
 
+    this._filterRooms();
     this._calcViewHeight();
   },
 
@@ -1546,30 +1555,10 @@ HotelCalendar.prototype = {
   },
 
   //==== RESERVATIONS
-  _updateDivReservation: function(/*HReservationObject*/reserv) {
+  _updateDivReservation: function(/*HReservationObject*/reserv, /*Bool?*/noRefresh) {
     if (!reserv._limits.isValid() || !reserv._html) {
       return;
     }
-
-    var numBeds = (+reserv._limits.right.dataset.hcalBedNum)-(+reserv._limits.left.dataset.hcalBedNum);
-    reserv._beds = [];
-    for (var i=0; i<=numBeds; reserv._beds.push(+reserv._limits.left.dataset.hcalBedNum+i++));
-
-    var boundsInit = reserv._limits.left.getBoundingClientRect();
-    var boundsEnd = reserv._limits.right.getBoundingClientRect();
-
-    reserv._html.removeAttribute('style');
-
-    if (reserv.splitted) {
-      reserv._html.classList.add('hcal-reservation-splitted');
-      var magicNumber = Math.floor(Math.abs(Math.sin((reserv.getUserData('parent_reservation') || reserv.id))) * 100000);
-      var bbColor = this._intToRgb(magicNumber);
-      reserv._html.style.borderColor = `rgb(${bbColor[0]},${bbColor[1]},${bbColor[2]})`;
-    } else {
-      reserv._html.classList.remove('hcal-reservation-splitted');
-    }
-    reserv._html.style.backgroundColor = reserv.color;
-    reserv._html.style.color = reserv.colorText;
 
     if (reserv.readOnly) {
       reserv._html.classList.add('hcal-reservation-readonly');
@@ -1577,45 +1566,79 @@ HotelCalendar.prototype = {
       reserv._html.classList.remove('hcal-reservation-readonly');
     }
 
-    var etableOffset = this.etable.getBoundingClientRect();
-
-    reserv._html.style.top = `${boundsInit.top-etableOffset.top}px`;
-    var divHeight = (boundsEnd.bottom-etableOffset.top)-(boundsInit.top-etableOffset.top);
-    reserv._html.style.height = `${divHeight}px`;
-    reserv._html.style.lineHeight = `${divHeight}px`;
-    var fontHeight = divHeight/1.3;
-    if (fontHeight > 16) {
-      fontHeight = 16;
-    }
-    reserv._html.style.fontSize = `${fontHeight}px`;
-
-    var clearBorderLeft = function(/*HTMLObject*/elm) {
-      elm.style.borderLeftWidth = '0';
-      elm.style.borderTopLeftRadius = '0';
-      elm.style.borderBottomLeftRadius = '0';
-    };
-    var clearBorderRight = function(/*HTMLObject*/elm) {
-      elm.style.borderRightWidth = '0';
-      elm.style.borderTopRightRadius = '0';
-      elm.style.borderBottomRightRadius = '0';
-    };
-
-    if (reserv._drawModes[0] === 'soft-start' && reserv._drawModes[1] === 'soft-end') {
-      clearBorderLeft(reserv._html);
-      clearBorderRight(reserv._html);
-      reserv._html.style.left = `${boundsInit.left-etableOffset.left}px`;
-      reserv._html.style.width = `${(boundsEnd.left-boundsInit.left)+boundsEnd.width}px`;
-    } else if (reserv._drawModes[0] === 'soft-start') {
-      clearBorderLeft(reserv._html);
-      reserv._html.style.left = `${boundsInit.left-etableOffset.left}px`;
-      reserv._html.style.width = `${(boundsEnd.left-boundsInit.left)+boundsEnd.width/2.0}px`;
-    } else if (reserv._drawModes[1] === 'soft-end') {
-      clearBorderRight(reserv._html);
-      reserv._html.style.left = `${boundsInit.left-etableOffset.left+boundsInit.width/2.0}px`;
-      reserv._html.style.width = `${(boundsEnd.left-boundsInit.left)+boundsEnd.width}px`;
+    if (reserv.room._active) {
+      reserv._html.classList.remove('hcal-hidden');
     } else {
-      reserv._html.style.left = `${(boundsInit.left-etableOffset.left)+boundsEnd.width/2.0}px`;
-      reserv._html.style.width = `${(boundsEnd.left-boundsInit.left)}px`;
+      reserv._html.classList.add('hcal-hidden');
+    }
+
+    if (reserv._active) {
+      reserv._html.classList.remove('hcal-reservation-unselect');
+    } else {
+      reserv._html.classList.add('hcal-reservation-unselect');
+    }
+
+    if (!noRefresh) {
+      var numBeds = (+reserv._limits.right.dataset.hcalBedNum)-(+reserv._limits.left.dataset.hcalBedNum);
+      reserv._beds = [];
+      for (var i=0; i<=numBeds; reserv._beds.push(+reserv._limits.left.dataset.hcalBedNum+i++));
+
+      var boundsInit = reserv._limits.left.getBoundingClientRect();
+      var boundsEnd = reserv._limits.right.getBoundingClientRect();
+
+      reserv._html.removeAttribute('style');
+
+      if (reserv.splitted) {
+        reserv._html.classList.add('hcal-reservation-splitted');
+        var magicNumber = Math.floor(Math.abs(Math.sin((reserv.getUserData('parent_reservation') || reserv.id))) * 100000);
+        var bbColor = this._intToRgb(magicNumber);
+        reserv._html.style.borderColor = `rgb(${bbColor[0]},${bbColor[1]},${bbColor[2]})`;
+      } else {
+        reserv._html.classList.remove('hcal-reservation-splitted');
+      }
+      reserv._html.style.backgroundColor = reserv.color;
+      reserv._html.style.color = reserv.colorText;
+
+      var etableOffset = this.etable.getBoundingClientRect();
+
+      reserv._html.style.top = `${boundsInit.top-etableOffset.top}px`;
+      var divHeight = (boundsEnd.bottom-etableOffset.top)-(boundsInit.top-etableOffset.top);
+      reserv._html.style.height = `${divHeight}px`;
+      reserv._html.style.lineHeight = `${divHeight}px`;
+      var fontHeight = divHeight/1.3;
+      if (fontHeight > 16) {
+        fontHeight = 16;
+      }
+      reserv._html.style.fontSize = `${fontHeight}px`;
+
+      var clearBorderLeft = function(/*HTMLObject*/elm) {
+        elm.style.borderLeftWidth = '0';
+        elm.style.borderTopLeftRadius = '0';
+        elm.style.borderBottomLeftRadius = '0';
+      };
+      var clearBorderRight = function(/*HTMLObject*/elm) {
+        elm.style.borderRightWidth = '0';
+        elm.style.borderTopRightRadius = '0';
+        elm.style.borderBottomRightRadius = '0';
+      };
+
+      if (reserv._drawModes[0] === 'soft-start' && reserv._drawModes[1] === 'soft-end') {
+        clearBorderLeft(reserv._html);
+        clearBorderRight(reserv._html);
+        reserv._html.style.left = `${boundsInit.left-etableOffset.left}px`;
+        reserv._html.style.width = `${(boundsEnd.left-boundsInit.left)+boundsEnd.width}px`;
+      } else if (reserv._drawModes[0] === 'soft-start') {
+        clearBorderLeft(reserv._html);
+        reserv._html.style.left = `${boundsInit.left-etableOffset.left}px`;
+        reserv._html.style.width = `${(boundsEnd.left-boundsInit.left)+boundsEnd.width/2.0}px`;
+      } else if (reserv._drawModes[1] === 'soft-end') {
+        clearBorderRight(reserv._html);
+        reserv._html.style.left = `${boundsInit.left-etableOffset.left+boundsInit.width/2.0}px`;
+        reserv._html.style.width = `${(boundsEnd.left-boundsInit.left)+boundsEnd.width}px`;
+      } else {
+        reserv._html.style.left = `${(boundsInit.left-etableOffset.left)+boundsEnd.width/2.0}px`;
+        reserv._html.style.width = `${(boundsEnd.left-boundsInit.left)}px`;
+      }
     }
   },
 
@@ -1736,12 +1759,12 @@ HotelCalendar.prototype = {
     return _.reject(this._reservations, function(item){ return item === reservationObj || item.linkedId !== reservationObj.id; });
   },
 
-  _updateReservation: function(/*HReservationObject*/reservationObj) {
+  _updateReservation: function(/*HReservationObject*/reservationObj, /*Bool?*/noRefresh) {
     // Fill
     if (reservationObj._limits.isValid()) {
-      this._updateDivReservation(reservationObj);
+      this._updateDivReservation(reservationObj, noRefresh);
     } else {
-      console.warn(`[Hotel Calendar][_updateReservation] Can't place reservation ID@${reservationObj.id}`);
+      console.warn(`[Hotel Calendar][_updateReservation] Can't place reservation ID@${reservationObj.id} [${reservationObj.startDate.format(HotelCalendar.DATE_FORMAT_LONG_)} --> ${reservationObj.endDate.format(HotelCalendar.DATE_FORMAT_LONG_)}]`);
       this.removeReservation(reservationObj);
     }
   },
@@ -2052,6 +2075,52 @@ HotelCalendar.prototype = {
   },
 
   //==== HELPER FUNCTIONS
+  _in_domain: function(/*HRoomObject/HReservationObject*/obj, /*Array*/domain) {
+    if (!domain || domain.length === 0) {
+      return true;
+    }
+
+    var founded = false;
+    for (var f of domain) {
+      if (typeof f[2] === 'object' && f[2].length === 0) {
+        continue;
+      }
+
+      var fieldName = f[0].toLowerCase();
+      var compMode = f[1].toLowerCase();
+      if (compMode === 'ilike') {
+        var value = f[2].toLowerCase();
+        var userData = obj.getUserData(fieldName) && obj.getUserData(fieldName).toLowerCase() || '';
+        if ((fieldName in obj && obj[fieldName].toLowerCase().search(value) !== -1) || userData.search(value) !== -1) {
+          founded = true;
+          break;
+        }
+      } else if (compMode === '=') {
+        if ((fieldName in obj && obj[fieldName] === f[2]) ||
+            obj.getUserData(fieldName) === f[2]) {
+          founded = true;
+          break;
+        }
+      } else if (compMode === 'in') {
+        if ((fieldName in obj && obj[fieldName] in f[2]) ||
+            obj.getUserData(fieldName) in f[2] ||
+            (obj[fieldName] && typeof obj[fieldName] === 'object' && _.every(obj[fieldName], function(item) { return f[2].indexOf(item) !== -1; })) ||
+            (obj.getUserData(fieldName) && typeof obj.getUserData(fieldName) === 'object' && _.every(obj.getUserData(fieldName), function(item) { return f[2].indexOf(item) !== -1; }))) {
+          founded = true;
+          break;
+        }
+      } else if (compMode === 'some') {
+        if ((obj[fieldName] && typeof obj[fieldName] === 'object' && _.some(obj[fieldName], function(item) { return f[2].indexOf(item) !== -1; })) ||
+            (obj.getUserData(fieldName) && typeof obj.getUserData(fieldName) === 'object' && _.some(obj.getUserData(fieldName), function(item) { return f[2].indexOf(item) !== -1; }))) {
+          founded = true;
+          break;
+        }
+      }
+    }
+
+    return founded;
+  },
+
   getDateDiffDays: function(/*MomentObject*/start, /*MomentObject*/end) {
 	  return end.clone().startOf('day').diff(start.clone().startOf('day'), 'days');
   },
@@ -2460,6 +2529,7 @@ HotelCalendar.prototype = {
 };
 
 /** CONSTANTS **/
+HotelCalendar.DOMAIN = { NONE: -1, RESERVATIONS: 0, ROOMS: 1 };
 HotelCalendar.ACTION = { NONE: -1, MOVE_ALL: 0, MOVE_LEFT: 1, MOVE_RIGHT: 2, SWAP: 3 };
 HotelCalendar.MODE = { NONE: -1, SWAP_FROM: 0, SWAP_TO: 1 };
 HotelCalendar.DATE_FORMAT_SHORT_ = 'DD/MM/YYYY';
@@ -2506,7 +2576,7 @@ function HRoom(/*Int*/id, /*String*/number, /*Int*/capacity, /*String*/type, /*B
   this.overbooking = false;
 
   this._html = false;
-  this._visible = true;
+  this._active = true;
   this._userData = {};
 }
 HRoom.prototype = {
@@ -2515,7 +2585,7 @@ HRoom.prototype = {
     if (typeof key === 'undefined') {
       return this._userData;
     }
-    return this._userData[key];
+    return key in this._userData && this._userData[key] || null;
   },
   addUserData: function(/*Dictionary*/data) {
     if (!_.isObject(data)) {
@@ -2535,6 +2605,7 @@ HRoom.prototype = {
     );
     nroom.overbooking = this.overbooking;
     nroom._html = this._html;
+    nroom._active = this._active;
     nroom.addUserData(this.getUserData());
     return nroom;
   }
@@ -2569,6 +2640,7 @@ function HReservation(/*Dictionary*/rValues) {
   this._html = false;
   this._limits = new HLimit();
   this._beds = [];
+  this._active = true;
   this._userData = {};
 }
 HReservation.prototype = {
@@ -2581,7 +2653,7 @@ HReservation.prototype = {
     if (typeof key === 'undefined') {
       return this._userData;
     }
-    return this._userData[key];
+    return key in this._userData && this._userData[key] || null;
   },
   addUserData: function(/*Dictionary*/data) {
     if (!_.isObject(data)) {
@@ -2616,6 +2688,7 @@ HReservation.prototype = {
     nreserv._html = this._html;
     nreserv._drawModes = _.clone(this._drawModes);
     nreserv._limits = this._limits.clone();
+    nreserv._active = this._active;
     nreserv.addUserData(this.getUserData());
     return nreserv;
   }
