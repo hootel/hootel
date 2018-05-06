@@ -55,6 +55,11 @@
   max-height: 100%;
   align-items: stretch;
 }
+
+#cal-pag-prev-plus, #cal-pag-prev, #cal-pag-selector, #cal-pag-next, #cal-pag-next-plus {
+	min-height: 0px;
+}
+
 .table-reservations-header {
 	order: 1;
 	flex-grow: 1;
@@ -247,13 +252,8 @@
 	/*border: 2px solid #3465a4;*/
 }
 
-.hcal-cell-pagination {
-	padding: 0.5em;
-}
-
 .hcal-cell-pagination button {
-	margin: 0 0.2em 0.2em 0.2em;
-	padding: 0.2em;
+	padding: 0.1em;
 }
 
 .hcal-hidden {
