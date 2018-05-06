@@ -25,25 +25,18 @@
                     <sheet>
                         <div class="oe_title">
                             <h1>
-                                <field name="partner_id" default_focus="1" placeholder="Name" readonly="1"/>
+                                <field name="partner_id" default_focus="1" placeholder="Name" readonly="1"/> -
+                                <field name="folio_id" readonly="1" nolabel="1"/>
                             </h1>
+                            <h2>
+                                <field name="edit_room" nolabel="1"/>
+                                <field name="product_id" select="1" domain="[('isroom','=',True)]"
+                                    nolabel="1" options="{'no_create': True}"
+                                    attrs="{'readonly':[('edit_room','=',False)]}"/>
+                            </h2>
                         </div>
-							<table class="oe_form_group" colspan="6">
-								<tr><field name="folio_id" readonly="1"/></tr>
-								<tr><h3>Room No: </h3></tr>
-								<tr class="oe_form_group_row">
-									<td class="oe_form_group_cell oe_form_group_cell_label"><field name="edit_room" nolabel="1"/></td>
-									<td class="oe_form_group_cell">
-										<h2>
-										<field name="product_id" select="1" domain="[('isroom','=',True)]"
-											string="Room No" options="{'no_create': True}"
-											attrs="{'readonly':[('edit_room','=',False)]}"/>
-										</h2>
-									</td>
-								</tr>
-							</table>
-                            <group colspan="6">
-                                 <group>
+                            <group>                               
+                                <group>
                                     <field name="checkin"/>
                                     <field name="checkout"/>
                                 </group>
@@ -51,24 +44,13 @@
                                     <field name="adults"/>
                                     <field name="children"/>
                                 </group>
-                            </group>
-                            <group colspan="6">
-                                <group>
+                                 <group>
                                     <field name="virtual_room_id" on_change="1" options="{'no_create': True}"
                                            attrs="{'readonly':[('state','not in',('draft'))]}"/>
                                     <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>
-                                     <field name="segmentation_id" widget="many2many_tags" placeholder="Segmentation..."
-                                    options="{'no_create': True,'no_open': True}" />
+                                    <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/> 
                                 </group>
-                                <group>
-                                    <field name="amount_reservation" readonly="1"/>
-                                    <label for="discount" groups="sale.group_discount_per_so_line"/>
-                                    <div name="discount" groups="sale.group_discount_per_so_line">
-                                        <field name="discount" class="oe_inline"/> %
-                                    </div>
-                                </group>
-                            </group>
-                                <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>                                
+                            </group>                                                                                      
                             <group invisible="1">
                                 <field name="check_rooms" invisible="1"/>
                                 <field name="cardex_pending" invisible="1"/>
@@ -91,6 +73,14 @@
                                             <field name="price" />
                                         </tree>
                                     </field>
+                                     <group colspan="2" class="oe_subtotal_footer">
+                                        <field name="price_unit" readonly="1" />       
+                                        <label for="discount" groups="sale.group_discount_per_so_line"/>
+                                        <div name="discount" groups="sale.group_discount_per_so_line">
+                                            <field name="discount" class="oe_inline"/>
+                                        </div>
+                                         <field name="price_total" string="Final Price"/>                                            
+                                    </group>
                                 </page>
                                 <page name="services" string="Services">
                                     <separator string="Related services" />
@@ -109,12 +99,16 @@
                                 </page>
                                 <page name="others" string="Others">
                                     <group colspan="4" col="4">
-                                        <field name="reservation_type" />
-                                        <field name="out_service_description"
-                                               attrs="{'invisible':[('reservation_type','not in',('out'))]}"/>
-                                    </group>
-                                    <group>
-                                      <field name="overbooking" />
+                                        <group>
+                                            <field name="segmentation_id" widget="many2many_tags" placeholder="Segmentation..."
+                                                options="{'no_create': True,'no_open': True}" />
+                                            <field name="overbooking" />
+                                        </group>
+                                        <group>
+                                            <field name="reservation_type" />
+                                            <field name="out_service_description"
+                                                   attrs="{'invisible':[('reservation_type','not in',('out'))]}"/>
+                                        </group>
                                     </group>
                                 </page>
                             </notebook>
@@ -132,23 +126,33 @@
             <field name="name">hotel.reservation.tree</field>
             <field name="model">hotel.reservation</field>
             <field name="arch" type="xml">
-                <tree string="Hotel Reservation" decoration-danger="folio_pending_amount &gt; 0 and
-                    checkin &lt;= current_date" decoration-muted="state == 'cancelled'" create="false">                                  
+                <tree string="Hotel Reservation"
+                decoration-danger="folio_pending_amount &gt; 0 and
+                    checkin &lt;= current_date"
+                decoration-muted="state == 'cancelled' and
+                    folio_pending_amount &gt; 0"
+                decoration-success="folio_pending_amount == 0 and
+                    checkout &lt;= current_date"
+                create="false">
+                    <button icon="fa fa-2x fa-angellist"
+                       attrs="{'invisible':['|',('folio_pending_amount','&gt;',0),
+                            ('state' ,'!=', 'done')]}"
+                    />  
                     <field name="product_id" string="Room"/>
                     <button type="action" class="oe_stat_button"
-                        id="go_folio" icon="fa-list-ul"
+                        id="go_folio" icon="fa fa-2x fa-list-ul"
                         name="%(open_hotel_folio1_form_tree_all)d"
                         context="{'search_default_partner_id': partner_id}"
                     />    
                     <field name="partner_id"/>
                     <button type="object" class="oe_stat_button"
-                        id="go_folio" icon="fa-file"
+                        id="go_folio" icon="fa fa-2x fa-file"
                         name="open_folio"
                     />  
                     <field name="folio_id"/>                      
                     <field name="checkin" widget="date"/>
                     <button type="action" class="oe_stat_button"
-                        id="cardex_smart_button" icon="fa-user-plus"
+                        id="cardex_smart_button" icon="fa fa-2x fa-user-plus"
                         name="%(launch_checkin_wizard_add)d"
                         context="{'partner_id': partner_id,'enter_date': checkin,
                             'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
@@ -168,6 +172,11 @@
                     <!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
                     <field name="cardex_pending" invisible="1"/>
                     <field name="folio_pending_amount" string="Folio Pending Amount"/>
+                    <button type="object" class="oe_stat_button"
+                        id="cardex_smart_button" icon="fa fa-3x fa-money"
+                        name="action_pay"
+                        attrs="{'invisible':[('folio_pending_amount','==',0)]}"
+                    />
                     <field name="state" />                    
                 </tree>
             </field>
@@ -184,9 +193,24 @@
                     <filter string="Cancelled"
                                 domain="[('state', '=', 'cancelled')]"
                                  />
-                     <filter string="On Board"
+                    <filter string="On Board"
                                 domain="[('state','in',['booking'])]"
                                 help="Current Booking" />
+                    <filter string="To enter"
+                                domain="[('state', '=', 'confirm')]"
+                                 />
+                    <filter string="Reservations to 7 days" name="next_res_week"
+                            domain="[('checkin', '&lt;', (context_today()+datetime.timedelta(days=7)).strftime('%Y-%m-%d')),
+                            ('state', '=', 'confirm')]"
+                            help="Show all reservations for which date enter is before than 7 days"/>
+                    <filter string="Reservations to 14 days" name="next_res_2week"
+                            domain="[('checkin', '&lt;', (context_today()+datetime.timedelta(days=14)).strftime('%Y-%m-%d')),
+                            ('state', '=', 'confirm')]"
+                            help="Show all reservations for which date enter is before than 14 days"/>
+                    <filter string="Reservations to 1 month" name="next_res_week"
+                            domain="[('checkin', '&lt;', (context_today()+datetime.timedelta(days=30)).strftime('%Y-%m-%d')),
+                            ('state', '=', 'confirm')]"
+                            help="Show all reservations for which date enter is before than aprox. 1 month"/>
                     <filter string="To Assign"
                                 domain="[('to_assign','=',True)]"
                                 />
@@ -196,6 +220,9 @@
                                  />
                     <filter string="Late Payment"
                                 domain="[('folio_id.invoices_amount','&gt;',0),('state','in',['done'])]"
+                                />
+                    <filter string="Lates and NoShows"
+                                domain="[('cancelled_reason','in',['late','noshow'])]"
                                 />
                     <separator/>
                     <filter string="Staff"

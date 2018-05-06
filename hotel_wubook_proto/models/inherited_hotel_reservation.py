@@ -38,11 +38,12 @@ _logger = logging.getLogger(__name__)
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
 
-    @api.model
-    def _get_default_origin_sale(self):
+    @api.depends('channel_type','wchannel_id')
+    def _get_origin_sale(self):
         for record in self:
             record.origin_sale = record.channel_type != 'web' and \
-                                record.channel_type or record.wchannel_id.name
+                                dict(self.fields_get(allfields=['channel_type'])['channel_type']['selection'])[record.channel_type] \
+                                or record.wchannel_id.name
 
     @api.depends('wrid', 'wchannel_id')
     def _is_from_channel(self):
@@ -72,8 +73,8 @@ class HotelReservation(models.Model):
                                readonly=True)
     wstatus_reason = fields.Char("WuBook Status Reason", readonly=True)
     wcustomer_notes = fields.Text(related='folio_id.wcustomer_notes')
-    origin_sale = fields.Char('Origin', default=_get_default_origin_sale,
-                              readonly=True)
+    origin_sale = fields.Char('Origin', compute=_get_origin_sale,
+                              store=True)
 
     @api.model
     def create(self, vals):

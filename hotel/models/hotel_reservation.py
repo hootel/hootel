@@ -357,6 +357,11 @@ class HotelReservation(models.Model):
             else:
                 res.cardex_pending = True
 
+    @api.multi
+    def action_pay(self):
+        self.ensure_one()
+        return self.folio_id.action_pay()
+
     @api.model
     def daily_plan(self):
         _logger.info('daily_plan')

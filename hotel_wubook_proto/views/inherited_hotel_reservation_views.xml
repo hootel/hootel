@@ -65,7 +65,7 @@
         <field name="model">hotel.reservation</field>
         <field name="inherit_id" ref="hotel.view_hotel_reservation_search" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='partner_id']" position="before">
+            <xpath expr="//field[@name='folio_id']" position="after">
                 <field name="wchannel_reservation_code"/>
                 <field name="virtual_room_id"/>
             </xpath>
