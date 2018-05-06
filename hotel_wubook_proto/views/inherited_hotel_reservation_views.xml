@@ -54,7 +54,6 @@
         <field name="inherit_id" ref="hotel.view_hotel_reservation_tree" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='state']" position="before">
-                <field name="virtual_room_id" string="Reserved Room Type"/>
                 <field name="origin_sale"/>
             </xpath>
         </field>
@@ -67,7 +66,6 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='folio_id']" position="after">
                 <field name="wchannel_reservation_code"/>
-                <field name="virtual_room_id"/>
             </xpath>
             <xpath expr="//group[@id='group_by']" position="inside">
                 <filter name="origin" string="Origin" domain="[]"
