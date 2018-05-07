@@ -77,7 +77,7 @@ function import_price_plans(){
 
 function push_price_plans(){
 	var self = this;
-	new Model('wubook').call('push_price_plans', [false]).then(function(results){
+	new Model('wubook').call('push_priceplans', [false]).then(function(results){
 			self.do_notify(_t('Operation Success'), _t('Price Plans successfully pushed'), false);
 	}).fail(function(){
 		self.do_warn(_t('Operation Errors'), _t('Errors while pushing price plans to WuBook. See issues log.'), true);
