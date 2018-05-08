@@ -939,14 +939,14 @@ HotelCalendar.prototype = {
     button.setAttribute('id', 'cal-pag-selector');
     button.firstElementChild.classList.remove('fa-angle-left');
     button.firstElementChild.classList.add('fa-calendar');
-    button.addEventListener('click', function(){
-      if (this.options.startDate.isSame(moment().utc().subtract(1, 'd'), 'd')) {
-        // TODO: Implement Calendar
-      } else {
+    if (this.options.startDate.isSame(moment().utc().subtract(1, 'd'), 'd')) {
+      // TODO
+    } else {
+      button.addEventListener('click', function(){
         this.setStartDate(moment().utc(), undefined, true);
         this._dispatchEvent('hcalOnDateChanged', { 'date_begin': this.options.startDate.clone(), 'date_end': this._endDate.clone() });
-      }
-    }.bind(this));
+      }.bind(this));
+    }
     cell.appendChild(button);
 
     button = button.cloneNode(true);

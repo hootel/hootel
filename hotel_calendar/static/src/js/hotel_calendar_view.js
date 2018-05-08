@@ -290,12 +290,12 @@ var HotelCalendarView = View.extend({
             }).tooltip('show');
         });
         this._hcalendar.addEventListener('hcalOnClickReservation', function(ev){
-            var res_id = ev.detail.reservationObj.getUserData('folio_id');
+            //var res_id = ev.detail.reservationObj.getUserData('folio_id');
             $(ev.detail.reservationDiv).tooltip('hide');
             self.call_action({
               type: 'ir.actions.act_window',
-              res_model: 'hotel.folio',
-              res_id: res_id,
+              res_model: 'hotel.reservation',
+              res_id: ev.detail.reservationObj.id,
               views: [[false, 'form']]
             });
             // self._model.call('get_formview_id', [res_id, Session.user_context]).then(function(view_id){
@@ -504,117 +504,18 @@ var HotelCalendarView = View.extend({
             startDate.set({'hour': def_arrival_hour[0], 'minute': def_arrival_hour[1], 'second': 0});
             endDate.set({'hour': def_departure_hour[0], 'minute': def_departure_hour[1], 'second': 0});
 
-            // Workaround moment comparation
-            var now = moment(new Date()).utc();
-            if (startDate.isSame(now, 'day')) {
-                startDate = now.add(30,'m'); // +30 mins
-            }
-
-            // Creater/Select Partner + Create Folio + Create Reservation + Confirm Folio? = Fucking Crazy uH :/
-            // FIXME: The process increase always the number of the reservation
-            var pop = new Common.SelectCreateDialog(self, {
-                res_model: 'res.partner',
-                domain: [],
-                title: _t("Select Partner"),
+            var popCreate = new Common.FormViewDialog(self, {
+                res_model: 'hotel.reservation',
+                context: {
+                  'default_checkin': startDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
+                  'default_checkout': endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
+                  'default_adults': numBeds,
+                  'default_children': 0,
+                  'default_product_id': room.id,
+                },
+                title: _t("Create: ") + _t("Reservation"),
+                initial_view: "form",
                 disable_multiple_selection: true,
-                on_selected: function(element_ids) {
-                	var partner_id = element_ids[0];
-                	// Create Folio
-                	var data = {
-                		'partner_id': partner_id,
-                	};
-                	HotelFolioObj.call('create', [data]).then(function(result){
-                        var folio_id = result;
-                        var virtual_room_ids = room.getUserData('inside_rooms_ids');
-                        var virtual_room_id = virtual_room_ids?virtual_room_ids[0]:false
-                        // Get Unit Price of Virtual Room
-                        var popCreate = new Common.FormViewDialog(self, {
-                            res_model: 'hotel.reservation',
-                            context: {
-                            	//'default_partner_id': partner_id,
-                            	'default_folio_id': folio_id,
-                              'default_checkin': startDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
-                              'default_checkout': endDate.utc().format(ODOO_DATETIME_MOMENT_FORMAT),
-                              'default_adults': numBeds,
-                              'default_children': 0,
-                              'default_product_id': room.id,
-                              //'default_virtual_room_id': virtual_room_id,
-                              'default_name': `${room.number}`,
-                            },
-                            title: _t("Create: ") + _t("Reservation"),
-                            initial_view: "form",
-                            disable_multiple_selection: true,
-                            form_view_options: { 'not_interactible_on_create':true },
-                            create_function: function(data, options) {
-                            	var dself = this;
-                                var def = $.Deferred();
-                                var res_id = true;
-                                var dataset = self.dataset;
-                                options = options || {};
-                                var internal_options = _.extend({}, options, {'internal_dataset_changed': true});
-                                self.mutex.exec(function(){
-                                	// FIXME: Workaround to get values of 'only-read' fields...
-                                	data = _.extend(data, {
-                                		'folio_id': folio_id,
-                                		'name': `${room.number}`,
-                                	});
-                                  return dataset.create(data, internal_options).then(function (id) {
-                                    dataset.ids.push(id);
-                                    res_id = id;
-                                    dself._record_created = true;
-                                  });
-                                });
-                                self.mutex.def.then(function () {
-                                	var dialog = new Dialog(self, {
-                                        title: _t("Confirm Folio"),
-                                        buttons: [
-                                            {
-                                                text: _t("Yes, confirm it"),
-                                                classes: 'btn-primary',
-                                                close: true,
-                                                disabled: res_id < 0,
-                                                click: function () {
-                                                	HotelFolioObj.call('action_confirm', [folio_id]).then(function(results){
-                                                    }).fail(function(err, ev){
-                                                        alert(_t("[Hotel Calendar]\nERROR: Can't confirm folio!"));
-                                                    });
-                                                }
-                                            },
-                                            {
-                                                text: _t("No"),
-                                                close: true
-                                            }
-                                        ],
-                                        $content: QWeb.render('HotelCalendar.ConfirmFolio')
-                                    }).open();
-                                    dialog.on("closed", null, function(){
-                                        self.trigger("change:commands", options);
-                                        def.resolve(res_id);
-                                    });
-                                });
-
-                                return def;
-                            },
-                            read_function: function(ids, fields, options) {
-                                return self.dataset.read_ids(ids, fields, options);
-                            }
-                        }).open();
-                        popCreate.opened().then(function () {
-                          popCreate.view_form.on('on_button_cancel', popCreate, function(){
-                          	HotelFolioObj.call('unlink', [[folio_id]]).fail(function(err, ev){
-
-                          	});
-                          });
-                        });
-                        popCreate.on('closed', popCreate, function(){
-                        	if (!this.dataset.ids.length) {
-                        		HotelFolioObj.call('unlink', [[folio_id]]).fail(function(err, ev){
-
-                            });
-                        	}
-                        });
-                    });
-                }
             }).open();
         });
 
@@ -1298,7 +1199,7 @@ var HotelCalendarView = View.extend({
       if (virtual && virtual.length > 0) {
         domain.push(['inside_rooms_ids', 'some', virtual]);
       }
-      
+
       this._hcalendar.setDomain(HotelCalendar.DOMAIN.ROOMS, domain);
     },
 

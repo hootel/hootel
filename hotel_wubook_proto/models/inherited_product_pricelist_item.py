@@ -20,6 +20,7 @@
 #
 ##############################################################################
 from openerp import models, fields, api
+from openerp.exceptions import ValidationError
 
 
 class ProductPricelistItem(models.Model):
@@ -27,6 +28,15 @@ class ProductPricelistItem(models.Model):
 
     wpushed = fields.Boolean("WuBook Pushed", default=True, readonly=True)
     wdaily = fields.Boolean(related='pricelist_id.wdaily', readonly=True)
+
+    @api.constrains('fixed_price')
+    def _check_fixed_price(self):
+        vroom = self.env['hotel.virtual.room'].search([
+                ('product_id.product_tmpl_id', '=', self.product_tmpl_id.id)
+            ], limit=1)
+        if vroom and vroom.wrid and self.compute_price == 'fixed' \
+                and self.fixed_price <= 0.0:
+            raise ValidationError(_("Price need be greater than zero"))
 
     @api.model
     def create(self, vals):
