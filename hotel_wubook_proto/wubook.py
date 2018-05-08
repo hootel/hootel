@@ -21,9 +21,9 @@
 ##############################################################################
 import xmlrpclib
 import pytz
-from datetime import datetime, timedelta
+from datetime import timedelta
 from urlparse import urljoin
-from odoo import models, api, fields
+from odoo import models, api
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
@@ -45,27 +45,20 @@ WUBOOK_STATUS_ACCEPTED = 4
 WUBOOK_STATUS_CANCELLED = 5
 WUBOOK_STATUS_CANCELLED_PENALTY = 6
 
-WUBOOK_STATUS_GOOD = [
+WUBOOK_STATUS_GOOD = (
     WUBOOK_STATUS_CONFIRMED,
     WUBOOK_STATUS_WAITING,
     WUBOOK_STATUS_ACCEPTED,
-]
-WUBOOK_STATUS_BAD = [
+)
+WUBOOK_STATUS_BAD = (
     WUBOOK_STATUS_REFUSED,
     WUBOOK_STATUS_CANCELLED,
     WUBOOK_STATUS_CANCELLED_PENALTY,
-]
-
-
-def _partner_split_comma_name(partner_name):
-    return [
-        ' '.join(partner_name.split(',')[:-1]),
-        ' '.join(partner_name.split(',')[-1:]),
-    ]
+)
 
 
 # WUBOOK
-class WuBook(models.TransientModel):
+class WuBook(models.AbstractModel):
     _name = 'wubook'
 
     # === INITALIZATION
@@ -195,11 +188,13 @@ class WuBook(models.TransientModel):
             'message': message,
             'wid': wid,
             'wmessage': wmessage,
-            'date_start': dfrom and datetime.strptime(
-                    dfrom, DEFAULT_WUBOOK_DATE_FORMAT).strftime(
+            'date_start': dfrom and date_utils.get_datetime(
+                dfrom,
+                dtformat=DEFAULT_WUBOOK_DATE_FORMAT).strftime(
                                                 DEFAULT_SERVER_DATE_FORMAT),
-            'date_end': dto and datetime.strptime(
-                    dto, DEFAULT_WUBOOK_DATE_FORMAT).strftime(
+            'date_end': dto and date_utils.get_datetime(
+                dto,
+                dtformat=DEFAULT_WUBOOK_DATE_FORMAT).strftime(
                                                 DEFAULT_SERVER_DATE_FORMAT),
         })
 
@@ -373,16 +368,18 @@ class WuBook(models.TransientModel):
             if not self.init_connection():
                 return False
         # Sanitize Dates
-        now = fields.datetime.now().strftime(DEFAULT_WUBOOK_DATE_FORMAT)
-        now_dt = datetime.strptime(now, DEFAULT_WUBOOK_DATE_FORMAT)
-        dfrom_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
-        dto_dt = datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT)
-        if dfrom_dt < now_dt:
-            dfrom = now
+        now_dt = date_utils.now()
+        now = now_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT)
+        dfrom_dt = date_utils.get_datetime(dfrom,
+                                           dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
+        dto_dt = date_uitls.get_datetime(dto,
+                                         dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
         if dfrom_dt > dto_dt:
             dtemp = dfrom
             dfrom = dto
             dto = dtemp
+        if dfrom_dt < now_dt:
+            dfrom = now
         rcode, results = self.SERVER.fetch_rooms_values(self.TOKEN,
                                                         self.LCODE,
                                                         dfrom,
@@ -457,7 +454,8 @@ class WuBook(models.TransientModel):
             'phone': reserv.partner_id.phone,
             'street': reserv.partner_id.street,
             'country': reserv.partner_id.country_id.code,
-            'arrival_hour': datetime.strptime(reserv.checkin, "%H:%M:%S"),
+            'arrival_hour': date_utils.get_datetime(reserv.checkin,
+                                                    dtformar="%H:%M:%S"),
             'notes': ''     # TODO:
         }
         rcode, results = self.SERVER.new_reservation(
@@ -951,7 +949,9 @@ class WuBook(models.TransientModel):
                 ('wrid', '=', k_rid)
             ], limit=1)
             if vroom:
-                date_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
+                date_dt = date_utils.get_datetime(
+                    dfrom,
+                    dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
                 for day_vals in v_rid:
                     date_str = date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
                     # Get Availability
@@ -1068,8 +1068,9 @@ class WuBook(models.TransientModel):
                     ], limit=1)
                     if vroom:
                         for item in v_rid:
-                            date_dt = datetime.strptime(
-                                    item['date'], DEFAULT_WUBOOK_DATE_FORMAT)
+                            date_dt = date_utils.get_datetime(
+                                item['date'],
+                                dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
                             restriction_item = restriction_item_obj.search([
                                 ('restriction_id', '=', restriction_id.id),
                                 ('date_start', '=', date_dt.strftime(
@@ -1115,8 +1116,12 @@ class WuBook(models.TransientModel):
         ], limit=1)
         if pricelist:
             pricelist_item_obj = self.env['product.pricelist.item']
-            dfrom_dt = datetime.strptime(dfrom, DEFAULT_WUBOOK_DATE_FORMAT)
-            dto_dt = datetime.strptime(dto, DEFAULT_WUBOOK_DATE_FORMAT)
+            dfrom_dt = date_utils.get_datetime(
+                dfrom,
+                dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
+            dto_dt = date_utils.get_datetime(
+                dto,
+                dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
             days_diff = abs((dto_dt - dfrom_dt).days) + 1
             for i in range(0, days_diff):
                 ndate_dt = dfrom_dt + timedelta(days=i)
@@ -1192,11 +1197,14 @@ class WuBook(models.TransientModel):
         reservation_lines = []
         tprice = 0.0
         for brday in broom['roomdays']:
-            wndate = datetime.strptime(
+            wndate = date_utils.get_datetime(
                 brday['day'],
-                DEFAULT_WUBOOK_DATE_FORMAT
+                dtformat=DEFAULT_WUBOOK_DATE_FORMAT
             ).replace(tzinfo=pytz.utc)
-            if date_utils.date_in(wndate, dates_checkin[0], dates_checkout[0]-timedelta(days=1), hours=False) == 0:
+            if date_utils.date_in(wndate,
+                                  dates_checkin[0],
+                                  dates_checkout[0] - timedelta(days=1),
+                                  hours=False) == 0:
                 reservation_lines.append((0, False, {
                     'date': wndate.strftime(
                         DEFAULT_SERVER_DATE_FORMAT),
@@ -1556,7 +1564,7 @@ class WuBook(models.TransientModel):
     def push_availability(self):
         vroom_avail_ids = self.env['hotel.virtual.room.availability'].search([
             ('wpushed', '=', False),
-            ('date', '>=', datetime.strftime(fields.datetime.now(),
+            ('date', '>=', date_utils.now(hours=False).strftime(
                                              DEFAULT_SERVER_DATE_FORMAT))
         ])
 
@@ -1569,8 +1577,9 @@ class WuBook(models.TransientModel):
             for vroom_avail in vroom_avails:
                 vroom_avail.with_context({
                             'wubook_action': False}).write({'wpushed': True})
-                date_dt = datetime.strptime(vroom_avail.date,
-                                            DEFAULT_SERVER_DATE_FORMAT)
+                date_dt = date_utils.get_datetime(
+                    vroom_avail.date,
+                    dtformat=DEFAULT_SERVER_DATE_FORMAT)
                 days.append({
                     'date': date_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
                     'avail': vroom_avail.avail,
@@ -1578,6 +1587,7 @@ class WuBook(models.TransientModel):
                     # 'booked': vroom_avail.booked and 1 or 0,
                 })
             avails.append({'id': vroom.wrid, 'days': days})
+        _logger.info("UPDATING AVAILABILITY IN WUBOOK...")
         _logger.info(avails)
         if any(avails):
             self.update_availability(avails)
@@ -1587,14 +1597,16 @@ class WuBook(models.TransientModel):
     def push_priceplans(self):
         unpushed = self.env['product.pricelist.item'].search([
             ('wpushed', '=', False),
-            ('date_start', '>=', datetime.strftime(fields.datetime.now(),
+            ('date_start', '>=', date_utils.now(hours=False).strftime(
                                                    DEFAULT_SERVER_DATE_FORMAT))
         ], order="date_start ASC")
         if any(unpushed):
-            date_start = datetime.strptime(unpushed[0].date_start,
-                                           DEFAULT_SERVER_DATE_FORMAT)
-            date_end = datetime.strptime(unpushed[-1].date_start,
-                                         DEFAULT_SERVER_DATE_FORMAT)
+            date_start = date_utils.get_datetime(
+                unpushed[0].date_start,
+                dtformat=DEFAULT_SERVER_DATE_FORMAT)
+            date_end = date_utils.get_datetime(
+                unpushed[-1].date_start,
+                dtformat=DEFAULT_SERVER_DATE_FORMAT)
             days_diff = abs((date_end-date_start).days) + 1
 
             prices = {}
@@ -1621,7 +1633,7 @@ class WuBook(models.TransientModel):
                                     strftime(DEFAULT_SERVER_DATE_FORMAT),
                                 })
                             prices[pr.wpid][vroom.wrid].append(prod.price)
-
+            _logger.info("UPDATING PRICES IN WUBOOK...")
             _logger.info(prices)
             for k_pk, v_pk in prices.iteritems():
                 if any(v_pk):
@@ -1638,14 +1650,16 @@ class WuBook(models.TransientModel):
         rest_item_obj = self.env['hotel.virtual.room.restriction.item']
         unpushed = rest_item_obj.search([
             ('wpushed', '=', False),
-            ('date_start', '>=', datetime.strftime(fields.datetime.now(),
+            ('date_start', '>=', date_utils.now(hours=False).strftime(
                                                    DEFAULT_SERVER_DATE_FORMAT))
         ], order="date_start ASC")
         if any(unpushed):
-            date_start = datetime.strptime(unpushed[0].date_start,
-                                           DEFAULT_SERVER_DATE_FORMAT)
-            date_end = datetime.strptime(unpushed[-1].date_start,
-                                         DEFAULT_SERVER_DATE_FORMAT)
+            date_start = date_utils.get_datetime(
+                unpushed[0].date_start,
+                dtformat=DEFAULT_SERVER_DATE_FORMAT)
+            date_end = date_utils.get_datetime(
+                unpushed[-1].date_start,
+                dtformat=DEFAULT_SERVER_DATE_FORMAT)
             days_diff = date_utils.date_diff(
                 date_start,
                 date_end,
@@ -1680,7 +1694,7 @@ class WuBook(models.TransientModel):
                             })
                         else:
                             restrictions[rp.wpid][vroom.wrid].append({})
-            _logger.info("UPDATING RESTRICTIONS...")
+            _logger.info("UPDATING RESTRICTIONS IN WUBOOK...")
             _logger.info(restrictions)
             for k_res, v_res in restrictions.iteritems():
                 if any(v_res):

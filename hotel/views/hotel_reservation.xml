@@ -25,13 +25,16 @@
                     <sheet>
                         <div class="oe_title">
                             <h1>
-                                <field name="partner_id" default_focus="1" placeholder="Name" readonly="1"/> -
+                                <field name="partner_id" default_focus="1"
+                                    placeholder="Lastname, Firstname"
+                                    attrs="{'readonly':[('folio_id','!=',False)]}"
+                                    required="1"/> -
                                 <field name="folio_id" readonly="1" nolabel="1"/>
                             </h1>
                             <h2>
                                 <field name="edit_room" nolabel="1"/>
                                 <field name="product_id" select="1" domain="[('isroom','=',True)]"
-                                    nolabel="1" options="{'no_create': True}"
+                                    nolabel="1" options="{'no_create': True}" placeholder="Room"
                                     attrs="{'readonly':[('edit_room','=',False)]}"/>
                             </h2>
                         </div>
@@ -47,7 +50,7 @@
                                  <group>
                                     <field name="virtual_room_id" on_change="1" options="{'no_create': True}"
                                            attrs="{'readonly':[('state','not in',('draft'))]}"/>
-                                    <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>
+                                    <field name="channel_type" attrs="{'required':[('reservation_type','not in',('staff','out'))]}"/>
                                     <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/> 
                                 </group>
                             </group>                                                                                      

@@ -259,7 +259,8 @@ class HotelReservation(models.Model):
                              'State', readonly=True,
                              default=lambda *a: 'draft',
                              track_visibility='always')
-    reservation_type = fields.Selection(related='folio_id.reservation_type')
+    reservation_type = fields.Selection(related='folio_id.reservation_type',
+                                        default=lambda *a: 'normal')
     cancelled_reason = fields.Selection([
         ('late', 'Late'),
         ('intime', 'In time'),
@@ -319,12 +320,25 @@ class HotelReservation(models.Model):
     amount_reservation = fields.Float('Total',
                                       compute='_computed_amount_reservation')
     edit_room = fields.Boolean(default=True)
-    nights = fields.Integer('Nights',computed='_computed_nights', store=True)
+    nights = fields.Integer('Nights',compute='_computed_nights', store=True)
     channel_type = fields.Selection(related='folio_id.channel_type')
     last_updated_res = fields.Datetime('Last Updated')
     folio_pending_amount = fields.Monetary(related='folio_id.invoices_amount')
     segmentation_id = fields.Many2many(related='folio_id.segmentation_id')
+    shared_folio = fields.Boolean (compute='_computed_shared')
+    #Used to notify is the reservation folio has other reservations or services
 
+    @api.multi
+    def _computed_shared(self):
+        for record in self:
+            if record.folio_id:
+                if len(record.folio_id.room_lines) > 1 or \
+                        record.folio_id.service_lines.filtered(lambda x: (
+                        x.ser_room_line != record.id)):
+                    record.shared_folio = True
+                else:
+                    record.shared_folio = False
+                
     @api.depends('checkin', 'checkout')
     def _computed_nights(self):
         _logger.info('_computed_amount_reservation')
@@ -497,7 +511,7 @@ class HotelReservation(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'hotel.folio',
             'views': [[False, "form"]],
-            'target': 'new',
+            'target': 'inline',
             'res_id': self.folio_id.id,
         }
 
@@ -598,51 +612,61 @@ class HotelReservation(models.Model):
         @param vals: dictionary of fields value.
         @return: new record set for hotel folio line.
         """
+        if not 'reservation_type' in vals or not vals.get('reservation_type'):
+            vals.update({'reservation_type': 'normal'})
         if 'folio_id' in vals:
             folio = self.env["hotel.folio"].browse(vals['folio_id'])
             vals.update({'order_id': folio.order_id.id})
+        elif 'partner_id' in vals:
+            folio_vals = {'partner_id':int(vals.get('partner_id')),
+                          'channel_type': vals.get('channel_type')}
+            folio = self.env["hotel.folio"].create(folio_vals)
+            vals.update({'order_id': folio.order_id.id,
+                         'folio_id': folio.id,
+                         'reservation_type': vals.get('reservation_type'),
+                         'channel_type': vals.get('channel_type')})
+        if folio:
+            record = super(HotelReservation, self).create(vals)
+            # Check Capacity
+            room = self.env['hotel.room'].search([
+                ('product_id', '=', record.product_id.id)
+            ])
+            persons = record.adults + record.children
+            if persons > room.capacity:
+                raise ValidationError(
+                    _("Reservation persons can't be higher than room capacity"))
+            if record.adults == 0:
+                raise ValidationError(_("Reservation has no adults"))
 
-        record = super(HotelReservation, self).create(vals)
-        # Check Capacity
-        room = self.env['hotel.room'].search([
-            ('product_id', '=', record.product_id.id)
-        ])
-        persons = record.adults + record.children
-        if persons > room.capacity:
-            raise ValidationError(
-                _("Reservation persons can't be higher than room capacity"))
-        if record.adults == 0:
-            raise ValidationError(_("Reservation has no adults"))
+            if record.state == 'draft' and record.folio_id.state == 'sale':
+                record.confirm()
+            record._compute_color()
 
-        if record.state == 'draft' and record.folio_id.state == 'sale':
-            record.confirm()
-        record._compute_color()
+            # Update Availability (Removed because wubook-proto do it)
+            # cavail = self.env['hotel.reservation'].get_availability(
+            #     record.checkin,
+            #     record.checkout,
+            #     record.product_id.id, dbchanged=False)
+            # hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
+            # for item in cavail:
+            #     for rec in item['days']:
+            #         vroom_avail = hotel_vroom_avail_obj.search([
+            #             ('virtual_room_id', '=', item['id']),
+            #             ('date', '=', rec['date'])
+            #         ])
+            #         vals = {
+            #             'avail': rec['avail']
+            #         }
+            #         if vroom_avail:
+            #             vroom_avail.write(vals)
+            #         else:
+            #             vals.update({
+            #                 'virtual_room_id': item['id'],
+            #                 'date': rec['date'],
+            #             })
+            #             hotel_vroom_avail_obj.create(vals)
 
-        # Update Availability (Removed because wubook-proto do it)
-        # cavail = self.env['hotel.reservation'].get_availability(
-        #     record.checkin,
-        #     record.checkout,
-        #     record.product_id.id, dbchanged=False)
-        # hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
-        # for item in cavail:
-        #     for rec in item['days']:
-        #         vroom_avail = hotel_vroom_avail_obj.search([
-        #             ('virtual_room_id', '=', item['id']),
-        #             ('date', '=', rec['date'])
-        #         ])
-        #         vals = {
-        #             'avail': rec['avail']
-        #         }
-        #         if vroom_avail:
-        #             vroom_avail.write(vals)
-        #         else:
-        #             vals.update({
-        #                 'virtual_room_id': item['id'],
-        #                 'date': rec['date'],
-        #             })
-        #             hotel_vroom_avail_obj.create(vals)
-
-        return record
+            return record
 
     @api.multi
     def write(self, vals):
@@ -662,7 +686,6 @@ class HotelReservation(models.Model):
             'edit_room': False,
             'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         })
-
         res = super(HotelReservation, self).write(vals)
         if datesChanged:
             for record in self:
@@ -890,7 +913,7 @@ class HotelReservation(models.Model):
 
     @api.multi
     @api.onchange('checkin', 'checkout', 'room_type_id', 'virtual_room_id',
-                  'check_rooms', 'edit_room')
+                  'check_rooms', 'edit_room', 'product_id')
     def on_change_checkout(self):
         '''
         When you change checkin or checkout it will checked it
@@ -907,13 +930,21 @@ class HotelReservation(models.Model):
             now_utc_dt = date_utils.get_datetime(self.checkin)\
                 + timedelta(days=1)
             self.checkout = now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        if self.overbooking:
+            return
         checkout_dt = date_utils.get_datetime(self.checkout)
         # Reservation end day count as free day. Not check it
         checkout_dt -= timedelta(days=1)
         occupied = self.env['hotel.reservation'].occupied(
             self.checkin,
-            checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
+            checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)).filtered(
+                lambda r: r.id != self._origin.id)
         rooms_occupied = occupied.mapped('product_id.id')
+        if self.product_id and self.product_id.id in rooms_occupied:
+            warning_msg = _('You tried to change \
+                   reservation with room those already reserved in this \
+                   reservation period')
+            raise ValidationError(warning_msg)
         domain_rooms = [
             ('isroom', '=', True),
             ('id', 'not in', rooms_occupied)
