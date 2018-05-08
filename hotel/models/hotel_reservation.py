@@ -320,12 +320,25 @@ class HotelReservation(models.Model):
     amount_reservation = fields.Float('Total',
                                       compute='_computed_amount_reservation')
     edit_room = fields.Boolean(default=True)
-    nights = fields.Integer('Nights',computed='_computed_nights', store=True)
+    nights = fields.Integer('Nights',compute='_computed_nights', store=True)
     channel_type = fields.Selection(related='folio_id.channel_type')
     last_updated_res = fields.Datetime('Last Updated')
     folio_pending_amount = fields.Monetary(related='folio_id.invoices_amount')
     segmentation_id = fields.Many2many(related='folio_id.segmentation_id')
+    shared_folio = fields.Boolean (compute='_computed_shared')
+    #Used to notify is the reservation folio has other reservations or services
 
+    @api.multi
+    def _computed_shared(self):
+        for record in self:
+            if record.folio_id:
+                if len(record.folio_id.room_lines) > 1 or \
+                        record.folio_id.service_lines.filtered(lambda x: (
+                        x.ser_room_line != record.id)):
+                    record.shared_folio = True
+                else:
+                    record.shared_folio = False
+                
     @api.depends('checkin', 'checkout')
     def _computed_nights(self):
         _logger.info('_computed_amount_reservation')
@@ -498,7 +511,7 @@ class HotelReservation(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'hotel.folio',
             'views': [[False, "form"]],
-            'target': 'new',
+            'target': 'inline',
             'res_id': self.folio_id.id,
         }
 
@@ -673,7 +686,6 @@ class HotelReservation(models.Model):
             'edit_room': False,
             'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         })
-
         res = super(HotelReservation, self).write(vals)
         if datesChanged:
             for record in self:
@@ -925,7 +937,8 @@ class HotelReservation(models.Model):
         checkout_dt -= timedelta(days=1)
         occupied = self.env['hotel.reservation'].occupied(
             self.checkin,
-            checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
+            checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)).filtered(
+                lambda r: r.id != self._origin.id)
         rooms_occupied = occupied.mapped('product_id.id')
         if self.product_id and self.product_id.id in rooms_occupied:
             warning_msg = _('You tried to change \
