@@ -21,6 +21,8 @@
 ##############################################################################
 from openerp import models, fields, api, _
 from datetime import date, datetime, timedelta
+from openerp.tools import (
+    DEFAULT_SERVER_DATE_FORMAT)
 import json
 
 
@@ -139,6 +141,11 @@ class Data_Bi(models.Model):
         dic_tipo_habitacion = []  # Diccionario con Virtuals Rooms
         tipo = self.env['hotel.virtual.room'].search_read(
             [], ['virtual_code', 'product_id'])
+        dic_tipo_habitacion.append({
+            'ID_Hotel': compan.id_hotel,
+            'ID_Tipo_Habitacion': 0,
+            'Descripcion': 'No asignado'.encode(
+                'ascii', 'xmlcharrefreplace')})
         for i in tipo:
             dic_tipo_habitacion.append({
                 'ID_Hotel': compan.id_hotel,
@@ -256,10 +263,16 @@ class Data_Bi(models.Model):
 # ID_Pais numérico Código del país
         dic_reservas = []
         # Diccionario con las Reservas
+        fechafototxt = fechafoto.strftime(DEFAULT_SERVER_DATE_FORMAT)
+        fechafotoyear = fechafototxt[0:4]+'-01-01 00:00:00'
+
         lineas = self.env['hotel.reservation.line'].search(
-            ['&', ('date', '>=', fechafoto),
-             ('reservation_id.reservation_type', '=', 'normal'),
-             ], order="date")
+            [('reservation_id.reservation_type', '=', 'normal'),
+             ('create_date', '>', fechafotoyear),
+             '|', ('create_date', '<', fechafototxt),
+                ('reservation_id.last_updated_res', '<', fechafototxt)
+             ], order="create_date")
+
         for linea in lineas:
             id_estado_r = linea.reservation_id.state
 
@@ -272,6 +285,10 @@ class Data_Bi(models.Model):
                 id_segmen = linea.reservation_id.segmentation_id[0].id
             elif len(linea.reservation_id.partner_id.category_id) > 0:
                 id_segmen = linea.reservation_id.partner_id.category_id[0].id
+
+            v_room = 0
+            if linea.reservation_id.virtual_room_id.product_id.id is not False:
+                v_room = linea.reservation_id.virtual_room_id.product_id.id
 
             chanel_r = 0
             if linea.reservation_id.channel_type:
@@ -328,8 +345,7 @@ class Data_Bi(models.Model):
                 'Salida': (datetime.strptime(linea.date, "%Y-%m-%d") +
                            timedelta(days=1)).strftime("%Y-%m-%d"),
                 'Noches': 1,
-                'ID_TipoHabitacion':
-                linea.reservation_id.virtual_room_id.product_id.id,
+                'ID_TipoHabitacion': v_room,
                 'ID_Regimen': 0,
                 'Adultos': linea.reservation_id.adults,
                 'Menores': linea.reservation_id.children,
