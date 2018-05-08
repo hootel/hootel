@@ -149,7 +149,7 @@
                         name="%(open_hotel_reservation_form_tree_all)d"
                         context="{'search_default_partner_id': partner_id}"
                     />
-                    <field name="partner_id"/>                                  
+                    <field name="partner_id"/>
                     <field name="virtual_room_id" string="Reserved Room Type"/>                   
                     <field name="nights" />
                     <field name="adults" string="Persons"/> 

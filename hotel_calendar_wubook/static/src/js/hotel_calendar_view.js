@@ -29,7 +29,7 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
     _sounds: [],
 
     // Custom Constants
-    SOUNDS: { NONE: 0, BELL:1 },
+    SOUNDS: { NONE: 0, BOOK_NEW:1, BOOK_CANCELLED:2 },
 
     update_buttons_counter: function () {
       this._super();
@@ -66,7 +66,8 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
     init: function(parent, dataset, fields_view, options) {
       this._super.apply(this, arguments);
 
-      this._sounds[this.SOUNDS.BELL] = new Audio('hotel_calendar_wubook/static/src/sfx/bell_ringing.mp3');
+      this._sounds[this.SOUNDS.BOOK_NEW] = new Audio('hotel_calendar_wubook/static/src/sfx/book_new.mp3');
+      this._sounds[this.SOUNDS.BOOK_CANCELLED] = new Audio('hotel_calendar_wubook/static/src/sfx/book_cancelled.mp3');
     },
 
     init_calendar_view: function () {
@@ -122,15 +123,17 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
           }
           else if (notif[1]['type'] === 'reservation') {
             var reserv = notif[1]['reservation'];
-            if (!(notif[1]['action'] === 'unlink' || reserv['state'] === 'cancelled')) {
-              if (!this._hcalendar.getReservation(reserv['reserv_id']) && reserv['wrid'] && reserv['wrid'] !== '') {
-                this._play_sound(this.SOUNDS.BELL);
+            if (reserv['wrid']) {
+              if (notif[1]['action'] === 'create') {
+                this._play_sound(this.SOUNDS.BOOK_NEW);
+              } else if (notif[1]['action'] !== 'unlink' && reserv['state'] === 'cancelled') {
+                this._play_sound(this.SOUNDS.BOOK_CANCELLED);
               }
             }
           }
         }
       }
-      
+
       this._super(notifications);
     },
 
