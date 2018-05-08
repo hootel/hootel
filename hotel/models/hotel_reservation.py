@@ -302,11 +302,12 @@ class HotelReservation(models.Model):
     cardex_ids = fields.One2many('cardex', 'reservation_id')
     # TODO: As cardex_count is a computed field, it can't not be used in a domain filer
     # Non-stored field hotel.reservation.cardex_count cannot be searched
-    # So, let's return its value here and use the function in the checkinwizard view ?
+    # searching on a computed field can also be enabled by setting the search parameter.
+    # The value is a method name returning a Domains
     cardex_count = fields.Integer('Cardex counter',
                                   compute='_compute_cardex_count')
     cardex_pending = fields.Boolean('Cardex Pending',
-                                    compute='_compute_cardex_count')
+                                    compute='_compute_cardex_count', search='_search_cardex_pending')
     cardex_pending_num = fields.Integer('Cardex Pending Num',
                                         compute='_compute_cardex_count')
     check_rooms = fields.Boolean('Check Rooms')
@@ -357,6 +358,13 @@ class HotelReservation(models.Model):
                 res.cardex_pending = False
             else:
                 res.cardex_pending = True
+
+    # https://www.odoo.com/es_ES/forum/ayuda-1/question/calculated-fields-in-search-filter-possible-118501
+    @api.multi
+    def _search_cardex_pending(self, operator, value):
+        recs = self.search([]).filtered(lambda x: x.cardex_pending is True)
+        if recs:
+            return [('id', 'in', [x.id for x in recs])]
 
     @api.multi
     def action_pay(self):
