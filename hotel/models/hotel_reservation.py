@@ -346,8 +346,8 @@ class HotelReservation(models.Model):
         for res in self:
             if res.checkin and res.checkout:
                 nights = days_diff = date_utils.date_diff(
-                    self.checkin,
-                    self.checkout, hours=False)
+                    res.checkin,
+                    res.checkout, hours=False)
             res.nights = nights
 
     @api.onchange('reservation_lines')
