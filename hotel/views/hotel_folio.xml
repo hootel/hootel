@@ -156,7 +156,8 @@
                             <page string="Lines">
                                 <field name="room_lines" colspan="4" string="Room Line"
                                     nolabel="1" context="{'room_lines':room_lines,'folio_id': id}">
-                                    <tree string="Room Line" colors="red:state == 'cancelled'">
+                                    <tree string="Room Line" colors="red:state == 'cancelled'"
+                                     default_order="id">
 										<!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
 										<field name="cardex_pending" invisible="1"/>
                                         <button type="action" class="oe_stat_button"
