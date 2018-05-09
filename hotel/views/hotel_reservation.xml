@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+        
+        <!-- Action Menu -->
+        <record model="ir.values" id="menu_open_wizard_duplicate_reservation">
+          <field name="model_id" ref="model_hotel_reservation" />
+          <field name="name">Duplicate Reservation</field>
+          <field name="key2">client_action_multi</field>
+          <field name="value" eval="'ir.actions.act_window,' + str(ref('hotel.action_hotel_duplicate_reservation'))" />
+          <field name="key">action</field>
+          <field name="model">hotel.reservation</field>
+        </record>
+
+        <!-- Action for hotel reservation -->
+        <record model="ir.actions.act_window" id="open_hotel_reservation_form_tree_all">
+            <field name="name">Hotel Reservation</field>
+            <field name="res_model">hotel.reservation</field>
+            <field name="view_type">form</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+
+        <menuitem name="Reservation Rooms" id="menu_open_hotel_reservation_form_tree_all"
+            action="open_hotel_reservation_form_tree_all" sequence="10" parent="menu_all_folio" />
 
          <!--=== Hotel Reservation ==== -->
         <!-- Form view of hotel reservation -->
@@ -249,27 +272,5 @@
             </field>
         </record>
 
-        <!-- Action Menu -->
-        <record model="ir.values" id="menu_open_wizard_duplicate_reservation">
-          <field name="model_id" ref="model_hotel_reservation" />
-          <field name="name">Duplicate Reservation</field>
-          <field name="key2">client_action_multi</field>
-          <field name="value" eval="'ir.actions.act_window,' + str(ref('hotel.action_hotel_duplicate_reservation'))" />
-          <field name="key">action</field>
-          <field name="model">hotel.reservation</field>
-        </record>
-
-        <!-- Action for hotel reservation -->
-        <record model="ir.actions.act_window" id="open_hotel_reservation_form_tree_all">
-            <field name="name">Hotel Reservation</field>
-            <field name="res_model">hotel.reservation</field>
-            <field name="view_type">form</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-        </record>
-
-
-        <menuitem name="Reservation Rooms" id="menu_open_hotel_reservation_form_tree_all"
-            action="open_hotel_reservation_form_tree_all" sequence="10" parent="menu_all_folio" />
     </data>
 </openerp>
