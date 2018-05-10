@@ -71,11 +71,12 @@ var CalendarMenu = Widget.extend({
     start: function(){
       this.$dropdown = this.$(".o_calendar_settings_dropdown");
       return $.when(
-        new Model("res.users").call("read", [[Session.uid], ["pms_show_notifications", "pms_show_pricelist", "pms_show_availability"]])
+        new Model("res.users").call("read", [[Session.uid], ["pms_show_notifications", "pms_show_pricelist", "pms_show_availability", "pms_divide_rooms_by_capacity"]])
       ).then(function(result) {
         this._show_notifications = result[0]['pms_show_notifications'];
         this._show_pricelist = result[0]['pms_show_pricelist'];
         this._show_availability = result[0]['pms_show_availability'];
+        this._show_divide_rooms_by_capacity = result[0]['pms_divide_rooms_by_capacity'];
         return this.update();
       }.bind(this));
     },
@@ -148,6 +149,15 @@ var CalendarMenu = Widget.extend({
       this._show_availability = !this._show_availability;
       new Model('res.users').call('write', [Session.uid, {
           pms_show_availability: this._show_availability
+      }]).then(function () {
+          window.location.reload();
+      });
+    },
+
+    toggle_show_divide_rooms_by_capacity: function() {
+      this._show_divide_rooms_by_capacity = !this._show_divide_rooms_by_capacity;
+      new Model('res.users').call('write', [Session.uid, {
+          pms_divide_rooms_by_capacity: this._show_divide_rooms_by_capacity
       }]).then(function () {
           window.location.reload();
       });
