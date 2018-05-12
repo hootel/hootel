@@ -38,6 +38,11 @@ _logger = logging.getLogger(__name__)
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
 
+    @api.multi
+    def set_access_for_wubook_fields(self):
+        for rec in self:
+            rec.able_to_modify_wubook = rec.env['res.users'].has_group('base.group_system')
+
     @api.depends('channel_type','wchannel_id')
     def _get_origin_sale(self):
         for record in self:
@@ -62,6 +67,7 @@ class HotelReservation(models.Model):
                                       compute=_is_from_channel, store=False,
                                       readonly=True)
     to_read = fields.Boolean('To Read', default=False)
+    able_to_modify_wubook = fields.Boolean(compute=set_access_for_wubook_fields, string='Is user able to modify wubook fields?')
 
     wstatus = fields.Selection([
         ('0', 'No WuBook'),
