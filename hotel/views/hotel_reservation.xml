@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
-        
         <!-- Action Menu -->
         <record model="ir.values" id="menu_open_wizard_duplicate_reservation">
           <field name="model_id" ref="model_hotel_reservation" />
@@ -45,7 +44,62 @@
                         <!--button name="open_master" string="Open Master" type="object" class="oe_highlight" icon="fa-file" attrs="{'invisible':['|',['parent_reservation', '=', False]]}" /-->
                         <field name="state" widget="statusbar"/>
                     </header>
+                    <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                         attrs="{'invisible': ['|',('shared_folio','=',False),('splitted', '=', True)]}">
+                             This reservation has other reservantions and/or services in the folio, you can check it in the
+                             <bold><button class="alert-link" type="object" name="open_folio" string="Folio Form"/></bold>
+                    </div>
+                    <div class="alert alert-danger" role="alert" style="margin-bottom:0px;"
+                         attrs="{'invisible': [('splitted','=',False)]}">
+                             This reservation is part of splitted reservation!, you can check it in the
+                             <bold><button class="alert-link" type="object" name="open_folio" string="Folio Form"/></bold>
+                    </div>
+                    <field name="shared_folio" invisible="1"/>
                     <sheet>
+                        <div class=" oe_button_box">
+                            <button type="action" class="oe_stat_button"
+                                id="cardex_smart_button"
+                                icon="fa-user-plus"
+                                name="%(launch_checkin_wizard_add)d"
+                                context="{'partner_id': partner_id,'enter_date': checkin,
+                                    'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
+                                attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
+                                    ('cardex_pending','=', False)]}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value"><field name="cardex_pending_num"
+                                    widget="statinfo" nolabel="1"/></span>
+                                    <span class="o_stat_text">Pending Checks</span>
+                                </div>
+                            </button>
+
+                            <button type="object" class="oe_stat_button"
+                                id="cardex_smart_button"
+                                icon="fa-bed"
+                                name="action_checks"
+                                attrs="{'invisible': [('cardex_count','&lt;=',0)]}">
+                                <div class="o_form_field o_stat_info">
+                                  <span class="o_stat_value"><field name="cardex_count"
+                                   widget="statinfo" nolabel="1"/></span>
+                                  <span class="o_stat_text">Checks</span>
+                                </div>
+                            </button>
+                            <field name="currency_id" invisible="1"/>
+                                                       
+                            <button type="object" class="oe_stat_button"
+                                id="payment_smart_button"
+                                icon="fa-file"
+                                name="action_pay"
+                                attrs="{'invisible': [('folio_pending_amount','&lt;=',0)]}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="folio_pending_amount" nolabel="1"
+                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </span>
+                                    <span class="o_stat_text">Pending Folio Payment</span>
+                                </div>
+                            </button>
+
+                        </div>
                         <div class="oe_title">
                             <h1>
                                 <field name="partner_id" default_focus="1"
@@ -65,6 +119,9 @@
                                 <group>
                                     <field name="checkin"/>
                                     <field name="checkout"/>
+                                    <field name="email" placeholder="email"/>
+                                    <field name="mobile" placeholder="mobile"/>
+                                    <field name="phone" />
                                 </group>
                                 <group>
                                     <field name="adults"/>
@@ -83,7 +140,6 @@
                                 <field name="pricelist_id" invisible="1"/>
                                 <field name="product_uom_qty" invisible="1" />
                                 <field name="invoice_status" invisible="1"/>
-                                <field name="price_unit" invisible="1"/>
 				                <field name="nights" invisible="1"/>
                                 <field name="name" invisible="1" />                                
                                 <field name="product_uom" string="Rent(UOM)" invisible="1" />
@@ -100,7 +156,7 @@
                                         </tree>
                                     </field>
                                      <group colspan="2" class="oe_subtotal_footer">
-                                        <field name="price_unit" readonly="1" />       
+                                        <field name="price_unit"/>       
                                         <label for="discount" groups="sale.group_discount_per_so_line"/>
                                         <div name="discount" groups="sale.group_discount_per_so_line">
                                             <field name="discount" class="oe_inline"/>
@@ -164,6 +220,7 @@
                        attrs="{'invisible':['|',('folio_pending_amount','&gt;',0),
                             ('state' ,'!=', 'done')]}"
                     />
+                    <field name="state" />
                     <button type="object" class="oe_stat_button"
                         id="go_folio" icon="fa fa-2x fa-file"
                         name="open_folio"
@@ -195,7 +252,6 @@
                     <field name="to_assign" invisible="1"/>
                     <!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
                     <field name="cardex_pending" invisible="1"/>                    
-                    <field name="state" />
                     <field name="price_unit" string="Reservation Price"/>
                     <field name="discount" groups="sale.group_discount_per_so_line"/>
                     <field name="price_total" string="Final Price"/>

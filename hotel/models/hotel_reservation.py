@@ -253,8 +253,8 @@ class HotelReservation(models.Model):
                               track_visibility='always',
                               help='Number of children there in guest list.')
     to_assign = fields.Boolean('To Assign')
-    state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirm'),
-                              ('booking', 'Booking'), ('done', 'Done'),
+    state = fields.Selection([('draft', 'Pre-reservation'), ('confirm', 'Pending Entry'),
+                              ('booking', 'On Board'), ('done', 'Out'),
                               ('cancelled', 'Cancelled')],
                              'State', readonly=True,
                              default=lambda *a: 'draft',
@@ -327,6 +327,9 @@ class HotelReservation(models.Model):
     folio_pending_amount = fields.Monetary(related='folio_id.invoices_amount')
     segmentation_id = fields.Many2many(related='folio_id.segmentation_id')
     shared_folio = fields.Boolean (compute='_computed_shared')
+    email = fields.Char('E-mail', related='partner_id.email')
+    mobile = fields.Char('Mobile', related='partner_id.mobile')
+    phone = fields.Char('Phone', related='partner_id.phone')
     #Used to notify is the reservation folio has other reservations or services
 
     @api.multi
@@ -692,6 +695,9 @@ class HotelReservation(models.Model):
             })
         vals.update({
             'edit_room': False,
+        })
+        if datesChanged or 'state' in vals or 'virtual_room_id' in vals:
+            vals.update({
             'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         })
         res = super(HotelReservation, self).write(vals)
