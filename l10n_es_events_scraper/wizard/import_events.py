@@ -51,7 +51,8 @@ MONTHS_MAP = {
 
 
 class EventCity:
-    def __init__(self, postid=0, city='', dates=[], name='', address='', venue='', prices='', buy_tickets=''):
+    def __init__(self, postid=0, city='', dates=[], name='', address='',
+                 venue='', prices='', buy_tickets=''):
         self.postid = postid
         self.city = city
         self.dates = dates
@@ -169,7 +170,8 @@ class ImportEventsWizard(models.TransientModel):
         else:
             return False
 
-    def _import_city_events(self, events, search, npag=1, pags=-1, onlyFuture=False):
+    def _import_city_events(self, events, search, npag=1, pags=-1,
+                            onlyFuture=False):
         pags = pags if pags == -1 else (pags-1)
         E_URL = 'http://www.entradasyconciertos.com'
         frmt_page = '/page/%d/?s=%s' % (npag, quote_plus(search))
@@ -207,7 +209,6 @@ class ImportEventsWizard(models.TransientModel):
         self._import_city_events(
             events,
             '%s %s' % (self.city, self.year),
-            npag=1,
             pags=1,
             onlyFuture=True)
 
@@ -216,17 +217,21 @@ class ImportEventsWizard(models.TransientModel):
             for day in event.dates:
                 vals = {
                     'name': event.name,
+                    'location': "%s, %s" % (event.address, event.venue),
+                    'description': "Price: %s\nBuy Tickets: %s" % (
+                        event.prices,
+                        event.buy_tickets),
+                    'start': day.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                    'stop': day.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                    'duration': 1.0,
                 }
                 fev = cal_event_obj.search([
                     ('web_id', '=', event.postid),
-                    ('start', '=', day.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
                 ])
             if fev:
                 fev.write(vals)
             else:
                 vals.update({
-                    'start': day.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                    'stop': day.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
                     'web_id': event.postid,
                 })
                 cal_event_obj.create(vals)

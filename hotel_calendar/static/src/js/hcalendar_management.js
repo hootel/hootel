@@ -302,7 +302,7 @@ HotelCalendarManagement.prototype = {
     telm.innerHTML = "<strong>No OTA</strong>";
     telm.dataset.orgValue = telm.dataset.state = 'false';
     telm.dataset.hcalParentCell = parentCell.getAttribute('id');
-    telm.classList.add('hcal-management-input');
+    telm.classList.add('hcal-management-input', 'pull-left');
     telm.addEventListener('click', function(ev){ $this.onInputChange(ev, this); }, false);
     cell.appendChild(telm);
 
@@ -310,9 +310,7 @@ HotelCalendarManagement.prototype = {
     telm.setAttribute('id', this._sanitizeId(`OPTIONS_${roomId}_${dateShortStr}`));
     telm.setAttribute('name', 'options');
     telm.setAttribute('title', this._t('Options'));
-    telm.classList.add('dropdown');
-    telm.classList.add('pull-right');
-    telm.classList.add('hcal-management-record-options');
+    telm.classList.add('dropdown', 'pull-right', 'hcal-management-record-options');
     telm.innerHTML = `
       <a href='#' data-toggle='dropdown' class='dropdown-toggle'><i class='fa fa-2x fa-ellipsis-v'> </i></a>
       <ul class='dropdown-menu' style='min-width: 80px'>
