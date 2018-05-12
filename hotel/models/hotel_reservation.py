@@ -682,12 +682,12 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         datesChanged = ('checkin' in vals or 'checkout' in vals)
-        if datesChanged:
+        if datesChanged and 'reservation_lines' not in vals:
             for record in self:
                 checkin = vals.get('checkin', record.checkin)
                 checkout = vals.get('checkout', record.checkout)
                 days_diff = date_utils.date_diff(checkin,
-                                                 checkout, hours=False)
+                                                 checkout, hours=False)                                                 
             rlines = self.prepare_reservation_lines(checkin, days_diff)
             vals.update({
                 'reservation_lines': rlines['commands'],
@@ -1017,11 +1017,8 @@ class HotelReservation(models.Model):
         '''
         @param self: object pointer
         '''
-        self.write({'state': 'done'})
-        for folio_line in self:
-            workflow.trg_write(self._uid, 'sale.order',
-                               folio_line.order_line_id.order_id.id,
-                               self._cr)
+        for res in self:
+            res.action_reservation_checkout()
         return True
 
     @api.one
