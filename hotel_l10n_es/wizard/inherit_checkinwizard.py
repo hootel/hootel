@@ -54,7 +54,7 @@ class Wizard(models.TransientModel):
     @api.onchange('poldocument_cardex', 'documenttype_cardex')
     def validation_poldocument_dni(self):
         if self.poldocument_cardex <> False:
-            if self.documenttype_cardex in ['D','C','I']:
+            if self.documenttype_cardex in ['D','C']:
                 validcaracter = "TRWAGMYFPDXBNJZSQVHLCKE"
                 dig_ext = "XYZ"
                 reemp_dig_ext = {'X':'0', 'Y':'1', 'Z':'2'}
