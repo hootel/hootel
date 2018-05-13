@@ -88,10 +88,6 @@ class FolioWizard(models.TransientModel):
                               default=_get_default_checkin)
     checkout = fields.Datetime('Check Out', required=True,
                                default=_get_default_checkout)
-    rooms_num = fields.Integer('Number of Rooms')
-    max_rooms = fields.Integer('Max', readonly=True)
-    virtual_room_id = fields.Many2one('hotel.virtual.room',
-                                      string="Virtual Rooms")
     reservation_wizard_ids = fields.One2many('hotel.reservation.wizard',
                                              'folio_wizard_id',
                                              string="Resevations")
@@ -103,70 +99,17 @@ class FolioWizard(models.TransientModel):
         ('phone', 'Phone'),
         ('web', 'Web'),
     ], 'Sales Channel')
+    virtual_room_wizard_ids = fields.Many2many('hotel.virtual.room.wizard',
+                                      string="Virtual Rooms")
 
-    @api.multi
-    @api.onchange('checkin', 'checkout')
-    def onchange_checks(self):
-        '''
-        When you change checkin or checkout it will checked it
-        and update the qty of hotel folio line
-        -----------------------------------------------------------------
-        @param self: object pointer
-        '''
-        self.ensure_one()
-        now_utc_dt = date_utils.now()
-        if not self.checkin:
-            self.checkin = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-        if not self.checkout:
-            self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+    def assign_rooms(self):
+        self.assign=True
 
-        # UTC -> Hotel tz
-        tz = self.env['ir.values'].get_default('hotel.config.settings',
-                                               'tz_hotel')
-        chkin_utc_dt = date_utils.get_datetime(self.checkin)
-        chkout_utc_dt = date_utils.get_datetime(self.checkout)
-
-        if chkin_utc_dt >= chkout_utc_dt:
-            dpt_hour = self.env['ir.values'].get_default(
-                'hotel.config.settings', 'default_departure_hour')
-            checkout_str = (chkin_utc_dt + timedelta(days=1)).strftime(
-                                                    DEFAULT_SERVER_DATE_FORMAT)
-            checkout_str = "%s %s:00" % (checkout_str, dpt_hour)
-            checkout_dt = date_utils.get_datetime(checkout_str, stz=tz)
-            checkout_utc_dt = date_utils.dt_as_timezone(checkout_dt, 'UTC')
-            self.checkout = checkout_utc_dt.strftime(
-                                                DEFAULT_SERVER_DATETIME_FORMAT)
-        checkout_dt = date_utils.get_datetime(self.checkout, stz=tz)
-        # Reservation end day count as free day. Not check it
-        checkout_dt -= timedelta(days=1)
-        occupied = self.env['hotel.reservation'].occupied(
-            self.checkin,
-            checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
-        rooms_occupied = occupied.mapped('product_id.id')
-        free_rooms = self.env['hotel.room'].search([
-            ('product_id.id', 'not in', rooms_occupied)
-        ])
-        free_virtual_ids = free_rooms.mapped('price_virtual_room.id')
-        domain_rooms = [('id', 'in', free_virtual_ids)]
-        return {'domain': {'virtual_room_id': domain_rooms}}
-
-    @api.onchange('virtual_room_id')
-    def onchange_virtual_room_id(self):
-        self.ensure_one()
-        if self.virtual_room_id and self.checkin and self.checkout:
-            checkout_dt = date_utils.get_datetime(self.checkout)
-            # Reservation end day count as free day. Not check it
-            checkout_dt -= timedelta(days=1)
-            self.max_rooms = len(
-                self.virtual_room_id.check_availability_virtual_room(
-                        self.checkin,
-                        checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                        self.virtual_room_id.id)
-                        )
-
-    @api.onchange('rooms_num')
+    @api.onchange('virtual_room_wizard_ids')
     def onchange_rooms_num(self):
         self.ensure_one()
+        return
+        import wdb; wdb.set_trace()
         if self.rooms_num > self.max_rooms:
             raise ValidationError(_("Too many rooms!"))
         elif self.virtual_room_id:
@@ -236,12 +179,61 @@ class FolioWizard(models.TransientModel):
             self.virtual_room_id = ''
             self.rooms_num = 0
             self.total = total
+                                      
+    @api.multi
+    @api.onchange('checkin', 'checkout')
+    def onchange_checks(self):
+        '''
+        When you change checkin or checkout it will checked it
+        and update the qty of hotel folio line
+        -----------------------------------------------------------------
+        @param self: object pointer
+        '''
+        self.ensure_one()
+        now_utc_dt = date_utils.now()
+        if not self.checkin:
+            self.checkin = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        if not self.checkout:
+            self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
-    @api.depends('reservation_wizard_ids')
+        # UTC -> Hotel tz
+        tz = self.env['ir.values'].get_default('hotel.config.settings',
+                                               'tz_hotel')
+        chkin_utc_dt = date_utils.get_datetime(self.checkin)
+        chkout_utc_dt = date_utils.get_datetime(self.checkout)
+
+        if chkin_utc_dt >= chkout_utc_dt:
+            dpt_hour = self.env['ir.values'].get_default(
+                'hotel.config.settings', 'default_departure_hour')
+            checkout_str = (chkin_utc_dt + timedelta(days=1)).strftime(
+                                                    DEFAULT_SERVER_DATE_FORMAT)
+            checkout_str = "%s %s:00" % (checkout_str, dpt_hour)
+            checkout_dt = date_utils.get_datetime(checkout_str, stz=tz)
+            checkout_utc_dt = date_utils.dt_as_timezone(checkout_dt, 'UTC')
+            self.checkout = checkout_utc_dt.strftime(
+                                                DEFAULT_SERVER_DATETIME_FORMAT)
+        checkout_dt = date_utils.get_datetime(self.checkout, stz=tz)
+        # Reservation end day count as free day. Not check it
+        checkout_dt -= timedelta(days=1)
+        virtual_room_ids = self.env['hotel.virtual.room'].search([])
+        virtual_rooms = []
+        
+        for virtual in virtual_room_ids:
+            virtual_rooms.append((0, False, {
+                        'virtual_room_id': virtual.id,
+                        'checkin': self.checkin,
+                        'checkout': self.checkout,
+                        'folio_wizard_id': self.id,
+                    }))
+        self.virtual_room_wizard_ids = virtual_rooms
+        for virtual in self.virtual_room_wizard_ids:
+            virtual.update_price()
+
+    @api.depends('virtual_room_wizard_ids')
     def _computed_total(self):
         total = 0
-        for line in self.reservation_wizard_ids:
-            total += line.price
+        for line in self.virtual_room_wizard_ids:
+            total += line.total_price
         self.total = total
 
     @api.multi
@@ -263,7 +255,7 @@ class FolioWizard(models.TransientModel):
                 'partner_id': self.partner_id.id,
                 'channel_type': self.channel_type,
                 'room_lines': reservations,
-            }
+            }   
         newfol = self.env['hotel.folio'].create(vals)
         for room in newfol.room_lines:
             room.on_change_checkin_checkout_product_id()
@@ -271,6 +263,97 @@ class FolioWizard(models.TransientModel):
         if self.confirm:
             newfol.action_confirm()
 
+class VirtualRoomWizars(models.TransientModel):
+    _name = 'hotel.virtual.room.wizard'
+
+    @api.multi
+    def _get_default_checkin(self):
+        return self.folio_wizard_id.checkin
+
+    @api.model
+    def _get_default_checkout(self):
+        return self.folio_wizard_id.checkout
+
+    virtual_room_id = fields.Many2one('hotel.virtual.room',
+                                      string="Virtual Rooms")
+    rooms_num = fields.Integer('Number of Rooms')
+    max_rooms = fields.Integer('Max', compute="_compute_max")
+    price = fields.Float(string='Price by Room')
+    total_price = fields.Float(string='Total Price')    
+    folio_wizard_id = fields.Many2one('hotel.folio.wizard')
+    discount = fields.Integer('discount')
+    checkin = fields.Datetime('Check In', required=True,
+                              default=_get_default_checkin)
+    checkout = fields.Datetime('Check Out', required=True,
+                               default=_get_default_checkout)
+
+    def _compute_max(self):        
+        self.max_rooms = len(
+                self.virtual_room_id.check_availability_virtual_room(
+                    self.checkin,
+                    self.checkout,
+                    self.virtual_room_id.id)
+                    )
+        
+
+    @api.onchange('rooms_num', 'discount', 'price','virtual_room_id',
+                  'checkin','checkout')
+    def update_price(self):
+        for line in self:
+            now_utc_dt = date_utils.now()
+            if not self.checkin:
+                self.checkin = self.folio_wizard_id.checkin
+            if not self.checkout:
+                self.checkout = self.folio_wizard_id.checkout
+            if self.rooms_num > self.max_rooms:
+                raise ValidationError(_("There are not enough rooms!"))
+            # UTC -> Hotel tz
+            tz = self.env['ir.values'].get_default('hotel.config.settings',
+                                                   'tz_hotel')
+            chkin_utc_dt = date_utils.get_datetime(self.checkin)
+            chkout_utc_dt = date_utils.get_datetime(self.checkout)
+
+            if chkin_utc_dt >= chkout_utc_dt:
+                dpt_hour = self.env['ir.values'].get_default(
+                    'hotel.config.settings', 'default_departure_hour')
+                checkout_str = (chkin_utc_dt + timedelta(days=1)).strftime(
+                                                        DEFAULT_SERVER_DATE_FORMAT)
+                checkout_str = "%s %s:00" % (checkout_str, dpt_hour)
+                checkout_dt = date_utils.get_datetime(checkout_str, stz=tz)
+                checkout_utc_dt = date_utils.dt_as_timezone(checkout_dt, 'UTC')
+                self.checkout = checkout_utc_dt.strftime(
+                                                    DEFAULT_SERVER_DATETIME_FORMAT)
+            checkout_dt = date_utils.get_datetime(self.checkout, stz=tz)
+            # Reservation end day count as free day. Not check it
+            checkout_dt -= timedelta(days=1)
+            nights = days_diff = date_utils.date_diff(self.checkin,
+                                              self.checkout,
+                                              hours=False)
+            start_date_dt = date_utils.dt_as_timezone(chkin_utc_dt,
+                                                        tz)
+            # Reservation end day count as free day. Not check it
+            checkout_dt -= timedelta(days=1)
+
+            pricelist_id = self.env['ir.values'].sudo().get_default(
+                        'hotel.config.settings', 'parity_pricelist_id')
+            if pricelist_id:
+                pricelist_id = int(pricelist_id)
+                
+            res_price = 0
+            for i in range(0, nights):
+                ndate = start_date_dt + timedelta(days=i)
+                ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                prod = self.virtual_room_id.product_id.with_context(
+                    lang=self.folio_wizard_id.partner_id.lang,
+                    partner=self.folio_wizard_id.partner_id.id,
+                    quantity=1,
+                    date=ndate_str,
+                    pricelist=pricelist_id,
+                    uom=self.virtual_room_id.product_id.uom_id.id)
+                res_price += prod.price
+            self.price = res_price - (res_price * self.discount)/100
+            self.total_price = self.rooms_num * self.price
+            
 
 class ReservationWizard(models.TransientModel):
     _name = 'hotel.reservation.wizard'
@@ -294,6 +377,7 @@ class ReservationWizard(models.TransientModel):
     amount_reservation = fields.Float(string='Total', readonly=True)
     partner_id = fields.Many2one(related='folio_wizard_id.partner_id')
 
+    
     @api.multi
     @api.onchange('product_id')
     def onchange_product_id(self):

@@ -253,8 +253,8 @@ class HotelReservation(models.Model):
                               track_visibility='always',
                               help='Number of children there in guest list.')
     to_assign = fields.Boolean('To Assign')
-    state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirm'),
-                              ('booking', 'Booking'), ('done', 'Done'),
+    state = fields.Selection([('draft', 'Pre-reservation'), ('confirm', 'Pending Entry'),
+                              ('booking', 'On Board'), ('done', 'Out'),
                               ('cancelled', 'Cancelled')],
                              'State', readonly=True,
                              default=lambda *a: 'draft',
@@ -327,6 +327,9 @@ class HotelReservation(models.Model):
     folio_pending_amount = fields.Monetary(related='folio_id.invoices_amount')
     segmentation_id = fields.Many2many(related='folio_id.segmentation_id')
     shared_folio = fields.Boolean (compute='_computed_shared')
+    email = fields.Char('E-mail', related='partner_id.email')
+    mobile = fields.Char('Mobile', related='partner_id.mobile')
+    phone = fields.Char('Phone', related='partner_id.phone')
     #Used to notify is the reservation folio has other reservations or services
 
     @api.multi
@@ -679,12 +682,12 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         datesChanged = ('checkin' in vals or 'checkout' in vals)
-        if datesChanged:
+        if datesChanged and 'reservation_lines' not in vals:
             for record in self:
                 checkin = vals.get('checkin', record.checkin)
                 checkout = vals.get('checkout', record.checkout)
                 days_diff = date_utils.date_diff(checkin,
-                                                 checkout, hours=False)
+                                                 checkout, hours=False)                                                 
             rlines = self.prepare_reservation_lines(checkin, days_diff)
             vals.update({
                 'reservation_lines': rlines['commands'],
@@ -692,6 +695,9 @@ class HotelReservation(models.Model):
             })
         vals.update({
             'edit_room': False,
+        })
+        if datesChanged or 'state' in vals or 'virtual_room_id' in vals:
+            vals.update({
             'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         })
         res = super(HotelReservation, self).write(vals)
@@ -1011,11 +1017,8 @@ class HotelReservation(models.Model):
         '''
         @param self: object pointer
         '''
-        self.write({'state': 'done'})
-        for folio_line in self:
-            workflow.trg_write(self._uid, 'sale.order',
-                               folio_line.order_line_id.order_id.id,
-                               self._cr)
+        for res in self:
+            res.action_reservation_checkout()
         return True
 
     @api.one

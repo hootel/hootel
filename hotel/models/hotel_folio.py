@@ -503,7 +503,6 @@ class HotelFolio(models.Model):
 
     @api.multi
     def action_done(self):
-        self.write({'state': 'done'})
         for line in self.room_lines:
             if line.state == "booking":
                 line.action_reservation_checkout()
@@ -570,7 +569,8 @@ class HotelFolio(models.Model):
                         if line.product_id.invoice_policy == 'cost':
                             order._create_analytic_account()
                             break
-            sale.room_lines.confirm()
+            sale.room_lines.filtered(
+                lambda r: r.state != 'cancelled').confirm()
             if auto_done:
                 sale.order_id.action_done()
 
