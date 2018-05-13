@@ -969,17 +969,23 @@ var HotelCalendarView = View.extend({
       }
     },
 
-    _open_bookings_tree: function(tsearch) {
-      var $elm = this.$el.find('#pms-menu #bookings_search');
-      var searchQuery = tsearch || $elm.val();
+    _generate_bookings_domain: function(tsearch) {
       var domain = [];
+      domain.push('|', '|', '|', '|',
+                  ['partner_id.name', 'ilike', tsearch],
+                  ['partner_id.mobile', 'ilike', tsearch],
+                  ['partner_id.vat', 'ilike', tsearch],
+                  ['partner_id.email', 'ilike', tsearch],
+                  ['partner_id.phone', 'ilike', tsearch]);
+      return domain;
+    },
+
+    _open_bookings_tree: function() {
+      var $elm = this.$el.find('#pms-menu #bookings_search');
+      var searchQuery = $elm.val();
+      var domain = false;
       if (searchQuery) {
-        domain.push('|', '|', '|', '|',
-                    ['partner_id.name', 'ilike', searchQuery],
-                    ['partner_id.mobile', 'ilike', searchQuery],
-                    ['partner_id.vat', 'ilike', searchQuery],
-                    ['partner_id.email', 'ilike', searchQuery],
-                    ['partner_id.phone', 'ilike', searchQuery]);
+        domain = this._generate_bookings_domain(searchQuery);
       }
 
       this.call_action({
