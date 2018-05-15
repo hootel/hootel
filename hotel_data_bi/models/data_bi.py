@@ -279,8 +279,7 @@ class Data_Bi(models.Model):
 
             precio_dto = 0
             if linea.reservation_id.discount != 0:
-                precio_dto = linea.price - (linea.price *
-                                            linea.reservation_id.discount)/100
+                precio_dto = linea.price * linea.reservation_id.discount/100
 
             channel_c = 0
             precio_comision = 0
