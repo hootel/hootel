@@ -35,6 +35,7 @@
         'sale_stock',
         'report',
         'account_payment_return',
+        'cash_daily_report',
     ],
     'license': "",
     'demo': ['data/hotel_data.xml'],

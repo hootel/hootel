@@ -12,4 +12,4 @@ Credits
 Creator
 ------------
 
-* Alexandre Díaz <alex@aloxa.eu>
+* Alexandre Díaz <dev@redneboa.es>

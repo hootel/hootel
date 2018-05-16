@@ -18,31 +18,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-{
-    'name': 'Glasof Exporter',
-    'version': '1.0',
-    'author': "Alexandre Díaz <dev@redneboa.es>",
-    'website': 'https://www.eiqui.com',
-    'category': 'hotel/glasof',
-    'summary': "Export Odoo Data to xls compatible with Glasof",
-    'description': "Glasof Exporter",
-    'depends': [
-        'account',
-    ],
-    'external_dependencies': {
-        'python': ['xlsxwriter']
-    },
-    'data': [
-        'wizard/glasof_wizard.xml',
-        'data/menus.xml',
-    ],
-    'qweb': [],
-    'test': [
-    ],
-
-    'installable': True,
-    'auto_install': False,
-    'application': False,
-    'license': 'AGPL-3',
-}
+from . import wizard

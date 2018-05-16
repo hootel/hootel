@@ -1577,12 +1577,15 @@ class WuBook(models.AbstractModel):
             for vroom_avail in vroom_avails:
                 vroom_avail.with_context({
                             'wubook_action': False}).write({'wpushed': True})
+                wavail = vroom_avail.avail
+                if wavail > vroom_avail.wmax_avail:
+                    wavail = vroom_avail.wmax_avail
                 date_dt = date_utils.get_datetime(
                     vroom_avail.date,
                     dtformat=DEFAULT_SERVER_DATE_FORMAT)
                 days.append({
                     'date': date_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT),
-                    'avail': vroom_avail.avail,
+                    'avail': wavail,
                     'no_ota': vroom_avail.no_ota and 1 or 0,
                     # 'booked': vroom_avail.booked and 1 or 0,
                 })

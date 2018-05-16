@@ -20,21 +20,22 @@
 ##############################################################################
 
 {
-    'name': 'Glasof Exporter',
+    'name': 'Cash Daily Report',
     'version': '1.0',
     'author': "Alexandre Díaz <dev@redneboa.es>",
     'website': 'https://www.eiqui.com',
-    'category': 'hotel/glasof',
-    'summary': "Export Odoo Data to xls compatible with Glasof",
-    'description': "Glasof Exporter",
+    'category': 'reports',
+    'summary': "Export payments report in xls format",
+    'description': "Cash Daily Report",
     'depends': [
         'account',
+        'account_payment_return',
     ],
     'external_dependencies': {
         'python': ['xlsxwriter']
     },
     'data': [
-        'wizard/glasof_wizard.xml',
+        'wizard/cash_daily_report.xml',
         'data/menus.xml',
     ],
     'qweb': [],
