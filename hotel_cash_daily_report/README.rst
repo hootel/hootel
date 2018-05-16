@@ -1,7 +1,7 @@
-CASH DAILY REPORT
+HOTEL CASH DAILY REPORT
 =============
 
-Export payments report to xls
+Export payments report in xls format
 
 
 Credits

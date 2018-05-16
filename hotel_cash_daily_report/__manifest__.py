@@ -20,14 +20,15 @@
 ##############################################################################
 
 {
-    'name': 'Cash Daily Report',
+    'name': 'Hotel Cash Daily Report',
     'version': '1.0',
     'author': "Alexandre Díaz <dev@redneboa.es>",
     'website': 'https://www.eiqui.com',
     'category': 'reports',
-    'summary': "Export payments report to xls",
-    'description': "Cash Daily Report",
+    'summary': "Export payments report in xls format",
+    'description': "Hotel Cash Daily Report",
     'depends': [
+        'hotel',
         'account',
         'account_payment_return',
     ],
