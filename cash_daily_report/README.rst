@@ -1,4 +1,4 @@
-HOTEL CASH DAILY REPORT
+CASH DAILY REPORT
 =============
 
 Export payments report in xls format

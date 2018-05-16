@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <menuitem id="menu_account_finance_xls_reports" name="XLS Reports" parent="account.menu_finance_reports" groups="account.group_account_user"/>
+        <menuitem id="cash_daily_report_wizard" name="Cash Daily Report Wizard"
+            parent="cash_daily_report.menu_account_finance_xls_reports"
+            groups="account.group_account_manager,account.group_account_user"
+            action="action_open_cash_daily_report_wizard" sequence="1" />
+
+    </data>
+</odoo>
