@@ -22,7 +22,7 @@
 {
     'name': 'Glasof Exporter',
     'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
+    'author': "Alexandre Díaz <dev@redneboa.es>",
     'website': 'https://www.eiqui.com',
     'category': 'hotel/glasof',
     'summary': "Export Odoo Data to xls compatible with Glasof",
