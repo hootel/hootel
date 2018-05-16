@@ -2,8 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Solucións Aloxa S.L. <info@aloxa.eu>
-#                       Alexandre Díaz <dev@redneboa.es>
+#    Copyright (C) 2018 Alexandre Díaz <dev@redneboa.es>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,42 +20,24 @@
 ##############################################################################
 
 {
-    'name': 'Hotel Calendar',
+    'name': 'Report qweb-pdf print',
     'version': '1.0',
-    'author': "Alexandre Díaz (Aloxa Solucións S.L.) <alex@aloxa.eu>",
-    'website': 'https://www.eiqui.com',
-    'category': 'eiqui/hotel',
-    'summary': "Hotel Calendar",
-    'description': "Hotel Calendar",
+    'author': "Alexandre Díaz <dev@redneboa.es>",
+    'website': '',
+    'category': 'reports',
+    'summary': "Send to print qweb-pdf",
+    'description': "Report qweb-pdf print",
     'depends': [
-        'bus',
-        'web',
-        'hotel',
-        'web_widget_color',
     ],
-    'external_dependencies': {
-        'python': []
-    },
     'data': [
         'views/general.xml',
-        'views/actions.xml',
-        'views/res_config_views.xml',
-        'views/inherited_res_users_views.xml',
-        'views/inherited_hotel_virtual_room_views.xml',
-        'views/inherited_hotel_room_views.xml',
-        'views/virtual_room_pricelist_cached_views.xml',
-        'data/views.xml',
-        'data/menus.xml',
-	    'security/ir.model.access.csv',
-        'wizard/wizard_reservation.xml'
     ],
-    'qweb': [
-        'static/src/xml/*.xml',
-    ],
+    'qweb': [],
     'test': [
     ],
 
     'installable': True,
     'auto_install': False,
+    'application': False,
     'license': 'AGPL-3',
 }

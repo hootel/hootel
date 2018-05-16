@@ -54,7 +54,7 @@ class Wizard(models.TransientModel):
     @api.onchange('poldocument_cardex', 'documenttype_cardex')
     def validation_poldocument_dni(self):
         if self.poldocument_cardex <> False:
-            if self.documenttype_cardex in ['D','C','I']:
+            if self.documenttype_cardex in ['D','C']:
                 validcaracter = "TRWAGMYFPDXBNJZSQVHLCKE"
                 dig_ext = "XYZ"
                 reemp_dig_ext = {'X':'0', 'Y':'1', 'Z':'2'}
@@ -161,11 +161,10 @@ class Wizard(models.TransientModel):
         # get the last cardex in this reservation (set difference theory)
         cardex = self.env['cardex'].search([('reservation_id', '=', record_id.id)]) - old_cardex
 
-        # FIXME: Hackish solution for close & print (https://www.odoo.com/es_ES/forum/ayuda-1/question/close-wizard-after-print-report-86786)
         action_report = self.pdf_viajero(cardex.id)
         # FIXME: Hackish solution for close & print
         # (https://www.odoo.com/es_ES/forum/ayuda-1/question/close-wizard-after-print-report-86786)
-        del action_report['report_type']
+        action_report['report_type'] = 'qweb-pdf-print'
         return action_report
 
     @api.onchange('partner_id')

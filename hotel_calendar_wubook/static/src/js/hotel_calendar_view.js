@@ -146,6 +146,13 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
       qdict['channel_name'] = tp[5];
       return qdict;
     },
+
+    _generate_bookings_domain: function(tsearch) {
+      var domain = this._super(tsearch);
+      domain.splice(0, 0, '|');
+      domain.push(['wrid', 'ilike', tsearch]);
+      return domain;
+    }
   });
 
   return HotelCalendarViewWuBook;

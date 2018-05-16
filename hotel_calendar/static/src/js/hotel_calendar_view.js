@@ -71,11 +71,12 @@ var CalendarMenu = Widget.extend({
     start: function(){
       this.$dropdown = this.$(".o_calendar_settings_dropdown");
       return $.when(
-        new Model("res.users").call("read", [[Session.uid], ["pms_show_notifications", "pms_show_pricelist", "pms_show_availability"]])
+        new Model("res.users").call("read", [[Session.uid], ["pms_show_notifications", "pms_show_pricelist", "pms_show_availability", "pms_divide_rooms_by_capacity"]])
       ).then(function(result) {
         this._show_notifications = result[0]['pms_show_notifications'];
         this._show_pricelist = result[0]['pms_show_pricelist'];
         this._show_availability = result[0]['pms_show_availability'];
+        this._show_divide_rooms_by_capacity = result[0]['pms_divide_rooms_by_capacity'];
         return this.update();
       }.bind(this));
     },
@@ -148,6 +149,15 @@ var CalendarMenu = Widget.extend({
       this._show_availability = !this._show_availability;
       new Model('res.users').call('write', [Session.uid, {
           pms_show_availability: this._show_availability
+      }]).then(function () {
+          window.location.reload();
+      });
+    },
+
+    toggle_show_divide_rooms_by_capacity: function() {
+      this._show_divide_rooms_by_capacity = !this._show_divide_rooms_by_capacity;
+      new Model('res.users').call('write', [Session.uid, {
+          pms_divide_rooms_by_capacity: this._show_divide_rooms_by_capacity
       }]).then(function () {
           window.location.reload();
       });
@@ -245,38 +255,12 @@ var HotelCalendarView = View.extend({
         $widget.append("<div id='hcalendar'></div>"); // FIXME: Use 'hcal_widget'
 
         this._hcalendar = new HotelCalendar('#hcalendar', options, pricelist, restrictions, this.$el[0]);
-        this._hcalendar.addEventListener('hcalOnPricelistChanged', function(ev){
-          var qdict = {
-            'old_price': ev.detail.old_price,
-            'new_price': ev.detail.price
-          };
-          var hasChanged = false;
-          var price = ev.detail.price.replace(',', '.'); // FIXME: Found best method to replace comma separator
-          var dialog = new Dialog(self, {
-              title: _t("Confirm Price Change"),
-              buttons: [
-                  {
-                    text: _t("Yes, change it"),
-                    classes: 'btn-primary',
-                    close: true,
-                    click: function () {
-                      new Model('product.pricelist').call('update_price', [ev.detail.pricelist_id, ev.detail.vroom_id, ev.detail.date.format(ODOO_DATETIME_MOMENT_FORMAT), ev.detail.price]).fail(function(err, ev){
-                        self._hcalendar.updateVRoomPrice(ev.detail.pricelist_id, ev.detail.vroom_id, ev.detail.date, ev.detail.old_price);
-                      });
-                      hasChanged = true;
-                    }
-                  },
-                  {
-                    text: _t("No"),
-                    close: true
-                  }
-              ],
-              $content: QWeb.render('HotelCalendar.ConfirmPriceChange', qdict)
-          }).open();
-          dialog.$modal.on('hide.bs.modal', function(e){
-            if (!hasChanged) {
-              self._hcalendar.updateVRoomPrice(ev.detail.pricelist_id, ev.detail.vroom_id, ev.detail.date, ev.detail.old_price);
-            }
+        this._hcalendar.addEventListener('hcalOnSavePricelist', function(ev){
+          var pricelist = self._hcalendar.getPricelist();
+          var oparams = [false, self._hcalendar._pricelist_id, false, pricelist, {}, {}];
+          new Model('hotel.calendar.management').call('save_changes', oparams).then(function(results){
+              $(self._hcalendar.btnSaveChanges).removeClass('need-save');
+              $('.hcal-input-changed').removeClass('hcal-input-changed');
           });
         });
         this._hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){
@@ -959,17 +943,23 @@ var HotelCalendarView = View.extend({
       }
     },
 
-    _open_bookings_tree: function(tsearch) {
-      var $elm = this.$el.find('#pms-menu #bookings_search');
-      var searchQuery = tsearch || $elm.val();
+    _generate_bookings_domain: function(tsearch) {
       var domain = [];
+      domain.push('|', '|', '|', '|',
+                  ['partner_id.name', 'ilike', tsearch],
+                  ['partner_id.mobile', 'ilike', tsearch],
+                  ['partner_id.vat', 'ilike', tsearch],
+                  ['partner_id.email', 'ilike', tsearch],
+                  ['partner_id.phone', 'ilike', tsearch]);
+      return domain;
+    },
+
+    _open_bookings_tree: function() {
+      var $elm = this.$el.find('#pms-menu #bookings_search');
+      var searchQuery = $elm.val();
+      var domain = false;
       if (searchQuery) {
-        domain.push('|', '|', '|', '|',
-                    ['partner_id.name', 'ilike', searchQuery],
-                    ['partner_id.mobile', 'ilike', searchQuery],
-                    ['partner_id.vat', 'ilike', searchQuery],
-                    ['partner_id.email', 'ilike', searchQuery],
-                    ['partner_id.phone', 'ilike', searchQuery]);
+        domain = this._generate_bookings_domain(searchQuery);
       }
 
       this.call_action({

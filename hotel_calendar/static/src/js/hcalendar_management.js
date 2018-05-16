@@ -91,6 +91,7 @@ function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options,
   this._restrictions = {};
   this._availability = {};
   this._copy_values = {};
+  this._mode = HotelCalendarManagement.MODE.ALL;
 
   /***/
   if (!this._create()) {
@@ -139,6 +140,31 @@ HotelCalendarManagement.prototype = {
     return this.options;
   },
 
+  setMode: function(/*Int*/mode) {
+    if (typeof mode === 'undefined') {
+      mode = this._mode;
+    }
+    if (mode === HotelCalendarManagement.MODE.LOW) {
+      this.etable.classList.remove('hcal-management-medium');
+      this.etable.classList.add('hcal-management-low');
+      this.edivrhl.classList.remove('hcal-management-medium');
+      this.edivrhl.classList.add('hcal-management-low');
+      this._mode = HotelCalendarManagement.MODE.LOW;
+    } else if (mode === HotelCalendarManagement.MODE.MEDIUM) {
+      this.etable.classList.remove('hcal-management-low');
+      this.etable.classList.add('hcal-management-medium');
+      this.edivrhl.classList.remove('hcal-management-low');
+      this.edivrhl.classList.add('hcal-management-medium');
+      this._mode = HotelCalendarManagement.MODE.MEDIUM;
+    } else {
+      this.etable.classList.remove('hcal-management-low');
+      this.etable.classList.remove('hcal-management-medium');
+      this.edivrhl.classList.remove('hcal-management-low');
+      this.edivrhl.classList.remove('hcal-management-medium');
+      this._mode = HotelCalendarManagement.MODE.ALL;
+    }
+  },
+
 
   /** PRIVATE MEMBERS **/
   //==== MAIN FUNCTIONS
@@ -174,7 +200,7 @@ HotelCalendarManagement.prototype = {
     var dateShortStr = dateCell.format(HotelCalendarManagement._DATE_FORMAT_SHORT);
 
     row = table.insertRow();
-
+    row.setAttribute('name', 'price');
     cell = row.insertCell();
     cell.setAttribute('colspan', '3');
     telm = document.createElement("input");
@@ -200,7 +226,7 @@ HotelCalendarManagement.prototype = {
     cell.appendChild(telm);
 
     row = table.insertRow();
-
+    row.setAttribute('name', 'rest_a');
     cell = row.insertCell();
     telm = document.createElement("input");
     telm.setAttribute('id', this._sanitizeId(`MIN_STAY_${roomId}_${dateShortStr}`));
@@ -251,7 +277,7 @@ HotelCalendarManagement.prototype = {
     cell.appendChild(telm);
 
     row = table.insertRow();
-
+    row.setAttribute('name', 'rest_b');
     cell = row.insertCell();
     cell.setAttribute('colspan', '3');
     telm = document.createElement("select");
@@ -292,6 +318,7 @@ HotelCalendarManagement.prototype = {
     cell.appendChild(telm);
 
     row = table.insertRow();
+    row.setAttribute('name', 'rest_c');
     cell = row.insertCell();
     cell.style.textAlign = 'center';
     cell.setAttribute('colspan', '4');
@@ -727,6 +754,7 @@ HotelCalendarManagement.prototype = {
   //==== UPDATE FUNCTIONS
   _updateView: function() {
     this._create_table_data_days();
+    this.setMode();
   },
 
   //==== HELPER FUNCTIONS
@@ -1017,7 +1045,7 @@ HotelCalendarManagement.prototype = {
 };
 
 /** STATIC METHODS **/
-HotelCalendarManagement.MODE = { NONE:0, COPY:1, PASTE:2 }
+HotelCalendarManagement.MODE = { NONE:0, COPY:1, PASTE:2, ALL:3, MEDIUM:4, LOW:5 };
 HotelCalendarManagement._DATE_FORMAT_LONG = "DD/MM/YYYY HH:mm:ss";
 HotelCalendarManagement._DATE_FORMAT_SHORT = "DD/MM/YYYY";
 HotelCalendarManagement.toMoment = function(/*String,MomentObject*/ndate, /*String*/format) {

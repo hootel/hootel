@@ -277,6 +277,10 @@ class Data_Bi(models.Model):
             if linea.reservation_id.channel_type:
                 chanel_r = canal_array.index(linea.reservation_id.channel_type)
 
+            precio_dto = 0
+            if linea.reservation_id.discount != 0:
+                precio_dto = linea.price * linea.reservation_id.discount/100
+
             channel_c = 0
             precio_comision = 0
             precio_neto = linea.price
@@ -330,6 +334,7 @@ class Data_Bi(models.Model):
                 'Noches': 1,
                 'ID_TipoHabitacion':
                 linea.reservation_id.virtual_room_id.product_id.id,
+                'ID_HabitacionDuerme': linea.reservation_id.product_id.id,
                 'ID_Regimen': 0,
                 'Adultos': linea.reservation_id.adults,
                 'Menores': linea.reservation_id.children,
@@ -337,6 +342,7 @@ class Data_Bi(models.Model):
                 'PrecioDiario': precio_neto,
                 'PrecioComision': precio_comision,
                 'PrecioIva': precio_iva,
+                'PrecioDto': precio_dto,
                 'ID_Tarifa': linea.reservation_id.pricelist_id.id,
                 'ID_Pais': id_codeine})
 

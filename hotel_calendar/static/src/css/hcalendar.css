@@ -87,6 +87,14 @@
 	overflow-x: hidden;
   max-height: 20vh;
 }
+.table-calcs input, .table-reservations-header input {
+	border-radius: 0;
+	border: 1px solid lightgray;
+	width: 100%;
+}
+.table-calcs input {
+	text-align: center;
+}
 
 
 .btn-hcal { }
@@ -242,6 +250,11 @@
 .hcal-cell-room-type-group-item-day {
 	padding: 0 !important;
 	height: 100%;
+}
+
+.hcal-input-changed {
+	background-color: rgb(237,110,110);
+	border: 1px solid gray;
 }
 
 .hcal-cell-room-type-group-item-day-occupied {

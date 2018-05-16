@@ -247,6 +247,21 @@ var HotelCalendarManagementView = View.extend({
                 });
             });
 
+            // Calendar Mode
+            var $list = self.$el.find('#mpms-search #mode_list');
+            $list.select2({
+                minimumResultsForSearch: -1
+            });
+            $list.on('change', function(ev){
+                var mode = HotelCalendarManagement.MODE.ALL;
+                if (this.value === 'low') {
+                    mode = HotelCalendarManagement.MODE.LOW;
+                } else if (this.value === 'medium') {
+                    mode = HotelCalendarManagement.MODE.MEDIUM;
+                }
+                self._hcalendar.setMode(mode);
+            });
+
             self.create_calendar({
                 rooms: rooms,
                 days: self._view_options['days'],

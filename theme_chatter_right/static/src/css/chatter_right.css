@@ -1,0 +1,13 @@
+@media only screen and (min-width: 1024px) {
+  .o_form_sheet_bg.o_form_sheet_chatter_right {
+    width: calc(100% - 390px);
+    display: inline-block;
+  }
+
+  .oe_chatter {
+    display: inline-block !important;
+    width: 390px !important;
+    position: absolute;
+    background-color: white;
+  }
+}
