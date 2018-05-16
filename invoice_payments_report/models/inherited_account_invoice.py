@@ -29,8 +29,9 @@ class AccountInvoice(models.Model):
     def _compute_balance_due(self):
         payments_amount_total = 0.0
         json_payments = json.loads(self.payments_widget)
-        for payment in json_payments['content']:
-            payments_amount_total += payment['amount']
-        self.balance_due = self.amount_total - payments_amount_total
+        if json_payments:
+            for payment in json_payments['content']:
+                payments_amount_total += payment['amount']
+            self.balance_due = self.amount_total - payments_amount_total
 
     balance_due = fields.Float('Balance Due', compute="_compute_balance_due")
