@@ -16,8 +16,8 @@
         <field name="model">hotel.folio</field>
         <field name="inherit_id" ref="hotel.view_hotel_folio1_form" />
         <field name="arch" type="xml">
-            <xpath expr="//notebook/page/field[@name='room_lines']/tree/field[@name='state']" position="before">
-                    <field name="wchannel_id" />
+            <xpath expr="//notebook/page/field[@name='room_lines']/tree/field[@name='checkout']" position="after">
+                    <field name="origin_sale"/>
             </xpath>
         </field>
     </record>

@@ -7,18 +7,20 @@
         <field name="arch" type="xml">
            <xpath expr="//page[@name='days']" position="after">
                 <page name="wubook" string="Wubook" attrs="{'invisible': [('wrid','=','none')]}">
-                    <group colspan="4" col="4">
-                        <field name="able_to_modify_wubook" invisible="1"/>
+                    <group colspan="4" col="4">                        
                         <field name="wrid" attrs='{"readonly": [("able_to_modify_wubook","!=",False)]}'/>
-                        <field name="wchannel_id" attrs='{"readonly": [("able_to_modify_wubook","!=",False)]}'/>
                         <field name="wchannel_reservation_code" attrs='{"readonly": [("able_to_modify_wubook","!=",False)]}'/>
                         <field name="wstatus" attrs='{"readonly": [("able_to_modify_wubook","!=",False)]}'/>
                         <field name="wstatus_reason" attrs='{"readonly": [("able_to_modify_wubook","!=",False)]}'/>
                     </group>
                 </page>
+            </xpath>            
+            <xpath expr="//field[@name='channel_type']" position="after">
+                <field name="wchannel_id" attrs='{"readonly": [("able_to_modify_wubook","!=",False)], "invisible":[("channel_type","!=", "web")]}' string="OTA"/>
             </xpath>
-            <xpath expr="//notebook" position="before">
+            <xpath expr="//field[@name='cardex_pending']" position="before">
                 <group colspan="6" col="6">
+                    <field name="able_to_modify_wubook" invisible="1"/>
                     <field name="wis_from_channel" readonly="True" invisible="True"/>
                     <field name="wcustomer_notes" readonly="1" attrs="{'invisible': [('wrid','=','none')]}" nolabel="1"/>
                 </group>
@@ -55,7 +57,7 @@
         <field name="model">hotel.reservation</field>
         <field name="inherit_id" ref="hotel.view_hotel_reservation_tree" />
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='checkout']" position="before">
+            <xpath expr="//field[@name='checkout']" position="after">
                 <field name="origin_sale"/>
             </xpath>
         </field>

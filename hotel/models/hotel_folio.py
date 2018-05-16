@@ -153,6 +153,7 @@ class HotelFolio(models.Model):
     checkouts_reservations = fields.Integer('checkouts reservations')
     partner_internal_comment = fields.Text(string='Internal Partner Notes',
                                            related='partner_id.comment')
+    internal_comment = fields.Text(string='Internal Folio Notes')
     cancelled_reason = fields.Text('Cause of cancelled')
     prepaid_warning_days = fields.Integer(
         'Prepaid Warning Days',
@@ -218,8 +219,6 @@ class HotelFolio(models.Model):
             record.order_id._amount_all()
             total_inv_refund = 0
             payments = acc_pay_obj.search([
-                '|',
-                ('invoice_ids', 'in', record.invoice_ids.ids),
                 ('folio_id', '=', record.id)
             ])
             total_paid = sum(pay.amount for pay in payments)

@@ -271,6 +271,7 @@ class HotelReservation(models.Model):
                                     ondelete='cascade')
     folio_id = fields.Many2one('hotel.folio', string='Folio',
                                ondelete='cascade')
+    folio_name = fields.Char(compute="_computed_folio_name")
     checkin = fields.Datetime('Check In', required=True,
                               default=_get_default_checkin,
                               track_visibility='always')
@@ -320,6 +321,8 @@ class HotelReservation(models.Model):
     # To show de total amount line in read_only mode
     amount_reservation = fields.Float('Total',
                                       compute='_computed_amount_reservation')
+    amount_reservation_services = fields.Float('Services Amount',
+                                               compute='_computed_amount_reservation')
     edit_room = fields.Boolean(default=True)
     nights = fields.Integer('Nights',compute='_computed_nights', store=True)
     channel_type = fields.Selection(related='folio_id.channel_type')
@@ -327,10 +330,33 @@ class HotelReservation(models.Model):
     folio_pending_amount = fields.Monetary(related='folio_id.invoices_amount')
     segmentation_id = fields.Many2many(related='folio_id.segmentation_id')
     shared_folio = fields.Boolean (compute='_computed_shared')
+    #Used to notify is the reservation folio has other reservations or services
     email = fields.Char('E-mail', related='partner_id.email')
     mobile = fields.Char('Mobile', related='partner_id.mobile')
     phone = fields.Char('Phone', related='partner_id.phone')
-    #Used to notify is the reservation folio has other reservations or services
+    partner_internal_comment = fields.Text(string='Internal Partner Notes',
+                                           related='partner_id.comment')
+    folio_internal_comment = fields.Text(string='Internal Folio Notes',
+                                           related='folio_id.internal_comment')
+    preconfirm = fields.Boolean('Auto confirm to Save', default=True)
+    
+    def _computed_folio_name(self):
+        for res in self:
+            res.folio_name = res.folio_id.name + '-' + \
+                res.folio_id.date_order
+
+    @api.multi
+    def action_checks(self):
+        self.ensure_one()
+        return {
+            'name': _('Cardexs'),
+            'view_type': 'form',
+            'view_mode': 'tree,form',
+            'res_model': 'cardex',
+            'type': 'ir.actions.act_window',
+            'domain': [('reservation_id', '=', self.id)],
+            'target': 'new',
+        }
 
     @api.multi
     def _computed_shared(self):
@@ -353,14 +379,17 @@ class HotelReservation(models.Model):
                     res.checkout, hours=False)
             res.nights = nights
 
-    @api.onchange('reservation_lines')
+    @api.depends('reservation_lines', 'service_line_ids')
     def _computed_amount_reservation(self):
         _logger.info('_computed_amount_reservation')
         for res in self:
-            amount_reservation = 0
+            amount_reservation = amount_service = 0
             for line in res.reservation_lines:
                 amount_reservation += line.price
-            res.amount_reservation = amount_reservation
+            for service in res.service_line_ids:
+                amount_service += service.price_total
+            res.amount_reservation = amount_reservation + amount_service
+            res.amount_reservation_services = amount_service
             res.price_unit = amount_reservation
 
     @api.multi
@@ -383,9 +412,33 @@ class HotelReservation(models.Model):
             return [('id', 'in', [x.id for x in recs])]
 
     @api.multi
-    def action_pay(self):
+    def action_pay_folio(self):
         self.ensure_one()
         return self.folio_id.action_pay()
+
+    @api.multi
+    def action_pay_reservation(self):
+        self.ensure_one()
+        partner = self.partner_id.id
+        amount = self.amount_reservation
+        view_id = self.env.ref('hotel.view_account_payment_folio_form').id
+        return{
+            'name': _('Register Payment'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'account.payment',
+            'type': 'ir.actions.act_window',
+            'view_id': view_id,
+            'context': {
+                'default_folio_id': self.folio_id.id,
+                'default_amount': amount,
+                'default_payment_type': 'inbound',
+                'default_partner_type': 'customer',
+                'default_partner_id': partner,
+                'default_communication': self.name,
+            },
+            'target': 'new',
+        }
 
     @api.model
     def daily_plan(self):
@@ -517,13 +570,39 @@ class HotelReservation(models.Model):
 
     @api.multi
     def open_folio(self):
+        action = self.env.ref('hotel.open_hotel_folio1_form_tree_all').read()[0]
+        if self.folio_id:
+            action['views'] = [(self.env.ref('hotel.view_hotel_folio1_form').id, 'form')]
+            action['res_id'] = self.folio_id.id
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+        return action
+
+    @api.multi
+    def add_room(self):
+        action = self.env.ref('hotel.open_hotel_reservation_form_tree_all').read()[0]
+        if self.folio_id:
+            context = {
+                'default_partner_id': self.partner_id.id,
+                'default_checkin': self.checkin,
+                'default_checout': self.checkout,
+                'default_folio_id': self.folio_id.id,
+            }
+            action['views'] = [(self.env.ref('hotel.view_hotel_reservation_form').id, 'form')]
+            action['context'] = context
+        else:
+            action = {'type': 'ir.actions.act_window_close'}
+        return action
+
+    @api.multi
+    def open_reservation_form(self):
         self.ensure_one()
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'hotel.folio',
+            'res_model': 'hotel.reservation',
             'views': [[False, "form"]],
             'target': 'inline',
-            'res_id': self.folio_id.id,
+            'res_id': self.id,
         }
 
     @api.multi
@@ -649,7 +728,8 @@ class HotelReservation(models.Model):
             if record.adults == 0:
                 raise ValidationError(_("Reservation has no adults"))
 
-            if record.state == 'draft' and record.folio_id.state == 'sale':
+            if (record.state == 'draft' and record.folio_id.state == 'sale') or \
+                    record.preconfirm == True:
                 record.confirm()
             record._compute_color()
 
@@ -682,7 +762,8 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         datesChanged = ('checkin' in vals or 'checkout' in vals)
-        if datesChanged and 'reservation_lines' not in vals:
+        if (datesChanged and 'reservation_lines' not in vals) or \
+                not self.reservation_lines: #To allow add bottom room on folio form
             for record in self:
                 checkin = vals.get('checkin', record.checkin)
                 checkout = vals.get('checkout', record.checkout)

@@ -17,10 +17,8 @@
             <field name="name">Hotel Reservation</field>
             <field name="res_model">hotel.reservation</field>
             <field name="view_type">form</field>
-            <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
         </record>
-
 
         <menuitem name="Reservation Rooms" id="menu_open_hotel_reservation_form_tree_all"
             action="open_hotel_reservation_form_tree_all" sequence="10" parent="menu_all_folio" />
@@ -36,21 +34,49 @@
                         <field name="splitted" invisible="True" />
                         <field name="parent_reservation" invisible="True" />
                         <!--<button name="send_reservation_mail" type="object" string="Send Reservation Email" states="confirm" class="oe_highlight"/>-->
-                        <button name="confirm" string="Confirm" states="draft,cancelled" class="oe_highlight" type="object"/>
-                        <button name="action_cancel" string="Cancel Reservation" states="draft,confirm,done" class="oe_highlight" type="object"/>
-                        <button name="action_reservation_checkout" string="Done" states="booking,cancelled" class="oe_highlight" type="object"/>
-                        <button name="draft" string="Set to Draft" states="cancel" class="oe_highlight" type="object"/>
-                        <button name="%(action_hotel_split_reservation)d" string="Split" type="action" class="oe_highlight" icon="fa-cut" state="draft,confirm"/>
-                        <button name="unify" string="Unify" type="object" class="oe_highlight" icon="fa-compress" attrs="{'invisible':['|',['splitted', '=', False]]}" />
+                        <button name="confirm" string="Confirm" class="oe_highlight"
+                            type="object"
+                            attrs="{'invisible':['|',('folio_id', '=', False),('state','not in',('draft','cancel'))]}"
+                        />
+                        <button name="action_cancel" string="Cancel Reservation"
+                            class="oe_highlight" type="object"
+                            attrs="{'invisible':['|',('folio_id', '=', False),('state','in',('draft','cancel','done'))]}"
+                        />
+                        <button name="action_reservation_checkout" string="Done"
+                            states="booking,cancelled" class="oe_highlight"
+                            type="object"
+                        />
+                        <button name="draft" string="Set to Draft"
+                            states="cancel" class="oe_highlight"
+                            type="object"
+                        />
+                        <button name="%(action_hotel_split_reservation)d" string="Split"
+                            type="action" class="oe_highlight"
+                            icon="fa-cut" state="draft,confirm"
+                            attrs="{'invisible': [('folio_id','=',False)]}"
+                        />
+                        <button name="unify" string="Unify"
+                            type="object" class="oe_highlight"
+                            icon="fa-compress"
+                            attrs="{'invisible':[('splitted', '=', False)]}"
+                        />
+                        <label for="preconfirm"
+                            string="Autoconfirm"
+                            attrs="{'invisible':[('folio_id', '!=', False)]}"
+                        />
+                        <span name="preconfirm" attrs="{'invisible':[('folio_id', '!=', False)]}">
+                            <field name="preconfirm" />
+                        </span>                        
                         <!--button name="open_master" string="Open Master" type="object" class="oe_highlight" icon="fa-file" attrs="{'invisible':['|',['parent_reservation', '=', False]]}" /-->
                         <field name="state" widget="statusbar"/>
+                        
                     </header>
                     <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
                          attrs="{'invisible': ['|',('shared_folio','=',False),('splitted', '=', True)]}">
                              This reservation has other reservantions and/or services in the folio, you can check it in the
                              <bold><button class="alert-link" type="object" name="open_folio" string="Folio Form"/></bold>
                     </div>
-                    <div class="alert alert-danger" role="alert" style="margin-bottom:0px;"
+                    <div class="alert alert-warning" role="alert" style="margin-bottom:0px;"
                          attrs="{'invisible': [('splitted','=',False)]}">
                              This reservation is part of splitted reservation!, you can check it in the
                              <bold><button class="alert-link" type="object" name="open_folio" string="Folio Form"/></bold>
@@ -58,8 +84,54 @@
                     <field name="shared_folio" invisible="1"/>
                     <sheet>
                         <div class=" oe_button_box">
+                            <button type="object" class="oe_stat_button"
+                                id="folio_smart_button"
+                                icon="fa-file"
+                                name="open_folio"
+                                attrs="{'invisible': [('folio_id','=',False)]}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_text"><field name="folio_id" readonly="1" nolabel="1"/></span>
+                                </div>
+                            </button>
+                            <button type="object" class="oe_stat_button"
+                                id="add_room"
+                                icon="fa-cart-plus"
+                                name="add_room"
+                                attrs="{'invisible': [('folio_id','=',False)]}"
+                                context= "{
+                                    'default_partner_id': partner_id}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_text">Add Room</span>
+                                </div>
+                            </button>                                                                             
+                            <button type="object" class="oe_stat_button"
+                                id="payment_folio_smart_button"
+                                icon="fa-exclamation-circle"
+                                name="action_pay_folio"
+                                attrs="{'invisible': [('folio_pending_amount','&lt;=',0)]}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="folio_pending_amount" nolabel="1"
+                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </span>
+                                    <span class="o_stat_text">In Folio</span>
+                                </div>
+                            </button>                        
+                            <button type="object" class="oe_stat_button"
+                                id="payment_reservation_smart_button"
+                                icon="fa-usd"
+                                name="action_pay_reservation"
+                                attrs="{'invisible': [('folio_pending_amount','&lt;=',0)]}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value">                                        
+                                        <field name="amount_reservation" nolabel="1"
+                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                    </span>
+                                    <span class="o_stat_text">In Reservation</span>
+                                </div>
+                            </button>
                             <button type="action" class="oe_stat_button"
-                                id="cardex_smart_button"
+                                id="pending_checkins_smart_button"
                                 icon="fa-user-plus"
                                 name="%(launch_checkin_wizard_add)d"
                                 context="{'partner_id': partner_id,'enter_date': checkin,
@@ -74,8 +146,8 @@
                             </button>
 
                             <button type="object" class="oe_stat_button"
-                                id="cardex_smart_button"
-                                icon="fa-bed"
+                                id="checkin_smart_button"
+                                icon="fa-users"
                                 name="action_checks"
                                 attrs="{'invisible': [('cardex_count','&lt;=',0)]}">
                                 <div class="o_form_field o_stat_info">
@@ -85,116 +157,141 @@
                                 </div>
                             </button>
                             <field name="currency_id" invisible="1"/>
-                                                       
-                            <button type="object" class="oe_stat_button"
-                                id="payment_smart_button"
-                                icon="fa-file"
-                                name="action_pay"
-                                attrs="{'invisible': [('folio_pending_amount','&lt;=',0)]}">
-                                <div class="o_form_field o_stat_info">
-                                    <span class="o_stat_value">
-                                        <field name="folio_pending_amount" nolabel="1"
-                                        widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                    </span>
-                                    <span class="o_stat_text">Pending Folio Payment</span>
-                                </div>
-                            </button>
 
                         </div>
-                        <div class="oe_title">
-                            <h1>
-                                <field name="partner_id" default_focus="1"
-                                    placeholder="Lastname, Firstname"
-                                    attrs="{'readonly':[('folio_id','!=',False)]}"
-                                    required="1"/> -
-                                <field name="folio_id" readonly="1" nolabel="1"/>
-                            </h1>
-                            <h2>
-                                <field name="edit_room" nolabel="1"/>
-                                <field name="product_id" select="1" domain="[('isroom','=',True)]"
-                                    nolabel="1" options="{'no_create': True}" placeholder="Room"
-                                    attrs="{'readonly':[('edit_room','=',False)]}"/>
-                            </h2>
-                        </div>
-                            <group>                               
-                                <group>
-                                    <field name="checkin"/>
-                                    <field name="checkout"/>
-                                    <field name="email" placeholder="email"/>
-                                    <field name="mobile" placeholder="mobile"/>
-                                    <field name="phone" />
-                                </group>
-                                <group>
-                                    <field name="adults"/>
-                                    <field name="children"/>
-                                </group>
-                                 <group>
-                                    <field name="virtual_room_id" on_change="1" options="{'no_create': True}"
-                                           attrs="{'readonly':[('state','not in',('draft'))]}"/>
-                                    <field name="channel_type" attrs="{'required':[('reservation_type','not in',('staff','out'))]}"/>
-                                    <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/> 
-                                </group>
-                            </group>                                                                                      
-                            <group invisible="1">
-                                <field name="check_rooms" invisible="1"/>
-                                <field name="cardex_pending" invisible="1"/>
-                                <field name="pricelist_id" invisible="1"/>
-                                <field name="product_uom_qty" invisible="1" />
-                                <field name="invoice_status" invisible="1"/>
-				                <field name="nights" invisible="1"/>
-                                <field name="name" invisible="1" />                                
-                                <field name="product_uom" string="Rent(UOM)" invisible="1" />
+                        <span class="label label-danger" attrs="{'invisible': [('state', 'not in', ('cancelled'))]}">Cancelled Reservation!</span>
+                        <h1>                            
+                            <field name="edit_room" nolabel="1" class="fa fa-bed" />        
+                            <field name="product_id" select="1" domain="[('isroom','=',True)]"
+                                nolabel="1" options="{'no_create': True,'no_open': True}" placeholder="Room"
+                                attrs="{'readonly':[('edit_room','=',False)]}"
+                                style="margin-right: 30px;"/>
+                            <span class="fa fa-user" style="margin-right:10px;"/>
+                            <field name="partner_id" default_focus="1"
+                                placeholder="Lastname, Firstname"
+                                attrs="{'readonly':[('folio_id','!=',False)]}"
+                                required="1"/>
+                        </h1>
+                        <h3>
+                            From <span class="fa fa-sign-in" style="margin: 5px;"/><field name="checkin" widget="date" style="margin-right: 10px;"/> to                          
+                            <span class="fa fa-sign-out" style="margin-right: 5px;"/><field name="checkout" widget="date"/>
+                        </h3>                                                                                                   
+                        <group>                                                                                     
+                            <group string="Contact Details" name="contact_details">
+                                <field name="email" placeholder="email" widget="email" />
+                                <field name="mobile" placeholder="mobile" widget="phone" />
+                                <field name="phone" placeholder="phone" widget="phone" />
+                                <field name="partner_internal_comment" string="Partner Note"/>                                
                             </group>
-                            <separator/>
-                            <notebook colspan="6" col="6">
-                                <page name="days" string="Days">
-                                    <button name="%(action_hotel_massive_price_change_reservation_days)d" string="Massive Change" type="action"
-                                                    class="oe_highlight pull-right oe_edit_only" icon="fa-bolt"/>
-                                    <field name="reservation_lines" nolabel= "1">
-                                        <tree create="false" delete="false" editable="bottom">
-                                            <field name="date" readonly="True" />
-                                            <field name="price" />
-                                        </tree>
-                                    </field>
-                                     <group colspan="2" class="oe_subtotal_footer">
-                                        <field name="price_unit"/>       
-                                        <label for="discount" groups="sale.group_discount_per_so_line"/>
-                                        <div name="discount" groups="sale.group_discount_per_so_line">
-                                            <field name="discount" class="oe_inline"/>
-                                        </div>
-                                         <field name="price_total" string="Final Price"/>                                            
+                            <group string="Reservation Details" name="reservation_details">
+                                <field name="adults"/>
+                                <field name="children"/>
+                                <field name="virtual_room_id" on_change="1" options="{'no_create': True,'no_open': True}" 
+                                       attrs="{'readonly':[('state','not in',('draft'))]}"/>
+                                <field name="channel_type" attrs="{'required':[('reservation_type','not in',('staff','out'))]}"/>
+                                <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>
+                                <field name="folio_internal_comment" string="Reservation Note"/>  
+                            </group>                            
+                        </group>                        
+                                                    
+                        <group invisible="1">
+                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                             <group string="Total" name="amount">
+                                <field name="price_unit" />>       
+                                <label for="discount" groups="sale.group_discount_per_so_line"/>
+                                <div name="discount" groups="sale.group_discount_per_so_line">
+                                    <field name="discount" class="oe_inline"/>
+                                </div>
+                                <field name="amount_reservation_services"/>
+                                <field name="price_total" invisible="1"/>
+                            </group>      
+                            <field name="check_rooms" invisible="1"/>
+                            <field name="cardex_pending" invisible="1"/>
+                            <field name="pricelist_id" invisible="1"/>
+                            <field name="product_uom_qty" invisible="1" />
+                            <field name="invoice_status" invisible="1"/>
+                            <field name="nights" invisible="1"/>
+                            <field name="name" invisible="1" />                                
+                            <field name="product_uom" string="Rent(UOM)" invisible="1" />
+                        </group>                                       
+                        <notebook>
+                            <page name="days" string="Days">
+                                <button name="%(action_hotel_massive_price_change_reservation_days)d" string="Massive Price Change" type="action"
+                                       class="oe_highlight pull-right oe_edit_only" icon="fa-bolt"/>
+                                <group col="9">
+                                    <group colspan="6" string="Reservation Services" name="reservation_services">                                                           
+                                        <field name="service_line_ids"
+                                            context="{'default_ser_room_line': active_id, 'default_folio_id': folio_id}"
+                                            nolabel="1" style="padding-right:10px !important;">
+                                            <tree string="Services"  editable="bottom">
+                                                <field name="sequence" widget="handle"/>
+                                                <field name="folio_id" invisible="1"/>
+                                                <field name="product_id"
+                                                    attrs="{'readonly': ['|', ('qty_invoiced', '&gt;', 0), ('procurement_ids', '!=', [])]}"
+                                                    domain="[('isservice','=',True)]"
+                                                    context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                                                   />
+                                                <field name="layout_category_id" groups="sale.group_sale_layout"/>
+                                                <field name="name"/>
+                                                <field name="ser_room_line" options="{'create': False, 'create_edit': False}"/>
+                                                <field name="product_uom_qty"
+                                                    string="Ordered Qty"
+                                                    context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                                                />
+                                                <field name="qty_delivered" invisible="1"
+                                                    attrs="{'readonly': [('qty_delivered_updateable', '=', False)]}"/>
+                                                <field name="qty_invoiced"
+                                                    invisible="1"/>
+                                                <field name="qty_to_invoice" invisible="1"/>
+                                                <field name="product_uom"
+                                                    attrs="{'readonly': [('state', 'in', ('sale','done', 'cancel'))]}"
+                                                    context="{'company_id': parent.company_id}"
+                                                    groups="product.group_uom" options='{"no_open": True}'/>
+                                                <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
+                                                <field name="price_unit"
+                                                    attrs="{'readonly': [('qty_invoiced', '&gt;', 0)]}"/>
+                                                <field name="tax_id" widget="many2many_tags" domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]"
+                                                    attrs="{'readonly': [('qty_invoiced', '&gt;', 0)]}"/>
+                                                <field name="discount" groups="sale.group_discount_per_so_line"/>
+                                                <field name="price_subtotal" widget="monetary" invisible="1"/>
+                                                <field name="price_total" widget="monetary"/>
+                                                <field name="qty_delivered_updateable" invisible="1"/>
+                                                <field name="procurement_ids" invisible="1"/>
+                                                <field name="state" invisible="1"/>
+                                                <field name="invoice_status" invisible="1"/>
+                                                <field name="customer_lead" invisible="1"/>
+                                                <field name="currency_id" invisible="1"/>
+                                            </tree>                                                
+                                        </field>
+                                    </group>                                       
+                                    <group colspan="3" string="Days" name="days">                                
+                                        <field name="reservation_lines" nolabel="1">                                    
+                                            <tree create="false" delete="false" editable="bottom">
+                                                <field name="date" readonly="True" />
+                                                <field name="price" />
+                                            </tree>                              
+                                        </field>
+                                    </group>                                                                   
+                                 </group>
+                            </page>
+                            <page>
+                                   
+                            </page>
+                            <page name="others" string="Others">
+                                <group colspan="4" col="4">
+                                    <group>
+                                        <field name="segmentation_id" widget="many2many_tags" placeholder="Segmentation..."
+                                            options="{'no_create': True,'no_open': True}" />
+                                        <field name="overbooking" />
                                     </group>
-                                </page>
-                                <page name="services" string="Services">
-                                    <separator string="Related services" />
-                                    <field name="service_line_ids" string="Service Line"
-                                        nolabel="1" context="{'default_ser_room_line': active_id}">
-                                        <tree string="Service Line">
-                                            <field name="name" />
-                                            <field name="ser_room_line" />
-                                            <field name="product_id" />
-                                            <field name="product_uom_qty" />
-                                            <field name="price_unit" />
-                                            <field name="price_subtotal" />
-                                            <field name="state" />
-                                        </tree>
-                                    </field>
-                                </page>
-                                <page name="others" string="Others">
-                                    <group colspan="4" col="4">
-                                        <group>
-                                            <field name="segmentation_id" widget="many2many_tags" placeholder="Segmentation..."
-                                                options="{'no_create': True,'no_open': True}" />
-                                            <field name="overbooking" />
-                                        </group>
-                                        <group>
-                                            <field name="reservation_type" />
-                                            <field name="out_service_description"
-                                                   attrs="{'invisible':[('reservation_type','not in',('out'))]}"/>
-                                        </group>
+                                    <group>
+                                        <field name="reservation_type" />
+                                        <field name="out_service_description"
+                                               attrs="{'invisible':[('reservation_type','not in',('out'))]}"/>
                                     </group>
-                                </page>
-                            </notebook>
+                                </group>
+                            </page>
+                        </notebook>
                     </sheet>
                     <div class="oe_chatter">
                         <field name="message_follower_ids" widget="mail_followers"/>
@@ -218,8 +315,10 @@
                     checkout &lt;= current_date"
                 >
                     <button icon="fa fa-2x fa-angellist"
-                       attrs="{'invisible':['|',('folio_pending_amount','&gt;',0),
+                        attrs="{'invisible':['|',('folio_pending_amount','&gt;',0),
                             ('state' ,'!=', 'done')]}"
+                        type="object"
+                        name="open_folio"
                     />
                     <field name="state" />
                     <button type="object" class="oe_stat_button"
@@ -227,6 +326,14 @@
                         name="open_folio"
                     />
                     <field name="folio_id"/>
+                    <button type="action" class="oe_stat_button"
+                        id="cardex_smart_button" icon="fa fa-1x fa-user-plus"
+                        name="%(launch_checkin_wizard_add)d"
+                        context="{'partner_id': partner_id,'enter_date': checkin,
+                            'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
+                        attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
+                            ('cardex_pending','=', False)]}"
+                    />
                     <field name="product_id" string="Room"/>
                     <button type="action" class="oe_stat_button"
                         id="reservations_partner" icon="fa fa-2x fa-list-ul"
@@ -236,15 +343,7 @@
                     <field name="partner_id"/>
                     <field name="virtual_room_id" string="Reserved Room Type"/>                   
                     <field name="nights" />
-                    <field name="adults" string="Persons"/> 
-                    <button type="action" class="oe_stat_button"
-                        id="cardex_smart_button" icon="fa fa-1x fa-user-plus"
-                        name="%(launch_checkin_wizard_add)d"
-                        context="{'partner_id': partner_id,'enter_date': checkin,
-                            'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
-                        attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
-                            ('cardex_pending','=', False)]}"
-                    />
+                    <field name="adults" string="Persons"/>                    
                     <field name="checkin" widget="date"/>
                     <field name="checkout"  widget="date"/>
                     <field name="create_date"/>
