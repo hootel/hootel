@@ -16,6 +16,11 @@
   - [ ] hotel_node_master: Configure a node as a master
   - [ ] glasof_exporter: Export Odoo data to Glasof xls format
   - [x] hotel_revenue: Export Odoo data for Revenue in xls format
+  - [x] cash_daily_report: Export Odoo Payments & Payment Returns to xls format
+  - [x] invoice_payments_report: Add payments info in invoices
+  - [x] theme_chatter_right: Puts chatter to the right
+  - [ ] report_qweb_pdf_print: Adds new report_type to generate pdf and launch print process
+  - [ ] l10n_es_events_scraper: Gets info about relevant events in Spain
 
 **HOW WORKS?**
   - The idea is... the hotel sell 'virtual rooms' and the customer is assigned to one 'normal room'.
