@@ -323,6 +323,12 @@ class HotelReservation(models.Model):
                                       compute='_computed_amount_reservation')
     amount_reservation_services = fields.Float('Services Amount',
                                                compute='_computed_amount_reservation')
+    amount_room = fields.Float('Amount Room', compute="_computed_amount_reservation")
+    amount_discount = fields.Float('Room with Discount', compute="_computed_amount_reservation")
+    discount_type = fields.Selection([
+        ('percent', 'Percent'),
+        ('fixed', 'Fixed')], 'Discount Type', default=lambda *a: 'percent')
+    discount_fixed = fields.Float('Fixed Discount')
     edit_room = fields.Boolean(default=True)
     nights = fields.Integer('Nights',compute='_computed_nights', store=True)
     channel_type = fields.Selection(related='folio_id.channel_type')
@@ -371,7 +377,6 @@ class HotelReservation(models.Model):
                 
     @api.depends('checkin', 'checkout')
     def _computed_nights(self):
-        _logger.info('_computed_amount_reservation')
         for res in self:
             if res.checkin and res.checkout:
                 nights = days_diff = date_utils.date_diff(
@@ -379,18 +384,28 @@ class HotelReservation(models.Model):
                     res.checkout, hours=False)
             res.nights = nights
 
-    @api.depends('reservation_lines', 'service_line_ids')
+    @api.depends('reservation_lines', 'discount_fixed', 'discount')
     def _computed_amount_reservation(self):
         _logger.info('_computed_amount_reservation')
         for res in self:
-            amount_reservation = amount_service = 0
+            amount_reservation = amount_service = amount_room = 0
             for line in res.reservation_lines:
-                amount_reservation += line.price
+                amount_room += line.price
             for service in res.service_line_ids:
-                amount_service += service.price_total
-            res.amount_reservation = amount_reservation + amount_service
+                # We must calc the line to can show the price in edit mode
+                # on smartbutton whithout having to wait to save.
+                total_line = service.price_unit * service.product_uom_qty
+                discount = (service.discount * total_line) / 100
+                amount_service += total_line - discount            
+            res.amount_room = amount_room #To view price_unit with read_only
+            if res.discount_type == 'fixed':
+                res.discount = (res.discount_fixed * 100) / amount_room
+            else:
+                res.discount_fixed = (res.discount * amount_room) / 100      
+            res.amount_discount = amount_room - res.discount_fixed
+            res.price_unit = res.amount_room
             res.amount_reservation_services = amount_service
-            res.price_unit = amount_reservation
+            res.amount_reservation = res.amount_discount + amount_service #To the smartbutton
 
     @api.multi
     def _compute_cardex_count(self):
@@ -555,6 +570,11 @@ class HotelReservation(models.Model):
                 ])
 
     @api.multi
+    def overbooking_button(self):
+        self.ensure_one()
+        return self.write({'overbooking': not self.overbooking})
+    
+    @api.multi
     def open_master(self):
         self.ensure_one()
         if not self.parent_reservation:
@@ -596,15 +616,11 @@ class HotelReservation(models.Model):
 
     @api.multi
     def open_reservation_form(self):
-        self.ensure_one()
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'hotel.reservation',
-            'views': [[False, "form"]],
-            'target': 'inline',
-            'res_id': self.id,
-        }
-
+        action = self.env.ref('hotel.open_hotel_reservation_form_tree_all').read()[0]        
+        action['views'] = [(self.env.ref('hotel.view_hotel_reservation_form').id, 'form')]
+        action['res_id'] = self.id
+        return action
+        
     @api.multi
     def unify(self):
         self.ensure_one()
@@ -761,9 +777,9 @@ class HotelReservation(models.Model):
 
     @api.multi
     def write(self, vals):
-        datesChanged = ('checkin' in vals or 'checkout' in vals)
-        if (datesChanged and 'reservation_lines' not in vals) or \
-                not self.reservation_lines: #To allow add bottom room on folio form
+        pricesChanged = ('checkin' in vals or 'checkout' in vals or 'discount' in vals)
+        if (pricesChanged and 'reservation_lines' not in vals) or \
+                not self.reservation_lines: #To allow add tree edit bottom room_lines on folio form
             for record in self:
                 checkin = vals.get('checkin', record.checkin)
                 checkout = vals.get('checkout', record.checkout)
@@ -777,12 +793,12 @@ class HotelReservation(models.Model):
         vals.update({
             'edit_room': False,
         })
-        if datesChanged or 'state' in vals or 'virtual_room_id' in vals:
+        if pricesChanged or 'state' in vals or 'virtual_room_id' in vals:
             vals.update({
             'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         })
         res = super(HotelReservation, self).write(vals)
-        if datesChanged:
+        if pricesChanged:
             for record in self:
                 if record.reservation_type in ('staff', 'out'):
                     record.update({'price_unit': 0})

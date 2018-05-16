@@ -81,7 +81,6 @@
         'data/email_template_reserv.xml',
         'data/email_template_exit.xml',
     ],
-    'qweb': ['static/src/xml/qweb.xml'],
     'css': ['static/src/css/room_kanban.css'],
     'auto_install': False,
     'installable': True

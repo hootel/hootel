@@ -162,7 +162,10 @@
                                     nolabel="1" context="{'room_lines':room_lines,'folio_id': id}">
                                     <tree string="Rooms"
                                           colors="red:state == 'cancelled'"
-                                          default_order="id" editable="bottom">                                        
+                                          default_order="id" editable="bottom"
+                                          options="{'no_open': True}">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="folio_id" invisible="1"/>
                                         <field name="state" />
                                         <button type="action" class="oe_stat_button"
                                             id="cardex_smart_button" icon="fa fa-1x fa-user-plus"
@@ -176,6 +179,11 @@
                                                options="{'no_create': True,'no_open': True}"
                                         />
                                         <field name="partner_id"/>
+                                        <field name="product_uom_qty"
+                                            string="Ordered Qty"
+                                            context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
+                                            invisible="1"
+                                        />
                                         <field name="virtual_room_id" string="Reserved Room Type"/>                   
                                         <field name="nights" />
                                         <field name="adults" string="Persons"/>                                        
@@ -184,15 +192,35 @@
                                         <field name="cardex_ids" invisible ="1"/>
                                         <field name="to_assign" invisible="1"/>
                                         <!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
-                                        <field name="cardex_pending" invisible="1"/>                    
-                                        <field name="price_unit" string="Reservation Price"/>
+                                        <field name="cardex_pending" invisible="1"/>
+                                        <field name="qty_delivered" invisible="1"
+                                            attrs="{'readonly': [('qty_delivered_updateable', '=', False)]}"/>
+                                        <field name="qty_invoiced"
+                                            invisible="1"/>
+                                        <field name="qty_to_invoice" invisible="1"/>
+                                        <field name="product_uom"
+                                            attrs="{'readonly': [('state', 'in', ('sale','done', 'cancel'))]}"
+                                            context="{'company_id': parent.company_id}"
+                                            groups="product.group_uom" options='{"no_open": True}'
+                                            invisible="1"/>
+                                        <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags" invisible="1"/>
+                                        <field name="tax_id" widget="many2many_tags" domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]"
+                                           invisible="1"/>                                                                            
+                                        <field name="qty_delivered_updateable" invisible="1"/>
+                                        <field name="procurement_ids" invisible="1"/>
+                                        <field name="state" invisible="1"/>
+                                        <field name="invoice_status" invisible="1"/>
+                                        <field name="customer_lead" invisible="1"/>
+                                        <field name="currency_id" invisible="1"/>
+                                        <field name="price_unit" invisible="0"/>
+                                        <field name="amount_room" string="Reservation Price" readonly="1"/>
                                         <field name="discount" groups="sale.group_discount_per_so_line"/>
-                                        <field name="price_total" string="Final Price"/>
+                                        <field name="amount_discount" string="Final Price"/>
+                                        <field name="price_subtotal" widget="monetary" invisible="1"/>
+                                        <field name="price_total" widget="monetary"/>
                                         <button type="object" class="oe_stat_button"
                                             id="go_reservation" icon="fa fa-2x fa-bars"
-                                            name="open_reservation_form"
-                                            context="{'search_default_id': id, 'view_mode': 'form'}"
-                                        />
+                                            name="open_reservation_form"/>
                                     </tree>
                                 </field>
                                 <separator string="Service Lines" colspan="4"/>

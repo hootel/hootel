@@ -155,6 +155,10 @@ class HotelFolio(models.Model):
                                            related='partner_id.comment')
     internal_comment = fields.Text(string='Internal Folio Notes')
     cancelled_reason = fields.Text('Cause of cancelled')
+    payment_ids = fields.One2many('account.payment', 'folio_id',
+                                    readonly=True)
+    return_ids = fields.One2many('payment.return', 'folio_id',
+                                    readonly=True)
     prepaid_warning_days = fields.Integer(
         'Prepaid Warning Days',
         help='Margin in days to create a notice if a payment \
@@ -169,7 +173,7 @@ class HotelFolio(models.Model):
         ('door', 'Door'),
         ('mail', 'Mail'),
         ('phone', 'Phone'),
-        ('web','Web'),], 'Sales Channel')
+        ('web','Web')], 'Sales Channel')
     num_invoices = fields.Integer(compute='_compute_num_invoices')
     rooms_char = fields.Char('Rooms', compute='_computed_rooms_char')
     segmentation_id = fields.Many2many('res.partner.category',
@@ -179,6 +183,14 @@ class HotelFolio(models.Model):
         for record in self:
             rooms = ', '.join(record.mapped('room_lines.product_id.name'))
             record.rooms_char = rooms
+
+    @api.model
+    def recompute_amount(self):
+        folios = self.env['hotel.folio']
+        if folios:
+            folios = folios.filtered(lambda x: (
+                x.name == folio_name))
+        folios.compute_invoices_amount()
 
     @api.multi
     def _compute_num_invoices(self):
@@ -210,7 +222,7 @@ class HotelFolio(models.Model):
             fol.write({'checkouts_reservations': count_checkout})
         return True
 
-    @api.depends('order_line.price_total')
+    @api.depends('order_line.price_total', 'payment_ids', 'return_ids')
     @api.multi
     def compute_invoices_amount(self):
         _logger.info('compute_invoices_amount')
@@ -224,15 +236,13 @@ class HotelFolio(models.Model):
             total_paid = sum(pay.amount for pay in payments)
             return_lines = self.env['payment.return.line'].search([('move_line_ids','in',payments.mapped('move_line_ids.id'))])
             total_inv_refund = sum(pay_return.amount for pay_return in return_lines)
-            for inv in record.invoice_ids:
-                if inv.type == 'out_refund' and inv.state != 'cancel':
-                    total_inv_refund += inv.amount_total
             vals = {
                 'invoices_amount': record.amount_total - total_paid + total_inv_refund,
-                'invoices_paid': total_paid - total_inv_refund,
+                'invoices_paid': total_paid,
                 'refund_amount': total_inv_refund,
             }
             record.update(vals)
+            record.room_lines._compute_color()
 
     @api.multi
     def action_pay(self):

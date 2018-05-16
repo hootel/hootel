@@ -71,6 +71,14 @@ class AccountPayment(models.Model):
     @api.multi
     def modify(self):
         self.cancel()
+        vals = {
+            'journal_id': self.journal_id,
+            'partner_id': self.partner_id,
+            'amount': self.amount,
+            'payment_date': self.payment_date,
+            'communication': self.communication,
+            'folio_id': self.folio_id}
+        self.update(vals)
         self.post()
 
     @api.multi
@@ -81,46 +89,17 @@ class AccountPayment(models.Model):
         for payment in self:
             amount_pending = 0
             total_amount = 0
-            if payment.invoice_ids and not payment.folio_id:
-############# It's necesary becouse invoice_ids in folio (sale_order) is compute (can't search)
-                folios = self.env['hotel.folio'].search([
-                    ('partner_id', '=', payment.partner_id.id)
-                ])
-                for rec in folios:
-                    for inv in rec.invoice_ids:
-                        if inv.id in payment.invoice_ids.ids:
-                            fol = self.env['hotel.folio'].search([
-                                ('id', '=', rec.id)
-                            ])
-#############                            
-            elif payment.folio_id:
+            if payment.folio_id:
                 fol = payment.env['hotel.folio'].search([
                     ('id', '=', payment.folio_id.id)
                 ])
             else:
                 return
-            # We must pay only one folio
             if len(fol) == 0:
                 return
             elif len(fol) > 1:
                 raise except_orm(_('Warning'), _('This pay is related with \
                                                 more than one Reservation.'))
             else:
-                payment.write({'folio_id': fol.id})
-                total_folio = fol.amount_total
-                payments = payment.env['account.payment'].search([
-                    '|', ('folio_id', '=', fol.id),
-                    ('invoice_ids', 'in', fol.invoice_ids.ids),
-                    ('payment_type', '=', 'inbound'),
-                    ('state', '=', 'posted')
-                ])
-                total_amount = sum(pay.amount for pay in payments)
-                if total_amount < total_folio:
-                    amount_pending = total_folio - total_amount
-                paid = total_folio - amount_pending
-                fol.write({'invoices_amount': amount_pending})
-                fol.write({'invoices_paid': paid})
-                payment.amount_total_folio = total_folio
-                fol.room_lines[0]._compute_color()
-                res += payment
+                fol.compute_invoices_amount()
             return res
