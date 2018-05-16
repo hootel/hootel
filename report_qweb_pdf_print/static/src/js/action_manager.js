@@ -20,8 +20,6 @@ odoo.define('report_qweb_pdf_print.report', function (require) {
       var self = this;
       action = _.clone(action);
 
-      console.log(action.report_type);
-
       if (action.report_type === 'qweb-pdf-print') {
         Session.rpc('/report/check_wkhtmltopdf').then(function (state) {
           if (state === 'upgrade' || state === 'ok') {
