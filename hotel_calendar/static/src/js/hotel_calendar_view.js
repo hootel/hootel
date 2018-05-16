@@ -255,38 +255,12 @@ var HotelCalendarView = View.extend({
         $widget.append("<div id='hcalendar'></div>"); // FIXME: Use 'hcal_widget'
 
         this._hcalendar = new HotelCalendar('#hcalendar', options, pricelist, restrictions, this.$el[0]);
-        this._hcalendar.addEventListener('hcalOnPricelistChanged', function(ev){
-          var qdict = {
-            'old_price': ev.detail.old_price,
-            'new_price': ev.detail.price
-          };
-          var hasChanged = false;
-          var price = ev.detail.price.replace(',', '.'); // FIXME: Found best method to replace comma separator
-          var dialog = new Dialog(self, {
-              title: _t("Confirm Price Change"),
-              buttons: [
-                  {
-                    text: _t("Yes, change it"),
-                    classes: 'btn-primary',
-                    close: true,
-                    click: function () {
-                      new Model('product.pricelist').call('update_price', [ev.detail.pricelist_id, ev.detail.vroom_id, ev.detail.date.format(ODOO_DATETIME_MOMENT_FORMAT), ev.detail.price]).fail(function(err, ev){
-                        self._hcalendar.updateVRoomPrice(ev.detail.pricelist_id, ev.detail.vroom_id, ev.detail.date, ev.detail.old_price);
-                      });
-                      hasChanged = true;
-                    }
-                  },
-                  {
-                    text: _t("No"),
-                    close: true
-                  }
-              ],
-              $content: QWeb.render('HotelCalendar.ConfirmPriceChange', qdict)
-          }).open();
-          dialog.$modal.on('hide.bs.modal', function(e){
-            if (!hasChanged) {
-              self._hcalendar.updateVRoomPrice(ev.detail.pricelist_id, ev.detail.vroom_id, ev.detail.date, ev.detail.old_price);
-            }
+        this._hcalendar.addEventListener('hcalOnSavePricelist', function(ev){
+          var pricelist = self._hcalendar.getPricelist();
+          var oparams = [false, self._hcalendar._pricelist_id, false, pricelist, {}, {}];
+          new Model('hotel.calendar.management').call('save_changes', oparams).then(function(results){
+              $(self._hcalendar.btnSaveChanges).removeClass('need-save');
+              $('.hcal-input-changed').removeClass('hcal-input-changed');
           });
         });
         this._hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){

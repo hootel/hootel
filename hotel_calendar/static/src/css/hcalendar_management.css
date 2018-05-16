@@ -76,6 +76,20 @@
 	background-color: #FCFEE1 !important;
 }
 
+.hcal-management-low > tbody > tr > td, .hcal-management-low > table > tbody > tr > td {
+	height: 35px !important;
+}
+
+.hcal-management-medium > tbody > tr > td, .hcal-management-medium > table > tbody > tr > td {
+	height: 60px !important;
+}
+
+.hcal-management-medium tr[name='rest_b'], .hcal-management-medium tr[name='rest_c'],
+	.hcal-management-low tr[name='rest_a'], .hcal-management-low tr[name='rest_b'], .hcal-management-low tr[name='rest_c'] {
+	display: none;
+	visibility: hidden;
+}
+
 .table-vrooms {
 	float: left;
 	margin-top: 1.6em;

@@ -50,10 +50,7 @@
 
 <t t-name="HotelCalendar.ConfirmPriceChange">
 	<div class="content">
-		<p>The following changes will be made...</p>
-		<span><strong>Current Price:</strong> <t t-esc="old_price" t-widget="monetary"/></span><br/>
-		<span><strong>New Price:</strong> <t t-esc="new_price" t-widget="monetary"/></span><br/>
-		<p>Are you sure you want to make this changes?</p>
+		<p>Are you sure you want to change these prices?</p>
 	</div>
 </t>
 

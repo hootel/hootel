@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template id="report_invoice_document" inherit_id="account.report_invoice_document">
+    <xpath expr="//div[@class='row']/div[@class='col-xs-4 pull-right']/table[@class='table table-condensed']" position="inside">
+        <tr class="border-black">
+            <td><strong>Balance Due</strong></td>
+            <td class="text-right">
+                <span t-field="o.balance_due" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+            </td>
+        </tr>
+        <tr class="border-black">
+            <td><strong>Payment Status</strong></td>
+            <td class="text-right">
+                <span t-field="o.state"/>
+            </td>
+        </tr>
+    </xpath>
+    <xpath expr="//div[@class='page']" position="inside">
+        <t t-set="paymentsJSON" t-value="json.loads(o.payments_widget)" />
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Payment Ref.</th>
+                        <th>Payment Date</th>
+                        <th>Payment Method</th>
+                        <th>Paid Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr t-foreach="paymentsJSON['content']" t-as="payment">
+                        <td t-esc="payment['ref']" />
+                        <td t-esc="payment['date']" />
+                        <td t-esc="payment['journal_name']" />
+                        <td t-esc="payment['amount']" />
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </xpath>
+</template>
+
+</odoo>
