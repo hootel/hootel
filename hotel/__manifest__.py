@@ -36,6 +36,7 @@
         'report',
         'account_payment_return',
         'cash_daily_report',
+        'report_qweb_pdf_preview',
     ],
     'license': "",
     'demo': ['data/hotel_data.xml'],

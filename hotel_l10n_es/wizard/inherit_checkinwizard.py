@@ -162,9 +162,7 @@ class Wizard(models.TransientModel):
         cardex = self.env['cardex'].search([('reservation_id', '=', record_id.id)]) - old_cardex
 
         action_report = self.pdf_viajero(cardex.id)
-        # FIXME: Hackish solution for close & print
-        # (https://www.odoo.com/es_ES/forum/ayuda-1/question/close-wizard-after-print-report-86786)
-        action_report['report_type'] = 'qweb-pdf-print'
+        action_report['report_type'] = 'qweb-pdf-preview'
         return action_report
 
     @api.onchange('partner_id')

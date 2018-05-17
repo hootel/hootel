@@ -19,7 +19,7 @@
   - [x] cash_daily_report: Export Odoo Payments & Payment Returns to xls format
   - [x] invoice_payments_report: Add payments info in invoices
   - [x] theme_chatter_right: Puts chatter to the right
-  - [ ] report_qweb_pdf_print: Adds new report_type to generate pdf and launch print process
+  - [x] report_qweb_pdf_preview: Adds new report_type to generate pdf and launch preview/print process
   - [ ] l10n_es_events_scraper: Gets info about relevant events in Spain
 
 **HOW WORKS?**

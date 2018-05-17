@@ -1,7 +1,7 @@
-REPORT QWEB PDF PRINT
+REPORT QWEB PDF PREVIEW
 =============
 
-Send to print qweb-pdf
+Preview pdf report
 
 
 Credits
