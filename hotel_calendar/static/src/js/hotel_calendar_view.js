@@ -640,10 +640,10 @@ var HotelCalendarView = View.extend({
         var self = this;
         var domain = [];
 
-        var HotelFolioObj = new Model('hotel.folio');
+        var HotelFolioObj = new Model('hotel.reservation');
 
          //~ // Checkouts Button
-        domain = [['checkouts_reservations', '>', 0]];
+        domain = [['is_checkout', '=', True]];
         HotelFolioObj.call('search_count', [domain]).then(function(count){
           var $ninfo = self.$el.find('#pms-menu #btn_action_checkout div.ninfo');
           var $badge_checkout = $ninfo.find('.badge');
@@ -657,7 +657,7 @@ var HotelCalendarView = View.extend({
         });
 
         // Checkins Button
-        domain = [['checkins_reservations', '>', 0]];
+        domain = [['is_checkin', '=', True]];
         HotelFolioObj.call('search_count', [domain]).then(function(count){
           var $ninfo = self.$el.find('#pms-menu #btn_action_checkin div.ninfo');
           var $badge_checkin = $ninfo.find('.badge');
