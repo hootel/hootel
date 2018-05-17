@@ -71,6 +71,7 @@ class AccountInvoice(models.Model):
 
 
     dif_customer_payment = fields.Boolean(compute='_compute_dif_customer_payment')
+    from_folio = fields.Boolean(compute='_compute_dif_customer_payment')
     sale_ids = fields.Many2many(
             'sale.order', 'sale_order_invoice_rel', 'invoice_id',
             'order_id', 'Sale Orders', readonly=True,
@@ -81,6 +82,8 @@ class AccountInvoice(models.Model):
         for inv in self:
             sales = inv.mapped('invoice_line_ids.sale_line_ids.order_id')
             folios = self.env['hotel.folio'].search([('order_id.id','in',sales.ids)])
+            if folios:
+                inv.from_folio = True
             payments_obj = self.env['account.payment']
             payments = payments_obj.search([('folio_id','in',folios.ids)])
             for pay in payments:

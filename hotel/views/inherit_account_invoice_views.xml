@@ -11,7 +11,11 @@
                              You have payments on the related folio associated with other customers than the current one on the invoice.
                              Make sure to <bold><button class="alert-link" type="object" name="action_folio_payments" string="modify the payment"/></bold> from the folio if necessary before paying this invoice
                         </div>
-                        <field name="dif_customer_payment" invisible="1"/>
+                        <field name="dif_customer_payment" invisible="1" />
+                        <field name="from_folio" invisible="1" />
+                    </xpath>
+                    <xpath expr="//button[2]" position="attributes">
+                         <attribute name="attrs">{'invisible': [('from_folio','=',True)]}</attribute>
                     </xpath>
                 </field>
         </record>

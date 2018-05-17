@@ -483,12 +483,12 @@ class HotelReservation(models.Model):
                             is_checkout = False where is_checkin = True or \
                             is_checkout = True")
         checkins_res = reservations.filtered(lambda x: (
-            x.state == 'confirm'
+            x.state in ('confirm','draft')
             and date_utils.date_compare(x.checkin, today_str, hours=False)
             and x.reservation_type == 'normal'))
         checkins_res.write({'is_checkin': True})
         checkouts_res = reservations.filtered(lambda x: (
-            x.state == 'booking'
+            x.state not in ('done','cancelled')
             and date_utils.date_compare(x.checkout, today_str,
                                         hours=False)
             and x.reservation_type == 'normal'))
@@ -778,18 +778,19 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         pricesChanged = ('checkin' in vals or 'checkout' in vals or 'discount' in vals)
-        if (pricesChanged and 'reservation_lines' not in vals) or \
-                not self.reservation_lines: #To allow add tree edit bottom room_lines on folio form
-            for record in self:
-                checkin = vals.get('checkin', record.checkin)
-                checkout = vals.get('checkout', record.checkout)
-                days_diff = date_utils.date_diff(checkin,
-                                                 checkout, hours=False)                                                 
-            rlines = self.prepare_reservation_lines(checkin, days_diff)
-            vals.update({
-                'reservation_lines': rlines['commands'],
-                'price_unit':  rlines['total_price'],
-            })
+        if len(self.env) == 1: #FIX, pass this to before of super with update instead of vals??¿
+            if (pricesChanged and 'reservation_lines' not in vals) or \
+                    not self.reservation_lines: #To allow add tree edit bottom room_lines on folio form
+                for record in self:
+                    checkin = vals.get('checkin', record.checkin)
+                    checkout = vals.get('checkout', record.checkout)
+                    days_diff = date_utils.date_diff(checkin,
+                                                     checkout, hours=False)                                                 
+                rlines = self.prepare_reservation_lines(checkin, days_diff)
+                vals.update({
+                    'reservation_lines': rlines['commands'],
+                    'price_unit':  rlines['total_price'],
+                })
         vals.update({
             'edit_room': False,
         })

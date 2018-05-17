@@ -60,6 +60,13 @@ class Wizard(models.TransientModel):
             for res in reservations:
                 return res.cardex_ids
 
+    def default_cardex_ids(self):
+        if ('reservation_ids' and 'folio') in self.env.context:
+            ids = [item[1] for item in self.env.context.get('reservation_ids')]
+            reservations = self.env['hotel.reservation'].browse(ids)
+            for res in reservations:
+                return res.segmentation_id
+
     ''' TODO: clean-up
     def default_count_cardex(self):
         if 'reservation_ids' and 'folio' in self.env.context:
@@ -164,7 +171,10 @@ class Wizard(models.TransientModel):
         record_id = self.env['hotel.reservation'].browse(
             self.reservation_id.id)
         # save the cardex for this reservation
-        record_id.write({'cardex_ids': [(0, False, cardex_val)]})
+        record_id.write({
+            'cardex_ids': [(0, False, cardex_val)],
+            'segmentation_id': self.segmentation_id,
+        })
 
         # update the state of the current reservation
         if record_id.cardex_count > 0:
