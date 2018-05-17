@@ -86,6 +86,8 @@ class HotelReservation(models.Model):
 
     @api.model
     def create(self, vals):
+        if vals.get('wrid') != '':
+            vals.update({'preconfirm': False})
         res = super(HotelReservation, self).create(vals)
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():

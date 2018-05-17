@@ -1228,7 +1228,7 @@ class WuBook(models.AbstractModel):
             'wstatus': wstatus,
             'to_read': True,
             'state': is_cancellation and
-            'cancelled' or 'confirm',
+            'cancelled' or 'draft',
             'virtual_room_id': vroom.id,
             'splitted': split_booking,
         }

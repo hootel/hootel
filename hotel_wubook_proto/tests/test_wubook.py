@@ -65,7 +65,7 @@ class TestWubook(TestHotelWubook):
             ('wrid', 'in', processed_rids)
         ], order='id ASC')
         self.assertTrue(nreserv, "Reservation not found")
-        self.assertEqual(nreserv.state, 'confirm', "Invalid reservation state")
+        self.assertEqual(nreserv.state, 'draft', "Invalid reservation state")
         nfolio = self.env['hotel.folio'].search([
             ('id', '=', nreserv.folio_id.id)
         ], limit=1)
@@ -124,7 +124,7 @@ class TestWubook(TestHotelWubook):
 
         for nreserv in nreservs:
             # Check State
-            self.assertEqual(nreserv.state, 'confirm',
+            self.assertEqual(nreserv.state, 'draft',
                              "Invalid reservation state")
 
             # Check Dates
@@ -410,7 +410,7 @@ class TestWubook(TestHotelWubook):
         ], order='id ASC')
 
         self.assertEqual(nreservs[0].state,
-                         'confirm',
+                         'draft',
                          "Overbooking don't handled")
         self.assertTrue(nreservs[1].overbooking,
                         "Overbooking don't handled")
