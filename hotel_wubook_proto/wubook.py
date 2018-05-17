@@ -372,7 +372,7 @@ class WuBook(models.AbstractModel):
         now = now_dt.strftime(DEFAULT_WUBOOK_DATE_FORMAT)
         dfrom_dt = date_utils.get_datetime(dfrom,
                                            dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
-        dto_dt = date_uitls.get_datetime(dto,
+        dto_dt = date_utils.get_datetime(dto,
                                          dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
         if dfrom_dt > dto_dt:
             dtemp = dfrom
