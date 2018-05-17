@@ -55,7 +55,7 @@ odoo.define('report_qweb_pdf_preview.report', function (require) {
             ];
 
             self.ir_actions_act_window_close(action, options);
-            self._open_viewer(encodeURIComponent(`/report/download?token=123&data=${encodeURIComponent(JSON.stringify(response))}`));
+            self._open_viewer(encodeURIComponent(`/report/download?token=123&data=${JSON.stringify(response)}`));
           } else {
             this._super(action, options);
           }
