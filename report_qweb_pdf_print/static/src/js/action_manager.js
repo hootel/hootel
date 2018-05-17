@@ -8,11 +8,40 @@ odoo.define('report_qweb_pdf_print.report', function (require) {
    */
 
   var ActionManager = require('web.ActionManager');
+  var Dialog = require('web.Dialog');
   var Core = require('web.core');
   var Session = require('web.session');
 
   var _t = Core._t;
   var QWeb = Core.qweb;
+
+  var make_report_url = function (action) {
+      var report_urls = {
+          'qweb-html': '/report/html/' + action.report_name,
+          'qweb-pdf': '/report/pdf/' + action.report_name,
+          'controller': action.report_file,
+      };
+      // We may have to build a query string with `action.data`. It's the place
+      // were report's using a wizard to customize the output traditionally put
+      // their options.
+      if (_.isUndefined(action.data) || _.isNull(action.data) || (_.isObject(action.data) && _.isEmpty(action.data))) {
+          if (action.context.active_ids) {
+              var active_ids_path = '/' + action.context.active_ids.join(',');
+              // Update the report's type - report's url mapping.
+              report_urls = _.mapObject(report_urls, function (value, key) {
+                  return value += active_ids_path;
+              });
+          }
+      } else {
+          var serialized_options_path = '?options=' + encodeURIComponent(JSON.stringify(action.data));
+          serialized_options_path += '&context=' + encodeURIComponent(JSON.stringify(action.context));
+          // Update the report's type - report's url mapping.
+          report_urls = _.mapObject(report_urls, function (value, key) {
+              return value += serialized_options_path;
+          });
+      }
+      return report_urls;
+  };
 
   ActionManager.include({
 
@@ -21,35 +50,38 @@ odoo.define('report_qweb_pdf_print.report', function (require) {
       action = _.clone(action);
 
       if (action.report_type === 'qweb-pdf-print') {
+        var report_urls = make_report_url(action);
         Session.rpc('/report/check_wkhtmltopdf').then(function (state) {
           if (state === 'upgrade' || state === 'ok') {
-            // Trigger the download of the PDF report.
             var response = [
-              '/report/pdf/' + action.report_name,
+              report_urls['qweb-pdf'],
               'qweb-pdf'
             ];
 
-            console.log(JSON.stringify(response));
             self.ir_actions_act_window_close(action, options);
-
-            // session.get_file({
-            //       url: '/report/download',
-            //       data: {data: JSON.stringify(response)},
-            //       complete: framework.unblockUI,
-            //       error: c.rpc_error.bind(c),
-            //       success: function () {
-            //           if (action && options && !action.dialog) {
-            //               options.on_close();
-            //           }
-            //       },
-            //   });
-            return window.location.href = '/report_qweb_pdf_print/static/src/lib/viewerjs-0.5.8/index.html#';
+            self._open_viewer(encodeURIComponent(`/report/download?token=123&data=${encodeURIComponent(JSON.stringify(response))}`));
         } else {
           this._super(action, options);
         }
       });
     }
+  },
+
+  _open_viewer: function(url) {
+    var qdict = { filepath: url };
+    var dialog = new Dialog(this, {
+        title: _t("PDF Viewer"),
+        buttons: [
+          {
+            text: _t("Close"),
+            classes: 'btn-primary',
+            close: true,
+          }
+        ],
+        $content: QWeb.render('report_qweb_pdf_print.ViewerDialog', qdict)
+    }).open();
   }
+
 });
 
 });

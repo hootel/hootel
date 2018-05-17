@@ -685,7 +685,7 @@ var HotelCalendarView = View.extend({
        //~ });
 
         // OverBookings
-        domain = [['overbooking', '=', true]];
+        domain = [['overbooking', '=', true], ['state', 'not in', ['cancelled']]];
         this._model.call('search_count', [domain]).then(function(count){
           var $ninfo = self.$el.find('#pms-menu #btn_swap div.ninfo');
           var $badge_swap = $ninfo.find('.badge');

@@ -32,7 +32,9 @@
     'data': [
         'views/general.xml',
     ],
-    'qweb': [],
+    'qweb': [
+        'static/src/xml/*.xml',
+    ],
     'test': [
     ],
 

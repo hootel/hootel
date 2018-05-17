@@ -1,0 +1,8 @@
+<template>
+
+<t t-name="report_qweb_pdf_print.ViewerDialog">
+  <t t-set="file_url" t-value="'/report_qweb_pdf_print/static/src/lib/pdfjs/web/viewer.html?file=' + filepath" />
+  <iframe class="o_viewer_js" width="100%" height="100%" t-att-src='file_url' allowfullscreen="allowfullscreen" webkitallowfullscreen="webkitallowfullscreen"></iframe>
+</t>
+
+</template>
