@@ -622,11 +622,6 @@ function attachDOMEventsToEventBus(eventBus) {
     var event = document.createEvent('CustomEvent');
     event.initCustomEvent('pagesloaded', true, true, { pagesCount: evt.pagesCount });
     evt.source.container.dispatchEvent(event);
-
-    // FIXME: Workarround for auto-print feature
-    if (evt.source.linkService.autoPrint) {
-      eventBus.dispatch('print');
-    }
   });
   eventBus.on('scalechange', function (evt) {
     var event = document.createEvent('UIEvents');
@@ -2755,7 +2750,7 @@ var PDFLinkService = function () {
         }
 
         // FIXME: Workarround for auto-print feature
-        this.autoPrint = ('autoprint' in params);
+        this.autoPrint = ('autoprint' in params && params.autoprint !== 0);
       } else {
         if (/^\d+$/.test(hash) && hash <= this.pagesCount) {
           console.warn('PDFLinkService_setHash: specifying a page number ' + 'directly after the hash symbol (#) is deprecated, ' + ('please use the "#page=' + hash + '" form instead.'));
@@ -8299,6 +8294,11 @@ var PDFViewer = function () {
           source: _this,
           pagesCount: pagesCount
         });
+
+        // FIXME: Workarround for auto-print feature
+        if (_this.linkService.autoPrint) {
+          _this.eventBus.dispatch('print');
+        }
       });
       var isOnePageRenderedResolved = false;
       var onePageRenderedCapability = (0, _pdfjsLib.createPromiseCapability)();
