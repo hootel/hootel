@@ -20,13 +20,13 @@
 ##############################################################################
 
 {
-    'name': 'Report Type qweb-pdf-preview',
+    'name': 'PDF Preview & Print',
     'version': '1.0',
     'author': "Alexandre Díaz <dev@redneboa.es>",
     'website': '',
     'category': 'reports',
-    'summary': "Preview qweb-pdf reports",
-    'description': "Report Type qweb-pdf-preview",
+    'summary': "Preview pdf report & launch print process",
+    'description': "Preview pdf report & launch print process",
     'depends': [
     ],
     'data': [

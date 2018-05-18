@@ -162,7 +162,7 @@ class Wizard(models.TransientModel):
         cardex = self.env['cardex'].search([('reservation_id', '=', record_id.id)]) - old_cardex
 
         action_report = self.pdf_viajero(cardex.id)
-        action_report['report_type'] = 'qweb-pdf-preview'
+        action_report['report_type'] = 'qweb-pdf-preview-print'
         return action_report
 
     @api.onchange('partner_id')

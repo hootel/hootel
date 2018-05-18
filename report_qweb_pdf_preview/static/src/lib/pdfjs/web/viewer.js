@@ -622,6 +622,11 @@ function attachDOMEventsToEventBus(eventBus) {
     var event = document.createEvent('CustomEvent');
     event.initCustomEvent('pagesloaded', true, true, { pagesCount: evt.pagesCount });
     evt.source.container.dispatchEvent(event);
+
+    // FIXME: Workarround for auto-print feature
+    if (evt.source.linkService.autoPrint) {
+      eventBus.dispatch('print');
+    }
   });
   eventBus.on('scalechange', function (evt) {
     var event = document.createEvent('UIEvents');
@@ -2693,6 +2698,7 @@ var PDFLinkService = function () {
           dest = void 0;
       if (hash.indexOf('=') >= 0) {
         var params = (0, _ui_utils.parseQueryString)(hash);
+
         if ('search' in params) {
           this.eventBus.dispatch('findfromurlhash', {
             source: this,
@@ -2747,6 +2753,9 @@ var PDFLinkService = function () {
             mode: params.pagemode
           });
         }
+
+        // FIXME: Workarround for auto-print feature
+        this.autoPrint = ('autoprint' in params);
       } else {
         if (/^\d+$/.test(hash) && hash <= this.pagesCount) {
           console.warn('PDFLinkService_setHash: specifying a page number ' + 'directly after the hash symbol (#) is deprecated, ' + ('please use the "#page=' + hash + '" form instead.'));
