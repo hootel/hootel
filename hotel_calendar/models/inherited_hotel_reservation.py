@@ -353,7 +353,7 @@ class HotelReservation(models.Model):
                 vals.get('state') or vals.get('splitted') or \
                 vals.get('reserve_color') or \
                 vals.get('reserve_color_text') or vals.get('product_id') or \
-                vals.get('parent_reservation'):
+                vals.get('parent_reservation') or vals.get('overbooking'):
             for record in self:
                 record.send_bus_notification(
                     'write',
