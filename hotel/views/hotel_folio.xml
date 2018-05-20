@@ -152,9 +152,9 @@
                                 <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancel'))]}"/>
                                 <field name="partner_internal_comment"/>                            
                             </group>
-                            <group>
-                                <field name="internal_comment"/>
-                            </group>
+                        </group>
+                        <group>
+                            <field name="note" />
                         </group>
                         <notebook colspan="4" col="1">
                             <page string="Lines">
@@ -285,7 +285,10 @@
                                     <field name="amount_total" nolabel="1" sum="Total amount"
                                         widget='monetary' />
                                 </group>
-                                <div class="oe_clear" />
+                                <div class="oe_clear" />                                
+                                <group>
+                                    <field name="internal_comment"/>
+                                </group>
                             </page>
                             <page string="Other data" invisible="1">
                                 <group>

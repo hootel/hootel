@@ -183,8 +183,8 @@
                              <span class="fa fa-user" style="margin-left:20px;"/>
                         </h1>
                         <h3>
-                            From <span class="fa fa-sign-in" style="margin: 5px;"/><field name="checkin" widget="date" style="margin-right: 10px;"/> to                          
-                            <span class="fa fa-sign-out" style="margin-right: 5px;"/><field name="checkout" widget="date"/>
+                            From <span class="fa fa-sign-in" style="margin: 5px;"/><field name="checkin" style="margin-right: 10px;"/> to                          
+                            <span class="fa fa-sign-out" style="margin-right: 5px;"/><field name="checkout" />
                         </h3>                                                                                                   
                         <group col="12">                                                                                     
                             <group colspan="5" string="General Info" name="contact_details" >
