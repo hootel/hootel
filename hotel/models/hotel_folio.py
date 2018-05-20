@@ -366,12 +366,14 @@ class HotelFolio(models.Model):
             pending = False
             if fol.reservation_type == 'normal':
                 for reser in fol.room_lines:
-                    if reser.state != 'cancelled':
+                    if reser.state != 'cancelled' and \
+                            not reser.parent_reservation:
                         num_cardex += len(reser.cardex_ids)
                 fol.cardex_count = num_cardex
                 pending = 0
                 for reser in fol.room_lines:
-                    if reser.state != 'cancelled':
+                    if reser.state != 'cancelled' and \
+                            not reser.parent_reservation:
                         pending += (reser.adults + reser.children) \
                                           - len(reser.cardex_ids)
                 if pending <= 0:
@@ -535,6 +537,13 @@ class HotelFolio(models.Model):
                       }
             line.write(values)
         return invoice_id
+
+    @api.multi
+    def advance_invoice(self):
+        order_ids = [folio.order_id.id for folio in self]
+        sale_obj = self.env['sale.order'].browse(order_ids)
+        invoices = action_invoice_create(self, grouped=True)
+        return invoices              
 
     @api.multi
     def action_invoice_cancel(self):

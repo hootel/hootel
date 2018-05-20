@@ -18,7 +18,8 @@
                         </group>                        
 					</group>
                     <group>
-                        <field name="virtual_room_wizard_ids" nolabel="1">
+                        <field name="virtual_room_wizard_ids" nolabel="1"
+                                attrs="{'invisible': [('autoassign','=',False)]}">
                             <tree editable="bottom" create="false" delete="false"
                             decoration-danger="max_rooms &lt; rooms_num"
                             decoration-muted="max_rooms == 0"
@@ -34,17 +35,15 @@
                             </tree>
                         </field>                        
                     </group>
+                    <label for="autoassign"/>
+                    <label for="confirm" invisible="1"/>
+                    <field name="confirm"/>
                     <group colspan="2" class="oe_subtotal_footer">
-                        <field name="total"/>
-                        <field name="confirm"/>
-<!--
-                        <field name="assign" invisible="1"/>
--->
-                    </group>
-                    
+                        <field name="total"/>                        
+                    </group>                    
 					<group>
 						<field name="reservation_wizard_ids" colspan="4" string="Room Lines"
-							nolabel="1" >
+							nolabel="1" attrs="{'invisible': [('autoassign','=',True)]}">
 							<tree string="Room Line" delete="false" editable="buttom">
 								<field name="product_id" string="Room No" options="{'no_create': True}"/>                                
 								<field name="virtual_room_id" options="{'no_create': True}" />
@@ -60,11 +59,9 @@
 							</tree>
 						</field>						
 					</group>
-                    <footer>
+                    <footer>                                      
                         <button name="create_folio" string="Create Reservations" type="object"
 							class="oe_highlight" />
-                        <button name="create_folio" string="Assign Rooms" type="object"
-							class="oe_highlight" />                       
                     </footer> 
 				</sheet>
 			</form>

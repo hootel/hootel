@@ -168,7 +168,7 @@ class GlassofExporterWizard(models.TransientModel):
 
         nrow = 0
         for inv in account_invs:
-            worksheet.write(nrow, 0, inv.name)
+            worksheet.write(nrow, 0, inv.number)
             worksheet.write(nrow, 1, inv.date_invoice, xls_cell_format_date)
             worksheet.write(nrow, 2, '')
             worksheet.write(nrow, 3, inv.partner_id.vat and
@@ -223,9 +223,10 @@ class GlassofExporterWizard(models.TransientModel):
             worksheet.write(nrow, 40, '')
             worksheet.write(nrow, 41, '')
             worksheet.write(nrow, 42, '')
-            worksheet.write(nrow, 43, '')
+            worksheet.write(nrow, 43, '430')
             nrow += 1
 
+        workbook.add_worksheet('compras')
         workbook.close()
         file_data.seek(0)
         tnow = fields.Datetime.now().replace(' ', '_')

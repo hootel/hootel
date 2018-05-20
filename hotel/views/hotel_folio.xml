@@ -132,12 +132,12 @@
                             <field name="date_order" />
 							<field name="mobile" placeholder="mobile"/>
                             <field name="phone" />
+                            <field name="partner_invoice_id" domain="[('parent_id','=',partner_id)]"/>
                             <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                             <field name="reservation_type" attrs="{'readonly':[('state','not in',('draft'))]}"/>
                             <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>
                             <field name="segmentation_id" widget="many2many_tags" placeholder="Segmentation..."
-                                options="{'no_create': True,'no_open': True}" />
-                            <field name="partner_invoice_id" domain="[('parent_id','=',partner_id)]" invisible="1"/>
+                                options="{'no_create': True,'no_open': True}" />                            
                             <field name="pricelist_id" domain="[('type','=','sale')]" invisible="1"/>
                             <field name="project_id" invisible="1"/>
                             <field name="partner_shipping_id" invisible="1" domain="[('parent_id','=',partner_id)]" />
@@ -318,14 +318,15 @@
             <field name="arch" type="xml">
                 <tree string="Hotel Folio" decoration-info="state == 'draft'"
                         decoration-muted="state == 'cancel'"
-                        decoration-danger="invoices_amount &gt; 0" limit="80">
+                        decoration-danger="invoices_amount &gt; 0 and state == 'done'" limit="80">
+                    <field name="state" />
                     <field name="name" />
                     <field name="partner_id" select="1" />
                     <field name="date_order" select="1" />
-                    <field name="rooms_char"/>
+                    <field name="rooms_char" string="Rooms"/>
                     <field name="amount_total" sum="Total amount" />
                     <field name="invoices_amount" string="Pending Pay"/>
-                    <field name="state" invisible="1" />
+                    <field name="invoice_status"/>                    
                 </tree>
             </field>
         </record>
@@ -440,6 +441,15 @@
                 </graph>
             </field>
         </record>
+
+        <!-- Add create invoice merge folio -->
+        
+        <act_window id="action_view_folio_advance_payment_inv"
+            name="Invoice Folio"
+            src_model="hotel.folio"
+            res_model="sale.advance.payment.inv"
+            key2="client_action_multi" target="new"
+            view_mode="form" multi="True"/>
 
         <!-- Action for hotel folio -->
         <record model="ir.actions.act_window" id="open_hotel_folio1_form_tree_all">

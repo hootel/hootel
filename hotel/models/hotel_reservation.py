@@ -382,7 +382,7 @@ class HotelReservation(models.Model):
                 nights = days_diff = date_utils.date_diff(
                     res.checkin,
                     res.checkout, hours=False)
-            res.nights = nights
+                res.nights = nights
 
     @api.depends('reservation_lines', 'discount_fixed', 'discount')
     def _computed_amount_reservation(self):
@@ -435,7 +435,7 @@ class HotelReservation(models.Model):
     def action_pay_reservation(self):
         self.ensure_one()
         partner = self.partner_id.id
-        amount = self.amount_reservation
+        amount = min(self.amount_reservation, self.folio_pending_amount)
         view_id = self.env.ref('hotel.view_account_payment_folio_form').id
         return{
             'name': _('Register Payment'),
@@ -446,6 +446,7 @@ class HotelReservation(models.Model):
             'view_id': view_id,
             'context': {
                 'default_folio_id': self.folio_id.id,
+                'default_room_id': self.id,
                 'default_amount': amount,
                 'default_payment_type': 'inbound',
                 'default_partner_type': 'customer',
@@ -599,22 +600,6 @@ class HotelReservation(models.Model):
         return action
 
     @api.multi
-    def add_room(self):
-        action = self.env.ref('hotel.open_hotel_reservation_form_tree_all').read()[0]
-        if self.folio_id:
-            context = {
-                'default_partner_id': self.partner_id.id,
-                'default_checkin': self.checkin,
-                'default_checout': self.checkout,
-                'default_folio_id': self.folio_id.id,
-            }
-            action['views'] = [(self.env.ref('hotel.view_hotel_reservation_form').id, 'form')]
-            action['context'] = context
-        else:
-            action = {'type': 'ir.actions.act_window_close'}
-        return action
-
-    @api.multi
     def open_reservation_form(self):
         action = self.env.ref('hotel.open_hotel_reservation_form_tree_all').read()[0]        
         action['views'] = [(self.env.ref('hotel.view_hotel_reservation_form').id, 'form')]
@@ -731,6 +716,9 @@ class HotelReservation(models.Model):
                          'folio_id': folio.id,
                          'reservation_type': vals.get('reservation_type'),
                          'channel_type': vals.get('channel_type')})
+        vals.update({
+            'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        })
         if folio:
             record = super(HotelReservation, self).create(vals)
             # Check Capacity
@@ -743,7 +731,6 @@ class HotelReservation(models.Model):
                     _("Reservation persons can't be higher than room capacity"))
             if record.adults == 0:
                 raise ValidationError(_("Reservation has no adults"))
-
             if (record.state == 'draft' and record.folio_id.state == 'sale') or \
                     record.preconfirm == True:
                 record.confirm()
@@ -790,10 +777,9 @@ class HotelReservation(models.Model):
             for record in self:
                 if record.reservation_type in ('staff', 'out'):
                     record.update({'price_unit': 0})
-                record.folio_id.compute_invoices_amount()
-       
+                record.folio_id.compute_invoices_amount()       
         for record in self:
-            if (pricesChanged and 'reservation_lines' not in vals) or \
+            if (pricesChanged and 'reservation_lines' not in vals) and \
                     not record.reservation_lines: #To allow add tree edit bottom room_lines on folio form
                 checkin = vals.get('checkin', record.checkin)
                 checkout = vals.get('checkout', record.checkout)
@@ -1174,7 +1160,7 @@ class HotelReservation(models.Model):
         checkin_utc_dt = date_utils.get_datetime(str_checkin_utc)
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt, tz_hotel)
         days_diff = date_utils.date_diff(str_checkin_utc, str_checkout_utc,
-                                         hours=False) + 1
+                                         hours=False)
         dates_list = date_utils.generate_dates_list(checkin_dt, days_diff,
                                                     stz=tz_hotel)
         reservations = self.env['hotel.reservation'].search([

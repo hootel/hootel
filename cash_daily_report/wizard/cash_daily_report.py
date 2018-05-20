@@ -19,17 +19,29 @@
 #
 ##############################################################################
 from odoo import api, fields, models, _
+from openerp.exceptions import except_orm, UserError, ValidationError
 from cStringIO import StringIO
+import datetime
+from datetime import datetime, date, time 
 import xlsxwriter
 import base64
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 
 
 class CashDailyReportWizard(models.TransientModel):
     FILENAME = 'cash_daily_report.xls'
     _name = 'cash.daily.report.wizard'
 
-    date_start = fields.Date("Start Date")
-    date_end = fields.Date("End Date")
+    @api.model
+    def _get_default_date_start(self):
+        return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+
+    @api.model
+    def _get_default_date_end(self):
+        return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
+
+    date_start = fields.Date("Start Date", default=_get_default_date_start)
+    date_end = fields.Date("End Date", default=_get_default_date_end)
     xls_filename = fields.Char()
     xls_binary = fields.Binary()
 
@@ -63,7 +75,7 @@ class CashDailyReportWizard(models.TransientModel):
             'bg_color': '#CCCCCC'
         })
 
-        worksheet = workbook.add_worksheet('Cash Daily Report')
+        worksheet = workbook.add_worksheet(_('Cash Daily Report'))
 
         worksheet.write('A1', _('Name'), xls_cell_format_header)
         worksheet.write('B1', _('Reference'), xls_cell_format_header)
@@ -99,7 +111,7 @@ class CashDailyReportWizard(models.TransientModel):
             ('date', '<=', self.date_end),
         ])
         offset += len(account_payments)
-        total_payment_returns_amount = 0.0
+        total_payment_returns_amount = k_line = 0.0
         for k_payment, v_payment in enumerate(payment_returns):
             for k_line, v_line in enumerate(v_payment.line_ids):
                 worksheet.write(k_line+offset, 0, v_payment.name)
@@ -112,18 +124,25 @@ class CashDailyReportWizard(models.TransientModel):
                                 xls_cell_format_money)
                 total_payment_returns_amount += v_line.amount
             offset += len(v_payment.line_ids)
-        offset += 1
-        worksheet.write(k_line+offset, 4, 'TOTAL PAYMENTS')
-        worksheet.write(k_line+offset, 5, total_account_payment_amount,
-                        xls_cell_format_money)
-        offset += 1
-        worksheet.write(k_line+offset, 4, 'TOTAL PAYMENT RETURNS')
-        worksheet.write(k_line+offset, 5, -total_payment_returns_amount,
-                        xls_cell_format_money)
-        offset += 1
-        worksheet.write(k_line+offset, 4, 'TOTAL')
+        if total_account_payment_amount == 0 and total_payment_returns_amount == 0:
+            raise UserError(_('Not Any Payments'))
+        line = offset
+        if k_line:
+            line = k_line + offset
+        if total_account_payment_amount > 0:
+            line += 1
+            worksheet.write(line, 4, _('TOTAL PAYMENTS'))
+            worksheet.write(line, 5, total_account_payment_amount,
+                            xls_cell_format_money)
+        if total_payment_returns_amount > 0:
+            line += 1
+            worksheet.write(line, 4, _('TOTAL PAYMENT RETURNS'))
+            worksheet.write(line, 5, -total_payment_returns_amount,
+                            xls_cell_format_money)
+        line += 1
+        worksheet.write(line, 4, _('TOTAL'))
         worksheet.write(
-            k_line+offset,
+            line,
             5,
             total_account_payment_amount - total_payment_returns_amount,
             xls_cell_format_money)

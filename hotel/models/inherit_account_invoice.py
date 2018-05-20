@@ -56,26 +56,14 @@ class AccountInvoice(models.Model):
             'domain': [('id', 'in', payment_ids)],
         }
         
-    # ~ @api.one
-    # ~ @api.depends(
-    #     ~ 'amount_total',
-    #     ~ 'invoice_line_ids.price_subtotal',
-    #     ~ 'move_id.line_ids.amount_residual',
-    #     ~ 'move_id.line_ids.currency_id')
-    # ~ def change_sale_amount(self):
-    #     ~ _logger.info("DEPENDDDSSSSS")
-    #     ~ for inv in self:
-    #         ~ folios = self.env['hotel.folio'].search([('id','in',sale_ids)])
-    #         ~ _logger.info("FOLIOS CAMBIADOS DESDE LA FACTURA:")
-    #         ~ _logger.info(folios)
-
-
     dif_customer_payment = fields.Boolean(compute='_compute_dif_customer_payment')
     from_folio = fields.Boolean(compute='_compute_dif_customer_payment')
     sale_ids = fields.Many2many(
             'sale.order', 'sale_order_invoice_rel', 'invoice_id',
             'order_id', 'Sale Orders', readonly=True,
             help="This is the list of sale orders related to this invoice.")
+    folio_ids = fields.Many2many(
+            comodel_name='hotel.folio', compute='_compute_dif_customer_payment')
 
     @api.multi
     def _compute_dif_customer_payment(self):
@@ -84,6 +72,7 @@ class AccountInvoice(models.Model):
             folios = self.env['hotel.folio'].search([('order_id.id','in',sales.ids)])
             if folios:
                 inv.from_folio = True
+                inv.folio_ids = [(6, 0, folios.ids)]
             payments_obj = self.env['account.payment']
             payments = payments_obj.search([('folio_id','in',folios.ids)])
             for pay in payments:

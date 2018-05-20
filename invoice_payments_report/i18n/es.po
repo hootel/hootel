@@ -1,0 +1,58 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* invoice_payments_report
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 10.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-05-20 07:38+0000\n"
+"PO-Revision-Date: 2018-05-20 09:40+0200\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: es\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#. module: invoice_payments_report
+#: model:ir.ui.view,arch_db:invoice_payments_report.report_invoice_document
+msgid "<strong>Balance Due</strong>"
+msgstr "<strong>Saldo Adeudado</strong>"
+
+#. module: invoice_payments_report
+#: model:ir.ui.view,arch_db:invoice_payments_report.report_invoice_document
+msgid "<strong>Payment Status</strong>"
+msgstr "<strong>Estado del Pago</strong>"
+
+#. module: invoice_payments_report
+#: model:ir.model.fields,field_description:invoice_payments_report.field_account_invoice_balance_due
+msgid "Balance Due"
+msgstr "Saldo Adeudado"
+
+#. module: invoice_payments_report
+#: model:ir.model,name:invoice_payments_report.model_account_invoice
+msgid "Invoice"
+msgstr "Factura"
+
+#. module: invoice_payments_report
+#: model:ir.ui.view,arch_db:invoice_payments_report.report_invoice_document
+msgid "Paid Amount"
+msgstr "Cantidad Pagada"
+
+#. module: invoice_payments_report
+#: model:ir.ui.view,arch_db:invoice_payments_report.report_invoice_document
+msgid "Payment Date"
+msgstr "Fecha Pago"
+
+#. module: invoice_payments_report
+#: model:ir.ui.view,arch_db:invoice_payments_report.report_invoice_document
+msgid "Payment Method"
+msgstr "Método de pago"
+
+#. module: invoice_payments_report
+#: model:ir.ui.view,arch_db:invoice_payments_report.report_invoice_document
+msgid "Payment Ref."
+msgstr "Ref. Pago"

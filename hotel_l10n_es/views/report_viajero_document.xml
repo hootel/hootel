@@ -10,7 +10,10 @@
                             <img src='/hotel_l10n_es/static/src/img/logo_alda_bn.png'
                             style="width:100%; max-heigth:50px; margin:0 0 1em 0;"/>
                             <p style="font-size:1.16em;">PART OF TRAVELERS ENTRY</p>
-                            <p class="numerocheck">Document number: <strong><span t-field="o.id"/></strong>/<span t-field="o.reservation_id"/></p>
+                            <p class="numerocheck">Document number: <strong><span t-field="o.id"/></strong>/
+                            <span t-if="o.reservation_id.product_id.description_sale"><span t-field="o.reservation_id.folio_id"/> ( <span t-field="o.reservation_id.product_id.description_sale"/>)</span>
+                            <span t-if="not o.reservation_id.product_id.description_sale"><span t-field="o.reservation_id"/></span>
+                            </p>
                             <p style="font-size:0.65em;"> Total amount (Reservation Card): <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong></p>
                             <p><strong>CIF: <span t-field="company.vat"/></strong><br/>
                             <strong><span t-field="company.display_name"/></strong><br/>

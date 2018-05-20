@@ -47,8 +47,10 @@
                     <field name="room_amenities" colspan="4" nolabel="1" />
                   </page>
                   <page string="Descriptions">
-                    <separator string="Description" />
-                    <field name="description" colspan="4" nolabel="1" />
+                    <group>
+                        <field name="description_sale" colspan="2" string="Name in reports"/>
+                        <field name="description" colspan="2" string="Description Sales"/>
+                    </group>
                   </page>
                 </notebook>
                 <group>

@@ -43,3 +43,5 @@ access_hotel_restrictions_item_manager,hotel.restriction.item.manager,hotel.mode
 access_hotel_restrictions_item_user,hotel.restriction.item.user,hotel.model_hotel_virtual_room_restriction_item,hotel.group_hotel_user,1,1,1,1
 access_hotel_virtual_room_availability_manager,hotel.availability.manager,hotel.model_hotel_virtual_room_availability,hotel.group_hotel_manager,1,1,1,1
 access_hotel_virtual_room_availability_user,hotel.availability.user,hotel.model_hotel_virtual_room_availability,hotel.group_hotel_user,1,1,1,1
+access_hotel_user reconcilie,hotel.user reconcilie,account.model_account_partial_reconcile,hotel.group_hotel_user,1,1,1,1
+access_hotel_user_account_full_reconcilie,hotel.user_account_full_reconcilie,account.model_account_full_reconcile,hotel.group_hotel_user,1,1,1,1

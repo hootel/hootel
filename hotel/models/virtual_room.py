@@ -88,6 +88,7 @@ class VirtualRoom(models.Model):
     product_id = fields.Many2one(
         'product.product', required=True,
         ondelete='cascade')
+    active = fields.Boolean(default=True, help="The active field allows you to hide the category without removing it.")
 
     @api.multi
     def get_capacity(self):

@@ -93,7 +93,7 @@
                                 </div>
                             </button>
                             <button type="action" class="oe_stat_button"
-                                id="add_room"
+                                id="books"
                                 icon="fa-list-ul"
                                 attrs="{'invisible': [('partner_id','=',False)]}"
                                 name="%(open_hotel_reservation_form_tree_all)d"
@@ -112,7 +112,7 @@
                                         <field name="folio_pending_amount" nolabel="1"
                                         widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                     </span>
-                                    <span class="o_stat_text">In Folio</span>
+                                    <span class="o_stat_text">Pending Folio</span>
                                 </div>
                             </button>                        
                             <button type="object" class="oe_stat_button"
@@ -125,7 +125,18 @@
                                         <field name="amount_reservation" nolabel="1"
                                         widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                     </span>
-                                    <span class="o_stat_text">In Reservation</span>
+                                    <span class="o_stat_text">Reservation</span>
+                                </div>
+                            </button>
+                            <button type="object" class="oe_stat_button"
+                                id="open_master_reservation"
+                                icon="fa-chain-broken"
+                                name="open_master"
+                                attrs="{'invisible':[('parent_reservation','=',False)]}">
+                                <div class="o_form_field o_stat_info">
+                                    <span class="o_stat_value"><field name="parent_reservation"
+                                    widget="statinfo" nolabel="1"/></span>
+                                    <span class="o_stat_text">Master Reservation</span>
                                 </div>
                             </button>
                             <button type="action" class="oe_stat_button"
@@ -134,8 +145,8 @@
                                 name="%(launch_checkin_wizard_add)d"
                                 context="{'partner_id': partner_id,'enter_date': checkin,
                                     'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
-                                attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
-                                    ('cardex_pending','=', False)]}">
+                                attrs="{'invisible':['|', '|', ('state','not in',('confirm','booking')),
+                                    ('cardex_pending','=', False),('parent_reservation','!=',False)]}">
                                 <div class="o_form_field o_stat_info">
                                     <span class="o_stat_value"><field name="cardex_pending_num"
                                     widget="statinfo" nolabel="1"/></span>
@@ -146,7 +157,8 @@
                                 id="checkin_smart_button"
                                 icon="fa-users"
                                 name="action_checks"
-                                attrs="{'invisible': [('cardex_count','&lt;=',0)]}">
+                                attrs="{'invisible': ['|', ('cardex_count','&lt;=',0),
+                                    ('parent_reservation','!=',False)]}">
                                 <div class="o_form_field o_stat_info">
                                   <span class="o_stat_value"><field name="cardex_count"
                                    widget="statinfo" nolabel="1"/></span>
@@ -184,6 +196,7 @@
                                 <field name="folio_internal_comment" string="Reservation Note"/>                                
                             </group>
                             <group colspan="4" string="Reservation Details" name="reservation_details">
+                                <field name="name"/>
                                 <field name="adults"/>
                                 <field name="children"/>
                                 <field name="virtual_room_id" on_change="1" options="{'no_create': True,'no_open': True}" 
@@ -225,7 +238,6 @@
                             <field name="product_uom_qty" invisible="1" />
                             <field name="invoice_status" invisible="1"/>
                             <field name="nights" invisible="1"/>
-                            <field name="name" invisible="1" />                                
                             <field name="product_uom" string="Rent(UOM)" invisible="1" />
                         </group>                                       
                         <notebook>
@@ -357,7 +369,7 @@
                     <field name="checkout"  widget="date"/>
                     <field name="create_date"/>
                     <field name="overbooking" invisible="1" />
-                    <field name="last_updated_res"/>
+                    <field name="last_updated_res" string="Updated on"/>
                     <field name="cardex_ids" invisible ="1"/>
                     <field name="to_assign" invisible="1"/>
                     <!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
@@ -368,7 +380,7 @@
                     <field name="folio_pending_amount" string="Folio Pending Amount"/>
                     <button type="object" class="oe_stat_button"
                         id="cardex_smart_button" icon="fa fa-3x fa-money"
-                        name="action_pay"
+                        name="action_pay_folio"
                         attrs="{'invisible':[('folio_pending_amount','==',0)]}"
                     />                
                 </tree>

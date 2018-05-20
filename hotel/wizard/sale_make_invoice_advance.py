@@ -31,10 +31,21 @@ class SaleAdvancePaymentInv(models.TransientModel):
         ctx = self.env.context.copy()
         if self._context.get('active_model') == 'hotel.folio':
             hotel_fol = self.env['hotel.folio']
-            hotel = hotel_fol.browse(self._context.get('active_ids',
+            folios = hotel_fol.browse(self._context.get('active_ids',
                                                        []))
-            ctx.update({'active_ids': [hotel.order_id.id],
-                        'active_id': hotel.order_id.id})
+            order_active_id = folios.filtered(lambda x: (
+                x.id == self._context.get('active_id'))).order_id.id
+            active_order_id = self.env['sale.order'].search([
+                ('id','=', order_active_id)
+            ])
+            active_order_ids = self.env['sale.order'].search([
+                ('id','in',folios.mapped('order_id.id'))
+            ])
+            origin = ', '.join(folios.mapped('name'))
+            ctx.update({'active_model': 'sale.order',
+                        'active_ids': active_order_ids.ids,
+                        'active_id': active_order_id.id,
+                        'invoice_origin': origin})
         return super(SaleAdvancePaymentInv,
                      self.with_context(ctx))._get_advance_payment_method()
 
@@ -52,20 +63,3 @@ class SaleAdvancePaymentInv(models.TransientModel):
                                               to invoice?',
                                               default=_get_advance_payment,
                                               required=True)
-
-    @api.multi
-    def create_invoices(self):
-        ctx = self.env.context.copy()
-        hotel = False
-        if self._context.get('active_model') == 'hotel.folio':
-            hotel_fol = self.env['hotel.folio']
-            hotel = hotel_fol.browse(self._context.get('active_ids',
-                                                       []))
-            ctx.update({'active_ids': [hotel.order_id.id],
-                        'active_id': hotel.order_id.id,
-                        'invoice_origin': hotel.name})
-        res = super(SaleAdvancePaymentInv,
-                    self.with_context(ctx)).create_invoices()
-        if hotel and res.get('res_id', False):
-            hotel.write({'hotel_invoice_id': res['res_id']})  
-        return res

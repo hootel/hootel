@@ -82,6 +82,12 @@ class AccountPayment(models.Model):
         self.post()
 
     @api.multi
+    def delete(self):
+        self.cancel()
+        self.move_name = ''        
+        self.unlink()
+
+    @api.multi
     @api.depends('state')
     def _compute_folio_amount(self):
         res = []

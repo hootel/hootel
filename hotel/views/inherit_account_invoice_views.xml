@@ -14,8 +14,11 @@
                         <field name="dif_customer_payment" invisible="1" />
                         <field name="from_folio" invisible="1" />
                     </xpath>
-                    <xpath expr="//button[2]" position="attributes">
-                         <attribute name="attrs">{'invisible': [('from_folio','=',True)]}</attribute>
+                    <xpath expr="//field[@name='date_invoice']" position="after">
+                         <field name="folio_ids" widget="many2many_tags"/>
+                    </xpath>
+                    <xpath expr="//button[@name='%(account.action_account_invoice_payment)d']" position="attributes">
+                         <attribute name="attrs">{'invisible': ['|',('from_folio','=',True)]}</attribute>
                     </xpath>
                 </field>
         </record>
