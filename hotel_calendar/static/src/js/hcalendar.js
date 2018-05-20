@@ -1267,10 +1267,10 @@ HotelCalendar.prototype = {
         row.dataset.hcalVRoomId = listitem.room
         row.classList.add('hcal-row-detail-room-price-group-item');
         cell = row.insertCell();
-        cell.innerHTML = "<marquee behavior='alternate' scrollamount='1' scrolldelay='100'>"+listitem.title + ' ' + this.options.currencySymbol+ '</marquee>';
-        cell.classList.add('hcal-cell-detail-room-group-item');
-        cell.classList.add('btn-hcal');
-        cell.classList.add('btn-hcal-flat');
+        var span = document.createElement('span');
+        cell.title = cell.textContent = listitem.title + ' ' + this.options.currencySymbol;
+        cell.classList.add('hcal-cell-detail-room-group-item', 'btn-hcal', 'btn-hcal-flat');
+        cell.style.textAlign = 'right';
         cell.setAttribute("colspan", "3");
         for (var i=0; i<=$this.options.days; i++) {
       	var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();

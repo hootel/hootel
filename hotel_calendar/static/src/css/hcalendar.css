@@ -5,6 +5,10 @@
  *     Alexandre Díaz <alex@aloxa.eu>
  */
 
+ :root {
+  --currency-ellipsis: '... €'; /* FIXME: This is a problem for other currencies! */
+}
+
 /** ANIMATIONS **/
 @keyframes cell-invalid {
 	0% {
@@ -141,7 +145,7 @@
 	overflow: scroll;
 }
 .hcal-table td {
-	text-align: center !important;
+	text-align: center;
 	min-width: 100px;
 	white-space: nowrap;
 	overflow: hidden;
@@ -447,6 +451,8 @@ td.hcal-cell-month-day-occupied {
 
 .hcal-cell-detail-room-group-item {
 	white-space: nowrap;
+	text-align: right;
+	text-overflow: var(--currency-ellipsis);
 }
 
 .hcal-unused-zone {
