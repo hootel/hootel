@@ -1122,7 +1122,7 @@ class WuBook(models.AbstractModel):
             dto_dt = date_utils.get_datetime(
                 dto,
                 dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
-            days_diff = abs((dto_dt - dfrom_dt).days) + 1
+            days_diff = date_utils.date_diff(dfrom_dt, dto_dt, hours=False) + 1
             for i in range(0, days_diff):
                 ndate_dt = dfrom_dt + timedelta(days=i)
                 for k_rid, v_rid in plan_prices.iteritems():
@@ -1392,9 +1392,6 @@ class WuBook(models.AbstractModel):
                                                 DEFAULT_SERVER_DATETIME_FORMAT)
                     checkout_str = dates_checkout[0].strftime(
                                                 DEFAULT_SERVER_DATETIME_FORMAT)
-                    rcheckout_dt = dates_checkout[0] - timedelta(days=1)
-                    rcheckout_str = rcheckout_dt.strftime(
-                                                DEFAULT_SERVER_DATETIME_FORMAT)
                     vals = self._generate_booking_vals(
                         broom,
                         checkin_str,
@@ -1411,7 +1408,7 @@ class WuBook(models.AbstractModel):
                     )
                     free_rooms = hotel_vroom_obj.check_availability_virtual_room(
                         checkin_str,
-                        rcheckout_str,
+                        checkout_str,
                         virtual_room_id=vroom.id,
                         notthis=used_rooms)
                     if any(free_rooms):
@@ -1610,7 +1607,7 @@ class WuBook(models.AbstractModel):
             date_end = date_utils.get_datetime(
                 unpushed[-1].date_start,
                 dtformat=DEFAULT_SERVER_DATE_FORMAT)
-            days_diff = abs((date_end-date_start).days) + 1
+            days_diff = date_utils.date_diff(date_srat, date_end, hours=False) + 1
 
             prices = {}
             pricelist_ids = self.env['product.pricelist'].search([
