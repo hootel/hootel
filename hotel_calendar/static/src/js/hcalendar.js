@@ -1271,7 +1271,6 @@ HotelCalendar.prototype = {
         cell.title = cell.textContent = listitem.title + ' ' + this.options.currencySymbol;
         cell.classList.add('hcal-cell-detail-room-group-item', 'btn-hcal', 'btn-hcal-flat');
         cell.dataset.currencySymbol = this.options.currencySymbol;
-        cell.style.textAlign = 'right';
         cell.setAttribute("colspan", "3");
         for (var i=0; i<=$this.options.days; i++) {
       	var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
