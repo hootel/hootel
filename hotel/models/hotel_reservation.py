@@ -580,14 +580,10 @@ class HotelReservation(models.Model):
         self.ensure_one()
         if not self.parent_reservation:
             raise ValidationError(_("This is the parent reservation"))
-
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'hotel.reservation',
-            'views': [[False, "form"]],
-            'target': 'new',
-            'res_id': self.parent_reservation.id,
-        }
+        action = self.env.ref('hotel.open_hotel_reservation_form_tree_all').read()[0]
+        action['views'] = [(self.env.ref('hotel.view_hotel_reservation_form').id, 'form')]
+        action['res_id'] = self.parent_reservation.id
+        return action
 
     @api.multi
     def open_folio(self):
@@ -1030,8 +1026,6 @@ class HotelReservation(models.Model):
         if self.overbooking:
             return
         checkout_dt = date_utils.get_datetime(self.checkout)
-        # Reservation end day count as free day. Not check it
-        checkout_dt -= timedelta(days=1)
         occupied = self.env['hotel.reservation'].occupied(
             self.checkin,
             checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)).filtered(
@@ -1127,19 +1121,17 @@ class HotelReservation(models.Model):
                 raise ValidationError(_('Room line Check In Date Should be \
                 less than the Check Out Date!'))
         if not self.overbooking and not self._context.get("ignore_avail_restrictions", False):
-            # Reservation end day count as free day. Not check it
-            chkout_utc_dt -= timedelta(days=1)
             occupied = self.env['hotel.reservation'].occupied(
                 self.checkin,
                 chkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
             occupied = occupied.filtered(
                 lambda r: r.product_id.id == self.product_id.id
                 and r.id != self.id)
-            occupied_name = ','.join(str(x.folio_id.name) for x in occupied)
+            occupied_name = ','.join(str(x.product_id.name) for x in occupied)
             if occupied:
                 warning_msg = _('You tried to change/confirm \
                    reservation with room those already reserved in this \
-                   reservation period: %s') % occupied_name
+                   reservation period: %s ') % occupied_name
                 raise ValidationError(warning_msg)
 
     @api.multi

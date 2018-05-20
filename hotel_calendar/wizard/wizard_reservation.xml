@@ -24,9 +24,9 @@
                             decoration-danger="max_rooms &lt; rooms_num"
                             decoration-muted="max_rooms == 0"
                             decoration-success="max_rooms &gt; rooms_num and rooms_num &gt; 0">
-                                <field name="virtual_room_id" string="Room Type"/>
-                                <field name="rooms_num" attrs="{'readonly': [('max_rooms','=',0)]}" />
                                 <field name="max_rooms" />
+                                <field name="virtual_room_id" string="Room Type"/>
+                                <field name="rooms_num" attrs="{'readonly': [('max_rooms','=',0)]}" />                                
                                 <field name="checkin" widget="date" />
                                 <field name="checkout" widget="date" />
                                 <field name="discount"/>
@@ -35,9 +35,9 @@
                             </tree>
                         </field>                        
                     </group>
-                    <field name="autoassign" invisible="1"/>
-                    <label for="confirm" invisible="1"/>
-                    <field name="confirm"/>
+                    <label for="autoassign" />
+                    <field name="autoassign" />
+                    <field name="confirm" invisible="1"/>
                     <group colspan="2" class="oe_subtotal_footer">
                         <field name="total"/>                        
                     </group>                    
@@ -52,6 +52,7 @@
 								<field name="nights" /> 
 								<field name="adults" />
 								<field name="children" />
+                                <field name="discount" />
 								<field name="amount_reservation" />
 								<field name="price" invisible = "1"/>
 								<field name="partner_id" invisible = "1" />

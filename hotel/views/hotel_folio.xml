@@ -166,7 +166,7 @@
                                           options="{'no_open': True}">
                                         <button type="object" class="oe_stat_button"
                                             id="splitted" icon="fa fa-1x fa-chain-broken"
-                                            name="open_reservation_form"
+                                            name="open_master"
                                             attrs="{'invisible':[('splitted','=', False)]}"
                                         />
                                         <field name="sequence" widget="handle"/>

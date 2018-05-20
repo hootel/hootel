@@ -118,7 +118,6 @@ class FolioWizard(models.TransientModel):
                     raise ValidationError(_("Too many rooms!"))
             elif line.virtual_room_id:                
                 checkout_dt = date_utils.get_datetime(line.checkout)
-                checkout_dt -= timedelta(days=1)
                 occupied = self.env['hotel.reservation'].occupied(
                     line.checkin,
                     checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
@@ -161,10 +160,12 @@ class FolioWizard(models.TransientModel):
                     adults = self.env['hotel.room'].search([
                         ('product_id.id', '=', room.id)
                     ]).capacity
+                    res_price = res_price - (res_price * line.discount)/100
                     total += res_price
                     cmds.append((0, False, {
                                 'checkin': line.checkin,
                                 'checkout': line.checkout,
+                                'discount': line.discount,
                                 'product_id': room.id,
                                 'nights': nights,
                                 'adults': adults,
@@ -252,6 +253,7 @@ class FolioWizard(models.TransientModel):
                         'children': line.children,
                         'checkin': line.checkin,
                         'checkout': line.checkout,
+                        'discount': line.discount,
                         'virtual_room_id': line.virtual_room_id.id,
                     }))
         vals = {
@@ -291,7 +293,7 @@ class VirtualRoomWizars(models.TransientModel):
     price = fields.Float(string='Price by Room')
     total_price = fields.Float(string='Total Price')    
     folio_wizard_id = fields.Many2one('hotel.folio.wizard')
-    discount = fields.Integer('discount')
+    discount = fields.Float('discount')
     checkin = fields.Datetime('Check In', required=True,
                               default=_get_default_checkin)
     checkout = fields.Datetime('Check Out', required=True,
@@ -387,6 +389,7 @@ class ReservationWizard(models.TransientModel):
     price = fields.Float(string='Total')
     amount_reservation = fields.Float(string='Total', readonly=True)
     partner_id = fields.Many2one(related='folio_wizard_id.partner_id')
+    discount = fields.Float('discount')
 
     
     @api.multi
@@ -410,7 +413,7 @@ class ReservationWizard(models.TransientModel):
                     raise ValidationError(_("This room is occupied!, please, choice other room or change the reservation date"))
 
     @api.multi
-    @api.onchange('checkin', 'checkout', 'virtual_room_id')
+    @api.onchange('checkin', 'checkout', 'virtual_room_id', 'discount')
     def onchange_dates(self):
         for line in self:
             if not self.checkin:
@@ -448,6 +451,7 @@ class ReservationWizard(models.TransientModel):
                 adults = self.env['hotel.room'].search([
                     ('product_id.id', '=', line.product_id.id)
                 ]).capacity
+                res_price = res_price - (res_price * self.discount)/100
                 line.amount_reservation = res_price
                 line.price = res_price
             checkout_dt = date_utils.get_datetime(self.checkout)

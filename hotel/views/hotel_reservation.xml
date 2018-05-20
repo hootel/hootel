@@ -129,13 +129,13 @@
                                 </div>
                             </button>
                             <button type="object" class="oe_stat_button"
-                                id="open_master_reservation"
+                                id="open_master"
                                 icon="fa-chain-broken"
                                 name="open_master"
                                 attrs="{'invisible':[('splitted','=',False)]}">
                                 <div class="o_form_field o_stat_info">
                                     <span><field name="parent_reservation"
-                                    nolabel="1"/></span>
+                                    nolabel="1" readonly="1"/></span>
                                     <span class="o_stat_text">Splitted!</span>
                                 </div>
                             </button>
@@ -339,7 +339,7 @@
                         type="object"
                         class="oe_stat_button"
                         id="splitted" 
-                        name="open_reservation_form"
+                        name="open_master"
                         attrs="{'invisible':[('splitted','=', False)]}"
                     />
                     <button icon="fa fa-2x fa-angellist"
@@ -370,6 +370,7 @@
                     />
                     <field name="partner_id"/>
                     <field name="splitted" invisible="1" />
+                    <field name="parent_reservation" invisible="1" />
                     <field name="virtual_room_id" string="Reserved Room Type"/>                   
                     <field name="nights" />
                     <field name="adults" string="Persons"/>                    
