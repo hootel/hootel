@@ -6,7 +6,7 @@
  */
 
  :root {
-  --currency-ellipsis: '... €'; /* FIXME: This is a problem for other currencies! */
+  --currency-ellipsis: '... ' attr('dataset-currency-symbol'); /* FIXME: This is a problem for other currencies! */
 }
 
 /** ANIMATIONS **/
@@ -452,7 +452,12 @@ td.hcal-cell-month-day-occupied {
 .hcal-cell-detail-room-group-item {
 	white-space: nowrap;
 	text-align: right;
-	text-overflow: var(--currency-ellipsis);
+	text-overflow: '...';
+}
+
+/* FIXME: Workaround for work with other currencies */
+.hcal-cell-detail-room-group-item[data-currency-symbol='€'] {
+	text-overflow: '... €';
 }
 
 .hcal-unused-zone {
