@@ -164,6 +164,11 @@
                                           colors="red:state == 'cancelled'"
                                           default_order="id" editable="bottom"
                                           options="{'no_open': True}">
+                                        <button type="object" class="oe_stat_button"
+                                            id="splitted" icon="fa fa-1x fa-chain-broken"
+                                            name="open_reservation_form"
+                                            attrs="{'invisible':[('splitted','=', False)]}"
+                                        />
                                         <field name="sequence" widget="handle"/>
                                         <field name="folio_id" invisible="1"/>
                                         <field name="state" />
@@ -172,8 +177,8 @@
                                             name="%(launch_checkin_wizard_add)d"
                                             context="{'partner_id': partner_id,'enter_date': checkin,
                                                 'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
-                                            attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
-                                                ('cardex_pending','=', False)]}"
+                                            attrs="{'invisible':['|','|', ('state','not in',('confirm','booking')),
+                                                ('cardex_pending','=', False),('parent_reservation','!=',False)]}"
                                         />
                                         <field name="product_id" string="Room"
                                                options="{'no_create': True,'no_open': True}"
@@ -184,6 +189,8 @@
                                             context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
                                             invisible="1"
                                         />
+                                        <field name="splitted" invisible="1" />
+                                        <field name="parent_reservation" invisible="1" />
                                         <field name="virtual_room_id" string="Reserved Room Type"/>                   
                                         <field name="nights" />
                                         <field name="adults" string="Persons"/>                                        

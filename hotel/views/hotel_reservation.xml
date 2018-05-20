@@ -132,11 +132,11 @@
                                 id="open_master_reservation"
                                 icon="fa-chain-broken"
                                 name="open_master"
-                                attrs="{'invisible':[('splitted','!=',False)]}">
+                                attrs="{'invisible':[('splitted','=',False)]}">
                                 <div class="o_form_field o_stat_info">
                                     <span><field name="parent_reservation"
                                     nolabel="1"/></span>
-                                    <span class="o_stat_text">Master Reservation</span>
+                                    <span class="o_stat_text">Splitted!</span>
                                 </div>
                             </button>
                             <button type="action" class="oe_stat_button"
@@ -146,7 +146,7 @@
                                 context="{'partner_id': partner_id,'enter_date': checkin,
                                     'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
                                 attrs="{'invisible':['|', '|', ('state','not in',('confirm','booking')),
-                                    ('cardex_pending','=', False),('splitted','=',False)]}">
+                                    ('cardex_pending','=', False),('parent_reservation','!=',False)]}">
                                 <div class="o_form_field o_stat_info">
                                     <span class="o_stat_value"><field name="cardex_pending_num"
                                     widget="statinfo" nolabel="1"/></span>
@@ -158,7 +158,7 @@
                                 icon="fa-users"
                                 name="action_checks"
                                 attrs="{'invisible': ['|', ('cardex_count','&lt;=',0),
-                                    ('splitted','=',False)]}">
+                                    ('parent_reservation','!=',False)]}">
                                 <div class="o_form_field o_stat_info">
                                   <span class="o_stat_value"><field name="cardex_count"
                                    widget="statinfo" nolabel="1"/></span>
@@ -335,6 +335,13 @@
                     checkout &lt;= current_date and not overbooking"
                 decoration-warning="overbooking"
                 >
+                    <button icon="fa fa-1x fa-chain-broken"
+                        type="object"
+                        class="oe_stat_button"
+                        id="splitted" 
+                        name="open_reservation_form"
+                        attrs="{'invisible':[('splitted','=', False)]}"
+                    />
                     <button icon="fa fa-2x fa-angellist"
                         attrs="{'invisible':['|',('folio_pending_amount','&gt;',0),
                             ('state' ,'!=', 'done')]}"
@@ -352,8 +359,8 @@
                         name="%(launch_checkin_wizard_add)d"
                         context="{'partner_id': partner_id,'enter_date': checkin,
                             'exit_date': checkout,'reservation_id': id, 'hidden_cardex': True, 'edit_cardex': True }"
-                        attrs="{'invisible':['|', ('state','not in',('confirm','booking')),
-                            ('cardex_pending','=', False)]}"
+                        attrs="{'invisible':['|','|', ('state','not in',('confirm','booking')),
+                                ('cardex_pending','=', False),('parent_reservation','!=',False)]}"
                     />
                     <field name="product_id" string="Room"/>
                     <button type="action" class="oe_stat_button"
@@ -362,6 +369,7 @@
                         context="{'search_default_partner_id': partner_id}"
                     />
                     <field name="partner_id"/>
+                    <field name="splitted" invisible="1" />
                     <field name="virtual_room_id" string="Reserved Room Type"/>                   
                     <field name="nights" />
                     <field name="adults" string="Persons"/>                    
