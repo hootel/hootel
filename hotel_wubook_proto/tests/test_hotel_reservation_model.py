@@ -21,6 +21,7 @@
 #
 ##############################################################################
 from datetime import timedelta
+from openerp.exceptions import UserError
 from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT,
     DEFAULT_SERVER_DATE_FORMAT)
@@ -139,7 +140,9 @@ class TestHotelReservation(TestHotelWubook):
             ('wrid', 'in', processed_rids)
         ])
         self.assertTrue(nreserv, "Reservation not found")
-        nreserv.sudo(self.user_hotel_manager).unlink()
+
+        with self.assertRaises(UserError):
+            nreserv.sudo(self.user_hotel_manager).unlink()
 
     def test_action_cancel(self):
         now_utc_dt = date_utils.now()
