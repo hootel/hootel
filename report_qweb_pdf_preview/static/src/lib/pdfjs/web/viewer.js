@@ -2693,6 +2693,7 @@ var PDFLinkService = function () {
           dest = void 0;
       if (hash.indexOf('=') >= 0) {
         var params = (0, _ui_utils.parseQueryString)(hash);
+
         if ('search' in params) {
           this.eventBus.dispatch('findfromurlhash', {
             source: this,
@@ -2747,6 +2748,9 @@ var PDFLinkService = function () {
             mode: params.pagemode
           });
         }
+
+        // FIXME: Workarround for auto-print feature
+        this.autoPrint = ('autoprint' in params && params.autoprint !== 0);
       } else {
         if (/^\d+$/.test(hash) && hash <= this.pagesCount) {
           console.warn('PDFLinkService_setHash: specifying a page number ' + 'directly after the hash symbol (#) is deprecated, ' + ('please use the "#page=' + hash + '" form instead.'));
@@ -8290,6 +8294,11 @@ var PDFViewer = function () {
           source: _this,
           pagesCount: pagesCount
         });
+
+        // FIXME: Workarround for auto-print feature
+        if (_this.linkService.autoPrint) {
+          _this.eventBus.dispatch('print');
+        }
       });
       var isOnePageRenderedResolved = false;
       var onePageRenderedCapability = (0, _pdfjsLib.createPromiseCapability)();

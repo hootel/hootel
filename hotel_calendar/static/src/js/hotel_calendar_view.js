@@ -219,7 +219,7 @@ var HotelCalendarView = View.extend({
         setTimeout(function(){
           for (var reserv of self._hcalendar._reservations) {
             var style = window.getComputedStyle(reserv._html, null);
-            if (parseInt(style.width, 10) < 15 || parseInt(style.height, 10) < 15) {
+            if (parseInt(style.width, 10) < 15 || parseInt(style.height, 10) < 15 || parseInt(style.top, 10) === 0) {
               self._hcalendar._updateReservation(reserv);
             }
           }
@@ -409,7 +409,7 @@ var HotelCalendarView = View.extend({
                             };
                             new Model('hotel.reservation').call('write', [[newReservation.id], write_values]).then(function(result){
                               // Remove OB Room Row?
-                              if (oldReservation.room.overbooking && newReservation.room.id !== oldReservation.room.id && self._hcalendar.getReservationsByRoom(oldReservation.room).length === 0) {
+                              if (oldReservation.room.overbooking) {
                                 self._hcalendar.removeOBRoomRow(oldReservation);
                               }
                             }).fail(function(err, ev){

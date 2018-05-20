@@ -1,7 +1,7 @@
-REPORT QWEB PDF PREVIEW
+REPORT QWEB PDF PREVIEW & PRINT
 =============
 
-Preview pdf report
+Preview pdf report & launch print process
 
 
 Credits

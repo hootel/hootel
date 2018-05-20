@@ -666,7 +666,7 @@ HotelCalendar.prototype = {
       var reservs = this.getReservationsByRoom(this.options.rooms[i], true);
       for (var reserv of reservs) {
         var top = parseInt(reserv._html.style.top, 10);
-        reserv._html.style.top = `${top + cheight}px`;
+        reserv._html.style.top = (cheight === 0)?'0':`${top + cheight}px`;
       }
     }
 
@@ -1410,10 +1410,10 @@ HotelCalendar.prototype = {
     }
     else {
       var dateLimits = this.getDateLimits(this.reservationAction.inReservations);
-      var inMaxPersons = _.max(this.reservationAction.inReservations, function(item) { return item.getTotalPersons(); }).getTotalPersons();
-      var outMaxPersons = this.reservationAction.outReservations.length>0?_.max(this.reservationAction.outReservations, function(item) { return item.getTotalPersons(); }).getTotalPersons():false;
       var refInReservation = this.reservationAction.inReservations[0];
       var refOutReservation = this.reservationAction.outReservations[0];
+      var inCapacity = refInReservation?refInReservation.room.capacity:false;
+      var outCapacity = refOutReservation?refOutReservation.room.capacity:false;
       var realDateLimits = this.getFreeDatesByRoom(dateLimits[0], dateLimits[1], refInReservation?refInReservation.room.id:refOutReservation.room.id);
       for (var nreserv of this._reservations) {
         if (nreserv._html.classList.contains('hcal-reservation-swap-in-selected') || nreserv._html.classList.contains('hcal-reservation-swap-out-selected')) {
@@ -1421,7 +1421,8 @@ HotelCalendar.prototype = {
         }
 
         // Invalid capacity
-        if (nreserv.getTotalPersons() > inMaxPersons || (outMaxPersons && nreserv.getTotalPersons() > outMaxPersons))
+        var totalReservPerson = nreserv.getTotalPersons();
+        if (totalReservPerson > inCapacity || (outCapacity && totalReservPerson > outCapacity) || nreserv.room.capacity < refInReservation.getTotalPersons())
         {
           nreserv._html.classList.add('hcal-reservation-invalid-swap');
         }
