@@ -346,7 +346,7 @@ class HotelReservation(models.Model):
     folio_internal_comment = fields.Text(string='Internal Folio Notes',
                                            related='folio_id.internal_comment')
     preconfirm = fields.Boolean('Auto confirm to Save', default=True)
-    
+
     def _computed_folio_name(self):
         for res in self:
             res.folio_name = res.folio_id.name + '-' + \
@@ -375,7 +375,7 @@ class HotelReservation(models.Model):
                     record.shared_folio = True
                 else:
                     record.shared_folio = False
-                
+
     @api.depends('checkin', 'checkout')
     def _computed_nights(self):
         for res in self:
@@ -397,12 +397,12 @@ class HotelReservation(models.Model):
                 # on smartbutton whithout having to wait to save.
                 total_line = service.price_unit * service.product_uom_qty
                 discount = (service.discount * total_line) / 100
-                amount_service += total_line - discount            
+                amount_service += total_line - discount
             res.amount_room = amount_room #To view price_unit with read_only
             if res.discount_type == 'fixed':
                 res.discount = (res.discount_fixed * 100) / amount_room
             else:
-                res.discount_fixed = (res.discount * amount_room) / 100      
+                res.discount_fixed = (res.discount * amount_room) / 100
             res.amount_discount = amount_room - res.discount_fixed
             res.price_unit = res.amount_room
             res.amount_reservation_services = amount_service
@@ -575,7 +575,7 @@ class HotelReservation(models.Model):
     def overbooking_button(self):
         self.ensure_one()
         return self.write({'overbooking': not self.overbooking})
-    
+
     @api.multi
     def open_master(self):
         self.ensure_one()
@@ -598,11 +598,11 @@ class HotelReservation(models.Model):
 
     @api.multi
     def open_reservation_form(self):
-        action = self.env.ref('hotel.open_hotel_reservation_form_tree_all').read()[0]        
+        action = self.env.ref('hotel.open_hotel_reservation_form_tree_all').read()[0]
         action['views'] = [(self.env.ref('hotel.view_hotel_reservation_form').id, 'form')]
         action['res_id'] = self.id
         return action
-        
+
     @api.multi
     def unify(self):
         self.ensure_one()
@@ -761,7 +761,7 @@ class HotelReservation(models.Model):
 
     @api.multi
     def write(self, vals):
-        pricesChanged = ('checkin' in vals or 'checkout' in vals or 'discount' in vals)           
+        pricesChanged = ('checkin' in vals or 'checkout' in vals or 'discount' in vals)
         vals.update({
             'edit_room': False,
         })
@@ -774,14 +774,14 @@ class HotelReservation(models.Model):
             for record in self:
                 if record.reservation_type in ('staff', 'out'):
                     record.update({'price_unit': 0})
-                record.folio_id.compute_invoices_amount()       
+                record.folio_id.compute_invoices_amount()
         for record in self:
             if (pricesChanged and 'reservation_lines' not in vals) and \
                     not record.reservation_lines: #To allow add tree edit bottom room_lines on folio form
                 checkin = vals.get('checkin', record.checkin)
                 checkout = vals.get('checkout', record.checkout)
                 days_diff = date_utils.date_diff(checkin,
-                                                 checkout, hours=False)                                                 
+                                                 checkout, hours=False)
                 rlines = record.prepare_reservation_lines(checkin, days_diff)
                 record.update({
                     'reservation_lines': rlines['commands']
@@ -1154,7 +1154,7 @@ class HotelReservation(models.Model):
         checkin_dt = date_utils.dt_as_timezone(checkin_utc_dt, tz_hotel)
         days_diff = date_utils.date_diff(str_checkin_utc, str_checkout_utc,
                                          hours=False)
-        dates_list = date_utils.generate_dates_list(checkin_dt, days_diff,
+        dates_list = date_utils.generate_dates_list(checkin_dt, days_diff or 1,
                                                     stz=tz_hotel)
         reservations = self.env['hotel.reservation'].search([
             ('reservation_lines.date', 'in', dates_list),

@@ -5,6 +5,7 @@
  *     Alexandre Díaz <alex@aloxa.eu>
  */
 
+
 /** ANIMATIONS **/
 @keyframes cell-invalid {
 	0% {
@@ -141,7 +142,7 @@
 	overflow: scroll;
 }
 .hcal-table td {
-	text-align: center !important;
+	text-align: center;
 	min-width: 100px;
 	white-space: nowrap;
 	overflow: hidden;
@@ -447,6 +448,13 @@ td.hcal-cell-month-day-occupied {
 
 .hcal-cell-detail-room-group-item {
 	white-space: nowrap;
+	text-align: right !important;
+	text-overflow: '...';
+}
+
+/* FIXME: Workaround for work with other currencies */
+.hcal-cell-detail-room-group-item[data-currency-symbol='€'] {
+	text-overflow: '... €';
 }
 
 .hcal-unused-zone {

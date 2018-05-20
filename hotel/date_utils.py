@@ -125,7 +125,7 @@ def dt_as_timezone(date_dt, stz):
     return date_dt.astimezone(tz.gettz(stz and str(stz) or 'UTC'))
 
 
-# Generate a tuple of days start in 'cdate'
+# Generate a list of days start in 'cdate'
 def generate_dates_list(cdate,
                         num_days,
                         outformat=DEFAULT_SERVER_DATE_FORMAT, stz=False):
