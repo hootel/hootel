@@ -247,10 +247,10 @@ class HotelReservation(models.Model):
 
     reservation_no = fields.Char('Reservation No', size=64, readonly=True)
     adults = fields.Integer('Adults', size=64, readonly=False,
-                            track_visibility='always',
+                            track_visibility='onchange',
                             help='List of adults there in guest list. ')
     children = fields.Integer('Children', size=64, readonly=False,
-                              track_visibility='always',
+                              track_visibility='onchange',
                               help='Number of children there in guest list.')
     to_assign = fields.Boolean('To Assign')
     state = fields.Selection([('draft', 'Pre-reservation'), ('confirm', 'Pending Entry'),
@@ -258,7 +258,7 @@ class HotelReservation(models.Model):
                               ('cancelled', 'Cancelled')],
                              'State', readonly=True,
                              default=lambda *a: 'draft',
-                             track_visibility='always')
+                             track_visibility='onchange')
     reservation_type = fields.Selection(related='folio_id.reservation_type',
                                         default=lambda *a: 'normal')
     cancelled_reason = fields.Selection([
@@ -274,14 +274,15 @@ class HotelReservation(models.Model):
     folio_name = fields.Char(compute="_computed_folio_name")
     checkin = fields.Datetime('Check In', required=True,
                               default=_get_default_checkin,
-                              track_visibility='always')
+                              track_visibility='onchange')
     checkout = fields.Datetime('Check Out', required=True,
                                default=_get_default_checkout,
-                               track_visibility='always')
+                               track_visibility='onchange')
     room_type_id = fields.Many2one('hotel.room.type', string='Room Type')
     virtual_room_id = fields.Many2one('hotel.virtual.room',
                                       string='Virtual Room Type',
-                                      required=True)
+                                      required=True,
+                                      track_visibility='onchange')
     partner_id = fields.Many2one(related='folio_id.partner_id')
     reservation_lines = fields.One2many('hotel.reservation.line',
                                         'reservation_id',

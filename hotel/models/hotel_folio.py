@@ -112,14 +112,14 @@ class HotelFolio(models.Model):
                                  readonly=False,
                                  states={'done': [('readonly', True)]},
                                  help="Hotel room reservation detail.",
-                                 track_visibility='always')
+                                 track_visibility='onchange')
     service_lines = fields.One2many('hotel.service.line', 'folio_id',
                                     readonly=False,
                                     states={'done': [('readonly', True)]},
                                     help="Hotel services detail provide to"
                                     "customer and it will include in "
                                     "main Invoice.",
-                                    track_visibility='always')
+                                    track_visibility='onchange')
     hotel_policy = fields.Selection([('prepaid', 'On Booking'),
                                      ('manual', 'On Check In'),
                                      ('picking', 'On Checkout')],
