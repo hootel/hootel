@@ -35,7 +35,7 @@
                             </tree>
                         </field>                        
                     </group>
-                    <label for="autoassign"/>
+                    <field name="autoassign" invisible="1"/>
                     <label for="confirm" invisible="1"/>
                     <field name="confirm"/>
                     <group colspan="2" class="oe_subtotal_footer">
