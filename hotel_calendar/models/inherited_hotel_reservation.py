@@ -347,13 +347,13 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         ret = super(HotelReservation, self).write(vals)
-        if vals.get('partner_id') or vals.get('checkin') or \
-                vals.get('checkout') or vals.get('product_id') or \
-                vals.get('adults') or vals.get('children') or \
-                vals.get('state') or vals.get('splitted') or \
-                vals.get('reserve_color') or \
-                vals.get('reserve_color_text') or vals.get('product_id') or \
-                vals.get('parent_reservation') or vals.get('overbooking'):
+        if vals.has_key('partner_id') or vals.has_key('checkin') or \
+                vals.has_key('checkout') or vals.has_key('product_id') or \
+                vals.has_key('adults') or vals.has_key('children') or \
+                vals.has_key('state') or vals.has_key('splitted') or \
+                vals.has_key('reserve_color') or \
+                vals.has_key('reserve_color_text') or vals.has_key('product_id') or \
+                vals.has_key('parent_reservation') or vals.has_key('overbooking'):
             for record in self:
                 record.send_bus_notification(
                     'write',
@@ -361,7 +361,7 @@ class HotelReservation(models.Model):
                     ('cancelled' == record.state) and
                     _("Reservation Cancelled") or _("Reservation Changed")
                 )
-        elif any(vals):
+        elif not any(vals) or vals.has_key('to_read') or vals.has_key('to_assign'):
             self.send_bus_notification('write', 'noshow')
         return ret
 
