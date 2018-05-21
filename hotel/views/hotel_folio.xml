@@ -19,7 +19,7 @@
                            states="cancel" class="oe_highlight"/>
                          <button name="send_exit_mail" type="object" string="Send Exit Email"
                            states="done" class="oe_highlight"/>
-                        <button name="%(sale.action_view_sale_advance_payment_inv)d"
+                        <button name="%(hotel.action_view_folio_advance_payment_inv)d"
                             string="Create Invoice" type="action" class="btn-primary" states="sale"
                             attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
                         <button name="action_cancel_draft" states="cancel" string="Set to Draft"
@@ -191,7 +191,8 @@
                                         />
                                         <field name="splitted" invisible="1" />
                                         <field name="parent_reservation" invisible="1" />
-                                        <field name="virtual_room_id" string="Reserved Room Type"/>                   
+                                        <field name="virtual_room_id" string="Reserved Room Type"/>
+                                        <field name="name" invisible="1"/>               
                                         <field name="nights" />
                                         <field name="adults" string="Persons"/>                                        
                                         <field name="checkin" widget="date"/>
@@ -457,7 +458,7 @@
         <act_window id="action_view_folio_advance_payment_inv"
             name="Invoice Folio"
             src_model="hotel.folio"
-            res_model="sale.advance.payment.inv"
+            res_model="folio.advance.payment.inv"
             key2="client_action_multi" target="new"
             view_mode="form" multi="True"/>
 

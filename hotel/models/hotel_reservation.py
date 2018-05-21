@@ -839,7 +839,6 @@ class HotelReservation(models.Model):
             self.checkin = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         if not self.checkout:
             self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-
         if self.product_id:
             room = self.env['hotel.room'].search([
                 ('product_id', '=', self.product_id.id)
