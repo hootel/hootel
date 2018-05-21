@@ -361,7 +361,7 @@ class HotelReservation(models.Model):
                     ('cancelled' == record.state) and
                     _("Reservation Cancelled") or _("Reservation Changed")
                 )
-        elif not any(vals):
+        elif any(vals):
             self.send_bus_notification('write', 'noshow')
         return ret
 

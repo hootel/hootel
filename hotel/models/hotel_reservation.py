@@ -761,7 +761,10 @@ class HotelReservation(models.Model):
 
     @api.multi
     def write(self, vals):
-        pricesChanged = ('checkin' in vals or 'checkout' in vals or 'discount' in vals)
+        pricesChanged = ('checkin' in vals or \
+                         'checkout' in vals or \
+                         'discount' in vals or \
+                         'unit_price' in vals)
         vals.update({
             'edit_room': False,
         })
@@ -776,16 +779,17 @@ class HotelReservation(models.Model):
                     record.update({'price_unit': 0})
                 record.folio_id.compute_invoices_amount()
         for record in self:
-            if (pricesChanged and 'reservation_lines' not in vals) and \
+            if (pricesChanged and 'reservation_lines' not in vals) or \
                     not record.reservation_lines: #To allow add tree edit bottom room_lines on folio form
-                checkin = vals.get('checkin', record.checkin)
-                checkout = vals.get('checkout', record.checkout)
-                days_diff = date_utils.date_diff(checkin,
-                                                 checkout, hours=False)
-                rlines = record.prepare_reservation_lines(checkin, days_diff)
-                record.update({
-                    'reservation_lines': rlines['commands']
-                })
+                if not record.splitted: #TO REVIEW: Hot fix to avoid duplicate reservation_lines
+                    checkin = vals.get('checkin', record.checkin)
+                    checkout = vals.get('checkout', record.checkout)
+                    days_diff = date_utils.date_diff(checkin,
+                                                     checkout, hours=False)
+                    rlines = record.prepare_reservation_lines(checkin, days_diff)
+                    record.update({
+                        'reservation_lines': rlines['commands']
+                    })
         return res
 
     @api.multi

@@ -36,9 +36,9 @@
         'python': []
     },
     'data': [
+        'views/hotel_reservation.xml',
         'views/general.xml',
         'views/actions.xml',
-        'views/hotel_reservation.xml',
     ],
     'qweb': [
         'static/src/xml/*.xml',

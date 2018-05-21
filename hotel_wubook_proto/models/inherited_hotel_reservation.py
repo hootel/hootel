@@ -278,7 +278,7 @@ class HotelReservation(models.Model):
     @api.multi
     def mark_as_readed(self):
         for record in self:
-            record.write({'to_read': False})
+            record.write({'to_read': False, 'to_assign': False})
 
     @api.onchange('checkin', 'checkout', 'product_id')
     def on_change_checkin_checkout_product_id(self):

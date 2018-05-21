@@ -11,12 +11,13 @@
                 decoration-muted="state == 'cancelled' and not overbooking"
                 decoration-warning="overbooking"
                 >
-                    <button icon="fa fa-1x fa-chain-broken"
+                    <button icon="fa fa-2x fa-thumb-tack"
                         type="object"
                         class="oe_stat_button"
                         id="mark_readed" 
                         name="mark_as_readed"
                         attrs="{'invisible':[('to_read','=', False)]}"
+                        help="Mark as Read"
                     />
                     <button icon="fa fa-1x fa-chain-broken"
                         type="object"
@@ -42,6 +43,7 @@
                     <field name="parent_reservation" invisible="1" />
                     <field name="virtual_room_id" string="Reserved Room Type"/>                   
                     <field name="nights" />
+                    <field name="to_read" invisible="1"/>
                     <field name="adults" string="Persons"/>                    
                     <field name="checkin" widget="date"/>
                     <field name="checkout"  widget="date"/>
@@ -62,15 +64,18 @@
             </field>
         </record>
 
-         <!-- Action for hotel cloud reservation -->
-        <record model="ir.actions.act_window" id="open_hotel_wubook_reservation_form_tree_all">
-            <field name="name">Hotel Cloud Reservation</field>
-            <field name="res_model">hotel.reservation</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="view_hotel_toassign_reservation_tree" />
-            <field name="domain">[['wrid', '!=', 'none'],'|', ['to_assign', '=', true], ['to_read', '=', true]]</field>
-        </record>
-
+        <record id="hotel_reservation_view_form" model="ir.ui.view">
+        <field name="model">hotel.reservation</field>
+        <field name="inherit_id" ref="hotel.view_hotel_reservation_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='unify']" position="after">
+                <button name="mark_as_readed" string="Mark as Read"
+                    type="object" class="oe_highlight"
+                    icon="fa-1x fa-thumb-tack"
+                    attrs="{'invisible':[('to_read','=', False)]}"
+                />
+            </xpath>
+        </field>
+    </record>
     </data>
 </openerp>
