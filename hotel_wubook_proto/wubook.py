@@ -1607,7 +1607,7 @@ class WuBook(models.AbstractModel):
             date_end = date_utils.get_datetime(
                 unpushed[-1].date_start,
                 dtformat=DEFAULT_SERVER_DATE_FORMAT)
-            days_diff = date_utils.date_diff(date_srat, date_end, hours=False) + 1
+            days_diff = date_utils.date_diff(date_start, date_end, hours=False) + 1
 
             prices = {}
             pricelist_ids = self.env['product.pricelist'].search([
