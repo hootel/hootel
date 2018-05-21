@@ -18,26 +18,28 @@
     </xpath>
     <xpath expr="//div[@class='page']" position="inside">
         <t t-set="paymentsJSON" t-value="json.loads(o.payments_widget)" />
-        <div>
-            <table style="width:80%;">
-                <thead>
-                    <tr>
-                        <th>Payment Ref.</th>
-                        <th>Payment Date</th>
-                        <th>Payment Method</th>
-                        <th>Paid Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr t-foreach="paymentsJSON['content']" t-as="payment">
-                        <td t-esc="payment['ref']" />
-                        <td t-esc="payment['date']" />
-                        <td t-esc="payment['journal_name']" />
-                        <td t-esc="payment['amount']" />
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <span t-if="paymentsJSON">        
+            <div>
+                <table style="width:80%;">
+                    <thead>
+                        <tr>
+                            <th>Payment Ref.</th>
+                            <th>Payment Date</th>
+                            <th>Payment Method</th>
+                            <th>Paid Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="paymentsJSON['content']" t-as="payment">
+                            <td t-esc="payment['ref']" />
+                            <td t-esc="payment['date']" />
+                            <td t-esc="payment['journal_name']" />
+                            <td t-esc="payment['amount']" />
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </span>
     </xpath>
 </template>
 

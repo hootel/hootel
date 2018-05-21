@@ -87,7 +87,8 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
                   res_model: 'hotel.reservation',
                   res_id: elementIds[0],
                   title: _t('Open: ') + _t('Reservation'),
-                  view_id: viewId
+                  view_id: '%(hotel_calendar_wubook.view_hotel_toassign_reservation_tree)d',
+                  target: 'fullscreen'
                 }).open();
                 popView.on('write_completed', self, function () {
                   self.trigger('changed_value');
