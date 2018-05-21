@@ -226,10 +226,9 @@
                                 <field name="currency_id" invisible="1"/>
                                 <field name="price_subtotal" widget="monetary" invisible="1"/>
                                 <field name="price_unit" invisible="1"/>
-                            </group>
-                            <field name="folio_internal_comment" placeholder="Reservation Notes"/>                                                                             
+                            </group>                                                                                                        
                         </group>                                              
-                                                    
+                        <field name="folio_internal_comment" nolabel="1" placeholder="Reservation Notes"/> 
                         <group invisible="1">
                             <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>                                
                             <field name="check_rooms" invisible="1"/>
