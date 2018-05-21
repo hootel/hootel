@@ -7,6 +7,8 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='channel_type']" position="after">
                 <field name="wchannel_id" attrs='{"readonly": [("able_to_modify_wubook","=",False)], "invisible":[("channel_type","!=", "web")]}' string="OTA"/>
+                <field name="to_read" />
+                <field name="to_assign" />
             </xpath>
             <xpath expr="//field[@name='cardex_pending']" position="before">
                 <group colspan="6" col="6">                    

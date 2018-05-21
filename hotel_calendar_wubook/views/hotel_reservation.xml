@@ -34,7 +34,7 @@
                     <field name="product_id" string="Room"/>
                     <button type="action" class="oe_stat_button"
                         id="reservations_partner" icon="fa fa-2x fa-list-ul"
-                        name="%(open_hotel_reservation_form_tree_all)d"
+                        name="%(hotel.open_hotel_reservation_form_tree_all)d"
                         context="{'search_default_partner_id': partner_id}"
                     />
                     <field name="partner_id"/>
@@ -60,6 +60,16 @@
                     />                
                 </tree>
             </field>
+        </record>
+
+         <!-- Action for hotel cloud reservation -->
+        <record model="ir.actions.act_window" id="open_hotel_wubook_reservation_form_tree_all">
+            <field name="name">Hotel Cloud Reservation</field>
+            <field name="res_model">hotel.reservation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="view_hotel_toassign_reservation_tree" />
+            <field name="domain">[['wrid', '!=', 'none'],'|', ['to_assign', '=', true], ['to_read', '=', true]]</field>
         </record>
 
     </data>

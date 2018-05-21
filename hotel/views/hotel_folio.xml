@@ -154,7 +154,7 @@
                             </group>
                         </group>
                         <group>
-                            <field name="note" />
+                            <field name="internal_comment"/>
                         </group>
                         <notebook colspan="4" col="1">
                             <page string="Lines">
@@ -288,7 +288,7 @@
                                 </group>
                                 <div class="oe_clear" />                                
                                 <group>
-                                    <field name="internal_comment"/>
+                                    <field name="note" />
                                 </group>
                             </page>
                             <page string="Other data" invisible="1">

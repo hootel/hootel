@@ -75,16 +75,7 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
       return $.when(this._super()).then(function () {
         var deferredPromises = [];
         self.$el.find('#btn_channel_manager_request').on('click', function (ev) {
-          self.call_action({
-            type: 'ir.actions.act_window',
-            view_mode: 'form',
-            view_type: 'tree,form',
-            view_id: '%(hotel_calendar_wubook.view_hotel_toassign_reservation_tree)d',
-            res_model: 'hotel.reservation',
-            views: [[false, 'list'], [false, 'form']],
-            domain: _wubookNotifReservationsDomain,
-            name: _t('WuBook Reservations to Assign...'),
-          });
+          self.call_action("hotel_calendar_wubook.open_hotel_wubook_reservation_form_tree_all");
         });
 
         return $.when.apply($, deferredPromises);

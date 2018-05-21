@@ -192,8 +192,7 @@
                                 <field name="mobile" placeholder="mobile" widget="phone" />
                                 <field name="phone" placeholder="phone" widget="phone" />
                                 <field name="partner_internal_comment" string="Partner Note"/>
-                                <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>
-                                <field name="folio_internal_comment" string="Reservation Note"/>                                
+                                <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>                                                         
                             </group>
                             <group colspan="4" string="Reservation Details" name="reservation_details">
                                 <field name="name"/>
@@ -227,7 +226,8 @@
                                 <field name="currency_id" invisible="1"/>
                                 <field name="price_subtotal" widget="monetary" invisible="1"/>
                                 <field name="price_unit" invisible="1"/>
-                            </group>                                                                       
+                            </group>
+                            <field name="folio_internal_comment" placeholder="Reservation Notes"/>                                                                             
                         </group>                                              
                                                     
                         <group invisible="1">
