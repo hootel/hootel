@@ -75,30 +75,16 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
       return $.when(this._super()).then(function () {
         var deferredPromises = [];
         self.$el.find('#btn_channel_manager_request').on('click', function (ev) {
-          new Common.SelectCreateDialog(self, {
+          self.call_action({
+            type: 'ir.actions.act_window',
+            view_mode: 'form',
+            view_type: 'tree,form',
+            view_id: '%(hotel_calendar_wubook.view_hotel_toassign_reservation_tree)d',
             res_model: 'hotel.reservation',
+            views: [[false, 'list'], [false, 'form']],
             domain: _wubookNotifReservationsDomain,
-            title: _t('WuBook Reservations to Assign'),
-            disable_multiple_selection: true,
-            no_create: true,
-            on_selected: function (elementIds) {
-              return self._model.call('get_formview_id', [elementIds[0], Session.user_context]).then(function (viewId) {
-                var popView = new Common.FormViewDialog(self, {
-                  res_model: 'hotel.reservation',
-                  res_id: elementIds[0],
-                  title: _t('Open: ') + _t('Reservation'),
-                  view_id: '%(hotel_calendar_wubook.view_hotel_toassign_reservation_tree)d',
-                  target: 'fullscreen'
-                }).open();
-                popView.on('write_completed', self, function () {
-                  self.trigger('changed_value');
-                });
-                popView.on('closed', self, function () {
-                  self.reload_hcalendar_reservations(); // Here because don't trigger 'write_completed' when change state to confirm
-                });
-              });
-            }
-          }).open();
+            name: _t('WuBook Reservations to Assign...'),
+          });
         });
 
         return $.when.apply($, deferredPromises);
