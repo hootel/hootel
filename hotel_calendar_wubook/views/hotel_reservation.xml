@@ -47,6 +47,7 @@
                     <field name="adults" string="Persons"/>                    
                     <field name="checkin" widget="date"/>
                     <field name="checkout"  widget="date"/>
+                    <field name="origin_sale"/>
                     <field name="overbooking" invisible="1" />
                     <field name="to_assign" invisible="1"/>
                     <!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
