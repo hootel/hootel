@@ -1274,6 +1274,7 @@ class WuBook(models.AbstractModel):
         failed_reservations = []
         checkin_utc_dt = False
         checkout_utc_dt = False
+        split_booking = False
         for book in bookings:   # This create a new folio
             splitted_map = {}
             is_cancellation = book['status'] in WUBOOK_STATUS_BAD

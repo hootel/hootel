@@ -437,6 +437,7 @@ class HotelReservation(models.Model):
         self.ensure_one()
         partner = self.partner_id.id
         amount = min(self.amount_reservation, self.folio_pending_amount)
+        note = self.folio_id.name + ' (' + self.name + ')'
         view_id = self.env.ref('hotel.view_account_payment_folio_form').id
         return{
             'name': _('Register Payment'),
@@ -452,7 +453,7 @@ class HotelReservation(models.Model):
                 'default_payment_type': 'inbound',
                 'default_partner_type': 'customer',
                 'default_partner_id': partner,
-                'default_communication': self.name,
+                'default_communication': note,
             },
             'target': 'new',
         }

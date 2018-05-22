@@ -230,6 +230,17 @@
                                             id="go_reservation" icon="fa fa-2x fa-bars"
                                             name="open_reservation_form"/>
                                     </tree>
+                                    <form>                 
+                                        <group string="Days" name="days">                                
+                                            <field name="reservation_lines" nolabel="1">                                    
+                                                <tree>
+                                                    <field name="date" readonly="True" />
+                                                    <field name="price" />
+                                                </tree>                              
+                                            </field>
+                                            <field name="state" invisible="1" />
+                                        </group>  
+                                    </form>                                    
                                 </field>
                                 <separator string="Service Lines" colspan="4"/>
                                 <field name="service_lines"
