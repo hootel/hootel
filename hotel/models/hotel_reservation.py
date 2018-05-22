@@ -957,6 +957,7 @@ class HotelReservation(models.Model):
         #~ if self.invoice_status == 'invoiced' and not self.splitted:
             #~ raise ValidationError(_("This reservation is already invoiced. \
                         #~ To expand it you must create a new reservation."))
+        rline_obj = self.env['hotel.reservation.line']
         hotel_tz = self.env['ir.values'].sudo().get_default(
             'hotel.config.settings', 'hotel_tz')
         start_date_utc_dt = date_utils.get_datetime(str_start_date_utc)
@@ -965,49 +966,41 @@ class HotelReservation(models.Model):
         room = self.env['hotel.room'].search([
             ('product_id', '=', self.product_id.id)
         ])
-        product_id = self.virtual_room_id \
-            or room.sale_price_type == 'vroom' \
-            and room.price_virtual_room.product_id \
-            or self.product_id
+        product_id = room.sale_price_type == 'vroom' and room.price_virtual_room.product_id or room.product_id
         pricelist_id = self.env['ir.values'].sudo().get_default(
             'hotel.config.settings', 'parity_pricelist_id')
         if pricelist_id:
             pricelist_id = int(pricelist_id)
-        old_lines_ids = self.mapped('reservation_lines.id')
+        old_lines_days = self.mapped('reservation_lines.date')
         for i in range(0, days):
             ndate = start_date_dt + timedelta(days=i)
             ndate_str = ndate.strftime(DEFAULT_SERVER_DATE_FORMAT)
-            prod = product_id.with_context(
-                lang=self.partner_id.lang,
-                partner=self.partner_id.id,
-                quantity=1,
-                date=ndate_str,
-                pricelist=pricelist_id,
-                uom=self.product_uom.id)
-            if not self.reservation_lines.ids or \
-                ndate_str not in self.mapped('reservation_lines.date') or \
-                    update_old_prices:
+            if update_old_prices or ndate_str not in old_lines_days:
+                prod = product_id.with_context(
+                    lang=self.partner_id.lang,
+                    partner=self.partner_id.id,
+                    quantity=1,
+                    date=ndate_str,
+                    pricelist=pricelist_id,
+                    uom=self.product_uom.id)
                 line_price = prod.price
-                cmds.append((0, False, {
-                    'date': ndate_str,
-                    'price': line_price
-                }))
             else:
-                line = self.reservation_lines.search([
-                    ('id', 'in', old_lines_ids),
-                    ('date', '=', ndate)])
+                line = self.reservation_lines.filtered(lambda r: r.date == ndate_str)
                 line_price = line.price
-                cmds.append((0, False, {
-                        'date': ndate_str,
-                        'price': line_price
-                    }))
+            cmds.append((0, False, {
+                'date': ndate_str,
+                'price': line_price
+            }))
             total_price += line_price
+        return {'total_price': total_price, 'commands': cmds}
+
+    @api.constrains('adults')
+    def check_adults(self):
         if self.adults == 0 and self.product_id:
             room = self.env['hotel.room'].search([
                 ('product_id', '=', self.product_id.id)
-            ])
+            ], limit=1)
             self.adults = room.capacity
-        return {'total_price': total_price, 'commands': cmds}
 
     @api.multi
     @api.onchange('checkin', 'checkout', 'room_type_id', 'virtual_room_id',
