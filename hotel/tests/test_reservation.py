@@ -62,7 +62,7 @@ class TestHotelReservations(TestHotel):
         total_price = 0.0
         for rline in reservation.reservation_lines:
             total_price += rline.price
-        self.assertEqual(folio.amount_total, total_price,
+        self.assertEqual(folio.amount_untaxed, total_price,
                          "Folio amount doesn't match with reservation lines")
 
     def test_create_reservations(self):
