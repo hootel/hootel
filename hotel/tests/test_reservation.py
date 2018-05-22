@@ -62,7 +62,7 @@ class TestHotelReservations(TestHotel):
         total_price = 0.0
         for rline in reservation.reservation_lines:
             total_price += rline.price
-        self.assertEqual(folio.amount_untaxed, total_price,
+        self.assertEqual(folio.amount_total, total_price,
                          "Folio amount doesn't match with reservation lines")
 
     def test_create_reservations(self):
@@ -226,3 +226,35 @@ class TestHotelReservations(TestHotel):
                 org_reserv_start_utc_dt,
                 self.hotel_room_simple_100,
                 "Invalid Reservation Test #8")
+
+    def test_modify_reservation(self):
+        now_utc_dt = date_utils.now()
+
+        # 5.0, 15.0, 15.0, 35.0, 35.0, 10.0, 10.0
+
+        vroom_prices = self.prices_tmp[self.hotel_room_double_200.price_virtual_room.id]
+        org_reserv_start_utc_dt = now_utc_dt + timedelta(days=1)
+        org_reserv_end_utc_dt = org_reserv_start_utc_dt + timedelta(days=2)
+        folio = self.create_folio(self.user_hotel_manager, self.partner_2)
+        reservation = self.create_reservation(
+            self.user_hotel_manager,
+            folio,
+            org_reserv_start_utc_dt,
+            org_reserv_end_utc_dt,
+            self.hotel_room_double_200,
+            "Original Reservation Test #1")
+        ndate = org_reserv_start_utc_dt
+        for r_k, r_v in enumerate(reservation.reservation_lines):
+            self.assertEqual(r_v.date, ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))
+            self.assertEqual(r_v.price, vroom_prices[r_k+1])
+            ndate = ndate + timedelta(days=1)
+        self.assertEqual(reservation.amount_room, 30.0)
+        ndate = org_reserv_start_utc_dt + timedelta(days=1)
+        line = reservation.reservation_lines.filtered(lambda r: r.date == ndate.strftime(DEFAULT_SERVER_DATE_FORMAT))
+        reservation.reservation_lines = [(1, line.id, {'price': 100.0})]
+        self.assertEqual(reservation.amount_room, 115.0)
+        reservation.sudo(self.user_hotel_manager).write({
+            'checkin': (org_reserv_start_utc_dt + timedelta(days=1)).strftime(DEFAULT_SERVER_DATE_FORMAT),
+            'checkout': (org_reserv_end_utc_dt + timedelta(days=1)).strftime(DEFAULT_SERVER_DATE_FORMAT),
+        })
+        self.assertEqual(reservation.amount_room, 135.0)
