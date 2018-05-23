@@ -12,7 +12,7 @@
 	<template id="assets_backend" inherit_id="web.assets_backend">
 		<xpath expr="." position="inside">
 			<script type="text/javascript" src="/hotel_calendar/static/src/lib/bootbox.js"></script>
-			
+
 			<link rel="stylesheet" href="/hotel_calendar/static/src/css/hcalendar.css" />
 			<link rel="stylesheet" href="/hotel_calendar/static/src/css/hcalendar_management.css" />
 			<script type="text/javascript" src="/hotel_calendar/static/src/js/hcalendar.js"></script>
@@ -21,6 +21,8 @@
 			<link rel="stylesheet" href="/hotel_calendar/static/src/css/view.css" />
 			<script type="text/javascript" src="/hotel_calendar/static/src/js/hotel_calendar_view.js"></script>
 			<script type="text/javascript" src="/hotel_calendar/static/src/js/hotel_calendar_management_view.js"></script>
+
+			<script type="text/javascript" src="/hotel_calendar/static/src/js/open_reservation_wizard_listview_button.js"></script>
 		</xpath>
 	</template>
 
