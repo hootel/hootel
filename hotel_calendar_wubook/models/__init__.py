@@ -22,3 +22,4 @@
 from . import inherited_hotel_reservation
 from . import inherited_bus_hotel_calendar
 from . import inherited_wubook_issue
+from . import inherited_hotel_calendar_management

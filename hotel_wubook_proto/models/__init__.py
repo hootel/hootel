@@ -28,7 +28,6 @@ from . import inherited_reservation_restriction_item
 from . import inherited_virtual_room_availability
 from . import inherited_hotel_reservation
 from . import inherited_hotel_folio
-from . import inherited_hotel_calendar_management
 from . import inherited_res_partner
 from . import inherited_bus_hotel_calendar
 from . import wubook_channel_info
