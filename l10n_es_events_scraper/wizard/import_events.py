@@ -29,34 +29,6 @@ import logging
 _logger = logging.getLogger(__name__)
 
 CALENDAR_EVENT_TYPE_CONCERT = 'Concert'
-REQUEST_DELAY = 3
-MONTHS_MAP = {
-    'Enero': 1,
-    'Febrero': 2,
-    'Marzo': 3,
-    'Abril': 4,
-    'Mayo': 5,
-    'Junio': 6,
-    'Julio': 7,
-    'Agosto': 8,
-    'Septiembre': 9,
-    'Octubre': 10,
-    'Noviembre': 11,
-    'Diciembre': 12,
-}
-
-
-class EventCity:
-    def __init__(self, postid=0, city='', dates=[], name='', address='',
-                 venue='', prices='', buy_tickets=''):
-        self.postid = postid
-        self.city = city
-        self.dates = dates
-        self.name = name
-        self.address = address
-        self.venue = venue
-        self.prices = prices
-        self.buy_tickets = buy_tickets
 
 
 class ImportEventsWizard(models.TransientModel):
@@ -72,7 +44,7 @@ class ImportEventsWizard(models.TransientModel):
     @api.multi
     def import_events(self):
         events = []
-        scraper_abc._import_city_events(
+        scraper_abc.import_city_events(
             events,
             '%s %s' % (self.city, self.year),
             pags=1,

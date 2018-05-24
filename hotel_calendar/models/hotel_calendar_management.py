@@ -222,6 +222,37 @@ class HotelCalendarManagement(models.TransientModel):
                     })
         return json_data
 
+    @api.model
+    def _hcalendar_events_json_data(self, dfrom, dto):
+        date_start = date_utils.get_datetime(dfrom, hours=False) - timedelta(days=1)
+        date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        user_id = self.env['res.users'].browse(self.env.uid)
+        domain = []
+        if user_id.pms_allowed_events_tags:
+            domain.append(('categ_ids', 'in', user_id.pms_allowed_events_tags))
+        if user_id.pms_denied_events_tags:
+            domain.append(
+                ('categ_ids', 'not in', user_id.pms_denied_events_tags))
+        events_raw = self.env['calendar.event'].search(domain)
+        events_ll = self.env['calendar.event'].search([
+            ('start', '<=', dto),
+            ('stop', '>=', date_start_str)
+        ])
+        events_lr = self.env['calendar.event'].search([
+            ('start', '>=', date_start_str),
+            ('stop', '<=', dto)
+        ])
+        events = (events_ll | events_lr) & events_raw
+        json_data = []
+        for event in events:
+            json_data.append([
+                event.id,
+                event.name,
+                event.start,
+                event.location,
+            ])
+        return json_data
+
     def _hcalendar_get_count_reservations_json_data(self, dfrom, dto):
         vrooms = self.env['hotel.virtual.room'].search([])
         date_start = date_utils.get_datetime(dfrom, hours=False)
@@ -282,11 +313,13 @@ class HotelCalendarManagement(models.TransientModel):
         json_rest = self._hcalendar_restriction_json_data(restriction_item_ids)
         json_avails = self._hcalendar_availability_json_data(dfrom, dto)
         json_rc = self._hcalendar_get_count_reservations_json_data(dfrom, dto)
+        json_events = self._hcalendar_events_json_data(dfrom, dto)
         vals.update({
             'prices': json_prices or [],
             'restrictions': json_rest or [],
             'availability': json_avails or [],
             'count_reservations': json_rc or [],
+            'events': json_events or [],
         })
 
         if withRooms:

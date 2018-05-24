@@ -75,6 +75,7 @@ var HotelCalendarManagementView = View.extend({
     _last_dates: [false, false],
     _pricelist_id: null,
     _restriction_id: null,
+    _days_tooltips: [],
 
     /** VIEW METHODS **/
     init: function(parent, dataset, fields_view, options) {
@@ -204,6 +205,7 @@ var HotelCalendarManagementView = View.extend({
         var params = this.generate_params();
         var oparams = [false, params['dates'][0], params['dates'][1], false, false, true];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
+            self._days_tooltips = results['events'];
             var rooms = [];
             for (var r of results['rooms']) {
                 var nroom = new HVRoom(
@@ -292,6 +294,7 @@ var HotelCalendarManagementView = View.extend({
                 }
             });
             self._hcalendar.setData(results['prices'], results['restrictions'], results['availability'], results['count_reservations']);
+            self._assign_extra_info();
         });
     },
 
@@ -539,7 +542,9 @@ var HotelCalendarManagementView = View.extend({
         var params = this.generate_params();
         var oparams = [false, params['dates'][0], params['dates'][1], params['prices'], params['restrictions'], false];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
+            self._days_tooltips = results['events'];
             self._hcalendar.setData(results['prices'], results['restrictions'], results['availability'], results['count_reservations']);
+            self._assign_extra_info();
         });
         this._last_dates = params['dates'];
         this.$CalendarHeaderDays = this.$el.find("div.table-vroom-data-header");
@@ -613,7 +618,45 @@ var HotelCalendarManagementView = View.extend({
                 return env;
             }
         }
-    }
+    },
+
+    _assign_extra_info: function() {
+      var self = this;
+
+      $(this._hcalendar.etableHeader).find('.hcal-cell-header-day').each(function(index, elm){
+        var $elm = $(elm);
+        var cdate = HotelCalendar.toMoment($elm.data('hcalDate'), L10N_DATE_MOMENT_FORMAT);
+        var data = _.filter(self._days_tooltips, function(item) {
+          var ndate = HotelCalendar.toMoment(item[2], ODOO_DATE_MOMENT_FORMAT);
+          return ndate.isSame(cdate, 'd');
+        });
+        if (data.length > 0) {
+          $elm.addClass('hcal-event-day');
+          $elm.on("mouseenter", function(data){
+            var $this = $(this);
+            if (data.length > 0) {
+              var qdict = {
+                'date': $this.data('hcalDate'),
+                'events': _.map(data, function(item){
+                  return {
+                    'name': item[1],
+                    'date': item[2],
+                    'location': item[3]
+                  };
+                })
+              };
+              $this.attr('title', '');
+              $this.tooltip({
+                  animation: true,
+                  html: true,
+                  placement: 'bottom',
+                  title: QWeb.render('HotelCalendar.TooltipEvent', qdict)
+              }).tooltip('show');
+            }
+          }.bind(elm, data));
+        }
+      });
+    },
 });
 
 Core.view_registry.add('mpms', HotelCalendarManagementView);
