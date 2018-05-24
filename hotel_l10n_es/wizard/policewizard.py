@@ -26,14 +26,15 @@ import datetime
 from openerp.tools.translate import _
 
 import logging
-_logger=logging.getLogger(__name__)
+_logger = logging.getLogger(__name__)
 
 
 class Wizard(models.TransientModel):
     _name = 'police.wizard'
 
-    download_date = fields.Date('Date',required=True)
-    download_num = fields.Char('Correlative number',required=True,size=3,help='Number provided by the police')
+    download_date = fields.Date('Date', required=True)
+    download_num = fields.Char('Correlative number', required=True, size=3,
+                               help='Number provided by the police')
     txt_filename = fields.Char()
     txt_binary = fields.Binary()
     txt_message = fields.Char()
@@ -41,25 +42,29 @@ class Wizard(models.TransientModel):
     @api.one
     def generate_file(self):
         compa = self.env.user.company_id
-        if compa.police <> False and compa.property_name <> False:
-            lines = self.env['cardex'].search([('enter_date','=',self.download_date)])
-            content = "1|"+compa.police+"|"+compa.property_name.upper()[0:40]+"|"
+        if compa.police is not False and compa.property_name is not False:
+            lines = self.env['cardex'].search([('enter_date', '=',
+                                                self.download_date)])
+            content = "1|"+compa.police+"|"+compa.property_name.upper()[0:40]
+            content += "|"
             content += datetime.datetime.now().strftime("%Y%m%d|%H%M")
-            content += "|"+str(len(lines))+ """
+            content += "|"+str(len(lines)) + """
 """
 
-            for line in lines :
-                if ((line.partner_id.documenttype <> False)
-                    and (line.partner_id.poldocument <> False)
-                    and (line.partner_id.firstname <> False)
-                    and (line.partner_id.lastname <> False)):
+            for line in lines:
+                if ((line.partner_id.documenttype is not False)
+                        and (line.partner_id.poldocument is not False)
+                        and (line.partner_id.firstname is not False)
+                        and (line.partner_id.lastname is not False)):
 
-                    if  line.partner_id.documenttype in ["D","P","C"]:
+                    if line.partner_id.documenttype in ["D", "P", "C"]:
                         content += "2|"+line.partner_id.poldocument + "||"
                     else:
                         content += "2||"+line.partner_id.poldocument + "|"
                     content += line.partner_id.documenttype + "|"
-                    content += datetime.datetime.strptime(line.partner_id.polexpedition, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
+                    content += datetime.datetime.strptime(
+                        line.partner_id.polexpedition,
+                        "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
                     content += line.partner_id.firstname.upper() + "|"
                     apellidos = line.partner_id.lastname.split(" ", 1)
                     if len(apellidos) == 2:
@@ -68,23 +73,33 @@ class Wizard(models.TransientModel):
                     else:
                         content += "|"+apellidos[0].upper() + "|"
                     content += line.partner_id.gender.upper()[0] + "|"
-                    content += datetime.datetime.strptime(line.partner_id.birthdate_date, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
-                    content += line.partner_id.code_ine.name.upper()[0:21] + "|"
-                    content += datetime.datetime.strptime(line.enter_date, "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
+                    content += datetime.datetime.strptime(
+                        line.partner_id.birthdate_date,
+                        "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
+                    if len(line.partner_id.code_ine.code) == 5:
+                        content += u'ESPAÑA|'
+                    else:
+                        content += line.partner_id.code_ine.name.upper()[0:21]
+                        content += "|"
+                    content += datetime.datetime.strptime(
+                        line.enter_date,
+                        "%Y-%m-%d").date().strftime("%Y%m%d") + "|"
                     content += """
 """
                 else:
-                    _logger.info('---- Problema generando el fichero. Checkin Saltado ----')
+                    _logger.info('---- Problema generando el fichero. \
+                                 Checkin Saltado ----')
                     return self.write({
-                    'txt_message': _('Problem generating the file. Checkin without data, or incorrect data.')
-                    })
-
+                        'txt_message': _('Problem generating the file. \
+                                         Checkin without data, \
+                                         or incorrect data.')})
 
             return self.write({
-                'txt_filename': compa.police +'.'+ self.download_num,
-                'txt_message': _('Generated file. Download it and give it to the police.'),
+                'txt_filename': compa.police + '.' + self.download_num,
+                'txt_message': _(
+                    'Generated file. Download it and give it to the police.'),
                 'txt_binary': base64.encodestring(content.encode("iso-8859-1"))
                 })
         return self.write({
-        'txt_message': _('File not generated by configuration error.')
+            'txt_message': _('File not generated by configuration error.')
         })
