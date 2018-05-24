@@ -84,4 +84,29 @@
         </field>
     </record>
 
+     <!--graph view of hotel reservation -->
+    <record id="view_hotel_reservation_graph" model="ir.ui.view">
+        <field name="name">view.hotel.reservation.graph</field>
+        <field name="model">hotel.reservation</field>
+        <field name="arch" type="xml">
+            <graph type="bar">
+                <field name="origin_sale" string="Origin"/>
+                <field name="price_total" type="measure" />
+            </graph>
+        </field>
+    </record>
+
+    <!--pivot view of hotel reservation -->
+    <record id="view_hotel_pivot_graph" model="ir.ui.view">
+        <field name="name">view.hotel.pivot.graph</field>
+        <field name="model">hotel.reservation</field>
+        <field name="arch" type="xml">
+            <pivot string="Reservations">
+                <field name="checkin" type="row" />
+                <field name="origin_sale" string="Origin" type="col" />
+                <field name="price_total" string="Price" type="measure" />
+            </pivot>
+        </field>
+    </record>
+
 </odoo>

@@ -18,8 +18,7 @@ odoo.define('hotel_calendar_wubook.HotelCalendarViewWuBook', function (require) 
   var QWeb = Core.qweb;
 
   var _wubookNotifReservationsDomain = [
-    ['wrid', '!=', 'none'],
-    '|', ['to_assign', '=', true], ['to_read', '=', true]
+    ['to_assign', '=', true], ['to_read', '=', true]
   ];
   var _wubookIssuesDomain = [
     ['to_read', '=', true]

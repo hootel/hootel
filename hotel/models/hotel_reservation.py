@@ -112,7 +112,7 @@ class HotelReservation(models.Model):
                     'hotel.config.settings', 'color_letter_payment_pending')
         return (reserv_color, reserv_color_text)
 
-    @api.depends('state', 'reservation_type', 'folio_id.invoices_amount')
+    @api.depends('state', 'reservation_type', 'folio_id.invoices_amount','to_assign')
     def _compute_color(self):
         _logger.info('_compute_color')
         for rec in self:
@@ -161,6 +161,11 @@ class HotelReservation(models.Model):
         @param arg: User defined arguments
         '''
         return self.env['sale.order.line']._number_packages(field_name, arg)
+
+    @api.multi
+    def set_call_center_user(self):
+        user = self.env['res.users'].browse(self.env.uid)
+        rec.call_center = user.has_group('hotel.group_hotel_call')
 
     @api.multi
     def _get_default_checkin(self):
@@ -252,7 +257,7 @@ class HotelReservation(models.Model):
     children = fields.Integer('Children', size=64, readonly=False,
                               track_visibility='onchange',
                               help='Number of children there in guest list.')
-    to_assign = fields.Boolean('To Assign')
+    to_assign = fields.Boolean('To Assign', track_visibility='onchange')
     state = fields.Selection([('draft', 'Pre-reservation'), ('confirm', 'Pending Entry'),
                               ('booking', 'On Board'), ('done', 'Out'),
                               ('cancelled', 'Cancelled')],
@@ -346,6 +351,7 @@ class HotelReservation(models.Model):
     folio_internal_comment = fields.Text(string='Internal Folio Notes',
                                            related='folio_id.internal_comment')
     preconfirm = fields.Boolean('Auto confirm to Save', default=True)
+    call_center = fields.Boolean(compute='set_call_center_user')
 
     def _computed_folio_name(self):
         for res in self:
@@ -519,7 +525,6 @@ class HotelReservation(models.Model):
         for record in self:
             record.write({
                 'state': 'cancelled',
-                'to_assign': False,
                 'discount': 100.0,
             })
             if record.checkin_is_today:
@@ -545,7 +550,7 @@ class HotelReservation(models.Model):
     @api.multi
     def draft(self):
         for record in self:
-            record.write({'state': 'draft', 'to_assign': False})
+            record.write({'state': 'draft'})
 
             if record.splitted:
                 master_reservation = record.parent_reservation or record
@@ -563,7 +568,6 @@ class HotelReservation(models.Model):
     def action_reservation_checkout(self):
         for record in self:
             record.state = 'done'
-            record.to_assign = False
             if record.checkout_is_today():
                 record.is_checkout = False
                 folio = self.env['hotel.folio'].browse(self.folio_id.id)
@@ -714,6 +718,10 @@ class HotelReservation(models.Model):
                          'folio_id': folio.id,
                          'reservation_type': vals.get('reservation_type'),
                          'channel_type': vals.get('channel_type')})
+        user = self.env['res.users'].browse(self.env.uid)
+        if user.has_group('hotel.group_hotel_call'):
+            vals.update({'to_assign': True})
+
         vals.update({
             'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         })
@@ -733,31 +741,17 @@ class HotelReservation(models.Model):
                     record.preconfirm == True:
                 record.confirm()
             record._compute_color()
-
-            # Update Availability (Removed because wubook-proto do it)
-            # cavail = self.env['hotel.reservation'].get_availability(
-            #     record.checkin,
-            #     record.checkout,
-            #     record.product_id.id, dbchanged=False)
-            # hotel_vroom_avail_obj = self.env['hotel.virtual.room.availability']
-            # for item in cavail:
-            #     for rec in item['days']:
-            #         vroom_avail = hotel_vroom_avail_obj.search([
-            #             ('virtual_room_id', '=', item['id']),
-            #             ('date', '=', rec['date'])
-            #         ])
-            #         vals = {
-            #             'avail': rec['avail']
-            #         }
-            #         if vroom_avail:
-            #             vroom_avail.write(vals)
-            #         else:
-            #             vals.update({
-            #                 'virtual_room_id': item['id'],
-            #                 'date': rec['date'],
-            #             })
-            #             hotel_vroom_avail_obj.create(vals)
-
+            
+            if not record.reservation_lines and not record.splitted: #To allow add tree edit bottom room_lines on folio form
+            #TO REVIEW: Hot fix to avoid duplicate reservation_lines
+                checkin = vals.get('checkin', record.checkin)
+                checkout = vals.get('checkout', record.checkout)
+                days_diff = date_utils.date_diff(checkin,
+                                                 checkout, hours=False)
+                rlines = record.prepare_reservation_lines(checkin, days_diff)
+                record.update({
+                    'reservation_lines': rlines['commands']
+                })
             return record
 
     @api.multi
@@ -769,7 +763,8 @@ class HotelReservation(models.Model):
         vals.update({
             'edit_room': False,
         })
-        if pricesChanged or 'state' in vals or 'virtual_room_id' in vals:
+        if pricesChanged or 'state' in vals or 'virtual_room_id' in vals \
+                         or 'to_assign' in vals:
             vals.update({
             'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         })
@@ -780,9 +775,7 @@ class HotelReservation(models.Model):
                     record.update({'price_unit': 0})
                 record.folio_id.compute_invoices_amount()
         for record in self:
-            if (pricesChanged and 'reservation_lines' not in vals) or \
-                    not record.reservation_lines: #To allow add tree edit bottom room_lines on folio form
-                if not record.splitted: #TO REVIEW: Hot fix to avoid duplicate reservation_lines
+            if (pricesChanged and 'reservation_lines' not in vals):
                     checkin = vals.get('checkin', record.checkin)
                     checkout = vals.get('checkout', record.checkout)
                     days_diff = date_utils.date_diff(checkin,
@@ -1063,9 +1056,10 @@ class HotelReservation(models.Model):
         for r in self:
             vals = {}
             if r.cardex_ids:
-                vals.update({'state': 'booking', 'to_assign': False})
+                vals.update({'state': 'booking'})
             else:
-                vals.update({'state': 'confirm', 'to_assign': False})
+                vals.update({'state': 'confirm'})
+                vals.update({'state': 'confirm'})
             if r.checkin_is_today():
                 vals.update({'is_checkin': True})
                 folio = hotel_folio_obj.browse(r.folio_id.id)

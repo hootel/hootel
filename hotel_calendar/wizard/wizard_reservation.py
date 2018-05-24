@@ -40,6 +40,11 @@ class FolioWizard(models.TransientModel):
     _name = 'hotel.folio.wizard'
 
     @api.model
+    def _get_default_center_user(self):
+        user = self.env['res.users'].browse(self.env.uid)          
+        return user.has_group('hotel.group_hotel_call')
+
+    @api.model
     def _get_default_checkin(self):
         folio = False
         default_arrival_hour = self.env['ir.values'].get_default(
@@ -83,6 +88,12 @@ class FolioWizard(models.TransientModel):
             ndate_dt = date_utils.dt_as_timezone(ndate_dt, 'UTC')
             return ndate_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
 
+    @api.model
+    def _get_default_channel_type(self):
+        user = self.env['res.users'].browse(self.env.uid) 
+        if user.has_group('hotel.group_hotel_call'):
+            return 'call'
+
     partner_id = fields.Many2one('res.partner',string="Customer")
     checkin = fields.Datetime('Check In', required=True,
                               default=_get_default_checkin)
@@ -98,10 +109,11 @@ class FolioWizard(models.TransientModel):
         ('door', 'Door'),
         ('mail', 'Mail'),
         ('phone', 'Phone'),
-        ('web', 'Web'),
-    ], 'Sales Channel')
+        ('call', 'Call Center')
+    ], string='Sales Channel',  default=_get_default_channel_type)
     virtual_room_wizard_ids = fields.Many2many('hotel.virtual.room.wizard',
                                       string="Virtual Rooms")
+    call_center = fields.Boolean(default=_get_default_center_user)
 
     def assign_rooms(self):
         self.assign=True
@@ -255,6 +267,8 @@ class FolioWizard(models.TransientModel):
                         'checkout': line.checkout,
                         'discount': line.discount,
                         'virtual_room_id': line.virtual_room_id.id,
+                        'to_read': line.to_read,
+                        'to_assign': line.to_assign,
                     }))
         vals = {
                 'partner_id': self.partner_id.id,
@@ -390,7 +404,15 @@ class ReservationWizard(models.TransientModel):
     amount_reservation = fields.Float(string='Total', readonly=True)
     partner_id = fields.Many2one(related='folio_wizard_id.partner_id')
     discount = fields.Float('discount')
+    to_read = fields.Boolean(compute="_compute_to_read_assign")
+    to_assign = fields.Boolean(compute="_compute_to_read_assign")
 
+    @api.multi
+    def _compute_to_read_assign(self):
+        for rec in self:
+            user = self.env['res.users'].browse(self.env.uid)          
+            if user.has_group('hotel.group_hotel_call'):
+                rec.to_read = rec.to_assign = True
     
     @api.multi
     @api.onchange('product_id')

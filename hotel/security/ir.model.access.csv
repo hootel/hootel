@@ -45,3 +45,5 @@ access_hotel_virtual_room_availability_manager,hotel.availability.manager,hotel.
 access_hotel_virtual_room_availability_user,hotel.availability.user,hotel.model_hotel_virtual_room_availability,hotel.group_hotel_user,1,1,1,1
 access_hotel_user reconcilie,hotel.user reconcilie,account.model_account_partial_reconcile,hotel.group_hotel_user,1,1,1,1
 access_hotel_user_account_full_reconcilie,hotel.user_account_full_reconcilie,account.model_account_full_reconcile,hotel.group_hotel_user,1,1,1,1
+access_hotel_user_user,hotel.user_res_user,auth_crypt.model_res_users,hotel.group_hotel_user,1,1,0,0
+access_hotel_manager_user,hotel.manager_res_user,auth_crypt.model_res_users,hotel.group_hotel_manager,2,2,1,1

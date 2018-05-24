@@ -11,5 +11,11 @@
     <record id="group_hotel_user" model="res.groups">
         <field name="name">Hotel Management / User</field>
     </record>
+
+    <!--Group for hotel user -->
+    <record id="group_hotel_call" model="res.groups">
+        <field name="name">Hotel Management / CallCenter</field>
+        <field name="implied_ids" eval="[(4, ref('hotel.group_hotel_user'))]"/>
+    </record>
 </data>
 </openerp>

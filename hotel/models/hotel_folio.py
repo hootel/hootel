@@ -111,15 +111,13 @@ class HotelFolio(models.Model):
     room_lines = fields.One2many('hotel.reservation', 'folio_id',
                                  readonly=False,
                                  states={'done': [('readonly', True)]},
-                                 help="Hotel room reservation detail.",
-                                 track_visibility='onchange')
+                                 help="Hotel room reservation detail.",)
     service_lines = fields.One2many('hotel.service.line', 'folio_id',
                                     readonly=False,
                                     states={'done': [('readonly', True)]},
                                     help="Hotel services detail provide to"
                                     "customer and it will include in "
-                                    "main Invoice.",
-                                    track_visibility='onchange')
+                                    "main Invoice.")
     hotel_policy = fields.Selection([('prepaid', 'On Booking'),
                                      ('manual', 'On Check In'),
                                      ('picking', 'On Checkout')],
@@ -136,11 +134,14 @@ class HotelFolio(models.Model):
     #~ partner_invoice_id = fields.Many2one('res.partner', string='Invoice Address', readonly=False, required=True, help="Invoice address for current sales order.")
     hotel_invoice_id = fields.Many2one('account.invoice', 'Invoice')
     invoices_amount = fields.Monetary(compute='compute_invoices_amount',
-                                      store=True)
+                                      store=True, track_visibility='onchange',
+                                      string="Pending in Folio")
     refund_amount = fields.Monetary(compute='compute_invoices_amount',
-                                    store=True)
+                                    store=True, track_visibility='onchange',
+                                    string="Payment Returns")
     invoices_paid = fields.Monetary(compute='compute_invoices_amount',
-                                    store=True)
+                                    store=True, track_visibility='onchange',
+                                    string="Payments")
     booking_pending = fields.Integer('Booking pending',
                                      compute='_compute_cardex_count')
     cardex_count = fields.Integer('Cardex counter',
@@ -173,6 +174,7 @@ class HotelFolio(models.Model):
         ('door', 'Door'),
         ('mail', 'Mail'),
         ('phone', 'Phone'),
+        ('call', 'Call Center'),
         ('web','Web')], 'Sales Channel')
     num_invoices = fields.Integer(compute='_compute_num_invoices')
     rooms_char = fields.Char('Rooms', compute='_computed_rooms_char')

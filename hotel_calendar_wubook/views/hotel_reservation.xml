@@ -47,6 +47,9 @@
                     <field name="adults" string="Persons"/>                    
                     <field name="checkin" widget="date"/>
                     <field name="checkout"  widget="date"/>
+                    <field name="create_date"/>
+                    <field name="overbooking" invisible="1" />
+                    <field name="last_updated_res" string="Updated on"/>
                     <field name="origin_sale"/>
                     <field name="overbooking" invisible="1" />
                     <field name="to_assign" invisible="1"/>

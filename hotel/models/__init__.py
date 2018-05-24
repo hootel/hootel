@@ -48,4 +48,5 @@ from . import inherit_product_pricelist
 from . import res_config
 from . import inherit_res_partner
 from . import inherit_sale_order_line
+from . import inherit_sale_order
 #~ from . import hotel_dashboard

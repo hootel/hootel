@@ -17,7 +17,7 @@
             <field name="name">Hotel Reservation</field>
             <field name="res_model">hotel.reservation</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,form,graph,pivot</field>
         </record>
 
         <menuitem name="Reservation Rooms" id="menu_open_hotel_reservation_form_tree_all"
@@ -390,7 +390,8 @@
                         id="cardex_smart_button" icon="fa fa-3x fa-money"
                         name="action_pay_folio"
                         attrs="{'invisible':[('folio_pending_amount','==',0)]}"
-                    />                
+                    />
+                    <field name="create_uid"/>              
                 </tree>
             </field>
         </record>
@@ -403,6 +404,9 @@
                 <search string="Reservation Detail">
                     <field name="partner_id" />
                     <field name="folio_id" />
+                    <filter string="My Reservations"
+                                domain="[('create_uid', '=', uid)]"
+                                 />
                     <filter string="Cancelled"
                                 domain="[('state', '=', 'cancelled')]"
                                  />
@@ -430,6 +434,22 @@
                     <filter string="To Assign"
                                 domain="[('to_assign','=',True)]"
                                 />
+                    <separato/>                    
+                    <filter string="Call Center"
+                                domain="[('channel_type', '=', 'call')]"
+                                 />
+                    <filter string="Web"
+                                domain="[('channel_type', '=', 'web')]"
+                                 />
+                    <filter string="Door"
+                                domain="[('channel_type', '=', 'door')]"
+                                 />
+                    <filter string="Mail"
+                                domain="[('channel_type', '=', 'mail')]"
+                                 />
+                    <filter string="Phone"
+                                domain="[('channel_type', '=', 'phone')]"
+                                 />
                     <separator/>
                     <filter string="Still to be paid"
                                 domain="[('folio_id.invoices_amount','&gt;',0)]"
@@ -455,11 +475,13 @@
                         <filter string="Creation Date" domain="[]"
                             context="{'group_by':'create_date'}" />
                         <filter string="Checkin Date" domain="[]"
-                            context="{'group_by':'checkin'}" />                        
+                            context="{'group_by':'checkin'}" />
+                        <filter string="Created By" domain="[]"
+                            context="{'group_by':'create_uid'}" />
                     </group>
                 </search>
             </field>
         </record>
-
+        
     </data>
 </openerp>

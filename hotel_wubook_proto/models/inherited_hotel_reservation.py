@@ -41,7 +41,8 @@ class HotelReservation(models.Model):
     @api.multi
     def set_access_for_wubook_fields(self):
         for rec in self:
-            rec.able_to_modify_wubook = rec.env['res.users'].has_group('base.group_system')
+            user = self.env['res.users'].browse(self.env.uid)          
+            rec.able_to_modify_wubook = user.has_group('base.group_system')
 
     @api.depends('channel_type','wchannel_id')
     def _get_origin_sale(self):
@@ -88,6 +89,9 @@ class HotelReservation(models.Model):
     def create(self, vals):
         if vals.get('wrid') != None:
             vals.update({'preconfirm': False})
+        user = self.env['res.users'].browse(self.env.uid)          
+        if user.has_group('hotel.group_hotel_call'):
+            vals.update({'to_read': True})
         res = super(HotelReservation, self).create(vals)
         if self._context.get('wubook_action', True) and \
                 self.env['wubook'].is_valid_account():
@@ -195,7 +199,6 @@ class HotelReservation(models.Model):
 
     @api.multi
     def confirm(self):
-        self.mark_as_readed()
         can_confirm = True
         for record in self:
             if record.wis_from_channel and int(record.wstatus) in WUBOOK_STATUS_BAD:
@@ -224,7 +227,6 @@ class HotelReservation(models.Model):
     @api.multi
     def action_reservation_checkout(self):
         for record in self:
-            record.mark_as_readed()
             if record.state == 'cancelled':
                 return
             else:
