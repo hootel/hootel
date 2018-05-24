@@ -94,6 +94,15 @@
 	</t>
 </t>
 
+<t t-name="HotelCalendar.TooltipEvent">
+	<div class="oe_tooltip_string"><t t-esc="date"/></div>
+	<ul>
+		<li t-foreach="events" t-as="event">
+			<t t-esc="event.name"/>
+		</li>
+	</ul>
+</t>
+
 <t t-name="HotelCalendar.TooltipRoomOverbooking">
 	<div class="oe_tooltip_string"><t t-esc="name"/></div>
 	<p><b>Overbooking Management</b></p>

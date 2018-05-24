@@ -97,6 +97,9 @@
 	text-align: center;
 }
 
+.hcal-event-day {
+	background-color: #6ebcff !important;
+}
 
 .btn-hcal { }
 .btn-hcal.hcal-cell-current-day {

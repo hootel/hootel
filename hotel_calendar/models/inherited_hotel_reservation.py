@@ -110,6 +110,18 @@ class HotelReservation(models.Model):
                 room.room_amenities.ids))
         return json_rooms
 
+    @api.model
+    def _hcalendar_event_data(self, events):
+        json_events = []
+        for event in events:
+            json_events.append([
+                event.id,
+                event.name,
+                event.start,
+                event.location,
+            ])
+        return json_events
+
     @api.multi
     def get_hcalendar_reservations_data(self, dfrom, dto, domain, rooms):
         date_start = date_utils.get_datetime(dfrom, hours=False) \
@@ -218,6 +230,30 @@ class HotelReservation(models.Model):
         return json_rooms_rests
 
     @api.multi
+    def get_hcalendar_events_data(self, dfrom, dto):
+        date_start = date_utils.get_datetime(dfrom, hours=False) \
+            - timedelta(days=1)
+        date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+        user_id = self.env['res.users'].browse(self.env.uid)
+        domain = []
+        if user_id.pms_allowed_events_tags:
+            domain.append(('categ_ids', 'in', user_id.pms_allowed_events_tags))
+        if user_id.pms_denied_events_tags:
+            domain.append(
+                ('categ_ids', 'not in', user_id.pms_denied_events_tags))
+        events_raw = self.env['calendar.event'].search(domain)
+        events_ll = self.env['calendar.event'].search([
+            ('start', '<=', dto),
+            ('stop', '>=', date_start_str)
+        ])
+        events_lr = self.env['calendar.event'].search([
+            ('start', '>=', date_start_str),
+            ('stop', '<=', dto)
+        ])
+        events = (events_ll | events_lr) & events_raw
+        return self._hcalendar_event_data(events)
+
+    @api.multi
     def get_hcalendar_settings(self):
         user_id = self.env['res.users'].browse(self.env.uid)
         type_move = user_id.pms_type_move
@@ -240,7 +276,8 @@ class HotelReservation(models.Model):
 
     @api.multi
     def get_hcalendar_all_data(self, dfrom, dto, withRooms=True,
-                               withPricelist=True, withRestrictions=True):
+                               withPricelist=True, withRestrictions=True,
+                               withEvents=True):
         if not dfrom or not dto:
             raise ValidationError(_('Input Error: No dates defined!'))
 
@@ -254,6 +291,9 @@ class HotelReservation(models.Model):
         json_restr = {}
         if withRestrictions:
             json_restr = self.get_hcalendar_restrictions_data(dfrom, dto)
+        json_events = {}
+        if withEvents:
+            json_events = self.get_hcalendar_events_data(dfrom, dto)
 
         vals = {
             'rooms': withRooms and self._hcalendar_room_data(rooms) or [],
@@ -261,6 +301,7 @@ class HotelReservation(models.Model):
             'tooltips': json_res_tooltips,
             'pricelist': json_prices,
             'restrictions': json_restr,
+            'events': json_events,
         }
 
         return vals
@@ -347,13 +388,13 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         ret = super(HotelReservation, self).write(vals)
-        if vals.has_key('partner_id') or vals.has_key('checkin') or \
-                vals.has_key('checkout') or vals.has_key('product_id') or \
-                vals.has_key('adults') or vals.has_key('children') or \
-                vals.has_key('state') or vals.has_key('splitted') or \
-                vals.has_key('reserve_color') or \
-                vals.has_key('reserve_color_text') or vals.has_key('product_id') or \
-                vals.has_key('parent_reservation') or vals.has_key('overbooking'):
+        if 'partner_id' in vals or 'checkin' in vals or \
+                'checkout' in vals or 'product_id' in vals or \
+                'adults' in vals or 'children' in vals or \
+                'state' in vals or 'splitted' in vals or \
+                'reserve_color' in vals or \
+                'reserve_color_text' in vals or 'product_id' in vals or \
+                'parent_reservation' in vals or 'overbooking' in vals:
             for record in self:
                 record.send_bus_notification(
                     'write',
@@ -361,7 +402,7 @@ class HotelReservation(models.Model):
                     ('cancelled' == record.state) and
                     _("Reservation Cancelled") or _("Reservation Changed")
                 )
-        elif not any(vals) or vals.has_key('to_read') or vals.has_key('to_assign'):
+        elif not any(vals) or 'to_read' in vals or 'to_assign' in vals:
             self.send_bus_notification('write', 'noshow')
         return ret
 

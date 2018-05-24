@@ -179,6 +179,7 @@ var HotelCalendarView = View.extend({
     _model: null,
     _hcalendar: null,
     _reserv_tooltips: {},
+    _days_tooltips: {},
     _action_manager: null,
     _last_dates: [false, false],
 
@@ -525,6 +526,7 @@ var HotelCalendarView = View.extend({
           domains['dates'][1].format(ODOO_DATETIME_MOMENT_FORMAT)
         ];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
+            self._days_tooltips = results['events'];
             self._reserv_tooltips = results['tooltips'];
             var rooms = [];
             for (var r of results['rooms']) {
@@ -604,32 +606,66 @@ var HotelCalendarView = View.extend({
 
     _assign_extra_info: function() {
     	var self = this;
-        $(this._hcalendar.etable).find('.hcal-cell-room-type-group-item.btn-hcal-3d').on("mouseenter", function(){
-        	var $this = $(this);
-        	var room = self._hcalendar.getRoom($this.parent().data("hcalRoomObjId"));
-          if (room.overbooking) {
-            $this.tooltip({
-                  animation: true,
-                  html: true,
-                  placement: 'right',
-                  title: QWeb.render('HotelCalendar.TooltipRoomOverbooking', {'name': room.number})
-              }).tooltip('show');
-            return;
-          } else {
-          	var qdict = {
-      			  'price_from': room.getUserData('price_from'),
-              'inside_rooms': room.getUserData('inside_rooms'),
-              'num_inside_rooms': room.getUserData('inside_rooms').length,
-              'name': room.number
-          	};
-          	$this.tooltip({
-                  animation: true,
-                  html: true,
-                  placement: 'right',
-                  title: QWeb.render('HotelCalendar.TooltipRoom', qdict)
-              }).tooltip('show');
-          }
+      $(this._hcalendar.etable).find('.hcal-cell-room-type-group-item.btn-hcal-3d').on("mouseenter", function(){
+      	var $this = $(this);
+      	var room = self._hcalendar.getRoom($this.parent().data("hcalRoomObjId"));
+        if (room.overbooking) {
+          $this.tooltip({
+                animation: true,
+                html: true,
+                placement: 'right',
+                title: QWeb.render('HotelCalendar.TooltipRoomOverbooking', {'name': room.number})
+            }).tooltip('show');
+          return;
+        } else {
+        	var qdict = {
+    			  'price_from': room.getUserData('price_from'),
+            'inside_rooms': room.getUserData('inside_rooms'),
+            'num_inside_rooms': room.getUserData('inside_rooms').length,
+            'name': room.number
+        	};
+        	$this.tooltip({
+                animation: true,
+                html: true,
+                placement: 'right',
+                title: QWeb.render('HotelCalendar.TooltipRoom', qdict)
+            }).tooltip('show');
+        }
+      });
+
+      $(this._hcalendar.etableHeader).find('.hcal-cell-header-day').each(function(index, elm){
+        var $elm = $(elm);
+        var cdate = HotelCalendar.toMoment($elm.data('hcalDate'), L10N_DATE_MOMENT_FORMAT);
+        var data = _.filter(self._days_tooltips, function(item) {
+          var ndate = HotelCalendar.toMoment(item[2], ODOO_DATE_MOMENT_FORMAT);
+          return ndate.isSame(cdate, 'd');
         });
+        if (data.length > 0) {
+          $elm.addClass('hcal-event-day');
+          $elm.on("mouseenter", function(data){
+            var $this = $(this);
+            if (data.length > 0) {
+              var qdict = {
+                'date': $this.data('hcalDate'),
+                'events': _.map(data, function(item){
+                  return {
+                    'name': item[1],
+                    'date': item[2],
+                    'location': item[3]
+                  };
+                })
+              };
+              $this.attr('title', '');
+              $this.tooltip({
+                  animation: true,
+                  html: true,
+                  placement: 'bottom',
+                  title: QWeb.render('HotelCalendar.TooltipEvent', qdict)
+              }).tooltip('show');
+            }
+          }.bind(elm, data));
+        }
+      });
     },
 
     call_action: function(action) {

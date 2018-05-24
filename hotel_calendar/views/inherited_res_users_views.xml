@@ -21,12 +21,20 @@
 									<field name="pms_type_move" required="True" />
 									<field name="pms_default_num_days" required="True" />
 							</group>
+							<group colspan="4">
+									<field name="pms_allowed_events_tags" widget="many2many_tags" />
+									<field name="pms_denied_events_tags" widget="many2many_tags" />
+							</group>
 						</group>
 						<group string="Calendar Management (Revenue PMS)" name="calendar">
 							<group colspan="4">
 									<field name="npms_end_day_week" required="True" />
 									<field name="npms_end_day_week_offset" required="True" />
 									<field name="npms_default_num_days" required="True" />
+							</group>
+							<group colspan="4">
+									<field name="npms_allowed_events_tags" widget="many2many_tags" />
+									<field name="npms_denied_events_tags" widget="many2many_tags" />
 							</group>
 						</group>
 					</xpath>

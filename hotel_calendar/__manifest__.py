@@ -31,6 +31,7 @@
     'depends': [
         'bus',
         'web',
+        'calendar',
         'hotel',
         'web_widget_color',
     ],

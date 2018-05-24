@@ -19,20 +19,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from datetime import datetime, timedelta
+from dateutil import tz
 from openerp.exceptions import ValidationError
 from openerp import models, fields, api, _
-from datetime import datetime
-from time import sleep
-import requests
-import re
-try:
-    from urllib.parse import quote_plus
-except ImportError:     # Python 2
-    from urllib import quote_plus
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from ..scrapers import scraper_abc
 import logging
 _logger = logging.getLogger(__name__)
 
+CALENDAR_EVENT_TYPE_CONCERT = 'Concert'
 REQUEST_DELAY = 3
 MONTHS_MAP = {
     'Enero': 1,
@@ -66,173 +62,49 @@ class EventCity:
 class ImportEventsWizard(models.TransientModel):
     _name = 'wizard.import.events'
 
+    @api.model
+    def _get_default_year(self):
+        return datetime.now().year
+
     city = fields.Char('City', required=True)
-    year = fields.Integer('Year', required=True)
-
-    def _analize_page(self, url, onlyFuture):
-        r = requests.get(url)
-        if r.status_code == 200:
-            now = datetime.now()
-            eventCity = EventCity()
-            # Post ID
-            res = re.search(r'postid-(\d+)', r.text)
-            if res:
-                eventCity.postid = res.group(1)
-            # Name
-            res = re.search(
-                r'<h1 class="entry-title"><a href="[^"]+" rel="bookmark" title="([^"]+)">',
-                r.text, re.I)
-            if res:
-                eventCity.name = res.group(1)
-            # Date
-            res = re.search(r'<p><strong>Fecha:<\/strong>\s(.*?)<\/p>',
-                            r.text,
-                            re.I)
-            if not res:
-                res = re.search(
-                    r'<p><strong>Fecha\sy\shora:<\/strong>\s(.*?)<\/p>',
-                    r.text,
-                    re.I)
-            if res:
-                res = re.search(
-                    r'\w+\s(\d+)\sde\s(\w+)\sde\s(\d+)\sa\slas\s(\d+):(\d+)\shoras',
-                    res.group(1),
-                    re.U | re.I)
-                if res:
-                    cdate = datetime(
-                        int(res.group(3)),
-                        MONTHS_MAP[res.group(2)],
-                        int(res.group(1)),
-                        int(res.group(4)),
-                        int(res.group(5)),
-                        0)
-                    if not onlyFuture or (onlyFuture and cdate >= now):
-                        eventCity.dates.append(cdate)
-            else:
-                res = re.search(
-                    ur'<p><strong>Fechas\sy\días:<\/strong>\s(.*?)<\/p>',
-                    r.text,
-                    re.I)
-                if res:
-                    res = re.search(
-                        r'Del\s(\d+)\sal\s(\d+)\sde\s(\w+)\sde\s(\d+)',
-                        res.group(1),
-                        re.U | re.I)
-                    if res:
-                        date_begin = datetime(
-                            int(res.group(4)),
-                            MONTHS_MAP[res.group(3)],
-                            int(res.group(1)),
-                            0,
-                            0,
-                            0)
-                        date_end = datetime(
-                            int(res.group(4)),
-                            MONTHS_MAP[res.group(3)],
-                            int(res.group(2)),
-                            0,
-                            0,
-                            0)
-                        diff = abs((date_end - date_begin).days)
-                        for i in range(diff):
-                            cdate = date_begin + timedelta(days=i)
-                            if not onlyFuture or (onlyFuture and cdate >= now):
-                                eventCity.dates.append(cdate)
-            # Avenue
-            res = re.search(r'<p><strong>Lugar:<\/strong>\s(.*?)<\/p>',
-                            r.text,
-                            re.I)
-            if res:
-                eventCity.venue = res.group(1)
-            # Address
-            res = re.search(ur'<p><strong>Dirección:<\/strong>\s(.*?)<\/p>',
-                            r.text,
-                            re.I)
-            if res:
-                eventCity.address = res.group(1)
-            # Buy Tickets
-            res = re.search(
-                r'<p><strong>Venta de entradas:<\/strong>\s(.*?)<\/p>',
-                r.text,
-                re.I)
-            if res:
-                eventCity.buy_tickets = res.group(1)
-            # Prices
-            res = re.search(r'<p><strong>Precios:<\/strong>\s(.*?)<\/p>',
-                            r.text,
-                            re.I)
-            if res:
-                eventCity.prices = res.group(1)
-
-            if not any(eventCity.dates):
-                return False
-            return eventCity
-        else:
-            return False
-
-    def _import_city_events(self, events, search, npag=1, pags=-1,
-                            onlyFuture=False):
-        pags = pags if pags == -1 else (pags-1)
-        E_URL = 'http://www.entradasyconciertos.com'
-        frmt_page = '/page/%d/?s=%s' % (npag, quote_plus(search))
-        r = requests.get('%s%s' % (E_URL, frmt_page))
-        if r.status_code == 200:
-            # Get Pagination
-            pages = re.search(
-                ur"<span class='pages'>Página (\d+) de (\d+)</span>",
-                r.text)
-            total_pags = int(pages.group(2))
-
-            res_founds = re.finditer(
-                r'<h2 class="entry-title"><a href="([^"]+)" rel="bookmark">',
-                r.text)
-            for res in res_founds:
-                sleep(REQUEST_DELAY)
-                nevent = self._analize_page(res.group(1), onlyFuture)
-                if nevent:
-                    events.append(nevent)
-
-            # Recursive Call
-            if npag < total_pags and pags != 0:
-                sleep(REQUEST_DELAY)
-                self._import_city_events(events,
-                                         search,
-                                         npag=npag+1,
-                                         pags=pags,
-                                         onlyFuture=onlyFuture)
-        else:
-            raise Exception("Unespected Error!")
+    year = fields.Char('Year', required=True, default=_get_default_year)
 
     @api.multi
     def import_events(self):
         events = []
-        self._import_city_events(
+        scraper_abc._import_city_events(
             events,
             '%s %s' % (self.city, self.year),
             pags=1,
             onlyFuture=True)
 
         cal_event_obj = self.env['calendar.event']
+        event_type = self.env['calendar.event.type'].search([
+            ('name', '=', CALENDAR_EVENT_TYPE_CONCERT)
+        ], limit=1)
         for event in events:
+            fev = cal_event_obj.search([
+                ('web_id', '=', event.postid),
+            ])
+            if fev:
+                fev.unlink()
             for day in event.dates:
+                day = day.replace(tzinfo=tz.gettz('Europe/Madrid'))
+                day_utc = day.astimezone(tz.gettz('UTC'))
                 vals = {
                     'name': event.name,
                     'location': "%s, %s" % (event.address, event.venue),
-                    'description': "Price: %s\nBuy Tickets: %s" % (
+                    'description': _("Price: %s\nBuy Tickets: %s") % (
                         event.prices,
                         event.buy_tickets),
-                    'start': day.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                    'stop': day.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                    'duration': 1.0,
-                }
-                fev = cal_event_obj.search([
-                    ('web_id', '=', event.postid),
-                ])
-            if fev:
-                fev.write(vals)
-            else:
-                vals.update({
+                    'allday': False,
+                    'state': 'open',
+                    'privacy': 'confidential',
+                    'categ_ids': [(6, 0, [event_type.id])] if event_type else [],
                     'web_id': event.postid,
-                })
-                cal_event_obj.create(vals)
+                    'start': day_utc.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                    'stop': (day_utc + timedelta(hours=2)).strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                    'duration': 2.0,
+                }
+                cal_event_obj.with_context(no_mail_to_attendees=True).create(vals)
         return True

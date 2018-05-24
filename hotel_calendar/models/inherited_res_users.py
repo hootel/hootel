@@ -61,6 +61,13 @@ class ResUsers(models.Model):
     pms_show_availability = fields.Boolean('Show Availability', default=True)
     pms_show_num_rooms = fields.Integer('Show Num. Rooms', default=0)
 
+    pms_allowed_events_tags = fields.Many2many(
+        'calendar.event.type',
+        string="Allow Calander Event Tags")
+    pms_denied_events_tags = fields.Many2many(
+        'calendar.event.type',
+        string="Deny Calander Event Tags")
+
     npms_end_day_week = fields.Selection([
         ('1', 'Monday'),
         ('2', 'Tuesday'),
@@ -85,3 +92,10 @@ class ResUsers(models.Model):
         ('14', '2 Weeks'),
         ('7', '1 Week')
     ], string='Default number of days', default='month')
+
+    npms_allowed_events_tags = fields.Many2many(
+        'calendar.event.type',
+        string="Allow Calander Event Tags")
+    npms_denied_events_tags = fields.Many2many(
+        'calendar.event.type',
+        string="Deny Calander Event Tags")
