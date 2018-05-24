@@ -265,6 +265,7 @@ var HotelCalendarView = View.extend({
           });
         });
         this._hcalendar.addEventListener('hcalOnMouseEnterReservation', function(ev){
+          if (ev.detail.reservationObj) {
             var tp = self._reserv_tooltips[ev.detail.reservationObj.id];
             var qdict = self._generate_reservation_tooltip_dict(tp);
             $(ev.detail.reservationDiv).tooltip('destroy').tooltip({
@@ -273,6 +274,7 @@ var HotelCalendarView = View.extend({
               placement: 'bottom',
               title: QWeb.render('HotelCalendar.TooltipReservation', qdict)
             }).tooltip('show');
+          }
         });
         this._hcalendar.addEventListener('hcalOnClickReservation', function(ev){
             //var res_id = ev.detail.reservationObj.getUserData('folio_id');

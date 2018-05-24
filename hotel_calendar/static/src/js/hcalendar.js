@@ -550,8 +550,10 @@ HotelCalendar.prototype = {
     for (var i=start_index; i<this.options.rooms.length; i++) {
       var reservs = this.getReservationsByRoom(this.options.rooms[i], true);
       for (var reserv of reservs) {
-        var top = parseInt(reserv._html.style.top, 10);
-        reserv._html.style.top = `${top - cheight}px`;
+        if (reserv && reserv._html) {
+          var top = parseInt(reserv._html.style.top, 10);
+          reserv._html.style.top = `${top - cheight}px`;
+        }
       }
     }
 
