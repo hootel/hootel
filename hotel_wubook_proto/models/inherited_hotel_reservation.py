@@ -41,7 +41,7 @@ class HotelReservation(models.Model):
     @api.multi
     def set_access_for_wubook_fields(self):
         for rec in self:
-            user = self.env['res.users'].browse(self.env.uid)          
+            user = self.env['res.users'].browse(self.env.uid)
             rec.able_to_modify_wubook = user.has_group('base.group_system')
 
     @api.depends('channel_type','wchannel_id')
@@ -89,7 +89,7 @@ class HotelReservation(models.Model):
     def create(self, vals):
         if vals.get('wrid') != None:
             vals.update({'preconfirm': False})
-        user = self.env['res.users'].browse(self.env.uid)          
+        user = self.env['res.users'].browse(self.env.uid)
         if user.has_group('hotel.group_hotel_call'):
             vals.update({'to_read': True})
         res = super(HotelReservation, self).create(vals)
@@ -245,37 +245,6 @@ class HotelReservation(models.Model):
             reserv[13] = reservation.splitted or reservation.wis_from_channel
 
         return (json_reservs, json_tooltips)
-
-    @api.multi
-    def send_bus_notification(self, naction, ntype, ntitle=''):
-        hotel_cal_obj = self.env['bus.hotel.calendar']
-        for record in self:
-            hotel_cal_obj.send_reservation_notification({
-                'action': naction,
-                'type': ntype,
-                'title': ntitle,
-                'product_id': record.product_id.id,
-                'reserv_id': record.id,
-                'partner_name': record.partner_id.name,
-                'adults': record.adults,
-                'children': record.children,
-                'checkin': record.checkin,
-                'checkout': record.checkout,
-                'folio_id': record.folio_id.id,
-                'reserve_color': record.reserve_color,
-                'reserve_color_text': record.reserve_color_text,
-                'splitted': record.splitted,
-                'parent_reservation': record.parent_reservation and
-                record.parent_reservation.id or 0,
-                'room_name': record.product_id.name,
-                'partner_phone': record.partner_id.mobile
-                or record.partner_id.phone or _('Undefined'),
-                'state': record.state,
-                'fix_days': record.splitted or record.wis_from_channel,
-                'overbooking': record.overbooking,
-                'price': record.folio_id.amount_total,
-                'wrid': record.wrid,
-            })
 
     @api.multi
     def mark_as_readed(self):

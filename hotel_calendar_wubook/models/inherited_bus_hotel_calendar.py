@@ -46,6 +46,14 @@ class BusHotelCalendar(models.TransientModel):
         }
 
     @api.model
+    def _generate_reservation_notif(self, vals):
+        json = super(BusHotelCalendar, self)._generate_reservation_notif(vals)
+        json['reservation'].update({
+            'wrid': vals['wrid'],
+        })
+        return json
+
+    @api.model
     def send_issue_notification(self, ntype, title, issue_id, section,
                                 message):
         notif = self._generate_issue_notification(ntype, title, issue_id,
