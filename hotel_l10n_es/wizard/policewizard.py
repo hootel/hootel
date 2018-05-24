@@ -45,16 +45,17 @@ class Wizard(models.TransientModel):
         if compa.police is not False and compa.property_name is not False:
             lines = self.env['cardex'].search([('enter_date', '=',
                                                 self.download_date)])
-            content = "1|"+compa.police+"|"+compa.property_name.upper()[0:40]+"|"
+            content = "1|"+compa.police+"|"+compa.property_name.upper()[0:40]
+            content += "|"
             content += datetime.datetime.now().strftime("%Y%m%d|%H%M")
             content += "|"+str(len(lines)) + """
 """
 
             for line in lines:
-                if ((line.partner_id.documenttype is not False) and
-                    (line.partner_id.poldocument is not False) and
-                    (line.partner_id.firstname is not False) and
-                    (line.partner_id.lastname is not False)):
+                if ((line.partner_id.documenttype is not False)
+                        and (line.partner_id.poldocument is not False)
+                        and (line.partner_id.firstname is not False)
+                        and (line.partner_id.lastname is not False)):
 
                     if line.partner_id.documenttype in ["D", "P", "C"]:
                         content += "2|"+line.partner_id.poldocument + "||"
