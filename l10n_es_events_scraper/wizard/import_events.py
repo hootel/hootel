@@ -47,7 +47,6 @@ class ImportEventsWizard(models.TransientModel):
         scraper_abc.import_city_events(
             events,
             '%s %s' % (self.city, self.year),
-            pags=1,
             onlyFuture=True)
 
         cal_event_obj = self.env['calendar.event']

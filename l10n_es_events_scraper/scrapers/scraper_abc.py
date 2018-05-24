@@ -188,10 +188,10 @@ def import_city_events(events, search, npag=1, pags=-1,
         # Recursive Call
         if npag < total_pags and pags != 0:
             sleep(REQUEST_DELAY)
-            self.import_city_events(events,
-                                    search,
-                                    npag=npag+1,
-                                    pags=pags,
-                                    onlyFuture=onlyFuture)
+            import_city_events(events,
+                               search,
+                               npag=npag+1,
+                               pags=pags,
+                               onlyFuture=onlyFuture)
     else:
         raise Exception("Unespected Error!")
