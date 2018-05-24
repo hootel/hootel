@@ -46,7 +46,10 @@ class ResPartner(models.Model):
                             ('partner_id', '=', record.id)
                         ])
                         if folio_ids:
-                            folio_ids.write({'partner_id': org_partner_id.id})
+                            folio_ids.write({
+                                'partner_id': org_partner_id.id,
+                                'partner_invoice_id': org_partner_id.id,
+                            })
                         # DANGER: self-delete... perhaps best invisible?
                         # record.unlink()  This cause mistakes
                         record.write({'active': False})
