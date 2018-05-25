@@ -644,6 +644,7 @@ var HotelCalendarView = View.extend({
         });
         if (data.length > 0) {
           $elm.addClass('hcal-event-day');
+          $elm.prepend("<i class='fa fa-bell' style='margin-right: 0.1em'></i>");
           $elm.on("mouseenter", function(data){
             var $this = $(this);
             if (data.length > 0) {
