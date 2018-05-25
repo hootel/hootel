@@ -34,6 +34,6 @@ class AccountInvoice(models.Model):
                 payments_amount_total += payment['amount']
             self.balance_due = self.amount_total - payments_amount_total
         else:
-            self.balance_due = 0.0
+            self.balance_due = self.amount_total
 
     balance_due = fields.Float('Balance Due', compute="_compute_balance_due")
