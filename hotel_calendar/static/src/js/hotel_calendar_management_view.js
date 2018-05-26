@@ -203,7 +203,7 @@ var HotelCalendarManagementView = View.extend({
 
         /** DO MAGIC **/
         var params = this.generate_params();
-        var oparams = [false, params['dates'][0], params['dates'][1], false, false, true];
+        var oparams = [params['dates'][0], params['dates'][1], false, false, true];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
             self._days_tooltips = results['events'];
             var rooms = [];
@@ -540,7 +540,7 @@ var HotelCalendarManagementView = View.extend({
     reload_hcalendar_management: function() {
         var self = this;
         var params = this.generate_params();
-        var oparams = [false, params['dates'][0], params['dates'][1], params['prices'], params['restrictions'], false];
+        var oparams = [params['dates'][0], params['dates'][1], params['prices'], params['restrictions'], false];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
             self._days_tooltips = results['events'];
             self._hcalendar.setData(results['prices'], results['restrictions'], results['availability'], results['count_reservations']);

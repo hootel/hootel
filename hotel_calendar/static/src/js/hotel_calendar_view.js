@@ -179,7 +179,7 @@ var HotelCalendarView = View.extend({
     _model: null,
     _hcalendar: null,
     _reserv_tooltips: {},
-    _days_tooltips: {},
+    _days_tooltips: [],
     _action_manager: null,
     _last_dates: [false, false],
 
@@ -523,12 +523,11 @@ var HotelCalendarView = View.extend({
         /** DO MAGIC **/
         var domains = this.generate_domains();
         var oparams = [
-          false,
           domains['dates'][0].format(ODOO_DATETIME_MOMENT_FORMAT),
           domains['dates'][1].format(ODOO_DATETIME_MOMENT_FORMAT)
         ];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
-            self._days_tooltips = results['events'];
+            self._days_tooltips = self._days_tooltips.concat(results['events']);
             self._reserv_tooltips = results['tooltips'];
             var rooms = [];
             for (var r of results['rooms']) {
@@ -1148,13 +1147,13 @@ var HotelCalendarView = View.extend({
         }
 
         var oparams = [
-          false,
           dfrom.format(ODOO_DATETIME_MOMENT_FORMAT),
           dto.format(ODOO_DATETIME_MOMENT_FORMAT),
           false
         ];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
-            self._days_tooltips = results['events'];
+          console.log(results);
+            self._days_tooltips = self._days_tooltips.concat(results['events']);
             self._reserv_tooltips = _.extend(self._reserv_tooltips, results['tooltips']);
             var reservs = [];
             for (var r of results['reservations']) {
@@ -1191,12 +1190,8 @@ var HotelCalendarView = View.extend({
               reservs.push(nreserv);
             }
 
-            if (withPricelist) {
-              self._hcalendar.addPricelist(results['pricelist']);
-            }
-            if (withRestrictions) {
-              self._hcalendar.addRestrictions(results['restrictions']);
-            }
+            self._hcalendar.addPricelist(results['pricelist']);
+            self._hcalendar.addRestrictions(results['restrictions']);
             if (clearReservations) {
               self._hcalendar.setReservations(reservs);
             } else {
