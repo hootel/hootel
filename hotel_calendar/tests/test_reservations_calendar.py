@@ -42,8 +42,7 @@ class TestReservationsCalendar(TestHotelCalendar):
 
         hcal_data = hotel_reserv_obj.get_hcalendar_all_data(
             now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            [], [])
+            adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
 
         # Check Pricelist Integrity
         for k_pr, v_pr in hcal_data['pricelist'].iteritems():
@@ -89,8 +88,7 @@ class TestReservationsCalendar(TestHotelCalendar):
                                                     self.user_hotel_manager)
         hcal_data = reserv_obj.get_hcalendar_all_data(
             now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-            [], [])
+            adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
         vrooms = (self.hotel_vroom_budget, self.hotel_vroom_special)
         for vroom in vrooms:
             for k_pr, v_pr in hcal_data['pricelist'].iteritems():
@@ -112,8 +110,7 @@ class TestReservationsCalendar(TestHotelCalendar):
         def is_reservation_listed(reservation_id):
             hcal_data = hotel_reserv_obj.get_hcalendar_all_data(
                 now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                [], [])
+                adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
             # TODO: Perhaps not the best way to do this test... :/
             hasReservationTest = False
             for reserv in hcal_data['reservations']:
@@ -193,18 +190,15 @@ class TestReservationsCalendar(TestHotelCalendar):
         with self.assertRaises(ValidationError):
             hcal_data = hotel_reserv_obj.get_hcalendar_all_data(
                 False,
-                adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                [], [])
+                adv_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT))
         with self.assertRaises(ValidationError):
             hcal_data = hotel_reserv_obj.get_hcalendar_all_data(
                 now_utc_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                False,
-                [], [])
+                False)
         with self.assertRaises(ValidationError):
             hcal_data = hotel_reserv_obj.get_hcalendar_all_data(
                 False,
-                False,
-                [], [])
+                False)
 
     def test_calendar_settings(self):
         hcal_options = self.env['hotel.reservation'].sudo(

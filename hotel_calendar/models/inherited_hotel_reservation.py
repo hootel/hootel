@@ -123,7 +123,7 @@ class HotelReservation(models.Model):
         return json_events
 
     @api.model
-    def get_hcalendar_reservations_data(self, dfrom, dto, domain, rooms):
+    def get_hcalendar_reservations_data(self, dfrom, dto, rooms):
         date_start = date_utils.get_datetime(dfrom, hours=False) \
             - timedelta(days=1)
         date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
@@ -281,7 +281,7 @@ class HotelReservation(models.Model):
 
         rooms = self.env['hotel.room'].search([], order='hcal_sequence ASC')
         json_res, json_res_tooltips = self.get_hcalendar_reservations_data(
-            dfrom, dto, [], rooms)
+            dfrom, dto, rooms)
 
         vals = {
             'rooms': withRooms and self._hcalendar_room_data(rooms) or [],

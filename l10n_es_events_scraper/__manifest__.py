@@ -36,6 +36,7 @@
         ],
     },
     'data': [
+        'data/records.xml',
         'wizard/import_events.xml',
         'views/inherited_calendar_event.xml',
         'views/general.xml',
