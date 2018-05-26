@@ -6,8 +6,8 @@
         <field name="inherit_id" ref="hotel.view_hotel_folio1_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='partner_internal_comment']" position="before">
-                    <field name="whas_wubook_reservations" invisible="True" />
-                    <field name="wcustomer_notes" readonly="True" attrs="{'invisible':[('whas_wubook_reservations', '=', False)]}"/>
+                <field name="whas_wubook_reservations" invisible="True" />
+                <field name="wcustomer_notes" readonly="True" attrs="{'invisible':[('whas_wubook_reservations', '=', False)]}"/>
             </xpath>
         </field>
     </record>
@@ -17,7 +17,14 @@
         <field name="inherit_id" ref="hotel.view_hotel_folio1_form" />
         <field name="arch" type="xml">
             <xpath expr="//notebook/page/field[@name='room_lines']/tree/field[@name='checkout']" position="after">
-                    <field name="origin_sale"/>
+                <field name="origin_sale"/>
+                <field name="wis_from_channel" invisible="1"/>
+            </xpath>
+            <xpath expr="//notebook/page/field[@name='room_lines']/tree/field[@name='checkout']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wis_from_channel', '!=', False)]}</attribute>
+            </xpath>
+            <xpath expr="//notebook/page/field[@name='room_lines']/tree/field[@name='checkin']" position="attributes">
+                <attribute name="attrs">{'readonly': [('wis_from_channel', '!=', False)]}</attribute>
             </xpath>
         </field>
     </record>

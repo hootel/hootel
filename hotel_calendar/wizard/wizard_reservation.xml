@@ -58,8 +58,8 @@
 								<field name="price" invisible = "1"/>
 								<field name="partner_id" invisible = "1" />
 								<field name="folio_wizard_id" invisible = "1" />
-                                <field name="to_read" invisible="0" />
-                                <field name="to_assign" invisible="0" />
+                                <field name="to_read" invisible="1" />
+                                <field name="to_assign" invisible="1" />
 							</tree>
 						</field>						
 					</group>
