@@ -166,7 +166,7 @@ class GlassofExporterWizard(models.TransientModel):
             ('date', '<=', self.date_end),
         ])
 
-        nrow = 0
+        nrow = 1
         for inv in account_invs:
             worksheet.write(nrow, 0, inv.number)
             worksheet.write(nrow, 1, inv.date_invoice, xls_cell_format_date)

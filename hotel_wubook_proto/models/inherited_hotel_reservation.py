@@ -151,7 +151,7 @@ class HotelReservation(models.Model):
     def unlink(self):
         vals = []
         for record in self:
-            if record.wrid:
+            if record.wrid and not record.parent_reservation:
                 raise UserError(_("You can't delete wubook reservations"))
             vals.append({
                 'checkin': record.checkin,

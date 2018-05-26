@@ -230,21 +230,30 @@ class HotelFolio(models.Model):
         _logger.info('compute_invoices_amount')
         acc_pay_obj = self.env['account.payment']
         for record in self:
-            record.order_id._amount_all()
-            total_inv_refund = 0
-            payments = acc_pay_obj.search([
-                ('folio_id', '=', record.id)
-            ])
-            total_paid = sum(pay.amount for pay in payments)
-            return_lines = self.env['payment.return.line'].search([('move_line_ids','in',payments.mapped('move_line_ids.id'))])
-            total_inv_refund = sum(pay_return.amount for pay_return in return_lines)
-            vals = {
-                'invoices_amount': record.amount_total - total_paid + total_inv_refund,
-                'invoices_paid': total_paid,
-                'refund_amount': total_inv_refund,
-            }
-            record.update(vals)
-            record.room_lines._compute_color()
+            if record.reservation_type in ('staff', 'out'):
+                vals = {
+                'invoices_amount': 0,
+                'invoices_paid': 0,
+                'refund_amount': 0,
+                }
+                record.update(vals)
+                record.room_lines._compute_color()
+            else:                    
+                record.order_id._amount_all()
+                total_inv_refund = 0
+                payments = acc_pay_obj.search([
+                    ('folio_id', '=', record.id)
+                ])
+                total_paid = sum(pay.amount for pay in payments)
+                return_lines = self.env['payment.return.line'].search([('move_line_ids','in',payments.mapped('move_line_ids.id'))])
+                total_inv_refund = sum(pay_return.amount for pay_return in return_lines)
+                vals = {
+                    'invoices_amount': record.amount_total - total_paid + total_inv_refund,
+                    'invoices_paid': total_paid,
+                    'refund_amount': total_inv_refund,
+                }
+                record.update(vals)
+                record.room_lines._compute_color()
 
     @api.multi
     def action_pay(self):
@@ -573,6 +582,7 @@ class HotelFolio(models.Model):
                 invoice.state = 'cancel'
             sale.room_lines.action_cancel()
             sale.order_id.action_cancel()
+        
 
     @api.multi
     def action_confirm(self):
@@ -590,7 +600,7 @@ class HotelFolio(models.Model):
                             order._create_analytic_account()
                             break
             sale.room_lines.filtered(
-                lambda r: r.state != 'cancelled').confirm()
+                lambda r: r.state == 'draft').confirm()
             if auto_done:
                 sale.order_id.action_done()
 
@@ -610,8 +620,6 @@ class HotelFolio(models.Model):
         '''
         if not len(self._ids):
             return False
-        for room in self.room_lines:
-            room.state = 'draft'
         query = "select id from sale_order_line \
         where order_id IN %s and state=%s"
         self._cr.execute(query, (tuple(self._ids), 'cancel'))

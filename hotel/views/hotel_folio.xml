@@ -22,7 +22,7 @@
                         <button name="%(hotel.action_view_folio_advance_payment_inv)d"
                             string="Create Invoice" type="action" class="btn-primary" states="sale"
                             attrs="{'invisible': [('invoice_status', '!=', 'to invoice')]}"/>
-                        <button name="action_cancel_draft" states="cancel" string="Set to Draft"
+                        <button name="action_cancel_draft" states="cancel,sale" string="Set to Draft"
                             type="object" icon="fa-undo" class="oe_highlight" />
                         <button name="action_cancel" string="Cancel Folio" states="sale"
                             type="object" icon="fa-minus-square" class="oe_highlight" />
@@ -132,7 +132,7 @@
                             <field name="date_order" />
 							<field name="mobile" placeholder="mobile"/>
                             <field name="phone" />
-                            <field name="partner_invoice_id" domain="[('parent_id','=',partner_id)]"/>
+                            <field name="partner_invoice_id" />
                             <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                             <field name="reservation_type" attrs="{'readonly':[('state','not in',('draft'))]}"/>
                             <field name="channel_type" attrs="{'required':[('reservation_type','=','normal')]}"/>
@@ -163,6 +163,7 @@
                                     <tree string="Rooms"
                                           colors="red:state == 'cancelled'"
                                           default_order="id" editable="bottom"
+                                          delete="false"
                                           options="{'no_open': True}">
                                         <button type="object" class="oe_stat_button"
                                             id="splitted" icon="fa fa-1x fa-chain-broken"
@@ -199,7 +200,6 @@
                                         <field name="checkout"  widget="date"/>
                                         <field name="cardex_ids" invisible ="1"/>
                                         <field name="to_assign" invisible="1"/>
-                                        <!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
                                         <field name="cardex_pending" invisible="1"/>
                                         <field name="qty_delivered" invisible="1"
                                             attrs="{'readonly': [('qty_delivered_updateable', '=', False)]}"/>
