@@ -18,13 +18,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from odoo import api, fields, models, _
-from openerp.exceptions import except_orm, UserError, ValidationError
 from cStringIO import StringIO
 import datetime
-from datetime import datetime, date, time 
+from datetime import datetime, date, time
 import xlsxwriter
 import base64
+from odoo import api, fields, models, _
+from openerp.exceptions import except_orm, UserError, ValidationError
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 
 

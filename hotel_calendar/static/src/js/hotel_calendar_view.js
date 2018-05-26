@@ -513,7 +513,7 @@ var HotelCalendarView = View.extend({
           $dateTimePickerBegin.data("DateTimePicker").setDate(ev.detail.date_begin.local().add(1, 'd'));
           $dateTimePickerEnd.data("ignore_onchange", true);
           $dateTimePickerEnd.data("DateTimePicker").setDate(ev.detail.date_end.local());
-          this.reload_hcalendar_reservations(false, true, true, true);
+          this.reload_hcalendar_reservations(false);
         }.bind(this));
     },
 
@@ -1037,7 +1037,7 @@ var HotelCalendarView = View.extend({
 
             var date_end = $dateTimePickerEnd.data("DateTimePicker").getDate().set({'hour': 23, 'minute': 59, 'second': 59}).clone().utc();
             this._hcalendar.setStartDate(date_begin, this._hcalendar.getDateDiffDays(date_begin, date_end), false, function(){
-              _.defer(function(){ this.reload_hcalendar_reservations(false, true, true, true); }.bind(this));
+              _.defer(function(){ this.reload_hcalendar_reservations(false); }.bind(this));
             }.bind(this));
         }
     },
@@ -1133,7 +1133,7 @@ var HotelCalendarView = View.extend({
         }
     },
 
-    reload_hcalendar_reservations: function(clearReservations, withPricelist, withRestrictions, withEvents) {
+    reload_hcalendar_reservations: function(clearReservations) {
         var self = this;
         var domains = this.generate_domains();
         // Clip dates
@@ -1151,10 +1151,7 @@ var HotelCalendarView = View.extend({
           false,
           dfrom.format(ODOO_DATETIME_MOMENT_FORMAT),
           dto.format(ODOO_DATETIME_MOMENT_FORMAT),
-          false,
-          withPricelist || false,
-          withRestrictions || false,
-          withEvents || false,
+          false
         ];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
             self._days_tooltips = results['events'];

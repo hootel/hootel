@@ -18,10 +18,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from odoo import api, fields, models, _
 from cStringIO import StringIO
 import xlsxwriter
 import base64
+from odoo import api, fields, models, _
 
 
 class GlassofExporterWizard(models.TransientModel):

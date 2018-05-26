@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import logging
 from openerp import models, fields, api
 from openerp.exceptions import UserError
 from openerp.tools.translate import _
 
-import logging
 _logger = logging.getLogger(__name__)
 
 class Wizard(models.TransientModel):

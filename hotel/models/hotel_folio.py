@@ -22,6 +22,12 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import datetime
+import time
+import pytz
+import logging
+from decimal import Decimal
+from dateutil.relativedelta import relativedelta
 from openerp.exceptions import except_orm, UserError, ValidationError
 from openerp.tools import (
     misc,
@@ -29,13 +35,7 @@ from openerp.tools import (
     DEFAULT_SERVER_DATE_FORMAT)
 from openerp import models, fields, api, _
 from openerp import workflow
-from decimal import Decimal
-from dateutil.relativedelta import relativedelta
 from odoo.addons.hotel import date_utils
-import datetime
-import time
-import pytz
-import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -545,7 +545,7 @@ class HotelFolio(models.Model):
         order_ids = [folio.order_id.id for folio in self]
         sale_obj = self.env['sale.order'].browse(order_ids)
         invoices = action_invoice_create(self, grouped=True)
-        return invoices              
+        return invoices
 
     @api.multi
     def action_invoice_cancel(self):

@@ -19,9 +19,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 # ---------------------------------------------------------------------------
-from openerp import models, fields, api, _
 from decimal import Decimal
 import urllib2
+from openerp import models, fields, api, _
 
 
 class CurrencyExchangeRate(models.Model):

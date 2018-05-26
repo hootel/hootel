@@ -19,6 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import logging
 import xmlrpclib
 import pytz
 from datetime import timedelta
@@ -30,7 +31,6 @@ from odoo.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT)
 from odoo.addons.payment.models.payment_acquirer import _partner_split_name
 from odoo.addons.hotel import date_utils
-import logging
 _logger = logging.getLogger(__name__)
 
 # GLOBAL VARS

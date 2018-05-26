@@ -19,8 +19,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp.exceptions import ValidationError
 from datetime import datetime, timedelta
+from openerp.exceptions import ValidationError
 from openerp import models, api
 
 

@@ -19,12 +19,12 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import os
+import binascii
 from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 from odoo.addons.hotel import date_utils
-import os
-import binascii
 
 
 class WuBookInstaller(models.TransientModel):

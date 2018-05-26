@@ -19,8 +19,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp.addons.bus.controllers.main import BusController
 from openerp.http import request
+from openerp.addons.bus.controllers.main import BusController
 
 HOTEL_BUS_CHANNEL_ID = 'hpublic'
 

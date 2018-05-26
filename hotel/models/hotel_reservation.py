@@ -22,6 +22,12 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import pytz
+import time
+import logging
+from datetime import datetime, timedelta, date
+from decimal import Decimal
+from dateutil.relativedelta import relativedelta
 from openerp.exceptions import except_orm, UserError, ValidationError
 from openerp.tools import (
     misc,
@@ -29,13 +35,7 @@ from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT)
 from openerp import models, fields, api, _
 from openerp import workflow
-from decimal import Decimal
-from dateutil.relativedelta import relativedelta
-from datetime import datetime, timedelta, date
 from odoo.addons.hotel import date_utils
-import pytz
-import time
-import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -741,7 +741,7 @@ class HotelReservation(models.Model):
                     record.preconfirm == True:
                 record.confirm()
             record._compute_color()
-            
+
             if not record.reservation_lines and not record.splitted: #To allow add tree edit bottom room_lines on folio form
             #TO REVIEW: Hot fix to avoid duplicate reservation_lines
                 checkin = vals.get('checkin', record.checkin)

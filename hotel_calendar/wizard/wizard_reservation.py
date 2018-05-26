@@ -19,6 +19,12 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import pytz
+import time
+import logging
+from decimal import Decimal
+from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta, date
 from openerp.exceptions import except_orm, UserError, ValidationError
 from openerp.tools import (
     misc,
@@ -26,13 +32,7 @@ from openerp.tools import (
     DEFAULT_SERVER_DATETIME_FORMAT)
 from openerp import models, fields, api, _
 from openerp import workflow
-from decimal import Decimal
-from dateutil.relativedelta import relativedelta
-from datetime import datetime, timedelta, date
 from odoo.addons.hotel import date_utils
-import pytz
-import time
-import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -41,7 +41,7 @@ class FolioWizard(models.TransientModel):
 
     @api.model
     def _get_default_center_user(self):
-        user = self.env['res.users'].browse(self.env.uid)          
+        user = self.env['res.users'].browse(self.env.uid)
         return user.has_group('hotel.group_hotel_call')
 
     @api.model
@@ -90,7 +90,7 @@ class FolioWizard(models.TransientModel):
 
     @api.model
     def _get_default_channel_type(self):
-        user = self.env['res.users'].browse(self.env.uid) 
+        user = self.env['res.users'].browse(self.env.uid)
         if user.has_group('hotel.group_hotel_call'):
             return 'call'
 
@@ -128,7 +128,7 @@ class FolioWizard(models.TransientModel):
                 continue
             if line.rooms_num > line.max_rooms:
                     raise ValidationError(_("Too many rooms!"))
-            elif line.virtual_room_id:                
+            elif line.virtual_room_id:
                 checkout_dt = date_utils.get_datetime(line.checkout)
                 occupied = self.env['hotel.reservation'].occupied(
                     line.checkin,
@@ -188,7 +188,7 @@ class FolioWizard(models.TransientModel):
                             }))
         self.reservation_wizard_ids = cmds
         self.total = total
-                                      
+
     @api.multi
     @api.onchange('checkin', 'checkout')
     def onchange_checks(self):
@@ -226,7 +226,7 @@ class FolioWizard(models.TransientModel):
         checkout_dt -= timedelta(days=1)
         virtual_room_ids = self.env['hotel.virtual.room'].search([])
         virtual_rooms = []
-        
+
         for virtual in virtual_room_ids:
             virtual_rooms.append((0, False, {
                         'virtual_room_id': virtual.id,
@@ -274,7 +274,7 @@ class FolioWizard(models.TransientModel):
                 'partner_id': self.partner_id.id,
                 'channel_type': self.channel_type,
                 'room_lines': reservations,
-            }   
+            }
         newfol = self.env['hotel.folio'].create(vals)
         for room in newfol.room_lines:
             room.on_change_checkin_checkout_product_id()
@@ -305,7 +305,7 @@ class VirtualRoomWizars(models.TransientModel):
     rooms_num = fields.Integer('Number of Rooms')
     max_rooms = fields.Integer('Max', compute="_compute_max")
     price = fields.Float(string='Price by Room')
-    total_price = fields.Float(string='Total Price')    
+    total_price = fields.Float(string='Total Price')
     folio_wizard_id = fields.Many2one('hotel.folio.wizard')
     discount = fields.Float('discount')
     checkin = fields.Datetime('Check In', required=True,
@@ -314,14 +314,14 @@ class VirtualRoomWizars(models.TransientModel):
                                default=_get_default_checkout)
 
     def _compute_max(self):
-        for res in self:            
+        for res in self:
             res.max_rooms = len(
                     res.virtual_room_id.check_availability_virtual_room(
                         res.checkin,
                         res.checkout,
                         res.virtual_room_id.id)
                         )
-        
+
 
     @api.onchange('rooms_num', 'discount', 'price','virtual_room_id',
                   'checkin','checkout')
@@ -365,7 +365,7 @@ class VirtualRoomWizars(models.TransientModel):
                         'hotel.config.settings', 'parity_pricelist_id')
             if pricelist_id:
                 pricelist_id = int(pricelist_id)
-                
+
             res_price = 0
             for i in range(0, nights):
                 ndate = start_date_dt + timedelta(days=i)
@@ -380,7 +380,7 @@ class VirtualRoomWizars(models.TransientModel):
                 res_price += prod.price
             self.price = res_price - (res_price * self.discount)/100
             self.total_price = self.rooms_num * self.price
-            
+
 
 class ReservationWizard(models.TransientModel):
     _name = 'hotel.reservation.wizard'
@@ -410,10 +410,10 @@ class ReservationWizard(models.TransientModel):
     @api.multi
     def _compute_to_read_assign(self):
         for rec in self:
-            user = self.env['res.users'].browse(self.env.uid)          
+            user = self.env['res.users'].browse(self.env.uid)
             if user.has_group('hotel.group_hotel_call'):
                 rec.to_read = rec.to_assign = True
-    
+
     @api.multi
     @api.onchange('product_id')
     def onchange_product_id(self):

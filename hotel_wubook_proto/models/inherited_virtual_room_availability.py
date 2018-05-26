@@ -22,8 +22,8 @@
 from datetime import timedelta
 from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
-from odoo.addons.hotel import date_utils
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from odoo.addons.hotel import date_utils
 from ..wubook import DEFAULT_WUBOOK_DATE_FORMAT
 
 

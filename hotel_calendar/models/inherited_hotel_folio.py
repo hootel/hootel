@@ -18,8 +18,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api, _
 import logging
+from openerp import models, fields, api, _
 _logger = logging.getLogger(__name__)
 
 

@@ -19,15 +19,15 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 # ---------------------------------------------------------------------------
-from openerp.exceptions import except_orm, UserError, ValidationError
-from openerp.tools import misc, DEFAULT_SERVER_DATETIME_FORMAT
-from openerp import models, fields, api, _
-from openerp import workflow
 from decimal import Decimal
 import datetime
 import urllib2
 import time
 import logging
+from openerp.exceptions import except_orm, UserError, ValidationError
+from openerp.tools import misc, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp import models, fields, api, _
+from openerp import workflow
 _logger = logging.getLogger(__name__)
 
 
@@ -84,7 +84,7 @@ class AccountPayment(models.Model):
     @api.multi
     def delete(self):
         self.cancel()
-        self.move_name = ''        
+        self.move_name = ''
         self.unlink()
 
     @api.multi

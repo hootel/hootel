@@ -19,6 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import logging
 from openerp import models, fields, api, _
 from openerp.exceptions import UserError, ValidationError
 from ..wubook import (
@@ -31,7 +32,6 @@ from ..wubook import (
     WUBOOK_STATUS_CANCELLED_PENALTY,
     WUBOOK_STATUS_BAD)
 from odoo.addons.hotel import date_utils
-import logging
 _logger = logging.getLogger(__name__)
 
 

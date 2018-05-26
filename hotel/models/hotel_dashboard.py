@@ -21,9 +21,7 @@
 # ---------------------------------------------------------------------------
 import json
 from datetime import datetime, timedelta
-
 from babel.dates import format_datetime, format_date
-
 from odoo import models, api, _, fields
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT as DF
 from odoo.tools.misc import formatLang
@@ -48,7 +46,7 @@ class HotelDashboard(models.Model):
             self.kanban_dashboard_graph = json.dumps(self.get_bar_graph_datas())
         elif self.graph_type == 'line':
             self.kanban_dashboard_graph = json.dumps(self.get_line_graph_datas())
-        
+
     @api.one
     def _kanban_dashboard_graph(self):
         self.kanban_dashboard_graph = json.dumps(self.get_bar_graph_datas())
@@ -67,7 +65,7 @@ class HotelDashboard(models.Model):
     kanban_dashboard = fields.Text(compute='_kanban_dashboard')
     kanban_dashboard_graph = fields.Text(compute='_kanban_dashboard_graph')
     show_on_dashboard = fields.Boolean(string='Show journal on dashboard', help="Whether this journal should be displayed on the dashboard or not", default=True)
-    
+
     @api.multi
     def get_bar_graph_datas(self):
         data = []
@@ -104,18 +102,18 @@ class HotelDashboard(models.Model):
             #~ last_bank_stmt = self.env['account.bank.statement'].search([('journal_id', 'in', self.ids)], order="date desc, id desc", limit=1)
             #~ last_balance = last_bank_stmt and last_bank_stmt[0].balance_end or 0
             #~ #Get the number of items to reconcile for that bank journal
-            #~ self.env.cr.execute("""SELECT COUNT(DISTINCT(statement_line_id)) 
-                        #~ FROM account_move where statement_line_id 
-                        #~ IN (SELECT line.id 
-                            #~ FROM account_bank_statement_line AS line 
-                            #~ LEFT JOIN account_bank_statement AS st 
-                            #~ ON line.statement_id = st.id 
+            #~ self.env.cr.execute("""SELECT COUNT(DISTINCT(statement_line_id))
+                        #~ FROM account_move where statement_line_id
+                        #~ IN (SELECT line.id
+                            #~ FROM account_bank_statement_line AS line
+                            #~ LEFT JOIN account_bank_statement AS st
+                            #~ ON line.statement_id = st.id
                             #~ WHERE st.journal_id IN %s and st.state = 'open')""", (tuple(self.ids),))
             #~ already_reconciled = self.env.cr.fetchone()[0]
-            #~ self.env.cr.execute("""SELECT COUNT(line.id) 
-                            #~ FROM account_bank_statement_line AS line 
-                            #~ LEFT JOIN account_bank_statement AS st 
-                            #~ ON line.statement_id = st.id 
+            #~ self.env.cr.execute("""SELECT COUNT(line.id)
+                            #~ FROM account_bank_statement_line AS line
+                            #~ LEFT JOIN account_bank_statement AS st
+                            #~ ON line.statement_id = st.id
                             #~ WHERE st.journal_id IN %s and st.state = 'open'""", (tuple(self.ids),))
             #~ all_lines = self.env.cr.fetchone()[0]
             #~ number_to_reconcile = all_lines - already_reconciled
@@ -175,15 +173,15 @@ class HotelDashboard(models.Model):
             'sum_late': 23123,
             'currency_id': 1,
             'bank_statements_source': 'fonte',
-            'title': 'titulo', 
+            'title': 'titulo',
         }
-        
+
     @api.multi
     def get_line_graph_datas(self):
         data = []
         today = datetime.strptime(fields.Date.context_today(self), DF)
         days=30
-                
+
         for i in range(-1, days + 1):
             ndate = today + timedelta(days=i)
             ndate_str = ndate.strftime(DF)
@@ -193,7 +191,7 @@ class HotelDashboard(models.Model):
             name = format_date(ndate, 'd LLLL Y', locale=locale)
             data.append({'x':short_name,'y':day_onboard, 'name':name})
         return [{'values': data, 'area': True}]
-        
+
     @api.multi
     def action_create_new(self):
         #~ ctx = self._context.copy()
@@ -224,7 +222,7 @@ class HotelDashboard(models.Model):
             'view_id': view_id,
             'context': ctx,
         }
-    
+
     @api.multi
     def open_action(self):
         """return action based on type for related journals"""

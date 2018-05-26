@@ -20,11 +20,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
+import datetime
 from openerp import models, fields, api, _
 from openerp.exceptions import except_orm, ValidationError
 from odoo.addons.hotel import date_utils
-import datetime
 
 
 class Cardex(models.Model):

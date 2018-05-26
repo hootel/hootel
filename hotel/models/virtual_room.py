@@ -21,6 +21,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from decimal import Decimal
+from datetime import datetime, timedelta
+import dateutil.parser
+import urllib2
+import time
 from openerp.exceptions import except_orm, UserError, ValidationError
 from openerp.tools import (
     misc,
@@ -29,11 +34,6 @@ from openerp.tools import (
 from openerp import models, fields, api, _
 from openerp import workflow
 from odoo.addons.hotel import date_utils
-from decimal import Decimal
-from datetime import datetime, timedelta
-import dateutil.parser
-import urllib2
-import time
 
 
 class VirtualRoom(models.Model):

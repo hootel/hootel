@@ -19,12 +19,12 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>
 #
 # ---------------------------------------------------------------------------
-from openerp import models, fields, api, _
-from openerp.tools import misc, DEFAULT_SERVER_DATETIME_FORMAT
-from odoo.addons.hotel import date_utils
 import time
 import datetime
 import logging
+from openerp import models, fields, api, _
+from openerp.tools import misc, DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.addons.hotel import date_utils
 _logger = logging.getLogger(__name__)
 
 

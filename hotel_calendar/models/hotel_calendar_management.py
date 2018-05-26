@@ -19,6 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import logging
 from datetime import datetime, timedelta
 from openerp.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
@@ -26,7 +27,6 @@ from openerp.tools import (
 from openerp import models, api, _
 from openerp.exceptions import ValidationError
 from odoo.addons.hotel import date_utils
-import logging
 _logger = logging.getLogger(__name__)
 
 
@@ -143,6 +143,7 @@ class HotelCalendarManagement(models.TransientModel):
                 else:
                     avail_id.write(vals)
 
+    @api.model
     def _hcalendar_room_json_data(self, rooms):
         json_data = []
         for room in rooms:
@@ -155,6 +156,7 @@ class HotelCalendarManagement(models.TransientModel):
             ))
         return json_data
 
+    @api.model
     def _hcalendar_pricelist_json_data(self, prices):
         json_data = {}
         vroom_obj = self.env['hotel.virtual.room']
@@ -173,6 +175,7 @@ class HotelCalendarManagement(models.TransientModel):
             })
         return json_data
 
+    @api.model
     def _hcalendar_restriction_json_data(self, restrictions):
         json_data = {}
         for rec in restrictions:
@@ -253,6 +256,7 @@ class HotelCalendarManagement(models.TransientModel):
             ])
         return json_data
 
+    @api.model
     def _hcalendar_get_count_reservations_json_data(self, dfrom, dto):
         vrooms = self.env['hotel.virtual.room'].search([])
         date_start = date_utils.get_datetime(dfrom, hours=False)
@@ -277,7 +281,7 @@ class HotelCalendarManagement(models.TransientModel):
 
         return json_data
 
-    @api.multi
+    @api.model
     def get_hcalendar_all_data(self, dfrom, dto, pricelist_id, restriction_id,
                                withRooms):
         if not dfrom or not dto:

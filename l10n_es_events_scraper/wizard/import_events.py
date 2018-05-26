@@ -19,13 +19,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import logging
 from datetime import datetime, timedelta
 from dateutil import tz
 from openerp.exceptions import ValidationError
 from openerp import models, fields, api, _
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from ..scrapers import scraper_abc
-import logging
 _logger = logging.getLogger(__name__)
 
 CALENDAR_EVENT_TYPE_CONCERT = 'Concert'

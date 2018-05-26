@@ -19,9 +19,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import logging
 from openerp import http, _
 from openerp.http import request
-import logging
 from openerp.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 

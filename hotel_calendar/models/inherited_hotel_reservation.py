@@ -19,14 +19,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api, _
+import logging
 from datetime import datetime, timedelta
+from openerp import models, fields, api, _
 from openerp.exceptions import ValidationError
-from odoo.addons.hotel import date_utils
 from openerp.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT)
-import logging
+from odoo.addons.hotel import date_utils
 _logger = logging.getLogger(__name__)
 
 
@@ -122,7 +122,7 @@ class HotelReservation(models.Model):
             ])
         return json_events
 
-    @api.multi
+    @api.model
     def get_hcalendar_reservations_data(self, dfrom, dto, domain, rooms):
         date_start = date_utils.get_datetime(dfrom, hours=False) \
             - timedelta(days=1)
@@ -146,7 +146,7 @@ class HotelReservation(models.Model):
         reservations = (reservations_ll | reservations_lr) & reservations_raw
         return self._hcalendar_reservation_data(reservations)
 
-    @api.multi
+    @api.model
     def get_hcalendar_pricelist_data(self, dfrom, dto):
         pricelist_id = self.env['ir.values'].sudo().get_default(
                             'hotel.config.settings', 'parity_pricelist_id')
@@ -185,7 +185,7 @@ class HotelReservation(models.Model):
             })
         return json_rooms_prices
 
-    @api.multi
+    @api.model
     def get_hcalendar_restrictions_data(self, dfrom, dto):
         restriction_id = self.env['ir.values'].sudo().get_default(
                             'hotel.config.settings', 'parity_restrictions_id')
@@ -229,7 +229,7 @@ class HotelReservation(models.Model):
             json_rooms_rests.update({vroom.id: days})
         return json_rooms_rests
 
-    @api.multi
+    @api.model
     def get_hcalendar_events_data(self, dfrom, dto):
         date_start = date_utils.get_datetime(dfrom, hours=False) \
             - timedelta(days=1)
@@ -253,7 +253,7 @@ class HotelReservation(models.Model):
         events = (events_ll | events_lr) & events_raw
         return self._hcalendar_event_data(events)
 
-    @api.multi
+    @api.model
     def get_hcalendar_settings(self):
         user_id = self.env['res.users'].browse(self.env.uid)
         type_move = user_id.pms_type_move
@@ -274,10 +274,8 @@ class HotelReservation(models.Model):
             'show_num_rooms': user_id.pms_show_num_rooms,
         }
 
-    @api.multi
-    def get_hcalendar_all_data(self, dfrom, dto, withRooms=True,
-                               withPricelist=True, withRestrictions=True,
-                               withEvents=True):
+    @api.model
+    def get_hcalendar_all_data(self, dfrom, dto, withRooms=True):
         if not dfrom or not dto:
             raise ValidationError(_('Input Error: No dates defined!'))
 
@@ -285,23 +283,13 @@ class HotelReservation(models.Model):
         json_res, json_res_tooltips = self.get_hcalendar_reservations_data(
             dfrom, dto, [], rooms)
 
-        json_prices = {}
-        if withPricelist:
-            json_prices = self.get_hcalendar_pricelist_data(dfrom, dto)
-        json_restr = {}
-        if withRestrictions:
-            json_restr = self.get_hcalendar_restrictions_data(dfrom, dto)
-        json_events = {}
-        if withEvents:
-            json_events = self.get_hcalendar_events_data(dfrom, dto)
-
         vals = {
             'rooms': withRooms and self._hcalendar_room_data(rooms) or [],
             'reservations': json_res,
             'tooltips': json_res_tooltips,
-            'pricelist': json_prices,
-            'restrictions': json_restr,
-            'events': json_events,
+            'pricelist': self.get_hcalendar_pricelist_data(dfrom, dto),
+            'restrictions': self.get_hcalendar_restrictions_data(dfrom, dto),
+            'events': self.get_hcalendar_events_data(dfrom, dto),
         }
 
         return vals
@@ -336,7 +324,7 @@ class HotelReservation(models.Model):
                 'price': record.folio_id.amount_total,
             })
 
-    @api.multi
+    @api.model
     def swap_reservations(self, fromReservsIds, toReservsIds):
         fromReservs = self.env['hotel.reservation'].browse(fromReservsIds)
         toReservs = self.env['hotel.reservation'].browse(toReservsIds)
