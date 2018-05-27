@@ -527,7 +527,7 @@ var HotelCalendarView = View.extend({
           domains['dates'][1].format(ODOO_DATETIME_MOMENT_FORMAT)
         ];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
-            self._days_tooltips = self._days_tooltips.concat(results['events']);
+            self._days_tooltips = results['events'];
             self._reserv_tooltips = results['tooltips'];
             var rooms = [];
             for (var r of results['rooms']) {
@@ -1152,8 +1152,7 @@ var HotelCalendarView = View.extend({
           false
         ];
         this._model.call('get_hcalendar_all_data', oparams).then(function(results){
-          console.log(results);
-            self._days_tooltips = self._days_tooltips.concat(results['events']);
+            self._merge_days_tooltips(results['events']);
             self._reserv_tooltips = _.extend(self._reserv_tooltips, results['tooltips']);
             var reservs = [];
             for (var r of results['reservations']) {
@@ -1236,6 +1235,17 @@ var HotelCalendarView = View.extend({
         return {
             'dates': [date_begin, date_end]
         };
+    },
+
+    _merge_days_tooltips: function(new_tooltips) {
+      for (var nt of new_tooltips) {
+        var fnt = _.find(this._days_tooltips, function(item) { return item[0] === nt[0]});
+        if (fnt) {
+          fnt = nt;
+        } else {
+          this._days_tooltips.push(nt);
+        }
+      }
     },
 
     _find_bootstrap_environment: function() {

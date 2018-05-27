@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="calendar.view_calendar_event_form" />
         <field name="arch" type="xml">
             <xpath expr="//field[@name='allday']" position="before">
-                    <field name="web_id" readonly="True" attrs="{'invisible':[('web_id', '=', False)]}"/>
+                <field name="web_id" readonly="True" attrs="{'invisible':[('web_id', '=', False)]}"/>
             </xpath>
         </field>
     </record>
