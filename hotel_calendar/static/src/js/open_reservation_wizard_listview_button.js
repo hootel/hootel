@@ -1,7 +1,7 @@
 odoo.define('hotel_calendar.listview_button_open_reservation_wizard', function(require) {
 'use strict';
 /*
- * Hotel WuBook
+ * Hotel
  * GNU Public License
  * Alexandre Díaz <dev@redneboa.es>
  */

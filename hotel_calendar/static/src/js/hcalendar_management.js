@@ -9,9 +9,9 @@
  * Dependencies:
  *     - moment
  *     - underscore
- *     - jquery
- *     - bootbox
- *     - bootstrap
+ *     - jquery !shit
+ *     - bootbox  !shit
+ *     - bootstrap  !shit
  */
 
 function HotelCalendarManagement(/*String*/querySelector, /*Dictionary*/options, /*HTMLObject?*/_base) {

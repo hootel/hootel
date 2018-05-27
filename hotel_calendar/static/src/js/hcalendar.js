@@ -10,7 +10,6 @@
  *     - underscore
  *     - awesomeicons !shit
  *     - bootstrap !shit
- *     - datetimepicker !shit
  */
 
 
