@@ -1062,7 +1062,6 @@ class HotelReservation(models.Model):
                 vals.update({'state': 'booking'})
             else:
                 vals.update({'state': 'confirm'})
-                vals.update({'state': 'confirm'})
             if r.checkin_is_today():
                 vals.update({'is_checkin': True})
                 folio = hotel_folio_obj.browse(r.folio_id.id)

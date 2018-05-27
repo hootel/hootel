@@ -48,4 +48,5 @@ class HotelFolio(models.Model):
         for rec in self:
             for room in rec.room_lines:
                 room.to_read = False
+                room.to_assign = False
         return super(HotelFolio, self).action_confirm()
