@@ -28,7 +28,7 @@ from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from ..scrapers import scraper_abc
 _logger = logging.getLogger(__name__)
 
-CALENDAR_EVENT_TYPE_CONCERT = 'Concert'
+CALENDAR_EVENT_TYPE_CONCERT = 'Scraper-Concert'
 
 
 class ImportEventsWizard(models.TransientModel):

@@ -18,10 +18,32 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, api, fields
+
+REQUEST_DELAY = 3
+MONTHS_MAP = {
+    'Enero': 1,
+    'Febrero': 2,
+    'Marzo': 3,
+    'Abril': 4,
+    'Mayo': 5,
+    'Junio': 6,
+    'Julio': 7,
+    'Agosto': 8,
+    'Septiembre': 9,
+    'Octubre': 10,
+    'Noviembre': 11,
+    'Diciembre': 12,
+}
 
 
-class CalendarEvent(models.Model):
-    _inherit = 'calendar.event'
-
-    web_id = fields.Char('Web ID')
+class EventCity:
+    def __init__(self, postid=0, city='', dates=None, name='', address='',
+                 venue='', prices='', buy_tickets=''):
+        self.postid = postid
+        self.city = city
+        self.dates = dates or []
+        self.name = name
+        self.address = address
+        self.venue = venue
+        self.prices = prices
+        self.buy_tickets = buy_tickets

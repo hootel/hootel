@@ -27,37 +27,8 @@ try:
 except ImportError:     # Python 2
     from urllib import quote_plus
 import logging
+from .event_scraper import EventCity, MONTHS_MAP, REQUEST_DELAY
 _logger = logging.getLogger(__name__)
-
-
-REQUEST_DELAY = 3
-MONTHS_MAP = {
-    'Enero': 1,
-    'Febrero': 2,
-    'Marzo': 3,
-    'Abril': 4,
-    'Mayo': 5,
-    'Junio': 6,
-    'Julio': 7,
-    'Agosto': 8,
-    'Septiembre': 9,
-    'Octubre': 10,
-    'Noviembre': 11,
-    'Diciembre': 12,
-}
-
-
-class EventCity:
-    def __init__(self, postid=0, city='', dates=None, name='', address='',
-                 venue='', prices='', buy_tickets=''):
-        self.postid = postid
-        self.city = city
-        self.dates = dates or []
-        self.name = name
-        self.address = address
-        self.venue = venue
-        self.prices = prices
-        self.buy_tickets = buy_tickets
 
 
 def analize_page(url, onlyFuture):
@@ -174,7 +145,7 @@ def import_city_events(events, search, npag=1, pags=-1,
         pages = re.search(
             ur"<span class='pages'>Página (\d+) de (\d+)</span>",
             r.text)
-        total_pags = int(pages.group(2))
+        total_pags = pages and int(pages.group(2)) or 0
 
         res_founds = re.finditer(
             r'<h2 class="entry-title"><a href="([^"]+)" rel="bookmark">',

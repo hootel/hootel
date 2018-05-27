@@ -1163,7 +1163,7 @@ HotelCalendar.prototype = {
       if (this.options.rooms) {
         var room_types = this.getRoomTypes();
         for (var rt of room_types) {
-          if (rt) {
+          if (rt || room_types.length > 1) {
             row = tbody.insertRow();
             row.setAttribute('id', this._sanitizeId(`ROW_DETAIL_FREE_TYPE_${rt}`));
             row.dataset.hcalRoomType = rt;
@@ -2027,8 +2027,7 @@ HotelCalendar.prototype = {
       this.edtable.querySelectorAll('td.hcal-cell-detail-room-free-total-group-item-day'),
       this.edtable.querySelectorAll('td.hcal-cell-detail-room-perc-occup-group-item-day')
     ];
-    for (var i=0; i<=this.options.days; ++i) {
-      var cell = false;
+    for (var i=0; i<=cells[0].length; ++i) {
       // Occupation by Type
       cell = cells[0][i];
       if (cell) {
@@ -2039,13 +2038,15 @@ HotelCalendar.prototype = {
         cell.innerText = num_free;
         cell.style.backgroundColor = this._generateColor(num_free, num_rooms, 0.35, true, true);
       }
+    }
 
+    var num_rooms = this.getRoomsCapacityTotal();
+    for (var i=0; i<=this.options.days; ++i) {
       // Occupation Total
       cell = cells[1][i];
+      var cell_date = cell.dataset.hcalDate;
+      var num_free = this.calcDayRoomTotalReservations(cell_date);
       if (cell) {
-        var cell_date = cell.dataset.hcalDate;
-        var num_rooms = this.getRoomsCapacityTotal();
-        var num_free = this.calcDayRoomTotalReservations(cell_date);
         cell.innerText = num_free;
         cell.style.backgroundColor = this._generateColor(num_free, num_rooms, 0.35, true, true);
       }
@@ -2053,10 +2054,6 @@ HotelCalendar.prototype = {
       // Occupation Total Percentage
       cell = cells[2][i];
       if (cell) {
-        var parentRow = this.$base.querySelector(`#${cell.dataset.hcalParentRow}`);
-        var cell_date = cell.dataset.hcalDate;
-        var num_rooms = this.getRoomsCapacityTotal();
-        var num_free = this.calcDayRoomTotalReservations(cell_date);
         var perc = 100.0 - (num_free * 100.0 / num_rooms);
         cell.innerText = perc.toFixed(0);
         cell.style.backgroundColor = this._generateColor(perc, 100.0, 0.35, false, true);
@@ -2337,8 +2334,18 @@ HotelCalendar.prototype = {
 
   _onCellMouseEnter: function(ev) {
     var date_cell = HotelCalendar.toMoment(this.etable.querySelector(`#${ev.target.dataset.hcalParentCell}`).dataset.hcalDate);
+    var reserv;
+    if (this.reservationAction.reservation) {
+      var reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
+      if (!this.reservationAction.oldReservationObj) {
+        this.reservationAction.oldReservationObj = reserv.clone();
+        this.reservationAction.daysOffset = this.getDateDiffDays(reserv.startDate.clone().local(), date_cell);
+        if (this.reservationAction.daysOffset < 0 ) {
+          this.reservationAction.daysOffset = 0;
+        }
+      }
+    }
     if (this._isLeftButtonPressed(ev)) {
-      var reserv = null;
       var toRoom = undefined;
       var needUpdate = false;
       if (!this.reservationAction.reservation) {
@@ -2352,7 +2359,6 @@ HotelCalendar.prototype = {
         var b = this.reservationAction.mousePos[1] - ev.y;
         //var dist = Math.sqrt(a*a + b*b);
         if (this.reservationAction.action == HotelCalendar.ACTION.MOVE_RIGHT) {
-          reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
           if (reserv.fixDays) {
             this._reset_action_reservation();
             return true;
@@ -2367,7 +2373,6 @@ HotelCalendar.prototype = {
           this.reservationAction.newReservationObj = reserv;
           needUpdate = true;
         } else if (this.reservationAction.action == HotelCalendar.ACTION.MOVE_LEFT) {
-          reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
           if (reserv.fixDays) {
             this._reset_action_reservation();
             return true;
@@ -2383,15 +2388,6 @@ HotelCalendar.prototype = {
           this.reservationAction.newReservationObj = reserv;
           needUpdate = true;
         } else if (this.reservationAction.action == HotelCalendar.ACTION.MOVE_ALL) {
-          reserv = this.getReservation(this.reservationAction.reservation.dataset.hcalReservationObjId);
-          if (!this.reservationAction.oldReservationObj) {
-            this.reservationAction.oldReservationObj = reserv.clone();
-            this.reservationAction.daysOffset = this.getDateDiffDays(reserv.startDate.clone().local(), date_cell);
-            if (this.reservationAction.daysOffset < 0 ) {
-              this.reservationAction.daysOffset = 0;
-            }
-          }
-
           // Relative Movement
           date_cell.subtract(this.reservationAction.daysOffset, 'd');
 

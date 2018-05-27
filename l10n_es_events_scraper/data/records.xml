@@ -3,8 +3,8 @@
     <data noupdate="1">
 
         <record id="categ_event1" model="calendar.event.type">
-            <field name="name">Concert</field>
+            <field name="name">Scraper-Concert</field>
         </record>
-        
+
     </data>
 </odoo>
