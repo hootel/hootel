@@ -1121,17 +1121,19 @@ HotelCalendar.prototype = {
     var cell = row.insertCell();
     cell.setAttribute('colspan', 3);
     this.btnSaveChanges = document.createElement('button');
-    this.btnSaveChanges.classList.add('btn', 'col-xs-12', 'col-lg-12');
-    this.btnSaveChanges.setAttribute('id', 'btn_save_changes');
-    this.btnSaveChanges.style.height = '45px';
-    this.btnSaveChanges.setAttribute('title', this._t('Save Changes'));
-    this.btnSaveChanges.innerHTML = "<i class='fa fa-save fa-stack-2x'> </i>";
-    this.btnSaveChanges.addEventListener('click', function(ev){
-      if (this.classList.contains('need-save')) {
-        $this._dispatchEvent('hcalOnSavePricelist');
-      }
-    });
-    cell.appendChild(this.btnSaveChanges);
+    if (this.options.showPricelist) {
+      this.btnSaveChanges.classList.add('btn', 'col-xs-12', 'col-lg-12');
+      this.btnSaveChanges.setAttribute('id', 'btn_save_changes');
+      this.btnSaveChanges.style.height = '45px';
+      this.btnSaveChanges.setAttribute('title', this._t('Save Changes'));
+      this.btnSaveChanges.innerHTML = "<i class='fa fa-save fa-stack-2x'> </i>";
+      this.btnSaveChanges.addEventListener('click', function(ev){
+        if (this.classList.contains('need-save')) {
+          $this._dispatchEvent('hcalOnSavePricelist');
+        }
+      });
+      cell.appendChild(this.btnSaveChanges);
+    }
     //cell.setAttribute('class', 'col-xs-1 col-lg-1');
     for (var i=0; i<=this.options.days; i++) {
       var dd = this.options.startDate.clone().local().startOf('day').add(i,'d').utc();
