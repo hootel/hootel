@@ -39,6 +39,7 @@ class HotelVirtualRoomRestrictionItem(models.Model):
     applied_on = fields.Selection([
         ('1_global', 'Global'),
         ('0_virtual_room', 'Virtual Room')], string="Apply On", required=True,
+        default='0_virtual_room',
         help='Pricelist Item applicable on selected option')
 
     min_stay = fields.Integer("Min. Stay")
