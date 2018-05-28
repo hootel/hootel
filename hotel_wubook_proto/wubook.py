@@ -819,11 +819,11 @@ class WuBook(models.AbstractModel):
         if init_connection:
             if not self.init_connection():
                 return False
-        rcode, results = self.SERVER.rplan_get_rplan_values(self.TOKEN,
-                                                            self.LCODE,
-                                                            dfrom,
-                                                            dto,
-                                                            int(rpid))
+        rcode, results = self.SERVER.wired_rplan_get_rplan_values(self.TOKEN,
+                                                                  self.LCODE,
+                                                                  dfrom,
+                                                                  dto,
+                                                                  int(rpid))
         if init_connection:
             self.close_connection()
 
@@ -1255,6 +1255,8 @@ class WuBook(models.AbstractModel):
     # FIXME: Super big method!!! O_o
     @api.model
     def generate_reservations(self, bookings):
+        _logger.info("=== BOOKINGS FROM WUBOOK")
+        _logger.info(bookings)
         default_arrival_hour = self.env['ir.values'].sudo().get_default(
                             'hotel.config.settings', 'default_arrival_hour')
         default_departure_hour = self.env['ir.values'].sudo().get_default(

@@ -58,7 +58,7 @@ class website_wubook(http.Controller):
         if lcode != wlcode:
             raise ValidationError(_("Error! lcode doesn't match!"))
 
-        _logger.info(_("[WUBOOK] Importing Reservations..."))
+        _logger.info(_("[WUBOOK->ODOO] Importing Booking..."))
         # Create Reservation
         request.env['wubook'].sudo().fetch_booking(lcode, rcode)
 
@@ -92,7 +92,7 @@ class website_wubook(http.Controller):
         if lcode != wlcode:
             raise ValidationError(_("Error! lcode doesn't match!"))
 
-        _logger.info(_("[WUBOOK] Updating values..."))
+        _logger.info(_("[WUBOOK->ODOO] Updating values..."))
         wubook_obj = request.env['wubook'].sudo().with_context({
             'init_connection': False
         })
