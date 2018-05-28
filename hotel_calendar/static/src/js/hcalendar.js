@@ -306,9 +306,13 @@ HotelCalendar.prototype = {
 
   getReservationsByRoom: function(/*Int,HRoomObject*/room, /*Boolean*/includeUnusedZones) {
     if (!(room instanceof HRoom)) { room = this.getRoom(room); }
-    return _.filter(this._reservationsMap[room.id], function(item){
-      return (includeUnusedZones || (!includeUnusedZones && !item.unusedZone));
-    });
+    if (room) {
+      return _.filter(this._reservationsMap[room.id], function(item){
+        return (includeUnusedZones || (!includeUnusedZones && !item.unusedZone));
+      });
+    }
+
+    return [];
   },
 
   _updateReservationsMap: function() {
@@ -2028,6 +2032,8 @@ HotelCalendar.prototype = {
       this.edtable.querySelectorAll('td.hcal-cell-detail-room-free-total-group-item-day'),
       this.edtable.querySelectorAll('td.hcal-cell-detail-room-perc-occup-group-item-day')
     ];
+
+    var cell;
     for (var i=0; i<=cells[0].length; ++i) {
       // Occupation by Type
       cell = cells[0][i];
