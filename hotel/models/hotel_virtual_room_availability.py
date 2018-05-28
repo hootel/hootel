@@ -38,6 +38,9 @@ class HotelVirtualRoomAvailability(models.Model):
                             track_visibility='always')
     date = fields.Date('Date', required=True, track_visibility='always')
 
+    _sql_constraints = [('vroom_registry_unique', 'unique(virtual_room_id, date)',
+                         'Only can exists one availability in the same day for the same virtual room!')]
+
     @api.constrains('avail')
     def _check_avail(self):
         if self.avail < 0:
