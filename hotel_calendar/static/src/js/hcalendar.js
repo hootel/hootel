@@ -386,7 +386,7 @@ HotelCalendar.prototype = {
       if (!notCheck && limits.isValid()) {
         var diff_date = this.getDateDiffDays(reservation.startDate, reservation.endDate);
         var numBeds = +limits.right.dataset.hcalBedNum - +limits.left.dataset.hcalBedNum;
-        var ndate = reservation.startDate.clone();
+        var ndate = reservation.startDate.clone().local();
         for (var i=0; i<diff_date; ++i) {
           for (var b=0; b<=numBeds; ++b) {
             var reservs = this.getReservationsByDay(ndate, true, true, reservation.room.id, +limits.left.dataset.hcalBedNum+b, reservation);
