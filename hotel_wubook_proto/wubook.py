@@ -22,6 +22,7 @@
 import logging
 import xmlrpclib
 import pytz
+import json
 from datetime import timedelta
 from urlparse import urljoin
 from odoo import models, api
@@ -1192,7 +1193,7 @@ class WuBook(models.AbstractModel):
     def _generate_booking_vals(self, broom, checkin_str, checkout_str,
                                is_cancellation, wchannel_info, wstatus, crcode,
                                rcode, vroom, split_booking, dates_checkin,
-                               dates_checkout):
+                               dates_checkout, book):
         # Generate Reservation Day Lines
         reservation_lines = []
         tprice = 0.0
@@ -1220,7 +1221,7 @@ class WuBook(models.AbstractModel):
             'adults': persons,
             'children': 0,
             'reservation_lines': reservation_lines,
-            'price_unit': tprice,
+            'price_unit': broom['amount'],
             'to_assign': not is_cancellation,
             'wrid': rcode,
             'wchannel_id': wchannel_info and wchannel_info.id,
@@ -1231,6 +1232,7 @@ class WuBook(models.AbstractModel):
             'cancelled' or 'draft',
             'virtual_room_id': vroom.id,
             'splitted': split_booking,
+            'wbook_json': json.dumps(book),
         }
 
     @api.model
@@ -1342,11 +1344,24 @@ class WuBook(models.AbstractModel):
                             'wstatus': str(book['status']),
                             'wstatus_reason': book.get('status_reason', ''),
                             'to_read': True,
+                            'price_unit': book['amount'],
+                            'wcustomer_notes': book['customer_notes'],
+                            'wbook_json': json.dumps(book),
                         })
+                        partner_vals = self._generate_partner_vals(book)
+                        del partner_vals['unconfirmed']
+                        reserv.partner_id.write(partner_vals)
                         reservs_processed = True
                         if is_cancellation:
                             reserv.with_context({
                                     'wubook_action': False}).action_cancel()
+                        elif reserv.state == 'cancelled':
+                            reserv.with_context({
+                                'wubook_action': False,
+                            }).write({
+                                'discount': 0.0,
+                                'state': 'confirm',
+                            })
 
             # Do Nothing if already processed 'wrid'
             if reservs_processed:
@@ -1361,9 +1376,8 @@ class WuBook(models.AbstractModel):
                     ('email', '=', customer_mail)
                 ], limit=1)
             if not partner_id:
-                partner_id = res_partner_obj.create(
-                    self._generate_partner_vals(book)
-                )
+                partner_id = res_partner_obj.create(self._generate_partner_vals(book))
+
             # Search Wubook Channel Info
             wchannel_info = self.env['wubook.channel.info'].search(
                 [('wid', '=', str(book['id_channel']))], limit=1)
@@ -1407,7 +1421,8 @@ class WuBook(models.AbstractModel):
                         vroom,
                         split_booking,
                         dates_checkin,
-                        dates_checkout
+                        dates_checkout,
+                        book,
                     )
                     free_rooms = hotel_vroom_obj.check_availability_virtual_room(
                         checkin_str,
@@ -1458,7 +1473,8 @@ class WuBook(models.AbstractModel):
                                 vroom,
                                 False,
                                 (checkin_utc_dt, False),
-                                (checkout_utc_dt, False)
+                                (checkout_utc_dt, False),
+                                book,
                             )
                             vals.update({
                                 'product_id':

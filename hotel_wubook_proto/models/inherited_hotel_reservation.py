@@ -69,6 +69,7 @@ class HotelReservation(models.Model):
                                       readonly=True)
     to_read = fields.Boolean('To Read', default=False)
     able_to_modify_wubook = fields.Boolean(compute=set_access_for_wubook_fields, string='Is user able to modify wubook fields?')
+    wbook_json = fields.Text(readonly=True)
 
     wstatus = fields.Selection([
         ('0', 'No WuBook'),
