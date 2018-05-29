@@ -1221,7 +1221,7 @@ class WuBook(models.AbstractModel):
             'adults': persons,
             'children': 0,
             'reservation_lines': reservation_lines,
-            'price_unit': broom['amount'],
+            'price_unit': tprice,
             'to_assign': not is_cancellation,
             'wrid': rcode,
             'wchannel_id': wchannel_info and wchannel_info.id,
