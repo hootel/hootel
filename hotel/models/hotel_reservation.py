@@ -742,7 +742,7 @@ class HotelReservation(models.Model):
                     record.preconfirm == True:
                 record.confirm()
             record._compute_color()
-            
+
             if not record.reservation_lines and not record.splitted: #To allow add tree edit bottom room_lines on folio form
             #TO REVIEW: Hot fix to avoid duplicate reservation_lines
                 checkin = vals.get('checkin', record.checkin)
@@ -765,11 +765,10 @@ class HotelReservation(models.Model):
         vals.update({
             'edit_room': False,
         })
-        if pricesChanged or 'state' in vals or 'virtual_room_id' in vals \
-                         or 'to_assign' in vals:
+        if pricesChanged or 'state' in vals or 'virtual_room_id' in vals or 'to_assign' in vals:
             vals.update({
-            'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
-        })
+                'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+            })
         res = super(HotelReservation, self).write(vals)
         if pricesChanged:
             for record in self:

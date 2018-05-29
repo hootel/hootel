@@ -26,6 +26,7 @@ class HotelReservationLine(models.Model):
     _order = "date"
 
     reservation_id = fields.Many2one('hotel.reservation', string='Reservation',
-                                     ondelete='cascade')
+                                     ondelete='cascade', required=True,
+                                     copy=False)
     date = fields.Date('Date')
     price = fields.Float('Price')
