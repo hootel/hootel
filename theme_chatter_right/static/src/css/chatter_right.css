@@ -10,4 +10,8 @@
     position: absolute;
     background-color: white;
   }
+
+  .o_web_client > .o_main > .o_main_content > .o_content .table-responsive {
+    overflow-x: auto !important;
+  }
 }
