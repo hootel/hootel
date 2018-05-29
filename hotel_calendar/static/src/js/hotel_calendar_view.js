@@ -209,7 +209,6 @@ var HotelCalendarView = View.extend({
     },
 
     do_show: function() {
-      var self = this;
       this.do_push_state({});
       this.shown.resolve();
 
@@ -218,13 +217,13 @@ var HotelCalendarView = View.extend({
       if (this._hcalendar && !this._is_visible) {
         // FIXME: Workaround for restore "lost" reservations (Drawn when the view is hidden)
         setTimeout(function(){
-          for (var reserv of self._hcalendar._reservations) {
+          for (var reserv of this._hcalendar._reservations) {
             var style = window.getComputedStyle(reserv._html, null);
             if (parseInt(style.width, 10) < 15 || parseInt(style.height, 10) < 15 || parseInt(style.top, 10) === 0) {
-              self._hcalendar._updateReservation(reserv);
+              this._hcalendar._updateReservation(reserv);
             }
           }
-        }, 300);
+        }.bind(this), 300);
       }
     },
 
@@ -321,12 +320,12 @@ var HotelCalendarView = View.extend({
                         for (var nreserv of ev.detail.outReservs) {
                           $(nreserv._html).animate({'top': refFromReservDiv.style.top});
                         }
-                        self._model.call('swap_reservations', [false, fromIds, toIds]).then(function(results){
+                        self._model.call('swap_reservations', [fromIds, toIds]).then(function(results){
                           var allReservs = ev.detail.inReservs.concat(ev.detail.outReservs);
                           for (nreserv of allReservs) {
                             $(nreserv._html).stop(true);
                           }
-                        }).fail(function(err, ev){
+                        }).fail(function(err, errev){
                           for (var nreserv of ev.detail.inReservs) {
                             $(nreserv._html).animate({'top': refFromReservDiv.style.top}, 'fast');
                           }
@@ -415,7 +414,7 @@ var HotelCalendarView = View.extend({
                               if (oldReservation.room.overbooking) {
                                 self._hcalendar.removeOBRoomRow(oldReservation);
                               }
-                            }).fail(function(err, ev){
+                            }).fail(function(err, errev){
                                 self._hcalendar.replaceReservation(newReservation, oldReservation);
                             });
                             // Workarround for dispatch room lines regeneration
@@ -1074,6 +1073,7 @@ var HotelCalendarView = View.extend({
                 if (notif[1]['action'] === 'unlink' || reserv['state'] === 'cancelled') {
                   this._hcalendar.removeReservation(reserv['reserv_id'], true);
                   this._reserv_tooltips = _.pick(this._reserv_tooltips, function(value, key, obj){ return key != reserv['reserv_id']; });
+                  nreservs = _.reject(nreservs, function(item){ return item.id == reserv['reserv_id']; });
                 } else {
                   nreservs = _.reject(nreservs, {'id': reserv['reserv_id']}); // Only like last changes
                   var room = this._hcalendar.getRoom(reserv['product_id'], reserv['overbooking'], reserv['reserv_id']);

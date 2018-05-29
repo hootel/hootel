@@ -1713,8 +1713,8 @@ HotelCalendar.prototype = {
     var toDateLimits = this.getDateLimits(toReservations);
     var toRealDateLimits = this.getFreeDatesByRoom(toDateLimits[0], toDateLimits[1], toReservations[0].room.id);
 
-    if (fromDateLimits[0].isSameOrAfter(toRealDateLimits[0], 'd') && fromDateLimits[1].isSameOrBefore(toRealDateLimits[1], 'd') &&
-        toDateLimits[0].isSameOrAfter(fromRealDateLimits[0], 'd') && toDateLimits[1].isSameOrBefore(fromRealDateLimits[1], 'd'))
+    if (fromDateLimits[0].clone().local().isSameOrAfter(toRealDateLimits[0].clone().local(), 'd') && fromDateLimits[1].clone().local().isSameOrBefore(toRealDateLimits[1].clone().local(), 'd') &&
+        toDateLimits[0].clone().local().isSameOrAfter(fromRealDateLimits[0].clone().local(), 'd') && toDateLimits[1].clone().local().isSameOrBefore(fromRealDateLimits[1].clone().local(), 'd'))
     {
       // Change some critical values
       var refFromReservs = fromReservations[0];
