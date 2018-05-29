@@ -1343,6 +1343,7 @@ class WuBook(models.AbstractModel):
                             'wstatus': str(book['status']),
                             'wstatus_reason': book.get('status_reason', ''),
                             'to_read': True,
+                            'to_assign': True,
                             'price_unit': book['amount'],
                             'wcustomer_notes': book['customer_notes'],
                             'wbook_json': json.dumps(book),
