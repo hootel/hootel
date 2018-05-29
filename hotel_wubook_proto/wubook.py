@@ -1347,9 +1347,10 @@ class WuBook(models.AbstractModel):
                             'wcustomer_notes': book['customer_notes'],
                             'wbook_json': json.dumps(book),
                         })
-                        partner_vals = self._generate_partner_vals(book)
-                        del partner_vals['unconfirmed']
-                        reserv.partner_id.write(partner_vals)
+                        if reserv.partner_id.unconfirmed:
+                            reserv.partner_id.write(
+                                self._generate_partner_vals(book)
+                            )
                         reservs_processed = True
                         if is_cancellation:
                             reserv.with_context({
