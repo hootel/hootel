@@ -220,12 +220,12 @@
                                         <field name="invoice_status" invisible="1"/>
                                         <field name="customer_lead" invisible="1"/>
                                         <field name="currency_id" invisible="1"/>
-                                        <field name="price_unit" invisible="0"/>
+                                        <field name="price_unit" invisible="1"/>
                                         <field name="amount_room" string="Reservation Price" readonly="1"/>
                                         <field name="discount" groups="sale.group_discount_per_so_line"/>
                                         <field name="amount_discount" string="Final Price"/>
                                         <field name="price_subtotal" widget="monetary" invisible="1"/>
-                                        <field name="price_total" widget="monetary" invisible="0"/>
+                                        <field name="price_total" widget="monetary" invisible="1"/>
                                         <button type="object" class="oe_stat_button"
                                             id="go_reservation" icon="fa fa-2x fa-bars"
                                             name="open_reservation_form"/>
