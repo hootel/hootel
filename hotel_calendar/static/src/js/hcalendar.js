@@ -2158,27 +2158,27 @@ HotelCalendar.prototype = {
         var userData = userDataValue && userDataValue.toLowerCase() || '';
         if ((fieldName in obj && obj[fieldName].toLowerCase().search(value) !== -1) || userData.search(value) !== -1) {
           founded = true;
-          break;
-        }
+          //break;
+        } else { return false; }
       } else if (compMode === '=') {
         if ((fieldName in obj && obj[fieldName] === f[2]) || userDataValue === f[2]) {
           founded = true;
-          break;
-        }
+          //break;
+        } else { return false; }
       } else if (compMode === 'in') {
         if ((fieldName in obj && obj[fieldName] in f[2]) ||
             f[2].indexOf(userDataValue) != -1 ||
             (obj[fieldName] && typeof obj[fieldName] === 'object' && _.every(f[2], function(item) { return obj[fieldName].indexOf(item) !== -1; })) ||
             (userDataValue && typeof userDataValue === 'object' && userDataValue.length && _.every(f[2], function(item) { return userDataValue.indexOf(item) !== -1; }))) {
           founded = true;
-          break;
-        }
+          //break;
+        } else { return false; }
       } else if (compMode === 'some') {
         if ((obj[fieldName] && typeof obj[fieldName] === 'object' && _.some(f[2], function(item) { return obj[fieldName].indexOf(item) !== -1; })) ||
             (userDataValue && typeof userDataValue === 'object' && userDataValue.length && _.some(f[2], function(item) { return userDataValue.indexOf(item) !== -1; }))) {
           founded = true;
-          break;
-        }
+          //break;
+        } else { return false; }
       }
     }
 
