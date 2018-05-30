@@ -449,6 +449,8 @@ HotelCalendar.prototype = {
 
   //==== ROOMS
   _filterRooms: function() {
+    console.log("=== DOMAIN");
+    console.log(this._domains[HotelCalendar.DOMAIN.ROOMS]);
     for (var r of this.options.rooms) {
       r._active = this._in_domain(r, this._domains[HotelCalendar.DOMAIN.ROOMS]);
       if (r._active) {
@@ -458,7 +460,7 @@ HotelCalendar.prototype = {
       }
       if (r.id in this._reservationsMap) {
         for (var reserv of this._reservationsMap[r.id]) {
-          this._updateReservation(reserv);
+          this._updateReservation(reserv, !r._active);
         }
       }
     }
@@ -2152,30 +2154,30 @@ HotelCalendar.prototype = {
 
       var fieldName = f[0].toLowerCase();
       var compMode = f[1].toLowerCase();
+      var userDataValue = obj.getUserData(fieldName) || false; // FIXME: Unused in some cases
       if (compMode === 'ilike') {
         var value = f[2].toLowerCase();
-        var userData = obj.getUserData(fieldName) && obj.getUserData(fieldName).toLowerCase() || '';
+        var userData = userDataValue && userDataValue.toLowerCase() || '';
         if ((fieldName in obj && obj[fieldName].toLowerCase().search(value) !== -1) || userData.search(value) !== -1) {
           founded = true;
           break;
         }
       } else if (compMode === '=') {
-        if ((fieldName in obj && obj[fieldName] === f[2]) ||
-            obj.getUserData(fieldName) === f[2]) {
+        if ((fieldName in obj && obj[fieldName] === f[2]) || userDataValue === f[2]) {
           founded = true;
           break;
         }
       } else if (compMode === 'in') {
         if ((fieldName in obj && obj[fieldName] in f[2]) ||
-            obj.getUserData(fieldName) in f[2] ||
-            (obj[fieldName] && typeof obj[fieldName] === 'object' && _.every(obj[fieldName], function(item) { return f[2].indexOf(item) !== -1; })) ||
-            (obj.getUserData(fieldName) && typeof obj.getUserData(fieldName) === 'object' && _.every(obj.getUserData(fieldName), function(item) { return f[2].indexOf(item) !== -1; }))) {
+            f[2].indexOf(userDataValue) != -1 ||
+            (obj[fieldName] && typeof obj[fieldName] === 'object' && _.every(f[2], function(item) { return obj[fieldName].indexOf(item) !== -1; })) ||
+            (userDataValue && typeof userDataValue === 'object' && userDataValue.length && _.every(f[2], function(item) { return userDataValue.indexOf(item) !== -1; }))) {
           founded = true;
           break;
         }
       } else if (compMode === 'some') {
-        if ((obj[fieldName] && typeof obj[fieldName] === 'object' && _.some(obj[fieldName], function(item) { return f[2].indexOf(item) !== -1; })) ||
-            (obj.getUserData(fieldName) && typeof obj.getUserData(fieldName) === 'object' && _.some(obj.getUserData(fieldName), function(item) { return f[2].indexOf(item) !== -1; }))) {
+        if ((obj[fieldName] && typeof obj[fieldName] === 'object' && _.some(f[2], function(item) { return obj[fieldName].indexOf(item) !== -1; })) ||
+            (userDataValue && typeof userDataValue === 'object' && userDataValue.length && _.some(f[2], function(item) { return userDataValue.indexOf(item) !== -1; }))) {
           founded = true;
           break;
         }
