@@ -449,8 +449,6 @@ HotelCalendar.prototype = {
 
   //==== ROOMS
   _filterRooms: function() {
-    console.log("=== DOMAIN");
-    console.log(this._domains[HotelCalendar.DOMAIN.ROOMS]);
     for (var r of this.options.rooms) {
       r._active = this._in_domain(r, this._domains[HotelCalendar.DOMAIN.ROOMS]);
       if (r._active) {
