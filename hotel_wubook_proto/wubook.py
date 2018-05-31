@@ -375,12 +375,14 @@ class WuBook(models.AbstractModel):
                                            dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
         dto_dt = date_utils.get_datetime(dto,
                                          dtformat=DEFAULT_WUBOOK_DATE_FORMAT)
+        if dto_dt < now_dt:
+            return True
+        if dfrom_dt < now_dt:
+            dfrom = now
         if dfrom_dt > dto_dt:
             dtemp = dfrom
             dfrom = dto
             dto = dtemp
-        if dfrom_dt < now_dt:
-            dfrom = now
         rcode, results = self.SERVER.fetch_rooms_values(self.TOKEN,
                                                         self.LCODE,
                                                         dfrom,
