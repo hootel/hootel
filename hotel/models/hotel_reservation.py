@@ -802,6 +802,7 @@ class HotelReservation(models.Model):
     @api.onchange('adults', 'children', 'product_id')
     def check_capacity(self):
         if self.product_id:
+            self.tax_id = [(6, False, self.product_id.taxes_id.ids)]
             room = self.env['hotel.room'].search([
                 ('product_id', '=', self.product_id.id)
             ])

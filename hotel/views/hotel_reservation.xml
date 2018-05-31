@@ -273,7 +273,7 @@
                                                 <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
                                                 <field name="price_unit"
                                                     attrs="{'readonly': [('qty_invoiced', '&gt;', 0)]}"/>
-                                                <field name="tax_id" invisible="1"/>
+                                                <field name="tax_id" widget="many2many_tags" invisible="1"/>
                                                 <field name="discount" groups="sale.group_discount_per_so_line"/>
                                                 <field name="price_subtotal" widget="monetary" invisible="1"/>
                                                 <field name="price_total" widget="monetary"/>
