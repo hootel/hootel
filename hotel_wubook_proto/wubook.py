@@ -1221,15 +1221,14 @@ class WuBook(models.AbstractModel):
             'adults': persons,
             'children': 0,
             'reservation_lines': reservation_lines,
-            'price_unit': broom['amount'],
-            'to_assign': not is_cancellation,
+            'price_unit': tprice,
+            'to_assign': True,
             'wrid': rcode,
             'wchannel_id': wchannel_info and wchannel_info.id,
             'wchannel_reservation_code': crcode,
             'wstatus': wstatus,
             'to_read': True,
-            'state': is_cancellation and
-            'cancelled' or 'draft',
+            'state': is_cancellation and 'cancelled' or 'draft',
             'virtual_room_id': vroom.id,
             'splitted': split_booking,
             'wbook_json': json.dumps(book),
@@ -1344,13 +1343,15 @@ class WuBook(models.AbstractModel):
                             'wstatus': str(book['status']),
                             'wstatus_reason': book.get('status_reason', ''),
                             'to_read': True,
+                            'to_assign': True,
                             'price_unit': book['amount'],
                             'wcustomer_notes': book['customer_notes'],
                             'wbook_json': json.dumps(book),
                         })
-                        partner_vals = self._generate_partner_vals(book)
-                        del partner_vals['unconfirmed']
-                        reserv.partner_id.write(partner_vals)
+                        if reserv.partner_id.unconfirmed:
+                            reserv.partner_id.write(
+                                self._generate_partner_vals(book)
+                            )
                         reservs_processed = True
                         if is_cancellation:
                             reserv.with_context({

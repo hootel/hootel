@@ -238,7 +238,7 @@ class HotelFolio(models.Model):
                 }
                 record.update(vals)
                 record.room_lines._compute_color()
-            else:                    
+            else:
                 record.order_id._amount_all()
                 total_inv_refund = 0
                 payments = acc_pay_obj.search([
@@ -447,6 +447,13 @@ class HotelFolio(models.Model):
 
         return folio_id
 
+    @api.multi
+    def write(self, vals):
+        if 'room_lines' in vals and vals['room_lines'][0][2] and 'reservation_lines' in vals['room_lines'][0][2] and vals['room_lines'][0][2]['reservation_lines'][0][0] == 5:
+            del vals['room_lines']
+        return super(HotelFolio, self).write(vals)
+
+    @api.multi
     @api.onchange('partner_id')
     def onchange_partner_id(self):
         '''
@@ -456,27 +463,12 @@ class HotelFolio(models.Model):
         @param self: object pointer
         '''
         _logger.info('onchange_partner_id')
-        if self.partner_id:
-            partner_rec = self.env['res.partner'].browse(self.partner_id.id)
-            order_ids = [folio.order_id.id for folio in self]
-            if not order_ids:
-                self.partner_invoice_id = partner_rec.id
-                self.partner_shipping_id = partner_rec.id
-                self.pricelist_id = partner_rec.property_product_pricelist.id
-                raise UserError(_('Not Any Order For  %s ') % (partner_rec.name))
-            else:
-                self.partner_invoice_id = partner_rec.id
-                self.partner_shipping_id = partner_rec.id
-                self.pricelist_id = partner_rec.property_product_pricelist.id
-            for line in self.room_lines:
-                _logger.info(line.id)
-                days_diff = date_utils.date_diff(line.checkin,
-                                                 line.checkout,
-                                                 hours=False)
-                res = line.prepare_reservation_lines(line.checkin, days_diff)
-                line.reservation_lines = res['commands']
-                line.price_unit = res['total_price']
-        self.currency_id = self.env.ref('base.main_company').currency_id
+        self.update({
+            'currency_id': self.env.ref('base.main_company').currency_id,
+            'partner_invoice_id': self.partner_id and self.partner_id.id or False,
+            'partner_shipping_id': self.partner_id and self.partner_id.id or False,
+            'pricelist_id': self.partner_id and self.partner_id.property_product_pricelist.id or False,
+        })
         """
         Warning messajes saved in partner form to folios
         """
@@ -582,7 +574,7 @@ class HotelFolio(models.Model):
                 invoice.state = 'cancel'
             sale.room_lines.action_cancel()
             sale.order_id.action_cancel()
-        
+
 
     @api.multi
     def action_confirm(self):
