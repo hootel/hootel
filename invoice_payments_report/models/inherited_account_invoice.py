@@ -27,7 +27,7 @@ class AccountInvoice(models.Model):
 
     @api.depends('payments_widget', 'amount_total')
     def _compute_balance_due(self):
-        json_payments = json.loads(self.payments_widget)
+        json_payments = self.payments_widget and json.loads(self.payments_widget) or False
         if json_payments:
             payments_amount_total = 0.0
             for payment in json_payments['content']:

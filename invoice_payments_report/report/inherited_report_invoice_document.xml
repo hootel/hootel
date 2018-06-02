@@ -17,8 +17,8 @@
         </tr>
     </xpath>
     <xpath expr="//div[@class='page']" position="inside">
-        <t t-set="paymentsJSON" t-value="json.loads(o.payments_widget)" />
-        <span t-if="paymentsJSON">        
+        <t t-set="paymentsJSON" t-value="o.payments_widget and json.loads(o.payments_widget) or False" />
+        <span t-if="paymentsJSON">
             <div>
                 <table style="width:80%;">
                     <thead>
