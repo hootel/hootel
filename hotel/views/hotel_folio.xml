@@ -284,6 +284,7 @@
                                             <field name="invoice_status" invisible="1"/>
                                             <field name="customer_lead" invisible="1"/>
                                             <field name="currency_id" invisible="1"/>
+                                            <field name="channel_type" sttrs="{'invisible':[('channel_type', '!=', 'call')]"/>
                                         </tree>                                                
                                     </field>
                                 <group colspan="2" class="oe_subtotal_footer oe_right">
@@ -485,7 +486,7 @@
         </record>
 
         <menuitem id="menu_all_folio" name="Folio"
-            parent="hotel.hotel_management_menu" sequence="4" />
+            parent="hotel.hotel_management_menu" sequence="4"/>
         <menuitem name="Generate Folio" id="menu_open_hotel_folio1_form_tree_all"
             action="open_hotel_folio1_form_tree_all" sequence="5" parent="menu_all_folio" />
 

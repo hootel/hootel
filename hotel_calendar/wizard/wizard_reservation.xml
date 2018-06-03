@@ -23,21 +23,24 @@
                                 attrs="{'invisible': [('autoassign','=',False)]}">
                             <tree editable="bottom" create="false" delete="false"
                             decoration-danger="max_rooms &lt; rooms_num"
-                            decoration-muted="max_rooms == 0"
-                            decoration-success="max_rooms &gt; rooms_num and rooms_num &gt; 0">
+                            decoration-muted="can_confirm == False"
+                            decoration-success="max_rooms &gt;= rooms_num and rooms_num &gt; 0">
+                                <field name="min_stay" />
                                 <field name="max_rooms" />
-                                <field name="virtual_room_id" string="Room Type"/>
-                                <field name="rooms_num" attrs="{'readonly': [('max_rooms','=',0)]}" />                                
+                                <field name="virtual_room_id" string="Room Type" readonly="1"/>
+                                <field name="rooms_num" attrs="{'readonly': [('can_confirm','=',False)]}" />                                
                                 <field name="checkin" widget="date" />
                                 <field name="checkout" widget="date" />
-                                <field name="discount"/>
-                                <field name="price" attrs="{'readonly': [('max_rooms','=',0)]}"/>
-                                <field name="total_price" />
+                                <field name="discount" attrs="{'readonly': [('can_confirm','=',False)]}"/>
+                                <field name="price" attrs="{'readonly': [('can_confirm','=',False)]}"/>                                
+                                <field name="amount_reservation" readonly="1" />
+                                <field name="total_price" invisible="1" />
+                                <field name="can_confirm" invisible="1" />
                             </tree>
                         </field>                        
                     </group>
-                    <label for="autoassign" />
-                    <field name="autoassign" />
+                    <label for="autoassign" attrs="{'invisible': [('autoassign','=', False)]}"/>
+                    <field name="autoassign" attrs="{'invisible': [('autoassign','=', False)]}"/>
                     <field name="confirm" invisible="1"/>
                     <group colspan="2" class="oe_subtotal_footer">
                         <field name="total"/>                        
@@ -60,6 +63,19 @@
 								<field name="folio_wizard_id" invisible = "1" />
                                 <field name="to_read" invisible="1" />
                                 <field name="to_assign" invisible="1" />
+							</tree>
+						</field>						
+					</group>
+                    <group>
+						<field name="service_wizard_ids" colspan="4" string="Services"
+							nolabel="1" >
+							<tree string="Services" editable="buttom">
+								<field name="product_id" string="Service" options="{'no_create': True}"
+                                    domain="[('isservice','=',True)]"/>                                
+								<field name="product_uom_qty" />
+								<field name="price_unit" />
+								<field name="discount" /> 
+								<field name="price_total" />
 							</tree>
 						</field>						
 					</group>

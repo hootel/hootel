@@ -33,6 +33,7 @@ from openerp.tools import (
 from openerp import models, fields, api, _
 from openerp import workflow
 from odoo.addons.hotel import date_utils
+import odoo.addons.decimal_precision as dp
 _logger = logging.getLogger(__name__)
 
 
@@ -92,7 +93,7 @@ class FolioWizard(models.TransientModel):
     def _get_default_channel_type(self):
         user = self.env['res.users'].browse(self.env.uid)
         if user.has_group('hotel.group_hotel_call'):
-            return 'call'
+            return 'phone'
 
     partner_id = fields.Many2one('res.partner',string="Customer")
     checkin = fields.Datetime('Check In', required=True,
@@ -102,14 +103,16 @@ class FolioWizard(models.TransientModel):
     reservation_wizard_ids = fields.One2many('hotel.reservation.wizard',
                                              'folio_wizard_id',
                                              string="Resevations")
+    service_wizard_ids = fields.One2many('hotel.service.wizard',
+                                        'folio_wizard_id',
+                                        string='Services')
     total = fields.Float('Total', compute='_computed_total')
     confirm = fields.Boolean('Confirm Reservations', default="1")
     autoassign = fields.Boolean('Autoassign', default="1")
     channel_type = fields.Selection([
         ('door', 'Door'),
         ('mail', 'Mail'),
-        ('phone', 'Phone'),
-        ('call', 'Call Center')
+        ('phone', 'Phone')
     ], string='Sales Channel',  default=_get_default_channel_type)
     virtual_room_wizard_ids = fields.Many2many('hotel.virtual.room.wizard',
                                       string="Virtual Rooms")
@@ -238,9 +241,11 @@ class FolioWizard(models.TransientModel):
         for virtual in self.virtual_room_wizard_ids:
             virtual.update_price()
 
-    @api.depends('virtual_room_wizard_ids','reservation_wizard_ids')
+    @api.depends('virtual_room_wizard_ids','reservation_wizard_ids','service_wizard_ids')
     def _computed_total(self):
         total = 0
+        for line in self.service_wizard_ids:
+            total += line.price_total
         if not self.reservation_wizard_ids:
             for line in self.virtual_room_wizard_ids:
                 total += line.total_price
@@ -256,6 +261,7 @@ class FolioWizard(models.TransientModel):
         if not self.partner_id:
                raise ValidationError(_("We need know the customer!"))
         reservations = [(5, False, False)]
+        services = [(5, False, False)]
         if self.autoassign == True:
             self.create_reservations()
         for line in self.reservation_wizard_ids:
@@ -267,13 +273,21 @@ class FolioWizard(models.TransientModel):
                         'checkout': line.checkout,
                         'discount': line.discount,
                         'virtual_room_id': line.virtual_room_id.id,
-                        'to_read': line.to_read,
+                        'to_read': line.to_read, #REFACT: wubook module
                         'to_assign': line.to_assign,
+                    }))
+        for line in self.service_wizard_ids:
+            services.append((0, False, {
+                        'product_id': line.product_id.id,
+                        'discount': line.discount,
+                        'price_unit': line.price_unit,
+                        'product_uom_qty': line.product_uom_qty,
                     }))
         vals = {
                 'partner_id': self.partner_id.id,
                 'channel_type': self.channel_type,
                 'room_lines': reservations,
+                'service_lines': services,
             }
         newfol = self.env['hotel.folio'].create(vals)
         for room in newfol.room_lines:
@@ -307,21 +321,70 @@ class VirtualRoomWizars(models.TransientModel):
     price = fields.Float(string='Price by Room')
     total_price = fields.Float(string='Total Price')
     folio_wizard_id = fields.Many2one('hotel.folio.wizard')
+    amount_reservation = fields.Float(string='Total', readonly=True)
     discount = fields.Float('discount')
+    min_stay = fields.Integer('Min. Days', compute="_compute_max")
     checkin = fields.Datetime('Check In', required=True,
                               default=_get_default_checkin)
     checkout = fields.Datetime('Check Out', required=True,
                                default=_get_default_checkout)
+    can_confirm = fields.Boolean(compute="_can_confirm")
+
+    def _can_confirm(self):        
+        for vroom in self:
+            date_start = date_utils.get_datetime(vroom.checkin)
+            date_end = date_utils.get_datetime(vroom.checkout)
+            date_diff = date_utils.date_diff(date_start, date_end, hours=False)
+            if vroom.max_rooms > 0 and vroom.min_stay <= date_diff:
+                vroom.can_confirm = True
+            else:
+                vroom.can_confirm = False
 
     def _compute_max(self):
         for res in self:
-            res.max_rooms = len(
-                    res.virtual_room_id.check_availability_virtual_room(
+            user = self.env['res.users'].browse(self.env.uid)
+            date_start = date_utils.get_datetime(res.checkin)
+            date_end = date_utils.get_datetime(res.checkout)
+            date_diff = date_utils.date_diff(date_start, date_end, hours=False)
+            minstay_restrictions = self.env['hotel.virtual.room.restriction.item'].search([
+                ('virtual_room_id','=',res.virtual_room_id.id),
+            ])
+            avail_restrictions = self.env['hotel.virtual.room.availability'].search([
+                ('virtual_room_id','=',res.virtual_room_id.id)
+            ])
+            real_max = len(res.virtual_room_id.check_availability_virtual_room(
                         res.checkin,
                         res.checkout,
-                        res.virtual_room_id.id)
-                        )
+                        res.virtual_room_id.id))
+            avail = 100000
+            min_stay = 0
+            dates = []
+            for i in range(0, date_diff):
+                ndate_dt = date_start + timedelta(days=i)
+                ndate_str = ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                dates.append(ndate_str)
+                if minstay_restrictions:
+                    date_min_days = minstay_restrictions.filtered(
+                                lambda r: r.date_start <= ndate_str and \
+                                r.date_end >= ndate_str).min_stay
+                    if date_min_days > min_stay:
+                        min_stay = date_min_days
+                if user.has_group('hotel.group_hotel_call'):
+                    if avail_restrictions:
+                        max_avail = avail_restrictions.filtered(
+                                    lambda r: r.date == ndate_str).wmax_avail
+                        if max_avail < avail:
+                            avail = min(max_avail, real_max)
+                else:
+                    avail = real_max
+                
 
+            if avail < 100000 and avail > 0:
+                res.max_rooms = avail
+            else:
+                res.max_rooms = 0
+            if date_min_days > 0:
+                res.min_stay = date_min_days
 
     @api.onchange('rooms_num', 'discount', 'price','virtual_room_id',
                   'checkin','checkout')
@@ -380,6 +443,7 @@ class VirtualRoomWizars(models.TransientModel):
                 res_price += prod.price
             self.price = res_price - (res_price * self.discount)/100
             self.total_price = self.rooms_num * self.price
+            self.amount_reservation = self.total_price
 
 
 class ReservationWizard(models.TransientModel):
@@ -487,3 +551,38 @@ class ReservationWizard(models.TransientModel):
                 ('id', 'not in', rooms_occupied)
             ]
             return {'domain': {'product_id': domain_rooms}}
+
+class ServiceWizard(models.TransientModel):
+    _name = 'hotel.service.wizard'
+
+    product_id = fields.Many2one('product.product',
+                                string="Service")
+    folio_wizard_id = fields.Many2one('hotel.folio.wizard')
+    discount = fields.Float('discount')
+    price_unit = fields.Float('Unit Price', required=True, digits=dp.get_precision('Product Price'), default=0.0)
+    price_total = fields.Float(compute='_compute_amount', string='Subtotal', readonly=True, store=True)
+    product_uom_qty = fields.Float(string='Quantity', digits=dp.get_precision('Product Unit of Measure'), required=True, default=1.0)
+
+    @api.onchange('product_id')
+    def onchange_product_id(self):
+        if self.product_id:
+            #TODO change pricelist for partner
+            pricelist_id = self.env['ir.values'].sudo().get_default(
+                        'hotel.config.settings', 'parity_pricelist_id')
+            prod = self.product_id.with_context(
+                            lang=self.folio_wizard_id.partner_id.lang,
+                            partner=self.folio_wizard_id.partner_id.id,
+                            quantity=1,
+                            date=fields.Datetime.now(),
+                            pricelist=pricelist_id,
+                            uom=self.product_id.uom_id.id)
+            self.price_unit = prod.price
+            
+    @api.depends('price_unit', 'product_uom_qty', 'discount')
+    def _compute_amount(self):
+        for ser in self:
+            total = (ser.price_unit * ser.product_uom_qty)
+            ser.price_total = total - (total * ser.discount) / 100
+
+        
+    
