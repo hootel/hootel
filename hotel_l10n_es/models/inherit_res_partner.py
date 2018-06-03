@@ -93,6 +93,11 @@ class ResPartner(models.Model):
                 result += self.browse(partner_ids).name_get()
         return result
 
+    #TMP_FIX VAT Validation
+    @api.constrains("vat")
+    def check_vat(self):
+        return
+
     @api.onchange('poldocument')
     def onchange_poldocument(self):
         for partner in self:

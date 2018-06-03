@@ -90,15 +90,18 @@ class HotelServiceLine(models.Model):
     service_line_id = fields.Many2one('sale.order.line', 'Service Line',
                                       required=True, delegate=True,
                                       ondelete='cascade')
+    channel_type = fields.Selection([
+        ('door', 'Door'),
+        ('mail', 'Mail'),
+        ('phone', 'Phone'),
+        ('call', 'Call Center'),
+        ('web','Web')], 'Sales Channel')
     folio_id = fields.Many2one('hotel.folio', 'Folio', ondelete='cascade')
     ser_checkin = fields.Datetime('From Date', required=True,
                                        default=_service_checkin)
     ser_checkout = fields.Datetime('To Date', required=True,
                                         default=_service_checkout)
     ser_room_line = fields.Many2one('hotel.reservation','Room', default=_default_ser_room_line)
-
-
-
 
     @api.model
     def create(self, vals, check=True):
@@ -111,6 +114,9 @@ class HotelServiceLine(models.Model):
         if 'folio_id' in vals:
             folio = self.env['hotel.folio'].browse(vals['folio_id'])
             vals.update({'order_id': folio.order_id.id})
+        user = self.env['res.users'].browse(self.env.uid)
+        if user.has_group('hotel.group_hotel_call'):
+            vals.update({'channel_type': 'call'})
         return super(HotelServiceLine, self).create(vals)
 
     # ~ @api.multi

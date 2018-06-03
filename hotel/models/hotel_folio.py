@@ -134,10 +134,10 @@ class HotelFolio(models.Model):
     #~ partner_invoice_id = fields.Many2one('res.partner', string='Invoice Address', readonly=False, required=True, help="Invoice address for current sales order.")
     hotel_invoice_id = fields.Many2one('account.invoice', 'Invoice')
     invoices_amount = fields.Monetary(compute='compute_invoices_amount',
-                                      store=True, track_visibility='onchange',
+                                      store=True,
                                       string="Pending in Folio")
     refund_amount = fields.Monetary(compute='compute_invoices_amount',
-                                    store=True, track_visibility='onchange',
+                                    store=True,
                                     string="Payment Returns")
     invoices_paid = fields.Monetary(compute='compute_invoices_amount',
                                     store=True, track_visibility='onchange',
@@ -174,7 +174,6 @@ class HotelFolio(models.Model):
         ('door', 'Door'),
         ('mail', 'Mail'),
         ('phone', 'Phone'),
-        ('call', 'Call Center'),
         ('web','Web')], 'Sales Channel')
     num_invoices = fields.Integer(compute='_compute_num_invoices')
     rooms_char = fields.Char('Rooms', compute='_computed_rooms_char')

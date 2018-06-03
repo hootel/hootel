@@ -113,3 +113,10 @@ class HotelReservation(models.Model):
                 'price': record.folio_id.amount_total,
                 'wrid': record.wrid,
             })
+
+    @api.multi
+    def confirm(self):
+        for record in self:
+            if record.to_assign == True:
+                record.write({'to_read': False, 'to_assign': False})           
+        return super(HotelReservation, self).confirm()
