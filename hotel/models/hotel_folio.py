@@ -792,3 +792,31 @@ class HotelFolio(models.Model):
         for record in self:
             record.order_id.unlink()
         return super(HotelFolio, self).unlink()
+
+    @api.multi
+    def get_grouped_reservations_json(self):
+        self.ensure_one()
+        info_grouped = []
+        for rline in self.room_lines:
+            vals = {
+                'num': len(
+                    self.room_lines.filtered(lambda r: r.checkin == rline.checkin and r.checkout == rline.checkout and r.virtual_room_id.id == rline.virtual_room_id.id)
+                ),
+                'virtual_room': {
+                    'id': rline.virtual_room_id.id,
+                    'name': rline.virtual_room_id.name,
+                },
+                'checkin': rline.checkin,
+                'checkout': rline.checkout,
+                'nights': len(rline.reservation_lines),
+                'adults': rline.adults,
+                'childrens': rline.children,
+            }
+            founded = False
+            for srline in info_grouped:
+                if srline['num'] == vals['num'] and srline['virtual_room']['id'] == vals['virtual_room']['id'] and srline['checkin'] == vals['checkin'] and srline['checkout'] == vals['checkout']:
+                    founded = True
+                    break
+            if not founded:
+                info_grouped.append(vals)
+        return sorted(sorted(info_grouped, key=lambda k: k['virtual_room']['id']), key=lambda k: k['num'])

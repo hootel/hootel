@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xml>
 <odoo>
-  <data noupdate="1">
+  <data>
     <!-- Email Template For Hotel Reservation -->
     <record id="mail_template_hotel_reservation" model="mail.template">
       <field name="name">Confirm Reservation-Send by Email</field>
@@ -245,21 +245,34 @@
                                       </tr>
                                       <tr>
                                         <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">
-                                                  % if object.partner_id.contact_address:
-                                                  ${object.partner_id.contact_address}<br />
-                                                  % endif
-                                                  % if object.partner_id.phone:
-                                                  Tel.: ${object.partner_id.phone}<br />
-                                                  % endif
-                                                  % if object.partner_id.mobile:
-                                                  Mov.: ${object.partner_id.mobile}<br />
-                                                  % endif
-                                                  <br />
-                                        <strong>Entrada</strong>: ${object.room_lines[0].checkin[8:10]} del ${object.room_lines[0].checkin[5:7]} de ${object.room_lines[0].checkin[0:4]}<br />
-                                        <strong>Salida</strong>: ${object.room_lines[0].checkout[8:10]} del ${object.room_lines[0].checkout[5:7]} de ${object.room_lines[0].checkout[0:4]}<br />
-                                        <strong>Nº de noches</strong>: ${len(object.room_lines[0].reservation_lines)}<br />
-                                        <br />
-                                                  Recuerda que puedas cancelar gratuitamente esta reserva hasta las 12:00 h del día anterior a tu llegada.</td>
+                                        % if object.partner_id.contact_address:
+                                          ${object.partner_id.contact_address}<br />
+                                        % endif
+                                        % if object.partner_id.phone:
+                                          Tel.: ${object.partner_id.phone}<br />
+                                        % endif
+                                        % if object.partner_id.mobile:
+                                          Mov.: ${object.partner_id.mobile}<br />
+                                        % endif
+                                          <br />
+
+                                        % for rline in object.get_grouped_reservations_json():
+                                          <strong>${rline['num']} x ${rline['virtual_room']['name']}
+                                          % if rline['childrens'] > 0:
+                                            (${rline['adults']} Adults + ${rline['childrens']} Childrens)
+                                          % else:
+                                            (${rline['adults']} Adults)
+                                          %endif
+                                          </strong>
+                                          <br />
+                                          <strong style="margin-left:2em">Entrada</strong>: ${format_tz(rline['checkin'], format="%d de %B de %Y")}<br />
+                                          <strong style="margin-left:2em">Salida</strong>: ${format_tz(rline['checkout'], format="%d de %B de %Y")}<br />
+                                          <strong style="margin-left:2em"2>Nº de noches</strong>: ${rline['nights']}<br /><br />
+                                        % endfor
+
+                                          <br />
+                                          Recuerda que puedas cancelar gratuitamente esta reserva hasta las 12:00 h del día anterior a tu llegada.
+                                        </td>
                                       </tr>
                                       <tr>
                                       </tr>
@@ -392,64 +405,54 @@
                                       <table border="0" cellspacing="0" cellpadding="0">
                                         <tr>
                                           <td class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #C50967; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Información de la habitación</td>
-                                          </tr>
-
-
-                                                    % for row in object.room_lines:
-                                                    <tr>
-                                                      % if row.virtual_room_id.name:
-                                                      <td align="justify" class="subheading" style="color: #555555">
-                                          <strong>${row.virtual_room_id.name}</strong>
-                                          </td>
-                                                      % else:
-                                                      <td align="justify" class="subheading" style="color: #555555">
-                                          <strong>Habitación ${loop.index}</strong>
-                                          </td>
-                                                      % endif
-                                                    </tr>
+                                        </tr>
+                                        % set vroom_ids = object.room_lines.mapped('virtual_room_id.id')
+                                        % set vrooms = user.env['hotel.virtual.room'].browse(vroom_ids)
+                                        % for vroom in vrooms:
                                           <tr>
-                                            <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">Esta habitación cuenta con TV, Wi-Fi gratuita, calefacción y baño privado.<br />
-                                            <strong>Día de entrada</strong>: ${row.checkin[8:10]}/${row.checkin[5:7]}/${row.checkin[0:4]}<br />
-                                            <strong>Día de salida</strong>: ${row.checkout[8:10]}/${row.checkout[5:7]}/${row.checkout[0:4]}<br />
-                                            <strong>Nº de noches</strong>: ${len(row.reservation_lines)}<br />
-                                            <strong>Número de huéspedes</strong>:
-                                                      % if row.adults > 0:
-                                                      ${row.adults} Adultos
-                                                      % endif
-                                                      % if row.children > 0:
-                                                      / ${row.children} Menores
-                                                      % endif
-                                                      <br />
-                                          </td>
-                                        </tr>
-                                        <tr>
-                                        </tr>
-                                        <td valign="top" style="padding: 30px 0px 0px 0px;">
-                                          <table border="0" cellspacing="0" cellpadding="0">
-                                            <tr>
-                                              <td>
-                                              </td>
-                                            </tr>
-                                            <tr>
-                                              <td>
-                                              </td>
-                                            </tr>
-                                            <tr>
-                                            </tr>
-                                          </table>
-                                          </td>
-                                                  % endfor
-                                                </table>
-                                        </td>
-                                      </tr>
-                                    </table>
-                                  </td>
-                                </tr>
-                              </table>
-                            </td>
-                          </tr>
-                          <!--Article with thumbnail-->
-                          <tr>
+                                          % if vroom.name:
+                                            <td align="justify" class="subheading" style="color: #555555">
+                                              <strong>${vroom.name}</strong>
+                                            </td>
+                                          % else:
+                                            <td align="justify" class="subheading" style="color: #555555">
+                                              <strong>Habitación ${loop.index}</strong>
+                                            </td>
+                                          % endif
+                                          </tr>
+                                          <tr>
+                                            <td align="justify" class="paragraph"  style="padding: 10px 0 0 0;">
+                                              Esta habitación cuenta con TV, Wi-Fi gratuita, calefacción y baño privado.
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                          </tr>
+                                            <td valign="top" style="padding: 30px 0px 0px 0px;">
+                                              <table border="0" cellspacing="0" cellpadding="0">
+                                                <tr>
+                                                  <td>
+                                                  </td>
+                                                </tr>
+                                                <tr>
+                                                  <td>
+                                                  </td>
+                                                </tr>
+                                                <tr>
+                                                </tr>
+                                              </table>
+                                            </td>
+                                        % endfor
+                                      </table>
+                                    </td>
+                                  </tr>
+                                </table>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <!--Article with thumbnail-->
+                      <tr>
                             <td class="borderbottom" style="padding: 30px 0px 0px 0px;">
                               <table border="0" cellpadding="0" cellspacing="0" width="650" class="columns">
                                 <tr valign="top">
