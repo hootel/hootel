@@ -21,7 +21,7 @@
         </record>
 
         <menuitem name="Reservation Rooms" id="menu_open_hotel_reservation_form_tree_all"
-            action="open_hotel_reservation_form_tree_all" sequence="10" parent="menu_all_folio" />
+            action="open_hotel_reservation_form_tree_all" sequence="10" parent="menu_all_folio"/>
 
          <!--=== Hotel Reservation ==== -->
         <!-- Form view of hotel reservation -->

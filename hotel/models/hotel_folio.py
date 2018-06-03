@@ -174,7 +174,6 @@ class HotelFolio(models.Model):
         ('door', 'Door'),
         ('mail', 'Mail'),
         ('phone', 'Phone'),
-        ('call', 'Call Center'),
         ('web','Web')], 'Sales Channel')
     num_invoices = fields.Integer(compute='_compute_num_invoices')
     rooms_char = fields.Char('Rooms', compute='_computed_rooms_char')

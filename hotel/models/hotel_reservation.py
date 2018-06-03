@@ -337,7 +337,12 @@ class HotelReservation(models.Model):
     discount_fixed = fields.Float('Fixed Discount')
     edit_room = fields.Boolean(default=True)
     nights = fields.Integer('Nights',compute='_computed_nights', store=True)
-    channel_type = fields.Selection(related='folio_id.channel_type')
+    channel_type = fields.Selection([
+        ('door', 'Door'),
+        ('mail', 'Mail'),
+        ('phone', 'Phone'),
+        ('call', 'Call Center'),
+        ('web','Web')], 'Sales Channel')
     last_updated_res = fields.Datetime('Last Updated')
     folio_pending_amount = fields.Monetary(related='folio_id.invoices_amount')
     segmentation_id = fields.Many2many(related='folio_id.segmentation_id')
@@ -710,7 +715,8 @@ class HotelReservation(models.Model):
             vals.update({'reservation_type': 'normal'})
         if 'folio_id' in vals:
             folio = self.env["hotel.folio"].browse(vals['folio_id'])
-            vals.update({'order_id': folio.order_id.id})
+            vals.update({'order_id': folio.order_id.id,
+                         'channel_type': folio.channel_type})
         elif 'partner_id' in vals:
             folio_vals = {'partner_id':int(vals.get('partner_id')),
                           'channel_type': vals.get('channel_type')}
@@ -721,8 +727,8 @@ class HotelReservation(models.Model):
                          'channel_type': vals.get('channel_type')})
         user = self.env['res.users'].browse(self.env.uid)
         if user.has_group('hotel.group_hotel_call'):
-            vals.update({'to_assign': True})
-
+            vals.update({'to_assign': True,
+                         'channel_type': 'call'})
         vals.update({
             'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         })
@@ -769,6 +775,12 @@ class HotelReservation(models.Model):
             vals.update({
                 'last_updated_res': date_utils.now(hours=True).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
             })
+            user = self.env['res.users'].browse(self.env.uid)
+            if user.has_group('hotel.group_hotel_call'):
+                vals.update({
+                    'to_read': True,
+                    'to_assign': True,
+                })
         res = super(HotelReservation, self).write(vals)
         if pricesChanged:
             for record in self:
