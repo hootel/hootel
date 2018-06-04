@@ -1,5 +1,5 @@
-<?xml version="1.0"?> 
-    <openerp>      
+<?xml version="1.0"?>
+    <openerp>
         <data>
 
             <act_window
@@ -15,7 +15,7 @@
                 <field name="arch" type="xml">
                     <form>
                         <sheet>
-                            <group string="Generar estadistica para el I.N.E." colspan="1">  
+                            <group string="Generar estadistica para el I.N.E." colspan="1">
                                     <field name="ine_year" style="width:110px;"/>
                                     <field name="ine_month" style="width:110px"/>
                             </group>
@@ -25,18 +25,23 @@
                                 <field name="txt_binary" filename="txt_filename" readonly="1" style="margin-left: 20px;"/>
                             </div>
                             <separator string="ADR y RevPar"/>
-                            <group> 
+                            <group>
                                 <div>
                                     <field name="adr_screen" readonly="1"/>
                                     <field name="rev_screen" readonly="1"/>
-                                </div>  
-                            </group>                            
+                                </div>
+                            </group>
+                            <group>
+                              <div><!-- site-exportine -->
+                                <p>Abrir web del I.N.E.: <a href="https://arce.ine.es/ARCE/jsp/encuestaXml.jsp" target="_blank">I.N.E. <i class="fa fa-align-right"></i></a></p>
+                              </div>
+                            </group>
                         </sheet>
                     </form>
                 </field>
             </record>
 
-            <menuitem 
+            <menuitem
                 id="menu_ine_download"
                 name="INE File Download"
                 parent="hotel.hotel_reports_menu"
