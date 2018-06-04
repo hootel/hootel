@@ -1234,6 +1234,7 @@ class WuBook(models.AbstractModel):
             'virtual_room_id': vroom.id,
             'splitted': split_booking,
             'wbook_json': json.dumps(book),
+            'wmodified': book['was_modified']
         }
 
     @api.model

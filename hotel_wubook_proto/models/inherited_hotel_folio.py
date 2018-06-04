@@ -50,3 +50,56 @@ class HotelFolio(models.Model):
                 room.to_read = False
                 room.to_assign = False
         return super(HotelFolio, self).action_confirm()
+
+    @api.multi
+    def get_grouped_reservations_json(self, state, import_all=False):
+        super(HotelFolio, self).get_grouped_reservations_json(state, import_all=import_all)
+        self.ensure_one()
+        info_grouped = []
+        for rline in self.room_lines:
+            if (import_all or rline.to_send) and not rline.parent_reservation and rline.state == state and ((rline.state == 'cancelled' and not rline.wmodified) or rline.state != 'cancelled'):
+                dates = rline.get_real_checkin_checkout()
+                vals = {
+                    'num': len(
+                        self.room_lines.filtered(lambda r: r.get_real_checkin_checkout()[0] == dates[0] and r.get_real_checkin_checkout()[1] == dates[1] and r.virtual_room_id.id == rline.virtual_room_id.id and (r.to_send or import_all) and not r.parent_reservation and r.state == rline.state and ((r.state == 'cancelled' and not r.wmodified) or r.state != 'cancelled'))
+                    ),
+                    'virtual_room': {
+                        'id': rline.virtual_room_id.id,
+                        'name': rline.virtual_room_id.name,
+                    },
+                    'checkin': dates[0],
+                    'checkout': dates[1],
+                    'nights': len(rline.reservation_lines),
+                    'adults': rline.adults,
+                    'childrens': rline.children,
+                }
+                founded = False
+                for srline in info_grouped:
+                    if srline['num'] == vals['num'] and srline['virtual_room']['id'] == vals['virtual_room']['id'] and srline['checkin'] == vals['checkin'] and srline['checkout'] == vals['checkout']:
+                        founded = True
+                        break
+                if not founded:
+                    info_grouped.append(vals)
+        return sorted(sorted(info_grouped, key=lambda k: k['num'], reverse=True), key=lambda k: k['virtual_room']['id'])
+
+    @api.depends('room_lines')
+    def _compute_has_cancelled_reservations_to_send(self):
+        super(HotelFolio, self)._compute_has_cancelled_reservations_to_send()
+        has_to_send = False
+        for rline in self.room_lines:
+            if rline.splitted:
+                master_reservation = rline.parent_reservation or rline
+                has_to_send = self.env['hotel.reservation'].search_count([
+                    ('splitted', '=', True),
+                    ('folio_id', '=', self.id),
+                    ('to_send', '=', True),
+                    ('state', '=', 'cancelled'),
+                    ('wmodified', '=', False),
+                    '|',
+                    ('parent_reservation', '=', master_reservation.id),
+                    ('id', '=', master_reservation.id),
+                ]) > 0
+            elif rline.to_send and rline.state == 'cancelled' and not rline.wmodified:
+                has_to_send = True
+                break
+        self.has_cancelled_reservations_to_send = has_to_send

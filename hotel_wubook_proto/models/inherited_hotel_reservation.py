@@ -83,6 +83,7 @@ class HotelReservation(models.Model):
                                readonly=True)
     wstatus_reason = fields.Char("WuBook Status Reason", readonly=True)
     wcustomer_notes = fields.Text(related='folio_id.wcustomer_notes')
+    wmodified = fields.Boolean("WuBook Modified", readonly=True, default=False)
     origin_sale = fields.Char('Origin', compute=_get_origin_sale,
                               store=True)
 

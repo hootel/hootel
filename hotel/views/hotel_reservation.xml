@@ -33,6 +33,16 @@
                     <header>
                         <field name="splitted" invisible="True" />
                         <field name="parent_reservation" invisible="True" />
+                        <field name="has_confirmed_reservations_to_send" invisible="1" />
+                        <field name="has_cancelled_reservations_to_send" invisible="1" />
+                        <field name="has_checkout_to_send" invisible="1" />
+                        <button name="send_reservation_mail" type="object" string="Send Confirmation Email"
+                           attrs="{'invisible': [('has_confirmed_reservations_to_send', '=', False)]}" class="oe_highlight"/>
+                        <button name="send_cancel_mail" type="object" string="Send Cancel Email"
+                           attrs="{'invisible': [('has_cancelled_reservations_to_send', '=', False)]}" class="oe_highlight"/>
+                        <button name="send_exit_mail" type="object" string="Send Exit Email"
+                           attrs="{'invisible': [('has_checkout_to_send', '=', False)]}" class="oe_highlight"/>
+
                         <!--<button name="send_reservation_mail" type="object" string="Send Reservation Email" states="confirm" class="oe_highlight"/>-->
                         <button name="confirm" string="Confirm" class="oe_highlight"
                             type="object"
@@ -66,10 +76,10 @@
                         />
                         <span name="preconfirm" attrs="{'invisible':[('folio_id', '!=', False)]}">
                             <field name="preconfirm" />
-                        </span>                        
+                        </span>
                         <!--button name="open_master" string="Open Master" type="object" class="oe_highlight" icon="fa-file" attrs="{'invisible':['|',['parent_reservation', '=', False]]}" /-->
                         <field name="state" widget="statusbar"/>
-                        
+
                     </header>
                     <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
                          attrs="{'invisible': ['|',('shared_folio','=',False),('splitted', '=', True)]}">
@@ -101,7 +111,7 @@
                                 <div class="o_form_field o_stat_info">
                                     <span class="o_stat_text">Books</span>
                                 </div>
-                            </button>                                                                             
+                            </button>
                             <button type="object" class="oe_stat_button"
                                 id="payment_folio_smart_button"
                                 icon="fa-usd"
@@ -114,14 +124,14 @@
                                     </span>
                                     <span class="o_stat_text">Pending Folio</span>
                                 </div>
-                            </button>                        
+                            </button>
                             <button type="object" class="oe_stat_button"
                                 id="payment_reservation_smart_button"
                                 icon="fa-bed"
                                 name="action_pay_reservation"
                                 attrs="{'invisible': [('folio_pending_amount','&lt;=',0)]}">
                                 <div class="o_form_field o_stat_info">
-                                    <span class="o_stat_value">                                        
+                                    <span class="o_stat_value">
                                         <field name="amount_reservation" nolabel="1"
                                         widget="monetary" options="{'currency_field': 'currency_id'}"/>
                                     </span>
@@ -152,7 +162,7 @@
                                     widget="statinfo" nolabel="1"/></span>
                                     <span class="o_stat_text">Pending Checks</span>
                                 </div>
-                            </button>  
+                            </button>
                             <button type="object" class="oe_stat_button"
                                 id="checkin_smart_button"
                                 icon="fa-users"
@@ -170,12 +180,12 @@
                         </div>
                         <span class="label label-danger" attrs="{'invisible': [('state', 'not in', ('cancelled'))]}">Cancelled Reservation!</span>
                         <span class="label label-warning" attrs="{'invisible': [('overbooking', '=', False)]}">OverBooking!</span>
-                        <h1>                            
-                            <field name="edit_room" nolabel="1" class="fa fa-bed" />        
+                        <h1>
+                            <field name="edit_room" nolabel="1" class="fa fa-bed" />
                             <field name="product_id" select="1" domain="[('isroom','=',True)]"
                                 nolabel="1" options="{'no_create': True,'no_open': True}" placeholder="Room"
                                 attrs="{'readonly':[('edit_room','=',False)]}"
-                                style="margin-right: 30px;"/>                           
+                                style="margin-right: 30px;"/>
                             <field name="partner_id" default_focus="1"
                                 placeholder="Lastname, Firstname"
                                 attrs="{'readonly':[('folio_id','!=',False)]}"
@@ -183,28 +193,28 @@
                              <span class="fa fa-user" style="margin-left:20px;"/>
                         </h1>
                         <h3>
-                            From <span class="fa fa-sign-in" style="margin: 5px;"/><field name="checkin" style="margin-right: 10px;"/> to                          
+                            From <span class="fa fa-sign-in" style="margin: 5px;"/><field name="checkin" style="margin-right: 10px;"/> to
                             <span class="fa fa-sign-out" style="margin-right: 5px;"/><field name="checkout" />
-                        </h3>                                                                                                   
-                        <group col="12">                                                                                     
+                        </h3>
+                        <group col="12">
                             <group colspan="5" string="General Info" name="contact_details" >
                                 <field name="email" placeholder="email" widget="email" />
                                 <field name="mobile" placeholder="mobile" widget="phone" />
                                 <field name="phone" placeholder="phone" widget="phone" />
                                 <field name="partner_internal_comment" string="Partner Note"/>
-                                <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>                                                         
+                                <field name="cancelled_reason" attrs="{'invisible':[('state','not in',('cancelled'))]}"/>
                             </group>
                             <group colspan="4" string="Reservation Details" name="reservation_details">
                                 <field name="name"/>
                                 <field name="adults"/>
                                 <field name="children"/>
-                                <field name="virtual_room_id" on_change="1" options="{'no_create': True,'no_open': True}" 
+                                <field name="virtual_room_id" on_change="1" options="{'no_create': True,'no_open': True}"
                                        attrs="{'readonly':[('state','not in',('draft'))]}"/>
-                                <field name="channel_type" attrs="{'required':[('reservation_type','not in',('staff','out'))]}"/>                                  
+                                <field name="channel_type" attrs="{'required':[('reservation_type','not in',('staff','out'))]}"/>
                             </group>
                             <group class="oe_subtotal_footer" style="margin-right: 20px; !important" colspan="2" name="reservation_total" string="Amounts"  attrs="{'invisible':[('folio_id','=', False)]}">
                                 <field name="amount_room" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                                <field name="discount" string="Room Discount" attrs="{'invisible': [('discount_type','=','fixed')]}" />                                
+                                <field name="discount" string="Room Discount" attrs="{'invisible': [('discount_type','=','fixed')]}" />
                                 <field name="discount_fixed" string="Room Discount" attrs="{'invisible': [('discount_type','=','percent')]}" />
                                 <field name="discount_type" widget="radio" options="{'horizontal': true}" nolabel="1" colspan="2"/>
                                 <div class="oe_subtotal_footer_separator oe_inline o_td_label">
@@ -226,11 +236,11 @@
                                 <field name="currency_id" invisible="1"/>
                                 <field name="price_subtotal" widget="monetary" invisible="1"/>
                                 <field name="price_unit" invisible="1"/>
-                            </group>                                                                                                        
-                        </group>                                              
-                        <field name="folio_internal_comment" nolabel="1" placeholder="Reservation Notes"/> 
+                            </group>
+                        </group>
+                        <field name="folio_internal_comment" nolabel="1" placeholder="Reservation Notes"/>
                         <group invisible="1">
-                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>                                
+                            <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                             <field name="check_rooms" invisible="1"/>
                             <field name="cardex_pending" invisible="1"/>
                             <field name="pricelist_id" invisible="1"/>
@@ -238,11 +248,11 @@
                             <field name="invoice_status" invisible="1"/>
                             <field name="nights" invisible="1"/>
                             <field name="product_uom" string="Rent(UOM)" invisible="1" />
-                        </group>                                       
+                        </group>
                         <notebook>
-                            <page name="days" string="Service and Days">                               
-                                <group col="9">                                    
-                                    <group colspan="6" string="Reservation Services" name="reservation_services" attrs="{'invisible': [('folio_id','=',False)]}"> 
+                            <page name="days" string="Service and Days">
+                                <group col="9">
+                                    <group colspan="6" string="Reservation Services" name="reservation_services" attrs="{'invisible': [('folio_id','=',False)]}">
                                         <field name="service_line_ids"
                                             context="{'default_ser_room_line': active_id, 'default_folio_id': folio_id}"
                                             nolabel="1" style="padding-right:10px !important;">
@@ -283,18 +293,18 @@
                                                 <field name="invoice_status" invisible="1"/>
                                                 <field name="customer_lead" invisible="1"/>
                                                 <field name="currency_id" invisible="1"/>
-                                            </tree>                                                
+                                            </tree>
                                         </field>
-                                    </group>                                       
-                                    <group colspan="3" string="Days" name="days">                                
-                                        <field name="reservation_lines" nolabel="1">                                    
+                                    </group>
+                                    <group colspan="3" string="Days" name="days">
+                                        <field name="reservation_lines" nolabel="1">
                                             <tree create="false" delete="false" editable="bottom">
                                                 <field name="date" readonly="True" />
                                                 <field name="price" />
-                                            </tree>                              
+                                            </tree>
                                         </field>
-                                    </group>                                                                                                    
-                                 </group>                                 
+                                    </group>
+                                 </group>
                             </page>
                             <page name="others" string="Others">
                                 <group colspan="4" col="4">
@@ -337,7 +347,7 @@
                     <button icon="fa fa-1x fa-chain-broken"
                         type="object"
                         class="oe_stat_button"
-                        id="splitted" 
+                        id="splitted"
                         name="open_master"
                         attrs="{'invisible':[('splitted','=', False)]}"
                     />
@@ -370,9 +380,9 @@
                     <field name="partner_id"/>
                     <field name="splitted" invisible="1" />
                     <field name="parent_reservation" invisible="1" />
-                    <field name="virtual_room_id" string="Reserved Room Type"/>                   
+                    <field name="virtual_room_id" string="Reserved Room Type"/>
                     <field name="nights" />
-                    <field name="adults" string="Persons"/>                    
+                    <field name="adults" string="Persons"/>
                     <field name="checkin" widget="date"/>
                     <field name="checkout"  widget="date"/>
                     <field name="create_date"/>
@@ -381,7 +391,7 @@
                     <field name="cardex_ids" invisible ="1"/>
                     <field name="to_assign" invisible="1"/>
                     <!-- cardex_smart_button attrs depends on cardex_pending to be showed -->
-                    <field name="cardex_pending" invisible="1"/>                    
+                    <field name="cardex_pending" invisible="1"/>
                     <field name="price_unit" string="Reservation Price"/>
                     <field name="discount" groups="sale.group_discount_per_so_line"/>
                     <field name="price_total" string="Final Price"/>
@@ -391,7 +401,7 @@
                         name="action_pay_folio"
                         attrs="{'invisible':[('folio_pending_amount','==',0)]}"
                     />
-                    <field name="create_uid"/>              
+                    <field name="create_uid"/>
                 </tree>
             </field>
         </record>
@@ -434,7 +444,7 @@
                     <filter string="To Assign"
                                 domain="[('to_assign','=',True)]"
                                 />
-                    <separato/>                    
+                    <separato/>
                     <filter string="Call Center"
                                 domain="[('channel_type', '=', 'call')]"
                                  />
@@ -466,7 +476,7 @@
                                 />
                     <filter string="Out of Service"
                                 domain="[('reservation_type','in',['dontsell'])]"
-                                />	   
+                                />
                     <group id="group_by" expand="0" string="Group By">
                         <filter string="Room" domain="[]"
                             context="{'group_by':'product_id'}"/>
@@ -482,6 +492,6 @@
                 </search>
             </field>
         </record>
-        
+
     </data>
 </openerp>

@@ -342,11 +342,11 @@ class HotelReservation(models.Model):
         ('mail', 'Mail'),
         ('phone', 'Phone'),
         ('call', 'Call Center'),
-        ('web','Web')], 'Sales Channel')
+        ('web', 'Web')], 'Sales Channel')
     last_updated_res = fields.Datetime('Last Updated')
     folio_pending_amount = fields.Monetary(related='folio_id.invoices_amount')
     segmentation_id = fields.Many2many(related='folio_id.segmentation_id')
-    shared_folio = fields.Boolean (compute='_computed_shared')
+    shared_folio = fields.Boolean(compute='_computed_shared')
     #Used to notify is the reservation folio has other reservations or services
     email = fields.Char('E-mail', related='partner_id.email')
     mobile = fields.Char('Mobile', related='partner_id.mobile')
@@ -354,14 +354,36 @@ class HotelReservation(models.Model):
     partner_internal_comment = fields.Text(string='Internal Partner Notes',
                                            related='partner_id.comment')
     folio_internal_comment = fields.Text(string='Internal Folio Notes',
-                                           related='folio_id.internal_comment')
+                                         related='folio_id.internal_comment')
     preconfirm = fields.Boolean('Auto confirm to Save', default=True)
     call_center = fields.Boolean(compute='set_call_center_user')
+    to_send = fields.Boolean('To Send', default=True)
+    has_confirmed_reservations_to_send = fields.Boolean(
+                        related='folio_id.has_confirmed_reservations_to_send',
+                        readonly=True)
+    has_cancelled_reservations_to_send = fields.Boolean(
+                        related='folio_id.has_cancelled_reservations_to_send',
+                        readonly=True)
+    has_checkout_to_send = fields.Boolean(
+                        related='folio_id.has_checkout_to_send',
+                        readonly=True)
 
     def _computed_folio_name(self):
         for res in self:
             res.folio_name = res.folio_id.name + '-' + \
                 res.folio_id.date_order
+
+    @api.multi
+    def send_reservation_mail(self):
+        return self.folio_id.send_reservation_mail()
+
+    @api.multi
+    def send_exit_mail(self):
+        return self.folio_id.send_exit_mail()
+
+    @api.multi
+    def send_cancel_mail(self):
+        return self.folio_id.send_cancel_mail()
 
     @api.multi
     def action_checks(self):
@@ -615,6 +637,29 @@ class HotelReservation(models.Model):
         return action
 
     @api.multi
+    def get_real_checkin_checkout(self):
+        self.ensure_one()
+        if not self.splitted:
+            return (self.checkin, self.checkout)
+
+        master_reservation = self.parent_reservation or self
+        splitted_reservs = self.env['hotel.reservation'].search([
+            ('splitted', '=', True),
+            ('folio_id', '=', self.folio_id.id),
+            '|',
+            ('parent_reservation', '=', master_reservation.id),
+            ('id', '=', master_reservation.id)
+        ])
+        last_checkout = splitted_reservs[0].checkout
+        first_checkin = splitted_reservs[0].checkin
+        for reserv in splitted_reservs:
+            if last_checkout < reserv.checkout:
+                last_checkout = reserv.checkout
+            if first_checkin > reserv.checkin:
+                first_checkin = reserv.checkin
+        return (first_checkin, last_checkout)
+
+    @api.multi
     def unify(self):
         self.ensure_one()
         if not self.splitted:
@@ -764,6 +809,12 @@ class HotelReservation(models.Model):
 
     @api.multi
     def write(self, vals):
+        for record in self:
+            if ('checkin' in vals and self.checkin != vals['checkin']) or \
+               ('checkout' in vals and self.checkout != vals['checkout']) or \
+                    ('state' in vals and self.state != vals['state']):
+                vals.update({'to_send': True})
+
         pricesChanged = ('checkin' in vals or \
                          'checkout' in vals or \
                          'discount' in vals or \
