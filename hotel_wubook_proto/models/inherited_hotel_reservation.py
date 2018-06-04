@@ -49,7 +49,7 @@ class HotelReservation(models.Model):
         for record in self:
             if not record.channel_type:
                 record.channel_type = 'door'
-            record.origin_sale = record.channel_type != 'web' and \
+            record.origin_sale = (record.channel_type != 'web' or not record.wchannel_id) and \
                                 dict(self.fields_get(allfields=['channel_type'])['channel_type']['selection'])[record.channel_type] \
                                 or record.wchannel_id.name
 
