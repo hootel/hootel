@@ -383,8 +383,8 @@ class VirtualRoomWizars(models.TransientModel):
                 res.max_rooms = avail
             else:
                 res.max_rooms = 0
-            if date_min_days > 0:
-                res.min_stay = date_min_days
+            if min_stay > 0:
+                res.min_stay = min_stay
 
     @api.onchange('rooms_num', 'discount', 'price','virtual_room_id',
                   'checkin','checkout')
