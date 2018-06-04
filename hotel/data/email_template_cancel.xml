@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE xml>
 <odoo>
-  <data noupdate="1">
+  <data>
     <!-- Email Template For Hotel Reservation -->
     <record id="mail_template_hotel_cancel" model="mail.template">
       <field name="name">Cancel Reservation-Send by Email</field>
@@ -163,25 +163,18 @@
                                               ${object.partner_id.contact_address}<br />
                                               % endif
                                               <br />
-                                              % for row in object.room_lines:
-                                              % if row.virtual_room_id.name:
-                                              <strong>${row.virtual_room_id.name}</strong>
-                                              % else:
-                                              <strong>Habitación ${loop.index}</strong>
-                                              % endif
-                                              <br/>
-                                              <strong>Día de entrada</strong>: ${row.checkin[8:10]}/${row.checkin[5:7]}/${row.checkin[0:4]}<br />
-                                              <strong>Día de salida</strong>: ${row.checkout[8:10]}/${row.checkout[5:7]}/${row.checkout[0:4]}<br />
-                                              <strong>Nº de noches</strong>: ${len(row.reservation_lines)}<br />
-                                              <strong>Número de huéspedes</strong>:
-                                              % if row.adults > 0:
-                                              ${row.adults} Adultos
-                                              % endif
-                                              % if row.children > 0:
-                                              / ${row.children} Menores
-                                              % endif
-                                              <br/>
-                                              <br/>
+                                              % for rline in object.get_grouped_reservations_json('cancelled'):
+                                                <strong>${rline['num']} x ${rline['virtual_room']['name']}
+                                                % if rline['childrens'] > 0:
+                                                  (${rline['adults']} Adults + ${rline['childrens']} Childrens)
+                                                % else:
+                                                  (${rline['adults']} Adults)
+                                                %endif
+                                                </strong>
+                                                <br />
+                                                <strong style="margin-left:2em">Entrada</strong>: ${format_tz(rline['checkin'], format="%d de %B de %Y")}<br />
+                                                <strong style="margin-left:2em">Salida</strong>: ${format_tz(rline['checkout'], format="%d de %B de %Y")}<br />
+                                                <strong style="margin-left:2em"2>Nº de noches</strong>: ${rline['nights']}<br /><br />
                                               % endfor
                                             </td>
                                             </tr>
