@@ -418,7 +418,7 @@ class HotelReservation(models.Model):
                     res.checkout, hours=False)
                 res.nights = nights
 
-    @api.depends('reservation_lines', 'discount_fixed', 'discount')
+    @api.depends('reservation_lines', 'discount_fixed', 'discount', 'product_uom_qty', 'tax_id')
     def _computed_amount_reservation(self):
         _logger.info('_computed_amount_reservation')
         for res in self:
@@ -718,7 +718,6 @@ class HotelReservation(models.Model):
             'reservation_lines': rlines,
             'unit_price': tprice,
         })
-
         if not self_is_master:
             return {'type': 'ir.actions.act_window_close'}
         return True
@@ -865,7 +864,6 @@ class HotelReservation(models.Model):
     @api.onchange('adults', 'children', 'product_id')
     def check_capacity(self):
         if self.product_id:
-            self.tax_id = [(6, False, self.product_id.taxes_id.ids)]
             room = self.env['hotel.room'].search([
                 ('product_id', '=', self.product_id.id)
             ])
@@ -904,6 +902,7 @@ class HotelReservation(models.Model):
         if not self.checkout:
             self.checkout = time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         if self.product_id:
+            self.tax_id = [(6, False, self.virtual_room_id.product_id.taxes_id.ids)]
             room = self.env['hotel.room'].search([
                 ('product_id', '=', self.product_id.id)
             ])
@@ -965,7 +964,6 @@ class HotelReservation(models.Model):
             self.cardex_pending = 0
         else:
             self.price_unit = rlines['total_price']
-
 
     @api.model
     def get_availability(self, checkin, checkout, product_id, dbchanged=True,
