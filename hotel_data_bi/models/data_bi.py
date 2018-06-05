@@ -103,11 +103,13 @@ class Data_Bi(models.Model):
                                    'ascii', 'xmlcharrefreplace')})
 
         dic_canal = []  # Diccionario con los Canales
-        canal_array = ['door', 'mail', 'phone', 'web']
+        canal_array_txt = ['Puerta', 'E-Mail', u'Teléfono', 'Call-Center',
+                           'Web']
+        canal_array = ['door', 'mail', 'phone', 'call', 'web']
         for i in range(0, len(canal_array)):
             dic_canal.append({'ID_Hotel': compan.id_hotel,
                               'ID_Canal': i,
-                              'Descripcion': canal_array[i]})
+                              'Descripcion': canal_array_txt[i]})
 
         dic_hotel = []  # Diccionario con el/los nombre de los hoteles
         dic_hotel.append({'ID_Hotel': compan.id_hotel,
@@ -130,26 +132,29 @@ class Data_Bi(models.Model):
                                 'ascii', 'xmlcharrefreplace')})
 
         dic_estados = []  # Diccionario con los Estados Reserva
+        estado_array_txt = ['Borrador', 'Confirmada', 'Hospedandose',
+                            'Checkout', 'Cancelada']
         estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
         for i in range(0, len(estado_array)):
             dic_estados.append({'ID_Hotel': compan.id_hotel,
                                 'ID_EstadoReserva': i,
-                                'Descripcion': estado_array[i]})
+                                'Descripcion': estado_array_txt[i]})
 
         dic_tipo_habitacion = []  # Diccionario con Virtuals Rooms
+        dic_capacidad = []  # Diccionario con las capacidades
         tipo = self.env['hotel.virtual.room'].search_read(
             [], ['virtual_code', 'product_id'])
         for i in tipo:
+            room = self.env['hotel.virtual.room'].search(
+                [('product_id', '=', i['product_id'][0])])
+
             dic_tipo_habitacion.append({
                 'ID_Hotel': compan.id_hotel,
                 'ID_Tipo_Habitacion': i['product_id'][0],
                 'Descripcion': i['product_id'][1].encode(
-                    'ascii', 'xmlcharrefreplace')})
+                    'ascii', 'xmlcharrefreplace'),
+                'Estancias': room.get_capacity()})
 
-        dic_capacidad = []  # Diccionario con las capacidades
-        for i in tipo:
-            room = self.env['hotel.virtual.room'].search([
-                ('product_id', '=', i['product_id'][0])])
             dic_capacidad.append({
                 'ID_Hotel': compan.id_hotel,
                 'Hasta_Fecha':
@@ -319,6 +324,7 @@ class Data_Bi(models.Model):
             else:
                 precio_iva = (precio_neto*10/100)
                 precio_neto -= precio_iva
+
             dic_reservas.append({
                 'ID_Reserva': linea.reservation_id.folio_id.id,
                 'ID_Hotel': compan.id_hotel,
