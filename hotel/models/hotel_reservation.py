@@ -718,6 +718,7 @@ class HotelReservation(models.Model):
             'reservation_lines': rlines,
             'unit_price': tprice,
         })
+        master_reservation._computed_amount_reservation()
         if not self_is_master:
             return {'type': 'ir.actions.act_window_close'}
         return True
