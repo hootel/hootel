@@ -22,7 +22,7 @@
 ##############################################################################
 from .common import TestHotel
 from psycopg2 import IntegrityError
-from odoo.tool import mute_logger
+from odoo.tools import mute_logger
 
 
 class TestHotelRoomType(TestHotel):
