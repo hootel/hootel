@@ -4,7 +4,7 @@
 import logging
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping
-from odoo import fields, api, _
+from odoo import api, _
 _logger = logging.getLogger(__name__)
 
 
@@ -25,11 +25,10 @@ class HotelRoomTypeImporter(Component):
             map_record = room_type_mapper.map_record(rec)
             room_type = node_room_type_obj.search([('external_id', '=', rec['id'])],
                                                   limit=1)
-            # NEED REVIEW Import a record triggers a room_type.write / room_type.create back to the node
             if room_type:
                 room_type.write(map_record.values())
             else:
-                room_type.create(map_record.values(for_create=True))
+                room_type.with_context({'connector_no_export': True}).create(map_record.values(for_create=True))
 
 
 class NodeRoomTypeImportMapper(Component):
