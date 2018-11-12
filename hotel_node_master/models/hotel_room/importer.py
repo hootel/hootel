@@ -37,6 +37,8 @@ class NodeRoomImportMapper(Component):
     _inherit = 'node.import.mapper'
     _apply_on = 'node.room'
 
+    # SEE m2o_to_external at https://github.com/OCA/connector/blob/11.0/connector/components/mapper.py#L146
+
     direct = [
         ('id', 'external_id'),
         ('name', 'name'),

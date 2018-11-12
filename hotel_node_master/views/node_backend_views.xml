@@ -42,6 +42,14 @@
                                             string="Import in background"
                                             confirm="Synchronizing a node automatically updates Room Types in the Central Node. Do you want to proceed?"/>
                                 </div>
+                                <label string="Import Rooms" class="oe_inline"/>
+                                <div>
+                                    <button name="import_rooms"
+                                            type="object"
+                                            class="oe_highlight"
+                                            string="Import in background"
+                                            confirm="Synchronizing a node automatically updates Rooms in the Central Node. Do you want to proceed?"/>
+                                </div>
                             </group>
                         </page>
                     </notebook>
