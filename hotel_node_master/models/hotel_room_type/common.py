@@ -8,14 +8,14 @@ from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
 _logger = logging.getLogger(__name__)
 
+
 class NodeRoomType(models.Model):
     _name = 'node.room.type'
     _inherit = 'node.binding'
     _description = 'Node Hotel Room Type'
 
     name = fields.Char(required=True, translate=True)
-    room_ids = fields.Integer()
-    # fields.One2many('node.room', 'room_type_id', 'Rooms')
+    room_ids = fields.One2many('node.room', 'room_type_id', 'Rooms')
     active = fields.Boolean(default=True)
     sequence = fields.Integer(default=0)
 
@@ -46,6 +46,7 @@ class NodeRoomType(models.Model):
         with backend.work_on(self._name) as work:
             importer = work.component(usage='node.room.type.importer')
             return importer.fetch_room_types()
+
 
 class NodeRoomTypeAdapter(Component):
     _name = 'node.room.type.adapter'

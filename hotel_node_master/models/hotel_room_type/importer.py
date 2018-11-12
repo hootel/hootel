@@ -40,6 +40,7 @@ class NodeRoomTypeImportMapper(Component):
     direct = [
         ('id', 'external_id'),
         ('name', 'name'),
+        ('room_ids', 'room_ids'),
     ]
 
     @mapping

@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from odoo import models, api, fields
 from ...components.backend_adapter import NodeLogin, NodeServer
 
+
 class NodeBackend(models.Model):
     _name = 'node.backend'
     _description = 'Hotel Node Backend'
@@ -12,17 +13,17 @@ class NodeBackend(models.Model):
 
     name = fields.Char('Name')
     address = fields.Char('Host', required=True,
-                            help='Full URL to the host.')
+                          help='Full URL to the host.')
     db = fields.Char('Database Name',
-                          help='Odoo database name.')
+                     help='Odoo database name.')
     user = fields.Char('Username',
-                            help='Odoo administration user.')
+                       help='Odoo administration user.')
     passwd = fields.Char('Password',
-                                help='Odoo password.')
+                         help='Odoo password.')
     port = fields.Integer(string='TCP Port', default=443,
-                               help='Specify the TCP port for the XML-RPC protocol.')
+                          help='Specify the TCP port for the XML-RPC protocol.')
     protocol = fields.Selection([('jsonrpc', 'jsonrpc'), ('jsonrpc+ssl', 'jsonrpc+ssl')],
-                                     'Protocol', required=True, default='jsonrpc+ssl')
+                                'Protocol', required=True, default='jsonrpc+ssl')
     odoo_version = fields.Char()
 
     @contextmanager
@@ -50,3 +51,9 @@ class NodeBackend(models.Model):
         node_room_type_obj = self.env['node.room.type']
         for backend in self:
             node_room_type_obj.fetch_room_types(backend)
+
+    @api.multi
+    def import_rooms(self):
+        node_room_obj = self.env['node.room']
+        for backend in self:
+            node_room_obj.fetch_rooms(backend)

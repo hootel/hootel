@@ -5,6 +5,7 @@ import logging
 from odoo.addons.component.core import AbstractComponent, Component
 _logger = logging.getLogger(__name__)
 
+
 class NodeImporter(AbstractComponent):
     _name = 'node.importer'
     _inherit = ['base.importer', 'base.node.connector']

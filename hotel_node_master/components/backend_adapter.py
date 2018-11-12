@@ -17,6 +17,7 @@ class NodeLogin(object):
         self.user = user
         self.passwd = passwd
 
+
 class NodeServer(object):
     def __init__(self, login_data):
         self._server = None
@@ -49,11 +50,13 @@ class NodeServer(object):
         self._server.logout()
         self._server = None
 
+
 class HotelNodeInterfaceAdapter(AbstractComponent):
     _name = 'hotel.node.interface.adapter'
     _inherit = ['base.backend.adapter', 'base.node.connector']
     _usage = 'backend.adapter'
 
+    # === ROOM TYPES
     def create_room_type(self, name, room_ids):
         raise NotImplementedError
 
@@ -64,6 +67,19 @@ class HotelNodeInterfaceAdapter(AbstractComponent):
         raise NotImplementedError
 
     def fetch_room_types(self):
+        raise NotImplementedError
+
+    # === ROOMS
+    def create_room(self, name, capacity, room_type_id):
+        raise NotImplementedError
+
+    def modify_room(self, room_id, name, capacity, room_type_id):
+        raise NotImplementedError
+
+    def delete_room(self, room_id):
+        raise NotImplementedError
+
+    def fetch_rooms(self):
         raise NotImplementedError
 
     @property
@@ -82,7 +98,7 @@ class HotelNodeAdapter(AbstractComponent):
     _name = 'hotel.node.adapter'
     _inherit = 'hotel.node.interface.adapter'
 
-    # === ROOMS
+    # === ROOM TYPES
     def create_room_type(self, name, room_ids):
         return self._server.env['hotel.room.type'].create({
             'name': name
@@ -104,4 +120,32 @@ class HotelNodeAdapter(AbstractComponent):
         return self._server.env['hotel.room.type'].search_read(
             [],
             ['name']
+        )
+
+    # === ROOMS
+    def create_room(self, name, capacity, room_type_id):
+        return self._server.env['hotel.room'].create({
+            'name': name,
+            'capacity': capacity,
+            'room_type_id': room_type_id,
+        })
+
+    def modify_room(self, room_id, name, capacity, room_type_id):
+        return self._server.env['hotel.room'].write(
+            [room_id],
+            {
+                'name': name,
+                'capacity': capacity,
+                'room_type_id': room_type_id,
+            })
+
+    def delete_room(self, room_id):
+        _logger.warning("_delete_rooms(%s, room_id) is not yet implemented.", self)
+        return True
+        # return self._server.env['hotel.room'].unlink(room_id)
+
+    def fetch_rooms(self):
+        return self._server.env['hotel.room'].search_read(
+            [],
+            ['name', 'capacity', 'room_type_id']
         )
