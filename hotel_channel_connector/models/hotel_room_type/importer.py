@@ -80,10 +80,11 @@ class HotelRoomTypeImporter(Component):
                 'connector_no_export': True,
             }).write(map_record.values())
         else:
-            channel_room_type_avail_obj.with_context({
+            channel_room_type_avail = channel_room_type_avail_obj.with_context({
                 'connector_no_export': True,
                 'mail_create_nosubscribe': True,
             }).create(map_record.values(for_create=True))
+        channel_room_type_avail.channel_pushed = True
 
     @api.model
     def _map_room_values_restrictions(self, day_vals):
@@ -105,9 +106,10 @@ class HotelRoomTypeImporter(Component):
                 'connector_no_export': True,
             }).write(map_record.values())
         else:
-            channel_room_type_restr_item_obj.with_context({
+            room_type_restr = channel_room_type_restr_item_obj.with_context({
                 'connector_no_export': True,
             }).create(map_record.values(for_create=True))
+        room_type_restr.channel_pushed = True
 
     @api.model
     def _generate_room_values(self, dfrom, dto, values, set_max_avail=False):

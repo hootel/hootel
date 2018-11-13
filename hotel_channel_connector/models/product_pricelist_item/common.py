@@ -8,6 +8,7 @@ from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
 from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
 
+
 class ChannelProductPricelistItem(models.Model):
     _name = 'channel.product.pricelist.item'
     _inherit = 'channel.binding'

@@ -26,10 +26,11 @@ class ProductPricelistItemExporter(Component):
             ('date_start', '>=', datetime.now().strftime(
                 DEFAULT_SERVER_DATE_FORMAT))
         ], order="date_start ASC")
+
         if any(channel_unpushed):
             date_start = fields.Date.from_string(channel_unpushed[0].date_start)
             date_end = fields.Date.from_string(channel_unpushed[-1].date_start)
-            days_diff = (date_start - date_end).days + 1
+            days_diff = (date_end - date_start).days + 1
 
             prices = {}
             pricelist_ids = channel_product_pricelist_obj.search([
@@ -39,7 +40,7 @@ class ProductPricelistItemExporter(Component):
             for pr in pricelist_ids:
                 prices.update({pr.external_id: {}})
                 unpushed_pl = channel_product_pricelist_item_obj.search(
-                    [('channel_pushed', '=', False), ('pricelist_id', '=', pr.id)])
+                    [('channel_pushed', '=', False), ('pricelist_id', '=', pr.odoo_id.id)])
                 product_tmpl_ids = unpushed_pl.mapped('product_tmpl_id')
                 for pt_id in product_tmpl_ids:
                     channel_room_type = channel_room_type_obj.search([
@@ -50,7 +51,7 @@ class ProductPricelistItemExporter(Component):
                         for i in range(0, days_diff):
                             prod = channel_room_type.product_id.with_context({
                                 'quantity': 1,
-                                'pricelist': pr.id,
+                                'pricelist': pr.odoo_id.id,
                                 'date': (date_start + timedelta(days=i)).
                                         strftime(DEFAULT_SERVER_DATE_FORMAT),
                                 })

@@ -64,9 +64,10 @@ class ProductPricelistItemImporter(Component):
                                 'connector_no_export': True,
                             }).write(map_record.values())
                         else:
-                            channel_pricelist_item_obj.with_context({
+                            pricelist_item = channel_pricelist_item_obj.with_context({
                                 'connector_no_export': True,
                             }).create(map_record.values(for_create=True))
+                        pricelist_item.channel_pushed = True
         return True
 
     @api.model

@@ -31,18 +31,20 @@ class ChannelBackend(models.Model):
     pkey = fields.Char('Channel Service PKey')
     security_token = fields.Char('Channel Service Security Token')
 
-    avail_from = fields.Date('Availability From')
-    avail_to = fields.Date('Availability To')
+    avail_from = fields.Date('Availability From', store=False)
+    avail_to = fields.Date('Availability To', store=False)
 
-    restriction_from = fields.Date('Restriction From')
-    restriction_to = fields.Date('Restriction To')
+    restriction_from = fields.Date('Restriction From', store=False)
+    restriction_to = fields.Date('Restriction To', store=False)
     restriction_id = fields.Many2one('channel.hotel.room.type.restriction',
-                                     'Channel Restriction')
+                                     'Channel Restriction',
+                                     store=False)
 
-    pricelist_from = fields.Date('Pricelist From')
-    pricelist_to = fields.Date('Pricelist To')
+    pricelist_from = fields.Date('Pricelist From', store=False)
+    pricelist_to = fields.Date('Pricelist To', store=False)
     pricelist_id = fields.Many2one('channel.product.pricelist',
-                                   'Channel Product Pricelist')
+                                   'Channel Product Pricelist',
+                                   store=False)
 
     issue_ids = fields.One2many('hotel.channel.connector.issue',
                                 'backend_id',

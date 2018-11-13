@@ -60,9 +60,10 @@ class HotelRoomTypeRestrictionImporter(Component):
                                     'connector_no_export': True
                                 }).write(map_record.values())
                             else:
-                                channel_restriction_item_obj.with_context({
+                                channel_restriction_item = channel_restriction_item_obj.with_context({
                                     'connector_no_export': True
                                 }).create(map_record.values(for_create=True))
+                            channel_restriction_item.channel_pushed = True
 
     @api.model
     def import_restriction_values(self, date_from, date_to, channel_restr_id=False):

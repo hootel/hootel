@@ -64,6 +64,7 @@ class HotelRoomTypeAvailabilityImporter(Component):
                         room_type_avail_bind = channel_room_type_avail_obj.with_context({
                             'connector_no_export': True,
                         }).create(map_record.values(for_create=True))
+                    room_type_avail_bind.channel_pushed = True
                     iter_day += timedelta(days=1)
         return count
 
