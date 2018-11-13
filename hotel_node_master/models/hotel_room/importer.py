@@ -3,8 +3,8 @@
 
 import logging
 from odoo.addons.component.core import Component
-from odoo.addons.connector.components.mapper import mapping
-from odoo import fields, api, _
+from odoo.addons.connector.components.mapper import mapping, follow_m2o_relations, m2o_to_external
+from odoo import api, _
 _logger = logging.getLogger(__name__)
 
 
@@ -43,7 +43,7 @@ class NodeRoomImportMapper(Component):
         ('id', 'external_id'),
         ('name', 'name'),
         ('capacity', 'capacity'),
-        ('room_type_id', 'room_type_id'),
+        (m2o_to_external('room_type_id'), 'room_type_id')
     ]
 
     @mapping

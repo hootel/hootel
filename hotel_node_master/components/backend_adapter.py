@@ -94,6 +94,7 @@ class HotelNodeInterfaceAdapter(AbstractComponent):
             )
         return node_server.server
 
+
 class HotelNodeAdapter(AbstractComponent):
     _name = 'hotel.node.adapter'
     _inherit = 'hotel.node.interface.adapter'
