@@ -11,6 +11,7 @@
     'description': "Hotel Channel Connector Base",
     'depends': [
         'connector',
+        'web_notify',
         'hotel',
     ],
     'external_dependencies': {

@@ -1,11 +1,13 @@
 # Copyright 2018 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import logging
 import os
 import binascii
 from contextlib import contextmanager
 from odoo import models, api, fields
 from ...components.backend_adapter import WuBookLogin, WuBookServer
+_logger = logging.getLogger(__name__)
 
 class ChannelBackend(models.Model):
     _name = 'channel.backend'
@@ -64,104 +66,183 @@ class ChannelBackend(models.Model):
     def import_reservations(self):
         channel_hotel_reservation_obj = self.env['channel.hotel.reservation']
         for backend in self:
-            channel_hotel_reservation_obj.import_reservations(backend)
+            count = channel_hotel_reservation_obj.import_reservations(backend)
+            if count == 0:
+                self.env.user.notify_info("No reservations to import. All done :)",
+                                          title="Import Reservations")
+            else:
+                self.env.user.notify_info("%d reservations successfully imported" % count,
+                                          title="Import Reservations")
         return True
 
     @api.multi
     def import_reservation(self):
         channel_hotel_reservation_obj = self.env['channel.hotel.reservation']
         for backend in self:
-            channel_hotel_reservation_obj.import_reservation(
+            res = channel_hotel_reservation_obj.import_reservation(
                 backend,
                 backend.reservation_id_str)
+            if res:
+                self.env.user.notify_info(
+                    "'%s' reservation successfully imported" % backend.reservation_id_str,
+                    title="Import Reservations")
+            else:
+                self.env.user.notify_warning(
+                    "Can't import '%s' reservation" % backend.reservation_id_str,
+                    title="Import Reservations")
         return True
 
     @api.multi
     def import_rooms(self):
         channel_hotel_room_type_obj = self.env['channel.hotel.room.type']
         for backend in self:
-            channel_hotel_room_type_obj.import_rooms(backend)
+            count = channel_hotel_room_type_obj.import_rooms(backend)
+            if count == 0:
+                self.env.user.notify_info("No rooms to import. All done :)",
+                                          title="Import Rooms")
+            else:
+                self.env.user.notify_info("%d rooms successfully imported" % count,
+                                          title="Import Rooms")
         return True
 
     @api.multi
     def import_otas_info(self):
         channel_ota_info_obj = self.env['channel.ota.info']
         for backend in self:
-            channel_ota_info_obj.import_otas_info(backend)
+            count = channel_ota_info_obj.import_otas_info(backend)
+            self.env.user.notify_info("%d ota's successfully imported" % count,
+                                      title="Import OTA's")
         return True
 
     @api.multi
     def import_availability(self):
         channel_hotel_room_type_avail_obj = self.env['channel.hotel.room.type.availability']
         for backend in self:
-            channel_hotel_room_type_avail_obj.import_availability(
+            res = channel_hotel_room_type_avail_obj.import_availability(
                 backend,
                 backend.avail_from,
                 backend.avail_to)
+            if res:
+                self.env.user.notify_info("Availability successfully imported",
+                                          title="Import Availability")
+            else:
+                self.env.user.notify_warning("Error importing availability",
+                                             title="Import Availability")
         return True
 
     @api.multi
     def push_availability(self):
         channel_hotel_room_type_avail_obj = self.env['channel.hotel.room.type.availability']
         for backend in self:
-            channel_hotel_room_type_avail_obj.push_availability(backend)
+            res = channel_hotel_room_type_avail_obj.push_availability(backend)
+            if res:
+                self.env.user.notify_info("Availability successfully pushed",
+                                          title="Export Availability")
+            else:
+                self.env.user.notify_warning("Error pushing availability",
+                                             title="Export Availability")
         return True
 
     @api.multi
     def import_restriction_plans(self):
         channel_hotel_room_type_restr_obj = self.env['channel.hotel.room.type.restriction']
         for backend in self:
-            channel_hotel_room_type_restr_obj.import_restriction_plans(backend)
+            count = channel_hotel_room_type_restr_obj.import_restriction_plans(backend)
+            if count == 0:
+                self.env.user.notify_info("No restiction plans to import. All done :)",
+                                          title="Import Restrictions")
+            else:
+                self.env.user.notify_info("%d restriction plans successfully imported" % count,
+                                          title="Import Restrictions")
         return True
 
     @api.multi
     def import_restriction_values(self):
         channel_hotel_restr_item_obj = self.env['channel.hotel.room.type.restriction.item']
         for backend in self:
-            channel_hotel_restr_item_obj.import_restriction_values(
+            res = channel_hotel_restr_item_obj.import_restriction_values(
                 backend,
                 backend.restriction_from,
                 backend.restriction_to,
                 backend.restriction_id and backend.restriction_id.external_id or False)
+            if res:
+                self.env.user.notify_info("Restrictions successfully imported",
+                                          title="Import Restrictions")
+            else:
+                self.env.user.notify_warning("Error importing restrictions",
+                                             title="Import Restrictions")
         return True
 
     @api.multi
     def push_restriction(self):
         channel_hotel_restr_item_obj = self.env['channel.hotel.room.type.restriction.item']
         for backend in self:
-            channel_hotel_restr_item_obj.push_restriction(backend)
+            res = channel_hotel_restr_item_obj.push_restriction(backend)
+            if res:
+                self.env.user.notify_info("Restrictions successfully pushed",
+                                          title="Export Restrictions")
+            else:
+                self.env.user.notify_warning("Error pushing restrictions",
+                                             title="Export Restrictions")
         return True
 
     @api.multi
     def import_pricelist_plans(self):
         channel_product_pricelist_obj = self.env['channel.product.pricelist']
         for backend in self:
-            channel_product_pricelist_obj.import_price_plans(backend)
+            count = channel_product_pricelist_obj.import_price_plans(backend)
+            if count == 0:
+                self.env.user.notify_info("No pricelist plans to import. All done :)",
+                                          title="Import Pricelists")
+            else:
+                self.env.user.notify_info("%d pricelist plans successfully imported" % count,
+                                          title="Import Pricelists")
         return True
 
     @api.multi
     def import_pricelist_values(self):
         channel_product_pricelist_item_obj = self.env['channel.product.pricelist.item']
         for backend in self:
-            channel_product_pricelist_item_obj.import_pricelist_values(
+            res = channel_product_pricelist_item_obj.import_pricelist_values(
                 backend,
                 backend.pricelist_from,
                 backend.pricelist_to,
                 backend.pricelist_id and backend.pricelist_id.external_id or False)
+            if res:
+                self.env.user.notify_info("Pricelists successfully imported",
+                                          title="Import Pricelists")
+            else:
+                self.env.user.notify_warning("Error importing pricelists",
+                                             title="Import Pricelists")
         return True
 
     @api.multi
     def push_pricelist(self):
         channel_product_pricelist_item_obj = self.env['channel.product.pricelist.item']
         for backend in self:
-            channel_product_pricelist_item_obj.push_pricelist(backend)
+            res = channel_product_pricelist_item_obj.push_pricelist(backend)
+            if res:
+                self.env.user.notify_info("Pricelists successfully pushed",
+                                          title="Export Pricelists")
+            else:
+                self.env.user.notify_warning("Error pushing pricelists",
+                                             title="Export Pricelists")
         return True
 
-    @api.multi
-    def push_changes(self):
-        self.push_availability()
-        self.push_restriction()
-        self.push_pricelist()
+    @api.model
+    def _cron_push_changes(self):
+        _logger.info("======== PASA POR AKI!!")
+        backends = self.env[self._name].search([])
+        for backend in backends:
+            backend.push_availability()
+            backend.push_restriction()
+            backend.push_pricelist()
+
+    @api.model
+    def _cron_import_reservations(self):
+        backends = self.env[self._name].search([])
+        for backend in backends:
+            backend.import_reservations()
 
     @contextmanager
     @api.multi
