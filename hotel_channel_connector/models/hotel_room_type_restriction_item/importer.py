@@ -68,12 +68,21 @@ class HotelRoomTypeRestrictionImporter(Component):
     @api.model
     def import_restriction_values(self, date_from, date_to, channel_restr_id=False):
         channel_restr_plan_id = channel_restr_id.external_id if channel_restr_id else False
-        results = self.backend_adapter.wired_rplan_get_rplan_values(
-            date_from,
-            date_to,
-            int(channel_restr_plan_id))
-        if any(results):
-            self._generate_restriction_items(results)
+        try:
+            results = self.backend_adapter.wired_rplan_get_rplan_values(
+                date_from,
+                date_to,
+                int(channel_restr_plan_id))
+        except ChannelConnectorError as err:
+            self.create_issue(
+                section='restriction',
+                internal_message=str(err),
+                channel_message=err.data['message'],
+                channel_object_id=channel_restr_id,
+                dfrom=date_from, dto=date_to)
+        else:
+            if any(results):
+                self._generate_restriction_items(results)
 
 class HotelRoomTypeRestrictionItemImportMapper(Component):
     _name = 'channel.hotel.room.type.restriction.item.import.mapper'

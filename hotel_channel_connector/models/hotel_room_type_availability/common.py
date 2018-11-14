@@ -8,7 +8,6 @@ from odoo.exceptions import ValidationError
 from odoo.addons.queue_job.job import job, related_action
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
-from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
 from odoo.addons.hotel_channel_connector.components.backend_adapter import (
     DEFAULT_WUBOOK_DATE_FORMAT)
 
@@ -81,47 +80,18 @@ class ChannelHotelRoomTypeAvailability(models.Model):
                         })
 
     @job(default_channel='root.channel')
-    @api.multi
-    def update_availability(self, backend):
-        with backend.work_on(self._name) as work:
-            exporter = work.component(usage='hotel.room.type.availability.exporter')
-            try:
-                return exporter.update_availability(self)
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=backend.id,
-                    section='avail',
-                    internal_message=str(err),
-                    channel_message=err.data['message'])
-
-    @job(default_channel='root.channel')
     @api.model
     def import_availability(self, backend, dfrom, dto):
         with backend.work_on(self._name) as work:
             importer = work.component(usage='hotel.room.type.availability.importer')
-            try:
-                return importer.import_availability_values(dfrom, dto)
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=backend.id,
-                    section='avail',
-                    internal_message=str(err),
-                    channel_message=err.data['message'],
-                    dfrom=dfrom, dto=dto)
+            return importer.import_availability_values(dfrom, dto)
 
     @job(default_channel='root.channel')
     @api.model
     def push_availability(self, backend):
         with backend.work_on(self._name) as work:
             exporter = work.component(usage='hotel.room.type.availability.exporter')
-            try:
-                return exporter.push_availability()
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=backend.id,
-                    section='avail',
-                    internal_message=str(err),
-                    channel_message=err.data['message'])
+            return exporter.push_availability()
 
 class HotelRoomTypeAvailability(models.Model):
     _inherit = 'hotel.room.type.availability'

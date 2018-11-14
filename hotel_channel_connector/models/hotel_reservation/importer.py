@@ -26,34 +26,47 @@ class HotelReservationImporter(Component):
     _usage = 'hotel.reservation.importer'
 
     @api.model
-    def fetch_booking(self, channel_reservation_id, backend):
-        results = self.backend_adapter.fetch_booking(channel_reservation_id)
-        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
-            self._generate_reservations(results, backend)
-        if any(processed_rids):
-            self.backend_adapter.mark_bookings(list(set(processed_rids)))
-
-        # Update Odoo availability (don't wait for wubook)
-        # FIXME: This cause abuse service in first import!!
-        if checkin_utc_dt and checkout_utc_dt:
-            self.backend_adapter.fetch_rooms_values(
-                checkin_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                checkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
+    def fetch_booking(self, channel_reservation_id):
+        try:
+            results = self.backend_adapter.fetch_booking(channel_reservation_id)
+        except ChannelConnectorError as err:
+            self.create_issue(
+                section='reservation',
+                internal_message=str(err),
+                channel_message=err.data['message'])
+        else:
+            processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+                self._generate_reservations(results)
+            if any(processed_rids):
+                self.backend_adapter.mark_bookings(list(set(processed_rids)))
+            # Update Odoo availability (don't wait for wubook)
+            # FIXME: This cause abuse service in first import!!
+            if checkin_utc_dt and checkout_utc_dt:
+                self.backend_adapter.fetch_rooms_values(
+                    checkin_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    checkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
         return True
 
-    def fetch_new_bookings(self, backend):
-        results = self.backend_adapter.fetch_new_bookings()
-        processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
-            self._generate_reservations(results, backend)
-        if any(processed_rids):
-            uniq_rids = list(set(processed_rids))
-            self.backend_adapter.mark_bookings(uniq_rids)
-        # Update Odoo availability (don't wait for wubook)
-        # FIXME: This cause abuse service in first import!!
-        if checkin_utc_dt and checkout_utc_dt:
-            self.backend_adapter.fetch_rooms_values(
-                checkin_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
-                checkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
+    def fetch_new_bookings(self):
+        try:
+            results = self.backend_adapter.fetch_new_bookings()
+        except ChannelConnectorError as err:
+            self.create_issue(
+                section='reservation',
+                internal_message=str(err),
+                channel_message=err.data['message'])
+        else:
+            processed_rids, errors, checkin_utc_dt, checkout_utc_dt = \
+                self._generate_reservations(results)
+            if any(processed_rids):
+                uniq_rids = list(set(processed_rids))
+                self.backend_adapter.mark_bookings(uniq_rids)
+            # Update Odoo availability (don't wait for wubook)
+            # FIXME: This cause abuse service in first import!!
+            if checkin_utc_dt and checkout_utc_dt:
+                self.backend_adapter.fetch_rooms_values(
+                    checkin_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT),
+                    checkout_utc_dt.strftime(DEFAULT_SERVER_DATE_FORMAT))
 
     @api.model
     def _generate_booking_vals(self, broom, checkin_str, checkout_str,
@@ -119,7 +132,7 @@ class HotelReservationImporter(Component):
 
     # FIXME: Super big method!!! O_o
     @api.model
-    def _generate_reservations(self, bookings, backend):
+    def _generate_reservations(self, bookings):
         _logger.info("==[CHANNEL->ODOO]==== READING BOOKING ==")
         _logger.info(bookings)
         default_arrival_hour = self.env['ir.default'].sudo().get(
@@ -152,7 +165,6 @@ class HotelReservationImporter(Component):
             # the same transaction an cancellation)
             if crcode in failed_reservations:
                 self.create_issue(
-                    backend=backend,
                     section='reservation',
                     internal_emssage="Can't process a reservation that previusly failed!",
                     channel_object_id=book['reservation_code'])
@@ -253,7 +265,6 @@ class HotelReservationImporter(Component):
                 ], limit=1)
                 if not room_type_bind:
                     self.create_issue(
-                        backend=backend,
                         section='reservation',
                         internal_message="Can't found any room type associated to '%s' \
                                             in this hotel" % book['rooms'],
@@ -263,7 +274,6 @@ class HotelReservationImporter(Component):
 
                 if not any(room_type_bind.room_ids):
                     self.create_issue(
-                        backend=backend,
                         section='reservation',
                         internal_message="Selected room type (%s) doesn't have any real room" % book['rooms'],
                         channel_object_id=book['reservation_code'])
@@ -297,7 +307,6 @@ class HotelReservationImporter(Component):
                     )
                     if vals['price_unit'] != book['amount']:
                         self.create_issue(
-                            backend=backend,
                             section='reservation',
                             internal_message="Invalid reservation total price! %.2f != %.2f" % (vals['price_unit'], book['amount']),
                             channel_object_id=book['reservation_code'])
@@ -360,7 +369,6 @@ class HotelReservationImporter(Component):
                             })
                             reservations.append((0, False, vals))
                             self.create_issue(
-                                backend=backend,
                                 section='reservation',
                                 internal_message="Reservation imported with overbooking state",
                                 channel_object_id=rcode)
@@ -380,7 +388,6 @@ class HotelReservationImporter(Component):
 
             if split_booking:
                 self.create_issue(
-                    backend=backend,
                     section='reservation',
                     internal_message="Reservation Splitted",
                     channel_object_id=rcode)

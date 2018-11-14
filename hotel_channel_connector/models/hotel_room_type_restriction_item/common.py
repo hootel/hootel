@@ -6,7 +6,6 @@ from odoo.exceptions import ValidationError
 from odoo.addons.queue_job.job import job, related_action
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
-from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
 
 class ChannelHotelRoomTypeRestrictionItem(models.Model):
     _name = 'channel.hotel.room.type.restriction.item'
@@ -26,33 +25,17 @@ class ChannelHotelRoomTypeRestrictionItem(models.Model):
     def import_restriction_values(self, backend, dfrom, dto, external_id):
         with backend.work_on(self._name) as work:
             importer = work.component(usage='hotel.room.type.restriction.item.importer')
-            try:
-                return importer.import_restriction_values(
-                    dfrom,
-                    dto,
-                    channel_restr_id=external_id)
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=backend.id,
-                    section='restriction',
-                    internal_message=str(err),
-                    channel_message=err.data['message'],
-                    channel_object_id=external_id,
-                    dfrom=dfrom, dto=dto)
+            return importer.import_restriction_values(
+                dfrom,
+                dto,
+                channel_restr_id=external_id)
 
     @job(default_channel='root.channel')
     @api.model
     def push_restriction(self, backend):
         with backend.work_on(self._name) as work:
             exporter = work.component(usage='hotel.room.type.restriction.item.exporter')
-            try:
-                return exporter.push_restriction()
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=backend.id,
-                    section='restriction',
-                    internal_message=str(err),
-                    channel_message=err.data['message'])
+            return exporter.push_restriction()
 
 class HotelRoomTypeRestrictionItem(models.Model):
     _inherit = 'hotel.room.type.restriction.item'

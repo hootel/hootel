@@ -6,7 +6,6 @@ from odoo.exceptions import ValidationError, UserError
 from odoo.addons.queue_job.job import job, related_action
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
-from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
 from odoo.addons.hotel_channel_connector.components.backend_adapter import (
     WUBOOK_STATUS_CONFIRMED,
     WUBOOK_STATUS_WAITING,
@@ -65,58 +64,28 @@ class ChannelHotelReservation(models.Model):
     def import_reservation(self, backend, channel_reservation_id):
         with backend.work_on(self._name) as work:
             importer = work.component(usage='hotel.reservation.importer')
-            try:
-                return importer.fetch_booking(channel_reservation_id, backend.id)
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=backend.id,
-                    section='reservation',
-                    internal_message=str(err),
-                    channel_message=err.data['message'])
+            return importer.fetch_booking(channel_reservation_id)
 
     @job(default_channel='root.channel')
     @api.model
     def import_reservations(self, backend):
         with backend.work_on(self._name) as work:
             importer = work.component(usage='hotel.reservation.importer')
-            try:
-                return importer.fetch_new_bookings(backend.id)
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=backend.id,
-                    section='reservation',
-                    internal_message=str(err),
-                    channel_message=err.data['message'])
+            return importer.fetch_new_bookings()
 
     @job(default_channel='root.channel')
     @api.multi
     def cancel_reservation(self):
         with self.backend_id.work_on(self._name) as work:
             exporter = work.component(usage='hotel.reservation.exporter')
-            try:
-                return exporter.cancel_reservation(self)
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=self.backend_id.id,
-                    section='reservation',
-                    internal_message=str(err),
-                    channel_object_id=self.external_id,
-                    channel_message=err.data['message'])
+            return exporter.cancel_reservation(self)
 
     @job(default_channel='root.channel')
     @api.multi
     def mark_booking(self):
         with self.backend_id.work_on(self._name) as work:
             exporter = work.component(usage='hotel.reservation.exporter')
-            try:
-                return exporter.mark_booking(self)
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=self.backend_id.id,
-                    section='reservation',
-                    internal_message=str(err),
-                    channel_object_id=self.external_id,
-                    channel_message=err.data['message'])
+            return exporter.mark_booking(self)
 
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'

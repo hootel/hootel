@@ -6,7 +6,7 @@ from odoo.exceptions import ValidationError
 from odoo.addons.queue_job.job import job, related_action
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
-from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
+
 
 class ChannelProductPricelist(models.Model):
     _name = 'channel.product.pricelist'
@@ -27,14 +27,7 @@ class ChannelProductPricelist(models.Model):
         if not self.external_id:
             with self.backend_id.work_on(self._name) as work:
                 exporter = work.component(usage='product.pricelist.exporter')
-                try:
-                    exporter.create_plan(self)
-                except ChannelConnectorError as err:
-                    self.create_issue(
-                        backend=self.backend_id.id,
-                        section='restriction',
-                        internal_message=str(err),
-                        channel_message=err.data['message'])
+                exporter.create_plan(self)
 
     @job(default_channel='root.channel')
     @api.multi
@@ -43,14 +36,7 @@ class ChannelProductPricelist(models.Model):
         if self.external_id:
             with self.backend_id.work_on(self._name) as work:
                 exporter = work.component(usage='product.pricelist.exporter')
-                try:
-                    exporter.rename_plan(self)
-                except ChannelConnectorError as err:
-                    self.create_issue(
-                        backend=self.backend_id.id,
-                        section='restriction',
-                        internal_message=str(err),
-                        channel_message=err.data['message'])
+                exporter.rename_plan(self)
 
     @job(default_channel='root.channel')
     @api.multi
@@ -59,28 +45,14 @@ class ChannelProductPricelist(models.Model):
         if self.external_id:
             with self.backend_id.work_on(self._name) as work:
                 deleter = work.component(usage='product.pricelist.deleter')
-                try:
-                    deleter.delete_plan(self)
-                except ChannelConnectorError as err:
-                    self.create_issue(
-                        backend=self.backend_id.id,
-                        section='restriction',
-                        internal_message=str(err),
-                        channel_message=err.data['message'])
+                deleter.delete_plan(self)
 
     @job(default_channel='root.channel')
     @api.model
     def import_price_plans(self, backend):
         with backend.work_on(self._name) as work:
             importer = work.component(usage='product.pricelist.importer')
-            try:
-                return importer.import_pricing_plans()
-            except ChannelConnectorError as err:
-                self.create_issue(
-                    backend=backend.id,
-                    section='pricelist',
-                    internal_message=str(err),
-                    channel_message=err.data['message'])
+            return importer.import_pricing_plans()
 
 class ProductPricelist(models.Model):
     _inherit = 'product.pricelist'

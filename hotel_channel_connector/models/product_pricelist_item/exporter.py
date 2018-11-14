@@ -4,6 +4,7 @@
 import logging
 from datetime import datetime, timedelta
 from odoo.addons.component.core import Component
+from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
 from odoo.addons.hotel_channel_connector.components.backend_adapter import (
     DEFAULT_WUBOOK_DATE_FORMAT)
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
@@ -58,10 +59,16 @@ class ProductPricelistItemExporter(Component):
                             prices[pr.external_id][channel_room_type.external_id].append(prod.price)
             _logger.info("==[ODOO->CHANNEL]==== PRICELISTS ==")
             _logger.info(prices)
-            for k_pk, v_pk in prices.items():
-                if any(v_pk):
-                    self.backend_adapter.update_plan_prices(k_pk, date_start.strftime(
-                        DEFAULT_SERVER_DATE_FORMAT), v_pk)
-
-            channel_unpushed.write({'channel_pushed': True})
+            try:
+                for k_pk, v_pk in prices.items():
+                    if any(v_pk):
+                        self.backend_adapter.update_plan_prices(k_pk, date_start.strftime(
+                            DEFAULT_SERVER_DATE_FORMAT), v_pk)
+            except ChannelConnectorError as err:
+                self.create_issue(
+                    section='pricelist',
+                    internal_message=str(err),
+                    channel_message=err.data['message'])
+            else:
+                channel_unpushed.write({'channel_pushed': True})
         return True
