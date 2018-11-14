@@ -24,7 +24,7 @@ class ChannelProductPricelistItem(models.Model):
 
     @job(default_channel='root.channel')
     @api.model
-    def import_pricelist_values(self, backend):
+    def import_pricelist_values(self, backend, dfrom, dto, external_id):
         with backend.work_on(self._name) as work:
             importer = work.component(usage='product.pricelist.item.importer')
             try:
@@ -42,9 +42,9 @@ class ChannelProductPricelistItem(models.Model):
                     section='pricelist',
                     internal_message=str(err),
                     channel_message=err.data['message'],
-                    channel_object_id=backend.pricelist_id.external_id,
-                    dfrom=backend.pricelist_from,
-                    dto=backend.pricelist_to)
+                    channel_object_id=external_id,
+                    dfrom=dfrom,
+                    dto=dto)
                 return False
 
     @job(default_channel='root.channel')

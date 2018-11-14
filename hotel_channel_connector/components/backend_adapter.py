@@ -372,10 +372,6 @@ class WuBookAdapter(AbstractComponent):
         return results
 
     def mark_bookings(self, channel_reservation_ids):
-        init_connection = self._context.get('init_connection', True)
-        if init_connection:
-            if not self.init_connection():
-                return False
         rcode, results = self._server.mark_bookings(
             self._session_info[0],
             self._session_info[1],

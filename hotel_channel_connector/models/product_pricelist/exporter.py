@@ -19,10 +19,6 @@ class ProductPricelistExporter(Component):
             binding.name)
 
     @api.model
-    def delete_plan(self, binding):
-        return self.backend_adapter.delete_plan(binding.external_id)
-
-    @api.model
     def create_plan(self, binding):
         external_id = self.backend_adapter.create_plan(binding.name)
         binding.external_id = external_id

@@ -19,10 +19,6 @@ class HotelRoomTypeRestrictionExporter(Component):
             binding.name)
 
     @api.model
-    def delete_rplan(self, binding):
-        return self.backend_adapter.delete_rplan(binding.external_id)
-
-    @api.model
     def create_rplan(self, binding):
         external_id = self.backend_adapter.create_rplan(binding.name)
         binding.external_id = external_id

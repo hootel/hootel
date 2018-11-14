@@ -43,7 +43,7 @@ class ChannelHotelRoomType(models.Model):
                 self.create_issue(
                     backend=backend.id,
                     section='room',
-                    internal_message=_("Can't import rooms from WuBook"),
+                    internal_message=str(err),
                     channel_message=err.data['message'])
 
     @api.constrains('ota_capacity')
@@ -60,7 +60,6 @@ class ChannelHotelRoomType(models.Model):
                 raise ValidationError(_("Chanel short code can't be longer than 4 characters"))
 
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def create_room(self):
         self.ensure_one()
@@ -77,7 +76,6 @@ class ChannelHotelRoomType(models.Model):
                         channel_message=err.data['message'])
 
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def modify_room(self):
         self.ensure_one()
@@ -94,15 +92,14 @@ class ChannelHotelRoomType(models.Model):
                         channel_message=err.data['message'])
 
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def delete_room(self):
         self.ensure_one()
         if self.external_id:
             with self.backend_id.work_on(self._name) as work:
-                exporter = work.component(usage='hotel.room.type.exporter')
+                deleter = work.component(usage='hotel.room.type.deleter')
                 try:
-                    exporter.delete_room(self)
+                    deleter.delete_room(self)
                 except ChannelConnectorError as err:
                     self.create_issue(
                         backend=self.backend_id.id,

@@ -31,6 +31,8 @@ class ChannelBackend(models.Model):
     pkey = fields.Char('Channel Service PKey')
     security_token = fields.Char('Channel Service Security Token')
 
+    reservation_id_str = fields.Char('Channel Reservation ID', store=False)
+
     avail_from = fields.Date('Availability From', store=False)
     avail_to = fields.Date('Availability To', store=False)
 
@@ -66,6 +68,15 @@ class ChannelBackend(models.Model):
         return True
 
     @api.multi
+    def import_reservation(self):
+        channel_hotel_reservation_obj = self.env['channel.hotel.reservation']
+        for backend in self:
+            channel_hotel_reservation_obj.import_reservation(
+                backend,
+                backend.reservation_id_str)
+        return True
+
+    @api.multi
     def import_rooms(self):
         channel_hotel_room_type_obj = self.env['channel.hotel.room.type']
         for backend in self:
@@ -83,7 +94,10 @@ class ChannelBackend(models.Model):
     def import_availability(self):
         channel_hotel_room_type_avail_obj = self.env['channel.hotel.room.type.availability']
         for backend in self:
-            channel_hotel_room_type_avail_obj.import_availability(backend)
+            channel_hotel_room_type_avail_obj.import_availability(
+                backend,
+                backend.avail_from,
+                backend.avail_to)
         return True
 
     @api.multi
@@ -104,7 +118,11 @@ class ChannelBackend(models.Model):
     def import_restriction_values(self):
         channel_hotel_restr_item_obj = self.env['channel.hotel.room.type.restriction.item']
         for backend in self:
-            channel_hotel_restr_item_obj.import_restriction_values(backend)
+            channel_hotel_restr_item_obj.import_restriction_values(
+                backend,
+                backend.restriction_from,
+                backend.restriction_to,
+                backend.restriction_id and backend.restriction_id.external_id or False)
         return True
 
     @api.multi
@@ -125,7 +143,11 @@ class ChannelBackend(models.Model):
     def import_pricelist_values(self):
         channel_product_pricelist_item_obj = self.env['channel.product.pricelist.item']
         for backend in self:
-            channel_product_pricelist_item_obj.import_pricelist_values(backend)
+            channel_product_pricelist_item_obj.import_pricelist_values(
+                backend,
+                backend.pricelist_from,
+                backend.pricelist_to,
+                backend.pricelist_id and backend.pricelist_id.external_id or False)
         return True
 
     @api.multi

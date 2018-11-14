@@ -38,6 +38,7 @@ class HotelRoomTypeImporter(Component):
             else:
                 room_bind = channel_room_type_obj.with_context({'connector_no_export':True}).create(
                     map_record.values(for_create=True))
+                self.binder.bind(room['id'], room_bind)
         return count
 
     @api.model

@@ -22,7 +22,6 @@ class ChannelHotelRoomTypeRestriction(models.Model):
                               ondelete='cascade')
 
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def create_plan(self):
         self.ensure_one()
@@ -39,7 +38,6 @@ class ChannelHotelRoomTypeRestriction(models.Model):
                         channel_message=err.data['message'])
 
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def update_plan_name(self):
         self.ensure_one()
@@ -56,15 +54,14 @@ class ChannelHotelRoomTypeRestriction(models.Model):
                         channel_message=err.data['message'])
 
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def delete_plan(self):
         self.ensure_one()
         if self.external_id:
             with self.backend_id.work_on(self._name) as work:
-                exporter = work.component(usage='hotel.room.type.restriction.exporter')
+                deleter = work.component(usage='hotel.room.type.restriction.deleter')
                 try:
-                    exporter.delete_rplan(self)
+                    deleter.delete_rplan(self)
                 except ChannelConnectorError as err:
                     self.create_issue(
                         backend=self.backend_id.id,

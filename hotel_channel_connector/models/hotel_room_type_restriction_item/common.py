@@ -23,22 +23,22 @@ class ChannelHotelRoomTypeRestrictionItem(models.Model):
 
     @job(default_channel='root.channel')
     @api.model
-    def import_restriction_values(self, backend):
+    def import_restriction_values(self, backend, dfrom, dto, external_id):
         with backend.work_on(self._name) as work:
             importer = work.component(usage='hotel.room.type.restriction.item.importer')
             try:
                 return importer.import_restriction_values(
-                    backend.restriction_from,
-                    backend.restriction_to,
-                    channel_restr_id=backend.restriction_id)
+                    dfrom,
+                    dto,
+                    channel_restr_id=external_id)
             except ChannelConnectorError as err:
                 self.create_issue(
                     backend=backend.id,
                     section='restriction',
                     internal_message=str(err),
                     channel_message=err.data['message'],
-                    channel_object_id=backend.restriction_id,
-                    dfrom=backend.restriction_from, dto=backend.restriction_to)
+                    channel_object_id=external_id,
+                    dfrom=dfrom, dto=dto)
 
     @job(default_channel='root.channel')
     @api.model

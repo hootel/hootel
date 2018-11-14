@@ -23,10 +23,6 @@ class HotelRoomTypeExporter(Component):
             binding.channel_short_code)
 
     @api.model
-    def delete_room(self, binding):
-        return self.backend_adapter.delete_room(binding.external_id)
-
-    @api.model
     def create_room(self, binding):
         seq_obj = self.env['ir.sequence']
         short_code = seq_obj.next_by_code('hotel.room.type')[:4]

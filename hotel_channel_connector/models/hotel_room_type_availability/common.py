@@ -42,8 +42,45 @@ class ChannelHotelRoomTypeAvailability(models.Model):
                     than total rooms \
                     count: %d") % record.odoo_id.room_type_id.total_rooms_count)
 
+    @api.model
+    def refresh_availability(self, checkin, checkout, product_id):
+        date_start = fields.Date.from_string(checkin)
+        date_end = fields.Date.from_string(checkout)
+        # Not count end day of the reservation
+        date_diff = (date_end - date_start).days
+
+        channel_room_type_obj = self.env['channel.hotel.room.type']
+        channel_room_type_avail_obj = self.env['hotel.room.type.availability']
+
+        room_type_binds = channel_room_type_obj.search([('product_id', '=', product_id)])
+        for room_type_bind in room_type_binds:
+            if room_type_bind.external_id:
+                for i in range(0, date_diff):
+                    ndate_dt = date_start + timedelta(days=i)
+                    ndate_str = ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
+                    avail = len(channel_room_type_obj.odoo_id.check_availability_room_type(
+                        ndate_str,
+                        ndate_str,
+                        room_type_id=room_type_bind.odoo.id))
+                    max_avail = room_type_bind.total_rooms_count
+                    room_type_avail_id = channel_room_type_avail_obj.search([
+                        ('room_type_id', '=', room_type_bind.odoo.id),
+                        ('date', '=', ndate_str)], limit=1)
+                    if room_type_avail_id and room_type_avail_id.channel_max_avail >= 0:
+                        max_avail = room_type_avail_id.channel_max_avail
+                    avail = max(
+                        min(avail, room_type_bind.total_rooms_count, max_avail), 0)
+
+                    if room_type_avail_id:
+                        room_type_avail_id.write({'avail': avail})
+                    else:
+                        channel_room_type_avail_obj.create({
+                            'room_type_id': room_type_bind.odoo.id,
+                            'date': ndate_str,
+                            'avail': avail,
+                        })
+
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def update_availability(self, backend):
         with backend.work_on(self._name) as work:
@@ -59,18 +96,18 @@ class ChannelHotelRoomTypeAvailability(models.Model):
 
     @job(default_channel='root.channel')
     @api.model
-    def import_availability(self, backend):
+    def import_availability(self, backend, dfrom, dto):
         with backend.work_on(self._name) as work:
             importer = work.component(usage='hotel.room.type.availability.importer')
             try:
-                return importer.import_availability_values(backend.avail_from,
-                                                           backend.avail_to)
+                return importer.import_availability_values(dfrom, dto)
             except ChannelConnectorError as err:
                 self.create_issue(
                     backend=backend.id,
                     section='avail',
                     internal_message=str(err),
-                    channel_message=err.data['message'])
+                    channel_message=err.data['message'],
+                    dfrom=dfrom, dto=dto)
 
     @job(default_channel='root.channel')
     @api.model
@@ -133,46 +170,6 @@ class HotelRoomTypeAvailability(models.Model):
     def onchange_room_type_id(self):
         if self.room_type_id:
             self.channel_max_avail = self.room_type_id.total_rooms_count
-
-    @api.model
-    def refresh_availability(self, checkin, checkout, product_id):
-        date_start = fields.Date.from_string(checkin)
-        date_end = fields.Date.from_string(checkout)
-        # Not count end day of the reservation
-        date_diff = (date_end - date_start).days
-
-        room_type_obj = self.env['hotel.room.type']
-        room_type_avail_obj = self.env['hotel.room.type.availability']
-
-        room_types = room_type_obj.search([
-            ('room_ids.product_id', '=', product_id)
-        ])
-        for room_type in room_types:
-            if room_type.channel_room_id:
-                for i in range(0, date_diff):
-                    ndate_dt = date_start + timedelta(days=i)
-                    ndate_str = ndate_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
-                    avail = len(room_type_obj.check_availability_room_type(
-                        ndate_str,
-                        ndate_str,
-                        room_type_id=room_type.id))
-                    max_avail = room_type.total_rooms_count
-                    room_type_avail_id = room_type_avail_obj.search([
-                        ('room_type_id', '=', room_type.id),
-                        ('date', '=', ndate_str)], limit=1)
-                    if room_type_avail_id and room_type_avail_id.channel_max_avail >= 0:
-                        max_avail = room_type_avail_id.channel_max_avail
-                    avail = max(
-                        min(avail, room_type.total_rooms_count, max_avail), 0)
-
-                    if room_type_avail_id:
-                        room_type_avail_id.write({'avail': avail})
-                    else:
-                        room_type_avail_obj.create({
-                            'room_type_id': room_type.id,
-                            'date': ndate_str,
-                            'avail': avail,
-                        })
 
 class HotelRoomTypeAvailabilityAdapter(Component):
     _name = 'channel.hotel.room.type.availability.adapter'

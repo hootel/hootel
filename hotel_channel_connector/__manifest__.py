@@ -18,7 +18,6 @@
     },
     'data': [
         'data/cron_jobs.xml',
-        'views/general.xml',
         'views/hotel_channel_connector_issue_views.xml',
         'views/inherited_hotel_reservation_views.xml',
         'views/inherited_hotel_room_type_views.xml',
@@ -29,7 +28,6 @@
         'views/inherited_hotel_room_type_restriction_views.xml',
         'views/inherited_hotel_room_type_restriction_item_views.xml',
         'views/inherited_res_partner_views.xml',
-        'views/channel_ota_info_views.xml',
         'views/channel_hotel_reservation_views.xml',
         'views/channel_hotel_room_type_views.xml',
         'views/channel_hotel_room_type_availability_views.xml',
@@ -38,6 +36,7 @@
         'views/channel_product_pricelist_views.xml',
         'views/channel_product_pricelist_item_views.xml',
         'views/channel_connector_backend_views.xml',
+        'views/channel_ota_info_views.xml',
         'wizard/inherited_massive_changes.xml',
         'data/menus.xml',
         'data/sequences.xml',

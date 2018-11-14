@@ -26,7 +26,7 @@ class ChannelBinding(models.AbstractModel):
     @api.model
     def create_issue(self, **kwargs):
         self.env['hotel.channel.connector.issue'].sudo().create({
-            'backend_id': kwargs.get('backend', self.backend_id.id),
+            'backend_id': kwargs.get('backend', False),
             'section': kwargs.get('section', False),
             'internal_message': kwargs.get('internal_message', False),
             'channel_object_id': kwargs.get('channel_object_id', False),

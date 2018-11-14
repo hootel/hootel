@@ -21,7 +21,6 @@ class ChannelProductPricelist(models.Model):
     is_daily_plan = fields.Boolean("Channel Daily Plan", default=True, old_name='wdaily_plan')
 
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def create_plan(self):
         self.ensure_one()
@@ -38,7 +37,6 @@ class ChannelProductPricelist(models.Model):
                         channel_message=err.data['message'])
 
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def update_plan_name(self):
         self.ensure_one()
@@ -55,15 +53,14 @@ class ChannelProductPricelist(models.Model):
                         channel_message=err.data['message'])
 
     @job(default_channel='root.channel')
-    @related_action(action='related_action_unwrap_binding')
     @api.multi
     def delete_plan(self):
         self.ensure_one()
         if self.external_id:
             with self.backend_id.work_on(self._name) as work:
-                exporter = work.component(usage='product.pricelist.exporter')
+                deleter = work.component(usage='product.pricelist.deleter')
                 try:
-                    exporter.delete_plan(self)
+                    deleter.delete_plan(self)
                 except ChannelConnectorError as err:
                     self.create_issue(
                         backend=self.backend_id.id,
