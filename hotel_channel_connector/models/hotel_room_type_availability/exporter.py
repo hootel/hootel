@@ -50,5 +50,7 @@ class HotelRoomTypeAvailabilityExporter(Component):
                     section='avail',
                     internal_message=str(err),
                     channel_message=err.data['message'])
+                return False
             else:
                 channel_room_type_avails.write({'channel_pushed': True})
+        return True
