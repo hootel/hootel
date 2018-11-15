@@ -120,7 +120,7 @@ class HotelNodeAdapter(AbstractComponent):
     def fetch_room_types(self):
         return self._server.env['hotel.room.type'].search_read(
             [],
-            ['name']
+            ['name', 'room_ids']
         )
 
     # === ROOMS
@@ -141,12 +141,15 @@ class HotelNodeAdapter(AbstractComponent):
             })
 
     def delete_room(self, room_id):
-        _logger.warning("_delete_rooms(%s, room_id) is not yet implemented.", self)
-        return True
-        # return self._server.env['hotel.room'].unlink(room_id)
+        return self._server.env['hotel.room'].unlink(room_id)
 
     def fetch_rooms(self):
-        return self._server.env['hotel.room'].search_read(
+        rooms = self._server.env['hotel.room'].search_read(
             [],
             ['name', 'capacity', 'room_type_id']
         )
+        for rec in rooms:
+            rec['room_type_id'] = rec['room_type_id'][0]
+
+        return rooms
+

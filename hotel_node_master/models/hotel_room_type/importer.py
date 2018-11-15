@@ -39,9 +39,11 @@ class NodeRoomTypeImportMapper(Component):
     direct = [
         ('id', 'external_id'),
         ('name', 'name'),
-        ('room_ids', 'room_ids'),
     ]
+    # children = [('room_ids', 'room_ids', 'node.room')]
 
     @mapping
     def backend_id(self, record):
         return {'backend_id': self.backend_record.id}
+
+
