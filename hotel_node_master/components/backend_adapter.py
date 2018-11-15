@@ -153,3 +153,33 @@ class HotelNodeAdapter(AbstractComponent):
 
         return rooms
 
+
+    # === PARTNERS
+    def create_res_partner(self, name, email, is_company, type):
+        return self._server.env['node.res.partner'].create({
+            'name': name,
+            'email': email,
+            'is_company': is_company,
+            'type': type,
+        })
+
+    def modify_res_partner(self, partner_id, name, email, is_company, type):
+        return self._server.env['node.res.partner'].write(
+            [partner_id],
+            {
+                'name': name,
+                'email': email,
+                'is_company': is_company,
+                'type': type,
+            })
+
+    def delete_res_partner(self, partner_id):
+        _logger.warning("_delete_partner(%s, room_type_id) is not yet implemented.", self)
+        # return self._server.env['node.res.partner'].unlink(partner_id)
+
+    def fetch_res_partners(self):
+        rooms = self._server.env['node.res.partner'].search_read(
+            [],
+            ['name', 'email', 'is_company', 'type']
+        )
+        return rooms

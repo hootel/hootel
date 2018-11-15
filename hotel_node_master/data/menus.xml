@@ -24,4 +24,10 @@
         parent="menu_node_connector_root"
         action="action_node_room"/>
 
+    <menuitem id="menu_node_partners"
+        name="Partners"
+        sequence="1"
+        parent="menu_node_connector_root"
+        action="action_node_partner"/>
+
 </odoo>

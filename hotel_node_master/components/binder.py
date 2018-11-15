@@ -10,4 +10,5 @@ class NodeConnectorModelBinder(Component):
     _apply_on = [
         'node.room',
         'node.room.type',
+        'node.res.partner',
     ]

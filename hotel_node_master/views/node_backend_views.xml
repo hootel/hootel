@@ -50,6 +50,14 @@
                                             string="Import in background"
                                             confirm="Synchronizing a node automatically updates Rooms in the Central Node. Do you want to proceed?"/>
                                 </div>
+                                <label string="Import Partners" class="oe_inline"/>
+                                <div>
+                                    <button name="import_partners"
+                                            type="object"
+                                            class="oe_highlight"
+                                            string="Import in background"
+                                            confirm="Synchronizing a node automatically updates Partners in the Central Node. Do you want to proceed?"/>
+                                </div>
                             </group>
                         </page>
                     </notebook>
@@ -89,6 +97,14 @@
     <record id="action_node_room" model="ir.actions.act_window">
         <field name="name">Hotel Node Rooms</field>
         <field name="res_model">node.room</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <!--<field name="view_id" ref="node_backend_views_tree"/>-->
+    </record>
+
+    <record id="action_node_partner" model="ir.actions.act_window">
+        <field name="name">Hotel Node Partners</field>
+        <field name="res_model">node.res.partner</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <!--<field name="view_id" ref="node_backend_views_tree"/>-->

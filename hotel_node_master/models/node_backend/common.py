@@ -57,3 +57,9 @@ class NodeBackend(models.Model):
         node_room_obj = self.env['node.room']
         for backend in self:
             node_room_obj.fetch_rooms(backend)
+
+    @api.multi
+    def import_partners(self):
+        node_res_partner_obj = self.env['node.res.partner']
+        for backend in self:
+            node_res_partner_obj.fetch_res_partners(backend)
