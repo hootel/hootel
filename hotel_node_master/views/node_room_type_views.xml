@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="node_room_type_view_tree" model="ir.ui.view">
+        <field name="name">node.room.type.tree</field>
+        <field name="model">node.room.type</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="backend_id"/>
+                <field name="sync_date"/>
+                <field name="external_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="node_room_type_action" model="ir.actions.act_window">
+        <field name="name">List of Room Types</field>
+        <field name="res_model">node.room.type</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="target">main</field>
+    </record>
+
+    <menuitem id="menu_node_room_type"
+              name="Room Types"
+              sequence="1"
+              parent="menu_node_connector_root"
+              action="node_room_type_action"/>
+
+</odoo>

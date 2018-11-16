@@ -12,12 +12,6 @@
         parent="menu_node_connector_root"
         action="action_node_backend"/>
 
-    <menuitem id="menu_node_room_type"
-        name="Room Types"
-        sequence="1"
-        parent="menu_node_connector_root"
-        action="action_node_room_type"/>
-
     <menuitem id="menu_node_room"
         name="Rooms"
         sequence="1"
