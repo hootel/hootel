@@ -18,13 +18,16 @@ class HotelResPartnerImporter(Component):
     def fetch_res_partners(self):
         results = self.backend_adapter.fetch_res_partners()
         res_partner_mapper = self.component(usage='import.mapper',
-                                          model_name='node.res.partner')
+                                            model_name='node.res.partner')
 
         node_res_partner_obj = self.env['node.res.partner']
+        # TODO Merge partners
         for rec in results:
             map_record = res_partner_mapper.map_record(rec)
-            res_partner = node_res_partner_obj.search([('external_id', '=', rec['id'])],
-                                                  limit=1)
+            res_partner = node_res_partner_obj.search([
+                ('backend_id', '=', self.backend_record.id),
+                ('external_id', '=', rec['id'])
+            ])
             if res_partner:
                 res_partner.write(map_record.values())
             else:

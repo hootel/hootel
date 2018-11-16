@@ -21,7 +21,6 @@ class HotelRoomTypeImporter(Component):
                                           model_name='node.room.type')
 
         node_room_type_obj = self.env['node.room.type']
-        import wdb; wdb.set_trace()
         for rec in results:
             map_record = room_type_mapper.map_record(rec)
             room_type = node_room_type_obj.search([
