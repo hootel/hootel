@@ -141,7 +141,8 @@ class HotelNodeAdapter(AbstractComponent):
             })
 
     def delete_room(self, room_id):
-        return self._server.env['hotel.room'].unlink(room_id)
+        _logger.warning("_delete_room(%s, room_id) is not yet implemented.", self)
+        # return self._server.env['hotel.room'].unlink(room_id)
 
     def fetch_rooms(self):
         rooms = self._server.env['hotel.room'].search_read(
@@ -156,7 +157,7 @@ class HotelNodeAdapter(AbstractComponent):
 
     # === PARTNERS
     def create_res_partner(self, name, email, is_company, type):
-        return self._server.env['node.res.partner'].create({
+        return self._server.env['res.partner'].create({
             'name': name,
             'email': email,
             'is_company': is_company,
@@ -164,7 +165,7 @@ class HotelNodeAdapter(AbstractComponent):
         })
 
     def modify_res_partner(self, partner_id, name, email, is_company, type):
-        return self._server.env['node.res.partner'].write(
+        return self._server.env['res.partner'].write(
             [partner_id],
             {
                 'name': name,
@@ -174,11 +175,11 @@ class HotelNodeAdapter(AbstractComponent):
             })
 
     def delete_res_partner(self, partner_id):
-        _logger.warning("_delete_partner(%s, room_type_id) is not yet implemented.", self)
-        # return self._server.env['node.res.partner'].unlink(partner_id)
+        _logger.warning("_delete_partner(%s, partner_id) is not yet implemented.", self)
+        # return self._server.env['res.partner'].unlink(partner_id)
 
     def fetch_res_partners(self):
-        rooms = self._server.env['node.res.partner'].search_read(
+        rooms = self._server.env['res.partner'].search_read(
             [],
             ['name', 'email', 'is_company', 'type']
         )
