@@ -21,10 +21,13 @@ class HotelRoomTypeImporter(Component):
                                           model_name='node.room.type')
 
         node_room_type_obj = self.env['node.room.type']
+        import wdb; wdb.set_trace()
         for rec in results:
             map_record = room_type_mapper.map_record(rec)
-            room_type = node_room_type_obj.search([('external_id', '=', rec['id'])],
-                                                  limit=1)
+            room_type = node_room_type_obj.search([
+                ('backend_id', '=', self.backend_record.id),
+                ('external_id', '=', rec['id'])
+            ])
             if room_type:
                 room_type.write(map_record.values())
             else:

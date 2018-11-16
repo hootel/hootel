@@ -23,8 +23,10 @@ class HotelRoomImporter(Component):
         node_room_obj = self.env['node.room']
         for rec in results:
             map_record = room_mapper.map_record(rec)
-            room = node_room_obj.search([('external_id', '=', rec['id'])],
-                                        limit=1)
+            room = node_room_obj.search([
+                ('backend_id', '=', self.backend_record.id),
+                ('external_id', '=', rec['id'])
+            ])
             if room:
                 room.write(map_record.values())
             else:
@@ -40,7 +42,6 @@ class NodeRoomImportMapper(Component):
         ('id', 'external_id'),
         ('name', 'name'),
         ('capacity', 'capacity'),
-        ('room_type_id', 'room_type_id'),
         (external_to_m2o('room_type_id'), 'room_type_id')
     ]
 
