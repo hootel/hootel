@@ -19,7 +19,6 @@ class NodeRoomExporter(Component):
             binding.external_id,
             binding.name,
             binding.capacity,
-            # TODO Use .external_id is enough ?
             binding.room_type_id.external_id
         )
 
@@ -32,7 +31,6 @@ class NodeRoomExporter(Component):
         external_id = self.backend_adapter.create_room(
             binding.name,
             binding.capacity,
-            # TODO Use .external_id is enough ?
             binding.room_type_id.external_id
         )
         self.binder.bind(external_id, binding)

@@ -19,6 +19,8 @@ class NodeRoom(models.Model):
                                    required=True,
                                    ondelete='restrict')
     capacity = fields.Integer('Capacity')
+    active = fields.Boolean(default=True)
+    sequence = fields.Integer(default=0)
 
     @job(default_channel='root.channel')
     @api.model

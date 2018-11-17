@@ -3,7 +3,7 @@
 
 import logging
 from odoo.addons.component.core import Component
-from odoo.addons.connector.components.mapper import mapping, follow_m2o_relations, m2o_to_external, external_to_m2o
+from odoo.addons.connector.components.mapper import mapping, external_to_m2o
 from odoo import api, _
 _logger = logging.getLogger(__name__)
 
