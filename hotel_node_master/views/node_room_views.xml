@@ -3,9 +3,9 @@
 
     <!-- views -->
 
-    <record id="node_room_type_view_tree" model="ir.ui.view">
-        <field name="name">node.room.type.tree</field>
-        <field name="model">node.room.type</field>
+    <record id="node_room_view_tree" model="ir.ui.view">
+        <field name="name">node.room.tree</field>
+        <field name="model">node.room</field>
         <field name="arch" type="xml">
             <tree>
                 <field name="sequence" widget="handle"/>
@@ -19,9 +19,9 @@
 
     <!-- actions -->
 
-    <record id="node_room_type_action" model="ir.actions.act_window">
-        <field name="name">List of Room Types</field>
-        <field name="res_model">node.room.type</field>
+    <record id="node_room_action" model="ir.actions.act_window">
+        <field name="name">List of Rooms</field>
+        <field name="res_model">node.room</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="target">main</field>
@@ -29,10 +29,10 @@
 
     <!-- menus -->
 
-    <menuitem id="menu_node_room_type"
-              name="Room Types"
-              sequence="10"
+    <menuitem id="menu_node_room"
+              name="Rooms"
+              sequence="20"
               parent="menu_node_connector_root"
-              action="node_room_type_action"/>
+              action="node_room_action"/>
 
 </odoo>

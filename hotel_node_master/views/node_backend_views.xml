@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- views -->
+
     <record id="node_backend_views_form" model="ir.ui.view">
         <field name="name">node.backend.form</field>
         <field name="model">node.backend</field>
@@ -78,7 +80,9 @@
         </field>
     </record>
 
-    <record id="action_node_backend" model="ir.actions.act_window">
+    <!-- actions -->
+
+    <record id="node_backend_action" model="ir.actions.act_window">
         <field name="name">Hotel Node Backends</field>
         <field name="res_model">node.backend</field>
         <field name="view_type">form</field>
@@ -86,28 +90,17 @@
         <field name="view_id" ref="node_backend_views_tree"/>
     </record>
 
-    <record id="action_node_room_type" model="ir.actions.act_window">
-        <field name="name">Hotel Node Room Types</field>
-        <field name="res_model">node.room.type</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <!--<field name="view_id" ref="node_backend_views_tree"/>-->
-    </record>
+    <!-- menus -->
 
-    <record id="action_node_room" model="ir.actions.act_window">
-        <field name="name">Hotel Node Rooms</field>
-        <field name="res_model">node.room</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <!--<field name="view_id" ref="node_backend_views_tree"/>-->
-    </record>
+    <menuitem id="menu_node_connector_root"
+        parent="connector.menu_connector_root"
+        name="Hotel Node"
+        sequence="10"/>
 
-    <record id="action_node_partner" model="ir.actions.act_window">
-        <field name="name">Hotel Node Partners</field>
-        <field name="res_model">node.res.partner</field>
-        <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
-        <!--<field name="view_id" ref="node_backend_views_tree"/>-->
-    </record>
+    <menuitem id="menu_node_backend"
+        name="Backends"
+        sequence="1"
+        parent="menu_node_connector_root"
+        action="node_backend_action"/>
 
 </odoo>
