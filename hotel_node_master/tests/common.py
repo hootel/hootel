@@ -25,7 +25,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class TestHotel(common.SavepointCase):
+class TestHotelMasterNode(common.SavepointCase):
 
     @classmethod
     def _init_mock_hotel(cls):
@@ -33,6 +33,6 @@ class TestHotel(common.SavepointCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestHotel, cls).setUpClass()
+        super(TestHotelMasterNode, cls).setUpClass()
 
         cls._init_mock_hotel()

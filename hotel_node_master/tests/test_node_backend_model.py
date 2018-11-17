@@ -24,7 +24,16 @@ from .common import TestHotelMasterNode
 from odoo.exceptions import ValidationError
 
 
-# class TestHotelNodeMaster(TestHotelMasterNode):
+# class TestNodeBackend(TestHotelMasterNode):
 #
-#     def test_wizard_hotel_node_reservation(self):
+#     def test_create_backend(self):
+#         # TODO Do the test using different users
+#         pass
+#
+#     def test_connection(self):
+#         # TODO Do the test using different users
+#         pass
+#
+#     def test_import_rooms(self):
+#         # TODO Do the test using different users
 #         pass

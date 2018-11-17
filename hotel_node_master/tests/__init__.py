@@ -21,3 +21,4 @@
 #
 ##############################################################################
 from . import test_hotel_node_master
+from . import test_node_backend_model
