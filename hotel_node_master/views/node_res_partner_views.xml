@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- views -->
+
+    <record id="node_res_partner_view_tree" model="ir.ui.view">
+        <field name="name">node.res.partner.tree</field>
+        <field name="model">node.res.partner</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="backend_id"/>
+                <field name="sync_date"/>
+                <field name="external_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- actions -->
+
+    <!-- menus -->
+
+</odoo>
