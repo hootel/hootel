@@ -22,6 +22,7 @@ class HotelResPartnerImporter(Component):
 
         node_res_partner_obj = self.env['node.res.partner']
         # TODO Merge partners
+        import wdb; wdb.set_trace()
         for rec in results:
             map_record = res_partner_mapper.map_record(rec)
             res_partner = node_res_partner_obj.search([
@@ -29,7 +30,7 @@ class HotelResPartnerImporter(Component):
                 ('external_id', '=', rec['id'])
             ])
             if res_partner:
-                res_partner.write(map_record.values())
+                res_partner.with_context({'connector_no_export': True}).write(map_record.values())
             else:
                 res_partner.with_context({'connector_no_export': True}).create(map_record.values(for_create=True))
 

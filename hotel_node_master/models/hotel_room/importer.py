@@ -28,7 +28,7 @@ class HotelRoomImporter(Component):
                 ('external_id', '=', rec['id'])
             ])
             if room:
-                room.write(map_record.values())
+                room.with_context({'connector_no_export': True}).write(map_record.values())
             else:
                 room.with_context({'connector_no_export': True}).create(map_record.values(for_create=True))
 
