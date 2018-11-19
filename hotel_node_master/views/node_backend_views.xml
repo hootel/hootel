@@ -36,30 +36,42 @@
                     <notebook>
                         <page name="import" string="Imports">
                             <group>
-                                <label string="Import Room Types" class="oe_inline"/>
-                                <div>
-                                    <button name="import_room_types"
-                                            type="object"
-                                            class="oe_highlight"
-                                            string="Import in background"
-                                            confirm="Synchronizing a node automatically updates Room Types in the Central Node. Do you want to proceed?"/>
-                                </div>
-                                <label string="Import Rooms" class="oe_inline"/>
-                                <div>
-                                    <button name="import_rooms"
-                                            type="object"
-                                            class="oe_highlight"
-                                            string="Import in background"
-                                            confirm="Synchronizing a node automatically updates Rooms in the Central Node. Do you want to proceed?"/>
-                                </div>
-                                <label string="Import Partners" class="oe_inline"/>
-                                <div>
-                                    <button name="import_partners"
-                                            type="object"
-                                            class="oe_highlight"
-                                            string="Import in background"
-                                            confirm="Synchronizing a node automatically updates Partners in the Central Node. Do you want to proceed?"/>
-                                </div>
+                                <group>
+                                    <label string="Import Room Types" class="oe_inline"/>
+                                    <div>
+                                        <button name="import_room_types"
+                                                type="object"
+                                                class="oe_highlight"
+                                                string="Import in background"
+                                                confirm="Synchronizing a node automatically updates Room Types in the Central Node. Do you want to proceed?"/>
+                                    </div>
+                                    <label string="Import Rooms" class="oe_inline"/>
+                                    <div>
+                                        <button name="import_rooms"
+                                                type="object"
+                                                class="oe_highlight"
+                                                string="Import in background"
+                                                confirm="Synchronizing a node automatically updates Rooms in the Central Node. Do you want to proceed?"/>
+                                    </div>
+                                </group>
+                                <group>
+                                    <label string="Import Partners" class="oe_inline"/>
+                                    <div>
+                                        <button name="import_partners"
+                                                type="object"
+                                                class="oe_highlight"
+                                                string="Import in background"
+                                                confirm="Synchronizing a node automatically updates Partners in the Central Node. Do you want to proceed?"/>
+                                    </div>
+                                    <label string="Import Groups" class="oe_inline"/>
+                                    <div>
+                                        <button name="import_groups"
+                                                type="object"
+                                                class="oe_highlight"
+                                                string="Import in background"
+                                                confirm="Synchronizing a node automatically updates Groups in the Central Node. Do you want to proceed?"/>
+                                    </div>
+                                </group>
                             </group>
                         </page>
                     </notebook>

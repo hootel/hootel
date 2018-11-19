@@ -63,3 +63,9 @@ class NodeBackend(models.Model):
         node_res_partner_obj = self.env['node.res.partner']
         for backend in self:
             node_res_partner_obj.fetch_res_partners(backend)
+
+    @api.multi
+    def import_groups(self):
+        node_res_groups_obj = self.env['node.res.groups']
+        for backend in self:
+            node_res_groups_obj.fetch_res_groups(backend)

@@ -184,3 +184,22 @@ class HotelNodeAdapter(AbstractComponent):
             [],
             ['name', 'email', 'is_company', 'type']
         )
+
+    # === GROUPS
+    def create_res_groups(self, name, user_ids):
+        _logger.warning("_create_groups(%s, group_id) is not yet implemented.", self)
+        return True
+
+    def modify_res_groups(self, group_id, name, user_ids):
+        _logger.warning("_modify_groups(%s, group_id) is not yet implemented.", self)
+        return True
+
+    def delete_res_groups(self, group_id):
+        _logger.warning("_delete_groups(%s, groups_id) is not yet implemented.", self)
+        return True
+
+    def fetch_res_groups(self):
+        return self._server.env['res.groups'].search_read(
+            [],
+            ['full_name', 'user_ids']
+        )

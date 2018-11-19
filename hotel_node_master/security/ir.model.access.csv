@@ -3,3 +3,4 @@ access_node_backend,access_node_backend,model_node_backend,base.group_user,1,0,0
 access_node_room,access_node_room,model_node_room,base.group_user,1,0,0,0
 access_node_room_type,access_node_room_type,model_node_room_type,base.group_user,1,0,0,0
 access_node_res_partner,access_node_res_partner,model_node_res_partner,base.group_user,1,0,0,0
+access_node_res_groups,access_node_res_groups,model_node_res_groups,base.group_user,1,0,0,0
