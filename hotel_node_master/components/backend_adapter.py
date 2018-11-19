@@ -154,7 +154,6 @@ class HotelNodeAdapter(AbstractComponent):
 
         return rooms
 
-
     # === PARTNERS
     def create_res_partner(self, name, email, is_company, type):
         return self._server.env['res.partner'].create({
@@ -165,6 +164,8 @@ class HotelNodeAdapter(AbstractComponent):
         })
 
     def modify_res_partner(self, partner_id, name, email, is_company, type):
+        _logger.info('User #%s updated remote res.partner with ID: [%s] in node [%s]',
+                     self.env.context.get('uid'), partner_id, self._server)
         return self._server.env['res.partner'].write(
             [partner_id],
             {

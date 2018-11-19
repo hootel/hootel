@@ -12,3 +12,4 @@ class ResPartner(models.Model):
 
     node_backend_ids = fields.One2many('node.res.partner', 'odoo_id',
                                        'Nodes with this partner')
+
