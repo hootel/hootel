@@ -180,8 +180,7 @@ class HotelNodeAdapter(AbstractComponent):
         # return self._server.env['res.partner'].unlink(partner_id)
 
     def fetch_res_partners(self):
-        rooms = self._server.env['res.partner'].search_read(
+        return self._server.env['res.partner'].search_read(
             [],
             ['name', 'email', 'is_company', 'type']
         )
-        return rooms
