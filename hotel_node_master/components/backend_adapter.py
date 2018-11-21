@@ -215,11 +215,14 @@ class HotelNodeAdapter(AbstractComponent):
         return user_id
 
     def modify_res_users(self, user_id, login, partner_id, group_ids):
+        _logger.info('User #%s updated remote res.users with ID: [%s] in node [%s] [%s]',
+                     self.env.context.get('uid'), user_id, self._server._host, self._server)
         return self._server.env['res.users'].write(
             [user_id],
             {
                 'login': login,
                 'partner_id': partner_id,
+                'groups_id': [(6, False, group_ids)]
             })
 
     def delete_res_users(self, user_id):
@@ -229,7 +232,7 @@ class HotelNodeAdapter(AbstractComponent):
     def fetch_res_users(self):
         users = self._server.env['res.users'].search_read(
             [],
-            ['login', 'partner_id']
+            ['login', 'partner_id', 'groups_id']
         )
         for rec in users:
             rec['partner_id'] = rec['partner_id'][0]

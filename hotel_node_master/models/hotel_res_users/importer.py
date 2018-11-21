@@ -48,9 +48,17 @@ class NodeResUsersImportMapper(Component):
     direct = [
         ('id', 'external_id'),
         ('login', 'login'),
-        (external_to_m2o('partner_id'), 'partner_id')
+        (external_to_m2o('partner_id'), 'partner_id'),
     ]
 
     @mapping
     def backend_id(self, record):
         return {'backend_id': self.backend_record.id}
+
+    @mapping
+    def group_ids(self, record):
+        groups = self.env['node.res.groups'].search([
+            ('backend_id', '=', self.backend_record.id),
+            ('external_id', 'in', record['groups_id'])
+        ])
+        return {'group_ids': [(6, False, groups.ids)]}

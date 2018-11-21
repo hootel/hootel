@@ -20,8 +20,8 @@ class NodeResUsers(models.Model):
     email = fields.Char(related='partner_id.email', readonly=True)
 
     login = fields.Char(required=True, help="Used to log into the system")
-    group_ids = fields.Integer()
-    # group_ids = fields.Many2many('node.res.groups', 'node_res_groups_users_rel', 'uid', 'gid', string='Groups')
+    # group_ids = fields.Integer()
+    group_ids = fields.Many2many('node.res.groups', 'node_res_groups_users_rel', 'uid', 'gid', string='Groups')
 
     active = fields.Boolean(default=True)
 
