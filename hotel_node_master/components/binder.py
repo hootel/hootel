@@ -11,4 +11,6 @@ class NodeConnectorModelBinder(Component):
         'node.room',
         'node.room.type',
         'node.res.partner',
+        'node.res.groups',
+        'node.res.users',
     ]

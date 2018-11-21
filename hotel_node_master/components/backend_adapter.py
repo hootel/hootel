@@ -164,8 +164,8 @@ class HotelNodeAdapter(AbstractComponent):
         })
 
     def modify_res_partner(self, partner_id, name, email, is_company, type):
-        _logger.info('User #%s updated remote res.partner with ID: [%s] in node [%s]',
-                     self.env.context.get('uid'), partner_id, self._server)
+        _logger.info('User #%s updated remote res.partner with ID: [%s] in node [%s] [%s]',
+                     self.env.context.get('uid'), partner_id, self._server._host, self._server)
         return self._server.env['res.partner'].write(
             [partner_id],
             {
@@ -203,3 +203,35 @@ class HotelNodeAdapter(AbstractComponent):
             [],
             ['full_name', 'user_ids']
         )
+
+    # === USERS
+    def create_res_users(self, login, partner_id, group_ids):
+        user_id = self._server.env['res.users'].create({
+            'login': login,
+            'partner_id': partner_id,
+        })
+        _logger.info('User #%s created remote res.users with ID: [%s] in node [%s] [%s]',
+                     self.env.context.get('uid'), user_id, self._server._host, self._server)
+        return user_id
+
+    def modify_res_users(self, user_id, login, partner_id, group_ids):
+        return self._server.env['res.users'].write(
+            [user_id],
+            {
+                'login': login,
+                'partner_id': partner_id,
+            })
+
+    def delete_res_users(self, user_id):
+        _logger.warning("_delete_users(%s, groups_id) is not yet implemented.", self)
+        return True
+
+    def fetch_res_users(self):
+        users = self._server.env['res.users'].search_read(
+            [],
+            ['login', 'partner_id']
+        )
+        for rec in users:
+            rec['partner_id'] = rec['partner_id'][0]
+
+        return  users

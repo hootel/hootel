@@ -71,6 +71,14 @@
                                                 string="Import in background"
                                                 confirm="Synchronizing a node automatically updates Groups in the Central Node. Do you want to proceed?"/>
                                     </div>
+                                    <label string="Import Users" class="oe_inline"/>
+                                    <div>
+                                        <button name="import_users"
+                                                type="object"
+                                                class="oe_highlight"
+                                                string="Import in background"
+                                                confirm="Synchronizing a node automatically updates Users in the Central Node. Do you want to proceed?"/>
+                                    </div>
                                 </group>
                             </group>
                         </page>

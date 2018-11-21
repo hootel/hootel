@@ -20,6 +20,7 @@
         'views/node_room_type_views.xml',
         'views/node_room_views.xml',
         'views/node_res_groups_views.xml',
+        'views/node_res_users_views.xml',
         'views/node_res_partner_views.xml',
         'views/inherited_res_partner_views.xml',
         # 'views/hotel_node.xml',
