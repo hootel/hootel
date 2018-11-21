@@ -10,6 +10,5 @@ class ResPartner(models.Model):
 
     _inherit = 'res.partner'
 
-    node_backend_ids = fields.One2many('node.res.partner', 'odoo_id',
-                                       'Nodes with this partner')
-
+    partner_binding_ids = fields.One2many('node.res.partner', 'odoo_id',
+                                          'Node Partners binded to this one')

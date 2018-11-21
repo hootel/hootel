@@ -22,7 +22,6 @@ class HotelResPartnerImporter(Component):
                                             model_name='node.res.partner')
 
         # TODO first import companies and then customers, so they keep linked ?
-
         node_res_partner_obj = self.env['node.res.partner']
         for rec in results:
             # TODO partners without email or VAT should be marked as checkpoints
@@ -48,11 +47,11 @@ class HotelResPartnerImporter(Component):
                 ])
                 if res_partner:
                     res_partner_duplicated = node_res_partner.odoo_id
-                    # Merge partners among nodes updating node_backend_ids (SEE Addition Overloading)
-                    # `node_res_partner.odoo_id` is automatically updated
+                    # Merge partners among nodes updating partner_binding_ids
+                    # updates automatically `node_res_partner.odoo_id` (SEE Addition Overloading)
                     res_partner.with_context(
                         # prevent remote updates
-                        {'connector_no_export': True}).node_backend_ids += node_res_partner
+                        {'connector_no_export': True}).partner_binding_ids += node_res_partner
 
                     res_partner_duplicated.with_context(
                         # prevent remote updates

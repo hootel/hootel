@@ -19,6 +19,7 @@ class NodeResPartner(models.Model):
                               string='Partners',
                               required=True,
                               ondelete='cascade')
+    node_user_ids = fields.One2many('node.res.users', 'partner_id', string='Node Users')
 
     @job(default_channel='root.channel')
     @api.model
