@@ -15,8 +15,7 @@ class NodeResGroups(models.Model):
     _description = 'Node Hotel Groups'
 
     name = fields.Char(required=True)
-    # user_ids = fields.Integer()
-    user_ids = fields.Many2many('node.res.users', 'hotel_node_user_group_rel', 'gid', 'uid', string='Users')
+    user_ids = fields.Many2many('node.res.users', 'node_res_groups_users_rel', 'gid', 'uid', string='Users')
     active = fields.Boolean(default=True)
     sequence = fields.Integer(default=0)
 
