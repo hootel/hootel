@@ -3,7 +3,7 @@
 
 import xmlrpc.client
 import logging
-from urlparse import urljoin
+from urllib.parse import urljoin
 from odoo.addons.component.core import AbstractComponent
 from odoo.addons.queue_job.exception import RetryableJobError
 from odoo.tools import (
