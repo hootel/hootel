@@ -60,7 +60,16 @@ class ChannelBackend(models.Model):
     @api.multi
     def generate_key(self):
         for record in self:
-            record.security_token = binascii.hexlify(os.urandom(32)).decode()
+            record.security_token = binascii.hexlify(os.urandom(16)).decode()
+
+    @api.multi
+    def synchronize_push_urls(self):
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        base_url = base_url.replace("http://", "https://")
+        for record in self:
+            with record.work_on(self._name) as work:
+                adapter = work.component(usage='wubook.adapter')
+                return adapter.push_activation(base_url, record.security_token)
 
     @api.multi
     def import_reservations(self):

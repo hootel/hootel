@@ -3,6 +3,7 @@
 
 import xmlrpc.client
 import logging
+from urlparse import urljoin
 from odoo.addons.component.core import AbstractComponent
 from odoo.addons.queue_job.exception import RetryableJobError
 from odoo.tools import (
@@ -206,6 +207,30 @@ class HotelChannelInterfaceAdapter(AbstractComponent):
 class WuBookAdapter(AbstractComponent):
     _name = 'wubook.adapter'
     _inherit = 'hotel.channel.adapter'
+
+    # === GENERAL
+    def push_activation(self, base_url, security_token):
+        rcode_a, results_a = self._server.push_activation(
+            self._session_info[0],
+            self._session_info[1],
+            urljoin(base_url,
+                    "/hotel_channel/push/reservations/%s" % security_token),
+            1)
+        rcode_ua, results_ua = self._server.push_update_activation(
+            self.TOKEN,
+            self.LCODE,
+            urljoin(base_url, "/hotel_channel/push/rooms/%s" % security_token))
+
+        if rcode_a != 0:
+            raise ChannelConnectorError("Can't activate push reservations", {
+                'message': results_a,
+            })
+        if rcode_ua != 0:
+            raise ChannelConnectorError("Can't activate push rooms", {
+                'message': results_ua,
+            })
+
+        return rcode_a == 0 and rcode_ua == 0
 
     # === ROOMS
     def create_room(self, shortcode, name, capacity, price, availability):
