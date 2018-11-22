@@ -1,18 +1,20 @@
 # Copyright 2018 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
+import logging
 from datetime import datetime
-from openerp import http, _
-from openerp.http import request
-from openerp.exceptions import ValidationError
+from odoo import http, _
+from odoo.http import request
+from odoo.exceptions import ValidationError
 from odoo.addons.hotel_channel_connector.components.backend_adapter import (
     DEFAULT_WUBOOK_DATE_FORMAT)
 from odoo.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT)
+_logger = logging.getLogger(__name__)
 
 
-class website_wubook(http.Controller):
+class WubookPushURL(http.Controller):
     # Called when created a reservation in wubook
     @http.route(['/wubook/push/reservations/<string:security_token>'],
                 type='http', cors="*", auth="public", methods=['POST'],
@@ -20,6 +22,11 @@ class website_wubook(http.Controller):
     def wubook_push_reservations(self, security_token, **kwargs):
         rcode = kwargs.get('rcode')
         lcode = kwargs.get('lcode')
+
+        _logger.info("====== PUSH RESERVATION")
+        _logger.info(rcode)
+        _logger.info(lcode)
+        _logger.info(security_token)
 
         # Correct Input?
         if not lcode or not rcode or not security_token:
