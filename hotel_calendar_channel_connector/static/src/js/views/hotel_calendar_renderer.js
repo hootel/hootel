@@ -51,7 +51,7 @@ odoo.define('hotel_calendar_channel_connector.PMSHotelCalendarRendererChannelCon
     _generate_bookings_domain: function(tsearch) {
       var domain = this._super(tsearch);
       domain.splice(0, 0, '|');
-      domain.push(['wrid', 'ilike', tsearch]);
+      domain.push(['external_id', 'ilike', tsearch]);
       return domain;
     }
   });

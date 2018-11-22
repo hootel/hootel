@@ -50,10 +50,8 @@
                     <field name="create_date"/>
                     <field name="overbooking" invisible="1" />
                     <field name="last_updated_res" string="Updated on"/>
-                    <field name="origin_sale"/>
                     <field name="overbooking" invisible="1" />
                     <field name="to_assign" invisible="1"/>
-                    <field name="price_unit" string="Reservation Price"/>
                     <field name="discount" groups="sale.group_discount_per_so_line"/>
                     <field name="price_total" string="Final Price"/>
                     <field name="folio_pending_amount" string="Folio Pending Amount"/>
