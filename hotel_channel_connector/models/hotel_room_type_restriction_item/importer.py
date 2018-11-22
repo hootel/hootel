@@ -69,7 +69,7 @@ class HotelRoomTypeRestrictionImporter(Component):
 
     @api.model
     def import_restriction_values(self, date_from, date_to, channel_restr_id=False):
-        channel_restr_plan_id = channel_restr_id.external_id if channel_restr_id else False
+        channel_restr_plan_id = int(channel_restr_id) if channel_restr_id else False
         try:
             results = self.backend_adapter.wired_rplan_get_rplan_values(
                 date_from,
