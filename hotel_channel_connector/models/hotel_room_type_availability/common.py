@@ -105,7 +105,7 @@ class HotelRoomTypeAvailability(models.Model):
     booked = fields.Boolean('Booked', default=False, readonly=True)
 
     def _prepare_notif_values(self, record):
-        vals = super(HotelRoomTypeAvailability, self)._prepare_notif_values()
+        vals = super(HotelRoomTypeAvailability, self)._prepare_notif_values(record)
         vals.update({
             'no_ota': record.no_ota,
         })
