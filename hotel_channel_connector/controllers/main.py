@@ -14,7 +14,7 @@ from odoo.tools import (
 
 class website_wubook(http.Controller):
     # Called when created a reservation in wubook
-    @http.route(['/hotel_channel/push/reservations/<string:security_token>'],
+    @http.route(['/wubook/push/reservations/<string:security_token>'],
                 type='http', cors="*", auth="public", methods=['POST'],
                 website=True, csrf=False)
     def wubook_push_reservations(self, security_token, **kwargs):
@@ -22,7 +22,7 @@ class website_wubook(http.Controller):
         lcode = kwargs.get('lcode')
 
         # Correct Input?
-        if not lcode or not rcode:
+        if not lcode or not rcode or not security_token:
             raise ValidationError(_('Invalid Input Parameters!'))
 
         # WuBook Check
@@ -42,7 +42,7 @@ class website_wubook(http.Controller):
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
 
     # Called when modify room values (Delay: ~5mins)
-    @http.route(['/hotel_channel/push/rooms/<string:security_token>'], type='http',
+    @http.route(['/wubook/push/rooms/<string:security_token>'], type='http',
                 cors="*", auth="public", methods=['POST'], website=True,
                 csrf=False)
     def wubook_push_rooms(self, security_token, **kwargs):

@@ -100,6 +100,9 @@ class HotelChannelInterfaceAdapter(AbstractComponent):
     _inherit = ['base.backend.adapter', 'base.hotel.channel.connector']
     _usage = 'backend.adapter'
 
+    def push_activation(self, base_url, security_token):
+        raise NotImplementedError
+
     def create_room(self, shortcode, name, capacity, price, availability):
         raise NotImplementedError
 
@@ -210,11 +213,15 @@ class WuBookAdapter(AbstractComponent):
 
     # === GENERAL
     def push_activation(self, base_url, security_token):
+        _logger.info("====== PUSH INFO")
+        _logger.info(urljoin(base_url,
+                             "/wubook/push/reservations/%s" % security_token))
+
         rcode_a, results_a = self._server.push_activation(
             self._session_info[0],
             self._session_info[1],
             urljoin(base_url,
-                    "/hotel_channel/push/reservations/%s" % security_token),
+                    "/wubook/push/reservations/%s" % security_token),
             1)
         if rcode_a != 0:
             raise ChannelConnectorError("Can't activate push reservations", {
@@ -222,9 +229,9 @@ class WuBookAdapter(AbstractComponent):
             })
 
         rcode_b, results_b = self._server.push_update_activation(
-            self.TOKEN,
-            self.LCODE,
-            urljoin(base_url, "/hotel_channel/push/rooms/%s" % security_token))
+            self._session_info[0],
+            self._session_info[1],
+            urljoin(base_url, "/wubook/push/rooms/%s" % security_token))
         if rcode_b != 0:
             raise ChannelConnectorError("Can't activate push rooms", {
                 'message': results_b,
