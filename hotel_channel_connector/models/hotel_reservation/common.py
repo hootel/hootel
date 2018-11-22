@@ -55,9 +55,9 @@ class ChannelHotelReservation(models.Model):
 
     @job(default_channel='root.channel')
     @api.model
-    def refresh_availability(self, checkin, checkout, product_id):
+    def refresh_availability(self, checkin, checkout, room_id):
         self.env['channel.hotel.room.type.availability'].refresh_availability(
-            checkin, checkout, product_id)
+            checkin, checkout, room_id)
 
     @job(default_channel='root.channel')
     @api.model
@@ -86,6 +86,63 @@ class ChannelHotelReservation(models.Model):
         with self.backend_id.work_on(self._name) as work:
             exporter = work.component(usage='hotel.reservation.exporter')
             return exporter.mark_booking(self)
+
+    @api.multi
+    def write(self, vals):
+        if self._context.get('connector_no_export', True) and \
+                (vals.get('checkin') or vals.get('checkout') or
+                 vals.get('room_id') or vals.get('state')):
+            older_vals = []
+            new_vals = []
+            for record in self:
+                older_vals.append({
+                    'checkin': record.checkin,
+                    'checkout': record.checkout,
+                    'room_id': record.room_id,
+                })
+                new_vals.append({
+                    'checkin': vals.get('checkin', record.checkin),
+                    'checkout': vals.get('checkout', record.checkout),
+                    'room_id': vals.get('room_id', record.room_id),
+                })
+
+            res = super(ChannelHotelReservation, self).write(vals)
+
+            channel_room_type_avail_obj = self.env['channel.hotel.room.type.availability']
+            for k_i, v_i in enumerate(older_vals):
+                channel_room_type_avail_obj.refresh_availability(
+                    v_i['checkin'],
+                    v_i['checkout'],
+                    v_i['room_id'])
+                channel_room_type_avail_obj.refresh_availability(
+                    new_vals[k_i]['checkin'],
+                    new_vals[k_i]['checkout'],
+                    new_vals[k_i]['room_id'])
+        else:
+            res = super(ChannelHotelReservation, self).write(vals)
+        return res
+
+    @api.multi
+    def unlink(self):
+        vals = []
+        for record in self:
+            if any(record.channel_bind_ids) and record.channel_bind_ids[0].external_id \
+                    and not record.parent_reservation:
+                raise UserError(_("You can't delete OTA's reservations"))
+            vals.append({
+                'checkin': record.checkin,
+                'checkout': record.checkout,
+                'room_id': record.room_id.id,
+            })
+        res = super(ChannelHotelReservation, self).unlink()
+        if self._context.get('connector_no_export', True):
+            channel_room_type_avail_obj = self.env['channel.hotel.room.type.availability']
+            for record in vals:
+                channel_room_type_avail_obj.refresh_availability(
+                    record['checkin'],
+                    record['checkout'],
+                    record['room_id'])
+        return res
 
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
@@ -134,66 +191,6 @@ class HotelReservation(models.Model):
         if user.has_group('hotel.group_hotel_call'):
             vals.update({'to_read': True})
         return super(HotelReservation, self).create(vals)
-
-    @api.multi
-    def write(self, vals):
-        if self._context.get('wubook_action', True) and \
-                (vals.get('checkin') or vals.get('checkout') or
-                 vals.get('product_id') or vals.get('state')):
-            older_vals = []
-            new_vals = []
-            for record in self:
-                prod_id = False
-                if record.product_id:
-                    prod_id = record.product_id.id
-                older_vals.append({
-                    'checkin': record.checkin,
-                    'checkout': record.checkout,
-                    'product_id': prod_id,
-                })
-                new_vals.append({
-                    'checkin': vals.get('checkin', record.checkin),
-                    'checkout': vals.get('checkout', record.checkout),
-                    'product_id': vals.get('product_id', prod_id),
-                })
-
-            res = super(HotelReservation, self).write(vals)
-
-            room_type_avail_obj = self.env['hotel.room.type.availability']
-            for i in range(0, len(older_vals)):
-                room_type_avail_obj.refresh_availability(
-                    older_vals[i]['checkin'],
-                    older_vals[i]['checkout'],
-                    older_vals[i]['product_id'])
-                room_type_avail_obj.refresh_availability(
-                    new_vals[i]['checkin'],
-                    new_vals[i]['checkout'],
-                    new_vals[i]['product_id'])
-        else:
-            res = super(HotelReservation, self).write(vals)
-        return res
-
-    @api.multi
-    def unlink(self):
-        vals = []
-        for record in self:
-            if any(record.channel_bind_ids) and record.channel_bind_ids[0].external_id \
-                    and not record.parent_reservation:
-                raise UserError(_("You can't delete OTA's reservations"))
-            vals.append({
-                'checkin': record.checkin,
-                'checkout': record.checkout,
-                'product_id': record.product_id.id,
-            })
-        res = super(HotelReservation, self).unlink()
-        if self._context.get('wubook_action', True):
-            room_type_avail_obj = self.env['hotel.room.type.availability']
-            for record in vals:
-                room_type_avail_obj.refresh_availability(
-                    record['checkin'],
-                    record['checkout'],
-                    record['product_id'])
-        return res
 
     @api.multi
     def action_cancel(self):
@@ -267,10 +264,10 @@ class HotelReservation(models.Model):
     def mark_as_readed(self):
         self.write({'to_read': False, 'to_assign': False})
 
-    @api.onchange('checkin', 'checkout', 'product_id')
-    def on_change_checkin_checkout_product_id(self):
+    @api.onchange('checkin', 'checkout')
+    def onchange_dates(self):
         if not self.is_from_ota:
-            return super().on_change_checkin_checkout_product_id()
+            return super().onchange_dates()
 
 class HotelReservationAdapter(Component):
     _name = 'channel.hotel.reservation.adapter'

@@ -42,7 +42,7 @@ class ChannelHotelRoomTypeAvailability(models.Model):
                     count: %d") % record.odoo_id.room_type_id.total_rooms_count)
 
     @api.model
-    def refresh_availability(self, checkin, checkout, product_id):
+    def refresh_availability(self, checkin, checkout, room_id):
         date_start = fields.Date.from_string(checkin)
         date_end = fields.Date.from_string(checkout)
         # Not count end day of the reservation
@@ -51,7 +51,7 @@ class ChannelHotelRoomTypeAvailability(models.Model):
         channel_room_type_obj = self.env['channel.hotel.room.type']
         channel_room_type_avail_obj = self.env['hotel.room.type.availability']
 
-        room_type_binds = channel_room_type_obj.search([('product_id', '=', product_id)])
+        room_type_binds = channel_room_type_obj.search([('room_ids', '=', room_id)])
         for room_type_bind in room_type_binds:
             if room_type_bind.external_id:
                 for i in range(0, date_diff):

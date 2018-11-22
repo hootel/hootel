@@ -37,7 +37,7 @@ odoo.define('hotel_calendar_channel_connector.PMSHotelCalendarRendererChannelCon
       var self = this;
       return this._super().then(function () {
         self.$el.find('#btn_channel_manager_request').on('click', function (ev) {
-          self.do_action("hotel_calendar_wubook.hotel_reservation_action_manager_request");
+          self.do_action("hotel_calendar_channel_connector.hotel_reservation_action_manager_request");
         });
       });
     },

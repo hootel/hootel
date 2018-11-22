@@ -27,7 +27,7 @@
     'test': [
     ],
 
-    'installable': False,
+    'installable': True,
     'auto_install': True,
     'application': False,
     'license': 'AGPL-3',
