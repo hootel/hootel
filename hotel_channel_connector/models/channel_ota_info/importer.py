@@ -52,6 +52,20 @@ class ChannelOtaInfoImporter(Component):
                 count = count + 1
         return count
 
+    @api.model
+    def push_activation(self, base_url):
+        try:
+            results = self.backend_adapter.push_activation(
+                base_url,
+                self.backend_record.security_token)
+        except ChannelConnectorError as err:
+            self.create_issue(
+                section='channel',
+                internal_message=str(err),
+                channel_message=err.data['message'])
+            return False
+        return results
+
 
 class ChannelOtaInfoImportMapper(Component):
     _name = 'channel.ota.info.import.mapper'

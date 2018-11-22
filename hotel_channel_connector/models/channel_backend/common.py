@@ -66,10 +66,9 @@ class ChannelBackend(models.Model):
     def synchronize_push_urls(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         base_url = base_url.replace("http://", "https://")
+        channel_ota_info_obj = self.env['channel.ota.info']
         for record in self:
-            with record.work_on(self._name) as work:
-                adapter = work.component(usage='wubook.adapter')
-                return adapter.push_activation(base_url, record.security_token)
+            channel_ota_info_obj.push_activation(record, base_url)
 
     @api.multi
     def import_reservations(self):

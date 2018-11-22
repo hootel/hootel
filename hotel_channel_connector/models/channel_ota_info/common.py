@@ -22,6 +22,13 @@ class ChannelOtaInfo(models.Model):
             importer = work.component(usage='ota.info.importer')
             return importer.import_otas_info()
 
+    @job(default_channel='root.channel')
+    @api.model
+    def push_activation(self, backend, base_url):
+        with backend.work_on(self._name) as work:
+            importer = work.component(usage='ota.info.importer')
+            return importer.push_activation(base_url)
+
 class HotelRoomTypeAdapter(Component):
     _name = 'channel.ota.info.adapter'
     _inherit = 'wubook.adapter'
@@ -29,3 +36,6 @@ class HotelRoomTypeAdapter(Component):
 
     def fetch_rooms(self):
         return super(HotelRoomTypeAdapter, self).fetch_rooms()
+
+    def push_activation(self, base_url, security_token):
+        return super(HotelRoomTypeAdapter, self).push_activation(base_url, security_token)
