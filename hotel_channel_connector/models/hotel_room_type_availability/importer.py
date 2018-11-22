@@ -51,7 +51,8 @@ class HotelRoomTypeAvailabilityImporter(Component):
             for room_k, room_v in results.items():
                 iter_day = dfrom_dt
                 channel_room_type = channel_room_type_obj.search([
-                    ('channel_room_id', '=', room_k)
+                    ('backend_id', '=', self.backend_record.id),
+                    ('external_id', '=', room_k)
                 ], limit=1)
                 if channel_room_type:
                     for room in room_v:

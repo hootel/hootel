@@ -104,11 +104,6 @@ class HotelRoomTypeRestrictionItemImportMapper(Component):
 
     @only_create
     @mapping
-    def applied_on(self, record):
-        return {'applied_on': '0_room_type'}
-
-    @only_create
-    @mapping
     def channel_pushed(self, record):
         return {'channel_pushed': True}
 
