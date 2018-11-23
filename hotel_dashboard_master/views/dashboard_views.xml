@@ -1,0 +1,75 @@
+<odoo>
+<!-- Dashboard main template, display list of available hotels -->
+<template id="hotel_dashboard_master.dashboard_page" name="Hotel Dashboard">
+    <t t-call="website.layout">
+        <div class="container mt16">
+            <t t-set="title">Hotel Central Dashboard</t>
+            <div class="row">
+                <t t-foreach="backends" t-as="hotel">
+                    <div class="col-sm-4 mb32">
+                        <div class="well well-sm">
+                            <div>
+                                <a t-attf-href="/hotel/dashboard/#{slug(hotel)}">
+                                    <h4 t-esc="hotel.name"/>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</template>
+
+<!-- Hotels sub-template: header -->
+<template id="dashboard_backend_header" name="Hotel Dashboard Header">
+    <section class="oe_slides_box_shadow">
+        <div class="container">
+            <div class="row">
+                <!-- Name and breadcrumb -->
+                <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8">
+                    <h3 class="mt0">
+                        <a t-attf-href="/hotel/dashboard/#{slug(backend)}" t-esc="backend.name"/>
+                    </h3>
+                    <a t-attf-href="https://#{backend.address}" class="fa fa-arrow-right">
+                        <span t-esc="backend.address"/>
+                    </a>
+                </div>
+
+                <!-- Search box -->
+                <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8">
+                </div>
+            </div>
+
+            <div class="row" t-if="not search">
+                <!-- Navigation -->
+                <div class="col-md-8 col-sm-12 col-xs-12">
+                    <ul class="nav nav-tabs nav-tabs-border">
+                        <li>
+                            <a t-attf-href="/hotel/dashboard/#{slug(backend)}"> <i class="fa fa-home"></i> Home</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Sort options -->
+                <div class="col-md-4 col-sm-12 col-xs-12">
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+<!-- Hotel main template -->
+<template id="hotel_dashboard_master.dashboard_backend_view" name="Hotel Dashboard">
+    <t t-call="website.layout">
+        <t t-set="main_object" t-value="backend"/>
+        <t t-call="hotel_dashboard_master.dashboard_backend_header"/>
+        <div class="wrap">
+            <div class="container">
+                <h4>Add basic information about the status of this hotel</h4>
+            </div>
+        </div>
+    </t>
+</template>
+
+</odoo>
