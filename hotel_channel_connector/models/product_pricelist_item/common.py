@@ -28,12 +28,12 @@ class ChannelProductPricelistItem(models.Model):
             importer = work.component(usage='product.pricelist.item.importer')
             if not backend.pricelist_id:
                 return importer.import_all_pricelist_values(
-                    backend.pricelist_from,
-                    backend.pricelist_to)
+                    dfrom,
+                    dto)
             return importer.import_pricelist_values(
-                backend.pricelist_id.external_id,
-                backend.pricelist_from,
-                backend.pricelist_to)
+                external_id,
+                dfrom,
+                dto)
 
     @job(default_channel='root.channel')
     @api.model

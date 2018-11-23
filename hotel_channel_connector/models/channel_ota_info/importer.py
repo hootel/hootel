@@ -39,6 +39,7 @@ class ChannelOtaInfoImporter(Component):
                 }
                 map_record = ota_info_mapper.map_record(vals)
                 ota_info_bind = channel_ota_info_obj.search([
+                    ('backend_id', '=', self.backend_record.id),
                     ('ota_id', '=', ota_id)
                 ], limit=1)
                 if ota_info_bind:

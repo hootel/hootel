@@ -22,6 +22,7 @@ class HotelRoomTypeRestrictionItemExporter(Component):
         channel_room_type_rest_obj = self.env['channel.hotel.room.type.restriction']
         channel_rest_item_obj = self.env['channel.hotel.room.type.restriction.item']
         unpushed = channel_rest_item_obj.search([
+            ('backend_id', '=', self.backend_record.id),
             ('channel_pushed', '=', False),
             ('date', '>=', fields.Date.today())
         ], order="date ASC")
@@ -30,10 +31,13 @@ class HotelRoomTypeRestrictionItemExporter(Component):
             date_end = fields.Date.from_string(unpushed[-1].date)
             days_diff = (date_end-date_start).days + 1
             restrictions = {}
-            channel_restr_plan_ids = channel_room_type_rest_obj.search([])
+            channel_restr_plan_ids = channel_room_type_rest_obj.search([
+                ('backend_id', '=', self.backend_record.id),
+            ])
             for rp in channel_restr_plan_ids:
                 restrictions.update({rp.external_id: {}})
                 unpushed_rp = channel_rest_item_obj.search([
+                    ('backend_id', '=', self.backend_record.id),
                     ('channel_pushed', '=', False),
                     ('restriction_id', '=', rp.odoo_id.id)
                 ])

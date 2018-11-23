@@ -47,6 +47,7 @@ class HotelRoomTypeRestrictionImporter(Component):
                             date_dt = datetime.strptime(item['date'], DEFAULT_WUBOOK_DATE_FORMAT)
                             date_str = date_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
                             channel_restriction_item = channel_restriction_item_obj.search([
+                                ('backend_id', '=', self.backend_record.id),
                                 ('restriction_id', '=', channel_restriction_id.odoo_id.id),
                                 ('date', '=', date_str),
                                 ('applied_on', '=', '0_room_type'),

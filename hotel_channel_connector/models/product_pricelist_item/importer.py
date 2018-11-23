@@ -33,6 +33,7 @@ class ProductPricelistItemImporter(Component):
             usage='import.mapper',
             model_name='channel.product.pricelist.item')
         if pricelist_bind:
+            _logger.info("==== PASA BIND")
             channel_pricelist_item_obj = self.env['channel.product.pricelist.item']
             dfrom_dt = fields.Date.from_string(date_from)
             dto_dt = fields.Date.from_string(date_to)
@@ -54,6 +55,7 @@ class ProductPricelistItemImporter(Component):
                         }
                         map_record = pricelist_item_mapper.map_record(item)
                         pricelist_item = channel_pricelist_item_obj.search([
+                            ('backend_id', '=', self.backend_record.id),
                             ('pricelist_id', '=', pricelist_bind.odoo_id.id),
                             ('date_start', '=', ndate_str),
                             ('date_end', '=', ndate_str),
@@ -62,6 +64,7 @@ class ProductPricelistItemImporter(Component):
                             ('product_tmpl_id', '=',
                              channel_room_type.product_id.product_tmpl_id.id)
                         ], limit=1)
+                        _logger.info("=== ESCRIBEINDO")
                         if pricelist_item:
                             pricelist_item.with_context({
                                 'connector_no_export': True,
@@ -75,7 +78,9 @@ class ProductPricelistItemImporter(Component):
 
     @api.model
     def import_all_pricelist_values(self, date_from, date_to, rooms=None):
-        external_ids = self.env['channel.product.pricelist'].search([]).mapped('external_id')
+        external_ids = self.env['channel.product.pricelist'].search([
+            ('backend_id', '=', self.backend_record.id),
+        ]).mapped('external_id')
         for external_id in external_ids:
             if external_id:
                 self.import_pricelist_values(external_id, date_from, date_to, rooms=rooms)
@@ -97,8 +102,9 @@ class ProductPricelistItemImporter(Component):
                 channel_object_id=external_id,
                 dfrom=date_from,
                 dto=date_to)
+            return False
         else:
-            self._generate_pricelist_items(external_id, date_from, date_to, results)
+            return self._generate_pricelist_items(external_id, date_from, date_to, results)
 
 class ProductPricelistItemImportMapper(Component):
     _name = 'channel.product.pricelist.item.import.mapper'

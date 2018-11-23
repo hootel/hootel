@@ -51,7 +51,10 @@ class ChannelHotelRoomTypeAvailability(models.Model):
         channel_room_type_obj = self.env['channel.hotel.room.type']
         channel_room_type_avail_obj = self.env['hotel.room.type.availability']
 
-        room_type_binds = channel_room_type_obj.search([('room_ids', '=', room_id)])
+        room_type_binds = channel_room_type_obj.search([
+            ('backend_id', '=', self.backend_id.id),
+            ('room_ids', '=', room_id),
+        ])
         for room_type_bind in room_type_binds:
             if room_type_bind.external_id:
                 for i in range(0, date_diff):

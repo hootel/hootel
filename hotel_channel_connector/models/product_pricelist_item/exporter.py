@@ -23,6 +23,7 @@ class ProductPricelistItemExporter(Component):
         channel_product_pricelist_obj = self.env['channel.product.pricelist']
         channel_room_type_obj = self.env['channel.hotel.room.type']
         channel_unpushed = channel_product_pricelist_item_obj.search([
+            ('backend_id', '=', self.backend_record.id),
             ('channel_pushed', '=', False),
             ('date_start', '>=', datetime.now().strftime(
                 DEFAULT_SERVER_DATE_FORMAT))
@@ -35,16 +36,21 @@ class ProductPricelistItemExporter(Component):
 
             prices = {}
             pricelist_ids = channel_product_pricelist_obj.search([
+                ('backend_id', '=', self.backend_record.id),
                 ('external_id', '!=', False),
                 ('active', '=', True)
             ])
             for pr in pricelist_ids:
                 prices.update({pr.external_id: {}})
-                unpushed_pl = channel_product_pricelist_item_obj.search(
-                    [('channel_pushed', '=', False), ('pricelist_id', '=', pr.odoo_id.id)])
+                unpushed_pl = channel_product_pricelist_item_obj.search([
+                    ('backend_id', '=', self.backend_record.id),
+                    ('channel_pushed', '=', False),
+                    ('pricelist_id', '=', pr.odoo_id.id),
+                ])
                 product_tmpl_ids = unpushed_pl.mapped('product_tmpl_id')
                 for pt_id in product_tmpl_ids:
                     channel_room_type = channel_room_type_obj.search([
+                        ('backend_id', '=', self.backend_record.id),
                         ('product_id.product_tmpl_id', '=', pt_id.id)
                     ], limit=1)
                     if channel_room_type:

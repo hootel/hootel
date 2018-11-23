@@ -17,6 +17,7 @@ class HotelRoomTypeAvailabilityExporter(Component):
 
     def push_availability(self):
         channel_room_type_avail_ids = self.env['channel.hotel.room.type.availability'].search([
+            ('backend_id', '=', self.backend_record.id),
             ('channel_pushed', '=', False),
             ('date', '>=', fields.Date.today())
         ])

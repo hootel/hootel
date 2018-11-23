@@ -107,19 +107,6 @@ class HotelRoomType(models.Model):
         ], limit=1)
         return restriction
 
-    @api.multi
-    def create_bindings(self):
-        backends = self.env['channel.backend'].search([])
-        binding_obj = self.env['channel.hotel.room.type']
-        for backend in backends:
-            binding = binding_obj.search([
-                ('odoo_id', '=', self.id),
-                ('backend_id', '=', backend.id)], limit=1)
-            if not binding:
-                binding_obj.sudo().create({
-                    'odoo_id': self.id,
-                    'backend_id': backend.id,
-                })
 
 class HotelRoomTypeAdapter(Component):
     _name = 'channel.hotel.room.type.adapter'

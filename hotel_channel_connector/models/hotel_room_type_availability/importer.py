@@ -62,6 +62,7 @@ class HotelRoomTypeAvailabilityImporter(Component):
                         })
                         map_record = room_avail_mapper.map_record(room)
                         room_type_avail_bind = channel_room_type_avail_obj.search([
+                            ('backend_id', '=', self.backend_record.id),
                             ('room_type_id', '=', room['room_type_id']),
                             ('date', '=', room['date'])
                         ], limit=1)

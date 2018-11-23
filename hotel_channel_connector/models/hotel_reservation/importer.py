@@ -252,6 +252,7 @@ class HotelReservationImporter(Component):
             folio_id = False
             if crcode != 'undefined':
                 reserv_bind = channel_reserv_obj.search([
+                    ('backend_id', '=', self.backend_record.id),
                     ('ota_reservation_id', '=', crcode),
                 ], limit=1)
                 if reserv_bind:
