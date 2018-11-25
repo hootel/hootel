@@ -50,18 +50,6 @@ class ProductPricelistItem(models.Model):
         inverse_name='odoo_id',
         string='Hotel Channel Connector Bindings')
 
-class ProducrPricelistItemAdapter(Component):
-    _name = 'channel.product.pricelist.item.adapter'
-    _inherit = 'wubook.adapter'
-    _apply_on = 'channel.product.pricelist.item'
-
-    def fetch_plan_prices(self, external_id, date_from, date_to, rooms):
-        return super(ProducrPricelistItemAdapter, self).fetch_plan_prices(
-            external_id,
-            date_from,
-            date_to,
-            rooms)
-
 class BindingProductPricelistItemListener(Component):
     _name = 'binding.product.pricelist.item.listener'
     _inherit = 'base.connector.listener'

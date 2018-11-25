@@ -8,8 +8,7 @@ from odoo.exceptions import ValidationError
 from odoo.addons.queue_job.job import job, related_action
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
-from odoo.addons.hotel_channel_connector.components.backend_adapter import (
-    DEFAULT_WUBOOK_DATE_FORMAT)
+
 
 class ChannelHotelRoomTypeAvailability(models.Model):
     _name = 'channel.hotel.room.type.availability'
@@ -143,21 +142,6 @@ class HotelRoomTypeAvailability(models.Model):
     def onchange_room_type_id(self):
         if self.room_type_id:
             self.channel_max_avail = self.room_type_id.total_rooms_count
-
-class HotelRoomTypeAvailabilityAdapter(Component):
-    _name = 'channel.hotel.room.type.availability.adapter'
-    _inherit = 'wubook.adapter'
-    _apply_on = 'channel.hotel.room.type.availability'
-
-    def fetch_rooms_values(self, date_from, date_to, rooms=False):
-        return super(HotelRoomTypeAvailabilityAdapter, self).fetch_rooms_values(
-            date_from,
-            date_to,
-            rooms)
-
-    def update_availability(self, rooms_avail):
-        return super(HotelRoomTypeAvailabilityAdapter, self).update_availability(
-            rooms_avail)
 
 class BindingHotelRoomTypeAvailabilityListener(Component):
     _name = 'binding.hotel.room.type.listener'

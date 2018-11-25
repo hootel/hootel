@@ -6,7 +6,7 @@ from datetime import datetime
 from odoo import http, _
 from odoo.http import request
 from odoo.exceptions import ValidationError
-from odoo.addons.hotel_channel_connector.components.backend_adapter import (
+from odoo.addons.hotel_channel_connector_wubook.components.backend_adapter import (
     DEFAULT_WUBOOK_DATE_FORMAT)
 from odoo.tools import (
     DEFAULT_SERVER_DATE_FORMAT,

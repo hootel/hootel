@@ -4,9 +4,7 @@
 import logging
 import os
 import binascii
-from contextlib import contextmanager
 from odoo import models, api, fields
-from ...components.backend_adapter import WuBookLogin, WuBookServer
 _logger = logging.getLogger(__name__)
 
 class ChannelBackend(models.Model):
@@ -21,7 +19,10 @@ class ChannelBackend(models.Model):
         to add a version from an ``_inherit`` does not constrain
         to redefine the ``version`` field in the ``_inherit`` model.
         """
-        return [('1.2', '1.2+')]
+        return []
+
+    def _get_default_server(self):
+        return ''
 
     name = fields.Char('Name')
     version = fields.Selection(selection='select_versions', required=True)
@@ -29,7 +30,7 @@ class ChannelBackend(models.Model):
     passwd = fields.Char('Channel Service Password')
     lcode = fields.Char('Channel Service lcode')
     server = fields.Char('Channel Service Server',
-                         default='https://wired.wubook.net/xrws/')
+                         default=_get_default_server)
     pkey = fields.Char('Channel Service PKey')
     security_token = fields.Char('Channel Service Security Token')
 
@@ -228,18 +229,3 @@ class ChannelBackend(models.Model):
     @api.model
     def cron_import_reservations(self):
         self.env[self._name].search([]).import_reservations()
-
-    @contextmanager
-    @api.multi
-    def work_on(self, model_name, **kwargs):
-        self.ensure_one()
-        wubook_login = WuBookLogin(
-            self.server,
-            self.username,
-            self.passwd,
-            self.lcode,
-            self.pkey)
-        with WuBookServer(wubook_login) as channel_api:
-            _super = super(ChannelBackend, self)
-            with _super.work_on(model_name, channel_api=channel_api, **kwargs) as work:
-                yield work

@@ -107,26 +107,6 @@ class HotelRoomType(models.Model):
         ], limit=1)
         return restriction
 
-
-class HotelRoomTypeAdapter(Component):
-    _name = 'channel.hotel.room.type.adapter'
-    _inherit = 'wubook.adapter'
-    _apply_on = 'channel.hotel.room.type'
-
-    def create_room(self, shortcode, name, capacity, price, availability):
-        return super(HotelRoomTypeAdapter, self).create_room(
-            shortcode, name, capacity, price, availability)
-
-    def fetch_rooms(self):
-        return super(HotelRoomTypeAdapter, self).fetch_rooms()
-
-    def modify_room(self, channel_room_id, name, capacity, price, availability, scode):
-        return super(HotelRoomTypeAdapter, self).modify_room(
-            channel_room_id, name, capacity, price, availability, scode)
-
-    def delete_room(self, channel_room_id):
-        return super(HotelRoomTypeAdapter, self).delete_room(channel_room_id)
-
 class BindingHotelRoomTypeListener(Component):
     _name = 'binding.hotel.room.type.listener'
     _inherit = 'base.connector.listener'
