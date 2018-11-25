@@ -73,12 +73,13 @@ class ChannelBackend(models.Model):
         channel_hotel_reservation_obj = self.env['channel.hotel.reservation']
         for backend in self:
             count = channel_hotel_reservation_obj.import_reservations(backend)
-            if count == 0:
-                self.env.user.notify_info("No reservations to import. All done :)",
-                                          title="Import Reservations")
-            else:
-                self.env.user.notify_info("%d reservations successfully imported" % count,
-                                          title="Import Reservations")
+            if self.env.context.get('show_notify', True):
+                if count == 0:
+                    self.env.user.notify_info("No reservations to import. All done :)",
+                                              title="Import Reservations")
+                else:
+                    self.env.user.notify_info("%d reservations successfully imported" % count,
+                                              title="Import Reservations")
         return True
 
     @api.multi
@@ -88,7 +89,7 @@ class ChannelBackend(models.Model):
             res = channel_hotel_reservation_obj.import_reservation(
                 backend,
                 backend.reservation_id_str)
-            if not res:
+            if not res and self.env.context.get('show_notify', True):
                 self.env.user.notify_warning(
                     "Can't import '%s' reservation" % backend.reservation_id_str,
                     title="Import Reservations")
@@ -99,12 +100,13 @@ class ChannelBackend(models.Model):
         channel_hotel_room_type_obj = self.env['channel.hotel.room.type']
         for backend in self:
             count = channel_hotel_room_type_obj.import_rooms(backend)
-            if count == 0:
-                self.env.user.notify_info("No rooms to import. All done :)",
-                                          title="Import Rooms")
-            else:
-                self.env.user.notify_info("%d rooms successfully imported" % count,
-                                          title="Import Rooms")
+            if self.env.context.get('show_notify', True):
+                if count == 0:
+                    self.env.user.notify_info("No rooms to import. All done :)",
+                                              title="Import Rooms")
+                else:
+                    self.env.user.notify_info("%d rooms successfully imported" % count,
+                                              title="Import Rooms")
         return True
 
     @api.multi
@@ -112,8 +114,9 @@ class ChannelBackend(models.Model):
         channel_ota_info_obj = self.env['channel.ota.info']
         for backend in self:
             count = channel_ota_info_obj.import_otas_info(backend)
-            self.env.user.notify_info("%d ota's successfully imported" % count,
-                                      title="Import OTA's")
+            if self.env.context.get('show_notify', True):
+                self.env.user.notify_info("%d ota's successfully imported" % count,
+                                          title="Import OTA's")
         return True
 
     @api.multi
@@ -124,7 +127,7 @@ class ChannelBackend(models.Model):
                 backend,
                 backend.avail_from,
                 backend.avail_to)
-            if not res:
+            if not res and self.env.context.get('show_notify', True):
                 self.env.user.notify_warning("Error importing availability",
                                              title="Import Availability")
         return True
@@ -134,7 +137,7 @@ class ChannelBackend(models.Model):
         channel_hotel_room_type_avail_obj = self.env['channel.hotel.room.type.availability']
         for backend in self:
             res = channel_hotel_room_type_avail_obj.push_availability(backend)
-            if not res:
+            if not res and self.env.context.get('show_notify', True):
                 self.env.user.notify_warning("Error pushing availability",
                                              title="Export Availability")
         return True
@@ -144,12 +147,13 @@ class ChannelBackend(models.Model):
         channel_hotel_room_type_restr_obj = self.env['channel.hotel.room.type.restriction']
         for backend in self:
             count = channel_hotel_room_type_restr_obj.import_restriction_plans(backend)
-            if count == 0:
-                self.env.user.notify_info("No restiction plans to import. All done :)",
-                                          title="Import Restrictions")
-            else:
-                self.env.user.notify_info("%d restriction plans successfully imported" % count,
-                                          title="Import Restrictions")
+            if self.env.context.get('show_notify', True):
+                if count == 0:
+                    self.env.user.notify_info("No restiction plans to import. All done :)",
+                                              title="Import Restrictions")
+                else:
+                    self.env.user.notify_info("%d restriction plans successfully imported" % count,
+                                              title="Import Restrictions")
         return True
 
     @api.multi
@@ -161,7 +165,7 @@ class ChannelBackend(models.Model):
                 backend.restriction_from,
                 backend.restriction_to,
                 backend.restriction_id and backend.restriction_id.external_id or False)
-            if not res:
+            if not res and self.env.context.get('show_notify', True):
                 self.env.user.notify_warning("Error importing restrictions",
                                              title="Import Restrictions")
         return True
@@ -171,7 +175,7 @@ class ChannelBackend(models.Model):
         channel_hotel_restr_item_obj = self.env['channel.hotel.room.type.restriction.item']
         for backend in self:
             res = channel_hotel_restr_item_obj.push_restriction(backend)
-            if not res:
+            if not res and self.env.context.get('show_notify', True):
                 self.env.user.notify_warning("Error pushing restrictions",
                                              title="Export Restrictions")
         return True
@@ -181,12 +185,13 @@ class ChannelBackend(models.Model):
         channel_product_pricelist_obj = self.env['channel.product.pricelist']
         for backend in self:
             count = channel_product_pricelist_obj.import_price_plans(backend)
-            if count == 0:
-                self.env.user.notify_info("No pricelist plans to import. All done :)",
-                                          title="Import Pricelists")
-            else:
-                self.env.user.notify_info("%d pricelist plans successfully imported" % count,
-                                          title="Import Pricelists")
+            if self.env.context.get('show_notify', True):
+                if count == 0:
+                    self.env.user.notify_info("No pricelist plans to import. All done :)",
+                                              title="Import Pricelists")
+                else:
+                    self.env.user.notify_info("%d pricelist plans successfully imported" % count,
+                                              title="Import Pricelists")
         return True
 
     @api.multi
@@ -198,7 +203,7 @@ class ChannelBackend(models.Model):
                 backend.pricelist_from,
                 backend.pricelist_to,
                 backend.pricelist_id and backend.pricelist_id.external_id or False)
-            if not res:
+            if not res and self.env.context.get('show_notify', True):
                 self.env.user.notify_warning("Error importing pricelists",
                                              title="Import Pricelists")
         return True
@@ -208,7 +213,7 @@ class ChannelBackend(models.Model):
         channel_product_pricelist_item_obj = self.env['channel.product.pricelist.item']
         for backend in self:
             res = channel_product_pricelist_item_obj.push_pricelist(backend)
-            if not res:
+            if not res and self.env.context.get('show_notify', True):
                 self.env.user.notify_warning("Error pushing pricelists",
                                              title="Export Pricelists")
         return True

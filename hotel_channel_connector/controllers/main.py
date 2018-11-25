@@ -18,7 +18,7 @@ class WubookPushURL(http.Controller):
     # Called when created a reservation in wubook
     @http.route(['/wubook/push/reservations/<string:security_token>'],
                 type='http', cors="*", auth="public", methods=['POST'],
-                website=True, csrf=False)
+                website=True, csrf=True)
     def wubook_push_reservations(self, security_token, **kwargs):
         rcode = kwargs.get('rcode')
         lcode = kwargs.get('lcode')
