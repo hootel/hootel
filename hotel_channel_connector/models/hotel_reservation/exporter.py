@@ -4,6 +4,7 @@
 from odoo.addons.component.core import Component
 from odoo import api
 
+
 class HotelReservationExporter(Component):
     _name = 'channel.hotel.reservation.exporter'
     _inherit = 'hotel.channel.exporter'

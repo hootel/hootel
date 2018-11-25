@@ -6,10 +6,8 @@ from datetime import timedelta
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping, only_create
 from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
-from odoo.addons.hotel_channel_connector_wubook.components.backend_adapter import (
-    DEFAULT_WUBOOK_DATE_FORMAT)
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
-from odoo import api, _, fields
+from odoo import api, fields
 _logger = logging.getLogger(__name__)
 
 
@@ -102,6 +100,7 @@ class ProductPricelistItemImporter(Component):
             return False
         else:
             return self._generate_pricelist_items(external_id, date_from, date_to, results)
+
 
 class ProductPricelistItemImportMapper(Component):
     _name = 'channel.product.pricelist.item.import.mapper'

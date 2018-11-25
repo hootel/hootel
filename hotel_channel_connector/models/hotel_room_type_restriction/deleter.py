@@ -4,6 +4,7 @@
 from odoo.addons.component.core import Component
 from odoo import api
 
+
 class HotelRoomTypeRestrictionDeleter(Component):
     _name = 'channel.hotel.room.type.restriction.deleter'
     _inherit = 'hotel.channel.deleter'

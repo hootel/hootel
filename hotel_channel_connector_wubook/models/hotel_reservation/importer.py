@@ -5,8 +5,7 @@ import logging
 import json
 from datetime import datetime, timedelta
 from dateutil import tz
-from odoo.exceptions import ValidationError
-from odoo import fields, api, _
+from odoo import fields, api
 from odoo.tools import (
     DEFAULT_SERVER_DATE_FORMAT,
     DEFAULT_SERVER_DATETIME_FORMAT)

@@ -1,13 +1,12 @@
 # Copyright 2018 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import logging
 from odoo import api, models, fields, _
 from odoo.exceptions import ValidationError
-from odoo.addons.queue_job.job import job, related_action
+from odoo.addons.queue_job.job import job
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
-_logger = logging.getLogger(__name__)
+
 
 class ChannelHotelRoomType(models.Model):
     _name = 'channel.hotel.room.type'

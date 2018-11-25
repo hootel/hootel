@@ -1,11 +1,10 @@
 # Copyright 2018 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-import logging
 import os
 import binascii
 from odoo import models, api, fields
-_logger = logging.getLogger(__name__)
+
 
 class ChannelBackend(models.Model):
     _name = 'channel.backend'

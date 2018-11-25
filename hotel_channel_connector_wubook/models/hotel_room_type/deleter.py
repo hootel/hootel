@@ -5,6 +5,7 @@ from odoo.addons.component.core import Component
 from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
 from odoo import api
 
+
 class HotelRoomTypeDeleter(Component):
     _inherit = 'channel.hotel.room.type.deleter'
 

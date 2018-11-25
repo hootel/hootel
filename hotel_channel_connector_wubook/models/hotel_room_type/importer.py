@@ -1,15 +1,10 @@
 # Copyright 2018 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo.exceptions import ValidationError
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping
 from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
-from odoo import fields, api, _
-from odoo.tools import (
-    DEFAULT_SERVER_DATE_FORMAT,
-    DEFAULT_SERVER_DATETIME_FORMAT)
-from odoo.addons.hotel_channel_connector_wubook.components.backend_adapter import DEFAULT_WUBOOK_DATE_FORMAT
+from odoo import api
 
 
 class HotelRoomTypeImporter(Component):
@@ -44,6 +39,7 @@ class HotelRoomTypeImporter(Component):
                     self.binder.bind(room['id'], room_bind)
                 count = count + 1
         return count
+
 
 class HotelRoomTypeImportMapper(Component):
     _name = 'channel.hotel.room.type.import.mapper'

@@ -10,6 +10,7 @@ class ChannelOtaInfo(models.Model):
 
     ical = fields.Boolean("ical", default=False)
 
+
 class HotelRoomTypeAdapter(Component):
     _name = 'channel.ota.info.adapter'
     _inherit = 'wubook.adapter'

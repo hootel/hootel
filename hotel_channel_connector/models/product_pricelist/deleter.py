@@ -4,6 +4,7 @@
 from odoo.addons.component.core import Component
 from odoo import api
 
+
 class ProductPricelistDeleter(Component):
     _name = 'channel.product.pricelist.deleter'
     _inherit = 'hotel.channel.deleter'

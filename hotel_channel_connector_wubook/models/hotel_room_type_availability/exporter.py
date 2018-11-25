@@ -9,6 +9,7 @@ from odoo.addons.hotel_channel_connector_wubook.components.backend_adapter impor
 from odoo import api, _, fields
 _logger = logging.getLogger(__name__)
 
+
 class HotelRoomTypeAvailabilityExporter(Component):
     _inherit = 'channel.hotel.room.type.availability.exporter'
 

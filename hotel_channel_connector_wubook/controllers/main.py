@@ -8,9 +8,7 @@ from odoo.http import request
 from odoo.exceptions import ValidationError
 from odoo.addons.hotel_channel_connector_wubook.components.backend_adapter import (
     DEFAULT_WUBOOK_DATE_FORMAT)
-from odoo.tools import (
-    DEFAULT_SERVER_DATE_FORMAT,
-    DEFAULT_SERVER_DATETIME_FORMAT)
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
 _logger = logging.getLogger(__name__)
 
 

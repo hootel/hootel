@@ -2,17 +2,12 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import xmlrpc.client
-import logging
 from urllib.parse import urljoin
 from odoo.addons.component.core import AbstractComponent
 from odoo.addons.queue_job.exception import RetryableJobError
-from odoo.tools import (
-    DEFAULT_SERVER_DATE_FORMAT,
-    DEFAULT_SERVER_DATETIME_FORMAT)
 from odoo.addons.payment.models.payment_acquirer import _partner_split_name
 from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
 from odoo import fields, _
-_logger = logging.getLogger(__name__)
 
 # GLOBAL VARS
 DEFAULT_WUBOOK_DATE_FORMAT = "%d/%m/%Y"
@@ -37,6 +32,7 @@ WUBOOK_STATUS_BAD = (
     WUBOOK_STATUS_CANCELLED_PENALTY,
 )
 
+
 class WuBookLogin(object):
     def __init__(self, address, user, passwd, lcode, pkey):
         self.address = address
@@ -47,6 +43,7 @@ class WuBookLogin(object):
 
     def is_valid(self):
         return self.address and self.user and self.passwd and self.lcode and self.pkey
+
 
 class WuBookServer(object):
     def __init__(self, login_data):
@@ -65,7 +62,7 @@ class WuBookServer(object):
     @property
     def server(self):
         if not self._login_data.is_valid():
-            raise ChannelConnectorError("Invalid Channel Parameters!")
+            raise ChannelConnectorError(_("Invalid Channel Parameters!"))
         if self._server is None:
             try:
                 self._server = xmlrpc.client.ServerProxy(self._login_data.address)
@@ -79,7 +76,7 @@ class WuBookServer(object):
                     self._server = None
             except Exception:
                 self._server = None
-                raise RetryableJobError("Can't connect with channel!")
+                raise RetryableJobError(_("Can't connect with channel!"))
         return self._server
 
     @property
@@ -95,6 +92,7 @@ class WuBookServer(object):
         self._token = None
         self._server = None
 
+
 class WuBookAdapter(AbstractComponent):
     _name = 'wubook.adapter'
     _inherit = 'hotel.channel.adapter'
@@ -108,7 +106,7 @@ class WuBookAdapter(AbstractComponent):
                     "/wubook/push/reservations/%s" % security_token),
             1)
         if rcode_a != 0:
-            raise ChannelConnectorError("Can't activate push reservations", {
+            raise ChannelConnectorError(_("Can't activate push reservations"), {
                 'message': results_a,
             })
 
@@ -117,7 +115,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[1],
             urljoin(base_url, "/wubook/push/rooms/%s" % security_token))
         if rcode_b != 0:
-            raise ChannelConnectorError("Can't activate push rooms", {
+            raise ChannelConnectorError(_("Can't activate push rooms"), {
                 'message': results_b,
             })
 
@@ -138,7 +136,7 @@ class WuBookAdapter(AbstractComponent):
             # rtype=('name' in vals and vals['name'] and 3) or 1
         )
         if rcode != 0:
-            raise ChannelConnectorError("Can't create room in WuBook", {
+            raise ChannelConnectorError(_("Can't create room in WuBook"), {
                 'message': results,
             })
         return results
@@ -157,7 +155,7 @@ class WuBookAdapter(AbstractComponent):
             # rtype=('name' in vals and vals['name'] and 3) or 1
         )
         if rcode != 0:
-            raise ChannelConnectorError("Can't modify room in WuBook", {
+            raise ChannelConnectorError(_("Can't modify room in WuBook"), {
                 'message': results,
                 'channel_id': channel_room_id,
             })
@@ -169,7 +167,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[1],
             channel_room_id)
         if rcode != 0:
-            raise ChannelConnectorError("Can't delete room in WuBook", {
+            raise ChannelConnectorError(_("Can't delete room in WuBook"), {
                 'message': results,
                 'channel_id': channel_room_id,
             })
@@ -181,7 +179,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[1],
             channel_room_id)
         if rcode != 0:
-            raise ChannelConnectorError("Can't fetch room values from WuBook", {
+            raise ChannelConnectorError(_("Can't fetch room values from WuBook"), {
                 'message': results,
                 'channel_id': channel_room_id,
             })
@@ -195,7 +193,7 @@ class WuBookAdapter(AbstractComponent):
             fields.Date.from_string(date_to).strftime(DEFAULT_WUBOOK_DATE_FORMAT),
             rooms)
         if rcode != 0:
-            raise ChannelConnectorError("Can't fetch rooms values from WuBook", {
+            raise ChannelConnectorError(_("Can't fetch rooms values from WuBook"), {
                 'message': results,
             })
         return results
@@ -206,7 +204,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[1],
             rooms_avail)
         if rcode != 0:
-            raise ChannelConnectorError("Can't update rooms availability in WuBook", {
+            raise ChannelConnectorError(_("Can't update rooms availability in WuBook"), {
                 'message': results,
             })
         return results
@@ -214,7 +212,7 @@ class WuBookAdapter(AbstractComponent):
     def corporate_fetch(self):
         rcode, results = self._server.corporate_fetchable_properties(self.TOKEN)
         if rcode != 0:
-            raise ChannelConnectorError("Can't call 'corporate_fetch' from WuBook", {
+            raise ChannelConnectorError(_("Can't call 'corporate_fetch' from WuBook"), {
                 'message': results,
             })
         return results
@@ -244,7 +242,7 @@ class WuBookAdapter(AbstractComponent):
             customer,
             adults+children)
         if rcode != 0:
-            raise ChannelConnectorError("Can't create reservations in wubook", {
+            raise ChannelConnectorError(_("Can't create reservations in wubook"), {
                 'message': results,
                 'date_from': checkin,
                 'date_to': checkout,
@@ -258,7 +256,7 @@ class WuBookAdapter(AbstractComponent):
             channel_reservation_id,
             reason)
         if rcode != 0:
-            raise ChannelConnectorError("Can't cancel reservation in WuBook", {
+            raise ChannelConnectorError(_("Can't cancel reservation in WuBook"), {
                 'message': results,
                 'channel_reservation_id': channel_reservation_id,
             })
@@ -271,7 +269,7 @@ class WuBookAdapter(AbstractComponent):
             1,
             0)
         if rcode != 0:
-            raise ChannelConnectorError("Can't process reservations from wubook", {
+            raise ChannelConnectorError(_("Can't process reservations from wubook"), {
                 'message': results,
             })
         return results
@@ -282,7 +280,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[1],
             channel_reservation_id)
         if rcode != 0:
-            raise ChannelConnectorError("Can't process reservation from wubook", {
+            raise ChannelConnectorError(_("Can't process reservation from wubook"), {
                 'message': results,
             })
         return results
@@ -293,7 +291,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[1],
             channel_reservation_ids)
         if rcode != 0:
-            raise ChannelConnectorError("Can't mark as readed a reservation in wubook", {
+            raise ChannelConnectorError(_("Can't mark as readed a reservation in wubook"), {
                 'message': results,
                 'channel_reservation_ids': str(channel_reservation_ids),
             })
@@ -307,7 +305,7 @@ class WuBookAdapter(AbstractComponent):
             name,
             daily)
         if rcode != 0:
-            raise ChannelConnectorError("Can't add pricing plan to wubook", {
+            raise ChannelConnectorError(_("Can't add pricing plan to wubook"), {
                 'message': results,
             })
         return results
@@ -318,7 +316,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[1],
             channel_plan_id)
         if rcode != 0:
-            raise ChannelConnectorError("Can't delete pricing plan from wubook", {
+            raise ChannelConnectorError(_("Can't delete pricing plan from wubook"), {
                 'message': results,
                 'channel_plan_id': channel_plan_id,
             })
@@ -331,7 +329,7 @@ class WuBookAdapter(AbstractComponent):
             channel_plan_id,
             new_name)
         if rcode != 0:
-            raise ChannelConnectorError("Can't update pricing plan name in wubook", {
+            raise ChannelConnectorError(_("Can't update pricing plan name in wubook"), {
                 'message': results,
                 'channel_plan_id': channel_plan_id,
             })
@@ -345,7 +343,7 @@ class WuBookAdapter(AbstractComponent):
             fields.Date.from_string(date_from).strftime(DEFAULT_WUBOOK_DATE_FORMAT),
             prices)
         if rcode != 0:
-            raise ChannelConnectorError("Can't update pricing plan in wubook", {
+            raise ChannelConnectorError(_("Can't update pricing plan in wubook"), {
                 'message': results,
                 'channel_plan_id': channel_plan_id,
                 'date_from': date_from,
@@ -359,7 +357,7 @@ class WuBookAdapter(AbstractComponent):
             channel_plan_id,
             periods)
         if rcode != 0:
-            raise ChannelConnectorError("Can't update pricing plan period in wubook", {
+            raise ChannelConnectorError(_("Can't update pricing plan period in wubook"), {
                 'message': results,
                 'channel_plan_id': channel_plan_id,
             })
@@ -370,7 +368,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[0],
             self._session_info[1])
         if rcode != 0:
-            raise ChannelConnectorError("Can't get pricing plans from wubook", {
+            raise ChannelConnectorError(_("Can't get pricing plans from wubook"), {
                 'message': results,
             })
         return results
@@ -384,7 +382,7 @@ class WuBookAdapter(AbstractComponent):
             fields.Date.from_string(date_to).strftime(DEFAULT_WUBOOK_DATE_FORMAT),
             rooms or [])
         if rcode != 0:
-            raise ChannelConnectorError("Can't get pricing plans from wubook", {
+            raise ChannelConnectorError(_("Can't get pricing plans from wubook"), {
                 'message': results,
                 'channel_plan_id': channel_plan_id,
                 'date_from': date_from,
@@ -398,7 +396,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[0],
             self._session_info[1])
         if rcode != 0:
-            raise ChannelConnectorError("Can't fetch restriction plans from wubook", {
+            raise ChannelConnectorError(_("Can't fetch restriction plans from wubook"), {
                 'message': results,
             })
         return results
@@ -411,7 +409,7 @@ class WuBookAdapter(AbstractComponent):
             fields.Date.from_string(date_to).strftime(DEFAULT_WUBOOK_DATE_FORMAT),
             int(channel_restriction_plan_id))
         if rcode != 0:
-            raise ChannelConnectorError("Can't fetch restriction plans from wubook", {
+            raise ChannelConnectorError(_("Can't fetch restriction plans from wubook"), {
                 'message': results,
                 'channel_restriction_plan_id': channel_restriction_plan_id,
                 'date_from': date_from,
@@ -427,7 +425,7 @@ class WuBookAdapter(AbstractComponent):
             fields.Date.from_string(date_from).strftime(DEFAULT_WUBOOK_DATE_FORMAT),
             values)
         if rcode != 0:
-            raise ChannelConnectorError("Can't update plan restrictions on wubook", {
+            raise ChannelConnectorError(_("Can't update plan restrictions on wubook"), {
                 'message': results,
                 'channel_restriction_plan_id': channel_restriction_plan_id,
                 'date_from': date_from,
@@ -441,7 +439,7 @@ class WuBookAdapter(AbstractComponent):
             name,
             compact and 1 or 0)
         if rcode != 0:
-            raise ChannelConnectorError("Can't create plan restriction in wubook", {
+            raise ChannelConnectorError(_("Can't create plan restriction in wubook"), {
                 'message': results,
             })
         return results
@@ -453,7 +451,7 @@ class WuBookAdapter(AbstractComponent):
             channel_restriction_plan_id,
             new_name)
         if rcode != 0:
-            raise ChannelConnectorError("Can't rename plan restriction in wubook", {
+            raise ChannelConnectorError(_("Can't rename plan restriction in wubook"), {
                 'message': results,
                 'channel_restriction_plan_id': channel_restriction_plan_id,
             })
@@ -465,7 +463,7 @@ class WuBookAdapter(AbstractComponent):
             self._session_info[1],
             channel_restriction_plan_id)
         if rcode != 0:
-            raise ChannelConnectorError("Can't delete plan restriction on wubook", {
+            raise ChannelConnectorError(_("Can't delete plan restriction on wubook"), {
                 'message': results,
                 'channel_restriction_plan_id': channel_restriction_plan_id,
             })
@@ -474,7 +472,7 @@ class WuBookAdapter(AbstractComponent):
     def get_channels_info(self):
         results = self._server.get_channels_info(self._session_info[0])
         if not any(results):
-            raise ChannelConnectorError("Can't import channels info from wubook", {
+            raise ChannelConnectorError(_("Can't import channels info from wubook"), {
                 'message': results,
             })
         return results

@@ -13,6 +13,7 @@ from odoo.addons.hotel_channel_connector_wubook.components.backend_adapter impor
     WUBOOK_STATUS_CANCELLED_PENALTY,
     WUBOOK_STATUS_BAD)
 
+
 class ChannelHotelReservation(models.Model):
     _inherit = 'channel.hotel.reservation'
 
@@ -63,6 +64,7 @@ class HotelReservation(models.Model):
         if not can_confirm:
             raise ValidationError(_("Can't confirm OTA's cancelled reservations"))
         return super(HotelReservation, self).confirm()
+
 
 class HotelReservationAdapter(Component):
     _name = 'channel.hotel.reservation.adapter'

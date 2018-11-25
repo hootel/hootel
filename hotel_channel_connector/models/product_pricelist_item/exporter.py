@@ -4,6 +4,7 @@
 from odoo.addons.component.core import Component
 from odoo import api
 
+
 class ProductPricelistItemExporter(Component):
     _name = 'channel.product.pricelist.item.exporter'
     _inherit = 'hotel.channel.exporter'
