@@ -2,8 +2,6 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import logging
-import os
-import binascii
 from contextlib import contextmanager
 from odoo import models, api, fields
 from ...components.backend_adapter import WuBookLogin, WuBookServer

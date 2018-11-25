@@ -9,7 +9,7 @@ from odoo.addons.hotel_channel_connector.components.core import ChannelConnector
 from odoo.addons.hotel_channel_connector_wubook.components.backend_adapter import (
     DEFAULT_WUBOOK_DATE_FORMAT)
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
-from odoo import api, _
+from odoo import api, _, fields
 _logger = logging.getLogger(__name__)
 
 

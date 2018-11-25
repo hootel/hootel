@@ -6,7 +6,7 @@ from odoo.addons.component.core import Component
 from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
 from odoo.addons.hotel_channel_connector_wubook.components.backend_adapter import (
     DEFAULT_WUBOOK_DATE_FORMAT)
-from odoo import api, _
+from odoo import api, _, fields
 _logger = logging.getLogger(__name__)
 
 class HotelRoomTypeAvailabilityExporter(Component):

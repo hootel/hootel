@@ -7,7 +7,7 @@ from odoo.exceptions import ValidationError
 from odoo.addons.component.core import Component
 from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
 from odoo.addons.connector.components.mapper import mapping, only_create
-from odoo import api, _
+from odoo import api, _, fields
 _logger = logging.getLogger(__name__)
 
 
