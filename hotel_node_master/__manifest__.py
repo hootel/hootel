@@ -15,7 +15,7 @@
         {'python' : ['odoorpc']},
     'license': "AGPL-3",
     'data': [
-        # 'wizards/wizard_hotel_node_reservation.xml',
+        'wizards/wizard_hotel_node_reservation.xml',
         'views/node_backend_views.xml',
         'views/node_room_type_views.xml',
         'views/node_room_views.xml',
@@ -23,9 +23,6 @@
         'views/node_res_users_views.xml',
         'views/node_res_partner_views.xml',
         'views/inherited_res_partner_views.xml',
-        # 'views/hotel_node.xml',
-        # 'views/hotel_node_user.xml',
-        # 'views/inherited_res_partner_views.xml',
         'security/hotel_node_security.xml',
         'security/ir.model.access.csv',
     ],
