@@ -94,6 +94,22 @@
                                 </div>
                                 </group>
                         </page>
+                        <page name="reservations" string="Reservations">
+                            <group>
+                                <div class="oe_button_box" name="button_box" groups="base.group_user">
+                                    <button name="%(hotel_node_reservation_wizard_action)d" type="action"
+                                            string="Reservation Wizard" help="Make a reservation in this hotel"
+                                            class="oe_stat_button" icon="fa-suitcase"
+                                            context="{'backend_id': id}">
+                                    </button>
+                                    <button name="%(hotel_node_reservation_wizard_action_search)d" type="action"
+                                            string="Search" help="Search a reservation in this hotel"
+                                            class="oe_stat_button" icon="fa-search"
+                                            context="{'backend_id': id}">
+                                    </button>
+                                </div>
+                            </group>
+                        </page>
                     </notebook>
                 </sheet>
             </form>
