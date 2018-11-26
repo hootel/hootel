@@ -8,7 +8,7 @@
                Odoo Community Association (OCA)',
     'category': 'Generic Modules/Hotel Management',
     'depends': [
-        'website',
+        'website_form',
         'hotel_node_master'
     ],
     'license': "AGPL-3",

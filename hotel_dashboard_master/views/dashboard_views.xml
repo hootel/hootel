@@ -1,4 +1,5 @@
 <odoo>
+
 <!-- Dashboard main template, display list of available hotels -->
 <template id="hotel_dashboard_master.dashboard_page" name="Hotel Dashboard">
     <t t-call="website.layout">
@@ -36,7 +37,7 @@
                     </a>
                 </div>
 
-                <!-- Search box -->
+                <!-- Search box to be implemented -->
                 <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8">
                 </div>
             </div>
@@ -45,13 +46,19 @@
                 <!-- Navigation -->
                 <div class="col-md-8 col-sm-12 col-xs-12">
                     <ul class="nav nav-tabs nav-tabs-border">
-                        <li>
-                            <a t-attf-href="/hotel/dashboard/#{slug(backend)}"> <i class="fa fa-home"></i> Home</a>
+                        <li t-attf-class="#{header_tab == 'backend' and 'active' ''}">
+                            <a t-attf-href="/hotel/dashboard/#{slug(backend)}"> <i class="fa fa-home"/> Home</a>
+                        </li>
+                        <li t-attf-class="#{header_tab == 'room_types' and 'active' ''}">
+                            <a t-attf-href="/hotel/dashboard/#{slug(backend)}/room_types/"> Room Types</a>
+                        </li>
+                        <li t-attf-class="#{header_tab == 'wizard_reservation' and 'active' ''}">
+                            <a t-attf-href="/hotel/dashboard/#{slug(backend)}/wizard_reservation/"> Reservation Wizard</a>
                         </li>
                     </ul>
                 </div>
 
-                <!-- Sort options -->
+                <!-- Sort options to be implemented -->
                 <div class="col-md-4 col-sm-12 col-xs-12">
                 </div>
             </div>
@@ -62,12 +69,83 @@
 <!-- Hotel main template -->
 <template id="hotel_dashboard_master.dashboard_backend_view" name="Hotel Dashboard">
     <t t-call="website.layout">
-        <t t-set="main_object" t-value="backend"/>
         <t t-call="hotel_dashboard_master.dashboard_backend_header"/>
-        <div class="wrap">
-            <div class="container">
-                <h4>Add basic information about the status of this hotel</h4>
+        <div id="wrap" class="container">
+                <h4>This hotel has <b t-esc="len(room_types)"/> room types</h4>
+        </div>
+    </t>
+</template>
+
+<!-- Hotel room types list view sub-template -->
+<template id="dashboard_sub_template_room_types_view" name="Hotel Dashboard Room Types">
+    <div id="wrap" class="container">
+        <t t-foreach="room_types" t-as="room_type">
+            <div class="col-sm-4 mt16">
+                <div class="well well-sm">
+                    <a t-attf-href="/hotel/dashboard/#{slug(backend)}/room_types/#{slug(room_type)}">
+                        <h4 t-field="room_type.name"/>
+                    </a>
+                </div>
             </div>
+        </t>
+    </div>
+</template>
+
+<!-- Hotel room types view sub-template -->
+<template id="dashboard_sub_template_room_type_view" name="Hotel Dashboard Room Type">
+    <div id="wrap" class="container">
+        <t t-foreach="rooms" t-as="room">
+            <div class="col-sm-4 mt16">
+                <div class="well well-sm">
+                    <a t-attf-href="/hotel/dashboard/#{slug(backend)}/room_types/#{slug(room_type)}/room/#{slug(room)}">
+                        <h4 t-esc="room.name"/>
+                    </a>
+                </div>
+            </div>
+        </t>
+    </div>
+</template>
+
+<!-- Hotel room types main template -->
+<template id="hotel_dashboard_master.dashboard_room_types_view" name="Hotel Dashboard Room Types">
+    <t t-call="website.layout">
+
+        <t t-call="hotel_dashboard_master.dashboard_backend_header"/>
+        <t t-if="room_types">
+            <t t-call="hotel_dashboard_master.dashboard_sub_template_room_types_view"/>
+        </t>
+        <t t-if="room_type">
+            <t t-call="hotel_dashboard_master.dashboard_sub_template_room_type_view"/>
+        </t>
+
+    </t>
+</template>
+
+<!-- Hotel wizard reservation template -->
+<template id="hotel_dashboard_master.dashboard_wizard_reservation" name="Hotel Dashboard Wizard Reservation">
+    <t t-call="website.layout">
+    <t t-call="hotel_dashboard_master.dashboard_backend_header"/>
+    <t t-set="additional_title">Reservation Wizard</t>
+        <div id="wrap" class="container rows">
+            <section id="forms">
+                <form method="post"
+                      class="s_website_form container-fluid form-horizontal"
+                      action="/website_form/"
+                      data-model_name="node.room.type"
+                      data-success_page="/success"
+                      enctype="multipart/form-data">
+
+                    <!-- form fields -->
+
+                    <!-- submit button -->
+                    <div class="form-group">
+                        <div class="mt16">
+                            <a class="o_website_form_send btn btn-primary">Save</a>
+                            <span id="o_website_form_result"></span>
+                        </div>
+                    </div>
+                </form>
+            </section>
         </div>
     </t>
 </template>
