@@ -131,12 +131,12 @@
                 <form method="post"
                       class="s_website_form container-fluid form-horizontal"
                       action="/website_form/"
-                      data-model_name="node.room.type"
-                      data-success_page="/success"
+                      data-model_name="hotel.node.reservation.wizard"
+                      data-success_page="/wizard_reservation/success"
                       enctype="multipart/form-data">
 
                     <!-- form fields -->
-
+                    
                     <!-- submit button -->
                     <div class="form-group">
                         <div class="mt16">

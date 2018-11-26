@@ -15,7 +15,8 @@
     'data': [
         # 'security/hotel_dashboard_security.xml',
         # 'security/ir.model.access.csv'
-        'views/dashboard_views.xml'
+        'views/dashboard_views.xml',
+        'data/config_data.xml'
     ],
     'demo': [],
     'auto_install': False,
