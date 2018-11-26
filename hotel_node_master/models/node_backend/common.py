@@ -26,6 +26,9 @@ class NodeBackend(models.Model):
                                 'Protocol', required=True, default='jsonrpc+ssl')
     odoo_version = fields.Char()
 
+    room_type_ids = fields.One2many('node.room.type', 'backend_id',
+                                    'Room Types')
+
     @contextmanager
     @api.multi
     def work_on(self, model_name, **kwargs):

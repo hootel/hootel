@@ -37,14 +37,7 @@
                         <page name="import" string="Imports">
                             <group>
                                 <group>
-                                    <label string="Import Room Types" class="oe_inline"/>
-                                    <div>
-                                        <button name="import_room_types"
-                                                type="object"
-                                                class="oe_highlight"
-                                                string="Import in background"
-                                                confirm="Synchronizing a node automatically updates Room Types in the Central Node. Do you want to proceed?"/>
-                                    </div>
+
                                     <label string="Import Rooms" class="oe_inline"/>
                                     <div>
                                         <button name="import_rooms"
@@ -80,6 +73,18 @@
                                                 confirm="Synchronizing a node automatically updates Users in the Central Node. Do you want to proceed?"/>
                                     </div>
                                 </group>
+                            </group>
+                        </page>
+                        <page name="room_type" string="Room Types" attrs="{'invisible':[('id','=',False)]}">
+                            <group>
+                                <button name="import_room_types"
+                                        type="object"
+                                        class="oe_highlight"
+                                        string="Import Room Types"
+                                        confirm="Synchronizing a node automatically updates Room Types in the Central Node. Do you want to proceed?"/>
+                            </group>
+                            <group>
+                                <field name="room_type_ids" />
                             </group>
                         </page>
                     </notebook>
