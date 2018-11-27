@@ -84,3 +84,11 @@ class NodeBindingResPartnerListener(Component):
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_write(self, record, fields=None):
         record.modify_res_partner()
+
+
+class ResPartner(models.Model):
+
+    _inherit = 'res.partner'
+
+    node_binding_ids = fields.One2many('node.res.partner', 'odoo_id',
+                                       'Node Partners binded to this one')
