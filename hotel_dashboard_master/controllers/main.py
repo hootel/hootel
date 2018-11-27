@@ -53,5 +53,6 @@ class HotelDashboard(http.Controller):
         values = {
             'backend': backend,
             'header_tab': 'wizard_reservation',
+            'partners' : request.env['res.partner'].search([]),
         }
         return http.request.render('hotel_dashboard_master.dashboard_wizard_reservation', values)

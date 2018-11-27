@@ -126,7 +126,8 @@
     <t t-call="website.layout">
     <t t-call="hotel_dashboard_master.dashboard_backend_header"/>
     <t t-set="additional_title">Reservation Wizard</t>
-        <div id="wrap" class="container rows">
+        <div id="wrap" class="container">
+        <div class="container">
             <section id="forms">
                 <form method="post"
                       class="s_website_form container-fluid form-horizontal"
@@ -136,16 +137,31 @@
                       enctype="multipart/form-data">
 
                     <!-- form fields -->
-
+                    <div class="form-group form-field mt16">
+                        <div class="col-sm-1">
+                            <label class="control-label" for="partner_id">Customer</label>
+                        </div>
+                        <div class="col-sm-6">
+                            <select name="partner_id" class="o_website_form_input form-control" >
+                                <t t-foreach="partners" t-as="partner">
+                                    <option t-att-value="partner.id">
+                                        <t t-esc="partner.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                    </div>
                     <!-- submit button -->
+
                     <div class="form-group">
-                        <div class="mt16">
+                        <div class="col-md-12">
                             <a class="o_website_form_send btn btn-primary">Save</a>
                             <span id="o_website_form_result"></span>
                         </div>
                     </div>
                 </form>
             </section>
+        </div>
         </div>
     </t>
 </template>
