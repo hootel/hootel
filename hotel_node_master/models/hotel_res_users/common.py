@@ -14,21 +14,20 @@ class NodeResUsers(models.Model):
     _inherit = 'node.binding'
     _description = 'Node Hotel Users'
 
+    master_user_id = fields.Many2one(comodel_name='master.res.users',
+                                     string='Users',
+                                     required=True,
+                                     ondelete='cascade')
+    login = fields.Char(related='master_user_id.login', readonly=True, help="Used to log into the system")
+
     partner_id = fields.Many2one('node.res.partner', required=True, ondelete='restrict',
                                  string='Related Partner', help='Partner-related data of the user')
     name = fields.Char(related='partner_id.name', readonly=True)
     email = fields.Char(related='partner_id.email', readonly=True)
 
-    login = fields.Char(required=True, help="Used to log into the system")
-    # group_ids = fields.Integer()
     group_ids = fields.Many2many('node.res.groups', 'node_res_groups_users_rel', 'uid', 'gid', string='Groups')
 
     active = fields.Boolean(default=True)
-
-    _sql_constraints = [
-        ('login_id_uniq', 'unique(login)',
-         'You can not have two users with the same login !'),
-    ]
 
     @job(default_channel='root.channel')
     @api.model
@@ -93,3 +92,17 @@ class NodeBindingResUsersListener(Component):
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_write(self, record, fields=None):
         record.modify_res_users()
+
+
+class MasterResUsers(models.Model):
+    _name = 'master.res.users'
+    _description = 'Centralized Hotel Users'
+
+    login = fields.Char(required=True, help="Used to log into the system")
+    node_binding_ids = fields.One2many('node.res.users', 'master_user_id',
+                                       'Node Users binded to this one')
+
+    _sql_constraints = [
+        ('login_id_uniq', 'unique(login)',
+         'You can not have two users with the same login !'),
+    ]

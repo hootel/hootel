@@ -20,7 +20,6 @@ class HotelResUsersImporter(Component):
         results = self.backend_adapter.fetch_res_users()
         res_users_mapper = self.component(usage='import.mapper',
                                           model_name='node.res.users')
-
         # TODO first import partners and groups and then users, so they keep linked
         node_res_users_obj = self.env['node.res.users']
         for rec in results:
@@ -34,10 +33,20 @@ class HotelResUsersImporter(Component):
                 node_res_users.with_context(
                     {'connector_no_export': True}).write(map_record.values())
             else:
+                master_res_user = self.env['master.res.users'].search([
+                    ('login', '=', rec['login'])
+                ])
+                if not master_res_user:
+                    master_res_user = self.env['master.res.users'].create({'login': rec['login']})
+                else:
+                    # TODO mark record with duplicate key value in constraint "node_res_users_login_id_uniq" as checkpoint
+                    _logger.warning("External User with ID: [%s] imported from node [%s] has been marked as checkpoint "
+                                    "because it is using an existing login: [%s]",
+                                    rec['id'], self.backend_record.address, master_res_user.login)
+
+                map_record.update({'master_user_id': master_res_user.id})
                 node_res_users.with_context(
                     {'connector_no_export': True}).create(map_record.values(for_create=True))
-
-            # TODO mark record with duplicate key value in constraint "node_res_users_login_id_uniq" as checkpoint
 
 
 class NodeResUsersImportMapper(Component):
