@@ -20,8 +20,8 @@ class HotelNodeReservationWizard(models.TransientModel):
     _description = "Hotel Node Reservation Wizard"
 
     @api.model
-    def _default_node_id(self):
-        return self._context.get('node_id') or None
+    def _default_backend_id(self):
+        return self._context.get('backend_id') or None
 
     @api.model
     def _default_checkin(self):
@@ -33,7 +33,7 @@ class HotelNodeReservationWizard(models.TransientModel):
         today = fields.Date.context_today(self.with_context())
         return (fields.Date.from_string(today) + timedelta(days=1)).strftime(DEFAULT_SERVER_DATE_FORMAT)
 
-    node_id = fields.Many2one('project.project', 'Hotel', required=True, default=_default_node_id)
+    backend_id = fields.Many2one('node.backend', 'Hotel', required=True, default=_default_backend_id)
     partner_id = fields.Many2one('res.partner', string="Customer", required=True)
     room_type_wizard_ids = fields.One2many('node.room.type.wizard', 'node_reservation_wizard_id',
                                            string="Room Types")
@@ -60,14 +60,12 @@ class HotelNodeReservationWizard(models.TransientModel):
             for rec_room_type in rec.room_type_wizard_ids:
                 rec.price_total += rec_room_type.price_total
 
-    @api.onchange('node_id')
-    def _onchange_node_id(self):
-        if self.node_id:
-            _logger.info('_onchange_node_id(self): %s', self)
-            # TODO Save your credentials (session)
-            _logger.info('_compute_room_types for node %s', self.node_id)
-            cmds = self.node_id.room_type_ids.mapped(lambda room_type_id: (0, False, {
-                'node_id': self.node_id.id,
+    @api.onchange('backend_id')
+    def _onchange_backend_id(self):
+        if self.backend_id:
+            _logger.info('_onchange_backend_id(self): %s', self)
+            cmds = self.backend_id.room_type_ids.mapped(lambda room_type_id: (0, False, {
+                'backend_id': self.backend_id.id,
                 'room_type_id': room_type_id.id,
                 'checkin': self._default_checkin(),
                 'checkout': self._default_checkout(),
@@ -79,15 +77,18 @@ class HotelNodeReservationWizard(models.TransientModel):
         # TODO review node.room.type.wizard @api.constrains('room_qty')
         from pprint import pprint
         try:
-            node = self.env["project.project"].browse(vals['node_id'])
+            backend = self.env["node.backend"].browse(vals['backend_id'])
 
-            noderpc = odoorpc.ODOO(node.odoo_host, node.odoo_protocol, node.odoo_port)
-            noderpc.login(node.odoo_db, node.odoo_user, node.odoo_password)
+            noderpc = odoorpc.ODOO(backend.address, backend.protocol, backend.port)
+            noderpc.login(backend.db, backend.user, backend.passwd)
 
             # prepare required fields for hotel.folio
             remote_vals = {}
             partner = self.env["res.partner"].browse(vals['partner_id'])
-            remote_partner_id = noderpc.env['res.partner'].search([('email', '=', partner.email)]).pop()
+            remote_partner_id = self.env['node.res.partner'].search([
+                ('id', 'in', partner.partner_binding_ids.ids),
+                ('backend_id', '=', backend.id),
+            ]).external_id
             # TODO create partner if does not exist in remote node
             remote_vals.update({
                 'partner_id': remote_partner_id,
@@ -98,9 +99,9 @@ class HotelNodeReservationWizard(models.TransientModel):
             for cmds in vals['room_type_wizard_ids']:
                 # cmds is a list of triples: [0, 'virtual_1008', {'checkin': '2018-11-05', ...
                 room_type_wizard_values = cmds[2]
-                remote_room_type_id = self.env['hotel.node.room.type'].search([
+                remote_room_type_id = self.env['node.room.type'].search([
                     ('id', '=', room_type_wizard_values['room_type_id'])
-                ]).remote_room_type_id
+                ]).external_id
                 # prepare room_lines a number of times `room_qty` times
                 for room in range(room_type_wizard_values['room_qty']):
                     # prepare hotel.reservation.reservation_line_ids
@@ -135,50 +136,12 @@ class HotelNodeReservationWizard(models.TransientModel):
             _logger.error(err)
             raise ValidationError(err)
         else:
+            # Q. Do we need create the resrevation in the transient model ?
             return super().create(vals)
 
     @api.multi
     def create_node_reservation(self):
         _logger.info('# TODO: return a wizard and preview the reservation')
-        # self.ensure_one()
-        # # NOTE This function is executed __after__ create(self, vals) where _compute_restrictions are executed again
-        # try:
-        #     noderpc = odoorpc.ODOO(self.node_id.odoo_host, self.node_id.odoo_protocol, self.node_id.odoo_port)
-        #     noderpc.login(self.node_id.odoo_db, self.node_id.odoo_user, self.node_id.odoo_password)
-        #
-        #     # prepare required fields for hotel folio
-        #     remote_partner_id = noderpc.env['res.partner'].search([('email', '=', self.partner_id.email)]).pop()
-        #     vals = {
-        #         'partner_id': remote_partner_id,
-        #     }
-        #     # prepare hotel folio room_lines
-        #     room_lines = []
-        #     for rec in self.room_type_wizard_ids:
-        #         for x in range(rec.room_qty):
-        #             # prepare hotel reservation lines with details by day
-        #             reservation_line_cmds = rec.room_type_line_ids.mapped(lambda reservation_line: (0, False, {
-        #                 'date': reservation_line.date,
-        #                 'price': reservation_line.price,
-        #             }))
-        #             # add discount
-        #             room_lines.append((0, False, {
-        #                 'room_type_id': rec.room_type_id.remote_room_type_id,
-        #                 'checkin': rec.checkin,
-        #                 'checkout': rec.checkout,
-        #                 'reservation_line_ids': reservation_line_cmds,
-        #             }))
-        #     vals.update({'room_lines': room_lines})
-        #
-        #     from pprint import pprint
-        #     pprint(vals)
-        #
-        #     folio_id = noderpc.env['hotel.folio'].create(vals)
-        #     _logger.info('User #%s created a hotel.folio with ID: [%s]',
-        #                  self._context.get('uid'), folio_id)
-        #
-        #     noderpc.logout()
-        # except (odoorpc.error.RPCError, odoorpc.error.InternalError, urllib.error.URLError) as err:
-        #     raise ValidationError(err)
 
     @api.multi
     def _open_wizard_action_search(self):
@@ -198,8 +161,8 @@ class NodeRoomTypeWizard(models.TransientModel):
     _description = "Node Room Type Wizard"
 
     @api.model
-    def _default_node_id(self):
-        return self._context.get('node_id') or None
+    def _default_backend_id(self):
+        return self._context.get('backend_id') or None
 
     @api.model
     def _default_checkin(self):
@@ -213,9 +176,9 @@ class NodeRoomTypeWizard(models.TransientModel):
 
     node_reservation_wizard_id = fields.Many2one('hotel.node.reservation.wizard',
                                                  ondelete = 'cascade', required = True)
-    node_id = fields.Many2one('project.project', 'Hotel', default=_default_node_id, required=True)
+    backend_id = fields.Many2one('node.backend', 'Hotel', default=_default_backend_id, required=True)
 
-    room_type_id = fields.Many2one('hotel.node.room.type', 'Rooms Type')
+    room_type_id = fields.Many2one('node.room.type', 'Rooms Type')
     room_type_availability = fields.Integer('Availability', compute="_compute_restrictions", readonly=True, store=True)
     room_qty = fields.Integer('Quantity', default=0)
     room_type_line_ids = fields.One2many('node.room.type.line.wizard', 'node_room_type_line_wizard_id',
@@ -256,21 +219,21 @@ class NodeRoomTypeWizard(models.TransientModel):
         for rec in self:
             if rec.checkin and rec.checkout:
                 try:
-                    # TODO Load your credentials (session) ... should be faster?
-                    noderpc = odoorpc.ODOO(rec.node_id.odoo_host, rec.node_id.odoo_protocol, rec.node_id.odoo_port)
-                    noderpc.login(rec.node_id.odoo_db, rec.node_id.odoo_user, rec.node_id.odoo_password)
+                    # TODO Review rec.backend_id Load your credentials (session) ... should be faster?
+                    noderpc = odoorpc.ODOO(rec.backend_id.address, rec.backend_id.protocol, rec.backend_id.port)
+                    noderpc.login(rec.backend_id.db, rec.backend_id.user, rec.backend_id.passwd)
 
                     _logger.info('_compute_restrictions [availability] for room type %s', rec.room_type_id)
                     rec.room_type_availability = noderpc.env['hotel.room.type'].get_room_type_availability(
                             rec.checkin,
                             rec.checkout,
-                            rec.room_type_id.remote_room_type_id)
+                            rec.room_type_id.external_id)
 
                     _logger.info('_compute_restrictions [price_unit] for room type %s', rec.room_type_id)
                     rec.room_type_line_ids = noderpc.env['hotel.room.type'].get_room_type_price_unit(
                             rec.checkin,
                             rec.checkout,
-                            rec.room_type_id.remote_room_type_id)
+                            rec.room_type_id.external_id)
                     # cmds = []
                     # for x in range(rec.nights):
                     #     cmds.append((0, False, {
@@ -287,7 +250,7 @@ class NodeRoomTypeWizard(models.TransientModel):
                     rec.min_stay = noderpc.env['hotel.room.type'].get_room_type_restrictions(
                         rec.checkin,
                         rec.checkout,
-                        rec.room_type_id.remote_room_type_id)
+                        rec.room_type_id.external_id)
 
                     noderpc.logout()
                 except (odoorpc.error.RPCError, odoorpc.error.InternalError, urllib.error.URLError) as err:
@@ -332,10 +295,10 @@ class NodeSearchWizard(models.TransientModel):
     _description = "Node Search Wizard"
 
     @api.model
-    def _default_node_id(self):
-        return self._context.get('node_id') or None
+    def _default_backend_id(self):
+        return self._context.get('backend_id') or None
 
-    node_id = fields.Many2one('project.project', 'Hotel', default=_default_node_id)
+    backend_id = fields.Many2one('node.backend', 'Hotel', default=_default_backend_id)
     node_folio_wizard_id = fields.Many2one('node.folio.wizard')
     folio = fields.Char('Folio Number')
     partner_id = fields.Many2one('res.partner', string="Customer")
@@ -405,14 +368,14 @@ class NodeFolioWizard(models.TransientModel):
     _name = 'node.folio.wizard'
 
     @api.model
-    def _default_node_id(self):
-        return self._context.get('node_id') or None
+    def _default_backend_id(self):
+        return self._context.get('backend_id') or None
 
     @api.model
     def _default_folio_id(self):
         return self._context.get('folio_id') or None
 
-    node_id = fields.Many2one('project.project', 'Hotel', required=True, default=_default_node_id)
+    backend_id = fields.Many2one('node.backend', 'Hotel', required=True, default=_default_backend_id)
     folio_id = fields.Integer(required=True, default=_default_folio_id)
     folio_name = fields.Char('Folio Number', readonly=True)
     partner_id = fields.Many2one('res.partner', string="Customer", required=True)
@@ -422,39 +385,39 @@ class NodeFolioWizard(models.TransientModel):
     room_lines_wizard_ids = fields.One2many('node.reservation.wizard', 'node_folio_wizard_id')
     price_total = fields.Float(string='Total Price')
 
-    @api.onchange('node_id')
-    def _onchange_node_id(self):
+    @api.onchange('backend_id')
+    def _onchange_backend_id(self):
         self.ensure_one()
-        _logger.info('_onchange_node_id(self): %s', self)
+        _logger.info('_onchange_backend_id(self): %s', self)
 
-        noderpc = odoorpc.ODOO(self.node_id.odoo_host, self.node_id.odoo_protocol, self.node_id.odoo_port)
-        noderpc.login(self.node_id.odoo_db, self.node_id.odoo_user, self.node_id.odoo_password)
-
-        folio = noderpc.env['hotel.folio'].browse(self.folio_id)
-
-        self.folio_name = folio.name
-        self.partner_id = self.env['res.partner'].search([('email', '=', folio.partner_id.email)])
-        self.internal_comment = folio.internal_comment
-        self.price_total = folio.amount_total
-
-        cmds = []
-        for reservation in folio.room_lines:
-            cmds.append((0, False, {
-                'node_folio_wizard_id': self.id,
-                'room_type_id': self.env['hotel.node.room.type'].search([
-                    ('node_id', '=', self.node_id.id),
-                    ('remote_room_type_id', '=', reservation.room_type_id.id),
-                    ]).id,
-                'adults': reservation.adults,
-                'children': reservation.children,
-                'checkin': reservation.checkin,
-                'checkout': reservation.checkout,
-                'nights': reservation.nights,
-                'state': reservation.state,
-                'price_total': reservation.price_total,
-            }))
-
-        self.room_lines_wizard_ids = cmds
+        # noderpc = odoorpc.ODOO(self.node_id.odoo_host, self.node_id.odoo_protocol, self.node_id.odoo_port)
+        # noderpc.login(self.node_id.odoo_db, self.node_id.odoo_user, self.node_id.odoo_password)
+        #
+        # folio = noderpc.env['hotel.folio'].browse(self.folio_id)
+        #
+        # self.folio_name = folio.name
+        # self.partner_id = self.env['res.partner'].search([('email', '=', folio.partner_id.email)])
+        # self.internal_comment = folio.internal_comment
+        # self.price_total = folio.amount_total
+        #
+        # cmds = []
+        # for reservation in folio.room_lines:
+        #     cmds.append((0, False, {
+        #         'node_folio_wizard_id': self.id,
+        #         'room_type_id': self.env['hotel.node.room.type'].search([
+        #             ('node_id', '=', self.node_id.id),
+        #             ('remote_room_type_id', '=', reservation.room_type_id.id),
+        #             ]).id,
+        #         'adults': reservation.adults,
+        #         'children': reservation.children,
+        #         'checkin': reservation.checkin,
+        #         'checkout': reservation.checkout,
+        #         'nights': reservation.nights,
+        #         'state': reservation.state,
+        #         'price_total': reservation.price_total,
+        #     }))
+        #
+        # self.room_lines_wizard_ids = cmds
 
     @api.multi
     def update_node_reservation(self):
@@ -469,7 +432,7 @@ class NodeReservationWizard(models.TransientModel):
     _name = 'node.reservation.wizard'
 
     node_folio_wizard_id = fields.Many2one('node.folio.wizard')
-    room_type_id = fields.Many2one('hotel.node.room.type', 'Rooms Type')
+    room_type_id = fields.Many2one('node.room.type', 'Rooms Type')
     room_type_name = fields.Char('Name', related='room_type_id.name')
     checkin = fields.Date('Check In', required=True)
     checkout = fields.Date('Check Out', required=True)

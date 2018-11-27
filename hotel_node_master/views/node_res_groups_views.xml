@@ -29,10 +29,4 @@
 
     <!-- menus -->
 
-    <menuitem id="menu_node_res_groups"
-              name="Groups"
-              sequence="25"
-              parent="menu_node_connector_root"
-              action="node_res_groups_action"/>
-
 </odoo>

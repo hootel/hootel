@@ -29,10 +29,4 @@
 
     <!-- menus -->
 
-    <menuitem id="menu_node_room_type"
-              name="Room Types"
-              sequence="10"
-              parent="menu_node_connector_root"
-              action="node_room_type_action"/>
-
 </odoo>
