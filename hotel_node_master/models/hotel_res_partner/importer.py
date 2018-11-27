@@ -47,11 +47,11 @@ class HotelResPartnerImporter(Component):
                 ])
                 if res_partner:
                     res_partner_duplicated = node_res_partner.odoo_id
-                    # Merge partners among nodes updating partner_binding_ids
+                    # Merge partners among nodes updating node_binding_ids
                     # updates automatically `node_res_partner.odoo_id` (SEE Addition Overloading)
                     res_partner.with_context(
                         # prevent remote updates
-                        {'connector_no_export': True}).partner_binding_ids += node_res_partner
+                        {'connector_no_export': True}).node_binding_ids += node_res_partner
 
                     res_partner_duplicated.with_context(
                         # prevent remote updates

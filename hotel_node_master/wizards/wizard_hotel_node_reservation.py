@@ -86,7 +86,7 @@ class HotelNodeReservationWizard(models.TransientModel):
             remote_vals = {}
             partner = self.env["res.partner"].browse(vals['partner_id'])
             remote_partner_id = self.env['node.res.partner'].search([
-                ('id', 'in', partner.partner_binding_ids.ids),
+                ('id', 'in', partner.node_binding_ids.ids),
                 ('backend_id', '=', backend.id),
             ]).external_id
             # TODO create partner if does not exist in remote node
