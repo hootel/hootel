@@ -1,3 +1,16 @@
 <odoo>
 
+    <record id="hotel_node_master.model_hotel_node_reservation_wizard" model="ir.model">
+        <field name="website_form_access">True</field>
+        <field name="website_form_label">Hotel Reservation Wizard</field>
+    </record>
+
+    <function model="ir.model.fields" name="formbuilder_whitelist">
+        <value>hotel.node.reservation.wizard</value>
+        <value eval="[
+            'partner_id',
+            'room_type_wizard_ids'
+        ]"/>
+    </function>
+
 </odoo>
