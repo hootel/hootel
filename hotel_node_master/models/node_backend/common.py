@@ -29,7 +29,8 @@ class NodeBackend(models.Model):
     room_type_ids = fields.One2many('node.room.type', 'backend_id', 'Room Types')
     room_ids = fields.One2many('node.room', 'backend_id', 'Rooms')
     group_ids = fields.One2many('node.res.groups', 'backend_id', 'Access Groups')
-    user_ids = fields.One2many('node.res.users', 'backend_id', 'Users with access to this hotel')
+    user_ids = fields.One2many('node.res.users', 'backend_id', 'Users with access to this hotel',
+                               domain=['|', ('active', '=', True), ('active', '=', False)])
 
     @contextmanager
     @api.multi

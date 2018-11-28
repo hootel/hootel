@@ -56,9 +56,6 @@ class HotelResUsersImporter(Component):
                         backend_model_name='node.backend',
                         backend_id=self.backend_record.id,
                     )
-                    _logger.warning("External User with ID: [%s] imported from node [%s] "
-                                    "needs a review because it is using an existing login: [%s]",
-                                    rec['id'], self.backend_record.address, master_res_user.login)
 
 
 class NodeResUsersImportMapper(Component):
