@@ -82,18 +82,44 @@ class HotelNodeInterfaceAdapter(AbstractComponent):
     def fetch_rooms(self):
         raise NotImplementedError
 
-    @property
-    def _server(self):
-        try:
-            node_server = getattr(self.work, 'node_api')
-        except AttributeError:
-            raise AttributeError(
-                'You must provide a node_api attribute with a '
-                'WuBookServer instance to be able to use the '
-                'Backend Adapter.'
-            )
-        return node_server.server
+    # === PARTNERS
+    def create_res_partner(self, name, email, is_company, type):
+        raise NotImplementedError
 
+    def modify_res_partner(self, partner_id, name, email, is_company, type):
+        raise NotImplementedError
+
+    def delete_res_partner(self, partner_id):
+        raise NotImplementedError
+
+    def fetch_res_partners(self):
+        raise NotImplementedError
+
+    # === GROUPS
+    def create_res_groups(self, name, user_ids):
+        raise NotImplementedError
+
+    def modify_res_groups(self, group_id, name, user_ids):
+        raise NotImplementedError
+
+    def delete_res_groups(self, group_id):
+        raise NotImplementedError
+
+    def fetch_res_groups(self):
+        raise NotImplementedError
+
+    # === USERS
+    def create_res_users(self, login, partner_id, group_ids):
+        raise NotImplementedError
+
+    def modify_res_users(self, user_id, login, partner_id, group_ids):
+        raise NotImplementedError
+
+    def delete_res_users(self, user_id):
+        raise NotImplementedError
+
+    def fetch_res_users(self):
+        raise NotImplementedError
 
 class HotelNodeAdapter(AbstractComponent):
     _name = 'hotel.node.adapter'
