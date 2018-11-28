@@ -74,11 +74,11 @@ class NodeResUsersAdapter(Component):
     _inherit = 'hotel.node.adapter'
     _apply_on = 'node.res.users'
 
-    def create_res_users(self, login, partner_id, group_ids):
-        return super().create_res_users(login, partner_id, group_ids)
+    def create_res_users(self, login, active, partner_id, group_ids):
+        return super().create_res_users(login, active, partner_id, group_ids)
 
-    def modify_res_users(self, user_id, login, partner_id, group_ids):
-        return super().modify_res_users(user_id, login, partner_id, group_ids)
+    def modify_res_users(self, user_id, login, active, partner_id, group_ids):
+        return super().modify_res_users(user_id, login, active, partner_id, group_ids)
 
     def delete_res_users(self, user_id):
         return super().delete_res_users(user_id)

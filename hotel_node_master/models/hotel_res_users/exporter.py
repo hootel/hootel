@@ -18,6 +18,7 @@ class NodeResUsersExporter(Component):
         return self.backend_adapter.modify_res_users(
             binding.external_id,
             binding.login,
+            binding.active,
             binding.partner_id.external_id,
             # [r.external_id for r in binding.group_ids]
             # TODO Discuss where to do prepare commands for updating many2many fields
@@ -33,6 +34,7 @@ class NodeResUsersExporter(Component):
     def create_res_users(self, binding):
         external_id = self.backend_adapter.create_res_users(
             binding.login,
+            binding.active,
             binding.partner_id.external_id,
             # [r.external_id for r in binding.group_ids]
             # TODO Discuss where to do prepare commands for updating many2many fields

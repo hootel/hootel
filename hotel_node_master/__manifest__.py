@@ -23,6 +23,7 @@
         'views/node_res_users_views.xml',
         'views/node_res_partner_views.xml',
         'views/inherited_res_partner_views.xml',
+        'views/inherited_checkpoint_views.xml',
         'security/hotel_node_security.xml',
         'security/ir.model.access.csv',
     ],

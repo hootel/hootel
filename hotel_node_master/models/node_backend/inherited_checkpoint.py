@@ -19,3 +19,7 @@ class ConnectorCheckpoint(models.Model):
 
         return record
 
+    @api.multi
+    def reviewed(self):
+        self.record.active = True
+        return self.write({'state': 'reviewed'})

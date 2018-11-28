@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- views and menus -->
+
+    <record id="inherited_checkpoint_views_form" model="ir.ui.view">
+        <field name="model">connector.checkpoint</field>
+        <field name="inherit_id" ref="connector.view_connector_checkpoint_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//form/header" position="after">
+                <div class="alert alert-warning" role="alert" attrs="{'invisible': [('state','=','reviewed')]}">
+                    Reviewed records will be <b>automatically activated</b> in the node.
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

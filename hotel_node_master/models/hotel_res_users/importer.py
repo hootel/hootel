@@ -66,6 +66,7 @@ class NodeResUsersImportMapper(Component):
     direct = [
         ('id', 'external_id'),
         ('login', 'login'),
+        ('active', 'active'),
         (external_to_m2o('partner_id'), 'partner_id'),
     ]
 

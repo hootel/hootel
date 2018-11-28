@@ -56,6 +56,18 @@ class HotelNodeInterfaceAdapter(AbstractComponent):
     _inherit = ['base.backend.adapter', 'base.node.connector']
     _usage = 'backend.adapter'
 
+    @property
+    def _server(self):
+        try:
+            node_server = getattr(self.work, 'node_api')
+        except AttributeError:
+            raise AttributeError(
+                'You must provide a node_api attribute with a '
+                'WuBookServer instance to be able to use the '
+                'Backend Adapter.'
+            )
+        return node_server.server
+
     # === ROOM TYPES
     def create_room_type(self, name, room_ids):
         raise NotImplementedError
@@ -109,10 +121,10 @@ class HotelNodeInterfaceAdapter(AbstractComponent):
         raise NotImplementedError
 
     # === USERS
-    def create_res_users(self, login, partner_id, group_ids):
+    def create_res_users(self, login, active, partner_id, group_ids):
         raise NotImplementedError
 
-    def modify_res_users(self, user_id, login, partner_id, group_ids):
+    def modify_res_users(self, user_id, login, active, partner_id, group_ids):
         raise NotImplementedError
 
     def delete_res_users(self, user_id):
@@ -120,6 +132,7 @@ class HotelNodeInterfaceAdapter(AbstractComponent):
 
     def fetch_res_users(self):
         raise NotImplementedError
+
 
 class HotelNodeAdapter(AbstractComponent):
     _name = 'hotel.node.adapter'
@@ -231,16 +244,19 @@ class HotelNodeAdapter(AbstractComponent):
         )
 
     # === USERS
-    def create_res_users(self, login, partner_id, group_ids):
+    def create_res_users(self, login, active, partner_id, group_ids):
         user_id = self._server.env['res.users'].create({
             'login': login,
             'partner_id': partner_id,
+            'active': active,
+            # 'groups_id': [(6, False, group_ids)]
+            'groups_id': group_ids
         })
         _logger.info('User #%s created remote res.users with ID: [%s] in node [%s] [%s]',
                      self.env.context.get('uid'), user_id, self._server._host, self._server)
         return user_id
 
-    def modify_res_users(self, user_id, login, partner_id, group_ids):
+    def modify_res_users(self, user_id, login, active, partner_id, group_ids):
         _logger.info('User #%s updated remote res.users with ID: [%s] in node [%s] [%s]',
                      self.env.context.get('uid'), user_id, self._server._host, self._server)
         return self._server.env['res.users'].write(
@@ -248,6 +264,7 @@ class HotelNodeAdapter(AbstractComponent):
             {
                 'login': login,
                 'partner_id': partner_id,
+                'active': active,
                 # 'groups_id': [(6, False, group_ids)]
                 'groups_id': group_ids
             })
@@ -257,9 +274,11 @@ class HotelNodeAdapter(AbstractComponent):
         return True
 
     def fetch_res_users(self):
+        # users black list
+        users_blacklist = ['admin', 'portal']
         users = self._server.env['res.users'].search_read(
-            [],
-            ['login', 'partner_id', 'groups_id']
+            [('login', 'not in', users_blacklist)],
+            ['login', 'active', 'partner_id', 'groups_id']
         )
         for rec in users:
             rec['partner_id'] = rec['partner_id'][0]
