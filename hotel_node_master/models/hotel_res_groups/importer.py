@@ -21,8 +21,6 @@ class HotelResGroupsImporter(Component):
         res_groups_mapper = self.component(usage='import.mapper',
                                            model_name='node.res.groups')
 
-        # TODO first import groups and then users, so they keep linked
-
         node_res_groups_obj = self.env['node.res.groups']
         for rec in results:
             map_record = res_groups_mapper.map_record(rec)

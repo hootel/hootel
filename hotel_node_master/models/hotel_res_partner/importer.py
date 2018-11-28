@@ -21,7 +21,6 @@ class HotelResPartnerImporter(Component):
         res_partner_mapper = self.component(usage='import.mapper',
                                             model_name='node.res.partner')
 
-        # TODO first import companies and then customers, so they keep linked ?
         node_res_partner_obj = self.env['node.res.partner']
         for rec in results:
             # TODO partners without email or VAT should be marked as checkpoints

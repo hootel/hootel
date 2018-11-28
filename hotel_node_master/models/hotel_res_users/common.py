@@ -3,6 +3,7 @@
 
 import logging
 from odoo import api, models, fields, _
+from odoo.exceptions import UserError
 from odoo.addons.queue_job.job import job, related_action
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
@@ -28,6 +29,16 @@ class NodeResUsers(models.Model):
     group_ids = fields.Many2many('node.res.groups', 'node_res_groups_users_rel', 'uid', 'gid', string='Groups')
 
     active = fields.Boolean(default=True)
+
+    @api.multi
+    def write(self, vals):
+        for rec in self:
+            if 'backend_id' in vals and vals['backend_id'] != rec.backend_id.id:
+                msg = _("Changing a record between backends is not allowed. "
+                        "Please create a new one in the corresponding backend.")
+                _logger.warning(msg)
+                raise UserError(msg)
+        return super().write(vals)
 
     @job(default_channel='root.channel')
     @api.model
@@ -96,8 +107,11 @@ class NodeBindingResUsersListener(Component):
 
 class MasterResUsers(models.Model):
     _name = 'master.res.users'
-    _description = 'Centralized Hotel Users'
+    _description = 'Centralized Users'
 
+    partner_id = fields.Many2one('node.res.partner', required=True, ondelete='restrict',
+                                 string='Related Partner', help='Partner-related data of the user')
+    name = fields.Char(related='partner_id.name', readonly=True)
     login = fields.Char(required=True, help="Used to log into the system")
     node_binding_ids = fields.One2many('node.res.users', 'master_user_id',
                                        'Node Users binded to this one')

@@ -28,7 +28,6 @@ class HotelResUsersImporter(Component):
                 ('backend_id', '=', self.backend_record.id),
                 ('external_id', '=', rec['id'])
             ])
-            # TODO Merge users among nodes by login / email
             if node_res_users:
                 node_res_users.with_context(
                     {'connector_no_export': True}).write(map_record.values())
@@ -37,11 +36,14 @@ class HotelResUsersImporter(Component):
                     ('login', '=', rec['login'])
                 ])
                 if not master_res_user:
-                    master_res_user = self.env['master.res.users'].create({'login': rec['login']})
+                    master_res_user = self.env['master.res.users'].create({
+                        'partner_id': map_record.values()['partner_id'],
+                        'login': rec['login']
+                    })
                 else:
-                    # TODO mark record with duplicate key value in constraint "node_res_users_login_id_uniq" as checkpoint
-                    _logger.warning("External User with ID: [%s] imported from node [%s] has been marked as checkpoint "
-                                    "because it is using an existing login: [%s]",
+                    # TODO mark record with duplicate key value "node_res_users_login_id_uniq" as checkpoint
+                    _logger.warning("External User with ID: [%s] imported from node [%s] "
+                                    "SHOULD BE marked as checkpoint because it is using an existing login: [%s]",
                                     rec['id'], self.backend_record.address, master_res_user.login)
 
                 map_record.update({'master_user_id': master_res_user.id})

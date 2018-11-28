@@ -17,16 +17,34 @@
         </field>
     </record>
 
+    <record id="master_res_users_view_tree" model="ir.ui.view">
+        <field name="name">master.res.users.tree</field>
+        <field name="model">master.res.users</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="partner_id"/>
+                <field name="login"/>
+                <field name="node_binding_ids"/>
+            </tree>
+        </field>
+    </record>
+
     <!-- actions -->
 
-    <record id="node_res_users_action" model="ir.actions.act_window">
+    <record id="master_res_users_action" model="ir.actions.act_window">
         <field name="name">Users</field>
-        <field name="res_model">node.res.users</field>
+        <field name="res_model">master.res.users</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="target">main</field>
     </record>
 
     <!-- menus -->
+
+    <menuitem id="menu_node_users"
+              name="Users"
+              sequence="30"
+              parent="menu_node_connector_root"
+              action="master_res_users_action"/>
 
 </odoo>

@@ -1,7 +1,7 @@
 # Copyright 2018 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class NodeBinding(models.AbstractModel):
@@ -20,3 +20,14 @@ class NodeBinding(models.AbstractModel):
         ('backend_external_id_uniq', 'unique(backend_id, external_id)',
          'A binding already exists with the same Backend ID.'),
     ]
+
+
+    @api.model
+    def create(self, vals):
+        vals.update({'sync_date': fields.Datetime.now()})
+        return super().create(vals)
+
+    @api.multi
+    def write(self, vals):
+        vals.update({'sync_date': fields.Datetime.now()})
+        return super().write(vals)

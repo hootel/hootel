@@ -18,7 +18,6 @@ class NodeResGroupsExporter(Component):
         return self.backend_adapter.modify_res_groups(
             binding.external_id,
             binding.name,
-            # binding.user_ids
         )
 
     @api.model
@@ -29,6 +28,5 @@ class NodeResGroupsExporter(Component):
     def create_res_groups(self, binding):
         external_id = self.backend_adapter.create_res_groups(
             binding.name,
-            # binding.user_ids
         )
         self.binder.bind(external_id, binding)

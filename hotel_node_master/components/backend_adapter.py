@@ -222,7 +222,8 @@ class HotelNodeAdapter(AbstractComponent):
             {
                 'login': login,
                 'partner_id': partner_id,
-                'groups_id': [(6, False, group_ids)]
+                # 'groups_id': [(6, False, group_ids)]
+                'groups_id': group_ids
             })
 
     def delete_res_users(self, user_id):

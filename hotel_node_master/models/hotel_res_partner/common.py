@@ -3,6 +3,7 @@
 
 import logging
 from odoo import api, models, fields, _
+from odoo.exceptions import UserError
 from odoo.addons.queue_job.job import job, related_action
 from odoo.addons.component.core import Component
 from odoo.addons.component_event import skip_if
@@ -20,6 +21,16 @@ class NodeResPartner(models.Model):
                               required=True,
                               ondelete='cascade')
     node_user_ids = fields.One2many('node.res.users', 'partner_id', string='Node Users')
+
+    @api.multi
+    def write(self, vals):
+        for rec in self:
+            if 'backend_id' in vals and vals['backend_id'] != rec.backend_id.id:
+                msg = _("Changing a record between backends is not allowed. "
+                        "Please create a new one in the corresponding backend.")
+                _logger.warning(msg)
+                raise UserError(msg)
+        return super().write(vals)
 
     @job(default_channel='root.channel')
     @api.model
