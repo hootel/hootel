@@ -5,3 +5,4 @@ access_node_room_type,access_node_room_type,model_node_room_type,base.group_user
 access_node_res_partner,access_node_res_partner,model_node_res_partner,base.group_user,1,0,0,0
 access_node_res_groups,access_node_res_groups,model_node_res_groups,base.group_user,1,0,0,0
 access_node_res_users,access_node_res_users,model_node_res_users,base.group_user,1,0,0,0
+access_master_res_users,access_master_res_users,model_master_res_users,base.group_user,1,0,0,0
