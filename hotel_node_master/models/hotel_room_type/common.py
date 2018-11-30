@@ -58,6 +58,33 @@ class NodeRoomType(models.Model):
             importer = work.component(usage='node.room.type.importer')
             return importer.fetch_room_types()
 
+    @job(default_channel='root.channel')
+    @api.model
+    def fetch_room_type_availability(self, backend, checkin, checkout, room_type_id):
+        with backend.work_on(self._name) as work:
+            importer = work.component(usage='node.room.type.importer')
+            return importer.fetch_room_type_availability(checkin, checkout, room_type_id)
+
+    @job(default_channel='root.channel')
+    @api.model
+    def fetch_room_type_price_unit(self, backend, checkin, checkout, room_type_id):
+        with backend.work_on(self._name) as work:
+            importer = work.component(usage='node.room.type.importer')
+            return importer.fetch_room_type_price_unit(checkin, checkout, room_type_id)
+
+    @job(default_channel='root.channel')
+    @api.model
+    def fetch_room_type_restrictions(self, backend, checkin, checkout, room_type_id):
+        with backend.work_on(self._name) as work:
+            importer = work.component(usage='node.room.type.importer')
+            return importer.fetch_room_type_restrictions(checkin, checkout, room_type_id)
+
+    @job(default_channel='root.channel')
+    @api.model
+    def fetch_room_type_planning(self, backend, checkin, checkout, room_type_id):
+        with backend.work_on(self._name) as work:
+            importer = work.component(usage='node.room.type.importer')
+            return importer.fetch_room_type_planning(checkin, checkout, room_type_id)
 
 class NodeRoomTypeAdapter(Component):
     _name = 'node.room.type.adapter'
@@ -75,6 +102,18 @@ class NodeRoomTypeAdapter(Component):
 
     def fetch_room_types(self):
         return super().fetch_room_types()
+
+    def fetch_room_type_availability(self, checkin, checkout, room_type_id):
+        return super().fetch_room_type_availability(checkin, checkout, room_type_id)
+
+    def fetch_room_type_price_unit(self, checkin, checkout, room_type_id):
+        return super().fetch_room_type_price_unit(checkin, checkout, room_type_id)
+
+    def fetch_room_type_restrictions(self, checkin, checkout, room_type_id):
+        return super().fetch_room_type_restrictions(checkin, checkout, room_type_id)
+
+    def fetch_room_type_planning(self, checkin, checkout, room_type_id):
+        return super().fetch_room_type_planning(checkin, checkout, room_type_id)
 
 
 class NodeBindingRoomTypeListener(Component):

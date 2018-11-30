@@ -32,6 +32,22 @@ class HotelRoomTypeImporter(Component):
             else:
                 room_type.with_context({'connector_no_export': True}).create(map_record.values(for_create=True))
 
+    @api.model
+    def fetch_room_type_availability(self, checkin, checkout, room_type_id):
+        return self.backend_adapter.fetch_room_type_availability(checkin, checkout, room_type_id)
+
+    @api.model
+    def fetch_room_type_price_unit(self, checkin, checkout, room_type_id):
+        return self.backend_adapter.fetch_room_type_price_unit(checkin, checkout, room_type_id)
+
+    @api.model
+    def fetch_room_type_restrictions(self, checkin, checkout, room_type_id):
+        return self.backend_adapter.fetch_room_type_restrictions(checkin, checkout, room_type_id)
+
+    @api.model
+    def fetch_room_type_planning(self, checkin, checkout, room_type_id):
+        return self.backend_adapter.fetch_room_type_planning(checkin, checkout, room_type_id)
+
 
 class NodeRoomTypeImportMapper(Component):
     _name = 'node.room.type.import.mapper'

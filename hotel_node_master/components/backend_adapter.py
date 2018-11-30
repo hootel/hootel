@@ -35,6 +35,7 @@ class NodeServer(object):
     def server(self):
         if self._server is None:
             try:
+                _logger.warning('New Login')
                 self._server = odoorpc.ODOO(self._login_data.address,
                                             self._login_data.protocol,
                                             self._login_data.port)
@@ -161,6 +162,46 @@ class HotelNodeAdapter(AbstractComponent):
             [],
             ['name', 'room_ids']
         )
+
+    def fetch_room_type_availability(self, checkin, checkout, room_type_id):
+        return self._server.env['hotel.room.type'].get_room_type_availability(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+
+    def fetch_room_type_price_unit(self, checkin, checkout, room_type_id):
+        return self._server.env['hotel.room.type'].get_room_type_price_unit(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+
+    def fetch_room_type_restrictions(self, checkin, checkout, room_type_id):
+        return self._server.env['hotel.room.type'].get_room_type_restrictions(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+
+    def fetch_room_type_planning(self, checkin, checkout, room_type_id):
+        availability = self._server.env['hotel.room.type'].get_room_type_availability(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+        price_unit = self._server.env['hotel.room.type'].get_room_type_price_unit(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+        restrictions = self._server.env['hotel.room.type'].get_room_type_restrictions(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+
+        return {'availability': availability, 'price_unit': price_unit, 'restrictions': restrictions}
 
     # === ROOMS
     def create_room(self, name, capacity, room_type_id):

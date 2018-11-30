@@ -13,10 +13,6 @@
                         </h1>
                     </div>
                     <group attrs="{'invisible':[('backend_id','=',False)]}">
-                        <!--<group name="dates">-->
-                            <!--<field name="checkin" required="1" widget="date" />-->
-                            <!--<field name="checkout" required="1" widget="date" />-->
-                        <!--</group>-->
                         <group>
                             <field name="partner_id"/>
                         </group>

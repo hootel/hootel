@@ -21,7 +21,6 @@ class NodeBinding(models.AbstractModel):
          'A binding already exists with the same Backend ID.'),
     ]
 
-
     @api.model
     def create(self, vals):
         vals.update({'sync_date': fields.Datetime.now()})

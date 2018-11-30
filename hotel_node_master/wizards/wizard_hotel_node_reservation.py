@@ -39,19 +39,6 @@ class HotelNodeReservationWizard(models.TransientModel):
                                            string="Room Types")
     price_total = fields.Float(string='Total Price', compute='_compute_price_total', store=True)
 
-    # FIXED @constrains parameter 'room_type_wizard_ids.room_qty' is not a field name
-    # @api.constrains('room_type_wizard_ids')
-    # def _check_room_type_wizard_total_qty(self):
-    #     for rec in self:
-    #         total_qty = 0
-    #         for rec_room_type in rec.room_type_wizard_ids:
-    #             total_qty += rec_room_type.room_qty
-    #
-    #         if total_qty == 0:
-    #             msg = _("It is not possible to create the reservation.") + " " + \
-    #                   _("Maybe you forgot adding the quantity to at least one type of room?.")
-    #             raise ValidationError(msg)
-
     @api.depends('room_type_wizard_ids.price_total')
     def _compute_price_total(self):
         for rec in self:
@@ -122,11 +109,9 @@ class HotelNodeReservationWizard(models.TransientModel):
             remote_vals.update({'room_lines': room_lines})
 
             pprint(remote_vals)
-            # if total_qty == 0:
-            #     msg = _("It is not possible to create the reservation.") + " " + \
-            #           _("Maybe you forgot adding the quantity to at least one type of room?.")
-            #     raise ValidationError(msg)
+
             folio_id = noderpc.env['hotel.folio'].create(remote_vals)
+            # TODO Ensure node created the folio + reservation + services
             _logger.info('User #%s created a remote hotel.folio with ID: [%s]',
                          self._context.get('uid'), folio_id)
 
@@ -195,13 +180,15 @@ class NodeRoomTypeWizard(models.TransientModel):
 
     @api.constrains('room_qty')
     def _check_room_qty(self):
+        pass
         # At least one model cache has been invalidated, signaling through the database.
-        for rec in self:
-            if (rec.room_type_availability < rec.room_qty) or (rec.room_qty > 0 and rec.nights < rec.min_stay):
-                msg = _("At least one room type has not availability or does not meet restrictions.") + " " + \
-                      _("Please, review room type %s between %s and %s.") % (rec.room_type_id.name, rec.checkin, rec.checkout)
-                _logger.warning(msg)
-                raise ValidationError(msg)
+        # for rec in self:
+        #     _logger.info('_check_room_qty for room type %s', rec.room_type_id)
+        #     if (rec.room_type_availability < rec.room_qty) or (rec.room_qty > 0 and rec.nights < rec.min_stay):
+        #         msg = _("At least one room type has not availability or does not meet restrictions.") + " " + \
+        #               _("Please, review room type %s between %s and %s.") % (rec.room_type_id.name, rec.checkin, rec.checkout)
+        #         _logger.warning(msg)
+        #         raise ValidationError(msg)
 
     @api.depends('room_qty', 'price_unit', 'discount')
     def _compute_price_total(self):
@@ -217,44 +204,63 @@ class NodeRoomTypeWizard(models.TransientModel):
     @api.depends('checkin', 'checkout')
     def _compute_restrictions(self):
         for rec in self:
-            if rec.checkin and rec.checkout:
-                try:
-                    # TODO Review rec.backend_id Load your credentials (session) ... should be faster?
-                    noderpc = odoorpc.ODOO(rec.backend_id.address, rec.backend_id.protocol, rec.backend_id.port)
-                    noderpc.login(rec.backend_id.db, rec.backend_id.user, rec.backend_id.passwd)
+            node_room_type_obj = self.env['node.room.type']
+            try:
+                # TODO Review rec.backend_id Load your credentials (session) ... should be faster?
+                # noderpc = odoorpc.ODOO(rec.backend_id.address, rec.backend_id.protocol, rec.backend_id.port)
+                # noderpc.login(rec.backend_id.db, rec.backend_id.user, rec.backend_id.passwd)
 
-                    _logger.info('_compute_restrictions [availability] for room type %s', rec.room_type_id)
-                    rec.room_type_availability = noderpc.env['hotel.room.type'].get_room_type_availability(
-                            rec.checkin,
-                            rec.checkout,
-                            rec.room_type_id.external_id)
+                planning = node_room_type_obj.fetch_room_type_planning(
+                    rec.backend_id,
+                    rec.checkin,
+                    rec.checkout,
+                    rec.room_type_id,
+                )
+                rec.room_type_availability = planning['availability']
+                rec.room_type_line_ids = planning['price_unit']
+                rec.price_unit = sum(rec.room_type_line_ids.mapped('price'))
+                rec.min_stay = planning['restrictions']
 
-                    _logger.info('_compute_restrictions [price_unit] for room type %s', rec.room_type_id)
-                    rec.room_type_line_ids = noderpc.env['hotel.room.type'].get_room_type_price_unit(
-                            rec.checkin,
-                            rec.checkout,
-                            rec.room_type_id.external_id)
-                    # cmds = []
-                    # for x in range(rec.nights):
-                    #     cmds.append((0, False, {
-                    #         'date': (fields.Date.from_string(rec.checkin) + timedelta(days=x)).strftime(
-                    #             DEFAULT_SERVER_DATE_FORMAT),
-                    #         'price': 11.50,
-                    #     }))
-                    # from pprint import pprint
-                    # pprint(cmds)
-                    # rec.room_type_line_ids = cmds
-                    rec.price_unit = sum(rec.room_type_line_ids.mapped('price'))
+                # _logger.info('_compute_restrictions [availability] for room type %s', rec.room_type_id)
+                # rec.room_type_availability = noderpc.env['hotel.room.type'].get_room_type_availability(
+                #         rec.checkin,
+                #         rec.checkout,
+                #         rec.room_type_id.external_id)
+                # rec.room_type_availability = node_room_type_obj.fetch_room_type_availability(
+                #     rec.backend_id,
+                #     rec.checkin,
+                #     rec.checkout,
+                #     rec.room_type_id,
+                # )
+                #
+                # _logger.info('_compute_restrictions [price_unit] for room type %s', rec.room_type_id)
+                # rec.room_type_line_ids = noderpc.env['hotel.room.type'].get_room_type_price_unit(
+                #         rec.checkin,
+                #         rec.checkout,
+                #         rec.room_type_id.external_id)
+                # rec.room_type_line_ids = node_room_type_obj.fetch_room_type_price_unit(
+                #     rec.backend_id,
+                #     rec.checkin,
+                #     rec.checkout,
+                #     rec.room_type_id,
+                # )
+                # rec.price_unit = sum(rec.room_type_line_ids.mapped('price'))
+                #
+                # _logger.info('_compute_restrictions [min days] for room type %s', rec.room_type_id)
+                # rec.min_stay = noderpc.env['hotel.room.type'].get_room_type_restrictions(
+                #     rec.checkin,
+                #     rec.checkout,
+                #     rec.room_type_id.external_id)
+                # rec.min_stay = node_room_type_obj.fetch_room_type_restrictions(
+                #     rec.backend_id,
+                #     rec.checkin,
+                #     rec.checkout,
+                #     rec.room_type_id,
+                # )
 
-                    _logger.info('_compute_restrictions [min days] for room type %s', rec.room_type_id)
-                    rec.min_stay = noderpc.env['hotel.room.type'].get_room_type_restrictions(
-                        rec.checkin,
-                        rec.checkout,
-                        rec.room_type_id.external_id)
-
-                    noderpc.logout()
-                except (odoorpc.error.RPCError, odoorpc.error.InternalError, urllib.error.URLError) as err:
-                    raise ValidationError(err)
+                # noderpc.logout()
+            except (odoorpc.error.RPCError, odoorpc.error.InternalError, urllib.error.URLError) as err:
+                raise ValidationError(err)
 
     @api.onchange('room_qty')
     def _onchange_room_qty(self):
