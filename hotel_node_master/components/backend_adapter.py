@@ -185,17 +185,22 @@ class HotelNodeAdapter(AbstractComponent):
         )
 
     def fetch_room_type_planning(self, checkin, checkout, room_type_id):
-        availability = self._server.env['hotel.room.type'].get_room_type_availability(
-            checkin,
-            checkout,
-            room_type_id.external_id
-        )
-        price_unit = self._server.env['hotel.room.type'].get_room_type_price_unit(
-            checkin,
-            checkout,
-            room_type_id.external_id
-        )
-        restrictions = self._server.env['hotel.room.type'].get_room_type_restrictions(
+        # availability = self._server.env['hotel.room.type'].get_room_type_availability(
+        #     checkin,
+        #     checkout,
+        #     room_type_id.external_id
+        # )
+        # price_unit = self._server.env['hotel.room.type'].get_room_type_price_unit(
+        #     checkin,
+        #     checkout,
+        #     room_type_id.external_id
+        # )
+        # restrictions = self._server.env['hotel.room.type'].get_room_type_restrictions(
+        #     checkin,
+        #     checkout,
+        #     room_type_id.external_id
+        # )
+        return self._server.env['hotel.room.type'].get_room_type_planning(
             checkin,
             checkout,
             room_type_id.external_id

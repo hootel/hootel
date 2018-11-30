@@ -61,8 +61,6 @@ class HotelNodeReservationWizard(models.TransientModel):
 
     @api.model
     def create(self, vals):
-        # TODO review node.room.type.wizard @api.constrains('room_qty')
-        from pprint import pprint
         try:
             backend = self.env["node.backend"].browse(vals['backend_id'])
 
@@ -108,6 +106,7 @@ class HotelNodeReservationWizard(models.TransientModel):
                     }))
             remote_vals.update({'room_lines': room_lines})
 
+            from pprint import pprint
             pprint(remote_vals)
 
             folio_id = noderpc.env['hotel.folio'].create(remote_vals)
