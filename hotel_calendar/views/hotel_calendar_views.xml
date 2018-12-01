@@ -4,7 +4,7 @@
     <!-- Form view of hotel room -->
     <record model="ir.ui.view" id="hotel_calendar_view_form">
         <field name="name">hotel.calendar.form</field>
-        <field name="model">room.calendar</field>
+        <field name="model">hotel.calendar</field>
         <field name="arch" type="xml">
             <form string="Hotel Calendar">
                 <sheet>

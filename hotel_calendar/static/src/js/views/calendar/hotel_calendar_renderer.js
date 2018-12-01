@@ -30,6 +30,7 @@ var HotelCalendarView = AbstractRenderer.extend({
     _reserv_tooltips: {},
     _days_tooltips: [],
     _last_dates: [false, false],
+    _hcalendars: [],
 
 
     /** VIEW METHODS **/
