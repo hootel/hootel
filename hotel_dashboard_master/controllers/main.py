@@ -9,7 +9,7 @@ class HotelDashboard(http.Controller):
                 auth='public', website=True)
     def index(self, **kw):
         backends = request.env['node.backend'].search([])
-        return http.request.render('hotel_dashboard_master.dashboard_page', {'backends': backends})
+        return http.request.render('hotel_dashboard_master.hdm_home_page', {'backends': backends})
 
     @http.route('/hotel/dashboard/<model("node.backend"):backend>',
                 auth='public', website=True)
@@ -22,7 +22,7 @@ class HotelDashboard(http.Controller):
             ]),
             'header_tab': 'backend',
         }
-        return http.request.render('hotel_dashboard_master.dashboard_backend_view', values)
+        return http.request.render('hotel_dashboard_master.hdm_backend_view', values)
 
     @http.route([
         '/hotel/dashboard/<model("node.backend"):backend>/room_types/',
@@ -45,7 +45,7 @@ class HotelDashboard(http.Controller):
                 ('backend_id', '=', backend.id),
             ])
 
-        return http.request.render('hotel_dashboard_master.dashboard_room_types_view', values)
+        return http.request.render('hotel_dashboard_master.hdm_room_types_view', values)
 
     @http.route('/hotel/dashboard/<model("node.backend"):backend>/wizard_reservation/',
              auth='public', website=True)
@@ -55,4 +55,18 @@ class HotelDashboard(http.Controller):
             'header_tab': 'wizard_reservation',
             'partners' : request.env['res.partner'].search([]),
         }
-        return http.request.render('hotel_dashboard_master.dashboard_wizard_reservation', values)
+        room_type_wizard_ids = backend.room_type_ids.mapped(lambda room_type_id: (0, False, {
+            'backend_id': backend.id,
+            'room_type_id': room_type_id.id,
+            'checkin': request.env['hotel.node.reservation.wizard']._default_checkin(),
+            'checkout': request.env['hotel.node.reservation.wizard']._default_checkout(),
+        }))
+        wizard_reservation_vals = {
+            'backend_id': backend,
+            'room_type_wizard_ids': room_type_wizard_ids,
+        }
+        # odoo development tip/warning: if you use `new` method for having a virtual record, you should explicitly
+        # get default values before, as they are not fetched automatically.
+        values.update({'wizard': request.env['hotel.node.reservation.wizard'].new(wizard_reservation_vals)})
+
+        return http.request.render('hotel_dashboard_master.hdm_wizard_reservation', values)
