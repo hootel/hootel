@@ -215,6 +215,8 @@ class NodeRoomTypeWizard(models.TransientModel):
                     rec.checkout,
                     rec.room_type_id,
                 )
+                from pprint import pprint
+                pprint(planning)
                 rec.room_type_availability = planning['availability']
                 rec.room_type_line_ids = planning['price_unit']
                 rec.price_unit = sum(rec.room_type_line_ids.mapped('price'))

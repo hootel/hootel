@@ -200,13 +200,25 @@ class HotelNodeAdapter(AbstractComponent):
         #     checkout,
         #     room_type_id.external_id
         # )
+        # return {'availability': availability, 'price_unit': price_unit, 'restrictions': restrictions}
+
         return self._server.env['hotel.room.type'].get_room_type_planning(
             checkin,
             checkout,
             room_type_id.external_id
         )
 
-        return {'availability': availability, 'price_unit': price_unit, 'restrictions': restrictions}
+        # room_types_planning = []
+        # for room_type in room_type_id:
+        #     room_types_planning.append({
+        #         'room_type_id': room_type.id,
+        #         'planning': self._server.env['hotel.room.type'].get_room_type_planning(
+        #             checkin,
+        #             checkout,
+        #             room_type.external_id,
+        #         )
+        #     })
+        # return room_types_planning
 
     # === ROOMS
     def create_room(self, name, capacity, room_type_id):
