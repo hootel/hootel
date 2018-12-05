@@ -194,7 +194,7 @@
                     <div class="form-group form-field">
                         <div class="col-sm-2">
                             <label class="control-label" for="wizard.price_total">Total Price: </label>
-                            <t t-field="wizard.price_total"/>
+                            <span t-field="wizard.price_total"/>
                         </div>
                         <!-- submit button -->
                         <div class="form-group">
