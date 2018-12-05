@@ -8,8 +8,10 @@
     <function model="ir.model.fields" name="formbuilder_whitelist">
         <value>hotel.node.reservation.wizard</value>
         <value eval="[
+            'backend_id',
             'partner_id',
-            'room_type_wizard_ids'
+            'room_type_wizard_ids',
+            'price_total',
         ]"/>
     </function>
 
