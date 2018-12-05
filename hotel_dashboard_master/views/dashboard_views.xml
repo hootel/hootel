@@ -1,0 +1,223 @@
+<odoo>
+
+<!-- Dashboard main template, display list of available hotels -->
+<template id="hdm_home_page" name="Hotel Dashboard Home Page">
+    <t t-call="website.layout">
+        <div class="container mt16">
+            <t t-set="title">Hotel Central Dashboard</t>
+            <div class="row">
+                <t t-foreach="backends" t-as="hotel">
+                    <div class="col-sm-4 mb32">
+                        <div class="well well-sm">
+                            <div>
+                                <a t-attf-href="/hotel/dashboard/#{slug(hotel)}">
+                                    <h4 t-esc="hotel.name"/>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</template>
+
+<!-- Hotel backend sub-template header -->
+<template id="hdm_sub_template_backend_header" name="Hotel Dashboard Header">
+    <section class="oe_slides_box_shadow">
+        <div class="container">
+            <div class="row">
+                <!-- Name and breadcrumb -->
+                <div class="pull-left col-md-8 col-sm-12 col-xs-12 mt16 mb8">
+                    <h3 class="mt0">
+                        <a t-attf-href="/hotel/dashboard/#{slug(backend)}" t-esc="backend.name"/>
+                    </h3>
+                    <a t-attf-href="https://#{backend.address}" class="fa fa-arrow-right">
+                        <span t-esc="backend.address"/>
+                    </a>
+                </div>
+
+                <!-- Search box to be implemented -->
+                <div class="col-md-4 col-sm-12 col-xs-12 pul-right mt16 mb8">
+                </div>
+            </div>
+
+            <div class="row" t-if="not search">
+                <!-- Navigation -->
+                <div class="col-md-8 col-sm-12 col-xs-12">
+                    <ul class="nav nav-tabs nav-tabs-border">
+                        <li t-attf-class="#{header_tab == 'backend' and 'active' ''}">
+                            <a t-attf-href="/hotel/dashboard/#{slug(backend)}"> <i class="fa fa-home"/> Home</a>
+                        </li>
+                        <li t-attf-class="#{header_tab == 'room_types' and 'active' ''}">
+                            <a t-attf-href="/hotel/dashboard/#{slug(backend)}/room_types/"> Room Types</a>
+                        </li>
+                        <li t-attf-class="#{header_tab == 'wizard_reservation' and 'active' ''}">
+                            <a t-attf-href="/hotel/dashboard/#{slug(backend)}/wizard_reservation/"> Reservation Wizard</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Sort options to be implemented -->
+                <div class="col-md-4 col-sm-12 col-xs-12">
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+<!-- Hotel main-template view -->
+<template id="hdm_backend_view" name="Hotel Dashboard">
+    <t t-call="website.layout">
+        <t t-call="hotel_dashboard_master.hdm_sub_template_backend_header"/>
+        <div id="wrap" class="container">
+                <h4>This hotel has <b t-esc="len(room_types)"/> room types</h4>
+        </div>
+    </t>
+</template>
+
+<!-- Hotel room types sub-template list view  -->
+<template id="hdm_sub_template_room_types_view" name="Hotel Dashboard Room Types List">
+    <div id="wrap" class="container">
+        <t t-foreach="room_types" t-as="room_type">
+            <div class="col-sm-4 mt16">
+                <div class="well well-sm">
+                    <a t-attf-href="/hotel/dashboard/#{slug(backend)}/room_types/#{slug(room_type)}">
+                        <h4 t-field="room_type.name"/>
+                    </a>
+                </div>
+            </div>
+        </t>
+    </div>
+</template>
+
+<!-- Hotel room types sub-template view -->
+<template id="hdm_sub_template_room_type_view" name="Hotel Dashboard Room Type">
+    <div id="wrap" class="container">
+        <t t-foreach="rooms" t-as="room">
+            <div class="col-sm-4 mt16">
+                <div class="well well-sm">
+                    <a t-attf-href="/hotel/dashboard/#{slug(backend)}/room_types/#{slug(room_type)}/room/#{slug(room)}">
+                        <h4 t-esc="room.name"/>
+                    </a>
+                </div>
+            </div>
+        </t>
+    </div>
+</template>
+
+<!-- Hotel room types main-template view -->
+<template id="hdm_room_types_view" name="Hotel Dashboard Room Types">
+    <t t-call="website.layout">
+
+        <t t-call="hotel_dashboard_master.hdm_sub_template_backend_header"/>
+        <t t-if="room_types">
+            <t t-call="hotel_dashboard_master.hdm_sub_template_room_types_view"/>
+        </t>
+        <t t-if="room_type">
+            <t t-call="hotel_dashboard_master.hdm_sub_template_room_type_view"/>
+        </t>
+
+    </t>
+</template>
+
+<!-- Hotel wizard reservation main-template -->
+<template id="hdm_wizard_reservation" name="Hotel Dashboard Wizard Reservation">
+    <t t-call="website.layout">
+    <t t-call="hotel_dashboard_master.hdm_sub_template_backend_header"/>
+    <t t-set="additional_title">Reservation Wizard</t>
+        <div id="wrap" class="container">
+        <div class="container">
+            <section id="forms">
+                <form method="post" action="/website_form/" data-model_name="hotel.node.reservation.wizard"
+                      data-success_page="/wizard_reservation/success" enctype="multipart/form-data"
+                      class="s_website_form container-fluid form-horizontal">
+
+                    <input type="hidden" name="backend_id" t-att-value="backend.id"/>
+
+                    <!-- form fields -->
+                    <div class="form-group form-field mt16">
+                        <div class="col-sm-2">
+                            <label class="control-label" for="partner_id">Customer</label>
+                        </div>
+                        <div class="col-sm-6">
+                            <select name="partner_id" class="o_website_form_input form-control" >
+                                <option value="">select...</option>
+                                <t t-foreach="partners" t-as="partner">
+                                    <option t-att-value="partner.id">
+                                        <t t-esc="partner.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                    </div>
+
+                    <table class="table-striped table">
+                    <thead>
+                        <tr style="page-break-inside: avoid;">
+                            <td class="text-left">Room Type</td>
+                            <td class="text-right">Availability</td>
+                            <td class="text-right">Quantity</td>
+                            <td class="text-left">Arrival</td>
+                            <td class="text-left">Departure</td>
+                            <td class="text-right">Nights</td>
+                            <td class="text-right">Min. Days</td>
+                            <td class="text-right">Room Price</td>
+                            <td class="text-right">Discount (%)</td>
+                            <td class="text-right">Total Price</td>
+                        </tr>
+                    </thead>
+                        <t t-foreach="wizard.room_type_wizard_ids" t-as="room_type">
+                            <tr>
+                                <td><span t-field="room_type.room_type_id"/></td>
+                                <td class="text-right"><span t-field="room_type.room_type_availability"/></td>
+                                <td class="text-right">
+                                    <select name="room_type.room_qty" class="o_website_form_input form-control text-right">
+                                        <t t-foreach="range(room_type.room_type_availability+1)" t-as="selected_room_qty">
+                                            <option t-att-value="selected_room_qty">
+                                                <t t-esc="selected_room_qty"/>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </td>
+                                <td><span t-field="room_type.checkin"/></td>
+                                <td><span t-field="room_type.checkout"/></td>
+                                <td class="text-right"><span t-field="room_type.nights"/></td>
+                                <td class="text-right"><span t-field="room_type.min_stay"/></td>
+                                <td class="text-right"><span t-field="room_type.price_unit"/></td>
+                                <td class="text-right"><span t-field="room_type.discount"/></td>
+                                <td class="text-right"><span t-field="room_type.price_total"/></td>
+                            </tr>
+                        </t>
+                    </table>
+
+                    <div class="form-group form-field">
+                        <div class="col-sm-2">
+                            <label class="control-label" for="wizard.price_total">Total Price: </label>
+                            <span t-field="wizard.price_total"/>
+                        </div>
+                        <!-- submit button -->
+                        <div class="form-group">
+                            <div class="col-sm-6">
+                                <a class="o_website_form_send btn btn-primary">Confirm</a>
+                                <span id="o_website_form_result"/>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+        </div>
+    </t>
+</template>
+
+    <!-- menus -->
+
+    <record id="menu_hotel_dashboard" model="website.menu">
+        <field name="name">Dashboard</field>
+        <field name="url">/hotel/dashboard/</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">10</field>
+    </record>
+
+</odoo>
