@@ -18,6 +18,7 @@
         'hotel',
     ],
     'data': [
+        'security/inherited_hotel_folio.xml',
     ],
     'demo': [
     ],
