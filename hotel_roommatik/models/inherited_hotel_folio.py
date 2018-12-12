@@ -2,8 +2,15 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, fields, models, _
+import xml.etree.cElementTree as ET
 
 
 class Inherited_hotel_folio(models.Model):
 
-    _inherit = 'inherited_hotel_folio'
+    _inherit = 'hotel_folio'
+
+
+@api.model
+def RmGetReservation(self, Code=False):
+    xml_response = ET.Element("GetReservationResult")
+    return xml_response
