@@ -7,7 +7,7 @@ import xml.etree.cElementTree as ET
 
 class Inherited_hotel_folio(models.Model):
 
-    _inherit = 'hotel_folio'
+    _inherit = 'hotel.folio'
 
 
 @api.model
