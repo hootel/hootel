@@ -4,6 +4,7 @@
 import logging
 import time
 from datetime import timedelta
+from lxml import etree
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import (
     misc,
@@ -133,7 +134,8 @@ class HotelReservation(models.Model):
                              track_visibility='onchange')
     reservation_type = fields.Selection(related='folio_id.reservation_type',
                                         default=lambda *a: 'normal')
-    board_service_id = fields.Many2one('hotel.board.service', string='Board Service')
+    board_service_room_id = fields.Many2one('hotel.board.service.room.type',
+                                            string='Board Service')
     cancelled_reason = fields.Selection([
         ('late', 'Late'),
         ('intime', 'In time'),
@@ -173,8 +175,7 @@ class HotelReservation(models.Model):
     service_ids = fields.One2many('hotel.service', 'ser_room_line')
 
     pricelist_id = fields.Many2one('product.pricelist',
-                                   related='folio_id.pricelist_id',
-                                   readonly="1")
+                                   related='folio_id.pricelist_id') #TODO: Warning Mens to update pricelist
     checkin_partner_ids = fields.One2many('hotel.checkin.partner', 'reservation_id')
     # TODO: As checkin_partner_count is a computed field, it can't not be used in a domain filer
     # Non-stored field hotel.reservation.checkin_partner_count cannot be searched
@@ -259,6 +260,14 @@ class HotelReservation(models.Model):
                              readonly=True,
                              store=True,
                              compute='_compute_amount_reservation')
+    price_services = fields.Monetary(string='Services Total',
+                                     readonly=True,
+                                     store=True,
+                                     compute='_compute_amount_room_services')
+    price_room_services_set = fields.Monetary(string='Room Services Total',
+                                              readonly=True,
+                                              store=True,
+                                              compute='_compute_amount_set')
     # FIXME discount per night
     discount = fields.Float(string='Discount (%)', digits=dp.get_precision('Discount'), default=0.0)
 
@@ -283,13 +292,14 @@ class HotelReservation(models.Model):
         vals.update({
             'last_updated_res': fields.Datetime.now(),
         })
-        if 'board_service_id' in vals:
+        if 'board_service_room_id' in vals:
                 board_services = []
-                board = self.env['hotel.board.service'].browse(vals['board_service_id'])
-                for product in board.service_ids:
+                board = self.env['hotel.board.service.room.type'].browse(vals['board_service_room_id'])
+                for line in board.board_service_line_ids:
                     board_services.append((0, False, {
-                        'product_id': product.id,
+                        'product_id': line.product_id.id,
                         'is_board_service': True,
+                        'folio_id': vals.get('folio_id'),
                         }))
                 vals.update({'service_ids': board_services})
         if self.compute_price_out_vals(vals):
@@ -322,11 +332,12 @@ class HotelReservation(models.Model):
             if self.compute_board_services(vals):
                 record.service_ids.filtered(lambda r: r.is_board_service == True).unlink()
                 board_services = []
-                board = self.env['hotel.board.service'].browse(vals['board_service_id'])
-                for product in board.service_ids:
+                board = self.env['hotel.board.service.room.type'].browse(vals['board_service_room_id'])
+                for line in board.board_service_line_ids:
                     board_services.append((0, False, {
-                        'product_id': product.id,
+                        'product_id': line.product_id.id,
                         'is_board_service': True,
+                        'folio_id': record.folio_id.id or vals.get('folio_id')
                         }))
                 # NEED REVIEW: Why I need add manually the old IDs if board service is (0,0,(-)) ¿?¿?¿
                 record.update({'service_ids':  [(6, 0, record.service_ids.ids)] + board_services})
@@ -360,10 +371,10 @@ class HotelReservation(models.Model):
     @api.multi
     def compute_board_services(self, vals):
         """
-        We must compute service_ids when we hace a board_service_id without
+        We must compute service_ids when we have a board_service_id without
         service_ids associated to reservation
         """
-        if 'board_service_id' in vals:
+        if 'board_service_room_id' in vals:
             if 'service_ids' in vals:
                 for service in vals['service_ids']:
                     if 'is_board_service' in service[2] and \
@@ -393,7 +404,7 @@ class HotelReservation(models.Model):
         """ Deduce missing required fields from the onchange """
         res = {}
         onchange_fields = ['room_id', 'reservation_type',
-            'currency_id', 'name', 'board_service_id']
+            'currency_id', 'name', 'board_service_room_id']
         if values.get('room_type_id'):
             line = self.new(values)
             if any(f not in values for f in onchange_fields):
@@ -601,15 +612,17 @@ class HotelReservation(models.Model):
             ]
             return {'domain': {'room_id': domain_rooms}}
 
-    @api.onchange('board_service_id')
+    @api.onchange('board_service_room_id')
     def onchange_board_service(self):
-        if self.board_service_id:
+        if self.board_service_room_id:
             board_services = []
-            for product in self.board_service_id.service_ids:
+            for line in self.board_service_room_id.board_service_line_ids:
+                product = line.product_id
                 if product.per_day:
                     vals = {
                         'product_id': product.id,
                         'is_board_service': True,
+                        'folio_id': self.folio_id.id,
                         }
                     vals.update(self.env['hotel.service'].prepare_service_lines(
                         dfrom=self.checkin,
@@ -619,8 +632,10 @@ class HotelReservation(models.Model):
                         old_line_days=False))                    
                     board_services.append((0, False, vals))
             other_services = self.service_ids.filtered(lambda r: r.is_board_service == False)
-            
             self.update({'service_ids':  [(6, 0, other_services.ids)] + board_services})
+            for service in self.service_ids.filtered(lambda r: r.is_board_service == True):
+                service._compute_tax_ids()
+                service.price_unit = service._compute_price_unit()
 
     """
     STATE WORKFLOW -----------------------------------------------------
@@ -706,6 +721,16 @@ class HotelReservation(models.Model):
     """
     PRICE PROCESS ------------------------------------------------------
     """
+    @api.depends('service_ids.price_total')
+    def _compute_amount_room_services(self):
+        for record in self:
+            record.price_services = sum(record.mapped('service_ids.price_total'))
+
+    @api.depends('price_services','price_total')
+    def _compute_amount_set(self):
+        for record in self:
+            record.price_room_services_set = record.price_services + record.price_total
+
     @api.multi
     def compute_price_out_vals(self, vals):
         """
