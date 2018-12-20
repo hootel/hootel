@@ -5,7 +5,7 @@ from odoo import api, fields, models, _
 import json
 
 
-class hotel_folio(models.Model):
+class HotelFolio(models.Model):
 
     _inherit = 'hotel.folio'
 
