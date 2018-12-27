@@ -16,6 +16,9 @@
     'category': 'Generic Modules/Hotel Management',
     'depends': [
         'hotel',
+        'partner_contact_gender',
+        'partner_second_lastname',
+        'partner_contact_birthdate'
     ],
     'data': [
     ],
