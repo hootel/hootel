@@ -3,6 +3,7 @@
 
 import json
 from odoo import _, api, fields, models
+from datetime import datetime
 
 
 class ResPartner(models.Model):
@@ -11,40 +12,36 @@ class ResPartner(models.Model):
 
     @api.model
     def rm_add_customer(self, customer):
+        partnername = customer['LastName1'] + ' ' + customer['LastName2'] + ' ' + customer['FirstName']
         partner_res = self.env['res.partner'].search(
-            [('name', '=', customer['FirstName'])])
+            [('name', '=', partnername)])
         # Need a smart search function here (Check name, document, mail) return unique or null customer.
 
         json_response = dict()
         if any(partner_res):
             json_response = {
                 "Id": partner_res.id,
-                "FirstName": partner_res.name,
-                "LastName1": "Null",
-                "LastName2": "Null",
-                "Birthday": "Null",
-                "Sex": "Null",
-                "Address": [{
-                    "Nationality": "Null",
-                    "Country": partner_res.country_id.name,
-                    "ZipCode": partner_res.zip,
-                    "City": partner_res.city,
-                    "Street": partner_res.street,
-                    "House": "Null",
-                    "Flat": "Null",
-                    "Number": "Null",
-                    "Province": "Null",
-                }],
+                "FirstName": partner_res.firstname,
+                "LastName1": partner_res.lastname,
+                "LastName2": partner_res.lastname2,
+                "Birthday": partner_res.birthdate_date,
+                "Sex": partner_res.gender,
                 "IdentityDocument": [{
                     "Number": "Null",
                     "Type": "Null",
                     "ExpiryDate": "dateTime",
                     "ExpeditionDate": "dateTime",
-                    "Street": "Null",
-                    "House": "Null",
-                    "Flat": "Null",
-                    "Number": "Null",
-                    "Province": "Null",
+                    "Address": [{
+                        "Nationality": "Null",
+                        "Country": partner_res.country_id.name,
+                        "ZipCode": partner_res.zip,
+                        "City": partner_res.city,
+                        "Street": partner_res.street,
+                        "House": "Null",
+                        "Flat": "Null",
+                        "Number": "Null",
+                        "Province": partner_res.state_id.name,
+                    }],
                 }],
                 "Contact": [{
                     "Telephone": partner_res.phone,
@@ -56,10 +53,47 @@ class ResPartner(models.Model):
         else:
             # Create new customer
             json_response = {'Id': 0}
-        # Debug Stop -------------------
-        #import wdb; wdb.set_trace()
-        # Debug Stop -------
 
+            # Check Sex string
+            if customer['Sex'] not in {'male', 'female'}:
+                customer['Sex'] = ''
+
+            # Check state_id
+            city_srch = self.env['res.country.state'].search([
+                ('name', 'ilike',
+                    customer['IdentityDocument'][0]['Address'][0]['Province'])])
+
+            # Create Street2
+            street_2 = 'Nº ' + customer['IdentityDocument'][0]['Address'][0]['House']
+            street_2 += ', ' + customer['IdentityDocument'][0]['Address'][0]['Flat']
+            street_2 += ', ' + customer['IdentityDocument'][0]['Address'][0]['Number']
+
+            # Debug Stop -------------------
+            #import wdb; wdb.set_trace()
+            # Debug Stop -------
+
+            # Check birthdate_date
+            # Here need to convert birthdate_date to '%d%m%Y' fomat
+
+            write_custumer = self.create({
+                'firstname': customer['FirstName'],
+                'lastname': customer['LastName1'],
+                'lastname2': customer['LastName2'],
+                'birthdate_date': datetime.strptime(
+                    customer['Birthday'], '%d%m%Y'),
+                'gender': customer['Sex'],
+                'zip': customer['IdentityDocument'][0]['Address'][0]['ZipCode'],
+                'city': customer['IdentityDocument'][0]['Address'][0]['City'],
+                'street': customer['IdentityDocument'][0]['Address'][0]['Street'],
+                'street2': street_2,
+                'state_id': city_srch.id,
+                'phone': customer['Contact'][0]['Telephone'],
+                'mobile': customer['Contact'][0]['Mobile'],
+                'email': customer['Contact'][0]['Email'],
+                })
+
+
+            json_response = {'Id': write_custumer.id}
 
         # Id: será 0 en la solicitud y será diferente de 0 si el cliente se ha creado
         # correctamente en el PMS.
