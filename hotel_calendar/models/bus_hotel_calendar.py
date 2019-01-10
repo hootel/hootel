@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 from datetime import datetime
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT
-from odoo import models, api
+from odoo import models, api, _
 from odoo.addons.hotel_calendar.controllers.bus import HOTEL_BUS_CHANNEL_ID
 
 
@@ -30,7 +30,6 @@ class BusHotelCalendar(models.TransientModel):
             ('id', '=', master_reserv),
             ('splitted', '=', True),
         ])
-
         return {
             'type': 'reservation',
             'action': vals['action'],
@@ -40,33 +39,43 @@ class BusHotelCalendar(models.TransientModel):
             'userid': user_id.id,
             'reservation': {
                 'room_id': vals['room_id'],
-                'reserv_id': vals['reserv_id'],
-                'partner_name': vals['partner_name'],
+                'id': vals['reserv_id'],
+                'name': vals['partner_name'],
                 'adults': vals['adults'],
                 'childer': vals['children'],
                 'checkin': vals['checkin'],
                 'checkout': vals['checkout'],
                 'folio_id': vals['folio_id'],
-                'reserve_color': vals['reserve_color'],
-                'reserve_color_text': vals['reserve_color_text'],
+                'bgcolor': vals['reserve_color'],
+                'color': vals['reserve_color_text'],
                 'splitted': vals['splitted'],
                 'parent_reservation': vals['parent_reservation'],
                 'room_name': vals['room_name'],
                 'state': vals['state'],
                 'only_read': False,
                 'fix_days': vals['fix_days'],
-                'fix_rooms': False,
+                'fix_room': False,
                 'overbooking': vals['overbooking'],
+                'real_dates': vals['real_dates'],
             },
-            'tooltip': [
-                vals['partner_name'],
-                vals['partner_phone'],
-                vals['checkin'],
-                num_split,
-                vals['price'],
-                vals['reservation_type'],
-                vals['out_service_description'],
-            ]
+            'tooltip': {
+                'name': vals['partner_name'],
+                'phone': vals['partner_phone'],
+                'email': vals['partner_email'],
+                'room_type_name': vals['room_type_name'],
+                'adults': vals['adults'],
+                'children': vals['children'],
+                'checkin': vals['checkin'],
+                'checkout': vals['checkout'],
+                'arrival_hour': vals['arrival_hour'],
+                'departure_hour': vals['departure_hour'],
+                'num_split': num_split,
+                'amount_total': vals['amount_total'],
+                'pending_amount': vals['pending_amount'],
+                'amount_paid': vals['amount_paid'],
+                'type': vals['reservation_type'],
+                'out_service_description': vals['out_service_description'],
+            }
         }
 
     @api.model

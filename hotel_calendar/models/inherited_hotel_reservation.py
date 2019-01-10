@@ -78,25 +78,26 @@ class HotelReservation(models.Model):
         json_reservations = []
         json_reservation_tooltips = {}
         for reserv in reservations:
-            json_reservations.append([
-                reserv.room_id.id,
-                reserv.id,
-                reserv.folio_id.closure_reason_id.name or _('Out of service') if reserv.folio_id.reservation_type == 'out'
-                else reserv.folio_id.partner_id.name,
-                reserv.adults,
-                reserv.children,
-                reserv.checkin,
-                reserv.checkout,
-                reserv.folio_id.id,
-                reserv.reserve_color,
-                reserv.reserve_color_text,
-                reserv.splitted,
-                reserv.parent_reservation and reserv.parent_reservation.id
-                or False,
-                False,  # Read-Only
-                reserv.splitted,   # Fix Days
-                False,  # Fix Rooms
-                reserv.overbooking])
+            json_reservations.append({
+                'room_id': reserv.room_id.id,
+                'id': reserv.id,
+                'name': reserv.folio_id.closure_reason_id.name or _('Out of service') if reserv.folio_id.reservation_type == 'out'
+                        else reserv.folio_id.partner_id.name,
+                'adults': reserv.adults,
+                'childrens': reserv.children,
+                'checkin': reserv.checkin,
+                'checkout': reserv.checkout,
+                'folio_id': reserv.folio_id.id,
+                'bgcolor': reserv.reserve_color,
+                'color': reserv.reserve_color_text,
+                'splitted': reserv.splitted,
+                'parent_reservation': reserv.parent_reservation and reserv.parent_reservation.id or False,
+                'read_only': False,  # Read-Only
+                'fix_days': reserv.splitted,   # Fix Days
+                'fix_room': False,  # Fix Rooms
+                'overbooking': reserv.overbooking,
+                'state': reserv.state,
+                'real_dates': reserv.get_real_checkin_checkout()})
             num_split = 0
             if reserv.splitted:
                 master_reserv = reserv.parent_reservation or reserv
@@ -107,16 +108,27 @@ class HotelReservation(models.Model):
                     ('splitted', '=', True),
                 ])
             json_reservation_tooltips.update({
-                reserv.id: [
-                    _('Out of service') if reserv.folio_id.reservation_type == 'out' else reserv.folio_id.partner_id.name,
-                    reserv.folio_id.partner_id.mobile or
-                    reserv.folio_id.partner_id.phone or _('Undefined'),
-                    reserv.checkin,
-                    num_split,
-                    reserv.folio_id.amount_total,
-                    reserv.reservation_type,
-                    reserv.out_service_description or _('No reason given'),
-                ]
+                reserv.id: {
+                    'folio_name': reserv.folio_id.name,
+                    'name': _('Out of service') if reserv.folio_id.reservation_type == 'out' else reserv.folio_id.partner_id.name,
+                    'phone': reserv.mobile or reserv.phone or _('Phone not provided'),
+                    'email': reserv.email or _('Email not provided'),
+                    'room_type_name': reserv.room_type_id.name,
+                    'adults': reserv.adults,
+                    'children': reserv.children,
+                    'checkin': reserv.checkin,
+                    'checkout': reserv.checkout,
+                    'arrival_hour': reserv.arrival_hour,
+                    'departure_hour': reserv.departure_hour,
+                    'num_split': num_split,
+                    'amount_total': reserv.folio_id.amount_total,
+                    'pending_amount': reserv.folio_id.pending_amount,
+                    'amount_paid': reserv.folio_id.amount_total - reserv.folio_id.pending_amount,
+                    'type': reserv.reservation_type or 'normal',
+                    'out_service_description': reserv.out_service_description or
+                                               _('No reason given'),
+                    # TODO: Add Board Services and Extra Service as Cradle, Bed, ...
+                }
             })
         return (json_reservations, json_reservation_tooltips)
 
@@ -133,6 +145,7 @@ class HotelReservation(models.Model):
                 'name': room.name,
                 'capacity': room.capacity,
                 'class_name': room.room_type_id.class_id.name,
+                'class_id': room.room_type_id.class_id.id,
                 'shared': room.shared_room,
                 'price': room.room_type_id
                          and ['pricelist', room.room_type_id.id, pricelist_id,
@@ -145,15 +158,29 @@ class HotelReservation(models.Model):
         return json_rooms
 
     @api.model
+    def _hcalendar_calendar_data(self, calendars):
+        json_calendars = []
+        for calendar in calendars:
+            json_calendars.append({
+                'id': calendar.id,
+                'name': calendar.name,
+                'segmentation_ids': calendar.segmentation_ids.ids,
+                'location_ids': calendar.location_ids.ids,
+                'amenity_ids': calendar.amenity_ids.ids,
+                'room_type_ids': calendar.room_type_ids.ids,
+            })
+        return json_calendars
+
+    @api.model
     def _hcalendar_event_data(self, events):
         json_events = []
         for event in events:
-            json_events.append([
-                event.id,
-                event.name,
-                event.start,
-                event.location,
-            ])
+            json_events.append({
+                'id': event.id,
+                'name': event.name,
+                'date': event.start,
+                'location': event.location,
+            })
         return json_events
 
     @api.model
@@ -161,11 +188,7 @@ class HotelReservation(models.Model):
         date_start = fields.Date.from_string(dfrom) - timedelta(days=1)
         date_start_str = date_start.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
         reservations_raw = self.env['hotel.reservation'].search(
-            [
-                ('room_id', 'in', rooms.ids),
-                ('state', 'in',
-                 ['draft', 'confirm', 'booking', 'done', False]),
-            ],
+            [('room_id', 'in', rooms.ids)],
             order="checkin DESC, checkout ASC, adults DESC, children DESC")
         reservations_ll = self.env['hotel.reservation'].search([
             ('checkin', '<=', dto),
@@ -310,6 +333,7 @@ class HotelReservation(models.Model):
             raise ValidationError(_('Input Error: No dates defined!'))
 
         rooms = self.env['hotel.room'].search([], order='hcal_sequence ASC')
+        calendars = self.env['hotel.calendar'].search([])
         json_res, json_res_tooltips = self.get_hcalendar_reservations_data(
             dfrom, dto, rooms)
 
@@ -320,43 +344,57 @@ class HotelReservation(models.Model):
             'pricelist': self.get_hcalendar_pricelist_data(dfrom, dto),
             'restrictions': self.get_hcalendar_restrictions_data(dfrom, dto),
             'events': self.get_hcalendar_events_data(dfrom, dto),
+            'calendars': self._hcalendar_calendar_data(calendars)
         }
 
         return vals
 
     @api.multi
+    def generate_bus_values(self, naction, ntype, ntitle=''):
+        self.ensure_one()
+        return {
+            'action': naction,
+            'type': ntype,
+            'title': ntitle,
+            'room_id': self.room_id.id,
+            'reserv_id': self.id,
+            'partner_name': (self.closure_reason_id.name or _('Out of service'))
+                            if self.reservation_type == 'out' else self.partner_id.name,
+            'adults': self.adults,
+            'children': self.children,
+            'checkin': self.checkin,
+            'checkout': self.checkout,
+            'arrival_hour': self.arrival_hour,
+            'departure_hour': self.departure_hour,
+            'folio_id': self.folio_id.id,
+            'reserve_color': self.reserve_color,
+            'reserve_color_text': self.reserve_color_text,
+            'splitted': self.splitted,
+            'parent_reservation': self.parent_reservation and
+                                  self.parent_reservation.id or 0,
+            'room_name': self.room_id.name,
+            'room_type_name': self.room_type_id.name,
+            'partner_phone': self.partner_id.mobile
+                             or self.partner_id.phone or _('Undefined'),
+            'partner_email': self.partner_id.email or _('Undefined'),
+            'state': self.state,
+            'fix_days': self.splitted,
+            'overbooking': self.overbooking,
+            'amount_total': self.folio_id.amount_total,
+            'pending_amount': self.folio_id.pending_amount,
+            'amount_paid': self.folio_id.amount_total - self.folio_id.pending_amount,
+            'reservation_type': self.reservation_type or 'normal',
+            'closure_reason_id': self.closure_reason_id,
+            'out_service_description': self.out_service_description or _('No reason given'),
+            'real_dates': self.get_real_checkin_checkout(),
+        }
+
+    @api.multi
     def send_bus_notification(self, naction, ntype, ntitle=''):
         hotel_cal_obj = self.env['bus.hotel.calendar']
         for record in self:
-            hotel_cal_obj.send_reservation_notification({
-                'action': naction,
-                'type': ntype,
-                'title': ntitle,
-                'room_id': record.room_id.id,
-                'reserv_id': record.id,
-                'partner_name': record.closure_reason_id.name or _('Out of service') if record.reservation_type == 'out'
-                else record.partner_id.name,
-                'adults': record.adults,
-                'children': record.children,
-                'checkin': record.checkin,
-                'checkout': record.checkout,
-                'folio_id': record.folio_id.id,
-                'reserve_color': record.reserve_color,
-                'reserve_color_text': record.reserve_color_text,
-                'splitted': record.splitted,
-                'parent_reservation': record.parent_reservation and
-                                      record.parent_reservation.id or 0,
-                'room_name': record.room_id.name,
-                'partner_phone': record.partner_id.mobile
-                                 or record.partner_id.phone or _('Undefined'),
-                'state': record.state,
-                'fix_days': record.splitted,
-                'overbooking': record.overbooking,
-                'price': record.folio_id.amount_total,
-                'reservation_type': record.reservation_type,
-                'closure_reason_id': record.closure_reason_id or None,
-                'out_service_description': record.out_service_description or _('No reason given')
-            })
+            hotel_cal_obj.send_reservation_notification(
+                record.generate_bus_values(naction, ntype, ntitle))
 
     @api.model
     def swap_reservations(self, fromReservsIds, toReservsIds):
@@ -404,6 +442,7 @@ class HotelReservation(models.Model):
     @api.multi
     def write(self, vals):
         ret = super(HotelReservation, self).write(vals)
+        _logger.info("RESERV WRITE")
         if 'partner_id' in vals or 'checkin' in vals or \
                 'checkout' in vals or 'product_id' in vals or \
                 'adults' in vals or 'children' in vals or \
@@ -411,8 +450,9 @@ class HotelReservation(models.Model):
                 'closure_reason_id' in vals or 'out_service_description' in vals or \
                 'reservation_type' in vals or \
                 'reserve_color' in vals or \
-                'reserve_color_text' in vals or 'product_id' in vals or \
-                'parent_reservation' in vals or 'overbooking' in vals:
+                'reserve_color_text' in vals or 'price_total' in vals or \
+                'parent_reservation' in vals or 'overbooking' in vals or \
+                'room_type_id' in vals:
             for record in self:
                 record.send_bus_notification(
                     'write',

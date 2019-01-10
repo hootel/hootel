@@ -106,6 +106,23 @@ return AbstractModel.extend({
         });
     },
 
+    update_or_create_calendar_record: function(ids, vals) {
+        if (!ids) {
+            return this._rpc({
+                model: 'hotel.calendar',
+                method: 'create',
+                args: [vals],
+                context: Session.user_context,
+            });
+        }
+        return this._rpc({
+            model: 'hotel.calendar',
+            method: 'write',
+            args: [ids, vals],
+            context: Session.user_context,
+        });
+    },
+
     folio_search_count: function(domain) {
         return this._rpc({
             model: 'hotel.folio',
@@ -113,6 +130,24 @@ return AbstractModel.extend({
             args: [domain],
             context: Session.user_context,
         });
+    },
+
+    split_reservation: function(id, nights) {
+        return this._rpc({
+            model: this.modelName,
+            method: 'split',
+            args: [[id], nights],
+            context: Session.user_context,
+        })
+    },
+
+    unify_reservations: function(reserv_ids) {
+        return this._rpc({
+            model: this.modelName,
+            method: 'unify_ids',
+            args: [reserv_ids],
+            context: Session.user_context,
+        })
     },
 
     save_changes: function(params) {

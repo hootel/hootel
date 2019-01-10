@@ -3,16 +3,19 @@
 
 from odoo.addons.component.core import Component
 from odoo.addons.hotel_channel_connector.components.core import ChannelConnectorError
-from odoo import api, _
+from odoo import api, _, fields
 
 
 class ProductPricelistExporter(Component):
     _inherit = 'channel.product.pricelist.exporter'
 
     @api.model
-    def rename_plan(self, binding):
+    def update_plan_name(self, binding):
         try:
-            return self.backend_adapter.rename_plan(
+            binding.with_context({
+                'connector_no_export': True,
+            }).write({'sync_date': fields.Datetime.now()})
+            return self.backend_adapter.update_plan_name(
                 binding.external_id,
                 binding.name)
         except ChannelConnectorError as err:

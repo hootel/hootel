@@ -421,7 +421,7 @@ class HotelReservation(models.Model):
     @api.model
     def _autoassign(self, values):
         res = {}
-        checkin = values.get('checkin') 
+        checkin = values.get('checkin')
         checkout = values.get('checkout')
         room_type = values.get('room_type_id')
         if checkin and checkout and room_type:
@@ -475,21 +475,22 @@ class HotelReservation(models.Model):
             'checkin': checkin or self.checkin,
             'checkout': checkout or self.checkout,
             'folio_id': self.folio_id.id,
-            # 'product_id': self.product_id.id,
             'parent_reservation': self.parent_reservation.id,
             'state': self.state,
             'overbooking': self.overbooking,
             'reselling': self.reselling,
-            'price_unit': self.price_unit,
+            'price_total': self.price_total,
+            'price_tax': self.price_tax,
+            'price_subtotal': self.price_subtotal,
             'splitted': self.splitted,
-            # 'room_type_id': self.room_type_id.id,
             'room_type_id': self.room_type_id.id,
+            'room_id': self.room_id.id,
         }
 
     @api.constrains('adults')
     def _check_adults(self):
         for record in self:
-            extra_bed = record.service_ids.filtered(    
+            extra_bed = record.service_ids.filtered(
                         lambda r: r.product_id.is_extra_bed == True)
             if record.adults > record.room_id.get_capacity(len(extra_bed)):
                 raise ValidationError(
@@ -629,7 +630,7 @@ class HotelReservation(models.Model):
                         days=self.nights,
                         per_person=product.per_person,
                         persons=self.adults,
-                        old_line_days=False))                    
+                        old_line_days=False))
                     board_services.append((0, False, vals))
             other_services = self.service_ids.filtered(lambda r: r.is_board_service == False)
             self.update({'service_ids':  [(6, 0, other_services.ids)] + board_services})
@@ -959,7 +960,9 @@ class HotelReservation(models.Model):
 
         master_reservation = self.parent_reservation or self
         splitted_reservs = self.env['hotel.reservation'].search([
+            '|',
             ('splitted', '=', True),
+            ('id', '=', master_reservation.id), # This here because can create a splitted reserv before set as splitted the parent reservation (master)
             ('folio_id', '=', self.folio_id.id),
             '|',
             ('parent_reservation', '=', master_reservation.id),
@@ -975,76 +978,124 @@ class HotelReservation(models.Model):
         return (first_checkin, last_checkout)
 
     @api.multi
+    def split(self, nights):
+        for record in self:
+            date_start_dt = fields.Date.from_string(record.checkin)
+            date_end_dt = fields.Date.from_string(record.checkout)
+            date_diff = abs((date_end_dt - date_start_dt).days)
+            new_start_date_dt = date_start_dt + \
+                                timedelta(days=date_diff-nights)
+            if nights >= date_diff or nights < 1:
+                raise ValidationError(_("Invalid Nights! Max is \
+                                        '%d'") % (date_diff-1))
+
+            vals = record.generate_copy_values(
+                new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                date_end_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+            )
+            # Days Price
+            reservation_lines = [[], []]
+            tprice = [0.0, 0.0]
+            for rline in record.reservation_line_ids:
+                rline_dt = fields.Date.from_string(rline.date)
+                if rline_dt >= new_start_date_dt:
+                    reservation_lines[1].append((0, False, {
+                        'date': rline.date,
+                        'price': rline.price
+                    }))
+                    tprice[1] += rline.price
+                    reservation_lines[0].append((2, rline.id, False))
+                else:
+                    tprice[0] += rline.price
+
+            parent_res = record.parent_reservation or record
+            vals.update({
+                'splitted': True,
+                'price_total': tprice[1],
+                'parent_reservation': parent_res.id,
+                'room_type_id': parent_res.room_type_id.id,
+                'discount': parent_res.discount,
+                'reservation_line_ids': reservation_lines[1],
+            })
+            reservation_copy = self.env['hotel.reservation'].with_context({
+                'ignore_avail_restrictions': True}).create(vals)
+            if not reservation_copy:
+                raise ValidationError(_("Unexpected error copying record. \
+                                        Can't split reservation!"))
+            record.write({
+                'checkout': new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
+                'price_total': tprice[0],
+                'splitted': True,
+                'reservation_line_ids': reservation_lines[0],
+            })
+        return True
+
+    @api.multi
     def unify(self):
-        # FIXME Remove product inheritance
-        pass
-    #     self.ensure_one()
-    #     if not self.splitted:
-    #         raise ValidationError(_("This reservation can't be unified"))
-    #
-    #     master_reservation = self.parent_reservation or self
-    #     self_is_master = (master_reservation == self)
-    #
-    #     splitted_reservs = self.env['hotel.reservation'].search([
-    #         ('splitted', '=', True),
-    #         ('folio_id', '=', self.folio_id.id),
-    #         '|',
-    #         ('parent_reservation', '=', master_reservation.id),
-    #         ('id', '=', master_reservation.id)
-    #     ])
-    #
-    #     rooms_products = splitted_reservs.mapped('product_id.id')
-    #     if len(rooms_products) > 1 or \
-    #             (len(rooms_products) == 1
-    #                 and master_reservation.product_id.id != rooms_products[0]):
-    #         raise ValidationError(_("This reservation can't be unified: They \
-    #                                 all need to be in the same room"))
-    #
-    #     # Search checkout
-    #     last_checkout = splitted_reservs[0].checkout
-    #     for reserv in splitted_reservs:
-    #         if last_checkout < reserv.checkout:
-    #             last_checkout = reserv.checkout
-    #
-    #     # Agrupate reservation lines
-    #     reservation_line_ids = splitted_reservs.mapped('reservation_line_ids')
-    #     reservation_line_ids.sorted(key=lambda r: r.date)
-    #     rlines = [(5, False, False)]
-    #     tprice = 0.0
-    #     for rline in reservation_line_ids:
-    #         rlines.append((0, False, {
-    #             'date': rline.date,
-    #             'price': rline.price,
-    #         }))
-    #         tprice += rline.price
-    #
-    #     # Unify
-    #     folio = self.folio_id   # FIX: To Allow Unify confirm reservations
-    #     state = folio.state     # FIX
-    #     folio.state = 'draft'   # FIX
-    #     osplitted_reservs = splitted_reservs - master_reservation
-    #     osplitted_reservs.sudo().unlink()
-    #     folio.state = state  # FIX
-    #
-    #     # FIXME: Two writes because checkout regenerate reservation lines
-    #     master_reservation.write({
-    #         'checkout': last_checkout,
-    #         'splitted': False,
-    #     })
-    #     master_reservation.write({
-    #         'reservation_line_ids': rlines,
-    #         'price_unit': tprice,
-    #     })
-    #     if not self_is_master:
-    #         return {'type': 'ir.actions.act_window_close'}
-    #     return True
-    #
-    # '''
-    #       Created this because "copy()" function create a new record
-    #     and collide with date restrictions.
-    #     This function generate a usable dictionary with reservation values
-    #     for copy purposes.
-    # '''
+        self.ensure_one()
+        if not self.splitted:
+            raise ValidationError(_("This reservation can't be unified"))
+
+        master_reservation = self.parent_reservation or self
+
+        splitted_reservs = self.env['hotel.reservation'].search([
+            ('splitted', '=', True),
+            ('folio_id', '=', self.folio_id.id),
+            '|',
+            ('parent_reservation', '=', master_reservation.id),
+            ('id', '=', master_reservation.id)
+        ])
+        self.unify_books(splitted_reservs)
+
+        self_is_master = (master_reservation == self)
+        if not self_is_master:
+            return {'type': 'ir.actions.act_window_close'}
+
+    @api.model
+    def unify_ids(self, reserv_ids):
+        splitted_reservs = self.env[self._name].browse(reserv_ids)
+        self.unify_books(splitted_reservs)
+
+    @api.model
+    def unify_books(self, splitted_reservs):
+        master_reservation = splitted_reservs[0].parent_reservation or splitted_reservs[0]
+        room_type_ids = splitted_reservs.mapped('room_type_id.id')
+        if len(room_type_ids) > 1 or \
+                (len(room_type_ids) == 1
+                 and master_reservation.room_type_id.id != room_type_ids[0]):
+            raise ValidationError(_("This reservation can't be unified: They \
+                                    all need to be in the same room"))
+
+        # Search checkout
+        last_checkout = splitted_reservs[0].checkout
+        for reserv in splitted_reservs:
+            if last_checkout < reserv.checkout:
+                last_checkout = reserv.checkout
+
+        # Agrupate reservation lines
+        reservation_line_ids = splitted_reservs.mapped('reservation_line_ids')
+        reservation_line_ids.sorted(key=lambda r: r.date)
+        rlines = [(5, False, False)]
+        tprice = 0.0
+        for rline in reservation_line_ids:
+            rlines.append((0, False, {
+                'date': rline.date,
+                'price': rline.price,
+            }))
+            tprice += rline.price
+
+        # Unify
+        osplitted_reservs = splitted_reservs - master_reservation
+        osplitted_reservs.sudo().unlink()
+
+        master_reservation.write({
+            'checkout': last_checkout,
+            'splitted': master_reservation.get_real_checkin_checkout()[1] != last_checkout,
+            'reservation_line_ids': rlines,
+            'price_total': tprice,
+        })
+        return True
+
 
     @api.multi
     def open_master(self):
@@ -1052,7 +1103,7 @@ class HotelReservation(models.Model):
         if not self.parent_reservation:
             raise ValidationError(_("This is the parent reservation"))
         action = self.env.ref('hotel.open_hotel_reservation_form_tree_all').read()[0]
-        action['views'] = [(self.env.ref('hotel.view_hotel_reservation_form').id, 'form')]
+        action['views'] = [(self.env.ref('hotel.hotel_reservation_view_form').id, 'form')]
         action['res_id'] = self.parent_reservation.id
         return action
 

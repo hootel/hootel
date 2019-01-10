@@ -10,6 +10,12 @@
 	overflow: initial !important;
 }
  */
+
+.o_hotel_calendar_view {
+  display: flex;
+	height: 100%;
+}
+
 .nopadding {
    padding: 0 !important;
    margin: 0 !important;
@@ -17,64 +23,112 @@
 
 #pms-menu {
 	padding: 0 0.2em !important;
+	overflow: auto;
 }
+
+#pms-menu .input-group span, #pms-menu input {
+	border-radius: 0;
+}
+
 #pms-menu button {
-	min-height: 45px;
-	margin: 0.2em 0;
+  border-radius: 0;
+  border: 1px solid lightgray;
+  font-size: x-small;
 }
 
-#pms-search {
-	padding: 0.5em !important;
-	background-color: white;
-	box-shadow: 10px 1px 12px #333;
+#pms-calendar: {
+	flex: 1 1 auto;
+	overflow: auto;
 }
-#pms-search fieldset {
+
+button .led {
+	position: absolute;
 	display: inline-block;
+	right: 5px;
+	top: -1px;
+	width: 8px;
+	height: 8px;
+	border: 1px solid lightgray;
+	border-top-width: 0;
+	border-top-right-radius: 0;
+	border-top-left-radius: 0;
+	transition: all 0.5s ease;
 }
-#pms-search fieldset legend {
-	font-size: initial !important;
-	margin: initial !important;
+button .led-disabled {
+	background-color: dimgrey;
 }
-#pms-search .list {
-	overflow-y: auto;
+button .led-enabled {
+	background-color: khaki;
+	box-shadow: 0 0 8px 0px khaki;
+}
+
+button .led-green {
+	background-color: chartreuse;
+	box-shadow: 0 0 8px 0px chartreuse;
+}
+
+button .led-blue {
+	background-color: cornflowerblue;
+	box-shadow: 0 0 8px 0px cornflowerblue;
+}
+
+input#bookings_search {
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+	border: 1px solid lightgray;
+}
+
+#pms-menu .menu-date-box {
+	margin-top: 2px !important;
+}
+
+#pms-menu .menu-button-box, #pms-menu .menu-search-box, #pms-menu .menu-filter-box {
+	margin-top: 1em !important;
+}
+
+#pms-menu .menu-filter-box .filter-record {
+	margin-top: 1em;
+}
+
+#pms-menu .button-box {
 	text-align: left;
-}
-#pms-search label {
-	font-size: 12px;
-}
-
-#pms-search-table > tbody > tr > td {
-	background-color: white;
-	padding: 0.1em;
-	border: 1px solid #efefef;
-	border-width: 0 2px;
-	vertical-align: middle;
-	text-align: center;
-}
-#pms-search-table > tbody > tr > td:first-child {
-	border-width: 0 2px 0 0;
-}
-#pms-search-table > tbody > tr > td:last-child {
-	border-width: 0 0 0 2px;
+	min-height: 3.5em;
+	padding: 3px;
+	transition: all 0.5s ease;
 }
 
-#pms-search-cal-pag .btn {
-	background-color: transparent;
-	padding: 0.1em;
+.button-highlight {
+	background-color: orange;
+	color: white;
+}
+.button-highlight i {
+	color: white;
 }
 
-.input-group {
-	padding: 0.1em;
+.multi-calendar-tab-plus {
+	background-color: darkgray;
+	font-weight: bold;
+	color: white;
+}
+
+#pms-menu div[id^=btn_] {
+	padding: 2px;
+}
+
+.warn-message {
+  text-align: center;
+  line-height: 100vh;
+  font-size: xx-large;
+  color: gray;
 }
 
 /** SELECT 2 **/
-#pms-search .select2-search-choice {
-	padding-top: 1px !important;
-	padding-bottom: 1px !important;
-	font-size: 10px !important;
+#pms-menu .select2-container, #pms-menu .select2-choice {
+	border-radius: 0;
 }
-#pms-search .select2-search-choice-close {
-	top: 1px !important;
+#pms-menu .select2-choice {
+	height: 100%;
+	padding: 2px;
 }
 
 /** BOOTSTRAP **/
@@ -82,15 +136,98 @@
 	background-color: #d34f2a !important;
 }
 
-/** FONT AWESOME **/
-.cloud-text {
-	margin-top: .12em;
-	font-size: 26px;
-	font-family: sans-serif;
-	font-weight: bold;
-}
-
 /** ODOO **/
 .o_chat_window {
   z-index: 8 !important;
 }
+
+.o_button_icon {
+	display: inline-block;
+	width: 37px;
+	padding: 0px 3px;
+	text-align: center;
+	vertical-align: middle;
+	color: #7C7BAD;
+	font-size: 24px;
+}
+
+.o_button_text {
+	display: inline-block;
+	vertical-align: middle;
+	max-width: 70%;
+	line-height: 1.2;
+	text-align: left;
+}
+
+/** TOOLTIPS **/
+.popover-content {
+    font-family: Garuda, sans-serif;
+    font-size: 12px;
+    padding: 9px;
+}
+.popover h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 2px;
+    margin-bottom: 0px;
+}
+.popover {
+	max-width: 550px;
+}
+.popover .container {
+	max-width: -webkit-fill-available;
+}
+.popover .container p {
+    margin-top: 3px;
+    margin-bottom: 0px;
+}
+.popover header {
+    font-size: 1.3em;
+}
+.popover .fa-border {
+    padding: .25em;
+    border: solid 0.1em #777777;
+    border-radius: .2em;
+}
+
+.fa-text-inside {
+    font-family: Garuda, sans-serif;
+    font-size: 14px;
+}
+.col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+/* Spacing in Bootstrap v4.0 */
+.mt-3 {
+    margin-top: 3px;
+}
+.mt-10 {
+    margin-top: 10px !important;
+}
+.mt-25 {
+    margin-top: 25px;
+}
+.mr-5 {
+    margin-right: 5px;
+}
+.mx-25 {
+    margin-left: 25px;
+    margin-right: 25px;
+}
+.py-5 {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.pb-10 {
+    padding-bottom: 10px;
+}
+
+/* WARNING: The .row-eq-height class uses CSS3's flexbox layout mode,
+            which is not supported in Internet Explorer 9 and below. */
+.row-eq-height {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+/* TODO: Use Odoo Colours based on http://www.odoo.com/openerp_website/static/src/less/variables.less */
