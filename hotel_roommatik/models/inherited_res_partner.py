@@ -27,25 +27,27 @@ class ResPartner(models.Model):
                 "Birthday": partner_res.birthdate_date,
                 "Sex": partner_res.gender,
                 "IdentityDocument": [{
-                    "Number": "Null",
-                    "Type": "Null",
-                    "ExpiryDate": "dateTime",
-                    "ExpeditionDate": "dateTime",
+                    "Number": partner_res.document_number,
+                    "Type": partner_res.document_type,
+                    # TODO: ExpiryDate calculate/storage
+                    # "ExpiryDate": partner_res.,
+                    "ExpeditionDate": partner_res.document_expedition_date,
                     "Address": [{
-                        "Nationality": "Null",
+                        # TODO: Nationality calculate/storage
+                        # "Nationality": "Null",
                         "Country": partner_res.country_id.name,
                         "ZipCode": partner_res.zip,
                         "City": partner_res.city,
                         "Street": partner_res.street,
-                        "House": "Null",
-                        "Flat": "Null",
-                        "Number": "Null",
+                        # "House": "Null",
+                        # "Flat": "Null",
+                        # "Number": "Null",
                         "Province": partner_res.state_id.name,
                     }],
                 }],
                 "Contact": [{
                     "Telephone": partner_res.phone,
-                    "Fax": "Null",
+                    # "Fax": "Null",
                     "Mobile": partner_res.mobile,
                     "Email": partner_res.email,
                 }]
@@ -82,6 +84,10 @@ class ResPartner(models.Model):
                 'birthdate_date': datetime.strptime(
                     customer['Birthday'], '%d%m%Y'),
                 'gender': customer['Sex'],
+                'document_number': customer['IdentityDocument'][0]['Number'],
+                'document_type': customer['IdentityDocument'][0]['Type'].upper(),
+                'document_expedition_date': datetime.strptime(
+                    customer['IdentityDocument'][0]['ExpeditionDate'], '%d%m%Y'),
                 'zip': customer['IdentityDocument'][0]['Address'][0]['ZipCode'],
                 'city': customer['IdentityDocument'][0]['Address'][0]['City'],
                 'street': customer['IdentityDocument'][0]['Address'][0]['Street'],
