@@ -103,9 +103,17 @@
 	margin-top: 1.2em;
 }
 
+.table-room_type-data-header {
+	z-index: 1;
+}
+
+.table-room_type-data-header .hcal-management-table tr td {
+	background-color: white;
+}
+
 #hcal_management_widget {
 	overflow: auto;
-	display:flex;
+	display: flex;
 }
 
 #hcal-management-container-dd {

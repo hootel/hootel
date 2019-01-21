@@ -174,7 +174,7 @@ var HotelCalendarManagementView = AbstractRenderer.extend({
         var curScrollPos = $('.o_content').scrollTop();
         if (curScrollPos > 0) {
             this.$CalendarHeaderDays.css({
-                top: `0px`,
+                top: `${curScrollPos-this.$ehcal.position().top}px`,
                 position: 'sticky'
             });
         } else {
