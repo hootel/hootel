@@ -1,8 +1,7 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from openerp import models, fields, api, _
-from openerp.exceptions import ValidationError
 
 
 class HotelChannelConnectorIssue(models.Model):
@@ -23,11 +22,11 @@ class HotelChannelConnectorIssue(models.Model):
         ('room', 'Room'),
         ('avail', 'Availability')], required=True)
     to_read = fields.Boolean("To Read", default=True)
-    internal_message = fields.Char("Internal Message", old_name='message')
+    internal_message = fields.Char("Internal Message")
     date_start = fields.Date("From", readonly=True)
     date_end = fields.Date("To", readonly=True)
-    channel_object_id = fields.Char("Channel Object ID", old_name='wid', readonly=True)
-    channel_message = fields.Char("Channel Message", old_name='wmessage', readonly=True)
+    channel_object_id = fields.Char("Channel Object ID", readonly=True)
+    channel_message = fields.Char("Channel Message", readonly=True)
 
     @api.model
     def create(self, vals):

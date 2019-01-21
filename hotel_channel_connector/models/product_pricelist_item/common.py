@@ -1,4 +1,4 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models, fields
@@ -17,8 +17,8 @@ class ChannelProductPricelistItem(models.Model):
                               string='Hotel Product Pricelist Item',
                               required=True,
                               ondelete='cascade')
-    channel_pushed = fields.Boolean("Channel Pushed", readonly=True, default=False,
-                                    old_name='wpushed')
+    channel_pushed = fields.Boolean("Channel Pushed", readonly=True,
+                                    default=False)
 
     @job(default_channel='root.channel')
     @api.model
@@ -41,6 +41,7 @@ class ChannelProductPricelistItem(models.Model):
             exporter = work.component(usage='product.pricelist.item.exporter')
             return exporter.push_pricelist()
 
+
 class ProductPricelistItem(models.Model):
     _inherit = 'product.pricelist.item'
 
@@ -49,6 +50,7 @@ class ProductPricelistItem(models.Model):
         inverse_name='odoo_id',
         string='Hotel Channel Connector Bindings')
 
+
 class BindingProductPricelistItemListener(Component):
     _name = 'binding.product.pricelist.item.listener'
     _inherit = 'base.connector.listener'
@@ -56,7 +58,8 @@ class BindingProductPricelistItemListener(Component):
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_write(self, record, fields=None):
-        fields_to_check = ('date_start', 'date_end', 'fixed_price', 'product_tmpl_id')
+        fields_to_check = ('date_start', 'date_end', 'fixed_price',
+                           'product_tmpl_id')
         fields_checked = [elm for elm in fields_to_check if elm in fields]
         if any(fields_checked):
             record.channel_bind_ids.write({'channel_pushed': False})
@@ -78,6 +81,7 @@ class BindingProductPricelistItemListener(Component):
                         'backend_id': pricelist_bind.backend_id.id,
                     })
 
+
 class ChannelBindingProductPricelistItemListener(Component):
     _name = 'channel.binding.product.pricelist.item.listener'
     _inherit = 'base.connector.listener'
@@ -85,7 +89,8 @@ class ChannelBindingProductPricelistItemListener(Component):
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_write(self, record, fields=None):
-        fields_to_check = ('date_start', 'date_end', 'fixed_price', 'product_tmpl_id')
+        fields_to_check = ('date_start', 'date_end', 'fixed_price',
+                           'product_tmpl_id')
         fields_checked = [elm for elm in fields_to_check if elm in fields]
         if any(fields_checked):
             record.channel_pushed = False

@@ -2,7 +2,7 @@
 <odoo>
 
   <!-- FORM availability -->
-  <record id="room_type_availability_view_form" model="ir.ui.view">
+  <record id="hotel_room_type_availability_view_form" model="ir.ui.view">
     <field name="name">hotel.room.type.availability.form</field>
     <field name="model">hotel.room.type.availability</field>
     <field name="arch" type="xml">
@@ -14,8 +14,20 @@
           </group>
           <group>
             <field name="date" required="1"/>
-            <field name="avail"/>
+            <field name="quota"/>
+            <field name="max_avail"/>
           </group>
+          <notebook>
+              <page name="connector" string="Channel Connector">
+                  <group string="Hotel Channel Bindings">
+                      <field name="channel_bind_ids" nolabel="1">
+                          <tree>
+                              <field name="backend_id"/>
+                          </tree>
+                      </field>
+                  </group>
+              </page>
+          </notebook>
         </sheet>
         <div class="oe_chatter">
           <field name="message_follower_ids" widget="mail_followers"/>
@@ -26,7 +38,7 @@
   </record>
 
   <!-- TREE restriction -->
-  <record id="room_type_availability_view_tree" model="ir.ui.view">
+  <record id="hotel_room_type_availability_view_tree" model="ir.ui.view">
     <field name="name">hotel.room.type.availability.tree</field>
     <field name="model">hotel.room.type.availability</field>
     <field name="arch" type="xml">
@@ -34,22 +46,18 @@
         <!-- <field name="room_type_id" required="1"/> -->
         <field name="room_type_id" required="1"/>
         <field name="date" required="1"/>
-        <field name="avail"/>
+        <field name="quota"/>
+        <field name="max_avail"/>
       </tree>
     </field>
   </record>
 
   <!-- Action of reservation restriction -->
-  <record model="ir.actions.act_window" id="room_type_availability_action">
+  <record model="ir.actions.act_window" id="hotel_room_type_availability_action">
     <field name="name">Virtual Room Availability</field>
     <field name="res_model">hotel.room.type.availability</field>
     <field name="view_type">form</field>
     <field name="view_mode">tree,form</field>
   </record>
-
-  <!-- MENUS -->
-  <menuitem name="Availability" id="room_type_availability_menu"
-    action="room_type_availability_action" sequence="22"
-    parent="hotel.configuration_others"/>
 
  </odoo>

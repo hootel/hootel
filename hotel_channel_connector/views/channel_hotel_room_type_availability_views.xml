@@ -15,7 +15,7 @@
                     <field name="booked" />
                 </group>
                 <group>
-                    <field name="channel_max_avail" />
+                    <field name="avail" />
                     <field name="channel_pushed" />
                 </group>
             </form>
@@ -28,6 +28,7 @@
         <field name="arch" type="xml">
             <tree string="Hotel Channel Room Availability">
                 <field name="backend_id"/>
+                <field name="avail" />
             </tree>
         </field>
     </record>

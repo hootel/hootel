@@ -1,4 +1,4 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models, fields
@@ -17,7 +17,7 @@ class ChannelProductPricelist(models.Model):
                               string='Pricelist',
                               required=True,
                               ondelete='cascade')
-    is_daily_plan = fields.Boolean("Channel Daily Plan", default=True, old_name='wdaily_plan')
+    is_daily_plan = fields.Boolean("Channel Daily Plan", default=True)
 
     @job(default_channel='root.channel')
     @api.multi
@@ -53,6 +53,7 @@ class ChannelProductPricelist(models.Model):
             importer = work.component(usage='product.pricelist.importer')
             return importer.import_pricing_plans()
 
+
 class ProductPricelist(models.Model):
     _inherit = 'product.pricelist'
 
@@ -79,6 +80,7 @@ class ProductPricelist(models.Model):
                 names.append((name[0], name[1]))
         return names
 
+
 class BindingProductPricelistListener(Component):
     _name = 'binding.product.pricelist.listener'
     _inherit = 'base.connector.listener'
@@ -89,6 +91,7 @@ class BindingProductPricelistListener(Component):
         if 'name' in fields:
             for binding in record.channel_bind_ids:
                 binding.update_plan_name()
+
 
 class ChannelBindingProductPricelistListener(Component):
     _name = 'channel.binding.product.pricelist.listener'

@@ -19,4 +19,9 @@
         action="open_hotel_channel_connector_issue_tree_all"
         parent="menu_channel_connector_root"/>
 
+    <menuitem id="hotel_room_type_availability_menu"
+        name="Availability"
+        action="hotel_room_type_availability_action" sequence="22"
+        parent="hotel.configuration_others"/>
+
 </odoo>

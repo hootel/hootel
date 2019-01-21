@@ -23,6 +23,8 @@
         <field name="arch" type="xml">
             <tree string="Hotel Channel Reservation">
                 <field name="backend_id"/>
+                <field name="external_id" />
+                <field name="channel_status" />
             </tree>
         </field>
     </record>

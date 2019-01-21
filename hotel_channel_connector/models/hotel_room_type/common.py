@@ -1,4 +1,4 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models, fields, _
@@ -18,8 +18,9 @@ class ChannelHotelRoomType(models.Model):
                               string='Room Type',
                               required=True,
                               ondelete='cascade')
-    channel_short_code = fields.Char("Channel Short Code", readonly=True, old_name='wscode')
-    ota_capacity = fields.Integer("OTA's Capacity", default=1, old_name='wcapacity')
+    channel_short_code = fields.Char("Channel Short Code", readonly=True)
+    ota_capacity = fields.Integer("OTA's Capacity", default=1)
+    default_quota = fields.Integer("Default Quota", default=-1)
 
     @api.onchange('room_ids')
     def _get_capacity(self):
@@ -41,14 +42,16 @@ class ChannelHotelRoomType(models.Model):
     def _check_ota_capacity(self):
         for record in self:
             if record.ota_capacity < 1:
-                raise ValidationError(_("OTA's capacity can't be less than one"))
+                raise ValidationError(
+                    _("OTA's capacity can't be less than one"))
 
     @api.multi
     @api.constrains('channel_short_code')
     def _check_channel_short_code(self):
         for record in self:
             if len(record.channel_short_code) > 4:  # Wubook scode max. length
-                raise ValidationError(_("Chanel short code can't be longer than 4 characters"))
+                raise ValidationError(
+                    _("Chanel short code can't be longer than 4 characters"))
 
     @job(default_channel='root.channel')
     @api.multi
@@ -76,6 +79,7 @@ class ChannelHotelRoomType(models.Model):
             with self.backend_id.work_on(self._name) as work:
                 deleter = work.component(usage='hotel.room.type.deleter')
                 deleter.delete_room(self)
+
 
 class HotelRoomType(models.Model):
     _inherit = 'hotel.room.type'
@@ -106,6 +110,7 @@ class HotelRoomType(models.Model):
         ], limit=1)
         return restriction
 
+
 class BindingHotelRoomTypeListener(Component):
     _name = 'binding.hotel.room.type.listener'
     _inherit = 'base.connector.listener'
@@ -120,6 +125,7 @@ class BindingHotelRoomTypeListener(Component):
     # @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     # def on_record_create(self, record, fields=None):
     #     record.create_bindings()
+
 
 class ChannelBindingRoomTypeListener(Component):
     _name = 'channel.binding.room.type.listener'
@@ -136,7 +142,8 @@ class ChannelBindingRoomTypeListener(Component):
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_write(self, record, fields=None):
-        fields_to_check = ('name', 'ota_capacity', 'list_price', 'total_rooms_count')
+        fields_to_check = ('name', 'ota_capacity', 'list_price',
+                           'total_rooms_count')
         fields_checked = [elm for elm in fields_to_check if elm in fields]
         if any(fields_checked):
             record.modify_room()

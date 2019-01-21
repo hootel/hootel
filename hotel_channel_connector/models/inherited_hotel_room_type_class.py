@@ -1,7 +1,7 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import models, fields, api, _
+from openerp import models, api, _
 from openerp.exceptions import ValidationError
 
 
@@ -14,12 +14,14 @@ class HotelRoomTypeClass(models.Model):
     def write(self, vals):
         for record in self:
             if record.code_class in self._locked_codes:
-                raise ValidationError(_("Can't modify channel room type class"))
+                raise ValidationError(
+                    _("Can't modify channel room type class"))
         return super(HotelRoomTypeClass, self).write(vals)
 
     @api.multi
     def unlink(self):
         for record in self:
             if record.code_class in self._locked_codes:
-                raise ValidationError(_("Can't delete channel room type class"))
+                raise ValidationError(
+                    _("Can't delete channel room type class"))
         return super(HotelRoomTypeClass, self).unlink()

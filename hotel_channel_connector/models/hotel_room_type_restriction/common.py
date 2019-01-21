@@ -1,4 +1,4 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models, fields
@@ -24,7 +24,8 @@ class ChannelHotelRoomTypeRestriction(models.Model):
         self.ensure_one()
         if not self.external_id:
             with self.backend_id.work_on(self._name) as work:
-                exporter = work.component(usage='hotel.room.type.restriction.exporter')
+                exporter = work.component(
+                    usage='hotel.room.type.restriction.exporter')
                 exporter.create_rplan(self)
 
     @job(default_channel='root.channel')
@@ -33,7 +34,8 @@ class ChannelHotelRoomTypeRestriction(models.Model):
         self.ensure_one()
         if self.external_id:
             with self.backend_id.work_on(self._name) as work:
-                exporter = work.component(usage='hotel.room.type.restriction.exporter')
+                exporter = work.component(
+                    usage='hotel.room.type.restriction.exporter')
                 exporter.rename_rplan(self)
 
     @job(default_channel='root.channel')
@@ -42,15 +44,18 @@ class ChannelHotelRoomTypeRestriction(models.Model):
         self.ensure_one()
         if self.external_id:
             with self.backend_id.work_on(self._name) as work:
-                deleter = work.component(usage='hotel.room.type.restriction.deleter')
+                deleter = work.component(
+                    usage='hotel.room.type.restriction.deleter')
                 deleter.delete_rplan(self)
 
     @job(default_channel='root.channel')
     @api.model
     def import_restriction_plans(self, backend):
         with backend.work_on(self._name) as work:
-            importer = work.component(usage='hotel.room.type.restriction.importer')
+            importer = work.component(
+                usage='hotel.room.type.restriction.importer')
             return importer.import_restriction_plans()
+
 
 class HotelRoomTypeRestriction(models.Model):
     _inherit = 'hotel.room.type.restriction'
@@ -78,6 +83,7 @@ class HotelRoomTypeRestriction(models.Model):
                 names.append((name[0], name[1]))
         return names
 
+
 class BindingHotelRoomTypeListener(Component):
     _name = 'binding.hotel.room.type.restriction.listener'
     _inherit = 'base.connector.listener'
@@ -88,6 +94,7 @@ class BindingHotelRoomTypeListener(Component):
         if 'name' in fields:
             for binding in record.channel_bind_ids:
                 binding.update_plan_name()
+
 
 class ChannelBindingHotelRoomTypeRestrictionListener(Component):
     _name = 'channel.binding.hotel.room.type.restriction.listener'

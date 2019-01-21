@@ -3,3 +3,4 @@
 from . import inherited_hotel_reservation
 from . import inherited_bus_hotel_calendar
 from . import inherited_hotel_calendar_management
+from . import inherited_hotel_room_type_availability

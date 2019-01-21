@@ -1,4 +1,4 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models, fields, _
@@ -20,20 +20,17 @@ class ChannelHotelReservation(models.Model):
                               ondelete='cascade')
     ota_id = fields.Many2one('channel.ota.info',
                              string='Channel OTA ID',
-                             readonly=True,
-                             old_name='wchannel_id')
+                             readonly=True)
     ota_reservation_id = fields.Char("Channel OTA Reservation Code",
-                                     readonly=True,
-                                     old_name='wchannel_reservation_code')
-    channel_raw_data = fields.Text(readonly=True, old_name='wbook_json')
+                                     readonly=True)
+    channel_raw_data = fields.Text(readonly=True)
 
     channel_status = fields.Selection([
         ('0', 'No Channel'),
-    ], string='Channel Status', default='0', readonly=True, old_name='wstatus')
-    channel_status_reason = fields.Char("Channel Status Reason", readonly=True,
-                                        old_name='wstatus_reason')
+    ], string='Channel Status', default='0', readonly=True)
+    channel_status_reason = fields.Char("Channel Status Reason", readonly=True)
     channel_modified = fields.Boolean("Channel Modified", readonly=True,
-                                      default=False, old_name='wmodified')
+                                      default=False)
 
     @api.depends('channel_reservation_id', 'ota_id')
     def _is_from_ota(self):
@@ -42,9 +39,24 @@ class ChannelHotelReservation(models.Model):
 
     @job(default_channel='root.channel')
     @api.model
-    def refresh_availability(self, checkin, checkout, room_id):
+    def refresh_availability(self, checkin, checkout, backend_id, room_id=False, room_type_id=False):
         self.env['channel.hotel.room.type.availability'].refresh_availability(
-            checkin, checkout, room_id)
+            checkin, checkout, backend_id, room_id=room_id, room_type_id=room_type_id)
+
+    @job(default_channel='root.channel')
+    @api.multi
+    def check_quotas(self, checkin, checkout, room_id):
+        self.ensure_one()
+        if self.is_from_ota:
+            avail_ids = self.env['channel.hotel.room.type.availability'].search([
+                ('date', '>=', self.checkin),
+                ('date', '<=', self.checkout),
+                ('room_type_id', '=', self.room_id.room_type_id.id),
+                ('backend_id', self.backend_id.id),
+            ], limit=1)
+            for avail in avail_ids:
+                if avail.quota > 0:
+                    avail.quota = avail.quota - 1
 
     @job(default_channel='root.channel')
     @api.model
@@ -76,9 +88,9 @@ class ChannelHotelReservation(models.Model):
 
     @api.multi
     def write(self, vals):
-        if self._context.get('connector_no_export', True) and \
-                (vals.get('checkin') or vals.get('checkout') or
-                 vals.get('room_id') or vals.get('state')):
+        if self._context.get('connector_no_export', True) \
+            and (vals.get('checkin') or vals.get('checkout')
+                 or vals.get('room_id') or vals.get('state')):
             older_vals = []
             new_vals = []
             for record in self:
@@ -100,11 +112,13 @@ class ChannelHotelReservation(models.Model):
                 channel_room_type_avail_obj.refresh_availability(
                     v_i['checkin'],
                     v_i['checkout'],
-                    v_i['room_id'])
+                    self.backend_id.id,
+                    room_id=v_i['room_id'])
                 channel_room_type_avail_obj.refresh_availability(
                     new_vals[k_i]['checkin'],
                     new_vals[k_i]['checkout'],
-                    new_vals[k_i]['room_id'])
+                    self.backend_id.id,
+                    room_id=new_vals[k_i]['room_id'])
         else:
             res = super(ChannelHotelReservation, self).write(vals)
         return res
@@ -127,8 +141,10 @@ class ChannelHotelReservation(models.Model):
                 channel_room_type_avail_obj.refresh_availability(
                     record['checkin'],
                     record['checkout'],
-                    record['room_id'])
+                    self.backend_id.id,
+                    room_id=record['room_id'])
         return res
+
 
 class HotelReservation(models.Model):
     _inherit = 'hotel.reservation'
@@ -162,14 +178,12 @@ class HotelReservation(models.Model):
     # origin_sale = fields.Char('Origin', compute=_get_origin_sale,
     #                           store=True)
     is_from_ota = fields.Boolean('Is From OTA',
-                                 readonly=True,
-                                 old_name='wis_from_channel')
-    able_to_modify_channel = fields.Boolean(compute=_set_access_for_channel_fields,
-                                            string='Is user able to modify channel fields?',
-                                            old_name='able_to_modify_wubook')
+                                 readonly=True)
+    able_to_modify_channel = fields.Boolean(
+        compute=_set_access_for_channel_fields,
+        string='Is user able to modify channel fields?')
     to_read = fields.Boolean('To Read', default=False)
-    customer_notes = fields.Text(related='folio_id.customer_notes',
-                                 old_name='wcustomer_notes')
+    customer_notes = fields.Text(related='folio_id.customer_notes')
 
     @api.model
     def create(self, vals):
@@ -178,7 +192,15 @@ class HotelReservation(models.Model):
         user = self.env['res.users'].browse(self.env.uid)
         if user.has_group('hotel.group_hotel_call'):
             vals.update({'to_read': True})
-        return super(HotelReservation, self).create(vals)
+        new_id = super(HotelReservation, self).create(vals)
+        if new_id.is_from_ota:
+            avail_id = self.env['channel.hotel.room.type.availability'].search([
+                ('date', '>=', new_id.checkin),
+                ('date', '<=', new_id.checkout),
+                ('room_type_id', '=', new_id.room_id.room_type_id.id),
+            ], limit=1)
+            if avail_id.quota != -1:
+                avail_id.quota = avail_id.quota - 1
 
     @api.multi
     def generate_copy_values(self, checkin=False, checkout=False):
@@ -199,16 +221,19 @@ class HotelReservation(models.Model):
     def action_reservation_checkout(self):
         for record in self:
             if record.state != 'cancelled':
-                return super(HotelReservation, record).action_reservation_checkout()
+                return super(HotelReservation,
+                             record).action_reservation_checkout()
 
     @api.model
     def _hcalendar_reservation_data(self, reservations):
-        json_reservs, json_tooltips = super()._hcalendar_reservation_data(reservations)
+        json_reservs, json_tooltips = super()._hcalendar_reservation_data(
+            reservations)
 
         reserv_obj = self.env['hotel.reservation']
         for reserv in json_reservs:
             reservation = reserv_obj.browse(reserv['id'])
-            reserv['fix_days'] = reservation.splitted or reservation.is_from_ota
+            reserv['fix_days'] = reservation.splitted \
+                or reservation.is_from_ota
 
         return (json_reservs, json_tooltips)
 
@@ -221,27 +246,39 @@ class HotelReservation(models.Model):
         if not self.is_from_ota:
             return super().onchange_dates()
 
+
 class ChannelBindingHotelReservationListener(Component):
     _name = 'channel.binding.hotel.reservation.listener'
     _inherit = 'base.connector.listener'
     _apply_on = ['channel.hotel.reservation']
 
-
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_create(self, record, fields=None):
-        record.refresh_availability()
+        if record.is_from_ota:
+            record.check_quotas()
+        record.refresh_availability(record.checkin,
+                                    record.checkout,
+                                    record.backend_id.id,
+                                    room_id=record.room_id.id)
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_write(self, record, fields=None):
-        fields_to_check = ('room_id', 'state', 'checkin', 'checkout', 'room_type_id',
-                           'reservation_line_ids', 'splitted', 'overbooking')
+        fields_to_check = ('room_id', 'state', 'checkin', 'checkout',
+                           'room_type_id', 'reservation_line_ids', 'splitted',
+                           'overbooking')
         fields_checked = [elm for elm in fields_to_check if elm in fields]
         if any(fields_checked):
-            record.refresh_availability()
+            record.refresh_availability(record.checkin,
+                                        record.checkout,
+                                        record.backend_id.id,
+                                        room_id=record.room_id.id)
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_unlink(self, record, fields=None):
-        record.refresh_availability()
+        record.refresh_availability(record.checkin,
+                                    record.checkout,
+                                    record.backend_id.id,
+                                    room_id=record.room_id.id)
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_cancel(self, record, fields=None):

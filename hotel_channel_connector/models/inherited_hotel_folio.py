@@ -1,4 +1,4 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from openerp import models, fields, api
@@ -11,14 +11,13 @@ class HotelFolio(models.Model):
     @api.depends('room_lines')
     def _has_channel_reservations(self):
         for record in self:
-            channel_reservations = record.room_lines.filtered(lambda x: x.room_id)
+            channel_reservations = record.room_lines.filtered(
+                lambda x: x.room_id)
             record.has_channel_reservations = any(channel_reservations)
 
-    customer_notes = fields.Text("Channel Customer Notes",
-                                 readonly=True, old_name='wcustomer_notes')
-    has_channel_reservations = fields.Boolean(compute=_has_channel_reservations,
-                                              store=False,
-                                              old_name='whas_wubook_reservations')
+    customer_notes = fields.Text("Channel Customer Notes", readonly=True)
+    has_channel_reservations = fields.Boolean(
+        compute=_has_channel_reservations, store=False)
 
     @job(default_channel='root.channel')
     @api.model

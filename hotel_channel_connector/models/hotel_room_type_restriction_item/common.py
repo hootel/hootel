@@ -1,4 +1,4 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models, fields
@@ -17,14 +17,15 @@ class ChannelHotelRoomTypeRestrictionItem(models.Model):
                               string='Hotel Virtual Room Restriction',
                               required=True,
                               ondelete='cascade')
-    channel_pushed = fields.Boolean("Channel Pushed", readonly=True, default=False,
-                                    old_name='wpushed')
+    channel_pushed = fields.Boolean("Channel Pushed", readonly=True,
+                                    default=False)
 
     @job(default_channel='root.channel')
     @api.model
     def import_restriction_values(self, backend, dfrom, dto, external_id):
         with backend.work_on(self._name) as work:
-            importer = work.component(usage='hotel.room.type.restriction.item.importer')
+            importer = work.component(
+                usage='hotel.room.type.restriction.item.importer')
             return importer.import_restriction_values(
                 dfrom,
                 dto,
@@ -34,7 +35,8 @@ class ChannelHotelRoomTypeRestrictionItem(models.Model):
     @api.model
     def push_restriction(self, backend):
         with backend.work_on(self._name) as work:
-            exporter = work.component(usage='hotel.room.type.restriction.item.exporter')
+            exporter = work.component(
+                usage='hotel.room.type.restriction.item.exporter')
             return exporter.push_restriction()
 
 
@@ -54,9 +56,9 @@ class BindingHotelRoomTypeRestrictionItemListener(Component):
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_write(self, record, fields=None):
-        fields_to_check = ('min_stay', 'min_stay_arrival', 'max_stay', 'max_stay_arrival',
-                           'max_stay_arrival', 'closed', 'closed_departure', 'closed_arrival',
-                           'date')
+        fields_to_check = ('min_stay', 'min_stay_arrival', 'max_stay',
+                           'max_stay_arrival', 'max_stay_arrival', 'closed',
+                           'closed_departure', 'closed_arrival', 'date')
         fields_checked = [elm for elm in fields_to_check if elm in fields]
         if any(fields_checked):
             record.channel_bind_ids.write({'channel_pushed': False})
@@ -86,9 +88,9 @@ class ChannelBindingHotelRoomTypeRestrictionItemListener(Component):
 
     @skip_if(lambda self, record, **kwargs: self.no_connector_export(record))
     def on_record_write(self, record, fields=None):
-        fields_to_check = ('min_stay', 'min_stay_arrival', 'max_stay', 'max_stay_arrival',
-                           'max_stay_arrival', 'closed', 'closed_departure', 'closed_arrival',
-                           'date')
+        fields_to_check = ('min_stay', 'min_stay_arrival', 'max_stay',
+                           'max_stay_arrival', 'max_stay_arrival', 'closed',
+                           'closed_departure', 'closed_arrival', 'date')
         fields_checked = [elm for elm in fields_to_check if elm in fields]
         if any(fields_checked):
             record.channel_pushed = False

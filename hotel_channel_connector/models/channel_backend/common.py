@@ -96,11 +96,13 @@ class ChannelBackend(models.Model):
             count = channel_hotel_room_type_obj.import_rooms(backend)
             if self.env.context.get('show_notify', True):
                 if count == 0:
-                    self.env.user.notify_info("No rooms to import. All done :)",
-                                              title="Import Rooms")
+                    self.env.user.notify_info(
+                        "No rooms to import. All done :)",
+                        title="Import Rooms")
                 else:
-                    self.env.user.notify_info("%d rooms successfully imported" % count,
-                                              title="Import Rooms")
+                    self.env.user.notify_info(
+                        "%d rooms successfully imported" % count,
+                        title="Import Rooms")
         return True
 
     @api.multi
@@ -109,8 +111,9 @@ class ChannelBackend(models.Model):
         for backend in self:
             count = channel_ota_info_obj.import_otas_info(backend)
             if self.env.context.get('show_notify', True):
-                self.env.user.notify_info("%d ota's successfully imported" % count,
-                                          title="Import OTA's")
+                self.env.user.notify_info(
+                    "%d ota's successfully imported" % count,
+                    title="Import OTA's")
         return True
 
     @api.multi
@@ -143,11 +146,13 @@ class ChannelBackend(models.Model):
             count = channel_hotel_room_type_restr_obj.import_restriction_plans(backend)
             if self.env.context.get('show_notify', True):
                 if count == 0:
-                    self.env.user.notify_info("No restiction plans to import. All done :)",
-                                              title="Import Restrictions")
+                    self.env.user.notify_info(
+                        "No restiction plans to import. All done :)",
+                        title="Import Restrictions")
                 else:
-                    self.env.user.notify_info("%d restriction plans successfully imported" % count,
-                                              title="Import Restrictions")
+                    self.env.user.notify_info(
+                        "%d restriction plans successfully imported" % count,
+                        title="Import Restrictions")
         return True
 
     @api.multi
@@ -158,7 +163,8 @@ class ChannelBackend(models.Model):
                 backend,
                 backend.restriction_from,
                 backend.restriction_to,
-                backend.restriction_id and backend.restriction_id.external_id or False)
+                backend.restriction_id and backend.restriction_id.external_id
+                or False)
             if not res and self.env.context.get('show_notify', True):
                 self.env.user.notify_warning("Error importing restrictions",
                                              title="Import Restrictions")
@@ -181,11 +187,13 @@ class ChannelBackend(models.Model):
             count = channel_product_pricelist_obj.import_price_plans(backend)
             if self.env.context.get('show_notify', True):
                 if count == 0:
-                    self.env.user.notify_info("No pricelist plans to import. All done :)",
-                                              title="Import Pricelists")
+                    self.env.user.notify_info(
+                        "No pricelist plans to import. All done :)",
+                        title="Import Pricelists")
                 else:
-                    self.env.user.notify_info("%d pricelist plans successfully imported" % count,
-                                              title="Import Pricelists")
+                    self.env.user.notify_info(
+                        "%d pricelist plans successfully imported" % count,
+                        title="Import Pricelists")
         return True
 
     @api.multi

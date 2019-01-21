@@ -73,5 +73,6 @@ class WubookPushURL(http.Controller):
             backend, odoo_dfrom, odoo_dto, False)
         request.env['channel.product.pricelist.item'].import_pricelist_values(
             backend, odoo_dfrom, odoo_dto, False)
+        self.env['channel.backend'].cron_push_changes()
 
         return request.make_response('200 OK', [('Content-Type', 'text/plain')])
