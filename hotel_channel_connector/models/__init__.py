@@ -1,4 +1,4 @@
-# Copyright 2018 Alexandre Díaz <dev@redneboa.es>
+# Copyright 2018-2019 Alexandre Díaz <dev@redneboa.es>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from . import channel_binding
@@ -14,3 +14,4 @@ from . import inherited_hotel_folio
 from . import inherited_res_partner
 from . import channel_ota_info
 from . import hotel_channel_connector_issue
+from . import inherited_hotel_board_service_room_type

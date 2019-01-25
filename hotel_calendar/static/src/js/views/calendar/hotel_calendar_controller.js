@@ -555,64 +555,71 @@ var PMSCalendarController = AbstractController.extend({
           var newPrice = ev.detail.newPrice;
           var folio_id = newReservation.getUserData('folio_id');
 
-          var linkedReservs = _.find(ev.detail.calendar_obj._reservations, function(item){
-            return item.id !== newReservation.id && !item.unusedZone && item.getUserData('folio_id') === folio_id;
-          });
-
-          var hasChanged = false;
-
           var qdict = {
-            ncheckin: newReservation.startDate.clone().local().format(HotelConstants.L10N_DATETIME_MOMENT_FORMAT),
-            ncheckout: newReservation.endDate.clone().local().format(HotelConstants.L10N_DATETIME_MOMENT_FORMAT),
+            ncheckin: newReservation.startDate.clone().local().format(HotelConstants.L10N_DATE_MOMENT_FORMAT),
+            ncheckout: newReservation.endDate.clone().local().format(HotelConstants.L10N_DATE_MOMENT_FORMAT),
             nroom: newReservation.room.number,
             nprice: newPrice,
-            ocheckin: oldReservation.startDate.clone().local().format(HotelConstants.L10N_DATETIME_MOMENT_FORMAT),
-            ocheckout: oldReservation.endDate.clone().local().format(HotelConstants.L10N_DATETIME_MOMENT_FORMAT),
+            nadults: newReservation.adults,
+            ocheckin: oldReservation.startDate.clone().local().format(HotelConstants.L10N_DATE_MOMENT_FORMAT),
+            ocheckout: oldReservation.endDate.clone().local().format(HotelConstants.L10N_DATE_MOMENT_FORMAT),
             oroom: oldReservation.room.number,
             oprice: oldPrice,
-            hasReservsLinked: (linkedReservs && linkedReservs.length !== 0)?true:false
+            oadults: oldReservation.adults
           };
-          var dialog = new Dialog(self, {
-            title: _t("Confirm Reservation Changes"),
-            buttons: [
-              {
-                text: _t("Yes, change it"),
-                classes: 'btn-primary',
-                close: true,
-                disabled: !newReservation.id,
-                click: function () {
-                  var roomId = newReservation.room.id;
-                  if (newReservation.room.overbooking || newReservation.room.cancelled) {
-                    roomId = +newReservation.room.id.substr(newReservation.room.id.indexOf('@')+1);
+
+          if (qdict['ncheckin'] !== qdict['ocheckin'] || qdict['ncheckout'] !== qdict['ocheckout'] 
+              || qdict['nroom'] !== qdict['oroom'] || qdict['nadults'] !== qdict['oadults']) {
+              var linkedReservs = _.find(ev.detail.calendar_obj._reservations, function(item){
+                return item.id !== newReservation.id && !item.unusedZone && item.getUserData('folio_id') === folio_id;
+              });
+              qdict['hasReservsLinked'] = (linkedReservs && linkedReservs.length !== 0)?true:false;
+
+              var hasChanged = false;
+
+              var dialog = new Dialog(self, {
+                title: _t("Confirm Reservation Changes"),
+                buttons: [
+                  {
+                    text: _t("Yes, change it"),
+                    classes: 'btn-primary',
+                    close: true,
+                    disabled: !newReservation.id,
+                    click: function () {
+                      var roomId = newReservation.room.id;
+                      if (newReservation.room.overbooking || newReservation.room.cancelled) {
+                        roomId = +newReservation.room.id.substr(newReservation.room.id.indexOf('@')+1);
+                      }
+                      var write_values = {
+                        'checkin': newReservation.startDate.format(HotelConstants.ODOO_DATETIME_MOMENT_FORMAT),
+                        'checkout': newReservation.endDate.format(HotelConstants.ODOO_DATETIME_MOMENT_FORMAT),
+                        'room_id': roomId,
+                        'adults': newReservation.adults,
+                        'overbooking': newReservation.room.overbooking
+                      };
+                      if (newReservation.room.cancelled) {
+                          write_values['state'] = 'cancelled';
+                      } else if (!newReservation.room.cancelled && oldReservation.cancelled) {
+                          write_values['state'] = 'draft';
+                      }
+                      self.updateReservations(ev.detail.calendar_obj, [newReservation.id],
+                                              write_values, oldReservation, newReservation);
+                      hasChanged = true;
+                    }
+                  },
+                  {
+                    text: _t("No"),
+                    close: true,
                   }
-                  var write_values = {
-                    'checkin': newReservation.startDate.format(HotelConstants.ODOO_DATETIME_MOMENT_FORMAT),
-                    'checkout': newReservation.endDate.format(HotelConstants.ODOO_DATETIME_MOMENT_FORMAT),
-                    'room_id': roomId,
-                    'overbooking': newReservation.room.overbooking
-                  };
-                  if (newReservation.room.cancelled) {
-                      write_values['state'] = 'cancelled';
-                  } else if (!newReservation.room.cancelled && oldReservation.cancelled) {
-                      write_values['state'] = 'draft';
-                  }
-                  self.updateReservations(ev.detail.calendar_obj, [newReservation.id],
-                                          write_values, oldReservation, newReservation);
-                  hasChanged = true;
+                ],
+                $content: QWeb.render('HotelCalendar.ConfirmReservationChanges', qdict)
+              }).open();
+              dialog.on('closed', this, function(e){
+                if (!hasChanged) {
+                  ev.detail.calendar_obj.replaceReservation(newReservation, oldReservation);
                 }
-              },
-              {
-                  text: _t("No"),
-                  close: true,
-              }
-            ],
-            $content: QWeb.render('HotelCalendar.ConfirmReservationChanges', qdict)
-          }).open();
-          dialog.on('closed', this, function(e){
-            if (!hasChanged) {
-              ev.detail.calendar_obj.replaceReservation(newReservation, oldReservation);
-            }
-          });
+              });
+          }
         });
         this._multi_calendar.on_calendar('hcalOnUpdateSelection', function(ev){
           for (var td of ev.detail.old_cells) {
