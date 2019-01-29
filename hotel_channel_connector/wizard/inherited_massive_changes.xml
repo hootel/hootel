@@ -5,7 +5,7 @@
 		<field name="model">hotel.wizard.massive.changes</field>
 		<field name="inherit_id" ref="hotel.view_hotel_massive_changes_wizard" />
 		<field name="arch" type="xml">
-			<xpath expr="//form/group" position="after">
+			<xpath expr="//form/group[last()]" position="after">
 				<!-- Availability Fields -->
 				<group col="3" colspan="3" attrs="{'invisible':[('section', '!=', 'avail')]}">
 					<table class="oe_form_group">

@@ -71,6 +71,6 @@ class MassiveChangesWizard(models.TransientModel):
 
     @api.model
     def _save(self, ndate, room_types, record):
-        super(MassiveChangesWizard, self).massive_change()
+        super(MassiveChangesWizard, self)._save()
         if record.section == 'avail':
             self._save_availability(ndate, room_types, record)
