@@ -9,4 +9,3 @@ class HotelBoardServiceRoomType(models.Model):
     _inherit = 'hotel.board.service.room.type'
 
     channel_service = fields.Selection([], string='Channel Board Service')
-
