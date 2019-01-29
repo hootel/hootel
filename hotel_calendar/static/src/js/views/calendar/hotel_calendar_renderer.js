@@ -102,20 +102,20 @@ var HotelCalendarView = AbstractRenderer.extend({
         /** VIEW CONTROLS INITIALIZATION **/
         // DATE TIME PICKERS
         var DTPickerOptions = {
-            viewMode: 'months',
-            icons : {
-                time: 'fa fa-clock-o',
-                date: 'fa fa-calendar',
-                up: 'fa fa-chevron-up',
-                down: 'fa fa-chevron-down'
-               },
-            //language : moment.locale(),
-            locale : moment.locale(),
-            format : HotelConstants.L10N_DATE_MOMENT_FORMAT,
-            widgetPositioning:{
-        horizontal: 'auto',
-        vertical: 'bottom'
-    }
+          viewMode: 'months',
+          icons : {
+            time: 'fa fa-clock-o',
+            date: 'fa fa-calendar',
+            up: 'fa fa-chevron-up',
+            down: 'fa fa-chevron-down'
+          },
+          //language : moment.locale(),
+          locale : moment.locale(),
+          format : HotelConstants.L10N_DATE_MOMENT_FORMAT,
+          widgetPositioning:{
+            horizontal: 'auto',
+            vertical: 'bottom'
+          }
         };
         var $dateTimePickerBegin = this.$el.find('#pms-menu #date_begin');
         var $dateEndDays = this.$el.find('#pms-menu #date_end_days');
@@ -179,7 +179,6 @@ var HotelCalendarView = AbstractRenderer.extend({
         });
 
         return $.when(
-            this.trigger_up('onUpdateButtonsCounter'),
             this.trigger_up('onLoadViewFilters'),
         );
     },
