@@ -32,7 +32,7 @@ install:
   - git clone -b ${VERSION} https://github.com/OCA/account-payment.git ${HOME}/dependencies/account-payment --depth=1
   - git clone -b ${VERSION} https://github.com/OCA/connector.git ${HOME}/dependencies/connector --depth=1
   - git clone -b ${VERSION} https://github.com/OCA/queue.git ${HOME}/dependencies/queue --depth=1
-  - git -C partner-contact/ pull origin pull/617/head   # partner contact birthdate
+  - git -C ${HOME}/dependencies/partner-contact pull origin pull/617/head   # partner contact birthdate
   - pip install odoorpc
   - pip install cachetools>=2.0.1
   - travis_install_nightly
