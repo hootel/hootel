@@ -59,41 +59,24 @@ var HotelCalendarView = AbstractRenderer.extend({
 
     update_buttons_counter: function(ncheckouts, ncheckins, noverbookings, ncancelled) {
         var self = this;
-         // Checkouts Button
-        var $ninfo = self.$el.find('#pms-menu #btn_action_checkout span.ninfo');
-        $ninfo.text(ncheckouts);
-        if (ncheckouts) {
-            $ninfo.parent().parent().addClass('button-highlight');
-        } else {
-            $ninfo.parent().parent().removeClass('button-highlight');
-        }
-
-        // Checkins Button
-        $ninfo = self.$el.find('#pms-menu #btn_action_checkin span.ninfo');
-        $ninfo.text(ncheckins);
-        if (ncheckins) {
-            $ninfo.parent().parent().addClass('button-highlight');
-        } else {
-            $ninfo.parent().parent().removeClass('button-highlight');
-        }
 
         // OverBookings
-        $ninfo = self.$el.find('#pms-menu #btn_action_overbooking span.ninfo');
+        var $ninfo = self.$el.find('#pms-menu #btn_action_overbooking span.ninfo');
         $ninfo.text(noverbookings);
         if (noverbookings) {
-            $ninfo.parent().parent().addClass('button-highlight');
+            $ninfo.parent().parent().addClass('overbooking-highlight');
         } else {
-            $ninfo.parent().parent().removeClass('button-highlight');
+            $ninfo.parent().parent().removeClass('overbooking-highlight');
         }
 
-        // Cancelled
-        $ninfo = self.$el.find('#pms-menu #btn_action_cancelled span.ninfo');
-        $ninfo.text(ncancelled);
-        if (ncancelled) {
-            $ninfo.parent().parent().addClass('button-highlight');
-        } else {
-            $ninfo.parent().parent().removeClass('button-highlight');
-        }
+        // // Cancelled
+        // $ninfo = self.$el.find('#pms-menu #btn_action_cancelled span.ninfo');
+        // $ninfo.text(ncancelled);
+        // if (ncancelled) {
+        //     $ninfo.parent().parent().addClass('cancelled-highlight');
+        // } else {
+        //     $ninfo.parent().parent().removeClass('cancelled-highlight');
+        // }
     },
 
     init_calendar_view: function(){

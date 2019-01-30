@@ -21,6 +21,8 @@
    margin: 0 !important;
 }
 
+
+
 #pms-menu {
 	overflow: auto;
 	background-color: #f8f8f8;
@@ -72,33 +74,46 @@
 
 
 .unify-enabled {
-	background-color: khaki;
-	box-shadow: 0 0 8px 0px khaki;
+	background-color: #43A200;
+	box-shadow: 0 0 8px 0px #43A200;
+	color: white;
 }
 
 .divide-enabled {
-	background-color: khaki;
-	box-shadow: 0 0 8px 0px khaki;
+	background-color: #43A200;
+	box-shadow: 0 0 8px 0px #43A200;
+	color: white;
 }
 
 .overbooking-enabled {
-	background-color: khaki;
-	box-shadow: 0 0 8px 0px khaki;
+	background-color: #43A200;
+	box-shadow: 0 0 8px 0px #43A200;
+	color: white;
 }
 
 .cancelled-enabled {
-	background-color: khaki;
-	box-shadow: 0 0 8px 0px khaki;
+	background-color: #43A200;
+	box-shadow: 0 0 8px 0px #43A200;
 }
 
 .swap-from {
-	background-color: chartreuse;
-	box-shadow: 0 0 8px 0px chartreuse;
+	background-color: #E7CF1D;
+	box-shadow: 0 0 8px 0px #E7CF1D;
+	color: #7C7BAD;
 }
 
 .swap-to {
-	background-color: cornflowerblue;
-	box-shadow: 0 0 8px 0px cornflowerblue;
+	background-color: #43A200;
+	box-shadow: 0 0 8px 0px #43A200;
+	color: white;
+}
+
+.unify-enabled i, .divide-enabled i, .cancelled-enabled i, .overbooking-enabled i, .swap-to i {
+	color: white;
+}
+
+.swap-from i {
+	color: #7C7BAD;
 }
 
 /* END: BUTTON STATES */
@@ -133,14 +148,21 @@ input#bookings_search {
 	min-height: 3.5em;
 	padding: 3px;
 	transition: all 0.5s ease;
+	overflow: hidden;
 }
 
-.button-highlight {
-	background-color: orange;
+.overbooking-highlight {
 	color: white;
+	background-color: #FFA500;
 }
-.button-highlight i {
+
+.cancelled-highlight {
 	color: white;
+	background-color: #FFA500;
+}
+
+.overbooking-highlight i, .cancelled-highlight i {
+  color: white;
 }
 
 .multi-calendar-tab-plus {
@@ -195,6 +217,11 @@ input#bookings_search {
 	max-width: 70%;
 	line-height: 1.2;
 	text-align: left;
+}
+
+.text-hidden-xs {
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 /** TOOLTIPS **/
@@ -258,6 +285,12 @@ input#bookings_search {
 }
 .pb-10 {
     padding-bottom: 10px;
+}
+
+@media (min-width:0px) and (max-width: 1600px) {
+    /* .text-hidden-xs {
+        visibility: hidden;
+    } */
 }
 
 /* WARNING: The .row-eq-height class uses CSS3's flexbox layout mode,
