@@ -34,7 +34,7 @@ install:
   - git clone -b ${VERSION} https://github.com/OCA/queue.git ${HOME}/dependencies/queue --depth=1
   - git -C ${HOME}/dependencies/partner-contact fetch origin pull/617/head:pr-birthday
   - git -C ${HOME}/dependencies/partner-contact checkout pr-birthday
-  - git -C ${HOME}/dependencies/partner-contact pull --rebase 11.0
+  - git -C ${HOME}/dependencies/partner-contact pull --rebase origin ${VERSION}
   - pip install odoorpc
   - pip install cachetools>=2.0.1
   - travis_install_nightly
