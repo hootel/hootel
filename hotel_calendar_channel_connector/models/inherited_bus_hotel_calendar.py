@@ -10,23 +10,6 @@ class BusHotelCalendar(models.TransientModel):
     _inherit = 'bus.hotel.calendar'
 
     @api.model
-    def _generate_issue_notification(self, ntype, title, issue_id, section,
-                                     message):
-        user_id = self.env['res.users'].browse(self.env.uid)
-        return {
-            'type': 'issue',
-            'subtype': ntype,
-            'title': title,
-            'username': user_id.partner_id.name,
-            'userid': user_id.id,
-            'issue': {
-                'issue_id': issue_id,
-                'section': section.upper(),
-                'message': message,
-            },
-        }
-
-    @api.model
     def _generate_availability_notification(self, vals):
         date_dt = datetime.strptime(vals['date'], DEFAULT_SERVER_DATE_FORMAT)
         return {
@@ -48,6 +31,23 @@ class BusHotelCalendar(models.TransientModel):
         notif = self._generate_availability_notification(vals)
         self.env['bus.bus'].sendone((self._cr.dbname, 'hotel.reservation',
                                      HOTEL_BUS_CHANNEL_ID), notif)
+
+    @api.model
+    def _generate_issue_notification(self, ntype, title, issue_id, section,
+                                     message):
+        user_id = self.env['res.users'].browse(self.env.uid)
+        return {
+            'type': 'issue',
+            'subtype': ntype,
+            'title': title,
+            'username': user_id.partner_id.name,
+            'userid': user_id.id,
+            'issue': {
+                'issue_id': issue_id,
+                'section': section.upper(),
+                'message': message,
+            },
+        }
 
     @api.model
     def send_issue_notification(self, ntype, title, issue_id, section, message):

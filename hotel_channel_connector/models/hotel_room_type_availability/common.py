@@ -56,17 +56,6 @@ class HotelRoomTypeAvailability(models.Model):
             if record.quota != -1 and record.quota > record.room_type_id.total_rooms_count:
                 raise ValidationError(_("Invalid Quota!"))
 
-    def _prepare_notif_values(self, record):
-        vals = super(HotelRoomTypeAvailability,
-                     self)._prepare_notif_values(record)
-        vals.update({
-            'date': record.date,
-            'no_ota': record.no_ota,
-            'quota': record.quota,
-            'max_avail': record.max_avail,
-        })
-        return vals
-
     @api.onchange('room_type_id')
     def onchange_room_type_id(self):
         if self.room_type_id:
