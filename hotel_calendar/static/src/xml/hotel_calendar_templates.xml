@@ -201,9 +201,11 @@
 			<span class="fa fa-envelope fa-2x" role="button"
 				title="Send Reservation Email" />
 		</div>
-		<div class="col-sm-2 btn_popover_open_payment">
+		<div class="col-sm-2 btn_popover_open_payment_folio" data-toggle="collapse" data-target="#payment_reservation">
 			<span class="fa fa-money fa-2x" role="button"
-				title="Folio Payments" />
+				title="Folio Payments" id="payment_folio" />
+			<span class="fa fa-money fa-2x collapse btn_popover_open_payment_reservation" role="button"
+				title="Reservation Payments" id="payment_reservation" />
 		</div>
 		<t t-if="reservation_type =='normal'">
 			<div class="col-sm-2 btn_popover_open_invoice">
