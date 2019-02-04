@@ -403,7 +403,7 @@ var PMSCalendarController = AbstractController.extend({
               container: 'body',
               animation: false,
               html: true,
-              placement: 'bottom',
+              placement: 'auto bottom',
               content: QWeb.render('HotelCalendar.TooltipReservation', qdict)
             }).popover('show');
             /* destroy popover if mouse click is done out the popover */
