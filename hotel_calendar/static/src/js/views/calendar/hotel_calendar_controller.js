@@ -392,7 +392,7 @@ var PMSCalendarController = AbstractController.extend({
         $('html').on('click', function(e) {
           if (!$(e.target).hasClass("marked-as-having-a-popover") &&
               !$(e.target).parents().is('.popover.in') &&
-              (event.target.id !== 'payment_folio')) {
+              (e.target.id !== 'payment_folio')) {
                 _destroy_and_clear_popover_mark();
           }
         });
