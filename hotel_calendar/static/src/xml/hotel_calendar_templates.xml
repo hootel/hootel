@@ -123,7 +123,7 @@
 
 				<p><t t-esc="board_service_name"/></p>
 
-			<span class="circle pull-left"><t t-esc="price_room_services_set" t-widget="monetary"/>€</span>
+			<span class="circle pull-left" id="price_room"><t t-esc="price_room_services_set" t-widget="monetary"/>€</span>
 			<p>Adults: <t t-esc="adults"/></p>
 			<p class="children">Children: <t t-esc="children"/></p>
 		</div>
@@ -132,7 +132,8 @@
 
 <t t-name="HotelCalendar.TooltipReservation.Sale">
 	<div class="row row-eq-height mt-3">
-		<div class="col-sm-6 col-xs-6 bg-gray-light pb-3 pr-0 diagonal">
+		<div id="folio_pending_amount"
+			 t-attf-class="col-sm-6 col-xs-6 bg-gray-light pb-3 pr-0 diagonal {{pending_amount gt 0 ? 'diagonal_pending_amount':''}}">
 			<div class="on-top">
 				<div class="pull-left">
 					<p>Folio Pending</p>

@@ -458,6 +458,10 @@ var PMSCalendarController = AbstractController.extend({
                     target: result.target,
                   });
                 });
+              } else {
+                $('#payment_folio').css('color', '#A24689');
+                $('#folio_pending_amount').css('animation', 'blinker 1s linear');
+                $('#price_room').css('animation', 'blinker 1s linear');
               }
             });
             $reservationPopover.data('bs.popover').tip().find(".btn_popover_open_payment_reservation").on('click',
