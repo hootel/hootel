@@ -3,6 +3,7 @@
 import re
 import logging
 import pytesseract
+import os
 from datetime import datetime
 from .otsu import OtsuBinarize
 _logger = logging.getLogger(__name__)
@@ -16,9 +17,9 @@ class Bitmap2Text(object):
 
         for i in range(len(toVerify)):
             if toVerify[i].isdigit():
-                n += (toVerify[i] - '0') * m[i % 3]
+                n += (ord(toVerify[i].upper()) - ord('0')) * m[i % 3]
             elif toVerify[i].isalpha():
-                n += (toVerify[i] - 'A').upper() * m[i % 3]
+                n += (ord(toVerify[i].upper()) - ord('A')) * m[i % 3]
             else:
                 return -1
         return n % 10
@@ -39,13 +40,15 @@ class Bitmap2Text(object):
             "(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])",
             nif)
         if m:
-            return self._getNifNieLetter(m[1]).upper() == m.group(2).upper()
+            return self._getNifNieLetter(
+                m.group(1)).upper() == m.group(2).upper()
         else:
             return False
 
     def run(self, bitmap):
         binarizedImage = OtsuBinarize().run(bitmap)
 
+        dir_path = os.path.dirname(os.path.realpath(__file__))
         recognizedText = pytesseract.image_to_string(
             binarizedImage,
             lang="OCRB",
@@ -56,7 +59,8 @@ class Bitmap2Text(object):
                     -c load_fixed_length_dawgs=F\
                     -c load_bigram_dawg=F \
                     -c wordrec_enable_assoc=F \
-                    -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<")
+                    -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789< \
+                    --tessdata-dir %s" % dir_path)
 
         _logger.info("Readed:\n" + recognizedText)
 
@@ -67,7 +71,7 @@ class Bitmap2Text(object):
         lines = recognizedText.splitlines()
         result = {}
         try:
-            if '<' != lines[0][len(lines[0])] - 7:
+            if '<' != lines[0][len(lines[0]) - 7]:
                 # DNIe
                 zones = [
                     (0, 2),     # Tipo
@@ -139,12 +143,12 @@ class Bitmap2Text(object):
                         'traditional': False,
                         'passport': False,
                         'sex': zoneSex,
-                        'endDate': datetime.stpftime(zoneOutDate, "yyMMdd"),
-                        'birthday': datetime.stpftime(zoneBirthDate, "yyMMdd"),
+                        'endDate': datetime.strptime(zoneOutDate, "%y%m%d"),
+                        'birthday': datetime.strptime(zoneBirthDate, "%y%m%d"),
                     })
 
-                _logger.info("Verification Code: "
-                             + verificationCode + " >> " + verCode)
+                _logger.info("Verification Code: %d >> %d" %
+                             (verificationCode, verCode))
             elif lines.length >= 3:
                 # DNI Traditional
                 zones = [
@@ -211,12 +215,12 @@ class Bitmap2Text(object):
                         'traditional': True,
                         'passport': False,
                         'sex': zoneSex,
-                        'endDate': datetime.stpftime(zoneOutDate, "yyMMdd"),
-                        'birthday': datetime.stpftime(zoneBirthDate, "yyMMdd"),
+                        'endDate': datetime.strptime(zoneOutDate, "%y%m%d"),
+                        'birthday': datetime.strptime(zoneBirthDate, "%y%m%d"),
                     })
 
-                _logger("Verification Code: " + verificationCode + " >> "
-                        + verCode)
+                _logger.info("Verification Code: %d >> %d" %
+                             (verificationCode, verCode))
             else:
                 # Pasaporte Electronico
                 zones = [
@@ -294,10 +298,12 @@ class Bitmap2Text(object):
                         'traditional': False,
                         'passport': True,
                         'sex': zoneSex,
-                        'endDate': datetime.stpftime(zoneOutDate, "yyMMdd"),
-                        'birthday': datetime.stpftime(zoneBirthDate, "yyMMdd"),
+                        'endDate': datetime.strptime(zoneOutDate, "%y%m%d"),
+                        'birthday': datetime.strptime(zoneBirthDate, "%y%m%d"),
                     })
+                _logger.info("Verification Code: %d >> %d" %
+                             (verificationCode, verCode))
         except Exception as e:
-            e.printStackTrace()
+            _logger.error('Ooops', exc_info=True)
 
         return result

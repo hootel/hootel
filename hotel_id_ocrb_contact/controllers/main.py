@@ -6,12 +6,14 @@ import base64
 import io
 from PIL import Image
 from odoo import http
+from odoo.http import request
 from ..tools.image2text import Bitmap2Text
 _logger = logging.getLogger(__name__)
 
 
 class HotelOCRBContact(http.Controller):
-    @http.route(['/hotel/ocrb'], type='json', cors="*", auth="none")
+    @http.route(['/hotel/ocrb'], type='json', cors="*", auth="none",
+                website=True)
     def hotel_ocrb_contact(self, image64):
 
         imgdata = base64.b64decode(str(image64))
@@ -19,6 +21,9 @@ class HotelOCRBContact(http.Controller):
 
         result = Bitmap2Text().run(image)
 
+        request.env['res.partner'].sudo().create({
+            'name': result['name']
+        })
         _logger.info(result)
 
         return True
