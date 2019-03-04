@@ -62,8 +62,6 @@ class Bitmap2Text(object):
                     -c tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789< \
                     --tessdata-dir %s" % dir_path)
 
-        _logger.info("Readed:\n" + recognizedText)
-
         # Possible Values
         possibleSexValues = ('F', 'M', '<')
 
@@ -147,8 +145,8 @@ class Bitmap2Text(object):
                         'birthday': datetime.strptime(zoneBirthDate, "%y%m%d"),
                     })
 
-                _logger.info("Verification Code: %d >> %d" %
-                             (verificationCode, verCode))
+                # _logger.info("Verification Code: %d >> %d" %
+                #              (verificationCode, verCode))
             elif lines.length >= 3:
                 # DNI Traditional
                 zones = [
@@ -219,8 +217,8 @@ class Bitmap2Text(object):
                         'birthday': datetime.strptime(zoneBirthDate, "%y%m%d"),
                     })
 
-                _logger.info("Verification Code: %d >> %d" %
-                             (verificationCode, verCode))
+                # _logger.info("Verification Code: %d >> %d" %
+                #              (verificationCode, verCode))
             else:
                 # Pasaporte Electronico
                 zones = [
@@ -301,9 +299,10 @@ class Bitmap2Text(object):
                         'endDate': datetime.strptime(zoneOutDate, "%y%m%d"),
                         'birthday': datetime.strptime(zoneBirthDate, "%y%m%d"),
                     })
-                _logger.info("Verification Code: %d >> %d" %
-                             (verificationCode, verCode))
-        except Exception as e:
+
+                # _logger.info("Verification Code: %d >> %d" %
+                #              (verificationCode, verCode))
+        except Exception:
             _logger.error('Ooops', exc_info=True)
 
         return result
