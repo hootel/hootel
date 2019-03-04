@@ -48,8 +48,7 @@ class Bitmap2Text(object):
 
         recognizedText = pytesseract.image_to_string(
             binarizedImage,
-            lang="ocrb",
-            boxes=False,
+            lang="OCRB",
             config="-c load_system_dawg=F \
                     -c load_freq_dawg=F \
                     -c load_unambig_dawg=F \

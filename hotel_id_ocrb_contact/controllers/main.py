@@ -6,7 +6,7 @@ import base64
 import io
 from PIL import Image
 from odoo import http
-from tools.image2text import Bitmap2Text
+from ..tools.image2text import Bitmap2Text
 _logger = logging.getLogger(__name__)
 
 
