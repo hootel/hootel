@@ -5,11 +5,10 @@ import logging
 import pytesseract
 import os
 from datetime import datetime
-from .otsu import OtsuBinarize
 _logger = logging.getLogger(__name__)
 
 
-class Bitmap2Text(object):
+class Image2Text(object):
 
     def _checkDigits(self, toVerify):
         m = (7, 3, 1)
@@ -46,11 +45,9 @@ class Bitmap2Text(object):
             return False
 
     def run(self, bitmap):
-        binarizedImage = OtsuBinarize().run(bitmap)
-
         dir_path = os.path.dirname(os.path.realpath(__file__))
         recognizedText = pytesseract.image_to_string(
-            binarizedImage,
+            bitmap,
             lang="OCRB",
             config="-c load_system_dawg=F \
                     -c load_freq_dawg=F \

@@ -10,7 +10,7 @@ from PIL import Image
 from odoo import http
 from odoo.http import request
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
-from ..tools.image2text import Bitmap2Text
+from ..tools.image2text import Image2Text
 _logger = logging.getLogger(__name__)
 
 
@@ -21,7 +21,7 @@ class HotelOCRBContact(http.Controller):
 
         imgdata = base64.b64decode(str(image64))
         image = Image.open(io.BytesIO(imgdata))
-        result = Bitmap2Text().run(image)
+        result = Image2Text().run(image)
 
         dnieExpeditionDate = self._getExpeditionDate(
             result['birthday'], result['endDate'])
