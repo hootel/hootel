@@ -149,7 +149,7 @@ class HotelReservationImporter(Component):
             rate_id = 0
             self.create_issue(
                 section='reservation',
-                internal_emssage="Reservation imported with unknown \
+                internal_message="Reservation imported with unknown \
                     pricelist (established by default)",
                 channel_object_id=book['reservation_code'])
         if rate_id == 0:
@@ -249,7 +249,9 @@ class HotelReservationImporter(Component):
         return (checkin_utc_dt, checkout_utc_dt)
 
     def _update_reservation_binding(self, binding, book):
-        is_cancellation = book['status'] in WUBOOK_STATUS_BAD
+        channel_room_type_obj = self.env['channel.hotel.room.type']
+        is_modification = book['was_modified']
+        is_cancellation = book['status'] in WUBOOK_STATUS_BAD and not is_modification
         binding.with_context({'connector_no_export': True}).write({
             'channel_raw_data': json.dumps(book),
             'channel_status': str(book['status']),
@@ -280,12 +282,46 @@ class HotelReservationImporter(Component):
             binding.with_context({
                 'connector_no_export': True,
             }).write({
-                'discount': 0.0,
                 'state': 'confirm',
             })
+        # Wubook send the old reservation with modification key, we must make
+        # sure that the modification is the new value
+        crcode = str(book['channel_reservation_code'])
+        rcode = str(book['reservation_code'])
+        if is_modification and binding.external_id != rcode:
+            rcode_modified = str(book['modified_reservations'])
+            # Search reservations that already was modified by this Wubook book
+            reservations_processed = binding.folio_id.room_lines.filtered(
+                lambda r: rcode_modified in r.channel_modified_reservations
+                and rcode == r.external_id
+            )
+            checkin_utc_dt, checkout_utc_dt = self._get_book_dates(book)
+            index = 0
+            # We jump directly to the reservation to process
+            if reservations_processed:
+                index = len(reservations_processed)-1
+            broom = book['booked_rooms'][index:]
+            room_type_bind = channel_room_type_obj.search([
+                ('backend_id', '=', self.backend_record.id),
+                ('external_id', '=', broom['room_id'])
+            ], limit=1)
+            # TODO: Aqui chequeamos si es posible mantener la habitación de la reserva
+            # 1.- no ha cambiado el tipo de habita y 2.- hay dispo de esa habitación en las nuevas fechas
+            # si se puede mantener habitación, mantenemos con un parametro room_id
+            if room_type_bind == binding.room_type_id:
+                room_id = binding.room_id.id
+            reservations = self._prepare_complete_reservation(
+                checkin_utc_dt=checkin_utc_dt,
+                checkout_utc_dt=checkout_utc_dt,
+                broom=broom,
+                crcode=crcode,
+                rcode=rcode,
+                room_id=room_id,
+                room_type_bind=room_type_bind,
+                book=book,
+            )[0]
+            binding.write(reservations)
 
-
-    # FIXME: Super big method!!! O_o
     @api.model
     def _generate_reservations(self, bookings):
         _logger.info("==[CHANNEL->ODOO]==== READING BOOKING ==")
@@ -313,28 +349,28 @@ class HotelReservationImporter(Component):
             if crcode in failed_reservations:
                 self.create_issue(
                     section='reservation',
-                    internal_emssage="Can't process a reservation that previusly failed!",
+                    internal_message="Can't process a reservation that previusly failed!",
                     channel_object_id=book['reservation_code'])
                 continue
 
             checkin_utc_dt, checkout_utc_dt = self._get_book_dates(book)
 
             # Search Folio. If exists.
-            folio_id = False
+            folio = False
             if crcode != 'undefined':
                 reserv_bind = channel_reserv_obj.search([
                     ('backend_id', '=', self.backend_record.id),
                     ('ota_reservation_id', '=', crcode),
                 ], limit=1)
                 if reserv_bind:
-                    folio_id = reserv_bind.folio_id
+                    folio = reserv_bind.folio_id
             else:
                 reserv_bind = channel_reserv_obj.search([
                     ('backend_id', '=', self.backend_record.id),
                     ('external_id', '=', rcode),
                 ], limit=1)
                 if reserv_bind:
-                    folio_id = reserv_bind.folio_id
+                    folio = reserv_bind.folio_id
 
             # Need update reservations?
             reservs_processed = False
@@ -354,6 +390,7 @@ class HotelReservationImporter(Component):
             customer_mail = book.get('customer_mail', False)
             partner_id = False
             if customer_mail:
+                # REVIEW: Danger autoassociation with partner
                 partner_id = res_partner_obj.search([
                     ('email', '=', customer_mail)
                 ], limit=1)
@@ -384,118 +421,19 @@ class HotelReservationImporter(Component):
                         channel_object_id=book['reservation_code'])
                     failed_reservations.append(crcode)
                     continue
-
-                dates_checkin = [checkin_utc_dt, False]
-                dates_checkout = [checkout_utc_dt, False]
-                split_booking = False
-                split_booking_parent = False
-                # This perhaps create splitted reservation
-                while dates_checkin[0]:
-                    vals = self._generate_booking_vals(
-                        broom,
-                        crcode,
-                        rcode,
-                        room_type_bind,
-                        split_booking,
-                        dates_checkin,
-                        dates_checkout,
-                        checkin_utc_dt,
-                        checkout_utc_dt,
-                        book,
-                    )
-                    #
-                    # if vals['price_unit'] != book['amount']:
-                    #     bs = self.env['hotel.board.service.room.type'].browse(vals['board_service_room_id'])
-                    #     price_room_services_set = vals['price_unit'] + (bs.amount * len(broom['roomdays']))
-                    #     vals.update({'unconfirmed_channel_price': True})
-                    #     # check if difference is owing to misconfigured board services
-                    #     if price_room_services_set != book['amount']:
-                    #         internal_reason = 'Please, review the board services included in the reservation.'
-                    #         self.create_issue(
-                    #             section='reservation',
-                    #             internal_message="Invalid reservation total price! %.2f (calculated) != %.2f (wubook) %s" % (
-                    #                 vals['price_unit'], book['amount'], internal_reason),
-                    #             channel_object_id=book['reservation_code'])
-                    #     # TODO: Add other reasons in case of need
-
-
-                    free_rooms = room_type_bind.odoo_id.check_availability_room_type(
-                        vals['checkin'],
-                        (fields.Date.from_string(vals['checkout']) -
-                            timedelta(days=1)).strftime(
-                                DEFAULT_SERVER_DATE_FORMAT
-                                ),
-                        room_type_id=room_type_bind.odoo_id.id,
-                        notthis=used_rooms)
-                    if any(free_rooms):
-                        vals.update({
-                            'room_type_id': room_type_bind.odoo_id.id,
-                            'name': free_rooms[0].name,
-                        })
-                        reservations.append((0, False, vals))
-                        used_rooms.append(free_rooms[0].id)
-
-                        if split_booking:
-                            if not split_booking_parent:
-                                split_booking_parent = len(reservations)
-                            else:
-                                splitted_map.setdefault(
-                                    split_booking_parent,
-                                    []).append(len(reservations))
-                                # sql_constraint 'unique(backend_id, external_id)'
-                                del reservations[-1][2]['channel_bind_ids']
-                        dates_checkin = [dates_checkin[1], False]
-                        dates_checkout = [dates_checkout[1], False]
-                    else:
-                        date_diff = (dates_checkout[0].replace(
-                            hour=0, minute=0, second=0,
-                            microsecond=0) -
-                                     dates_checkin[0].replace(
-                                         hour=0, minute=0, second=0,
-                                         microsecond=0)).days
-                        if date_diff <= 0:
-                            if split_booking:
-                                if split_booking_parent:
-                                    del reservations[split_booking_parent-1:]
-                                    if split_booking_parent in splitted_map:
-                                        del splitted_map[split_booking_parent]
-                            # Can't found space for reservation: Overbooking
-                            vals = self._generate_booking_vals(
-                                broom,
-                                crcode,
-                                rcode,
-                                room_type_bind,
-                                False,
-                                (checkin_utc_dt, False),
-                                (checkout_utc_dt, False),
-                                checkin_utc_dt,
-                                checkout_utc_dt,
-                                book,
-                            )
-                            vals.update({
-                                'room_type_id': room_type_bind.odoo_id.id,
-                                'name': room_type_bind.name,
-                                'overbooking': True,
-                            })
-                            reservations.append((0, False, vals))
-                            self.create_issue(
-                                section='reservation',
-                                internal_message="Reservation imported with overbooking state",
-                                channel_object_id=rcode,
-                                dfrom=vals['checkin'], dto=vals['checkout'])
-                            dates_checkin = [False, False]
-                            dates_checkout = [False, False]
-                            split_booking = False
-                        else:
-                            split_booking = True
-                            dates_checkin = [
-                                dates_checkin[0],
-                                dates_checkin[0] + timedelta(days=date_diff-1)
-                            ]
-                            dates_checkout = [
-                                dates_checkout[0] - timedelta(days=1),
-                                checkout_utc_dt
-                            ]
+                reservations, used_rooms, splitted_map = \
+                        self._prepare_complete_reservation(
+                            checkin_utc_dt=checkin_utc_dt,
+                            checkout_utc_dt=checkout_utc_dt,
+                            broom=broom,
+                            crcode=crcode,
+                            rcode=rcode,
+                            room_type_bind=room_type_bind,
+                            book=book,
+                            reservations=reservations,
+                            used_rooms=used_rooms,
+                            splitted_map=splitted_map,
+                        )
 
             # Create Splitted Issue Information
             if split_booking:
@@ -517,26 +455,26 @@ class HotelReservationImporter(Component):
                 }
                 _logger.info("==[CHANNEL->ODOO]==== CREATING/UPDATING FOLIO ==")
                 _logger.info(reservations)
-                if folio_id:
-                    folio_id.with_context({
+                if folio:
+                    folio.with_context({
                         'connector_no_export': True}).write(vals)
                 else:
                     vals.update({
                         'partner_id': partner_id.id,
                         'wseed': book['sessionSeed']
                     })
-                    folio_id = hotel_folio_obj.with_context({
+                    folio = hotel_folio_obj.with_context({
                         'connector_no_export': True}).create(vals)
 
                 # Update Reservation Spitted Parents
-                sorted_rlines = folio_id.room_lines.sorted(key='id')
+                sorted_rlines = folio.room_lines.sorted(key='id')
                 for k_pid, v_pid in splitted_map.items():
                     preserv = sorted_rlines[k_pid-1]
                     for pid in v_pid:
                         creserv = sorted_rlines[pid-1]
                         creserv.parent_reservation = preserv.id
                 # Bind reservations
-                rlines = sorted_rlines = folio_id.room_lines
+                rlines = sorted_rlines = folio.room_lines
                 for rline in rlines:
                     for rline_bind in rline.channel_bind_ids:
                         self.binder.bind(rline_bind.external_id, rline_bind)
@@ -544,3 +482,128 @@ class HotelReservationImporter(Component):
                 processed_rids.append(rcode)
         return (processed_rids, any(failed_reservations),
                 checkin_utc_dt, checkout_utc_dt)
+
+    @api.model()
+    def _prepare_complete_reservation(self, **kwargs):
+        checkin_utc_dt = kwargs.get('checkin_utc_dt')
+        checkout_utc_dt = kwargs.get('checkout_utc_dt')
+        dates_checkin = [checkin_utc_dt, False]
+        dates_checkout = [checkout_utc_dt, False]
+        broom = kwargs.get('broom')
+        crcode = kwargs.get('crcode')
+        rcode = kwargs.get('rcode')
+        room_type_bind = kwargs.get('room_type_bind')
+        book = kwargs.get('book')
+        room_id = kwargs.get('room_id')
+        used_rooms = kwargs.get('used_rooms') or []
+        reservations = kwargs.get('reservations')
+        splitted_map = kwargs.get('splitted_map')
+        split_booking = False
+        split_booking_parent = False
+        # This perhaps create splitted reservation
+        while dates_checkin[0]:
+            vals = self._generate_booking_vals(
+                broom,
+                rcode,
+                rcode,
+                room_type_bind,
+                split_booking,
+                dates_checkin,
+                dates_checkout,
+                checkin_utc_dt,
+                checkout_utc_dt,
+                book,
+            )
+            # if vals['price_unit'] != book['amount']:
+            #     bs = self.env['hotel.board.service.room.type'].browse(vals['board_service_room_id'])
+            #     price_room_services_set = vals['price_unit'] + (bs.amount * len(broom['roomdays']))
+            #     vals.update({'unconfirmed_channel_price': True})
+            #     # check if difference is owing to misconfigured board services
+            #     if price_room_services_set != book['amount']:
+            #         internal_reason = 'Please, review the board services included in the reservation.'
+            #         self.create_issue(
+            #             section='reservation',
+            #             internal_message="Invalid reservation total price! %.2f (calculated) != %.2f (wubook) %s" % (
+            #                 vals['price_unit'], book['amount'], internal_reason),
+            #             channel_object_id=book['reservation_code'])
+            #     # TODO: Add other reasons in case of need
+            free_rooms = room_type_bind.odoo_id.check_availability_room_type(
+                vals['checkin'],
+                (fields.Date.from_string(vals['checkout']) -
+                    timedelta(days=1)).strftime(
+                        DEFAULT_SERVER_DATE_FORMAT
+                        ),
+                room_type_id=room_type_bind.odoo_id.id,
+                notthis=used_rooms)
+            if any(free_rooms):
+                if room_id and room_id in free_rooms._ids:
+                    selected_room = self.env['hotel.room'].browse(room_id)
+                else:
+                    selected_room = free_rooms[0]
+                vals.update({
+                    'room_type_id': room_type_bind.odoo_id.id,
+                    'name': selected_room.name,
+                    'room_id': selected_room.id,
+                })
+                reservations.append((0, False, vals))
+                used_rooms.append(selected_room.id)
+                if split_booking:
+                    if not split_booking_parent:
+                        split_booking_parent = len(reservations)
+                    else:
+                        splitted_map.setdefault(
+                            split_booking_parent,
+                            []).append(len(reservations))
+                        # sql_constraint 'unique(backend_id, external_id)'
+                        del reservations[-1][2]['channel_bind_ids']
+                dates_checkin = [dates_checkin[1], False]
+                dates_checkout = [dates_checkout[1], False]
+            else:
+                date_diff = (dates_checkout[0].replace(
+                    hour=0, minute=0, second=0,
+                    microsecond=0) - dates_checkin[0].replace(
+                        hour=0, minute=0, second=0, microsecond=0)).days
+                if date_diff <= 0:
+                    if split_booking:
+                        if split_booking_parent:
+                            del reservations[split_booking_parent-1:]
+                            if split_booking_parent in splitted_map:
+                                del splitted_map[split_booking_parent]
+                    # Can't found space for reservation: Overbooking
+                    vals = self._generate_booking_vals(
+                        broom,
+                        crcode,
+                        rcode,
+                        room_type_bind,
+                        False,
+                        (checkin_utc_dt, False),
+                        (checkout_utc_dt, False),
+                        checkin_utc_dt,
+                        checkout_utc_dt,
+                        book,
+                    )
+                    vals.update({
+                        'room_type_id': room_type_bind.odoo_id.id,
+                        'name': room_type_bind.name,
+                        'overbooking': True,
+                    })
+                    reservations.append((0, False, vals))
+                    self.create_issue(
+                        section='reservation',
+                        internal_message="Reservation imported with overbooking state",
+                        channel_object_id=rcode,
+                        dfrom=vals['checkin'], dto=vals['checkout'])
+                    dates_checkin = [False, False]
+                    dates_checkout = [False, False]
+                    split_booking = False
+                else:
+                    split_booking = True
+                    dates_checkin = [
+                        dates_checkin[0],
+                        dates_checkin[0] + timedelta(days=date_diff-1)
+                    ]
+                    dates_checkout = [
+                        dates_checkout[0] - timedelta(days=1),
+                        checkout_utc_dt
+                    ]
+        return reservations, used_rooms, splitted_map

@@ -148,6 +148,10 @@ class HotelCheckinPartner(models.Model):
             record.update(vals)
             if record.reservation_id.state == 'confirm':
                 record.reservation_id.state = 'booking'
+                reservation_lines = record.reservation_id.in_reservation_lines()
+                reservation_lines.update({
+                    'state': 'booking'
+                })
 
     @api.multi
     def action_done(self):

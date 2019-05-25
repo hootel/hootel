@@ -183,7 +183,7 @@ class HotelCalendarManagement(models.TransientModel):
                     SELECT
                       hrl.id
                     FROM hotel_reservation_line AS hrl
-                    WHERE date = %s
+                    WHERE date = %s and state != 'cancelled'
                     ''', ((cur_date_str),))
                 line_ids = [r[0] for r in self.env.cr.fetchall()]
                 reservation_ids = self.env['hotel.reservation.line'].browse(line_ids).\
