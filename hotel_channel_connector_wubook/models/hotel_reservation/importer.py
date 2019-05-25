@@ -149,7 +149,7 @@ class HotelReservationImporter(Component):
             rate_id = 0
             self.create_issue(
                 section='reservation',
-                internal_emssage="Reservation imported with unknown \
+                internal_message="Reservation imported with unknown \
                     pricelist (established by default)",
                 channel_object_id=book['reservation_code'])
         if rate_id == 0:
@@ -349,7 +349,7 @@ class HotelReservationImporter(Component):
             if crcode in failed_reservations:
                 self.create_issue(
                     section='reservation',
-                    internal_emssage="Can't process a reservation that previusly failed!",
+                    internal_message="Can't process a reservation that previusly failed!",
                     channel_object_id=book['reservation_code'])
                 continue
 
