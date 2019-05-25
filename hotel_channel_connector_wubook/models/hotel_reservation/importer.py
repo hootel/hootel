@@ -301,7 +301,7 @@ class HotelReservationImporter(Component):
             # TODO: Aqui chequeamos si es posible mantener la habitación de la reserva
             # 1.- no ha cambiado el tipo de habita y 2.- hay dispo de esa habitación en las nuevas fechas
             # si se puede mantener habitación, mantenemos con un parametro room_id
-            reservation_vals = self._prepare_complete_reservation(
+            reservations = self._prepare_complete_reservation(
                 checkin_utc_dt=checkin_utc_dt,
                 checkout_utc_dt=checkout_utc_dt,
                 broom=broom,
@@ -310,7 +310,7 @@ class HotelReservationImporter(Component):
                 room_type_bind=room_type_bind,
                 book=book,
             )[0]
-            binding.write(reservation_vals)
+            binding.write(reservations)
 
     @api.model
     def _generate_reservations(self, bookings):
@@ -411,18 +411,19 @@ class HotelReservationImporter(Component):
                         channel_object_id=book['reservation_code'])
                     failed_reservations.append(crcode)
                     continue
-                reservation_vals, used_rooms_res = self._prepare_complete_reservation(
-                    checkin_utc_dt=checkin_utc_dt,
-                    checkout_utc_dt=checkout_utc_dt,
-                    broom=broom,
-                    crcode=crcode,
-                    rcode=rcode,
-                    room_type_bind=room_type_bind,
-                    book=book,
-                    used_rooms=used_rooms,
-                )
-                reservations.append((0, False, reservation_vals))
-                used_rooms.append(used_rooms_res)
+                reservations, used_rooms, splitted_map = \
+                        self._prepare_complete_reservation(
+                            checkin_utc_dt=checkin_utc_dt,
+                            checkout_utc_dt=checkout_utc_dt,
+                            broom=broom,
+                            crcode=crcode,
+                            rcode=rcode,
+                            room_type_bind=room_type_bind,
+                            book=book,
+                            reservations=reservations,
+                            used_rooms=used_rooms,
+                            splitted_map=splitted_map,
+                        )
 
             # Create Splitted Issue Information
             if split_booking:
@@ -485,6 +486,8 @@ class HotelReservationImporter(Component):
         book = kwargs.get('book')
         room_id = kwargs.get('room_id')
         used_rooms = kwargs.get('used_rooms') or []
+        reservations = kwargs.get('reservations')
+        splitted_map = kwargs.get('splitted_map')
         split_booking = False
         split_booking_parent = False
         # This perhaps create splitted reservation
@@ -527,6 +530,7 @@ class HotelReservationImporter(Component):
                     'room_type_id': room_type_bind.odoo_id.id,
                     'name': free_rooms[0].name,
                 })
+                reservations.append((0, False, vals))
                 used_rooms.append(free_rooms[0].id)
                 if split_booking:
                     if not split_booking_parent:
@@ -568,6 +572,7 @@ class HotelReservationImporter(Component):
                         'name': room_type_bind.name,
                         'overbooking': True,
                     })
+                    reservations.append((0, False, vals))
                     self.create_issue(
                         section='reservation',
                         internal_message="Reservation imported with overbooking state",
@@ -586,4 +591,4 @@ class HotelReservationImporter(Component):
                         dates_checkout[0] - timedelta(days=1),
                         checkout_utc_dt
                     ]
-        return vals, used_rooms
+        return reservations, used_rooms, splitted_map
