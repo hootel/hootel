@@ -388,19 +388,24 @@ class HotelReservation(models.Model):
         vals.update({
             'last_updated_res': fields.Datetime.now(),
         })
+        #We make sure that checkin and checkout are on date format
+        checkin = fields.Date.from_string(vals['checkin']).strftime(
+            DEFAULT_SERVER_DATE_FORMAT)
+        checkout = fields.Date.from_string(vals['checkout']).strftime(
+            DEFAULT_SERVER_DATE_FORMAT)
         if self.compute_price_out_vals(vals):
             days_diff = (
-                fields.Date.from_string(vals['checkout']) - fields.Date.from_string(vals['checkin'])
+                fields.Date.from_string(checkout) - fields.Date.from_string(checkin)
             ).days
             vals.update(self.prepare_reservation_lines(
-                vals['checkin'],
+                checkin,
                 days_diff,
                 vals['pricelist_id'],
                 vals=vals))  # REVISAR el unlink
         if 'checkin' in vals and 'checkout' in vals \
                 and 'real_checkin' not in vals and 'real_checkout' not in vals:
-            vals['real_checkin'] = vals['checkin']
-            vals['real_checkout'] = vals['checkout']
+            vals['real_checkin'] = checkin
+            vals['real_checkout'] = checkout
         record = super(HotelReservation, self).create(vals)
         if record.preconfirm:
             record.confirm()
@@ -415,12 +420,14 @@ class HotelReservation(models.Model):
         for record in self:
             checkin = vals['checkin'] if 'checkin' in vals else record.checkin
             checkout = vals['checkout'] if 'checkout' in vals else record.checkout
-
+            #We make sure that checkin and checkout are on date format
+            checkin = fields.Date.from_string(checkin).strftime(DEFAULT_SERVER_DATE_FORMAT)
+            checkout = fields.Date.from_string(checkout).strftime(DEFAULT_SERVER_DATE_FORMAT)
             if not record.splitted and not vals.get('splitted', False):
                 if 'checkin' in vals:
-                    vals['real_checkin'] = vals['checkin']
+                    vals['real_checkin'] = checkin
                 if 'checkout' in vals:
-                    vals['real_checkout'] = vals['checkout']
+                    vals['real_checkout'] = checkout
 
             real_checkin = vals['real_checkin'] if 'real_checkin' in vals else record.real_checkin
             real_checkout = vals['real_checkout'] if 'real_checkout' in vals else record.real_checkout
@@ -824,16 +831,19 @@ class HotelReservation(models.Model):
             if user.has_group('hotel.group_hotel_call'):
                 vals.update({'channel_type': 'call'})
             if record.checkin_partner_ids:
-                vals.update({'state': 'booking'})
+                state = 'booking'
+                vals.update({'state': state})
             else:
-                vals.update({'state': 'confirm'})
+                state = 'confirm'
+                vals.update({'state': state})
             record.write(vals)
-            record.reservation_line_ids.update({
-                'cancel_discount': 0
+            reservation_lines = record.in_reservation_lines()
+            reservation_lines.update({
+                'cancel_discount': 0,
+                'state': state
             })
             if record.folio_id.state != 'confirm':
                 record.folio_id.action_confirm()
-
             if record.splitted:
                 master_reservation = record.parent_reservation or record
                 splitted_reservs = hotel_reserv_obj.search([
@@ -847,6 +857,11 @@ class HotelReservation(models.Model):
                 ])
                 if master_reservation.checkin_partner_ids:
                     record.update({'state': 'booking'})
+                    reservation_lines = record.in_reservation_lines()
+                    reservation_lines.update({
+                        'cancel_discount': 0,
+                        'state': state
+                    })
                 splitted_reservs.confirm()
         return True
 
@@ -865,6 +880,10 @@ class HotelReservation(models.Model):
             record.write({
                 'state': 'cancelled',
                 'cancelled_reason': record.compute_cancelation_reason()
+            })
+            reservation_lines = record.in_reservation_lines()
+            reservation_lines.update({
+                'state': 'cancelled'
             })
             record._compute_cancelled_discount()
             if record.splitted:
@@ -906,6 +925,11 @@ class HotelReservation(models.Model):
             record.state = 'draft'
             record.reservation_line_ids.update({
                 'cancel_discount': 0
+            })
+            reservation_lines = record.in_reservation_lines()
+            reservation_lines.update({
+                'cancel_discount': 0,
+                'state': 'draft'
             })
             if record.splitted:
                 master_reservation = record.parent_reservation or record
@@ -1024,18 +1048,24 @@ class HotelReservation(models.Model):
     def prepare_reservation_lines(self, dfrom, days, pricelist_id, vals=False, update_old_prices=False):
         total_price = 0.0
         discount = 0
-        cmds = [(5, 0, 0)]
+        cmds = []
         if not vals:
             vals = {}
         room_type_id = vals.get('room_type_id') or self.room_type_id.id
         product = self.env['hotel.room.type'].browse(room_type_id).product_id
         partner = self.env['res.partner'].browse(vals.get('partner_id') or self.partner_id.id)
+        state = vals.get('state') if 'state' in vals else self.state
         if 'discount' in vals and vals.get('discount') > 0:
             discount = vals.get('discount')
         for i in range(0, days):
             idate = (fields.Date.from_string(dfrom) + timedelta(days=i)).strftime(
                 DEFAULT_SERVER_DATE_FORMAT)
+            line_vals = {}
             old_line = self.reservation_line_ids.filtered(lambda r: r.date == idate)
+            if state != 'cancelled':
+                line_vals.update({
+                    'cancel_discount': 0
+                })
             if update_old_prices or not old_line:
                 product = product.with_context(
                     lang=partner.lang,
@@ -1046,20 +1076,37 @@ class HotelReservation(models.Model):
                     uom=product.uom_id.id)
                 # REVIEW this forces to have configured the taxes included in the price
                 line_price = product.price
+                line_vals.update({
+                    'price': line_price,
+                    'discount': discount,
+                    'state': state,
+                })
                 if old_line and old_line.id:
-                    cmds.append((1, old_line.id, {
-                        'price': line_price,
-                        'discount': discount
-                    }))
+                    cmds.append((1, old_line.id, line_vals))
                 else:
-                    cmds.append((0, False, {
-                        'date': idate,
-                        'price': line_price,
-                        'discount': discount
-                    }))
+                    line_vals.update({
+                        'date': idate
+                    })
+                    cmds.append((0, False, line_vals))
             else:
-                line_price = old_line.price
-                cmds.append((4, old_line.id))
+                line_vals.update({
+                    'state': state,
+                })
+                cmds.append((1, old_line.id, line_vals))
+        dto = (fields.Date.from_string(dfrom) + timedelta(days)).strftime(
+            DEFAULT_SERVER_DATE_FORMAT)
+        # Adds lines that were outside the range of the reservation (the compute
+        # state field on reservation line will leave them as canceled)
+        for out_line in self.reservation_line_ids.filtered(
+                lambda r: r.date < dfrom or r.date >= dto):
+            pricelist = self.env['product.pricelist'].browse(pricelist_id)
+            rule = pricelist.cancelation_rule_id
+            if rule:
+                discount = 100 - rule.penalty_modification
+            cmds.append((1, out_line.id, {
+                'cancel_discount': discount,
+                'state': 'cancelled',
+            }))
         return {'reservation_line_ids': cmds}
 
     @api.multi
@@ -1096,6 +1143,13 @@ class HotelReservation(models.Model):
     """
     AVAILABILTY PROCESS ------------------------------------------------
     """
+    @api.multi
+    def in_reservation_lines(self):
+        # Return the reseravtion lines that not are out by modifications on dates
+        reservation_line_ids = self.reservation_line_ids.filtered(
+            lambda r: r.date >= self.checkin and r.date < self.checkout
+            )
+        return reservation_line_ids
 
     @api.model
     def get_reservations(self, dfrom, dto):
@@ -1112,8 +1166,12 @@ class HotelReservation(models.Model):
     def _get_domain_reservations_occupation(self, dfrom, dto):
         #WARNING If add or remove domain items, update _hcalendar_get_count_reservations_json_data
         # in calendar module hotel_calendar
-        domain = [('reservation_line_ids.date', '>=', dfrom),
-                  ('reservation_line_ids.date', '<=', dto),
+        reservation_line_ids = self.env['hotel.reservation.line'].search([
+            ('date', '>=', dfrom),
+            ('date', '<=', dto),
+            ('state', '!=', 'cancelled')
+        ]).ids
+        domain = [('reservation_line_ids', 'in', reservation_line_ids),
                   ('state', '!=', 'cancelled'),
                   ('overbooking', '=', False),
                   ('reselling', '=', False)]
@@ -1136,7 +1194,8 @@ class HotelReservation(models.Model):
             }
         """
         domain = [('date', '>=', dfrom),
-                  ('date', '<', dto)]
+                  ('date', '<', dto),
+                  ('state', '!=', 'cancelled')]
         lines = self.env['hotel.reservation.line'].search(domain)
         reservations_dates = {}
         for record in lines:
@@ -1209,6 +1268,10 @@ class HotelReservation(models.Model):
     def action_reservation_checkout(self):
         for record in self:
             record.state = 'done'
+            reservation_lines = record.in_reservation_lines()
+            reservation_lines.update({
+                'state': 'done',
+            })
             if record.checkin_partner_ids:
                 record.checkin_partner_ids.filtered(
                     lambda check: check.state == 'booking').action_done()

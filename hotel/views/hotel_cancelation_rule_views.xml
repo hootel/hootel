@@ -26,6 +26,11 @@
                             <field name="apply_on_noshow" />
                             <field name="days_noshow" attrs="{'invisible': [('apply_on_noshow','not in',('days'))]}" />
                         </group>
+                        <group string="Modifications">
+                            <field name="penalty_modification" />
+                            <field name="apply_on_modification" />
+                            <field name="days_modification" attrs="{'invisible': [('apply_on_modification','not in',('days'))]}" />
+                        </group>
                     </group>
                 </sheet>
             </form>
@@ -44,6 +49,8 @@
                 <field name="apply_on_late" />
                 <field name="penalty_noshow" />
                 <field name="apply_on_noshow" />
+                <field name="penalty_modification" />
+                <field name="apply_on_modification" />
             </tree>
         </field>
     </record>

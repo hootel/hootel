@@ -293,12 +293,14 @@
                             <button name="%(action_hotel_massive_price_change_reservation_days)d" string="Massive Day Prices"
                                     type="action" icon="fa-bolt"/>
                             <field name="reservation_line_ids" nolabel="1">
-                                <tree create="false" delete="false" editable="bottom">
+                                <tree create="false" delete="false" editable="bottom"
+                                  decoration-danger="state == 'cancelled'">
                                     <field name="date" readonly="1" force_save="1"/>
                                     <field name="price" />
                                     <field name="discount" />
                                     <field name="cancel_discount"
-                                       attrs="{'column_invisible': [('parent.state','!=','cancelled')]}" />
+                                       attrs="{'invisible': [('state','!=','cancelled')]}" />
+                                    <field name='state' invisible="1" force_save="1"/>
                                 </tree>
                             </field>
                         </page>

@@ -18,11 +18,22 @@ class HotelReservationLine(models.Model):
             result.append((res.id, name))
         return result
 
+    def _default_line_state(self):
+        return self.reservation_id.state
+
     reservation_id = fields.Many2one('hotel.reservation', string='Reservation',
                                      ondelete='cascade', required=True,
                                      copy=False)
-    date = fields.Date('Date')
-    state = fields.Selection(related='reservation_id.state')
+    date = fields.Date('Date', index=True)
+    state = fields.Selection([
+        ('draft', 'Pre-reservation'),
+        ('confirm', 'Pending Entry'),
+        ('booking', 'On Board'),
+        ('done', 'Out'),
+        ('cancelled', 'Cancelled')
+        ],string='State', readonly=True,
+        default=_default_line_state, copy=False,
+        track_visibility='onchange')
     price = fields.Float(
         string='Price',
         digits=dp.get_precision('Product Price'))

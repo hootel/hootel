@@ -145,12 +145,6 @@ class HotelReservationImporter(Component):
                 tprice += room_day_price
             rate_id = brday['rate_id']
         # TODO: Review different pricelist in the different booked rooms (folio in Odoo)
-        if rate_id < 0:
-            rate_id = 0
-            self.create_issue(
-                section='reservation',
-                internal_emssage="Wubook Reservation with unknown pricelist",
-                channel_object_id=book['reservation_code'])
         if rate_id == 0:
             default_rate_id = self.env['channel.backend'].search([
                 ('id', '=', self.backend_record.id)

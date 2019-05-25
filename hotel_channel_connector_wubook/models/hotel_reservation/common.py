@@ -27,6 +27,7 @@ class ChannelHotelReservation(models.Model):
         (str(WUBOOK_STATUS_CANCELLED), 'Cancelled'),
         (str(WUBOOK_STATUS_CANCELLED_PENALTY), 'Cancelled with penalty'),
     ])
+    channel_modified_reservations = fields.Char('Wubook Modified Reservations')
 
     # TODO: Review where to check the total room amount
     # @api.model

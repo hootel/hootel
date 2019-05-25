@@ -16,15 +16,24 @@ class HotelCancelationRule(models.Model):
     days_intime = fields.Integer(
         'Days Late',
         help='Maximum number of days for free cancellation before Checkin')
+    # Late
     penalty_late = fields.Integer('% Penalty Late', defaul="100")
     apply_on_late = fields.Selection([
         ('first', 'First Day'),
         ('all', 'All Days'),
         ('days', 'Specify days')], 'Late apply on', default='first')
     days_late = fields.Integer('Late first days', default="2")
+    # No Show
     penalty_noshow = fields.Integer('% Penalty No Show', default="100")
     apply_on_noshow = fields.Selection([
         ('first', 'First Day'),
         ('all', 'All Days'),
         ('days', 'Specify days')], 'No Show apply on', default='all')
     days_noshow = fields.Integer('NoShow first days', default="2")
+    # Modification
+    penalty_modification = fields.Integer('% Penalty Modification', default="0")
+    apply_on_modification = fields.Selection([
+        ('first', 'First Modified Day'),
+        ('all', 'All Days Modified'),
+        ('days', 'Specify days')], 'No Show apply on', default='all')
+    days_modification = fields.Integer('Modification first days', default="2")
