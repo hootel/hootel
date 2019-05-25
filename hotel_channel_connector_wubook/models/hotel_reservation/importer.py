@@ -301,12 +301,15 @@ class HotelReservationImporter(Component):
             # TODO: Aqui chequeamos si es posible mantener la habitación de la reserva
             # 1.- no ha cambiado el tipo de habita y 2.- hay dispo de esa habitación en las nuevas fechas
             # si se puede mantener habitación, mantenemos con un parametro room_id
+            if room_type_bind == binding.room_type_id:
+                room_id = binding.room_id.id
             reservations = self._prepare_complete_reservation(
                 checkin_utc_dt=checkin_utc_dt,
                 checkout_utc_dt=checkout_utc_dt,
                 broom=broom,
                 crcode=crcode,
                 rcode=rcode,
+                room_id=room_id,
                 room_type_bind=room_type_bind,
                 book=book,
             )[0]
@@ -526,12 +529,17 @@ class HotelReservationImporter(Component):
                 room_type_id=room_type_bind.odoo_id.id,
                 notthis=used_rooms)
             if any(free_rooms):
+                if room_id and room_id in free_rooms._ids:
+                    selected_room = self.env['hotel.room'].browse(room_id)
+                else:
+                    selected_room = free_rooms[0]
                 vals.update({
                     'room_type_id': room_type_bind.odoo_id.id,
-                    'name': free_rooms[0].name,
+                    'name': selected_room.name,
+                    'room_id': selected_room.id,
                 })
                 reservations.append((0, False, vals))
-                used_rooms.append(free_rooms[0].id)
+                used_rooms.append(selected_room.id)
                 if split_booking:
                     if not split_booking_parent:
                         split_booking_parent = len(reservations)
