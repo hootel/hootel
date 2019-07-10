@@ -17,6 +17,7 @@ class NodeLogin(object):
         self.user = user
         self.passwd = passwd
 
+
 class NodeServer(object):
     def __init__(self, login_data):
         self._server = None
@@ -34,6 +35,7 @@ class NodeServer(object):
     def server(self):
         if self._server is None:
             try:
+                _logger.warning('New Login')
                 self._server = odoorpc.ODOO(self._login_data.address,
                                             self._login_data.protocol,
                                             self._login_data.port)
@@ -49,22 +51,11 @@ class NodeServer(object):
         self._server.logout()
         self._server = None
 
+
 class HotelNodeInterfaceAdapter(AbstractComponent):
     _name = 'hotel.node.interface.adapter'
     _inherit = ['base.backend.adapter', 'base.node.connector']
     _usage = 'backend.adapter'
-
-    def create_room_type(self, name, room_ids):
-        raise NotImplementedError
-
-    def modify_room_type(self, room_type_id, name, room_ids):
-        raise NotImplementedError
-
-    def delete_room_type(self, room_type_id):
-        raise NotImplementedError
-
-    def fetch_room_types(self):
-        raise NotImplementedError
 
     @property
     def _server(self):
@@ -78,11 +69,77 @@ class HotelNodeInterfaceAdapter(AbstractComponent):
             )
         return node_server.server
 
+    # === ROOM TYPES
+    def create_room_type(self, name, room_ids):
+        raise NotImplementedError
+
+    def modify_room_type(self, room_type_id, name, room_ids):
+        raise NotImplementedError
+
+    def delete_room_type(self, room_type_id):
+        raise NotImplementedError
+
+    def fetch_room_types(self):
+        raise NotImplementedError
+
+    # === ROOMS
+    def create_room(self, name, capacity, room_type_id):
+        raise NotImplementedError
+
+    def modify_room(self, room_id, name, capacity, room_type_id):
+        raise NotImplementedError
+
+    def delete_room(self, room_id):
+        raise NotImplementedError
+
+    def fetch_rooms(self):
+        raise NotImplementedError
+
+    # === PARTNERS
+    def create_res_partner(self, name, email, is_company, type):
+        raise NotImplementedError
+
+    def modify_res_partner(self, partner_id, name, email, is_company, type):
+        raise NotImplementedError
+
+    def delete_res_partner(self, partner_id):
+        raise NotImplementedError
+
+    def fetch_res_partners(self):
+        raise NotImplementedError
+
+    # === GROUPS
+    def create_res_groups(self, name, user_ids):
+        raise NotImplementedError
+
+    def modify_res_groups(self, group_id, name, user_ids):
+        raise NotImplementedError
+
+    def delete_res_groups(self, group_id):
+        raise NotImplementedError
+
+    def fetch_res_groups(self):
+        raise NotImplementedError
+
+    # === USERS
+    def create_res_users(self, login, active, partner_id, group_ids):
+        raise NotImplementedError
+
+    def modify_res_users(self, user_id, login, active, partner_id, group_ids):
+        raise NotImplementedError
+
+    def delete_res_users(self, user_id):
+        raise NotImplementedError
+
+    def fetch_res_users(self):
+        raise NotImplementedError
+
+
 class HotelNodeAdapter(AbstractComponent):
     _name = 'hotel.node.adapter'
     _inherit = 'hotel.node.interface.adapter'
 
-    # === ROOMS
+    # === ROOM TYPES
     def create_room_type(self, name, room_ids):
         return self._server.env['hotel.room.type'].create({
             'name': name
@@ -103,5 +160,185 @@ class HotelNodeAdapter(AbstractComponent):
     def fetch_room_types(self):
         return self._server.env['hotel.room.type'].search_read(
             [],
-            ['name']
+            ['name', 'room_ids']
         )
+
+    def fetch_room_type_availability(self, checkin, checkout, room_type_id):
+        return self._server.env['hotel.room.type'].get_room_type_availability(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+
+    def fetch_room_type_price_unit(self, checkin, checkout, room_type_id):
+        return self._server.env['hotel.room.type'].get_room_type_price_unit(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+
+    def fetch_room_type_restrictions(self, checkin, checkout, room_type_id):
+        return self._server.env['hotel.room.type'].get_room_type_restrictions(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+
+    def fetch_room_type_planning(self, checkin, checkout, room_type_id):
+        # availability = self._server.env['hotel.room.type'].get_room_type_availability(
+        #     checkin,
+        #     checkout,
+        #     room_type_id.external_id
+        # )
+        # price_unit = self._server.env['hotel.room.type'].get_room_type_price_unit(
+        #     checkin,
+        #     checkout,
+        #     room_type_id.external_id
+        # )
+        # restrictions = self._server.env['hotel.room.type'].get_room_type_restrictions(
+        #     checkin,
+        #     checkout,
+        #     room_type_id.external_id
+        # )
+        # return {'availability': availability, 'price_unit': price_unit, 'restrictions': restrictions}
+
+        return self._server.env['hotel.room.type'].get_room_type_planning(
+            checkin,
+            checkout,
+            room_type_id.external_id
+        )
+
+        # room_types_planning = []
+        # for room_type in room_type_id:
+        #     room_types_planning.append({
+        #         'room_type_id': room_type.id,
+        #         'planning': self._server.env['hotel.room.type'].get_room_type_planning(
+        #             checkin,
+        #             checkout,
+        #             room_type.external_id,
+        #         )
+        #     })
+        # return room_types_planning
+
+    # === ROOMS
+    def create_room(self, name, capacity, room_type_id):
+        return self._server.env['hotel.room'].create({
+            'name': name,
+            'capacity': capacity,
+            'room_type_id': room_type_id,
+        })
+
+    def modify_room(self, room_id, name, capacity, room_type_id):
+        return self._server.env['hotel.room'].write(
+            [room_id],
+            {
+                'name': name,
+                'capacity': capacity,
+                'room_type_id': room_type_id,
+            })
+
+    def delete_room(self, room_id):
+        _logger.warning("_delete_room(%s, room_id) is not yet implemented.", self)
+        # return self._server.env['hotel.room'].unlink(room_id)
+
+    def fetch_rooms(self):
+        rooms = self._server.env['hotel.room'].search_read(
+            [],
+            ['name', 'capacity', 'room_type_id']
+        )
+        for rec in rooms:
+            rec['room_type_id'] = rec['room_type_id'][0]
+
+        return rooms
+
+    # === PARTNERS
+    def create_res_partner(self, name, email, is_company, type):
+        return self._server.env['res.partner'].create({
+            'name': name,
+            'email': email,
+            'is_company': is_company,
+            'type': type,
+        })
+
+    def modify_res_partner(self, partner_id, name, email, is_company, type):
+        _logger.info('User #%s updated remote res.partner with ID: [%s] in node [%s] [%s]',
+                     self.env.context.get('uid'), partner_id, self._server._host, self._server)
+        return self._server.env['res.partner'].write(
+            [partner_id],
+            {
+                'name': name,
+                'email': email,
+                'is_company': is_company,
+                'type': type,
+            })
+
+    def delete_res_partner(self, partner_id):
+        _logger.warning("_delete_partner(%s, partner_id) is not yet implemented.", self)
+        # return self._server.env['res.partner'].unlink(partner_id)
+
+    def fetch_res_partners(self):
+        return self._server.env['res.partner'].search_read(
+            [],
+            ['name', 'email', 'is_company', 'type']
+        )
+
+    # === GROUPS
+    def create_res_groups(self, name, user_ids):
+        _logger.warning("_create_groups(%s, group_id) is not yet implemented.", self)
+        return True
+
+    def modify_res_groups(self, group_id, name, user_ids):
+        _logger.warning("_modify_groups(%s, group_id) is not yet implemented.", self)
+        return True
+
+    def delete_res_groups(self, group_id):
+        _logger.warning("_delete_groups(%s, groups_id) is not yet implemented.", self)
+        return True
+
+    def fetch_res_groups(self):
+        return self._server.env['res.groups'].search_read(
+            [],
+            ['full_name', 'user_ids']
+        )
+
+    # === USERS
+    def create_res_users(self, login, active, partner_id, group_ids):
+        user_id = self._server.env['res.users'].create({
+            'login': login,
+            'partner_id': partner_id,
+            'active': active,
+            # 'groups_id': [(6, False, group_ids)]
+            'groups_id': group_ids
+        })
+        _logger.info('User #%s created remote res.users with ID: [%s] in node [%s] [%s]',
+                     self.env.context.get('uid'), user_id, self._server._host, self._server)
+        return user_id
+
+    def modify_res_users(self, user_id, login, active, partner_id, group_ids):
+        _logger.info('User #%s updated remote res.users with ID: [%s] in node [%s] [%s]',
+                     self.env.context.get('uid'), user_id, self._server._host, self._server)
+        return self._server.env['res.users'].write(
+            [user_id],
+            {
+                'login': login,
+                'partner_id': partner_id,
+                'active': active,
+                # 'groups_id': [(6, False, group_ids)]
+                'groups_id': group_ids
+            })
+
+    def delete_res_users(self, user_id):
+        _logger.warning("_delete_users(%s, groups_id) is not yet implemented.", self)
+        return True
+
+    def fetch_res_users(self):
+        # users black list
+        users_blacklist = ['admin', 'portal']
+        users = self._server.env['res.users'].search_read(
+            [('login', 'not in', users_blacklist)],
+            ['login', 'active', 'partner_id', 'groups_id']
+        )
+        for rec in users:
+            rec['partner_id'] = rec['partner_id'][0]
+
+        return  users

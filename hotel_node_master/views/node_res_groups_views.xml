@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- views -->
+
+    <record id="node_res_groups_view_tree" model="ir.ui.view">
+        <field name="name">node.res.groups.tree</field>
+        <field name="model">node.res.groups</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="backend_id"/>
+                <field name="sync_date"/>
+                <field name="external_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- actions -->
+
+    <record id="node_res_groups_action" model="ir.actions.act_window">
+        <field name="name">Groups</field>
+        <field name="res_model">node.res.groups</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="target">main</field>
+    </record>
+
+    <!-- menus -->
+
+</odoo>

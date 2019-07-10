@@ -4,7 +4,7 @@
 import logging
 from odoo.addons.component.core import Component
 from odoo.addons.connector.components.mapper import mapping
-from odoo import fields, api, _
+from odoo import api, _
 _logger = logging.getLogger(__name__)
 
 
@@ -23,13 +23,30 @@ class HotelRoomTypeImporter(Component):
         node_room_type_obj = self.env['node.room.type']
         for rec in results:
             map_record = room_type_mapper.map_record(rec)
-            room_type = node_room_type_obj.search([('external_id', '=', rec['id'])],
-                                                  limit=1)
-            # NEED REVIEW Import a record triggers a room_type.write / room_type.create back to the node
+            room_type = node_room_type_obj.search([
+                ('backend_id', '=', self.backend_record.id),
+                ('external_id', '=', rec['id'])
+            ])
             if room_type:
-                room_type.write(map_record.values())
+                room_type.with_context({'connector_no_export': True}).write(map_record.values())
             else:
-                room_type.create(map_record.values(for_create=True))
+                room_type.with_context({'connector_no_export': True}).create(map_record.values(for_create=True))
+
+    @api.model
+    def fetch_room_type_availability(self, checkin, checkout, room_type_id):
+        return self.backend_adapter.fetch_room_type_availability(checkin, checkout, room_type_id)
+
+    @api.model
+    def fetch_room_type_price_unit(self, checkin, checkout, room_type_id):
+        return self.backend_adapter.fetch_room_type_price_unit(checkin, checkout, room_type_id)
+
+    @api.model
+    def fetch_room_type_restrictions(self, checkin, checkout, room_type_id):
+        return self.backend_adapter.fetch_room_type_restrictions(checkin, checkout, room_type_id)
+
+    @api.model
+    def fetch_room_type_planning(self, checkin, checkout, room_type_id):
+        return self.backend_adapter.fetch_room_type_planning(checkin, checkout, room_type_id)
 
 
 class NodeRoomTypeImportMapper(Component):
@@ -41,7 +58,10 @@ class NodeRoomTypeImportMapper(Component):
         ('id', 'external_id'),
         ('name', 'name'),
     ]
+    # children = [('room_ids', 'room_ids', 'node.room')]
 
     @mapping
     def backend_id(self, record):
         return {'backend_id': self.backend_record.id}
+
+

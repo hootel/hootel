@@ -8,15 +8,11 @@
 				<sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="node_id" placeholder="Hotel" required="1" force_save="1"
-                                   attrs="{'readonly': [('node_id', '!=', False)]}"/>
+                            <field name="backend_id" placeholder="Hotel" required="1" force_save="1"
+                                   attrs="{'readonly': [('backend_id', '!=', False)]}"/>
                         </h1>
                     </div>
-                    <group attrs="{'invisible':[('node_id','=',False)]}">
-                        <!--<group name="dates">-->
-                            <!--<field name="checkin" required="1" widget="date" />-->
-                            <!--<field name="checkout" required="1" widget="date" />-->
-                        <!--</group>-->
+                    <group attrs="{'invisible':[('backend_id','=',False)]}">
                         <group>
                             <field name="partner_id"/>
                         </group>
@@ -26,7 +22,7 @@
                                 <tree editable="bottom" create="false" delete="false"
                                       decoration-muted="room_type_availability == 0">
                                     <field name="node_reservation_wizard_id" invisible="1"/>
-                                    <field name="node_id" invisible="1"/>
+                                    <field name="backend_id" invisible="1"/>
                                     <field name="room_type_id" string="Room Type" readonly="1" force_save="1"/>
                                     <field name="room_type_availability" readonly="1"/>
                                     <field name="room_qty"/>
@@ -50,7 +46,7 @@
                             <field name="price_total" widget="monetary" readonly="1" force_save="1"/>
                         </group>
                     </group>
-                    <footer attrs="{'invisible':[('node_id','=',False)]}">
+                    <footer attrs="{'invisible':[('backend_id','=',False)]}">
                         <button name="create_node_reservation" string="Create Reservations" type="object"
 							class="oe_highlight" />
                         <button name="cancel" string="Cancel" special="cancel"
@@ -69,11 +65,11 @@
 				<sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="node_id" placeholder="Hotel" required="1" force_save="1"
-                                   attrs="{'readonly': [('node_id', '!=', False)]}"/>
+                            <field name="backend_id" placeholder="Hotel" required="1" force_save="1"
+                                   attrs="{'readonly': [('backend_id', '!=', False)]}"/>
                         </h1>
                     </div>
-                    <group attrs="{'invisible':[('node_id','=',False)]}">
+                    <group attrs="{'invisible':[('backend_id','=',False)]}">
                         <group>
                             <field name="folio"/>
                             <field name="checkin"/>
@@ -82,7 +78,7 @@
                             <field name="partner_id"/>
                         </group>
                     </group>
-                    <footer attrs="{'invisible':[('node_id','=',False)]}">
+                    <footer attrs="{'invisible':[('backend_id','=',False)]}">
                         <button name="search_node_reservation" string="Search Reservations" type="object"
 							class="oe_highlight" />
                         <button name="cancel" string="Cancel" special="cancel"
@@ -127,7 +123,7 @@
         </field>
     </record>
 
-    <record id="hotel_node_reservation_wizard_action" model="ir.actions.act_window">
+    <record id="node_reservation_wizard_action" model="ir.actions.act_window">
 		<field name="name">Hotel Reservation Wizard</field>
 		<field name="type">ir.actions.act_window</field>
 		<field name="res_model">hotel.node.reservation.wizard</field>
@@ -136,7 +132,7 @@
 		<field name="target">new</field>
 	</record>
 
-    <record id="hotel_node_reservation_wizard_action_search" model="ir.actions.act_window">
+    <record id="node_reservation_wizard_action_search" model="ir.actions.act_window">
 		<field name="name">Hotel Reservation Wizard Search</field>
 		<field name="type">ir.actions.act_window</field>
 		<field name="res_model">node.search.wizard</field>

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- views -->
+
     <record id="node_backend_views_form" model="ir.ui.view">
         <field name="name">node.backend.form</field>
         <field name="model">node.backend</field>
@@ -32,15 +34,79 @@
                         </notebook>
                     </group>
                     <notebook>
-                        <page name="import" string="Imports">
+                        <page name="room_type" string="Room Types" attrs="{'invisible':[('id','=',False)]}">
                             <group>
-                                <label string="Import Room Types" class="oe_inline"/>
+                                <button name="import_room_types"
+                                        type="object"
+                                        class="oe_highlight"
+                                        string="Import Room Types"
+                                        confirm="Synchronizing Room Types automatically updates Room Types in the Central Node. Do you want to proceed?"/>
+                            </group>
+                            <group>
+                                <field name="room_type_ids" nolabel="1" />
+                            </group>
+                        </page>
+                        <page name="rooms" string="Rooms" attrs="{'invisible':[('id','=',False)]}">
+                            <group>
+                                <button name="import_rooms"
+                                        type="object"
+                                        class="oe_highlight"
+                                        string="Import Rooms"
+                                        confirm="Synchronizing Rooms automatically updates Room Types and Rooms in the Central Node. Do you want to proceed?"/>
+                            </group>
+                            <group>
+                                <field name="room_ids" nolabel="1" />
+                            </group>
+                        </page>
+                        <page name="groups" string="Groups" attrs="{'invisible':[('id','=',False)]}">
+                            <group>
+                                <button name="import_groups"
+                                        type="object"
+                                        class="oe_highlight"
+                                        string="Import Groups"
+                                        confirm="Synchronizing Groups automatically updates Groups in the Central Node. Do you want to proceed?"/>
+                            </group>
+                            <group>
+                                <field name="group_ids" nolabel="1" />
+                            </group>
+                        </page>
+                        <page name="users" string="Users" attrs="{'invisible':[('id','=',False)]}">
+                            <group>
+                                <button name="import_users"
+                                        type="object"
+                                        class="oe_highlight"
+                                        string="Import Users"
+                                        confirm="Synchronizing Users automatically updates Groups and Users in the Central Node. Do you want to proceed?"/>
+                            </group>
+                            <group>
+                                <field name="user_ids" nolabel="1" />
+                            </group>
+                        </page>
+                        <page name="partners" string="Partners">
+                            <group>
+                                <label string="Import Partners" class="oe_inline"/>
                                 <div>
-                                    <button name="import_room_types"
+                                    <button name="import_partners"
                                             type="object"
                                             class="oe_highlight"
                                             string="Import in background"
-                                            confirm="Synchronizing a node automatically updates Room Types in the Central Node. Do you want to proceed?"/>
+                                            confirm="Synchronizing a node automatically updates Partners in the Central Node. Do you want to proceed?"/>
+                                </div>
+                                </group>
+                        </page>
+                        <page name="reservations" string="Reservations">
+                            <group>
+                                <div class="oe_button_box" name="button_box" groups="base.group_user">
+                                    <button name="%(node_reservation_wizard_action)d" type="action"
+                                            string="Reservation Wizard" help="Make a reservation in this hotel"
+                                            class="oe_stat_button" icon="fa-suitcase"
+                                            context="{'backend_id': id}">
+                                    </button>
+                                    <button name="%(node_reservation_wizard_action_search)d" type="action"
+                                            string="Search" help="Search a reservation in this hotel"
+                                            class="oe_stat_button" icon="fa-search"
+                                            context="{'backend_id': id}">
+                                    </button>
                                 </div>
                             </group>
                         </page>
@@ -62,7 +128,9 @@
         </field>
     </record>
 
-    <record id="action_node_backend" model="ir.actions.act_window">
+    <!-- actions -->
+
+    <record id="node_backend_action" model="ir.actions.act_window">
         <field name="name">Hotel Node Backends</field>
         <field name="res_model">node.backend</field>
         <field name="view_type">form</field>
@@ -70,12 +138,17 @@
         <field name="view_id" ref="node_backend_views_tree"/>
     </record>
 
-    <record id="action_node_room_type" model="ir.actions.act_window">
-    <field name="name">Hotel Node Room Types</field>
-    <field name="res_model">node.room.type</field>
-    <field name="view_type">form</field>
-    <field name="view_mode">tree,form</field>
-    <!--<field name="view_id" ref="node_backend_views_tree"/>-->
-</record>
+    <!-- menus -->
+
+    <menuitem id="menu_node_connector_root"
+        parent="connector.menu_connector_root"
+        name="Hotel Central Node"
+        sequence="10"/>
+
+    <menuitem id="menu_node_backend"
+        name="Backends"
+        sequence="1"
+        parent="menu_node_connector_root"
+        action="node_backend_action"/>
 
 </odoo>

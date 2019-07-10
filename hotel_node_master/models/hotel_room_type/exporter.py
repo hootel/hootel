@@ -6,6 +6,7 @@ from odoo.addons.component.core import Component
 from odoo import api, _
 _logger = logging.getLogger(__name__)
 
+
 class NodeRoomTypeExporter(Component):
     _name = 'node.room.type.exporter'
     _inherit = 'node.exporter'
