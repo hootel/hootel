@@ -20,11 +20,13 @@
 ##############################################################################
 from io import BytesIO
 import datetime
+import pytz
 import xlsxwriter
 import base64
 from odoo import api, fields, models, _
+import json
 from openerp.exceptions import UserError
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 
 
 class CashDailyReportWizard(models.TransientModel):
@@ -62,6 +64,7 @@ class CashDailyReportWizard(models.TransientModel):
 
     @api.model
     def _export(self):
+        user = self.env['res.users'].browse(self.env.uid)
         file_data = BytesIO()
         workbook = xlsxwriter.Workbook(file_data, {
             'strings_to_numbers': True,
@@ -101,6 +104,9 @@ class CashDailyReportWizard(models.TransientModel):
 
         worksheet.set_column('C:C', 50)
         worksheet.set_column('D:D', 11)
+        worksheet.set_column('E:E', 20)
+        worksheet.set_column('F:F', 20)
+        worksheet.set_column('G:G', 20)
 
         account_payments_obj = self.env['account.payment']
         account_payments = account_payments_obj.search([
@@ -113,51 +119,80 @@ class CashDailyReportWizard(models.TransientModel):
         total_account_expenses = 0.0
         payment_journals = {}
         expense_journals = {}
+        count_payment_journals = {}
+        count_expense_journals = {}
         total_dates = {}
         for k_payment, v_payment in enumerate(account_payments):
             where = v_payment.partner_id.name
             amount = v_payment.amount if v_payment.payment_type in ('inbound') \
                 else -v_payment.amount
             if v_payment.payment_type == 'transfer':
+                ingresos = 'Ingresos ' + v_payment.destination_journal_id.name
+                gastos = 'Gastos ' + v_payment.destination_journal_id.name
                 where = v_payment.destination_journal_id.name
                 total_account_payment += -amount
                 if v_payment.destination_journal_id.name not in payment_journals:
                     payment_journals.update({v_payment.destination_journal_id.name: -amount})
+                    count_payment_journals.update({v_payment.destination_journal_id.name: 1})
                 else:
                     payment_journals[v_payment.destination_journal_id.name] += -amount
+                    count_payment_journals[v_payment.destination_journal_id.name] += 1
                 if v_payment.payment_date not in total_dates:
                     total_dates.update({v_payment.payment_date: {v_payment.destination_journal_id.name: -amount}})
+                    total_dates[v_payment.payment_date].update({ingresos: -amount})
+                    total_dates[v_payment.payment_date].update({gastos: 0})
                 else:
                     if v_payment.destination_journal_id.name not in total_dates[v_payment.payment_date]:
+                        total_dates[v_payment.payment_date].update({ingresos: -amount})
+                        total_dates[v_payment.payment_date].update({gastos: 0})
                         total_dates[v_payment.payment_date].update({v_payment.destination_journal_id.name: -amount})
                     else:
+                        total_dates[v_payment.payment_date][ingresos] += -amount
                         total_dates[v_payment.payment_date][v_payment.destination_journal_id.name] += -amount
             if amount < 0:
+                ingresos = 'Ingresos ' + v_payment.journal_id.name
+                gastos = 'Gastos ' + v_payment.journal_id.name
                 total_account_expenses += -amount
                 if v_payment.journal_id.name not in expense_journals:
                     expense_journals.update({v_payment.journal_id.name: amount})
+                    count_expense_journals.update({v_payment.journal_id.name: 1})
                 else:
                     expense_journals[v_payment.journal_id.name] += amount
+                    count_expense_journals[v_payment.journal_id.name] += 1
                 if v_payment.payment_date not in total_dates:
                     total_dates.update({v_payment.payment_date: {v_payment.journal_id.name: amount}})
+                    total_dates[v_payment.payment_date].update({gastos: -amount})
+                    total_dates[v_payment.payment_date].update({ingresos: 0})
                 else:
                     if v_payment.journal_id.name not in total_dates[v_payment.payment_date]:
                         total_dates[v_payment.payment_date].update({v_payment.journal_id.name: amount})
+                        total_dates[v_payment.payment_date].update({gastos: -amount})
+                        total_dates[v_payment.payment_date].update({ingresos: 0})
                     else:
+                        total_dates[v_payment.payment_date][gastos] += -amount
                         total_dates[v_payment.payment_date][v_payment.journal_id.name] += amount
             else:
+                ingresos = 'Ingresos ' + v_payment.journal_id.name
+                gastos = 'Gastos ' + v_payment.journal_id.name
                 total_account_payment += amount
                 if v_payment.journal_id.name not in payment_journals:
                     payment_journals.update({v_payment.journal_id.name: amount})
+                    count_payment_journals.update({v_payment.journal_id.name: 1})
                 else:
                     payment_journals[v_payment.journal_id.name] += amount
+                    count_payment_journals[v_payment.journal_id.name] += 1
                 if v_payment.payment_date not in total_dates:
                     total_dates.update({v_payment.payment_date: {v_payment.journal_id.name: amount}})
+                    total_dates[v_payment.payment_date].update({ingresos: amount})
+                    total_dates[v_payment.payment_date].update({gastos: 0})
                 else:
                     if v_payment.journal_id.name not in total_dates[v_payment.payment_date]:
                         total_dates[v_payment.payment_date].update({v_payment.journal_id.name: amount})
+                        total_dates[v_payment.payment_date].update({ingresos: amount})
+                        total_dates[v_payment.payment_date].update({gastos: 0})
                     else:
                         total_dates[v_payment.payment_date][v_payment.journal_id.name] += amount
+                        total_dates[v_payment.payment_date][ingresos] += amount
 
             worksheet.write(k_payment+offset, 0, v_payment.create_uid.login)
             worksheet.write(k_payment+offset, 1, v_payment.communication)
@@ -177,20 +212,28 @@ class CashDailyReportWizard(models.TransientModel):
         offset += len(account_payments)
         total_payment_returns_amount = k_line = 0.0
         return_journals = {}
+        count_return_journals = {}
         for k_payment, v_payment in enumerate(payment_returns):
             for k_line, v_line in enumerate(v_payment.line_ids):
+                gastos = 'Gastos ' + v_payment.journal_id.name
                 if v_payment.journal_id.name not in return_journals:
                     return_journals.update({v_payment.journal_id.name: -v_line.amount})
+                    count_return_journals.update({v_payment.journal_id.name : 1})
                 else:
                     return_journals[v_payment.journal_id.name] += -v_line.amount
-
+                    count_return_journals[v_payment.journal_id.name] += 1
                 if v_payment.date not in total_dates:
                     total_dates.update({v_payment.date: {v_payment.journal_id.name: -v_line.amount}})
+                    total_dates.update({v_payment.date: {gastos: -v_line.amount}})
+                    total_dates.update({v_payment.date: {ingresos: 0}})
                 else:
                     if v_payment.journal_id.name not in total_dates[v_payment.date]:
                         total_dates[v_payment.date].update({v_payment.journal_id.name: -v_line.amount})
+                        total_dates[v_payment.date].update({gastos: -v_line.amount})
+                        total_dates.update({v_payment.date: {ingresos: 0}})
                     else:
                         total_dates[v_payment.date][v_payment.journal_id.name] += -v_line.amount
+                        total_dates[v_payment.date][gastos] += -v_line.amount
 
                 worksheet.write(k_line+offset, 0, v_payment.create_uid.login)
                 worksheet.write(k_line+offset, 1, v_line.reference)
@@ -208,17 +251,36 @@ class CashDailyReportWizard(models.TransientModel):
         if k_line:
             line = k_line + offset
 
+        worksheet.write(line + 1, 2, "Fecha/Hora:")
+        timezone = pytz.timezone(self._context.get('tz') or 'UTC')
+        event_date = datetime.datetime.now()
+        event_date = pytz.UTC.localize(event_date)
+
+        event_date = event_date.astimezone(timezone)
+        event_date = event_date.strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
+        worksheet.write(line + 2, 2, event_date)
+
+        account_cash_ids = self.env['account.journal'].search([('type','=','cash')])
+        for account in account_cash_ids:
+            result_cash = account.get_journal_dashboard_datas().get('account_balance')
+            worksheet.write(line + 3, 2, account.name)
+            worksheet.write(line + 4, 2, result_cash)
+
         result_journals = {}
         # NORMAL PAYMENTS
         if total_account_payment != 0:
             line += 1
-            worksheet.write(line, 4, _('TOTAL PAYMENTS'), xls_cell_format_header)
-            worksheet.write(line, 5, total_account_payment,
+            worksheet.write(line, 4, _('TOTAL COBROS'), xls_cell_format_header)
+            worksheet.write(line, 5, _('UDS'), xls_cell_format_header)
+            worksheet.write(line, 6, total_account_payment,
                             xls_cell_format_header)
         for journal in payment_journals:
             line += 1
             worksheet.write(line, 4, _(journal))
-            worksheet.write(line, 5, payment_journals[journal],
+            worksheet.write(line, 5, count_payment_journals[journal],
+                            xls_cell_format_money)
+            worksheet.write(line, 6, payment_journals[journal],
                             xls_cell_format_money)
             if journal not in result_journals:
                 result_journals.update({journal: payment_journals[journal]})
@@ -228,13 +290,16 @@ class CashDailyReportWizard(models.TransientModel):
         # RETURNS
         if total_payment_returns_amount != 0:
             line += 1
-            worksheet.write(line, 4, _('TOTAL PAYMENT RETURNS'), xls_cell_format_header)
-            worksheet.write(line, 5, total_payment_returns_amount,
+            worksheet.write(line, 4, _('TOTAL DEVOLUCIONES'), xls_cell_format_header)
+            worksheet.write(line, 5, _('UDS'), xls_cell_format_header)
+            worksheet.write(line, 6, total_payment_returns_amount,
                             xls_cell_format_header)
         for journal in return_journals:
             line += 1
             worksheet.write(line, 4, _(journal))
-            worksheet.write(line, 5, return_journals[journal],
+            worksheet.write(line, 5, count_return_journals[journal],
+                            xls_cell_format_money)
+            worksheet.write(line, 6, return_journals[journal],
                             xls_cell_format_money)
             if journal not in result_journals:
                 result_journals.update({journal: return_journals[journal]})
@@ -244,13 +309,16 @@ class CashDailyReportWizard(models.TransientModel):
         # EXPENSES
         if total_account_expenses != 0:
             line += 1
-            worksheet.write(line, 4, _('TOTAL EXPENSES'), xls_cell_format_header)
-            worksheet.write(line, 5, -total_account_expenses,
+            worksheet.write(line, 4, _('TOTAL GASTOS'), xls_cell_format_header)
+            worksheet.write(line, 5, _('UDS'), xls_cell_format_header)
+            worksheet.write(line, 6, -total_account_expenses,
                             xls_cell_format_header)
         for journal in expense_journals:
             line += 1
             worksheet.write(line, 4, _(journal))
-            worksheet.write(line, 5, -expense_journals[journal],
+            worksheet.write(line, 5, count_expense_journals[journal],
+                            xls_cell_format_money)
+            worksheet.write(line, 6, -expense_journals[journal],
                             xls_cell_format_money)
             if journal not in result_journals:
                 result_journals.update({journal: expense_journals[journal]})
@@ -262,35 +330,54 @@ class CashDailyReportWizard(models.TransientModel):
         worksheet.write(line, 4, _('TOTAL'), xls_cell_format_header)
         worksheet.write(
             line,
-            5,
+            6,
             total_account_payment + total_payment_returns_amount - total_account_expenses,
             xls_cell_format_header)
         for journal in result_journals:
             line += 1
             worksheet.write(line, 4, _(journal))
-            worksheet.write(line, 5, result_journals[journal],
+            worksheet.write(line, 6, result_journals[journal],
                             xls_cell_format_money)
 
-        worksheet = workbook.add_worksheet(_('Por dia'))
-        worksheet.write('A1', _('Date'), xls_cell_format_header)
-        columns = ('B1','C1','D1','E1','F1','G1','H1')
+        line += 1
+        worksheet.write(line, 2, _('FECHA:'))
+        line += 1
+        worksheet.write(line, 2, _('NOMBRE Y FIRMA TURNO SALIENTE:'))
+        worksheet.write(line, 4, _('NOMBRE Y FIRMA TURNO ENTRANTE:'))
+
+        if not user.has_group('hotel.group_hotel_manager'):
+            worksheet.protect()
+
+        worksheet_day = workbook.add_worksheet(_('Por dia'))
+        worksheet_day.write('A1', _('Date'), xls_cell_format_header)
+        columns = ('B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','M1')
         i = 0
         column_journal = {}
         for journal in result_journals:
-            worksheet.write(columns[i], _(journal), xls_cell_format_header)
+            ingresos = 'Ingresos ' + journal
+            gastos = 'Gastos ' + journal
+            worksheet_day.write(columns[i], _(ingresos), xls_cell_format_header)
+            i += 1
+            column_journal.update({ingresos: i})
+            worksheet_day.write(columns[i], _(gastos), xls_cell_format_header)
+            i += 1
+            column_journal.update({gastos: i})
+            worksheet_day.write(columns[i], _(journal), xls_cell_format_header)
             i += 1
             column_journal.update({journal: i})
 
-        worksheet.set_column('C:C', 50)
-        worksheet.set_column('D:D', 11)
+        worksheet_day.set_column('A:A', 11)
+        worksheet_day.set_column('B:K', 20)
 
         offset = 1
         total_dates = sorted(total_dates.items(), key=lambda x: x[0])
         for k_day, v_day in enumerate(total_dates):
-            worksheet.write(k_day+offset, 0, v_day[0])
+            worksheet_day.write(k_day+offset, 0, v_day[0])
             for journal in v_day[1]:
-                worksheet.write(k_day+offset, column_journal[journal], v_day[1][journal])
+                worksheet_day.write(k_day+offset, column_journal[journal], v_day[1][journal])
 
+        if not user.has_group('hotel.group_hotel_manager'):
+            worksheet_day.protect()
         workbook.close()
         file_data.seek(0)
         tnow = fields.Datetime.now().replace(' ', '_')
