@@ -473,7 +473,8 @@ class Data_Bi(models.Model):
                 'PrecioIva': precio_iva,
                 'PrecioDto': precio_dto,
                 'ID_Tarifa': linea.reservation_id.pricelist_id.id,
-                'ID_Pais': self.data_bi_get_codeine(linea)
+                'ID_Pais': self.data_bi_get_codeine(linea),
+                'ID_Room': linea.reservation_id.room_id.id
                 })
         # ID_Reserva numérico Código único de la reserva
         # ID_Hotel numérico Código del Hotel
