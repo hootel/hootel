@@ -83,7 +83,7 @@ class HotelReservation(models.Model):
         return reservations.mapped('localizator')
 
     @api.model
-    def rm_get_arraivals(self, code):
+    def rm_get_arrivals(self, code):
         reservations = self.env['hotel.reservation'].search([
             ('checkin', '=', fields.Date.today())])
         return reservations.mapped('localizator')

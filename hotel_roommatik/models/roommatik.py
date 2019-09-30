@@ -118,7 +118,7 @@ class RoomMatik(models.Model):
         return apidata.sudo().rm_get_departures(code)
 
     @api.model
-    def rm_get_arraivals(self, code):
+    def rm_get_arrivals(self, code):
         apidata = self.env['hotel.reservation']
         code = str(code) if not isinstance(code, str)
         return apidata.sudo().rm_get_arrivals(code)
