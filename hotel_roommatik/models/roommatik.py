@@ -38,6 +38,8 @@ class RoomMatik(models.Model):
         # RoomMatik Gets a reservation ready for check-in
         # through the provided code. (MANDATORY)
         apidata = self.env['hotel.reservation']
+        reservation_code = str(reservation_code) if not isinstance(
+            reservation_code, str)
         return apidata.sudo().rm_get_reservation(reservation_code)
 
     @api.model
@@ -54,6 +56,7 @@ class RoomMatik(models.Model):
         # Addition will be ok if the returned stay has ID. (MANDATORY)
         _logger.info('ROOMMATIK Check-IN')
         apidata = self.env['hotel.checkin.partner']
+        stay = str(stay) if not isinstance(stay, str)
         return apidata.sudo().rm_checkin_partner(stay)
 
     @api.model
@@ -62,6 +65,8 @@ class RoomMatik(models.Model):
         # (if code is related to a current stay)
         # (MANDATORY for check-out kiosk)
         apidata = self.env['hotel.checkin.partner']
+        check_in_code = str(check_in_code) if not isinstance(
+            check_in_code, str)
         return apidata.sudo().rm_get_stay(check_in_code)
 
     @api.model
@@ -103,7 +108,17 @@ class RoomMatik(models.Model):
     @api.model
     def rm_add_payment(self, code, payment):
         apidata = self.env['account.payment']
+        code = str(code) if not isinstance(code, str)
         return apidata.sudo().rm_add_payment(code, payment)
-        # Debug Stop -------------------
-        # import wdb; wdb.set_trace()
-        # Debug Stop -------------------
+
+    @api.model
+    def rm_get_departures(self, code):
+        apidata = self.env['hotel.reservation']
+        code = str(code) if not isinstance(code, str)
+        return apidata.sudo().rm_get_departures(code)
+
+    @api.model
+    def rm_get_arraivals(self, code):
+        apidata = self.env['hotel.reservation']
+        code = str(code) if not isinstance(code, str)
+        return apidata.sudo().rm_get_arrivals(code)

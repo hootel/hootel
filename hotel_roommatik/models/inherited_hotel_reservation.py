@@ -1,7 +1,7 @@
 # Copyright 2019 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import api, models
+from odoo import api, models, fields
 import json
 import logging
 _logger = logging.getLogger(__name__)
@@ -75,3 +75,15 @@ class HotelReservation(models.Model):
         return self.env['hotel.reservation'].search([
             '|', ('localizator', '=', code),
             ('folio_id.name', '=', code)])
+
+    @api.model
+    def rm_get_departures(self, code):
+        reservations = self.env['hotel.reservation'].search([
+            ('checkout', '=', fields.Date.today())])
+        return reservations.mapped('localizator')
+
+    @api.model
+    def rm_get_arraivals(self, code):
+        reservations = self.env['hotel.reservation'].search([
+            ('checkin', '=', fields.Date.today())])
+        return reservations.mapped('localizator')
