@@ -148,7 +148,7 @@ class HotelReservationImporter(Component):
         # Parse 'ancyllary' info
         if 'ancillary' in broom:
             if 'guests' in broom['ancillary']:
-                persons = broom['ancillary']['guests']
+                persons = min(broom['ancillary']['guests'], persons)
             if 'tax_inclusive' in broom['ancillary'] and not broom['ancillary']['tax_inclusive']:
                 _logger.info("--- Incoming Reservation without taxes included!")
                 tax_inclusive = False
@@ -178,6 +178,9 @@ class HotelReservationImporter(Component):
                 tprice += room_day_price
             rate_id = brday['rate_id']
             # TODO: Review different pricelist in the different booked rooms (folio in Odoo)
+
+        # Get the special offer rate id if any or the rate_id sent by Wubook / OTAs included in the roomdays
+        rate_id = book.get('ancillary', {}).get('wubook_special_rate_id', rate_id)
 
         parity_rate_id = self.env['channel.backend'].search([
             ('id', '=', self.backend_record.id)
