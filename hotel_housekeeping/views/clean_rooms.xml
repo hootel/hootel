@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2019 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com> License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+
+<odoo>
+
+    <record model="ir.ui.view" id="clean_rooms_form_view">
+        <field name="name">clean_rooms.form (in hotel_housekeeping)</field>
+        <field name="model">clean_rooms</field>
+        <field name="arch" type="xml">
+            <form>
+                <header></header>
+                <sheet>
+                    <field name="date"/>
+                    <field name="room_id"/>
+                    <field name="comment"/>
+                    <field name="type"/>
+                    <field name="state"/>
+                    <field name="clean_start"/>
+                    <field name="clean_end"/>
+                    <field name="housekeeper"/>
+                    <field name="reservation"/>
+                </sheet>
+                <div class="oe_chatter"></div>
+            </form>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="clean_rooms_search_view">
+        <field name="name">clean_rooms.search (in hotel_housekeeping)</field>
+        <field name="model">clean_rooms</field>
+        <field name="arch" type="xml">
+            <search>
+                <!-- TODO -->
+            </search>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="clean_rooms_tree_view">
+        <field name="name">clean_rooms.tree (in hotel_housekeeping)</field>
+        <field name="model">clean_rooms</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="date"/>
+                <field name="room_id"/>
+                <field name="type"/>
+                <field name="state"/>
+                <field name="clean_start"/>
+                <field name="clean_end"/>
+                <field name="housekeeper"/>
+                <field name="reservation"/>
+            </tree>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="clean_rooms_kanban_view">
+        <field name="model">clean_rooms</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="housekeeper" default_order="room_id" quick_create="false">
+                <field name="date"/>
+                <field name="room_id"/>
+                <field name="type"/>
+                <field name="state"/>
+                <field name="clean_start"/>
+                <field name="clean_end"/>
+                <field name="housekeeper"/>
+                <field name="reservation"/>
+                <field name="color_state"/>
+                <field name="color_type"/>
+                <templates>
+                    <t t-name="kanban-box">
+
+                        <!-- Set the Kanban Card color: -->
+                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color_type.raw_value)}
+                            oe_kanban_global_click"
+                            t-att="['style', 'background-color: '+record.color_state.raw_value]">
+                            <!-- <div t-if="record.state.raw_value == 1 " style="margin: 3px; background-color: #10FF01;"> -->
+                            <div class="o_dropdown_kanban dropdown">
+                                <!-- Top-right drop down menu here... -->
+                            </div>
+                            <div class="oe_kanban_body">
+                                <!-- Content elements and fields go here... -->
+                                <div>
+                                    <strong>
+                                        <h3 style="margin-top: 0px;
+                                            margin-bottom: 0px;">
+                                            <a type="open"><field name="room_id"/></a>
+                                        </h3>
+                                    </strong>
+                                </div>
+                                <div t-attf-class="oe_kanban_text_{{
+                                    record.color = 1
+                                    ? 'red' : 'black' }}">
+                                    <h3 style="text-align: center;
+                                    margin-top: 0px;
+                                    margin-bottom: 0px;" t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)}">
+                                        <field name="type"/>
+                                    </h3>
+                                    <h3 style="text-align: center;
+                                    margin-top: 0px;
+                                    margin-bottom: 0px;" t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)}">
+                                        <field name="state"/>
+                                    </h3>
+                                </div>
+                                <ul>
+                                    <li><field name="housekeeper"/></li>
+                                    <li><field name="reservation"/></li>
+                                    <li><field name="color_type"/></li>
+                                    <li><field name="color_state"/></li>
+                                </ul>
+                            </div>
+                            <div class="oe_kanban_footer">
+                                <div class="oe_kanban_footer_left">
+                                    <!-- Left hand footer... -->
+                                </div>
+                                <div class="oe_kanban_footer_right">
+                                    <!-- Right hand footer... -->
+                                </div>
+                            </div>
+                            <div class="oe_clear"/>
+                        </div>
+                        <!-- end of kanban color -->
+                        <!-- </div> -->
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record model="ir.actions.act_window" id="clean_rooms_act_window">
+        <field name="name">Clean Rooms</field>
+        <field name="res_model">clean_rooms</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <record model="ir.ui.menu" id="clean_rooms_menu">
+        <field name="name">Housekeeping</field>
+        <field name="parent_id" ref="hotel.hotel_reports_menu"/>
+        <field name="action" ref="clean_rooms_act_window"/>
+        <field name="sequence" eval="25"/>
+    </record>
+
+</odoo>

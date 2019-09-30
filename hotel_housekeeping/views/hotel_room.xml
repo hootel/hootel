@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2019 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com> License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl). -->
+
+<odoo>
+
+    <record id="rack_rooms_form_view" model="ir.ui.view">
+        <field name="name">rack_rooms.form (in hotel_housekeeping)</field>
+        <field name="model">hotel.room</field>
+        <field name="arch" type="xml">
+            <form string="Housekeeping Room Edit">
+                <h2>
+                    <field name="name" nolabel="True" readonly="True"/>
+                </h2>
+                <group>
+                    <field name="housekeeper"/>
+                    <field name="re_line_now"/>
+                    <field name="clean_type"/>
+                    <field name="clean_state"/>
+                    <field name="clean_notes"/>
+                </group>
+                <footer>
+                    <button special="cancel" string="Cancel" class="pull-left"/>
+                    <button name="action_save" type="object" string="Save and close" class="oe_highlight pull-left"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <act_window id="rack_form_act_window" name="Rack Rooms Edit" res_model="hotel.room" view_mode="form" view_id="rack_rooms_form_view"/>
+
+    <!-- <record id="rack_form_act_window" model="ir.actions.act_window"> <field name="act_window_id" ref="rack_rooms_form_view"/> <field name="view_id" ref="rack_rooms_form_view"/> <field name="view_mode">form</field> <field
+    name="model">hotel.room</field> </record> -->
+
+    <template id="assets_backend" inherit_id="web.assets_backend" name="Todo Kanban Assets">
+        <xpath expr="." position="inside">
+            <link rel="stylesheet" href="/hotel_housekeeping/static/src/css/rack_room_kanban.css"/>
+        </xpath>
+    </template>
+
+    <record model="ir.ui.view" id="rack_rooms_kanban_view">
+        <field name="model">hotel.room</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="housekeeper" default_order="clean_state" quick_create="false" group_create="false">
+                <field name="name"/>
+                <field name="housekeeper"/>
+                <field name="re_line_now"/>
+                <field name="clean_type"/>
+                <field name="clean_state"/>
+                <field name="id"/>
+                <field name="clean_notes"/>
+
+                <templates>
+                    <t t-name="lead_details">
+                        <!--template tooltip -->
+                        <ul class="oe_kanban_tooltip">
+                            <!--if there is data in table than go further(check the condi.) -->
+                            <li t-if="record.name.raw_value"><b>Meeting</b> <field name="name"/></li>
+                        </ul>
+                    </t>
+                    <t t-extend="KanbanView.buttons">
+                        <t t-jquery="button" t-operation="after">
+                            <t t-if="widget.modelName == 'hotel.room'">
+                                <button class="oe_button oe_highlight" type="button">My Button</button>
+                            </t>
+                        </t>
+                    </t>
+
+                    <t t-name="kanban-box">
+                        <t t-set="print_housekeeper" t-value="1"/>
+                        <!-- Set the Kanban Card color: -->
+                        <div t-attf-class="rack_box">
+                            <!-- <div t-attf-class="rack_box oe_kanban_color_#{kanban_getcolor(record.clean_type.raw_value)} oe_kanban_global_click" t-att="['style', 'background-color: '+record.clean_state.raw_value]"> -->
+                            <!-- <div t-if="record.state.raw_value == 1 " style="margin: 3px; background-color: #10FF01;"> -->
+                            <div class="o_dropdown_kanban dropdown">
+                                <!-- Top-right drop down menu here... -->
+                            </div>
+                            <div class="oe_kanban_body">
+                                <!-- Content elements and fields go here... -->
+                                <div>
+                                    <strong>
+                                        <h3>
+                                            <a type="open"><field name="name"/></a>
+                                        </h3>
+                                    </strong>
+                                </div>
+                                <div t-attf-class="oe_kanban_text_{{
+                                    record.color = 1
+                                    ? 'red' : 'black' }}">
+                                    <div class="kanban_central_icons" style="text-align: center;" t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)}">
+                                        <!-- <i t-attf-class="fa fa-3x {{record.clean_type.raw_value == 1 ? 'fa-sign-out' : 'fa-times-circle' }}"></i> -->
+                                        <div class="k-c-i-div">
+                                            <t t-if="record.clean_type.raw_value == 1">
+                                                <div class="exit-color ">
+                                                    <i t-attf-class="fa fa-2x fa-sign-out"></i>
+                                                    <field name="clean_type"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_type.raw_value == 2">
+                                                <div class="client-color ">
+                                                    <i t-attf-class="fa fa-2x fa-user-circle-o"></i>
+                                                    <field name="clean_type"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_type.raw_value == 3">
+                                                <div class="review-color ">
+                                                    <i t-attf-class="fa fa-2x fa-eye"></i>
+                                                    <field name="clean_type"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_type.raw_value == 4">
+                                                <t t-set="print_housekeeper" t-value="0"/>
+                                                <div class="staff-color ">
+                                                    <i t-attf-class="fa fa-2x fa-black-tie"></i>
+                                                    <field name="clean_type"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_type.raw_value == 5">
+                                                <t t-set="print_housekeeper" t-value="0"/>
+                                                <div class="out-service-color ">
+                                                    <i t-attf-class="fa fa-2x fa-times-circle"></i>
+                                                    <field name="clean_type"/>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <t t-set="print_housekeeper" t-value="0"/>
+                                                <div class="error-color ">
+                                                    <i t-attf-class="fa fa-2x fa-question-circle"></i>
+                                                    <field name="clean_type"/>
+                                                </div>
+                                            </t>
+                                            <!-- <field name="clean_type"/> -->
+                                        </div>
+                                        <div class="k-c-i-div">
+
+                                            <t t-if="record.clean_state.raw_value == 1">
+                                                <div class="cleaned-color ">
+                                                    <i t-attf-class="fa fa-2x fa-thumbs-o-up"></i>
+                                                    <field name="clean_state"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_state.raw_value == 2">
+                                                <div class="dirty-color ">
+                                                    <i t-attf-class="fa fa-2x fa-minus-circle"></i>
+                                                    <field name="clean_state"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_state.raw_value == 3">
+                                                <div class="cleaning-color ">
+                                                    <i t-attf-class="fa fa-2x fa-clock-o"></i>
+                                                    <field name="clean_state"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_state.raw_value == 4">
+                                                <div class="declined-color ">
+                                                    <i t-attf-class="fa fa-2x fa-lock"></i>
+                                                    <field name="clean_state"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_state.raw_value == 5">
+                                                <t t-set="print_housekeeper" t-value="0"/>
+                                                <div class="ecologic-color ">
+                                                    <i t-attf-class="fa fa-2x fa-leaf"></i>
+                                                    <field name="clean_state"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_state.raw_value == 6">
+                                                <div class="staff-color ">
+                                                    <i t-attf-class="fa fa-2x fa-thumbs-up"></i>
+                                                    <field name="clean_state"/>
+                                                </div>
+                                            </t>
+                                            <t t-elif="record.clean_state.raw_value == 7">
+                                                <div class="clean-ok-color ">
+                                                    <i t-attf-class="fa fa-2x fa-thumbs-up"></i>
+                                                    <field name="clean_state"/>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="error-color ">
+                                                    <t t-set="print_housekeeper" t-value="0"/>
+                                                    <i t-attf-class="fa fa-2x fa-question-circle"></i>
+                                                    <field name="clean_state"/>
+                                                </div>
+                                            </t>
+                                        </div>
+                                        <t t-if="print_housekeeper == 1">
+                                            <div class="text-color">
+                                                <img t-att-src="kanban_image('res.users', 'image_small', record.housekeeper.raw_value)" t-att-title="record.housekeeper.value" width="40" height="40" class="oe_kanban_avatar"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                                <ul>
+                                    <li><field name="housekeeper"/></li>
+                                </ul>
+                                <div class="notes"><field name="clean_notes"/></div>
+                            </div>
+                            <div class="oe_kanban_footer">
+                                <div class="oe_kanban_footer_left">
+                                    <!-- Left hand footer... -->
+                                    <div class="kanban_icon_buttons">
+                                        <a class="pull-left" name="rack_form_action" type="object">
+                                            <i class="fa fa-2x fa-pencil-square-o"></i>
+                                        </a>
+                                        <t t-if="record.re_line_now.raw_value != ''">
+                                            <a class="pull-left" name="view_reservation_action" type="object">
+                                                <i class="fa fa-2x fa-suitcase"></i>
+                                            </a>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="oe_kanban_footer_right">
+                                    <!-- Right hand footer... -->
+                                    <!-- <button class="oe_inline oe_stat_button" name="rack_form_action" type="object" icon="fa-file">UNO</button> -->
+                                    <div class="state-button">
+                                        <field name="clean_state" widget="kanban_state_selection"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="oe_clear"/>
+                        </div>
+                        <!-- end of kanban color -->
+                        <!-- </div> -->
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- <templates> <t t-extend="ListView.buttons"> <t t-jquery="button.o_list_button_add" t-operation="after" > <button type="button" t-if='widget.modelName == "m.dha.sig"' class="btn btn-primary btn-sm o_list_button_upload">Upload </button> </t> </t>
+    </templates> -->
+
+    <!-- <templates id="template" xml:space="preserve"> <t t-extend="KanbanView.buttons"> <t t-jquery="button" t-operation="after"> <t t-if="widget.modelName == 'hotel.room'"> <button class="oe_button oe_highlight" type="button">My Button</button> </t>
+    </t> </t> </templates> -->
+
+    <record model="ir.actions.act_window" id="rack_rooms_act_window">
+        <field name="name">Rack Rooms</field>
+        <field name="res_model">hotel.room</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+
+    <record model="ir.ui.menu" id="clean_rooms_menu">
+        <field name="name">Housekeeping</field>
+        <field name="parent_id" ref="hotel.hotel_reports_menu"/>
+        <field name="action" ref="rack_rooms_act_window"/>
+        <field name="sequence" eval="25"/>
+    </record>
+
+</odoo>

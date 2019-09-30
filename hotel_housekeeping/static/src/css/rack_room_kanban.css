@@ -1,0 +1,124 @@
+.rack_box {
+    margin-bottom: 4px !important;
+    border-radius: 10px;
+    border-color: #060606 !important;
+    padding-bottom: 0px !important;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border: 3px solid !important;
+    /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#d0e1ef+0,d0e1ef+100&1+0,0.02+100 */
+    background: -moz-linear-gradient(top, rgba(208, 225, 239, 1) 0%, rgba(208, 225, 239, 0.02) 100%);
+    /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, rgba(208, 225, 239, 1) 0%, rgba(208, 225, 239, 0.02) 100%);
+    /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, rgba(208, 225, 239, 1) 0%, rgba(208, 225, 239, 0.02) 100%);
+    /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d0e1ef', endColorstr='#05d0e1ef', GradientType=0);
+    /* IE6-9 */
+}
+
+/* clean_type */
+.exit-color {
+    color: #991492;
+    display: contents;
+}
+
+.client-color {
+    color: #36A828;
+    display: contents;
+}
+
+.review-color {
+    color: #B7B614;
+    display: contents;
+}
+
+.staff-color {
+    color: #C08686;
+    display: contents;
+}
+
+.out-service-color {
+    color: #000000;
+    display: contents;
+}
+
+.error-color {
+    color: #F7060A;
+    display: contents;
+}
+
+/* clean_state */
+.cleaned-color {
+    color: #36A828;
+    display: contents;
+}
+
+.clean-ok-color {
+    color: #36A828;
+    display: contents;
+}
+
+.dirty-color {
+    color: #F7060A;
+    display: contents;
+}
+
+.cleaning-color {
+    color: #2DF408;
+    display: contents;
+}
+
+.declined-color {
+    color: #AC182D;
+    display: contents;
+}
+
+.ecologic-color {
+    color: #4B882B;
+    display: contents;
+}
+
+.text-color {
+    color: #000000;
+    display: contents;
+}
+
+/* .o_kanban_record::after {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+    left: -3px !important;
+} */
+.rack_box h3 {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.kanban_icon_buttons {
+    text-align: center;
+    background-color: #050505;
+}
+
+.kanban_icon_buttons a {
+    margin-right: 1em;
+}
+
+.kanban_central_icons {
+    text-align: center;
+    color: #123456;
+}
+
+.k-c-i-div {
+    margin: 0 auto;
+    padding: 0 1em;
+    display: inline-grid;
+}
+
+.notes {
+    max-height: 3em;
+    overflow: hidden;
+}
+
+.state-button {
+    float: right;
+}

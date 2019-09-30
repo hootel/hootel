@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<odoo>
+    <report id="action_housekeeping_report" string="Housekeeping Report" model="hotel.room" report_type="qweb-pdf" name="Housekeeping.report_hk_template"/>
+</odoo>
