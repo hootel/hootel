@@ -1,12 +1,57 @@
 # Copyright 2019 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>
+# Darío Lodeiros
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 
 
 class Clean_rooms(models.Model):
 
-    # @api.multi
+    _name = 'clean_rooms'
+    _description = 'Clean Rooms'
+
+    # Fields declaration
+    room_id = fields.Many2one(
+        'hotel.room',
+        string='Hotel Room',
+        required=True,)
+    housekeeper_id = fields.Many2one(
+        'res.users',
+        string='Assigned housekeeper')  # REVIEW hr_employed?
+    reservation_id = fields.Many2one(
+        'hotel.reservation.line',
+        string='Reservation')
+    # REVIEW Change date and start/end by datetime start anda datetime end?
+    date = fields.Date('Date', required=True,)
+    clean_start = fields.Datetime('Start cleaning')
+    clean_end = fields.Datetime('End cleaning')
+    comment = fields.Text(string='Cleaning Room Notes')
+    type = fields.Selection([
+        ('exit', 'Exit'),
+        ('client', 'Client'),
+        ('review', 'Review'),
+        ('staff', 'Staff'),
+        ('out', 'Out of order')],
+        string='Clean as...')
+    from_state = fields.Selection([
+        ('cleaned', 'Cleaned'),
+        ('dirty', 'Dirty'),
+        ('cleaning', 'Cleaning'),
+        ('declined', 'Declined'),
+        ('ecologic', 'Ecologic'),
+        ('staff', 'Staff'),
+        ('cleaned_ok', 'Cleaned OK')],  # REVIEW Change 'cleaned OK' by flow
+        string='State',
+        compute='_compute_from_state',
+        compute_sudo=True,
+        # REVIEW inverse='_set_cleaned_log', --is useful?
+        search='_search_from_room_state')
+    color_state = fields.Char(string='Color State',
+                              compute='_check_color')
+    color_type = fields.Integer(string='Color Type',  # REVIEW Is necesary?
+                                compute='_check_color')  # REVIEW Is necesary?
+
+    # Compute and Search methods
+    @api.multi
     @api.depends('state')
     def _check_color(self):
         for record in self:
@@ -32,23 +77,7 @@ class Clean_rooms(models.Model):
                 k_color = 4
             elif record.type == 5:
                 k_color = 5
-            record.update({'color_state': color, 'color_type': k_color})
-
-    _name = 'clean_rooms'
-    _description = 'Clean Rooms'
-
-    date = fields.Date('Date', required=True,)
-    room_id = fields.Many2one('hotel.room', 'Hotel Room', required=True,)
-    comment = fields.Text(string='Cleaning Room Notes')
-    type = fields.Selection([(1, 'Exit'), (2, 'Client'), (3, 'Review'),
-                             (4, 'Staff'), (5, 'Out of order')],
-                            string='Clean as...')
-    state = fields.Selection([(1, 'Cleaned'), (2, 'Dirty'), (3, 'Cleaning'),
-                              (4, 'Declined'), (5, 'Ecologic'), (6, 'Staff')],
-                             string='State')
-    clean_start = fields.Datetime('Start cleaning')
-    clean_end = fields.Datetime('End cleaning')
-    housekeeper = fields.Many2one('res.users', 'Assigned housekeeper')
-    reservation = fields.Many2one('hotel.reservation.line', 'Reservation')
-    color_state = fields.Char(string='Color State', compute='_check_color')
-    color_type = fields.Integer(string='Color Type', compute='_check_color')
+            record.update({
+                'color_state': color,
+                'color_type': k_color
+                })

@@ -1,25 +1,52 @@
 # Copyright 2019 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>
+# Darío Lodeiros
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 
 
 class HotelRoom(models.Model):
 
     _inherit = 'hotel.room'
 
-    housekeeper = fields.Many2one('res.users', 'Assigned housekeeper')
-    re_line_now = fields.Many2one('hotel.reservation.line', 'Reservation')
-    clean_type = fields.Selection([(1, 'Exit'), (2, 'Client'), (3, 'Review'),
-                                   (4, 'Staff'), (5, 'Out of order')],
-                                  string='Clean as...')
-    clean_state = fields.Selection([(1, 'Cleaned'), (2, 'Dirty'),
-                                    (3, 'Cleaning'), (4, 'Declined'),
-                                    (5, 'Ecologic'), (6, 'Staff'),
-                                    (7, 'Cleaned OK')],
-                                   string='State')
+    # Fields declaration
+    default_housekeeper_id = fields.Many2one(
+        'res.users',
+        'Assigned housekeeper')  # REVIEW hr_employed? is necesary in room?
+    # REVIEW clean_type is necesary in room model?
+    clean_type = fields.Selection([
+        ('exit', 'Exit'),
+        ('client', 'Client'),
+        ('review', 'Review'),
+        ('staff', 'Staff'),
+        ('out', 'Out of order')],
+        string='Clean as...')
+    clean_state = fields.Selection([
+        ('cleaned', 'Cleaned'),
+        ('dirty', 'Dirty'),
+        ('cleaning', 'Cleaning'),
+        ('declined', 'Declined'),
+        ('ecologic', 'Ecologic'),
+        ('staff', 'Staff'),
+        ('cleaned_ok', 'Cleaned OK')],  # REVIEW Change 'cleaned OK' by flow
+        string='State',
+        compute='_compute_state',
+        compute_sudo=True,
+        # REVIEW inverse='_set_cleaned_log', --is useful?
+        search='_search_room_state')
     clean_notes = fields.Text('Notes')
 
+    # Compute and Search methods
+    @api.multi
+    def _compute_state(self):
+        for room in self:
+            return False
+            # TODO
+
+    def _search_room_state(self, operator, value):
+        # TODO Build domain to return search Example: [('id', 'in', ..)]
+        return [('id', 'in', False)]
+
+    # Action methods
     @api.multi
     def rack_form_action(self):
         view_id = self.env.ref('hotel_housekeeping.rack_rooms_form_view').id

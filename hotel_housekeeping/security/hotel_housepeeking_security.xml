@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
     <record id="hotel_group_housekeeper" model="res.groups">
         <field name="name">Cleaning and maintenance</field>
     </record>
+
 </odoo>

@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_clean_rooms_housekeeper,hotel_housekeeping.clean_rooms_housekeeper,hotel_housekeeping.model_clean_rooms,hotel_housekeeping.group_hotel_housekeeper,1,1,1,0
+access_clean_rooms_user,hotel_housekeeping.clean_rooms_user,hotel_housekeeping.model_clean_rooms,hotel.group_hotel_user,1,1,1,0
+accces_clean_rooms_manager,hotel_housekeeping.clean_rooms_manager,hotel_housekeeping.model_clean_rooms,hotel.group_hotel_manager,1,1,1,1
