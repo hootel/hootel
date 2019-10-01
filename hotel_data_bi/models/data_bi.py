@@ -65,6 +65,7 @@ class Data_Bi(models.Model):
             archivo == 12 'Segmentos'
             archivo == 13 'Clientes'
             archivo == 14 'Estado Reservas'
+            archivo == 15 'Room names'
         fechafoto = start date to take data
         """
 
@@ -132,6 +133,9 @@ class Data_Bi(models.Model):
         if (archivo == 0) or (archivo == 14):
             dic_estados = self.data_bi_estados(compan.id_hotel, estado_array)
             dic_export.append({'Estado Reservas': dic_estados})
+        if (archivo == 0) or (archivo == 15):
+            dic_rooms = self.data_bi_rooms(compan.id_hotel)
+            dic_export.append({'Nombre Habitaciones': dic_rooms})
         if (archivo == 0) or (archivo == 6):
             dic_reservas = self.data_bi_reservas(compan.id_hotel,
                                                  line_res,
@@ -146,6 +150,17 @@ class Data_Bi(models.Model):
         # Debug Stop -------------------
 
         return dictionaryToJson
+
+    @api.model
+    def data_bi_rooms(self, compan):
+        dic_rooms = []  # Diccionario con las habitaciones
+        rooms = self.env['hotel.room'].search_read([], ['name'])
+        _logger.info("DataBi: Adding the name of %s rooms.", str(len(rooms)))
+        for room in rooms:
+            dic_rooms.append({'ID_Hotel': compan,
+                              'ID_Room': room['id'],
+                              'Descripcion': room['name']})
+        return dic_rooms
 
     @api.model
     def data_bi_tarifa(self, compan):
@@ -458,7 +473,8 @@ class Data_Bi(models.Model):
                 'PrecioIva': precio_iva,
                 'PrecioDto': precio_dto,
                 'ID_Tarifa': linea.reservation_id.pricelist_id.id,
-                'ID_Pais': self.data_bi_get_codeine(linea)
+                'ID_Pais': self.data_bi_get_codeine(linea),
+                'ID_Room': linea.reservation_id.room_id.id
                 })
         # ID_Reserva numérico Código único de la reserva
         # ID_Hotel numérico Código del Hotel
