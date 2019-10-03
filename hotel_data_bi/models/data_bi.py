@@ -140,7 +140,8 @@ class Data_Bi(models.Model):
             dic_reservas = self.data_bi_reservas(compan.id_hotel,
                                                  line_res,
                                                  estado_array,
-                                                 dic_clientes)
+                                                 dic_clientes,
+                                                 )
             dic_export.append({'Reservas': dic_reservas})
 
         dictionaryToJson = json.dumps(dic_export)
@@ -446,6 +447,11 @@ class Data_Bi(models.Model):
                 precio_dto = linea.price * ((linea.discount or 0.0) * 0.01)
                 price = linea.price - precio_dto
                 precio_dto += price * ((linea.cancel_discount or 0.0) * 0.01)
+            regimen = 0
+
+            if linea.reservation_id.board_service_room_id.id:
+                regimen = linea.reservation_id.board_service_room_id.\
+                                                    hotel_board_service_id.id
 
             dic_reservas.append({
                 'ID_Reserva': linea.reservation_id.folio_id.id,
@@ -464,7 +470,7 @@ class Data_Bi(models.Model):
                 'ID_TipoHabitacion': linea.reservation_id.room_type_id.id,
                 'ID_HabitacionDuerme':
                     linea.reservation_id.room_id.room_type_id.id,
-                'ID_Regimen': 0,
+                'ID_Regimen': regimen,
                 'Adultos': linea.reservation_id.adults,
                 'Menores': linea.reservation_id.children,
                 'Cunas': 0,
