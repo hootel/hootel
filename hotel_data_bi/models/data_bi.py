@@ -453,6 +453,10 @@ class Data_Bi(models.Model):
                 regimen = linea.reservation_id.board_service_room_id.\
                                                     hotel_board_service_id.id
 
+            cuna = 0
+            for service in linea.reservation_id.service_ids:
+                if service.name.upper().find("CUNA") == 0:
+                    cuna += 1
             dic_reservas.append({
                 'ID_Reserva': linea.reservation_id.folio_id.id,
                 'ID_Hotel': compan,
@@ -473,7 +477,7 @@ class Data_Bi(models.Model):
                 'ID_Regimen': regimen,
                 'Adultos': linea.reservation_id.adults,
                 'Menores': linea.reservation_id.children,
-                'Cunas': 0,
+                'Cunas': cuna,
                 'PrecioDiario': precio_neto,
                 'PrecioComision': precio_comision,
                 'PrecioIva': precio_iva,
