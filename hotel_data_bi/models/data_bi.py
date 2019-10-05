@@ -530,13 +530,14 @@ class Data_Bi(models.Model):
                 response = 999
         elif reserva.reservation_id.channel_type == "agency":
             tour = reserva.reservation_id.tour_operator_id
+            response = 907
             if tour.name:
                 mach = next((
                     l for l in dic_clientes if l['Descripcion'] == tour.name),
                                                                         False)
-                response = mach['ID_Cliente']
-            else:
-                response = 907
+                if mach is not False:
+                    response = mach['ID_Cliente']
+
         elif reserva.reservation_id.channel_type == "operator":
             tour = reserva.reservation_id.tour_operator_id
             if tour.name:
