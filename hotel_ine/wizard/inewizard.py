@@ -234,6 +234,15 @@ class Wizard(models.TransientModel):
             if pernocta_total[dia-1] > suple + compan.ine_seats:
                 suple = pernocta_total[dia-1] - compan.ine_seats
 
+            # Here, we correct the "extra" rooms
+            while (len(active_room) < dindi + doble + otras):
+                if dindi > 0:
+                    dindi -= 1
+                elif doble > 0:
+                    doble -= 1
+                elif otras > 0:
+                    otras -= 1
+
             habitaciones_m = ET.SubElement(habitaciones,
                                            "HABITACIONES_MOVIMIENTO")
             ET.SubElement(habitaciones_m,
