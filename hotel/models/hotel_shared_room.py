@@ -4,6 +4,10 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
+from datetime import timedelta
+from odoo.tools import (
+    DEFAULT_SERVER_DATE_FORMAT,
+    DEFAULT_SERVER_DATETIME_FORMAT)
 
 
 class HotelSharedRoom(models.Model):
@@ -32,6 +36,8 @@ class HotelSharedRoom(models.Model):
         help="A description of the Product that you want to communicate to "
              " your customers. This description will be copied to every Sales "
              " Order, Delivery Order and Customer Invoice/Credit Note")
+    equivalent_room_id = fields.Many2one('hotel.room', 'Equivalent Room',
+                                         help='This room can be sold as...')
 
     @api.constrains('beds')
     def _constrain_beds(self):
@@ -99,3 +105,63 @@ class HotelSharedRoom(models.Model):
         self.bed_ids.write({
             'description_sale': self.descrition_sale,
         })
+
+    def room_equivalent_out(self, date, active):
+        reservation_line = self.env['hotel.reservation.line'].search([
+            ('room_id', '=', self.equivalent_room_id.id),
+            ('date', '=', date)
+        ])
+        checkout = (fields.Date.from_string(date) + timedelta(days=1)).strftime(
+            DEFAULT_SERVER_DATE_FORMAT)
+        if active:
+            if reservation_line:
+                return
+            reservation_vals = {
+                'is_automatic_blocked': True,
+                'room_id': self.equivalent_room_id.id,
+                'partner_id': self.env.user.company_id.partner_id.id,
+                'checkin': date,
+                'checkout': checkout,
+                'reservation_type': 'out',
+                'room_type_id': self.equivalent_room_id.room_type_id.id,
+            }
+            self.env['hotel.reservation'].with_context(blocked=True).create(reservation_vals)
+        if not active and reservation_line:
+            bed_lines = self.env['hotel.reservation.line'].search([
+                ('room_id', 'in', self.bed_ids.ids),
+                ('date', '=', date)
+            ])
+            if len(bed_lines) <= 1:
+                reservation_line.reservation_id.folio_id.unlink()
+        return False
+
+    def beds_out(self, date, active):
+        reservation_lines = self.env['hotel.reservation.line'].search([
+            ('room_id', 'in', self.bed_ids.ids),
+            ('date', '=', date)
+        ])
+        beds = self.bed_ids
+        checkout = (fields.Date.from_string(date) + timedelta(days=1)).strftime(
+            DEFAULT_SERVER_DATE_FORMAT)
+        if active:
+            if reservation_lines:
+                return
+            cmds = [(5, 0, 0)]
+            for bed in beds:
+                cmds.append((0, False, {
+                    'is_automatic_blocked': True,
+                    'room_id': bed.id,
+                    'checkin': date,
+                    'checkout': checkout,
+                    'reservation_type': 'out',
+                    'room_type_id': bed.room_type_id.id,
+                }))
+            folio_vals = {
+                'partner_id': self.env.user.company_id.partner_id.id,
+                'reservation_type': 'out',
+                'room_lines': cmds,
+            }
+            self.env['hotel.folio'].with_context(blocked=True).create(folio_vals)
+        if not active and reservation_lines:
+            reservation_lines[0].reservation_id.folio_id.unlink()
+        return False

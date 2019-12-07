@@ -360,6 +360,7 @@ class HotelReservation(models.Model):
                             store=True)
 
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
+    is_automatic_blocked = fields.Boolean(default=False)
 
     @api.model
     def create(self, vals):
@@ -477,6 +478,24 @@ class HotelReservation(models.Model):
                 vals.update({
                     'to_assign': True,
                 })
+            # Shared Room Compute blocked
+            new_room = self.env['hotel.room'].browse(vals['room_id']) if 'room_id' in vals else False
+            new_state = vals['state'] if 'state' in vals else False
+            if not self.env.context.get('blocked', False) and not record.is_automatic_blocked:
+                old_state = record.state
+                old_room = record.room_id
+                line_obj = self.env['hotel.reservation.line']
+                if old_state != new_state:
+                    if new_state == 'cancelled':
+                        active = False
+                    else:
+                        active = True
+                    for line in record.reservation_line_ids:
+                        line_obj._compute_rooms_beds_equivalents(old_room, line.date, active)
+                if old_room and new_room and old_room != new_room:
+                    for line in record.reservation_line_ids:
+                        line_obj._compute_rooms_beds_equivalents(old_room, line.date, False)
+                        line_obj._compute_rooms_beds_equivalents(new_room, line.date, True)
         record = super(HotelReservation, self).write(vals)
         return record
 
