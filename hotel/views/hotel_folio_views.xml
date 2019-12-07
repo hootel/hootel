@@ -349,7 +349,7 @@
         <field name="name">Hotel Folio</field>
         <field name="res_model">hotel.folio</field>
         <field name="view_type">form</field>
-        <field name="view_mode">tree,form,graph</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
     </record>
 
     <menuitem id="menu_all_folio" name="Reservations"
