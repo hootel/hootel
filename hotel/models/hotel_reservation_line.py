@@ -86,12 +86,13 @@ class HotelReservationLine(models.Model):
 
     @api.model
     def _compute_rooms_beds_equivalents(self, room, date, active):
-        if room and date:
-            equivalent_room = room.shared_room_id
+        if room and date and room.shared_room_id:
+            shared_room = room.shared_room_id
+            equivalent_room = shared_room.equivalent_room_id
             if equivalent_room:
-                equivalent_room.room_equivalent_out(date, active)
-            shared_room = self.env['hotel.shared.room'].search([
+                shared_room.room_equivalent_out(date, active)
+            shared_beds = self.env['hotel.shared.room'].search([
                 ('equivalent_room_id', '=', room.id)
             ])
-            if shared_room:
-                shared_room.beds_out(date, active)
+            if shared_beds:
+                shared_beds.beds_out(date, active)

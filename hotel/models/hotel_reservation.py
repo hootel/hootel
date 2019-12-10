@@ -485,7 +485,7 @@ class HotelReservation(models.Model):
                 old_state = record.state
                 old_room = record.room_id
                 line_obj = self.env['hotel.reservation.line']
-                if old_state != new_state:
+                if old_state and new_state and old_state != new_state:
                     if new_state == 'cancelled':
                         active = False
                     else:
