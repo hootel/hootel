@@ -58,7 +58,6 @@ class ResPartner(models.Model):
                     customer['IdentityDocument']['Number'])])
                 partner_res.unlink()
 
-
         if write_customer:
             json_response = self.rm_get_a_customer(write_customer.id)
             json_response = json.dumps(json_response)
@@ -97,8 +96,8 @@ class ResPartner(models.Model):
             'city': customer['Address']['City'],
             'street': customer['Address']['Street'],
             'street2': street_2,
-            'state_id': state.id if state else False,
-            'country_id': country.id if country else False,
+            'state_id': state.id if len(state) == 1 else False,
+            'country_id': country.id if len(country) == 1 else False,
             'phone': customer['Contact']['Telephone'],
             'mobile': customer['Contact']['Mobile'],
             'email': customer['Contact']['Email'],
