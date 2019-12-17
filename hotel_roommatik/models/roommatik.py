@@ -56,7 +56,6 @@ class RoomMatik(models.Model):
         # Addition will be ok if the returned stay has ID. (MANDATORY)
         _logger.info('ROOMMATIK Check-IN')
         apidata = self.env['hotel.checkin.partner']
-        stay = str(stay) if not isinstance(stay, str) else stay
         return apidata.sudo().rm_checkin_partner(stay)
 
     @api.model
