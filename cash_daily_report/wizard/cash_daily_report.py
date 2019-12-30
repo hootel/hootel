@@ -347,8 +347,9 @@ class CashDailyReportWizard(models.TransientModel):
             worksheet.protect()
         worksheet_day = workbook.add_worksheet(_('Por dia'))
         worksheet_day.write('A2', _('Date'), xls_cell_format_header)
-        columns_balance = {3: 'D:D', 6: 'G:G', 9: 'J:J', 12: 'M:M', 15: 'P:P', 18: 'S:S'}
-        i = 0
+        worksheet_day.write('B2', _('Validar'), xls_cell_format_header)
+        columns_balance = {4: 'E:E', 7: 'H:H', 10: 'K:K', 13: 'N:N', 16: 'Q:Q', 19: 'T:T'}
+        i = 1
         column_journal = {}
         for journal in result_journals:
             ingresos = 'Ingresos ' + journal
