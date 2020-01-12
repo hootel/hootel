@@ -243,8 +243,6 @@ class CashDailyReportWizard(models.TransientModel):
                                 xls_cell_format_money)
                 total_payment_returns_amount += -v_line.amount
             offset += len(v_payment.line_ids)
-        if total_account_payment_amount == 0 and total_payment_returns_amount == 0:
-            raise UserError(_('Not Any Payments'))
         line = offset
         if k_line:
             line = k_line + offset
