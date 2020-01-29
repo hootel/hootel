@@ -48,7 +48,6 @@ class CashDailyReportWizard(models.TransientModel):
                     })
 
     @api.model
-    @api.model
     def _get_default_date_start(self):
         return datetime.datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
 

@@ -16,6 +16,7 @@ DEFAULT_ROOMMATIK_DATETIME_FORMAT = "%s %s" % (
     DEFAULT_ROOMMATIK_DATE_FORMAT,
     DEFAULT_ROOMMATIK_TIME_FORMAT)
 
+
 class RoomMatik(models.Model):
     _name = 'roommatik.api'
 

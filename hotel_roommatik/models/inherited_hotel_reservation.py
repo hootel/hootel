@@ -31,7 +31,7 @@ class HotelReservation(models.Model):
 
     @api.model
     def rm_get_reservation(self, code):
-        # Search by localizator
+        # Search by localizator or Folio
         reservations = self._get_reservations_roommatik(code)
         reservations = reservations.filtered(
             lambda x: x.state in ('draft', 'confirm'))
