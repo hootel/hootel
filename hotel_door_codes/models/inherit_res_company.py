@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from openerp import models, fields, api
+from openerp import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 
@@ -28,8 +28,9 @@ class Inherit_res_company(models.Model):
     def _check_seedcode(self):
         for compan in self:
             if compan.seedcode > 9999:
-                raise ValidationError('The seed for the code must be a maximum \
-                                       of 4 digits. Be between 0 and 9999')
+                raise ValidationError(_('The seed for the code must be a \
+                                        maximum of 4 digits. Be between 0 \
+                                        and 9999'))
 
     _inherit = 'res.company'
 
