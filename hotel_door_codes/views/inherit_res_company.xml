@@ -12,6 +12,8 @@
                     <group name="door_code" string="Door Codes">
                         <field name="precode"/>
                         <field name="postcode"/>
+                        <field name="period"/>
+                        <field name="seedcode"/>
                     </group>
                 </xpath>
             </field>

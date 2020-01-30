@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Odoo, Open Source Management Solution
-#    Copyright (C) 2018-2019 Jose Luis Algara Toledo <osotranquilo@gmail.com>
+#    Copyright (C) 2018-2020 Jose Luis Algara Toledo <osotranquilo@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,8 +19,7 @@
 #
 ##############################################################################
 import datetime
-from datetime import datetime, date, time, timedelta
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 
 
@@ -38,41 +37,9 @@ class DoorCodeWizard(models.TransientModel):
     door_code = fields.Html(u'Código para la puerta')
 
     @api.multi
-    def doorcode4(self, fecha):
-        # Calculate de Door Code... need a date in String format "%Y-%m-%d"
-        compan = self.env.user.company_id
-        d = datetime.strptime(fecha, DEFAULT_SERVER_DATE_FORMAT)
-        dia_semana = datetime.weekday(d)  # Dias a restar y ponerlo en lunes
-        d = d - timedelta(days=dia_semana)
-        dtxt = d.strftime('%s.%%06d') % d.microsecond
-        dtxt = compan.precode + dtxt[4:8] + compan.postcode
-        return dtxt
-
-    @api.multi
     def check_code(self):
-        entrada = datetime.strptime(
-            self.date_start, DEFAULT_SERVER_DATE_FORMAT)
-        if datetime.weekday(entrada) == 0:
-            entrada = entrada + timedelta(days=1)
-        salida = datetime.strptime(
-            self.date_end, DEFAULT_SERVER_DATE_FORMAT)
-        if datetime.weekday(salida) == 0:
-            salida = salida - timedelta(days=1)
-        codes = (u'Código de entrada: ' +
-                 '<strong><span style="font-size: 2em;">' +
-                 self.doorcode4(self.date_start) +
-                 '</span></strong>')
-        while entrada <= salida:
-            if datetime.weekday(entrada) == 0:
-                codes += ("<br>" +
-                          u'Cambiará el Lunes ' +
-                          datetime.strftime(entrada, "%d-%m-%Y") +
-                          ' a: <strong><span style="font-size: 2em;">' +
-                          self.doorcode4(datetime.strftime(
-                              entrada, "%Y-%m-%d")) +
-                          '</span></strong>')
-            entrada = entrada + timedelta(days=1)
-
+        reservation = self.env['hotel.reservation']
+        codes = reservation.door_codes_text(self.date_start, self.date_end)
         return self.write({
              'door_code': codes
              })
