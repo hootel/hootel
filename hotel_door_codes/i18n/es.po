@@ -1,28 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* hotel_door_codes
+#	* hotel_door_codes
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-01-30 12:30+0000\n"
-"PO-Revision-Date: 2020-01-30 13:35+0100\n"
-"Last-Translator: Jose Luis Algara Toledo <osotranquilo@gmail.com>\n"
+"POT-Creation-Date: 2020-01-31 11:50+0000\n"
+"PO-Revision-Date: 2020-01-31 11:50+0000\n"
+"Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
+"Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
-"Language: es\n"
-"X-Generator: Poedit 2.0.6\n"
 
 #. module: hotel_door_codes
 #: code:addons/hotel_door_codes/models/inherit_hotel_reservation.py:67
 #: code:addons/hotel_door_codes/models/inherit_hotel_reservation.py:83
 #, python-format
 msgid " to:"
-msgstr "a:"
+msgstr " a:"
 
 #. module: hotel_door_codes
 #: model:ir.model.fields,field_description:hotel_door_codes.field_res_company_seedcode
@@ -60,11 +58,6 @@ msgid "Characters before the door code"
 msgstr "Caracteres antes del código"
 
 #. module: hotel_door_codes
-#: model:ir.ui.menu,name:hotel_door_codes.menu_hotel_door_code
-msgid "Codigos para la Puerta"
-msgstr "Codigos para la Puerta"
-
-#. module: hotel_door_codes
 #: model:ir.model,name:hotel_door_codes.model_res_company
 msgid "Companies"
 msgstr "Compañías"
@@ -78,11 +71,6 @@ msgstr "Creado por"
 #: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_create_date
 msgid "Created on"
 msgstr "Creado en"
-
-#. module: hotel_door_codes
-#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_door_code
-msgid "Código para la puerta"
-msgstr "Código para la puerta"
 
 #. module: hotel_door_codes
 #: model:ir.ui.view,arch_db:hotel_door_codes.door_code_reservation_form
@@ -101,9 +89,20 @@ msgid "Door Code Generator"
 msgstr "Generador de códigos de puerta"
 
 #. module: hotel_door_codes
+#: model:ir.ui.menu,name:hotel_door_codes.menu_hotel_door_code
 #: model:ir.ui.view,arch_db:hotel_door_codes.door_code_view_company_form
 msgid "Door Codes"
 msgstr "Códigos de puerta"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_door_code
+msgid "Door codes"
+msgstr "Códigos para la puerta"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_date_end
+msgid "End of period"
+msgstr "Fin del periodo"
 
 #. module: hotel_door_codes
 #: model:ir.model.fields,field_description:hotel_door_codes.field_hotel_reservation_door_codes
@@ -116,11 +115,6 @@ msgstr "Códigos de entrada"
 #, python-format
 msgid "Entry code: "
 msgstr "Código de entrada: "
-
-#. module: hotel_door_codes
-#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_date_end
-msgid "Fin del periodo"
-msgstr "Fin del periodo"
 
 #. module: hotel_door_codes
 #: model:ir.ui.view,arch_db:hotel_door_codes.hotel_door_code_view
@@ -136,11 +130,6 @@ msgstr "Reserva del hotel"
 #: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_id
 msgid "ID"
 msgstr "ID (identificación)"
-
-#. module: hotel_door_codes
-#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_date_start
-msgid "Inicio periodo"
-msgstr "Inicio periodo"
 
 #. module: hotel_door_codes
 #: code:addons/hotel_door_codes/models/inherit_hotel_reservation.py:81
@@ -175,6 +164,11 @@ msgid "Period of code change"
 msgstr "Periodo de cambio de código"
 
 #. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_date_start
+msgid "Start of the period"
+msgstr "Inicio del periodo"
+
+#. module: hotel_door_codes
 #: code:addons/hotel_door_codes/models/inherit_res_company.py:31
 #, python-format
 msgid "The seed for the code must be a                                         maximum of 4 digits. Be between 0                                         and 9999"
@@ -183,4 +177,5 @@ msgstr "La semilla del código debe tener un máximo de 4 dígitos. Estar entre 
 #. module: hotel_door_codes
 #: model:ir.model,name:hotel_door_codes.model_door_code
 msgid "door_code"
-msgstr "door_code"
+msgstr "códigos para la puerta"
+

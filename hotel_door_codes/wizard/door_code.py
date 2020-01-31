@@ -18,7 +18,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import datetime
+from datetime import datetime
 from odoo import api, fields, models
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 
@@ -30,11 +30,11 @@ class DoorCodeWizard(models.TransientModel):
     def _get_default_date_start(self):
         return datetime.now().strftime(DEFAULT_SERVER_DATE_FORMAT)
 
-    date_start = fields.Date("Inicio periodo",
+    date_start = fields.Date("Start of the period",
                              default=_get_default_date_start)
-    date_end = fields.Date("Fin del periodo",
+    date_end = fields.Date("End of period",
                            default=_get_default_date_start)
-    door_code = fields.Html(u'Código para la puerta')
+    door_code = fields.Html('Door codes')
 
     @api.multi
     def check_code(self):
