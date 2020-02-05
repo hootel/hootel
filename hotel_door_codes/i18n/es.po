@@ -1,0 +1,181 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* hotel_door_codes
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 11.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-01-31 11:50+0000\n"
+"PO-Revision-Date: 2020-01-31 11:50+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: hotel_door_codes
+#: code:addons/hotel_door_codes/models/inherit_hotel_reservation.py:67
+#: code:addons/hotel_door_codes/models/inherit_hotel_reservation.py:83
+#, python-format
+msgid " to:"
+msgstr " a:"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_res_company_seedcode
+msgid "4 digit Seed Code"
+msgstr "Semilla de 4 dígitos"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_hotel_reservation_box_code
+msgid "Box code"
+msgstr "Cod. de caja"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_hotel_reservation_box_number
+msgid "Box number"
+msgstr "Numero de Caja"
+
+#. module: hotel_door_codes
+#: selection:res.company,period:0
+msgid "Change Diary"
+msgstr "Cambiar a diario"
+
+#. module: hotel_door_codes
+#: selection:res.company,period:0
+msgid "Change Monday"
+msgstr "Cambiar el lunes"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_res_company_postcode
+msgid "Characters after the code"
+msgstr "Caracteres después del código"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_res_company_precode
+msgid "Characters before the door code"
+msgstr "Caracteres antes del código"
+
+#. module: hotel_door_codes
+#: model:ir.model,name:hotel_door_codes.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: hotel_door_codes
+#: model:ir.ui.view,arch_db:hotel_door_codes.door_code_reservation_form
+msgid "Códigos entrada"
+msgstr "Códigos entrada"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: hotel_door_codes
+#: model:ir.actions.act_window,name:hotel_door_codes.door_code_act
+#: model:ir.ui.view,arch_db:hotel_door_codes.hotel_door_code_view
+msgid "Door Code Generator"
+msgstr "Generador de códigos de puerta"
+
+#. module: hotel_door_codes
+#: model:ir.ui.menu,name:hotel_door_codes.menu_hotel_door_code
+#: model:ir.ui.view,arch_db:hotel_door_codes.door_code_view_company_form
+msgid "Door Codes"
+msgstr "Códigos de puerta"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_door_code
+msgid "Door codes"
+msgstr "Códigos para la puerta"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_date_end
+msgid "End of period"
+msgstr "Fin del periodo"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_hotel_reservation_door_codes
+msgid "Entry Codes"
+msgstr "Códigos de entrada"
+
+#. module: hotel_door_codes
+#: code:addons/hotel_door_codes/models/inherit_hotel_reservation.py:58
+#: code:addons/hotel_door_codes/models/inherit_hotel_reservation.py:74
+#, python-format
+msgid "Entry code: "
+msgstr "Código de entrada: "
+
+#. module: hotel_door_codes
+#: model:ir.ui.view,arch_db:hotel_door_codes.hotel_door_code_view
+msgid "Generate Code"
+msgstr "Generar códigos"
+
+#. module: hotel_door_codes
+#: model:ir.model,name:hotel_door_codes.model_hotel_reservation
+msgid "Hotel Reservation"
+msgstr "Reserva del hotel"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_id
+msgid "ID"
+msgstr "ID (identificación)"
+
+#. module: hotel_door_codes
+#: code:addons/hotel_door_codes/models/inherit_hotel_reservation.py:81
+#, python-format
+msgid "It will change on "
+msgstr "Cambiará el "
+
+#. module: hotel_door_codes
+#: code:addons/hotel_door_codes/models/inherit_hotel_reservation.py:65
+#, python-format
+msgid "It will change on monday "
+msgstr "Cambiará el lunes "
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code___last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_write_uid
+msgid "Last Updated by"
+msgstr "Última actualización de"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_write_date
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_res_company_period
+msgid "Period of code change"
+msgstr "Periodo de cambio de código"
+
+#. module: hotel_door_codes
+#: model:ir.model.fields,field_description:hotel_door_codes.field_door_code_date_start
+msgid "Start of the period"
+msgstr "Inicio del periodo"
+
+#. module: hotel_door_codes
+#: code:addons/hotel_door_codes/models/inherit_res_company.py:31
+#, python-format
+msgid "The seed for the code must be a                                         maximum of 4 digits. Be between 0                                         and 9999"
+msgstr "La semilla del código debe tener un máximo de 4 dígitos. Estar entre 0 y 9999"
+
+#. module: hotel_door_codes
+#: model:ir.model,name:hotel_door_codes.model_door_code
+msgid "door_code"
+msgstr "códigos para la puerta"
+
