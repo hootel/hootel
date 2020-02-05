@@ -92,7 +92,7 @@ class ResPartner(models.Model):
             'birthdate_date': datetime.strptime(
                 customer['Birthday'], DEFAULT_ROOMMATIK_DATE_FORMAT).date(),
             'gender': customer['Sex'],
-            'zip': zip,
+            'zip_id': zip.id,
             'city': customer['Address']['City'],
             'street': customer['Address']['Street'],
             'street2': street_2,
