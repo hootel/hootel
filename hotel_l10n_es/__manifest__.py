@@ -35,6 +35,7 @@
         'partner_contact_birthdate',
         'partner_firstname',
         'partner_vat_unique',
+        'base_iso3166',
     ],
     'data': [
         'data/code.ine.csv',

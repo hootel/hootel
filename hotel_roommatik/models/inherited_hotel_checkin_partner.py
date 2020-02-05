@@ -43,16 +43,21 @@ class HotelCheckinPartner(models.Model):
                          reservation_rm.id)
             for room_partner in stay["Customers"]:
                 if room_partner['Address']['Nationality'] == 'ESP':
-                    province = self.env['res.better.zip'].search([
+                    state_id = self.env['res.better.zip'].search([
                         ('name', '=', room_partner['Address']['ZipCode']),
-                    ], limit=1).state_id
+                    ], limit=1).state_id.id
                     code_ine = self.env['code.ine'].search([
-                        ('code', 'ilike', province.name)
+                        ('state_id', '=', state_id)
                     ], limit=1)
                 else:
                     code_ine = self.env['code.ine'].search([
                         ('code', '=', room_partner['Address']['Nationality'])
                     ], limit=1)
+                if not code_ine:
+                    _logger.info('CODE INE not found')
+                    code_ine = code_ine = self.env['code.ine'].search([
+                        ('code', '=', 'ES111')
+                        ], limit=1)
 
                 checkin_partner_val = {
                     'folio_id': reservation_rm.folio_id.id,
