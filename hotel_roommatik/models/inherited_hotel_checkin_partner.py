@@ -65,7 +65,7 @@ class HotelCheckinPartner(models.Model):
                     'partner_id': room_partner["Id"],
                     'enter_date': stay["Arrival"],
                     'exit_date': stay["Departure"],
-                    'code_ine_id': code_ine,
+                    'code_ine_id': code_ine.id,
                     }
                 try:
                     record = self.env['hotel.checkin.partner'].create(

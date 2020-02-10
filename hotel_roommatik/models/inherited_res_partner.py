@@ -68,17 +68,14 @@ class ResPartner(models.Model):
 
     def rm_prepare_customer(self, customer):
         zip = self.env['res.better.zip'].search([
-            ('name', 'ilike', customer['Address']['ZipCode'])])
+            ('name', 'ilike', customer['Address']['ZipCode'])], limit=1)
         # Check Sex string
         if customer['Sex'] not in {'male', 'female'}:
             customer['Sex'] = ''
-        # Check state_id
-        state = self.env['res.country.state'].search([
-            ('name', 'ilike', customer['Address']['Province'])])
-        if not state and zip:
+        if zip:
             state = zip.state_id
         country = self.env['res.country'].search([
-            ('code_alpha3', '=', customer['Address']['Country'])])
+            ('code_alpha3', '=', customer['Address']['Country'])], limit=1)
         if not country and zip:
             country = zip.country_id
         # Create Street2s
