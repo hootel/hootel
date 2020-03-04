@@ -6,7 +6,7 @@
               >
               <xpath expr="//div[@class='o_sub_menu_content']/t" position="after">
                   <div class="title-hotel-name">
-                      <t t-esc="request.env.user.company_id.property_name"/>
+                      <!--<t t-esc="request.env.user.company_id.property_name"/>-->
                   </div>
               </xpath>
               </template>
