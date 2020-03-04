@@ -42,9 +42,11 @@ class CashDailyReportWizard(models.TransientModel):
             for record in companies:
                 lastday = datetime.date.today().replace(day=1) + \
                     datetime.timedelta(days=-1)
+                lastday_str = lastday.strftime(
+                    DEFAULT_SERVER_DATE_FORMAT)
                 if record.period_lock_date != lastday:
                     record.write({
-                      'period_lock_date': lastday
+                      'period_lock_date': lastday_str
                     })
 
     @api.model
