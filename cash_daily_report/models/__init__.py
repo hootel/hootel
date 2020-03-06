@@ -18,5 +18,5 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-from . import wizard
-from . import models
+from . import inherited_account_payment
+from . import inherited_payment_return
