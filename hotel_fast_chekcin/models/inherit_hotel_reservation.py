@@ -20,7 +20,7 @@
 #
 ##############################################################################
 from openerp import models, fields, api
-from datetime import datetime, timedelta
+from datetime import datetime
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 
 
@@ -29,26 +29,22 @@ class Inherit_hotel_reservation(models.Model):
 
     @api.multi
     def urlcodefc(self, fecha):
-        # Calculate de Door Code... need a date in String format "%Y-%m-%d"
+        # Calculate de Secure Code to create url.
         compan = self.env.user.company_id
-        if not compan.precode:
-            compan.precode = ""
-        if not compan.postcode:
-            compan.postcode = ""
         d = datetime.strptime(fecha, DEFAULT_SERVER_DATE_FORMAT)
-        delay = compan.seedcode * 100
-        if compan.period == 7:
-            dia_semana = datetime.weekday(d)  # Dias a restar para lunes
-            d = d - timedelta(days=dia_semana)
+        delay = compan.fc_seeed_code * 100
         dtxt = float(d.strftime('%s.%%06d') % d.microsecond) + delay
-        dtxt = compan.precode + repr(dtxt)[4:8] + compan.postcode
+        dtxt = repr(dtxt)[4:8]
         return dtxt
 
     @api.multi
-    def door_codes_text(self, localizator, checkout):
+    def fc_url_text(self, localizator, checkout):
         compan = self.env.user.company_id
-        url = compan.fc_server + '/' + localizator
-        url += '/' + self.urlcodefc(datetime.strftime(checkout, "%Y-%m-%d"))
+        url = compan.fc_server + '/'
+        url += str(compan.fc_server_id) + '/'
+        url += localizator + '/'
+        # url += '/' + self.urlcodefc(datetime.strftime(checkout, "%Y-%m-%d"))
+        url += self.urlcodefc(checkout)
         return url
 
     @api.multi

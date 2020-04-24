@@ -9,9 +9,10 @@
             <field name="inherit_id" ref="base.view_company_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='hotel_settings_page']" position="inside">
-                    <group name="door_code" string="Door Codes">
+                    <group name="fast_checkin" string="Fast Checkin">
                         <field name="fc_server"/>
                         <field name="fc_server_id"/>
+                        <field name="fc_seeed_code"/>
                     </group>
                 </xpath>
             </field>

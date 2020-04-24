@@ -26,4 +26,5 @@ class Inherit_res_company(models.Model):
     _inherit = 'res.company'
 
     fc_server = fields.Char('Fast Checkin Server', default='https://...')
-    fc_server_id = fields.Integer('2 digit Seed Code', default=0)
+    fc_server_id = fields.Integer('Server ID', default=0)
+    fc_seeed_code = fields.Integer('2 digit Seed Code', default=99)
