@@ -25,7 +25,8 @@
     'author': "Jose Luis Algara Toledo <osotranquilo@gmail.com>",
     'website': 'https://www.aldahotels.com',
     'category': 'hotel fast checkin',
-    'summary': "Module for connecting Odoo with the Fast Checkin application made in Django.",
+    'summary': "Module for connecting Odoo with the Fast Checkin application \
+                made in Django.",
     'description': "Hotel Fast Checkin",
     'depends': [
         'hotel', 'hotel_l10n_es'
