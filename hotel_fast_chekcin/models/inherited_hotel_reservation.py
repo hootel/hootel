@@ -24,68 +24,72 @@ class HotelReservation(models.Model):
                 'folio_id.name', '=', reservations[0].folio_id.name)])
             reservations = reservations.filtered(
                 lambda x: x.state in ('draft', 'confirm'))
-
-            default_arrival_hour = self.env['ir.default'].sudo().get(
-                'res.config.settings', 'default_arrival_hour')
-            checkin = "%s %s" % (reservations[0].checkin,
-                                 default_arrival_hour)
-            default_departure_hour = self.env['ir.default'].sudo().get(
-                'res.config.settings', 'default_departure_hour')
-            checkout = "%s %s" % (reservations[0].checkout,
-                                  default_departure_hour)
-            _logger.info('FastCheckin serving  Folio: %s', reservations.ids)
-            json_response = {
-                'Reservation': {
-                    'Localizator': reservations[0].localizator,
-                    'FolioId': reservations[0].folio_id.id,
-                    'FolioName': reservations[0].folio_id.name,
-                    'Arrival': checkin,
-                    'Departure': checkout,
-                    'partner_id': reservations[0].partner_id.id,
-                    'PartnerFirstName': reservations[0].partner_id.firstname,
-                    'PartnerLastName': reservations[0].partner_id.lastname,
-                    'AmountTotal': reservations[0].folio_id.amount_total,
-                    'DepositAmount': reservations[
-                        0].folio_id.amount_total - reservations[
-                            0].folio_pending_amount,
-                    'PendingAmount': reservations[0].folio_pending_amount,
+            if any(reservations):
+                default_arrival_hour = self.env['ir.default'].sudo().get(
+                    'res.config.settings', 'default_arrival_hour')
+                checkin = "%s %s" % (reservations[0].checkin,
+                                     default_arrival_hour)
+                default_departure_hour = self.env['ir.default'].sudo().get(
+                    'res.config.settings', 'default_departure_hour')
+                checkout = "%s %s" % (reservations[0].checkout,
+                                      default_departure_hour)
+                _logger.info('FastCheckin serving Folio: %s', reservations.ids)
+                json_response = {
+                    'Reservation': {
+                        'Localizator': reservations[0].localizator,
+                        'FolioId': reservations[0].folio_id.id,
+                        'FolioName': reservations[0].folio_id.name,
+                        'Arrival': checkin,
+                        'Departure': checkout,
+                        'partner_id': reservations[0].partner_id.id,
+                        'PartnerFirstName': reservations[0].partner_id.firstname,
+                        'PartnerLastName': reservations[0].partner_id.lastname,
+                        'AmountTotal': reservations[0].folio_id.amount_total,
+                        'DepositAmount': reservations[
+                            0].folio_id.amount_total - reservations[
+                                0].folio_pending_amount,
+                        'PendingAmount': reservations[0].folio_pending_amount,
+                    }
                 }
-            }
-            for i, line in enumerate(reservations):
-                total_chekins = line.checkin_partner_pending_count
-                json_response['Reservation'].setdefault('Rooms', []).append({
-                    'Id': line.id,
-                    'ReservationId': reservations[0].folio_id.id,
+                for i, line in enumerate(reservations):
+                    total_chekins = line.checkin_partner_pending_count
+                    json_response['Reservation'].setdefault('Rooms', []).append({
+                        'Id': line.id,
+                        'ReservationId': reservations[0].folio_id.id,
 
-                    'Arrival': line.checkin,
-                    'Departure': line.checkout,
-                    'Nights': line.nights,
-                    'Adults': line.adults,
-                    'Children': line.children,
-                    'IsAvailable': total_chekins > 0,
-                    'Price': line.price_total,
-                    'RoomTypeId': line.room_type_id.id,
-                    'RoomTypeName': line.room_type_id.name,
-                    'RoomName': line.room_id.name,
-                    'checkin_partner_count': line.checkin_partner_count,
-                    'checkin_partner_pending_count':
-                        line.checkin_partner_pending_count,
-                    'Checkins': [],
-                    # 'RoomCheckins': line.checkin_partner_ids
-                })
-                if line.checkin_partner_count > 0:
-                    for checkin in line.checkin_partner_ids:
-                        json_response['Reservation'][
-                            'Rooms'][i]['Checkins'].append({
-                                'mobile': checkin.mobile,
-                                'birthdate_date': checkin.birthdate_date,
-                                'code_ine_id2': checkin.code_ine_id.name,
-                                'code_ine_id': checkin.code_ine_id.code,
-                                'name': checkin.name,
-                                'lastname': checkin.lastname,
-                                'partner_id': checkin.partner_id.id,
-                                'reservation_id': checkin.id,
-                                })
+                        'Arrival': line.checkin,
+                        'Departure': line.checkout,
+                        'Nights': line.nights,
+                        'Adults': line.adults,
+                        'Children': line.children,
+                        'IsAvailable': total_chekins > 0,
+                        'Price': line.price_total,
+                        'RoomTypeId': line.room_type_id.id,
+                        'RoomTypeName': line.room_type_id.name,
+                        'RoomName': line.room_id.name,
+                        'checkin_partner_count': line.checkin_partner_count,
+                        'checkin_partner_pending_count':
+                            line.checkin_partner_pending_count,
+                        'Checkins': [],
+                        # 'RoomCheckins': line.checkin_partner_ids
+                    })
+                    if line.checkin_partner_count > 0:
+                        for checkin in line.checkin_partner_ids:
+                            json_response['Reservation'][
+                                'Rooms'][i]['Checkins'].append({
+                                    'mobile': checkin.mobile,
+                                    'birthdate_date': checkin.birthdate_date,
+                                    'code_ine_id2': checkin.code_ine_id.name,
+                                    'code_ine_id': checkin.code_ine_id.code,
+                                    'name': checkin.name,
+                                    'lastname': checkin.lastname,
+                                    'partner_id': checkin.partner_id.id,
+                                    'reservation_id': checkin.id,
+                                    })
+            else:
+                _logger.warning('FastCheckin Search cancedel reservation %s',
+                                code)
+                json_response = {'Error': 'Canceled reservation ' + str(code)}
         else:
             _logger.warning('FastCheckin Not Found reservation %s', code)
             json_response = {'Error': 'Not Found ' + str(code)}
