@@ -74,7 +74,7 @@ class ResPartner(models.Model):
                              customer['lastname'],
                              customer['firstname'])
                 write_customer = self.env['res.partner'].search([
-                     ('lastname', '=', customer['lastname'])])
+                     ('document_number', '=', customer['document_number'])])
             except Exception as e:
                 if 'args' in e.__dir__():
                     error_name = e.args
@@ -82,18 +82,18 @@ class ResPartner(models.Model):
                     error_name = e.name
 
                 partner_res = self.env['res.partner'].search([(
-                    'lastname', '=',
-                    customer['lastname'])])
+                    'document_number', '=',
+                    customer['document_number'])])
                 partner_res.unlink()
 
         if write_customer:
-            self.fc_write_checkin(ReservationId, partner_res)
-            json_response = "OK"
-            json_response = json.dumps(json_response)
-            return json_response
+            return self.fc_write_checkin(ReservationId, write_customer)
+
         else:
             _logger.error(error_name)
-            return [False, error_name]
+            error_name = str(error_name).replace("'", "*")
+            json_response = json.dumps({'Error': error_name})
+            return json_response
 
     def fc_write_checkin(self, ReservationId, partner_res):
         _logger = logging.getLogger(__name__)
@@ -116,25 +116,19 @@ class ResPartner(models.Model):
             try:
                 record = self.env['hotel.checkin.partner'].create(
                     checkin_partner_val)
-                _logger.info('FASTCHECKIN check-in partner: %s in \
-                                                (%s Reservation) ID:%s.',
+                _logger.info('''FASTCHECKIN check-in partner: %s in
+                              (%s Reservation) ID:%s.''',
                              checkin_partner_val['partner_id'],
                              checkin_partner_val['reservation_id'],
                              record.id)
-
-                stay = {}
-                stay['Id'] = record.id
-                stay['Room'] = {}
-                stay['Room']['Id'] = reservation_obj.room_id.id
-                stay['Room']['Name'] = reservation_obj.room_id.name
-                json_response = stay
             except Exception as e:
                 error_name = 'Error not create Checkin '
                 error_name += str(e)
                 json_response = {'Error': error_name}
-                _logger.error('FASTCHECKIN writing %s in reservation: %s).',
+                _logger.error('FASTCHECKIN Error Checkin %s in reserv.: %s).',
                               checkin_partner_val['partner_id'],
                               checkin_partner_val['reservation_id'])
+                json_response = json.dumps(json_response)
                 return json_response
         else:
             _logger.error('FASTCHECKIN Nº chekcin exceded')
@@ -146,7 +140,8 @@ class ResPartner(models.Model):
         json_response += "Creado por la alicación.</br> A nombre de "
         json_response += "<strong>" + partner_res.name + '<strong>'
 
-        reservation_obj.message_post(body=json_response)
+        reservation_obj.message_post(body=json_response,
+                                     subject='Fast Checkin System')
 
         json_response = "OK"
         json_response = json.dumps(json_response)
