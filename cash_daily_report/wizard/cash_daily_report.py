@@ -240,8 +240,8 @@ class CashDailyReportWizard(models.TransientModel):
                     count_return_journals[v_payment.journal_id.name] += 1
                 if v_payment.date not in total_dates:
                     total_dates.update({v_payment.date: {v_payment.journal_id.name: -v_line.amount}})
-                    total_dates.update({v_payment.date: {gastos: -v_line.amount}})
-                    total_dates.update({v_payment.date: {ingresos: 0}})
+                    total_dates[v_payment.date].update({gastos: -v_line.amount})
+                    total_dates[v_payment.date].update({ingresos: 0})
                 else:
                     if v_payment.journal_id.name not in total_dates[v_payment.date]:
                         total_dates[v_payment.date].update({v_payment.journal_id.name: -v_line.amount})
