@@ -258,12 +258,12 @@ class CashDailyReportWizard(models.TransientModel):
                                 xls_cell_format_date)
                 worksheet.write(k_line+offset, 4, v_payment.journal_id.name)
                 if v_payment.validated:
-                    worksheet.write(k_payment+offset, 5, -v_line.amount,
+                    worksheet.write(k_line+offset, 5, -v_line.amount,
                                     validated_format)
                 else:
-                    worksheet.write(k_payment+offset, 5, -v_line.amount,
+                    worksheet.write(k_line+offset, 5, -v_line.amount,
                                     xls_cell_format_money)
-                worksheet.write(k_payment+offset, 6, "Devolucion")
+                worksheet.write(k_line+offset, 6, "Devolucion")
                 total_payment_returns_amount += -v_line.amount
             offset += len(v_payment.line_ids)
         line = offset
