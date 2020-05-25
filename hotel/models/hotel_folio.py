@@ -137,13 +137,18 @@ class HotelFolio(models.Model):
         ('web', 'Web'),
         ('agency', 'Agencia'),
         ('operator', 'Tour operador'),
-        ('virtualdoor', 'Virtual Door'),], 'Sales Channel', default='door')
-    user_id = fields.Many2one('res.users', string='Salesperson', index=True, ondelete='restrict',
-                              track_visibility='onchange', default=lambda self: self.env.user)
+        ('virtualdoor', 'Virtual Door'),
+        ('detour', 'Detour')
+        ], 'Sales Channel', default='door')
+    user_id = fields.Many2one('res.users', string='Salesperson',
+                              index=True, ondelete='restrict',
+                              track_visibility='onchange',
+                              default=lambda self: self.env.user)
     tour_operator_id = fields.Many2one('res.partner',
                                        'Tour Operator',
                                        ondelete='restrict',
-                                       domain=[('is_tour_operator', '=', True)])
+                                       domain=[
+                                           ('is_tour_operator', '=', True)])
     date_order = fields.Datetime(
         string='Order Date',
         required=True, readonly=True, index=True,
