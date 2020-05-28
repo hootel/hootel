@@ -22,7 +22,8 @@
         'base_location',
     ],
     'data': [
-        'data/res_users_data.xml'
+        'data/res_users_data.xml',
+        'views/inherit_res_company.xml'
     ],
     'demo': [
     ],

@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from odoo import api, models, fields
 # from odoo.tools import (
 #     DEFAULT_SERVER_DATE_FORMAT,
@@ -122,3 +122,22 @@ class RoomMatik(models.Model):
         apidata = self.env['hotel.reservation']
         code = str(code) if not isinstance(code, str) else code
         return apidata.sudo().rm_get_arrivals(code)
+
+    def normalize_checkin_date(self, date_in, date_out):
+        # Adjust reservation day to night sale kiosk
+        limit_night_sale = self.env.user.company_id.limit_night_sale
+        start_night_sale = datetime.strptime('00:00', '%H:%M').time()
+        limit_sale_today = datetime.strptime(limit_night_sale, '%H:%M').time()
+        checkin = datetime.strptime(date_in, DEFAULT_ROOMMATIK_DATE_FORMAT)
+        checkout = datetime.strptime(date_out, DEFAULT_ROOMMATIK_DATE_FORMAT)
+        tz_hotel = self.env['ir.default'].sudo().get(
+            'res.config.settings', 'tz_hotel')
+        self_tz = self.with_context(tz=tz_hotel)
+        mynow = fields.Datetime.context_timestamp(
+            self_tz,
+            datetime.now())
+        if start_night_sale < mynow.time() < limit_sale_today and \
+                checkin.date() == mynow.date():
+            checkin = checkin - timedelta(1)
+            checkout = checkout - timedelta(1)
+        return checkin.strftime(DEFAULT_ROOMMATIK_DATE_FORMAT), checkout.strftime(DEFAULT_ROOMMATIK_DATE_FORMAT)

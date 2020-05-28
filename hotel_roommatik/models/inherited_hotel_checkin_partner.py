@@ -3,10 +3,6 @@
 
 import json
 from odoo import api, models
-from odoo.addons.hotel_roommatik.models.roommatik import (
-    DEFAULT_ROOMMATIK_DATE_FORMAT,
-    DEFAULT_ROOMMATIK_DATETIME_FORMAT)
-from datetime import datetime
 import logging
 
 
@@ -19,9 +15,14 @@ class HotelCheckinPartner(models.Model):
         _logger = logging.getLogger(__name__)
         if not stay.get('ReservationCode'):
             reservation_obj = self.env['hotel.reservation']
+            roommatik = self.env['roommatik.api']
+            checkin, checkout = roommatik.normalize_checkin_date(
+                stay["Arrival"],
+                stay["Departure"]
+            )
             vals = {
-                'checkin': stay["Arrival"],
-                'checkout': stay["Departure"],
+                'checkin': checkin,
+                'checkout': checkout,
                 'adults': stay['Adults'],
                 'arrival_hour': stay['Arrival_hour'],
                 'room_type_id': stay['RoomType']['Id'],
