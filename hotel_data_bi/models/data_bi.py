@@ -179,7 +179,7 @@ class Data_Bi(models.Model):
         _logger.info("DataBi: Calculating all channels")
         dic_canal = []  # Diccionario con los Canales
         canal_array = ['Puerta', 'Mail', 'Telefono', 'Call Center', 'Web',
-                       'Agencia', 'Touroperador', 'Virtual Door']
+                       'Agencia', 'Touroperador', 'Virtual Door', u'Desvío']
         for i in range(0, len(canal_array)):
             dic_canal.append({'ID_Hotel': compan,
                               'ID_Canal': i,
@@ -370,6 +370,9 @@ class Data_Bi(models.Model):
         dic_clientes.append({'ID_Hotel': compan,
                              'ID_Cliente': 909,
                              'Descripcion': u'Virtual Door'})
+        dic_clientes.append({'ID_Hotel': compan,
+                             'ID_Cliente': 910,
+                             'Descripcion': u'Desvío'})
         return dic_clientes
 
     @api.model
@@ -411,7 +414,8 @@ class Data_Bi(models.Model):
                     'web': 4,
                     'agency': 5,
                     'operator': 6,
-                    'virtualdoor': 7}
+                    'virtualdoor': 7,
+                    'detour': 8}
 
         for linea in lineas:
             # _logger.info("DataBi: %s", linea.reservation_id.folio_id.name)
@@ -521,6 +525,8 @@ class Data_Bi(models.Model):
             response = 906
         elif reserva.reservation_id.channel_type == "virtualdoor":
             response = 909
+        elif reserva.reservation_id.channel_type == "detour":
+            response = 910
         elif reserva.reservation_id.channel_type == "web":
             if reserva.reservation_id.ota_id.id:
                 # OTA
