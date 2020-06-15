@@ -128,5 +128,5 @@ class HotelReservation(models.Model):
         for res in self:
             res.fc_url = self.fc_url_text(res.localizator, res.checkout)
 
-    fc_url = fields.Html('Fast Checkin URL',
+    fc_url = fields.Char('Fast Checkin URL',
                          compute='_compute_fc_url')
