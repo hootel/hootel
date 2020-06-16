@@ -488,8 +488,12 @@ class Data_Bi(models.Model):
                 'PrecioDto': precio_dto,
                 'ID_Tarifa': linea.reservation_id.pricelist_id.id,
                 'ID_Pais': self.data_bi_get_codeine(linea),
-                'ID_Room': linea.reservation_id.room_id.id
+                'ID_Room': linea.reservation_id.room_id.id,
+                'FechaCancelacion': "NONE",
                 })
+            if linea.reservation_id.state == 'cancelled':
+                dic_reservas[0]['FechaCancelacion'] = \
+                    linea.reservation_id.last_updated_res[:10]
         # ID_Reserva numérico Código único de la reserva
         # ID_Hotel numérico Código del Hotel
         # ID_EstadoReserva numérico Código del estado de la reserva
