@@ -33,7 +33,7 @@ class HotelCheckinPartner(models.Model):
             reservation_rm = reservation_obj.create(vals)
             stay['ReservationCode'] = reservation_rm.localizator
         else:
-            reservation_rm = self._get_reservations_roommatik(
+            reservation_rm = self.env['hotel.reservation']._get_reservations_roommatik(
                 stay['ReservationCode']) # REVIEW: Puede devolver más de una reserva
         total_chekins = reservation_rm.checkin_partner_pending_count
         stay['Total'] = reservation_rm.folio_pending_amount
