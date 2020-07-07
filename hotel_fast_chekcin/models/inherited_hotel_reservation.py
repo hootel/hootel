@@ -4,7 +4,7 @@
 from odoo import api, models, fields
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 _logger = logging.getLogger(__name__)
 
@@ -130,3 +130,21 @@ class HotelReservation(models.Model):
 
     fc_url = fields.Char('Fast Checkin URL',
                          compute='_compute_fc_url')
+
+    @api.multi
+    def fc_next_localizator(self):
+        # Search nexts localizators
+        s_date = date.today()+timedelta(days=-1)
+        s_date = s_date.strftime("%d-%m-%Y")
+        _logger.info('FASTCHECKIN search Localizators FROM %s Date.', s_date)
+        localizators = self.env['hotel.reservation'].search([(
+            'checkin', '>=', s_date)])
+        json_response = []
+        for localizator in localizators:
+            json_response.append([{
+                'Id': localizator.id,
+                'Localizator': localizator.localizator,
+                'Checkin': localizator.checkin,
+                'Estate': localizator.state,
+                }])
+        return json.dumps(json_response)

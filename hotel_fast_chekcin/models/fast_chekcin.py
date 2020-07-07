@@ -38,6 +38,8 @@ class FastCheckin(models.Model):
     def fc_get_reservation(self, reservation_code):
         # FastCheckin Gets a reservation ready for check-in
         # through the provided code. (MANDATORY)
+        _logger.info('FASTCHECKIN get reservation [%s] Code.', reservation_code)
+
         apidata = self.env['hotel.reservation']
         reservation_code = str(reservation_code) if not isinstance(
             reservation_code, str) else reservation_code
@@ -46,6 +48,13 @@ class FastCheckin(models.Model):
     @api.model
     def fc_set_partner(self, partner):
         # FastCheckin Sets a partner and assing a check-in
+        _logger.info('FASTCHECKIN set partner')
 
         apidata = self.env['res.partner']
         return apidata.sudo().fc_set_partner(partner)
+
+    @api.model
+    def fc_next_localizator(self):
+        # FastCheckin get next reservations and send localizator and state
+        apidata = self.env['hotel.reservation']
+        return apidata.sudo().fc_next_localizator()
