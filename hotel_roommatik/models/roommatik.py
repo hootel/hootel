@@ -112,16 +112,14 @@ class RoomMatik(models.Model):
         return apidata.sudo().rm_add_payment(code, payment)
 
     @api.model
-    def rm_get_departures(self, code):
+    def rm_get_departures(self):
         apidata = self.env['hotel.reservation']
-        code = str(code) if not isinstance(code, str) else code
-        return apidata.sudo().rm_get_departures(code)
+        return apidata.sudo().rm_get_departures()
 
     @api.model
-    def rm_get_arrivals(self, code):
+    def rm_get_arrivals(self):
         apidata = self.env['hotel.reservation']
-        code = str(code) if not isinstance(code, str) else code
-        return apidata.sudo().rm_get_arrivals(code)
+        return apidata.sudo().rm_get_arrivals()
 
     def normalize_checkin_date(self, date_in, date_out):
         # Adjust reservation day to night sale kiosk
