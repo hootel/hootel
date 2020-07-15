@@ -77,13 +77,13 @@ class HotelReservation(models.Model):
             ('folio_id.name', '=', code)])
 
     @api.model
-    def rm_get_departures(self, code):
+    def rm_get_departures(self):
         reservations = self.env['hotel.reservation'].search([
             ('checkout', '=', fields.Date.today())])
-        return reservations.mapped('localizator')
+        return json.dumps(reservations.mapped('localizator'))
 
     @api.model
-    def rm_get_arrivals(self, code):
+    def rm_get_arrivals(self):
         reservations = self.env['hotel.reservation'].search([
             ('checkin', '=', fields.Date.today())])
-        return reservations.mapped('localizator')
+        return json.dumps(reservations.mapped('localizator'))
