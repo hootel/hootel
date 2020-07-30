@@ -87,7 +87,9 @@
                 <field name="mobile"/>
                 <field name="email"/>
                 <field name="enter_date"/>
+                <field name="arrival_hour"/>
                 <field name="exit_date"/>
+                <field name="departure_hour"/>
                 <field name="reservation_id"/>
                 <field name="folio_id" force_save="1" invisible="1"/>
                 <field name="state"/>
