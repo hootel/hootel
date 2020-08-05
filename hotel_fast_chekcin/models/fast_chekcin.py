@@ -54,7 +54,7 @@ class FastCheckin(models.Model):
         return apidata.sudo().fc_set_partner(partner)
 
     @api.model
-    def fc_next_localizator(self):
+    def fc_next_localizator(self, dias=60):
         # FastCheckin get next reservations and send localizator and state
         apidata = self.env['hotel.reservation']
-        return apidata.sudo().fc_next_localizator()
+        return apidata.sudo().fc_next_localizator(dias)

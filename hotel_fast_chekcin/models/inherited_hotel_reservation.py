@@ -132,13 +132,14 @@ class HotelReservation(models.Model):
                          compute='_compute_fc_url')
 
     @api.multi
-    def fc_next_localizator(self):
+    def fc_next_localizator(self, dias):
         # Search nexts localizators
         s_date = date.today()+timedelta(days=-1)
-        s_date = s_date.strftime("%d-%m-%Y")
-        _logger.info('FASTCHECKIN search Localizators FROM %s Date.', s_date)
-        localizators = self.env['hotel.reservation'].search([(
-            'checkin', '>=', s_date)])
+        s_date2 = date.today()+timedelta(days=dias)
+        _logger.info('FASTCHECKIN search Localizators FROM %s To %s Dates.', s_date, s_date2)
+        localizators = self.env['hotel.reservation'].search([
+            ('checkin', '>=', s_date),
+            ('checkin', '<', s_date2)])
         json_response = []
         for localizator in localizators:
             json_response.append([{
