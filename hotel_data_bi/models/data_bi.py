@@ -490,10 +490,14 @@ class Data_Bi(models.Model):
                 'ID_Pais': self.data_bi_get_codeine(linea),
                 'ID_Room': linea.reservation_id.room_id.id,
                 'FechaCancelacion': "NONE",
+                'ID_Folio': linea.reservation_id.folio_id.name,
                 })
             if linea.reservation_id.state == 'cancelled':
-                dic_reservas[0]['FechaCancelacion'] = \
+                dic_reservas[-1]['FechaCancelacion'] = \
                     linea.reservation_id.last_updated_res[:10]
+                # _logger.info("DataBi: %s CANCELADA %s",
+                #              dic_reservas[-1]['Entrada'],
+                #              dic_reservas[-1]['ID_Folio'])
         # ID_Reserva numérico Código único de la reserva
         # ID_Hotel numérico Código del Hotel
         # ID_EstadoReserva numérico Código del estado de la reserva
