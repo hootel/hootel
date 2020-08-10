@@ -736,7 +736,7 @@ class HotelFolio(models.Model):
             compose_form_id = False
         ctx = dict()
         ctx.update({
-            'default_model': 'hotel.reservation',
+            'default_model': 'hotel.folio',
             'default_res_id': self._ids[0],
             'default_use_template': bool(template_id),
             'default_template_id': template_id,
