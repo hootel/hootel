@@ -171,6 +171,8 @@ class HotelReservationImporter(Component):
                     day_tax_weigh = brday['price'] * 100 / price_subtotal
                     amount_day_tax = broom['ancillary']['taxes'] * day_tax_weigh / 100
                 room_day_price = brday['price'] + amount_day_tax
+                if board_service_amount is None:
+                    board_service_amount = 0
                 reservation_lines.append((0, False, {
                     'date': wndate.strftime(DEFAULT_SERVER_DATE_FORMAT),
                     'price': room_day_price - board_service_amount,
