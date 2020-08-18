@@ -18,8 +18,11 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from io import BytesIO
 from datetime import datetime, date
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+import xlsxwriter
+import base64
 
 
 class KellysWizard(models.TransientModel):
@@ -44,6 +47,9 @@ class KellysWizard(models.TransientModel):
         default='kelly ASC, tipo ASC, checkin ASC',
         required=True,
         help='Establece el orden en el que se imprimira el listado')
+
+    xls_filename = fields.Char()
+    xls_binary = fields.Binary("Export data")
 
     @api.multi
     def calculate_report(self):
@@ -121,3 +127,82 @@ class KellysWizard(models.TransientModel):
 
         return self.env.ref(
                 'kellys_daily_report.report_kellysrooms').report_action(rooms)
+
+    @api.multi
+    def _excel_export(self):
+        tipo_limpieza = ['Salida', 'Cliente', 'Revisar', 'Staff', 'Averia']
+        file_data = BytesIO()
+        workbook = xlsxwriter.Workbook(file_data, {
+            'strings_to_numbers': True,
+            'default_date_format': 'dd/mm/yyyy'
+        })
+        company_id = self.env.user.company_id
+        workbook.set_properties({
+            'title': 'Exported data from ' + company_id.name,
+            'subject': 'Export Kellys Report from Odoo of ' + company_id.name,
+            'author': 'Odoo',
+            'manager': u'User',
+            'company': company_id.name,
+            'category': 'Hoja de Calculo',
+            'keywords': 'kellys, odoo, data, ' + company_id.name,
+            'comments': 'Created with Python in Odoo and XlsxWriter'})
+        workbook.use_zip64()
+
+        xls_cell_format_date = workbook.add_format({
+            'num_format': 'dd/mm/yyyy'
+        })
+
+        xls_cell_format_header = workbook.add_format({
+            'bg_color': '#CCCCCC',
+            'bold': True,
+            'align': 'center'
+        })
+
+        worksheet = workbook.add_worksheet(_('Kellys Report'))
+
+        worksheet.write('A1', _('Habitacion'), xls_cell_format_header)
+        worksheet.write('B1', _('Tipo L.'), xls_cell_format_header)
+        worksheet.write('C1', _('Notas'), xls_cell_format_header)
+        worksheet.write('D1', _('Entrada'), xls_cell_format_header)
+        worksheet.write('E1', _('Salida'), xls_cell_format_header)
+        worksheet.write('F1', _('Asignado'), xls_cell_format_header)
+
+        worksheet.set_column('A:A', 30)
+        worksheet.set_column('B:B', 10)
+        worksheet.set_column('C:C', 40)
+        worksheet.set_column('D:D', 15)
+        worksheet.set_column('E:E', 15)
+        worksheet.set_column('F:F', 30)
+
+        rooms = self.env['kellysrooms'].search([('id', 'in',
+                                                 self.habitaciones.ids)],
+                                               order=self.order)
+
+        offset = 1
+        for k_room, v_room in enumerate(rooms):
+
+            worksheet.write(k_room+offset, 0, v_room.habitacion)
+            worksheet.write(k_room+offset, 1, tipo_limpieza[v_room.tipo-1])
+            worksheet.write(k_room+offset, 2, v_room.notas)
+            worksheet.write(k_room+offset, 3, v_room.checkin,
+                            xls_cell_format_date)
+            worksheet.write(k_room+offset, 4, v_room.checkout,
+                            xls_cell_format_date)
+            worksheet.write(k_room+offset, 5, v_room.kelly.name)
+
+        workbook.close()
+        file_data.seek(0)
+
+        return {
+            'xls_filename': 'Kellys_%s_%s.xlsx' % (
+                self.env.user.company_id.property_name,
+                self.date_start),
+            'xls_binary': base64.encodestring(file_data.read()),
+        }
+
+    @api.multi
+    def excel_rooms_report(self):
+        self.write(self._excel_export())
+        return {
+            "type": "ir.actions.do_nothing",
+        }
