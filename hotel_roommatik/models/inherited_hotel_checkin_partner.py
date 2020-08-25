@@ -81,7 +81,7 @@ class HotelCheckinPartner(models.Model):
                             'segmentation_ids': [(6, 0, [stay['Segmentation']])]
                         })
                     record.action_on_board()
-                    stay['Id'] = record.id
+                    stay['Id'] = self.rm_obfuscate_id(record.id)
                     stay['Room'] = {}
                     stay['Room']['Id'] = reservation_rm.room_id.id
                     stay['Room']['Name'] = reservation_rm.room_id.name
@@ -106,7 +106,7 @@ class HotelCheckinPartner(models.Model):
     @api.model
     def rm_get_stay(self, code):
         # BUSQUEDA POR LOCALIZADOR
-        checkin_partner = self.search([('id', '=', code)])
+        checkin_partner = self.search([('id', '=', self.rm_desobfuscate_id(code))])
         default_arrival_hour = self.env['ir.default'].sudo().get(
             'res.config.settings', 'default_arrival_hour')
         default_departure_hour = self.env['ir.default'].sudo().get(
@@ -114,8 +114,8 @@ class HotelCheckinPartner(models.Model):
         if any(checkin_partner):
             arrival = checkin_partner.enter_date or default_arrival_hour
             departure = checkin_partner.exit_date or default_departure_hour
-            stay = {'Code': checkin_partner.id}
-            stay['Id'] = checkin_partner.id
+            stay = {'Code': self.rm_obfuscate_id(checkin_partner.id)}
+            stay['Id'] = self.rm_obfuscate_id(checkin_partner.id)
             stay['Room'] = {}
             stay['Room']['Id'] = checkin_partner.reservation_id.room_id.id
             stay['Room']['Name'] = checkin_partner.reservation_id.room_id.name
@@ -145,3 +145,12 @@ class HotelCheckinPartner(models.Model):
 
         json_response = json.dumps(stay)
         return json_response
+
+    @api.model
+    def rm_obfuscate_id(self, id_code):
+        return int(str(id_code + 3) + '4')
+
+    @api.model
+    def rm_desobfuscate_id(self, code):
+        return int(str(code)[:-1])-3
+
