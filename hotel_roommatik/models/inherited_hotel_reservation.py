@@ -31,12 +31,12 @@ class HotelReservation(models.Model):
         consumed = sum(onboard_reservations.mapped('price_total'))
         paid_in_folio = folio.invoices_paid
         total_in_folio = folio.amount_total
-        deposit = total_in_folio - (paid_in_folio - consumed)
-        to_pay = deposit - self.price_total
-        if to_pay > self.price_total:
-            return self.price_total
+        to_pay_folio = total_in_folio - (paid_in_folio - consumed)
+        to_pay_reservation = self.price_total - to_pay_folio
+        if to_pay_reservation > to_pay_folio:
+            return to_pay_folio
         else:
-            return to_pay
+            return self.price_total
 
     @api.model
     def rm_get_reservation(self, code):
