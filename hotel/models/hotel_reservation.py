@@ -163,7 +163,8 @@ class HotelReservation(models.Model):
                 localizator = re.sub("[^0-9]", "", record.folio_id.name)
                 checkout = int(re.sub("[^0-9]", "", record.checkout))
                 checkin = int(re.sub("[^0-9]", "", record.checkin))
-                localizator += str((checkin + checkout) % 99)
+                localizator += str((checkin + checkout + record.id) % 99)
+                localizator.replace('0','1')
                 record.localizator = localizator
 
     localizator = fields.Char('Localizator', compute='_compute_localizator',

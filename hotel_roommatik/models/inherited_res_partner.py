@@ -7,7 +7,8 @@ from datetime import datetime
 import logging
 from odoo.addons.hotel_roommatik.models.roommatik import (
     DEFAULT_ROOMMATIK_DATE_FORMAT)
-
+import logging
+_logger = logging.getLogger(__name__)
 
 class ResPartner(models.Model):
 
@@ -67,17 +68,26 @@ class ResPartner(models.Model):
             return [False, error_name]
 
     def rm_prepare_customer(self, customer):
+        _logger.info('-----------------------RM_PREPARE_CURSTOMER------------------------------')
         zip = self.env['res.better.zip'].search([
             ('name', 'ilike', customer['Address']['ZipCode'])], limit=1)
         # Check Sex string
+        _logger.info('ZIP:')
+        _logger.info(zip)
         if customer['Sex'] not in {'male', 'female'}:
             customer['Sex'] = ''
         if zip:
             state = zip.state_id
+        _logger.info('ZIP_STATE:')
+        _logger.info(zip.state_id.name)
         country = self.env['res.country'].search([
             ('code_alpha3', '=', customer['Address']['Country'])], limit=1)
+        _logger.info('DIRECT COUNTRY:') 
+        _logger.info(country)
         if not country and zip:
             country = zip.country_id
+            _logger.info('ZIP COUNTRY:')
+            _logger.info(country)
         # Create Street2s
         street_2 = customer['Address']['House']
         street_2 += ' ' + customer['Address']['Flat']
@@ -89,7 +99,7 @@ class ResPartner(models.Model):
             'birthdate_date': datetime.strptime(
                 customer['Birthday'], DEFAULT_ROOMMATIK_DATE_FORMAT).date(),
             'gender': customer['Sex'],
-            'zip_id': zip.id,
+            'zip': zip.name,
             'city': customer['Address']['City'],
             'street': customer['Address']['Street'],
             'street2': street_2,
