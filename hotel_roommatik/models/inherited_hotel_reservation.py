@@ -20,14 +20,23 @@ class HotelReservation(models.Model):
         # the proportional deposit part if the folio has more rooms that the
         # reservations code (this happens when in the same folio are
         # reservations with different checkins/outs convinations)
-        if len(folio.room_lines) > len(reservations) and folio.invoices_paid > 0:
-
-            total_reservations = sum(reservations.mapped('price_total'))
-            paid_in_folio = folio.invoices_paid
-            total_in_folio = folio.amount_total
-            deposit = total_reservations * paid_in_folio / total_in_folio
-            return deposit
         return folio.invoices_paid
+
+    @api.multi
+    def _compute_to_pay(self):
+        folio = self.folio_id
+        onboard_reservations = folio.room_lines.filtered(
+            lambda r: r.state in ['done', 'booking']
+        )
+        consumed = sum(onboard_reservations.mapped('price_total'))
+        paid_in_folio = folio.invoices_paid
+        total_in_folio = folio.amount_total
+        deposit = total_in_folio - (paid_in_folio - consumed)
+        to_pay = deposit - self.price_total
+        if to_pay > self.price_total:
+            return self.price_total
+        else:
+            return to_pay
 
     @api.model
     def rm_get_reservation(self, code):
@@ -60,7 +69,7 @@ class HotelReservation(models.Model):
                     'Adults': line.adults,
                     'IsAvailable': total_chekins > 0,
                     # IsAvailable “false” Rooms not need check-in
-                    'Price': line.price_total,
+                    'Price': line._compute_to_pay(),
                     'RoomTypeId': line.room_type_id.id,
                     'RoomTypeName': line.room_type_id.name,
                     'RoomName': line.room_id.name,
