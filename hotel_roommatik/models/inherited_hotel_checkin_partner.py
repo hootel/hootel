@@ -153,4 +153,3 @@ class HotelCheckinPartner(models.Model):
     @api.model
     def rm_desobfuscate_id(self, code):
         return int(str(code)[:-1])-3
-

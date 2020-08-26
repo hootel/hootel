@@ -1,7 +1,7 @@
 # Copyright 2019 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import api, models, fields
+from odoo import api, models, fields, _
 import json
 import logging
 _logger = logging.getLogger(__name__)
@@ -96,3 +96,15 @@ class HotelReservation(models.Model):
         reservations = self.env['hotel.reservation'].search([
             ('checkin', '=', fields.Date.today())])
         return json.dumps(reservations.mapped('localizator'))
+
+    @api.multi
+    def _compute_duplicate_keys(self):
+        if self.checkin_partner_count < 1:
+            self.duplicate_keys = _('No code yet')
+        else:
+            for res in self:
+                ch_partner = self.checkin_partner_ids[0]
+                res.duplicate_keys = ch_partner.rm_obfuscate_id(ch_partner.id)
+
+    duplicate_keys = fields.Char('Code to duplicate key',
+                                 compute='_compute_duplicate_keys')
