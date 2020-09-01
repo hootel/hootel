@@ -187,6 +187,7 @@ class HotelReservationImporter(Component):
         parity_rate_id = self.env['channel.backend'].search([
             ('id', '=', self.backend_record.id)
         ]).wubook_parity_pricelist_id
+        rate_id = int(rate_id)
         # WuBook API rate_id ( booked pricing plan: -1 Unknown, 0 WuBook Parity or WuBook id of the plan)
         if rate_id > 0:
             rate_id = self.env['channel.product.pricelist'].search([
