@@ -18,7 +18,7 @@ class AccountPayment(models.Model):
                 vals = {
                     'journal_id': 7,  # TODO:config setting
                     'partner_id': reservation.partner_invoice_id.id,
-                    'amount': cashpay['Amount'],
+                    'amount': float(cashpay['Amount'].replace(',', '.')),
                     'payment_date': cashpay['DateTime'],
                     'communication': reservation.name,
                     'folio_id': reservation.folio_id.id,
@@ -32,7 +32,7 @@ class AccountPayment(models.Model):
                 vals = {
                     'journal_id': 15,  # TODO:config setting
                     'partner_id': reservation.partner_invoice_id.id,
-                    'amount': cashpay['Amount'],
+                    'amount': float(cashpay['Amount'].replace(',', '.')),
                     'payment_date': cashpay['DateTime'],
                     'communication': reservation.name,
                     'folio_id': reservation.folio_id.id,
