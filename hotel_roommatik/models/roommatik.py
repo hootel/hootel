@@ -146,6 +146,7 @@ class RoomMatik(models.Model):
         apidata = self.env['account.payment']
         code = str(code) if not isinstance(code, str) else code
         _logger.info('---------------------------RETURN:')
+        payment = float(payment.replace(',', '.'))
         response = apidata.sudo().rm_add_payment(code, payment)
         _logger.info(response)
         return response
