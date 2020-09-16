@@ -85,6 +85,10 @@ class HotelCheckinPartner(models.Model):
                     stay['Room'] = {}
                     stay['Room']['Id'] = reservation_rm.room_id.id
                     stay['Room']['Name'] = reservation_rm.room_id.name
+                    stay['Departure'] = "%s %s" % (
+                        stay['Departure'], reservation_obj.departure_hour)
+                    _logger.error('ROOMMATIK checkin Exit Time: %s.', stay['Departure'])
+
                     json_response = stay
                 except Exception as e:
                     error_name = 'Error not create Checkin '
