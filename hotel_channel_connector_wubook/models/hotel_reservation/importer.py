@@ -433,22 +433,22 @@ class HotelReservationImporter(Component):
             
             #Wubook send first the reservation, and then the reservation (other time) with pay (payment_gateway_fee=
             if not book['modified_reservations'] and book['payment_gateway_fee']:
-            origin_reservation = self.env['channel.hotel.reservation'].search([("reservation_code","=",book["reservation_code"]]).odoo_id
-            if origin_reservation and book['payment_gateway_fee'] > 0:
-                vals = {
-                    'journal_id': 23,  # TODO:config setting
-                    'partner_id': origin_reservation.partner_invoice_id.id,
-                    'amount': float(book['payment_gateway_fee'].replace(',', '.')),
-                    'payment_date': fields.Date.today(),
-                    'communication': origin_reservation.name,
-                    'folio_id': origin_reservation.folio_id.id,
-                    'payment_type': 'inbound',
-                    'payment_method_id': 1,
-                    'partner_type': 'customer',
-                    'state': 'draft',
-                }
-                pay = self.create(vals)
-                pay.post()
+                origin_reservation = self.env['channel.hotel.reservation'].search([("reservation_code","=",book["reservation_code"]]).odoo_id
+                if origin_reservation and book['payment_gateway_fee'] > 0:
+                    vals = {
+                        'journal_id': 23,  # TODO:config setting
+                        'partner_id': origin_reservation.partner_invoice_id.id,
+                        'amount': float(book['payment_gateway_fee'].replace(',', '.')),
+                        'payment_date': fields.Date.today(),
+                        'communication': origin_reservation.name,
+                        'folio_id': origin_reservation.folio_id.id,
+                        'payment_type': 'inbound',
+                        'payment_method_id': 1,
+                        'partner_type': 'customer',
+                        'state': 'draft',
+                    }
+                    pay = self.create(vals)
+                    pay.post()
 
             # Search Folio. If exists.
             folio_id = False
