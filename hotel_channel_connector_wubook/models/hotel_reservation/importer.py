@@ -211,6 +211,7 @@ class HotelReservationImporter(Component):
             ('backend_id', '=', self.backend_record.id),
             ('ota_id', '=', str(book['id_channel'])),
         ], limit=1)
+                                                                                       
         modified_codes = ''
         if book['modified_reservations']:
             modified_codes = ' '.join(str(e) for e in book['modified_reservations'])
@@ -429,6 +430,25 @@ class HotelReservationImporter(Component):
                 continue
 
             checkin_utc_dt, checkout_utc_dt = self._get_book_dates(book)
+            
+            #Wubook send first the reservation, and then the reservation (other time) with pay (payment_gateway_fee=
+            if not book['modified_reservations'] and book['payment_gateway_fee']:
+            origin_reservation = self.env['channel.hotel.reservation'].search([("reservation_code","=",book["reservation_code"]]).odoo_id
+            if origin_reservation and book['payment_gateway_fee'] > 0:
+                vals = {
+                    'journal_id': 23,  # TODO:config setting
+                    'partner_id': origin_reservation.partner_invoice_id.id,
+                    'amount': float(book['payment_gateway_fee'].replace(',', '.')),
+                    'payment_date': fields.Date.today(),
+                    'communication': origin_reservation.name,
+                    'folio_id': origin_reservation.folio_id.id,
+                    'payment_type': 'inbound',
+                    'payment_method_id': 1,
+                    'partner_type': 'customer',
+                    'state': 'draft',
+                }
+                pay = self.create(vals)
+                pay.post()
 
             # Search Folio. If exists.
             folio_id = False
