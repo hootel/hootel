@@ -13,6 +13,7 @@ class HotelCheckinPartner(models.Model):
     @api.model
     def rm_checkin_partner(self, stay):
         _logger = logging.getLogger(__name__)
+        _logger.error('ROOMMATIK PAREMETRO STAY: %s', stay)
         if not stay.get('ReservationCode'):
             reservation_obj = self.env['hotel.reservation']
             roommatik = self.env['roommatik.api']
@@ -118,7 +119,8 @@ class HotelCheckinPartner(models.Model):
         if any(checkin_partner):
             arrival = checkin_partner.enter_date or default_arrival_hour
             departure = "%s %s" % (checkin_partner.exit_date,
-                                   default_departure_hour)
+                                   heckin_partner.reservation_id.departure_hour)
+                                   # default_departure_hour)
             stay = {'Code': self.rm_obfuscate_id(checkin_partner.id)}
             stay['Id'] = self.rm_obfuscate_id(checkin_partner.id)
             stay['Room'] = {}
