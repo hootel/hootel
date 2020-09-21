@@ -119,7 +119,7 @@ class HotelCheckinPartner(models.Model):
         if any(checkin_partner):
             arrival = checkin_partner.enter_date or default_arrival_hour
             departure = "%s %s" % (checkin_partner.exit_date,
-                                   heckin_partner.reservation_id.departure_hour)
+                                   checkin_partner.reservation_id.departure_hour)
                                    # default_departure_hour)
             stay = {'Code': self.rm_obfuscate_id(checkin_partner.id)}
             stay['Id'] = self.rm_obfuscate_id(checkin_partner.id)
