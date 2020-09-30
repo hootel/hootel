@@ -408,6 +408,7 @@ class HotelReservationImporter(Component):
         channel_room_type_obj = self.env['channel.hotel.room.type']
         # Space for store some data for construct folios
         processed_rids = []
+        reservations = []
         failed_reservations = []
         checkin_utc_dt = False
         checkout_utc_dt = False
@@ -449,6 +450,8 @@ class HotelReservationImporter(Component):
                     }
                     pay = self.env["account.payment"].create(vals)
                     pay.post()
+                    processed_rids.append(rcode)
+                    continue
 
             # Search Folio. If exists.
             folio_id = False
