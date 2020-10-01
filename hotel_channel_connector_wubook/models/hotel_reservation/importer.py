@@ -211,7 +211,7 @@ class HotelReservationImporter(Component):
             ('backend_id', '=', self.backend_record.id),
             ('ota_id', '=', str(book['id_channel'])),
         ], limit=1)
-                                                                                       
+
         modified_codes = ''
         if book['modified_reservations']:
             modified_codes = ' '.join(str(e) for e in book['modified_reservations'])
@@ -406,6 +406,7 @@ class HotelReservationImporter(Component):
         channel_reserv_obj = self.env['channel.hotel.reservation']
         hotel_folio_obj = self.env['hotel.folio']
         channel_room_type_obj = self.env['channel.hotel.room.type']
+        res_company_obj = self.env.user.company_id
         # Space for store some data for construct folios
         processed_rids = []
         reservations = []
@@ -431,13 +432,13 @@ class HotelReservationImporter(Component):
                 continue
 
             checkin_utc_dt, checkout_utc_dt = self._get_book_dates(book)
-            
+
             #Wubook send first the reservation, and then the reservation (other time) with pay (payment_gateway_fee=
-            if not book['modified_reservations'] and book['payment_gateway_fee']:
+            if not book['modified_reservations'] and book['payment_gateway_fee'] and res_company_obj.wu_journal_id != 0:
                 origin_reservation = self.env['channel.hotel.reservation'].search([("external_id","=",book["reservation_code"])], limit=1).odoo_id
                 if origin_reservation and book['payment_gateway_fee'] > 0:
                     vals = {
-                        'journal_id': 23,  # TODO:config setting
+                        'journal_id': res_company_obj.wu_journal_id.id,  #23
                         'partner_id': origin_reservation.partner_invoice_id.id,
                         'amount': book['payment_gateway_fee'],
                         'payment_date': fields.Date.today(),
