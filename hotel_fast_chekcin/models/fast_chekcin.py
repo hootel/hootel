@@ -58,3 +58,10 @@ class FastCheckin(models.Model):
         # FastCheckin get next reservations and send localizator and state
         apidata = self.env['hotel.reservation']
         return apidata.sudo().fc_next_localizator(dias)
+
+    @api.model
+    def fc_add_payment(self, code, amount, journal='0', name='FastCheckin'):
+        # FastCheckin add payment
+        # code = reservation Id
+        apidata = self.env['account.payment']
+        return apidata.sudo().fc_add_payment(code, amount, int(journal), name)

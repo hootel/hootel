@@ -13,6 +13,8 @@
                         <field name="fc_server"/>
                         <field name="fc_server_id"/>
                         <field name="fc_seeed_code"/>
+                        <field name="fc_credit_journal"/>
+                        <field name="fc_cash_journal"/>
                     </group>
                 </xpath>
             </field>

@@ -28,3 +28,11 @@ class Inherit_res_company(models.Model):
     fc_server = fields.Char('Fast Checkin Server', default='https://...')
     fc_server_id = fields.Integer('Server ID', default=0)
     fc_seeed_code = fields.Integer('2 digit Seed Code', default=99)
+    fc_credit_journal = fields.Many2one('account.journal',
+                                        string='Payment credit card journal',
+                                        help='Credit card payment journal.',
+                                        default=0)
+    fc_cash_journal = fields.Many2one('account.journal',
+                                      string='Payment cash journal',
+                                      help='Cash payment journal.',
+                                      default=0)

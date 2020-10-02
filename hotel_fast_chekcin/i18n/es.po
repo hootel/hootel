@@ -1,0 +1,124 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* hotel_fast_chekcin
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 11.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-10-02 16:11+0000\n"
+"PO-Revision-Date: 2020-10-02 18:14+0200\n"
+"Last-Translator: Jose Luis Algara Toledo <osotranquilo@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es\n"
+"X-Generator: Poedit 2.3\n"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_res_company_fc_seeed_code
+msgid "2 digit Seed Code"
+msgstr "Codigo semilla de 2 digitos"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,help:hotel_fast_chekcin.field_res_company_fc_cash_journal
+msgid "Cash payment journal."
+msgstr "Diario de pagos de caja."
+
+#. module: hotel_fast_chekcin
+#: model:ir.model,name:hotel_fast_chekcin.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model,name:hotel_fast_chekcin.model_res_partner
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,help:hotel_fast_chekcin.field_res_company_fc_credit_journal
+msgid "Credit card payment journal."
+msgstr "Diario de pagos TPV."
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: hotel_fast_chekcin
+#: model:ir.ui.view,arch_db:hotel_fast_chekcin.fastcheckin_url_view_company_form
+msgid "Fast Checkin"
+msgstr "Fast Checkin"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_res_company_fc_server
+msgid "Fast Checkin Server"
+msgstr "Servidor Fast Checkin"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_channel_hotel_reservation_fc_url
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_hotel_reservation_fc_url
+msgid "Fast Checkin URL"
+msgstr "URL Fast Checkin"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model,name:hotel_fast_chekcin.model_hotel_reservation
+msgid "Hotel Reservation"
+msgstr "Reserva del hotel"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_id
+msgid "ID"
+msgstr "ID (identificación)"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api___last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_write_uid
+msgid "Last Updated by"
+msgstr "Última actualización de"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_write_date
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_res_company_fc_cash_journal
+msgid "Payment cash journal"
+msgstr "Diario pagos por caja"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_res_company_fc_credit_journal
+msgid "Payment credit card journal"
+msgstr "Diario pagos tarjeta credito"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model,name:hotel_fast_chekcin.model_account_payment
+msgid "Payments"
+msgstr "Pagos"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_res_company_fc_server_id
+msgid "Server ID"
+msgstr "Server ID"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model,name:hotel_fast_chekcin.model_fastcheckin_api
+msgid "fastcheckin.api"
+msgstr "fastcheckin.api"
