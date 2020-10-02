@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-26 10:30+0000\n"
-"PO-Revision-Date: 2020-08-26 12:38+0200\n"
+"POT-Creation-Date: 2020-10-02 08:24+0000\n"
+"PO-Revision-Date: 2020-10-02 10:28+0200\n"
 "Last-Translator: Jose Luis Algara Toledo <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -21,6 +21,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:hotel_roommatik.field_res_company_limit_night_sale
 msgid "Allow night sale until..."
 msgstr "Permitir venta nocturna hasta..."
+
+#. module: hotel_roommatik
+#: model:ir.ui.view,arch_db:hotel_roommatik.view_company_form
+msgid "Cajero RoomMatik"
+msgstr "Cajero RoomMatik"
 
 #. module: hotel_roommatik
 #: model:ir.model.fields,field_description:hotel_roommatik.field_channel_hotel_reservation_duplicate_keys
@@ -49,6 +54,11 @@ msgid "Created on"
 msgstr "Creado en"
 
 #. module: hotel_roommatik
+#: model:ir.ui.view,arch_db:hotel_roommatik.door_code_view_report
+msgid "Código para duplicar la llave: ["
+msgstr "Código para duplicar la llave: ["
+
+#. module: hotel_roommatik
 #: model:ir.model.fields,field_description:hotel_roommatik.field_roommatik_api_display_name
 msgid "Display Name"
 msgstr "Nombre mostrado"
@@ -69,7 +79,7 @@ msgid "ID"
 msgstr "ID (identificación)"
 
 #. module: hotel_roommatik
-#: code:addons/hotel_roommatik/models/inherited_res_company.py:19
+#: code:addons/hotel_roommatik/models/inherited_res_company.py:27
 #, python-format
 msgid "Invalid limit hour (Format: HH:mm)"
 msgstr "Hora limite invalida (Formato: HH:mm)"
@@ -96,6 +106,16 @@ msgid "No code yet"
 msgstr "Sin código de momento"
 
 #. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_res_company_rm_cash_journal
+msgid "Payment cash journal"
+msgstr "Diario pagos por caja"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_res_company_rm_credit_journal
+msgid "Payment credit card journal"
+msgstr "Diario pagos tarjeta credito"
+
+#. module: hotel_roommatik
 #: model:ir.model,name:hotel_roommatik.model_account_payment
 msgid "Payments"
 msgstr "Pagos"
@@ -104,6 +124,16 @@ msgstr "Pagos"
 #: model:ir.model,name:hotel_roommatik.model_hotel_room_type
 msgid "Room Type"
 msgstr "Tipo de Habitación"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,help:hotel_roommatik.field_res_company_rm_cash_journal
+msgid "RoomMatik cash payment journal."
+msgstr "Diario de pagos por caja de RoomMatik."
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,help:hotel_roommatik.field_res_company_rm_credit_journal
+msgid "RoomMatik credit card payment journal."
+msgstr "Diario de pagos por tarjeta de credito de RoomMatik."
 
 #. module: hotel_roommatik
 #: model:ir.model,name:hotel_roommatik.model_hotel_checkin_partner
