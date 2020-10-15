@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-02 16:11+0000\n"
-"PO-Revision-Date: 2020-10-02 18:14+0200\n"
+"POT-Creation-Date: 2020-10-15 16:27+0000\n"
+"PO-Revision-Date: 2020-10-15 18:28+0200\n"
 "Last-Translator: Jose Luis Algara Toledo <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -74,6 +74,16 @@ msgid "Fast Checkin URL"
 msgstr "URL Fast Checkin"
 
 #. module: hotel_fast_chekcin
+#: model:ir.model.fields,help:hotel_fast_chekcin.field_hotel_folio_hide_pay
+msgid "Hide or show the price in external tools (Fast Checkin, Cashiers, etc.)"
+msgstr "Oculta o muestra el precio en las herramientas externas (Fast Checkin, Cajeros, etc.)"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model,name:hotel_fast_chekcin.model_hotel_folio
+msgid "Hotel Folio"
+msgstr "Ficha de reservas"
+
+#. module: hotel_fast_chekcin
 #: model:ir.model,name:hotel_fast_chekcin.model_hotel_reservation
 msgid "Hotel Reservation"
 msgstr "Reserva del hotel"
@@ -99,6 +109,11 @@ msgid "Last Updated on"
 msgstr "Última actualización en"
 
 #. module: hotel_fast_chekcin
+#: model:ir.ui.view,arch_db:hotel_fast_chekcin.fastcheckin_hide_pay_reservation_form
+msgid "Others"
+msgstr "Otros"
+
+#. module: hotel_fast_chekcin
 #: model:ir.model.fields,field_description:hotel_fast_chekcin.field_res_company_fc_cash_journal
 msgid "Payment cash journal"
 msgstr "Diario pagos por caja"
@@ -117,6 +132,11 @@ msgstr "Pagos"
 #: model:ir.model.fields,field_description:hotel_fast_chekcin.field_res_company_fc_server_id
 msgid "Server ID"
 msgstr "Server ID"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_hotel_folio_hide_pay
+msgid "Show price for payment"
+msgstr "Mostrar precios para pagos"
 
 #. module: hotel_fast_chekcin
 #: model:ir.model,name:hotel_fast_chekcin.model_fastcheckin_api

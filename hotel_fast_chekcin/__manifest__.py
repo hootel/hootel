@@ -21,7 +21,7 @@
 
 {
     'name': 'Hotel Fast Checkin',
-    'version': '1.0',
+    'version': '2.2',
     'author': "Jose Luis Algara Toledo <osotranquilo@gmail.com>",
     'website': 'https://www.aldahotels.com',
     'category': 'hotel fast checkin',
@@ -34,6 +34,7 @@
     'data': [
         'views/inherit_res_company.xml',
         'views/inherit_hotel_reservation.xml',
+        'views/inherit_hotel_folio.xml',
     ],
     'qweb': [],
     'test': [
