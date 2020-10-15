@@ -20,7 +20,10 @@ class HotelReservation(models.Model):
         # the proportional deposit part if the folio has more rooms that the
         # reservations code (this happens when in the same folio are
         # reservations with different checkins/outs convinations)
-        return folio.invoices_paid
+        if not folio.hide_pay:
+            return 0
+        else:
+            return folio.invoices_paid
 
     @api.multi
     def _compute_to_pay(self):
@@ -33,10 +36,13 @@ class HotelReservation(models.Model):
         total_in_folio = folio.amount_total
         to_pay_folio = total_in_folio - (paid_in_folio - consumed)
         to_pay_reservation = self.price_total - to_pay_folio
-        if to_pay_reservation > to_pay_folio:
-            return to_pay_folio
+        if not folio.hide_pay:
+            return 0
         else:
-            return self.price_total
+            if to_pay_reservation > to_pay_folio:
+                return to_pay_folio
+            else:
+                return self.price_total
 
     @api.model
     def rm_get_reservation(self, code):

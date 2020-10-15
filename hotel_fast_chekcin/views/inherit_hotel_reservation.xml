@@ -10,7 +10,7 @@
       <field name="arch" type="xml">
         <xpath expr="//page[@name='doorcode']" position="inside">
             <group>
-              <field name="fc_url" />
+                <field name="fc_url" />
             </group>
         </xpath>
       </field>
