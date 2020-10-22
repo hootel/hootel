@@ -1,7 +1,7 @@
 # Copyright 2019 Pablo Quesada
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 from odoo import api, fields, models
-
+from odoo.http import request
 
 class ResUsers(models.Model):
     _inherit = "res.users"
@@ -27,3 +27,9 @@ class ResUsers(models.Model):
         string="Properties",
         default=_get_default_pms_property,
     )
+
+    @api.model
+    def get_active_property_ids(self):
+        # TODO: Require performance test and security checks
+        active_property_ids = list(map(int, request.httprequest.cookies.get("pms_pids", "").split(",")))
+        return active_property_ids

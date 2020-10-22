@@ -49,5 +49,4 @@ class IrHttp(models.AbstractModel):
         #     raise MissingError(
         #         _("Wrong property and company access settings for this user. "
         #           "Please review property and company for user %s") % user.name)
-
         return res
