@@ -166,7 +166,9 @@ class Data_Bi(models.Model):
     @api.model
     def data_bi_tarifa(self, compan):
         dic_tarifa = []  # Diccionario con las tarifas
-        tarifas = self.env['product.pricelist'].search_read([], ['name'])
+        # tarifas = self.env['product.pricelist'].search_read([], ['name'])
+        tarifas = self.env['product.pricelist'].search_read(
+            ['|',('active', '=', False), ('active', '=', True)], ['name'])
         _logger.info("DataBi: Calculating %s fees", str(len(tarifas)))
         for tarifa in tarifas:
             dic_tarifa.append({'ID_Hotel': compan,
