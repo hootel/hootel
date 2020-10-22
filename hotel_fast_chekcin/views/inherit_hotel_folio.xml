@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Hotel Settings -->
+    <data>
+        <!-- Inherit Company view to add 'door_code' in Reservation Form -->
+        <record id="fastcheckin_hide_pay_reservation_form" model="ir.ui.view">
+            <field name="name">fastcheckin_hide_pay.folio_form</field>
+            <field name="model">hotel.folio</field>
+            <field name="inherit_id" ref="hotel.hotel_folio_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='invoicing']" position="after">
+                    <page string="Others">
+                        <group>
+                            <field name="hide_pay"/>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

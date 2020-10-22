@@ -42,37 +42,39 @@ class HotelReservation(models.Model):
                         'Arrival': checkin,
                         'Departure': checkout,
                         'partner_id': reservations[0].partner_id.id,
-                        'PartnerFirstName': reservations[0].partner_id.firstname,
+                        'PartnerFirstName': reservations[
+                            0].partner_id.firstname,
                         'PartnerLastName': reservations[0].partner_id.lastname,
                         'AmountTotal': reservations[0].folio_id.amount_total,
                         'DepositAmount': reservations[
                             0].folio_id.amount_total - reservations[
                                 0].folio_pending_amount,
                         'PendingAmount': reservations[0].folio_pending_amount,
+                        'HidePrices': reservations[0].folio_id.hide_pay,
                     }
                 }
                 for i, line in enumerate(reservations):
                     total_chekins = line.checkin_partner_pending_count
-                    json_response['Reservation'].setdefault('Rooms', []).append({
-                        'Id': line.id,
-                        'ReservationId': reservations[0].folio_id.id,
-
-                        'Arrival': line.checkin,
-                        'Departure': line.checkout,
-                        'Nights': line.nights,
-                        'Adults': line.adults,
-                        'Children': line.children,
-                        'IsAvailable': total_chekins > 0,
-                        'Price': line.price_total,
-                        'RoomTypeId': line.room_type_id.id,
-                        'RoomTypeName': line.room_type_id.name,
-                        'RoomName': line.room_id.name,
-                        'checkin_partner_count': line.checkin_partner_count,
-                        'checkin_partner_pending_count':
-                            line.checkin_partner_pending_count,
-                        'Checkins': [],
-                        # 'RoomCheckins': line.checkin_partner_ids
-                    })
+                    json_response['Reservation'].setdefault(
+                        'Rooms', []).append({
+                            'Id': line.id,
+                            'ReservationId': reservations[0].folio_id.id,
+                            'Arrival': line.checkin,
+                            'Departure': line.checkout,
+                            'Nights': line.nights,
+                            'Adults': line.adults,
+                            'Children': line.children,
+                            'IsAvailable': total_chekins > 0,
+                            'Price': line.price_total,
+                            'RoomTypeId': line.room_type_id.id,
+                            'RoomTypeName': line.room_type_id.name,
+                            'RoomName': line.room_id.name,
+                            'checkin_partner_count': line.checkin_partner_count,
+                            'checkin_partner_pending_count':
+                                line.checkin_partner_pending_count,
+                            'Checkins': [],
+                            # 'RoomCheckins': line.checkin_partner_ids
+                        })
                     if line.checkin_partner_count > 0:
                         for checkin in line.checkin_partner_ids:
                             json_response['Reservation'][
@@ -136,7 +138,8 @@ class HotelReservation(models.Model):
         # Search nexts localizators
         s_date = date.today()+timedelta(days=-1)
         s_date2 = date.today()+timedelta(days=dias)
-        _logger.info('FASTCHECKIN search Localizators FROM %s To %s Dates.', s_date, s_date2)
+        _logger.info('FASTCHECKIN search Localizators FROM %s To %s Dates.',
+                     s_date, s_date2)
         localizators = self.env['hotel.reservation'].search([
             ('checkin', '>=', s_date),
             ('checkin', '<', s_date2)])
