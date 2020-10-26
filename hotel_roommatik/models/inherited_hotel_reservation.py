@@ -48,8 +48,15 @@ class HotelReservation(models.Model):
     def rm_get_reservation(self, code):
         # Search by localizator or Folio
         reservations = self._get_reservations_roommatik(code)
+        _logger.warning('ROOMMATIK rm_get_reservation Encontradas: %s',
+                        len(reservations))
+
         reservations = reservations.filtered(
-            lambda x: x.state in ('draft', 'confirm'))
+            lambda x: x.state in ('draft', 'confirm', 'booking'))
+
+        _logger.warning('ROOMMATIK rm_get_reservation Filtradas: %s',
+                        len(reservations))
+
         if any(reservations):
             default_arrival_hour = self.env['ir.default'].sudo().get(
                 'res.config.settings', 'default_arrival_hour')
