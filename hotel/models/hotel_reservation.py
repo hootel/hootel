@@ -156,15 +156,15 @@ class HotelReservation(models.Model):
                     fields.Date.from_string(res.checkout) - fields.Date.from_string(res.checkin)
                 ).days
 
-    @api.depends('folio_id', 'checkin', 'checkout')
+    @api.depends('folio_id')
     def _compute_localizator(self):
         for record in self:
             if record.folio_id:
                 localizator = re.sub("[^0-9]", "", record.folio_id.name)
-                checkout = int(re.sub("[^0-9]", "", record.checkout))
-                checkin = int(re.sub("[^0-9]", "", record.checkin))
-                localizator += str((checkin + checkout) % 99)
-                localizator.replace('0','1')
+                total = 100
+                for a in localizator:
+                    total += int(a)
+                localizator += str((total) % 99)
                 record.localizator = localizator
 
     localizator = fields.Char('Localizator', compute='_compute_localizator',
