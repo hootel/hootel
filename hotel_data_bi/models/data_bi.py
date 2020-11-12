@@ -677,7 +677,8 @@ class Data_Bi(models.Model):
             data = json.loads(
                 reserva.reservation_id.channel_bind_ids.channel_raw_data)
 
-            if data.get('channel_data')['pay_model'] is not None:
+            data_channel = data.get('channel_data')
+            if 'pay_model' in data_channel:
                 json_pay_model = data.get('channel_data')['pay_model'].upper()
             else:
                 _logger.critical("EXPEDIA NO pay_model: %s",
