@@ -265,10 +265,10 @@ class Wizard(models.TransientModel):
             raise UserError(message)
             return
         precios = ET.SubElement(encuesta, "PRECIOS")
-        ET.SubElement(precios,
-                      "REVPAR_MENSUAL").text = str(round(ingresos/habitaci, 2))
-        ET.SubElement(precios,
-                      "ADR_MENSUAL").text = str(round(ingresos/hab_vend, 2))
+        adr_tot = str(round(ingresos/hab_vend, 2))
+        revpar_tot = str(round(ingresos/habitaci, 2))
+        ET.SubElement(precios, "REVPAR_MENSUAL").text = revpar_tot
+        ET.SubElement(precios, "ADR_MENSUAL").text = adr_tot
         ET.SubElement(precios, "ADR_TOUROPERADOR_TRADICIONAL").text = '0'
         ET.SubElement(precios,
                       "PCTN_HABITACIONES_OCUPADAS_TOUROPERADOR_TRADICIONAL"
@@ -319,9 +319,8 @@ class Wizard(models.TransientModel):
         return self.write({
              'txt_filename': 'INE_'+str(self.ine_month)+'_'+str(
                                                 for_year) + '.' + 'xml',
-             'adr_screen': 'ADR en el mes de la encuesta: '+str(
-                 round(ingresos/habitaci, 2)) + '€ y ',
-             'rev_screen': ' RevPar : '+str(round(ingresos/hab_vend, 2))+'€',
+             'adr_screen': 'ADR en el mes de la encuesta: ' + adr_tot + '€ y ',
+             'rev_screen': ' RevPar : ' + revpar_tot + '€',
              'txt_binary': base64.encodestring(xmlstr.encode())
              })
 
