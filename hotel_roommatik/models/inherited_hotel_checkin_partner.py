@@ -86,8 +86,9 @@ class HotelCheckinPartner(models.Model):
                     stay['Room'] = {}
                     stay['Room']['Id'] = reservation_rm.room_id.id
                     stay['Room']['Name'] = reservation_rm.room_id.name
-                    stay['Departure'] = "%s %s" % (
-                        stay['Departure'], reservation_rm.departure_hour)
+                    if len(stay['Departure']) < 13:
+                        stay['Departure'] = "%s %s" % (
+                            stay['Departure'], reservation_rm.departure_hour)
                     _logger.info('ROOMMATIK checkin Exit Time: %s', stay['Departure'])
 
                     json_response = stay
