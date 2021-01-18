@@ -362,7 +362,7 @@ class Data_Bi(models.Model):
                              'Descripcion': u'Teléfono'})
         dic_clientes.append({'ID_Hotel': compan,
                              'ID_Cliente': 906,
-                             'Descripcion': u'Call-Center'})
+                             'Descripcion': u'Call Center'})
         dic_clientes.append({'ID_Hotel': compan,
                              'ID_Cliente': 907,
                              'Descripcion': u'Agencia'})
