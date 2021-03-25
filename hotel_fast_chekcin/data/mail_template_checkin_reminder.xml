@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE xml>
+<odoo>
+        <data noupdate="1">
+        <record id='mail_template_checkin_reminder' model='mail.template'>
+            <field name="name">Fast Checkin Send by Email</field>
+            <field name="subject">Realiza ya tu check-in en Alda Hotels y ahorra tiempo</field>
+            <field name="partner_to">${(object.partner_id.id or '')}</field>
+            <field name="email_from">${(object.env.user.company_id.email or '')}</field>
+            <field name="reply_to">${(object.env.user.company_id.email or '')}</field>
+            <field name="model_id" ref="hotel.model_hotel_folio"/>
+            <field name="body_html"><![CDATA[
+                <style type="text/css">
+    .marco {
+        bgcolor: #f6f6f6;
+        margin: 0;
+        padding: 0;
+        min-width: 100% !important;
+    }
+    a {
+        color: #45c2b1;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    img {
+        height: auto;
+    }
+    .content {
+        border: 1px solid #eeeeee;
+    }
+    .logo {
+        font-family: sans-serif;
+        font-size: 36px;
+        font-weight: bold;
+        color: #ffffff;
+    }
+    .link a {
+        font-family: sans-serif;
+        font-size: 12px;
+        color: #45c2b1;
+    }
+    .subheading {
+        font-size: 14px;
+        color: #cccccc;
+        font-family: sans-serif;
+        font-weight: bold;
+        padding: 0 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .h1 {
+        font-family: sans-serif;
+        font-size: 48px;
+        font-weight: bold;
+        line-height: 56px;
+        color: #ffffff;
+        padding: 0 0 0 0;
+    }
+    .h2 {
+        font-family: sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        color: #444444;
+        padding: 0 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .h3 {
+        font-family: sans-serif;
+        font-size: 24px;
+        font-weight: regular;
+        color: #555555;
+        padding: 0 0 0 0;
+    }
+    .h4 {
+        font-family: sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        color: #666666;
+        padding: 0 0 0 0;
+    }
+    .paragraph {
+        font-family: sans-serif;
+        font-size: 14px;
+        line-height: 22px;
+        color: #666666;
+        font-weight: 200;
+        padding: 20px 0 0 0;
+    }
+    .listitem {
+        font-family: sans-serif;
+        font-size: 15px;
+        color: #666666;
+        font-weight: 200;
+        padding: 0 0 20px 0;
+    }
+    .smalltext {
+        font-family: sans-serif;
+        font-size: 14px;
+        color: #cccccc;
+        padding: 3px 0 0 0;
+    }
+    .borderbottom {
+        border-bottom: 1px solid #f2eeed;
+    }
+    @media only screen and (max-width: 651px) {
+        .columns {
+            width: 100% !important;
+        }
+        .columncontainer {
+            display: block !important;
+            width: 100% !important;
+        }
+        .paragraph,
+        .listitem {
+            font-size: 18px;
+        }
+        .link {
+            float: left;
+        }
+    }
+    @media only screen and (min-width: 651px) {
+        .content {
+            width: 650px !important;
+        }
+    }
+</style>
+
+                <div
+                    style="background-color:#ffffff; margin: 0; padding: 0; min-width: 100%!important;font-family: sans-serif; font-size: 16px; line-height: 22px; color: #666666; font-weight: 200; padding: 20px 0 0 0;">
+                    <div
+                        style="background-color:#ffffff; margin: 0; padding: 0; min-width: 100%!important;font-family: sans-serif; font-size: 16px; line-height: 22px; color: #666666; font-weight: 200; padding: 20px 0 0 0;">
+                        <table width="100%" background-color="#ffffff" border="0" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td>
+                                    <!--[if (gte mso 9)|(IE)]>
+                                    <table width="540" align="center" cellpadding="0" cellspacing="0" border="0">
+                                      <tr>
+                                        <td>
+                                          <![endif]-->
+                                    <!--Content Wrapper-->
+                                    <table class="content" background-color="#f6f6f6" align="center" cellpadding="0"
+                                           cellspacing="0" border="0"
+                                           style="width: 650px !important; border: 1px solid #eeeeee; background-color:#f6f6f6;">
+                                        <!--Header-->
+                                        <tr>
+                                            <td style="padding: 30px 30px 20px 30px;background-color:#1B1B1B">
+                                                <table border="0x" cellpadding="0" cellspacing="0" width="100%"
+                                                       class="columns">
+                                                    <tr valign="top">
+                                                    </tr>
+                                                </table>
+                                                <img src="https://www.aldahotels.es/firma/email/llegada/logobl.png"
+                                                     width="251" height="57" alt="Alda Hotels"/>
+                                                <table border="0x" cellpadding="0" cellspacing="0" width="100%"
+                                                       class="columns">
+                                                    <tr valign="top">
+                                                        <td width="50%" valign="middle" class="columncontainer">
+                                                            <table border="0" cellpadding="0" cellspacing="0"
+                                                                   width="100%">
+                                                                <tr>
+                                                                    <td align="right" valign="middle"
+                                                                        style="padding: 0px 0px 0px 0px;">
+                                                                        <table border="0" cellspacing="0"
+                                                                               cellpadding="0" class="link">
+                                                                            <tr>
+                                                                                <td style="padding: 0px 15px 0px 0px;">
+                                                                                    <a href="#" style="color:#FFFFFF">
+                                                                                        www.aldahotels.com</a>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                        </tr>
+                                        <!--1 Column resume-->
+                                        <tr>
+                                            <td class="borderbottom" style="padding: 60px 30px 60px 30px;">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td align="center" class="h2"
+                                                            style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #444444; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                            Tienes una reserva en ${object.company_id.property_name}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="center" style="padding: 20px 0 0 0;">
+                                                            <p style="font-size: 2em; line_height=0px; color: #45C2B1;">
+                                                                __</p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="justify" class="paragraph"
+                                                            style="padding: 10px 0 0 0px;">Hola
+
+                                                            % if object.partner_id.firstname:
+                                                                ${object.partner_id.firstname}
+                                                            % endif
+                                                            % if object.partner_id.firstname == False:
+                                                                % if object.partner_id.name:
+                                                                    ${object.partner_id.name}
+                                                                % endif
+                                                            % endif
+                                                            <br />
+                                                            Tienes una reserva en <strong>
+                                                                ${object.company_id.property_name}</strong>.<br>
+                                                            Te esperamos el día <strong>
+                                                                ${object.room_lines[0].checkin[8:10]}/${object.room_lines[0].checkin[5:7]}/${object.room_lines[0].checkin[0:4]}</strong>.<br>
+                                                        </td>
+                                                    </tr>
+                                                    <td align="center" class="paragraph" style="padding: 70px 0 0 0;">
+                                                        <strong style="font-size: 130%; color: #45C2B1;"><center>Realiza
+                                                            ya tu check-in y ahorra tiempo</center></strong><br>
+                                                        <strong
+                                                            style="color: #45C2B1; font-size: 200%; align-content:center;">
+                                                            1</strong> Accede a nuestro <strong style="color: grey">
+                                                        sistema de registro rápido</strong> y evita colas en
+                                                        recepción.<br>
+                                                        <strong
+                                                            style="color: #45C2B1; font-size: 200%; align-content: center">
+                                                            2</strong> Podrás <strong style="color: grey">completar tus
+                                                        datos</strong> de manera ágil, sencilla y segura.<br>
+                                                        <strong
+                                                            style="color: #45C2B1; font-size: 200%; align-content: center;">
+                                                            3</strong> Ayúdanos a <strong style="color: grey">evitar al
+                                                        máximo el contacto físico</strong> y respetar las
+                                                        distancias.<br>
+                                                        <strong
+                                                            style="color: #45C2B1; font-size: 200%; align-content: center;">
+                                                            4</strong> Y <strong style="color: grey">disfruta de las
+                                                        comodidades</strong> de tu habitación.<br></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="center" style="padding: 0px 0 0px 0; ">
+                                                            <table border="0" cellspacing="0" cellpadding="0">
+                                                                <tr>
+                                                                    <td align="center">
+                                                                        <p>
+                                                                            <a href="${object.room_lines[0].fc_url}"
+                                                                               target="_blank"
+                                                                               style="text-decoration: none; color: #FFFFFF; font-size: 2em; padding: 20px 20px 20px 20px;">
+                                                                        <div
+                                                                            style="padding: 0.5em; background-color: #45C2B1; border-color: #45C2B1; border-width: 2px;border-style:solid; border-bottom-style: solid;border-left-style: solid;border-right-style: solid;border-top-style: solid;-webkit-border-radius: 10; -moz-border-radius: 10; border-radius: 10px;font-size: 12px;">
+                                                                            Hacer check-in ➜
+                                                                        </div>
+                                                                        </p>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 20px 30px 20px 30px;background-color:#45C2B1">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td align="center" class="h2"
+                                                            style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #FFFFFF; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">
+                                                            ¡Muchas gracias por
+                                                            alojarte
+                                                            con nosotros!</td>
+                                                    </tr>
+                                                    <tr>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td align="center" valign="middle" class="borderbottom"
+                                                style="padding: 45px 0px 30px 30px;">
+                                                <table border="0" cellpadding="0" cellspacing="0" width="620"
+                                                       class="columns">
+                                                    <tr valign="top">
+                                                    </tr>
+                                                </table>
+                                                <img src="https://www.aldahotels.es/firma/email/llegada/logo.png"
+                                                     width="300" height="75" alt="Alda Hotels"/>
+                                                <table border="0" cellpadding="0" cellspacing="0" width="620"
+                                                       class="columns">
+                                                    <tr valign="top">
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <!--Footer-->
+                                        <tr>
+                                            <td class="footer">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td align="justify" class="smalltext"
+                                                            style="color: #828282; padding: 20px 20px 20px 20px;">En
+                                                            cumplimiento de la Ley 34-2002 de Servicios de la Sociedad
+                                                            de la Información y del Comercio Electrónico, así como
+                                                            de
+                                                            la Ley Orgánica 15-1999 del 13 de Diciembre de Protección de
+                                                            Datos de Carácter Personal y demás legislación concordante,
+                                                            se le informa que sus datos personales figuran en un fichero
+                                                            automatizado cuya
+                                                            responsabilidad es de GRUPO ALDA compuesto por las
+                                                            siguientes sociedades: Alda Rías Baixas SL CIF B70476494;
+                                                            Alda Compostela SL CIF B70108931; Alda Castilla SL CIF
+                                                            B70408224; Hoteles Rías Altas SL CIF B70503206; Comphostel
+                                                            Gestión Patrimonial SL CIF B70235452; Consultores Hoteleros
+                                                            Integrales SL CIF B70537121, con dirección postal a efecto
+                                                            de notificación en Praza da Algalia de Arriba, 3 – 15704
+                                                            Santiago de Compostela. Los datos personales que existen en
+                                                            nuestro poder están protegidos por nuestra Política de
+                                                            Privacidad
+                                                            y solo serán utilizados para los fines propios de nuestra
+                                                            actividad. Para ejercer sus derechos de acceso,
+                                                            rectificación, cancelación u oposición debe enviar un correo
+                                                            electrónico a protecciondatos@aldahotels.com
+                                                            indicándonos la opción a realizar. Este correo podría ser
+                                                            confidencial. Si recibe este e-mail por error, por favor
+                                                            elimínelo, así como cualquier documento adjunto, y
+                                                            notifíquelo a su emisor. Si usted no es
+                                                            el
+                                                            destinatario del mensaje, sepa que no está permitida ninguna
+                                                            difusión, copia o utilización no autorizada.</td>
+                                                    </tr>
+                                                    <tr>
+                                                    </tr>
+                                                </table>
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td align="center" valign="middle" class="listitem"
+                                                            style="color: #0A5F19; padding: 0px 0px 0px 0px">
+                                                            <img
+                                                                src="https://www.aldahotels.es/firma/email/llegada/eco.png"
+                                                                width="30" height="30" alt="ECO"/>
+                                                            <strong>Antes de imprimir este mensaje, compruebe que es
+                                                                verdaderamente necesario. El medioambiente es cosa de
+                                                                todos. </strong>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!--[if (gte mso 9)|(IE)]>
+                                            </td>
+                                          </tr>
+                                        </table>
+                                        <![endif]-->
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                ]]>
+            </field>
+        </record>
+
+    </data>
+</odoo>

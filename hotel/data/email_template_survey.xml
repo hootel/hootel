@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE xml>
+<odoo>
+      <data noupdate="1">
+        <record id='mail_template_survey' model='mail.template'>
+            <field name="name">Exit survey Send by Email</field>
+            <field name="subject">Muchas gracias por elegirnos. ¿Podrías ayudarnos a mejorar?</field>
+            <field name="partner_to">${object.id}</field>
+            <field name="email_from">${(object.env.user.company_id.email or '')}</field>
+            <field name="reply_to">${(object.env.user.company_id.email or '')}</field>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="body_html"><![CDATA[
+
+ <style type="text/css">
+    /*Global Styles*/
+    .marco {
+        bgcolor: #f6f6f6;
+        margin: 0;
+        padding: 0;
+        min-width: 100% !important;
+    }
+    a {
+        color: #45c2b1;
+        text-decoration: none;
+        font-weight: bold;
+    }
+    img {
+        height: auto;
+    }
+    .content {
+        border: 1px solid #eeeeee;
+    }
+    .logo {
+        font-family: sans-serif;
+        font-size: 36px;
+        font-weight: bold;
+        color: #ffffff;
+    }
+    .link a {
+        font-family: sans-serif;
+        font-size: 12px;
+        color: #45c2b1;
+    }
+    .subheading {
+        font-size: 14px;
+        color: #cccccc;
+        font-family: sans-serif;
+        font-weight: bold;
+        padding: 0 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .h1 {
+        font-family: sans-serif;
+        font-size: 48px;
+        font-weight: bold;
+        line-height: 56px;
+        color: #ffffff;
+        padding: 0 0 0 0;
+    }
+    .h2 {
+        font-family: sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        color: #444444;
+        padding: 0 0 0 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .h3 {
+        font-family: sans-serif;
+        font-size: 24px;
+        font-weight: regular;
+        color: #555555;
+        padding: 0 0 0 0;
+    }
+    .h4 {
+        font-family: sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        color: #666666;
+        padding: 0 0 0 0;
+    }
+    .paragraph {
+        font-family: sans-serif;
+        font-size: 14px;
+        line-height: 22px;
+        color: #666666;
+        font-weight: 200;
+        padding: 20px 0 0 0;
+    }
+    .listitem {
+        font-family: sans-serif;
+        font-size: 15px;
+        color: #666666;
+        font-weight: 200;
+        padding: 0 0 20px 0;
+    }
+    .smalltext {
+        font-family: sans-serif;
+        font-size: 14px;
+        color: #cccccc;
+        padding: 3px 0 0 0;
+    }
+    .borderbottom {
+        border-bottom: 1px solid #f2eeed;
+    }
+    /*Media Queries*/
+    @media only screen and (max-width: 651px) {
+        .columns {
+            width: 100% !important;
+        }
+        .columncontainer {
+            display: block !important;
+            width: 100% !important;
+        }
+        .paragraph,
+        .listitem {
+            font-size: 18px;
+        }
+        .link {
+            float: left;
+        }
+    }
+    @media only screen and (min-width: 651px) {
+        .content {
+            width: 650px !important;
+        }
+    }
+</style>
+<div style="background-color:#ffffff; margin: 0; padding: 0; min-width: 100%!important;font-family: sans-serif; font-size: 16px; line-height: 22px; color: #666666; font-weight: 200; padding: 20px 0 0 0;">
+    <div style="background-color:#ffffff; margin: 0; padding: 0; min-width: 100%!important;font-family: sans-serif; font-size: 16px; line-height: 22px; color: #666666; font-weight: 200; padding: 20px 0 0 0;">
+        <table width="100%" background-color="#ffffff" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>
+                    <!--[if (gte mso 9)|(IE)]>
+                    <table width="540" align="center" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td>
+                          <![endif]-->
+                    <!--Content Wrapper-->
+          <table class="content" background-color="#f6f6f6" align="center" cellpadding="0" cellspacing="0" border="0" style="width: 650px !important; border: 1px solid #eeeeee; background-color:#f6f6f6;">
+                        <!--Header-->
+                        <tr>
+                            <td style="padding: 30px 30px 20px 30px;background-color:#1B1B1B">
+                                <table border="0x" cellpadding="0" cellspacing="0" width="100%" class="columns">
+                                    <tr valign="top">
+                                    </tr>
+                                </table>
+                                <img src="https://www.aldahotels.es/firma/email/llegada/logobl.png" width="251" height="57" alt="Alda Hotels" />
+                                <table border="0x" cellpadding="0" cellspacing="0" width="100%" class="columns">
+                                    <tr valign="top">
+                                        <td width="50%" valign="middle" class="columncontainer">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                <tr>
+                                                    <td align="right" valign="middle" style="padding: 0px 0px 0px 0px;">
+                                                        <table border="0" cellspacing="0" cellpadding="0" class="link">
+                                                            <tr>
+                                                                <td style="padding: 0px 15px 0px 0px;">
+                                                                    <a href="#" style="color:#FFFFFF">www.aldahotels.com</a>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                        </tr>
+                        <!--1 Column resume-->
+                        <tr>
+                            <td class="borderbottom" style="padding: 60px 30px 60px 30px;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td align="center" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #444444; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">¡Muchas gracias por tu visita!</td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" style="padding: 20px 0 0 0;">
+                                            <p style="font-size: 2em; line_height=0px; color: #45C2B1;">__</p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                      <td align="justify" class="paragraph" style="padding: 10px 0 0 0;">Hola
+                                        % if object.firstname:
+                                            ${object.firstname}:
+                                        % endif
+                                        % if object.firstname == False:
+                                            % if object.name:
+                                                ${object.name}:
+                                            % endif
+                                        % endif
+
+
+                                          <br>
+Todo el equipo del <strong>${object.company_id.property_name}</strong> queremos darte las gracias por habernos elegido para quedarte en la ciudad. Esperamos que hayas disfrutado de tu estancia y que te hayamos hecho sentir como en casa en nuestro alojamiento.<br>
+										</strong>Para agradecerte la confianza que has depositado en Alda Hotels, <b>queremos obsequiarte con un descuento del 10%</b> en tu próxima visita a cualquiera de nuestros establecimientos. Consulta las localizaciones en nuestra web, elige tu siguiente destino y aplica el código en el momento de reservar .</td>
+                                    </tr>
+                                    <tr>
+                                        <td align="center" style="padding: 0px 0 0px 0; ">
+                                            <table border="0" cellspacing="0" cellpadding="0">
+                                                <tr>
+                                                  <td align="center">
+                                                  	<p>
+                                                    <a href="https://www.aldahotels.es" target="_blank" style="text-decoration: none; color: #FFFFFF; font-size: 2em; padding: 10px 20px 10px 20px;">
+                                                            <div style="padding: 0.5em; background-color: #45C2B1; border-color: #45C2B1; border-width: 2px;border-style:solid; border-bottom-style: solid;border-left-style: solid;border-right-style: solid;border-top-style: solid;-webkit-border-radius: 10; -moz-border-radius: 10; border-radius: 10px;font-size: 12px;">Código de descuento: REPITECONALDA
+                                                            </div>
+											  <tr>
+                                                                <td align="justify" class="paragraph" style="padding: 0px 0 0 0;"><p>Por otro lado, también queremos darte la oportunidad de que nos transmitas cómo ha sido tu experiencia con Alda Hotels. Trabajamos cada día para intentar brindar un buen servicio y, por ello, atendemos a cualquier sugerencia o comentario que nos ayude a seguir mejorando. <b>Te animamos a cubrir el siguiente cuestionario</b>, que no te llevará más de 5 minutos, para que valores tu estancia y nos hagas llegar cualquier propuesta que consideres oportuna.</p>
+
+                                                </td>
+                                              </tr>
+											  </td>
+														                                        <td align="center" style="padding: 0px 0 0px 0; ">
+                                            <table border="0" cellspacing="0" cellpadding="0">
+                                                <tr>
+                                                  <td align="center">
+                                                  	<p>
+                                                    <a href="https://forms.gle/RjusSXsis73tTHVV7" target="_blank" style="text-decoration: none; color: #FFFFFF; font-size: 2em; padding: 10px 20px 10px 20px;">
+                                                            <div style="padding: 0.5em; background-color: #45C2B1; border-color: #45C2B1; border-width: 2px;border-style:solid; border-bottom-style: solid;border-left-style: solid;border-right-style: solid;border-top-style: solid;-webkit-border-radius: 10; -moz-border-radius: 10; border-radius: 10px;font-size: 12px;">Cubrir encuesta de satisfacción ☰
+                                                            </div>
+											  <tr>
+                                                </tr>
+
+                                  </table>
+								<td
+                             </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <!--Section with sidebar info and services-->
+                        <tr> </tr>
+                        <!--Article with thumbnail reservation data-->
+                        <tr> </tr>
+                        <!--2 Column maps-->
+                        <tr> </tr>
+                        <!--Article with thumbnail amount-->
+                        <tr> </tr>
+                        <!--Article with thumbnail rooms data-->
+                        <tr> </tr>
+
+
+
+                        <!--Article with thumbnail-->
+                        <tr> </tr>
+                        <!--Section with sidebar-->
+                        <tr> </tr>
+                        <!--Article with thumbnail-->
+            <tr> </tr>
+                        <!--Article with thumbnail-->
+                        <tr> </tr>
+                        <!--Block Layout-->
+                        <tr>
+                            <td>
+                                <table border="0" cellpadding="0" cellspacing="0" width="650" class="columns">
+                                    <tr valign="top">
+                                        <td width="50%" class="columncontainer" style="background-color:#f9f9f9">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                <tr>
+                                                    <td valign="top" width="50%" background-color="#f9f9f9">
+                                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                            <tr>
+                                                                <td valign="top" style="padding: 30px 30px 20px 30px; height: 230px;" height="230px">
+                                                                    <table border="0" cellspacing="0" cellpadding="0">
+                                                                        <tr>
+                                                                            <td align="justify" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #45C2B1; padding: 15px 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;">Conoce nuestros alojamientos</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td align="justify" class="paragraph" style="padding: 10px 0 0 0;">Si has disfrutado de tu estancia, echa un vistazo a todos los alojamientos que ofrecemos, cada uno con unas características y personalidad propias.&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td style="padding: 20px 0 20px 0;  background-color:#F9F9F9">
+                                                                                <table border="0" cellspacing="0" cellpadding="0">
+                                                                                    <tr>
+                                                                                        <td align="center">
+                                                                                            <!--[if gte mso 12>
+                                                                    <div style="border: 2px solid #5e96ea;">
+                                                                      <![endif]-->
+                                                                                            <div style="border: 2px solid #45C2B1; border-radius: 3px; -webkit-border-radius: 3px; -moz-border-radius: 3px;">
+                                                                                                <a href="https://www.aldahotels.es" target="_blank" style="font-size: 12px; font-family: sans-serif; text-transform: uppercase; color: #45C2B1; border-color: #45C2B1; border: 2px solid #45C2B1; background-color: #ffffff; text-decoration: none; border-top: 12px solid #ffffff; border-bottom: 12px solid #ffffff; border-left: 12px solid #ffffff; border-right: 12px solid #ffffff; padding: 0 0 0 0; display: inline-block;">Más
+                                                                                                    información</a>
+                                                                                            </div>
+                                                                                            <!--[if gte mso 12>
+                                                                    </div>
+                                                                    <![endif]-->
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </table>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td width="50%" class="columncontainer">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                <tr>
+                                                    <td valign="top" width="50%" height="280px">
+                                                        <img src="https://www.aldahotels.es/firma/email/salida/salida.jpg" alt="" width="330" border="0" />
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                    <tr valign="top">
+                                        <td width="50%" class="columncontainer">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+</table>
+                                        </td>
+                                        <td width="50%" class="columncontainer" style="background-color:#45C2B1">
+                                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                <tr>
+                                                    <td valign="top" width="50%">
+                                                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                                            <tr> </tr>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <!--2 Column-->
+                        <tr> </tr>
+                        <!--3 Column-->
+                        <tr> </tr>
+                        <!--2 Column-->
+                        <tr>
+                        </tr>
+                        <!--1 Column-->
+                        <tr>
+                            <td style="padding: 30px 30px 20px 30px;background-color:#45C2B1">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td align="center" class="h2" style="font-family: sans-serif; font-size: 18px; font-weight: bold; color: #FFFFFF; padding: 0 0 0 0; text-transform: uppercase; letter-spacing: 0.5px;"> ¡Muchas gracias por
+                                            alojarte
+                                            con nosotros!</td>
+                                    </tr>
+                                    <tr>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="center" valign="middle" class="borderbottom" style="padding: 45px 0px 30px 30px;">
+                                <table border="0" cellpadding="0" cellspacing="0" width="620" class="columns">
+                                    <tr valign="top">
+                                    </tr>
+                                </table>
+                                <img src="https://www.aldahotels.es/firma/email/llegada/logo.png" width="300" height="75" alt="Alda Hotels" />
+                                <table border="0" cellpadding="0" cellspacing="0" width="620" class="columns">
+                                    <tr valign="top">
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <!--Footer-->
+                        <tr>
+                            <td class="footer">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td align="justify" class="smalltext" style="color: #828282; padding: 20px 20px 20px 20px;">En cumplimiento de la Ley 34/2002 de Servicios de la Sociedad de la Información y del Comercio Electrónico, así como
+                                            de
+                                            la Ley Orgánica 15/1999 del 13 de Diciembre de Protección de Datos de Carácter Personal y demás legislación concordante, se le informa que sus datos personales figuran en un fichero automatizado cuya
+                                            responsabilidad es de GRUPO ALDA compuesto por las siguientes sociedades: Alda Rías Baixas SL CIF B70476494; Alda Compostela SL CIF B70108931; Alda Castilla SL CIF B70408224; Hoteles Rías Altas SL CIF B70503206; Comphostel Gestión Patrimonial SL CIF B70235452; Consultores Hoteleros Integrales SL CIF B70537121, con dirección postal a efecto de notificación en Praza da Algalia de Arriba,  3 – 15704 Santiago de Compostela. Los datos personales que existen en nuestro poder están protegidos por nuestra Política de
+                                            Privacidad
+                                            y solo serán utilizados para los fines propios de nuestra actividad. Para ejercer sus derechos de acceso, rectificación, cancelación u oposición debe enviar un correo electrónico a protecciondatos@aldahotels.com
+                                            indicándonos la opción a realizar. Este correo podría ser confidencial. Si recibe este e-mail por error, por favor elimínelo, así como cualquier documento adjunto, y notifíquelo a su emisor. Si usted no es
+                                            el
+                                        destinatario del mensaje, sepa que no está permitida ninguna difusión, copia o utilización no autorizada.</td>
+                                    </tr>
+                                    <tr>
+                                    </tr>
+                                </table>
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td align="center" valign="middle" class="listitem" style="color: #0A5F19; padding: 0px 0px 0px 0px">
+                                            <img src="https://www.aldahotels.es/firma/email/llegada/eco.png" width="30" height="30" alt="ECO" />
+                                            <strong>Antes de imprimir este mensaje, compruebe que es verdaderamente necesario. El medioambiente es cosa de todos. </strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+          </table>
+                    <!--[if (gte mso 9)|(IE)]>
+                            </td>
+                          </tr>
+                        </table>
+                        <![endif]-->
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
+                ]]>
+            </field>
+        </record>
+
+    </data>
+</odoo>

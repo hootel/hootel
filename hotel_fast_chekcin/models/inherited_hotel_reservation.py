@@ -1,4 +1,4 @@
-# Copyright 2020 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>
+# Copyright 2020-2021 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo import api, models, fields
@@ -152,3 +152,11 @@ class HotelReservation(models.Model):
                 'Estate': localizator.state,
                 }])
         return json.dumps(json_response)
+
+    @api.multi
+    def fast_checkin_view_mail(self):
+        return self.folio_id.fast_checkin_view_mail()
+
+    @api.multi
+    def send_fast_checkin_mail(self):
+        return self.folio_id.send_fast_checkin_mail()

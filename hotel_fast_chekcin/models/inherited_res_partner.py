@@ -1,9 +1,11 @@
-# Copyright 2020 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>
+# Copyright 2020 - 2021 Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import json
-from odoo import api, models
+from odoo import models, fields, api
+# from datetime import timedelta
 import logging
+_logger = logging.getLogger(__name__)
 
 
 class ResPartner(models.Model):
@@ -13,7 +15,6 @@ class ResPartner(models.Model):
     @api.model
     def fc_set_partner(self, customer):
         # FastCheckin API CREACIÓN DE CLIENTE
-        _logger = logging.getLogger(__name__)
         ReservationId = customer['ReservationId']
         del customer['ReservationId']
 
@@ -96,7 +97,6 @@ class ResPartner(models.Model):
             return json_response
 
     def fc_write_checkin(self, ReservationId, partner_res):
-        _logger = logging.getLogger(__name__)
         _logger.info('FASTCHECKIN checkin customer in %s Reservation.',
                      ReservationId)
 
