@@ -12,10 +12,12 @@
                     <page string="Others">
                         <group>
                             <field name="hide_pay"/>
+                            <field name="fc_mail_sended" readonly="1"/>
                         </group>
                     </page>
                 </xpath>
             </field>
         </record>
+
     </data>
 </odoo>

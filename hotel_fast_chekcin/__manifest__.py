@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Odoo, Open Source Management Solution
-#    Copyright (C) 2018-2019 Jose Luis Algara Toledo <osotranquilo@gmail.com>
+#    Copyright (C) 2018-2021 Jose Luis Algara Toledo <osotranquilo@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 {
     'name': 'Hotel Fast Checkin',
-    'version': '2.2',
+    'version': '2.4',
     'author': "Jose Luis Algara Toledo <osotranquilo@gmail.com>",
     'website': 'https://www.aldahotels.com',
     'category': 'hotel fast checkin',
@@ -35,6 +35,8 @@
         'views/inherit_res_company.xml',
         'views/inherit_hotel_reservation.xml',
         'views/inherit_hotel_folio.xml',
+        'data/cron_jobs.xml',
+        'data/mail_template_checkin_reminder.xml',
     ],
     'qweb': [],
     'test': [

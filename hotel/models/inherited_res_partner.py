@@ -2,6 +2,7 @@
 # Copyright 2017  Dario Lodeiros
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 from odoo import api, fields, models
+from datetime import timedelta
 from odoo.osv.expression import get_unaccent_wrapper
 from odoo.exceptions import ValidationError
 import logging
@@ -50,3 +51,25 @@ class ResPartner(models.Model):
             res += super(ResPartner, self).name_search(
                 name, args=args, operator=operator, limit=limit_rest)
         return res
+
+    def send_exit_survey_mail(self):
+        checkins = self.env['hotel.checkin.partner'].search([
+            ('exit_date', '=', fields.Date.from_string(fields.Date.today()) - timedelta(days=1)),
+            ('email', '!=', False),
+        ])
+        reservations = self.env['hotel.reservation'].search([
+            ('checkout', '=', fields.Date.from_string(fields.Date.today()) - timedelta(days=1)),
+            ('state', '!=', 'cancelled'),
+            ('email', '!=', False),
+        ])
+
+        partners = (checkins.mapped('partner_id')) + (reservations.mapped('partner_id'))
+
+        for partner in partners:
+            self.env.ref('hotel.mail_template_survey').send_mail(
+                partner.id,
+                force_send=True)
+            msg = "<strong>Encuesta en mail de salida</strong></br> "
+            msg += "Mail enviado a</br> " + partner.email
+            partner.message_post(body=msg, subject='Send Exit Survey')
+        return

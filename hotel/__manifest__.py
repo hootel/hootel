@@ -61,6 +61,7 @@
         'data/email_template_cancel.xml',
         'data/email_template_reserv.xml',
         'data/email_template_exit.xml',
+        'data/email_template_survey.xml',
         'wizard/wizard_reservation.xml',
         'report/hotel_folio_templates.xml',
         'report/hotel_folio.xml'
