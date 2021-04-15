@@ -80,9 +80,10 @@
                 <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong>
             </p>
             <p class="amount">
+                <strong><span t-field="company.property_name"/></strong><br/>
                 <strong>CIF:
                     <span t-field="company.vat"/></strong><br/>
-                <strong><span t-field="company.display_name"/></strong><br/>
+                    <span t-field="company.display_name"/><br/>
                 <strong><span t-field="company.street"/>
                     <span t-field="company.street2"/></strong><br/>
                 <strong><span t-field="company.zip"/>
