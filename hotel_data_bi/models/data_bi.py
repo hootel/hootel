@@ -84,6 +84,8 @@ class Data_Bi(models.Model):
         limit_ago = (fechafoto - timedelta(
             days=self.env.user.company_id.data_bi_days)).strftime('%Y-%m-%d')
 
+        _logger.info("DataBi: Calculating From DATE: %s -------", limit_ago)
+
         dic_export = []  # Diccionario con todo lo necesario para exportar.
         if (archivo == 0) or (archivo == 7) or (archivo == 8):
             room_types = self.env['hotel.room.type'].search([])

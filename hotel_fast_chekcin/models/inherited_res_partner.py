@@ -137,7 +137,7 @@ class ResPartner(models.Model):
             return json_response
 
         json_response = "<strong>Fast-Checkin</strong></br> "
-        json_response += "Creado por la alicación.</br> A nombre de "
+        json_response += "Creado a nombre de "
         json_response += "<strong>" + partner_res.name + '<strong>'
 
         reservation_obj.message_post(body=json_response,
