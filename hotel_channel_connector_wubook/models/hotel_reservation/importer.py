@@ -98,8 +98,9 @@ class HotelReservationImporter(Component):
     def _get_board_services(self, broom, book, room_type_bind, persons):
         board_service = None
         board_service_amount = 0.0
+
         # WuBook Reservation Engine
-        if book['id_channel'] == 0:
+        if book['id_channel'] == 0 and book['boards'] != '':
             board_service = room_type_bind.board_service_room_type_ids.filtered(
                 lambda r: r.channel_service == book['boards'][room_type_bind.external_id]).id or None
         # Booking.com Reservation Engine
