@@ -15,25 +15,30 @@ class ResPartner(models.Model):
     @api.model
     def fc_set_partner(self, customer):
         # FastCheckin API CREACIÓN DE CLIENTE
+        _logger.info('FASTCHECKIN TO: %s ', customer)
         ReservationId = customer['ReservationId']
         del customer['ReservationId']
 
         if customer['country_id'] == 'ESP':
             country_data = self.env['code.ine'].search(
-                [('name', '=', customer['state_id'])])
+                [('name', 'ilike', customer['state_id'])])
+            state_data = self.env['res.country.state'].search(
+                [('name', 'ilike', customer['state_id'])])
             if len(country_data) > 1:
-                customer['state_id'] = country_data[1].state_id.id
+                customer['state_id'] = state_data[0].id
                 customer['country_id'] = country_data[1].state_id.country_id.id
                 customer['code_ine_id'] = country_data[1].id
 
             elif len(country_data) == 1:
-                customer['state_id'] = country_data[0].state_id.id
+                customer['state_id'] = state_data[0].id
                 customer['country_id'] = country_data[0].state_id.country_id.id
                 customer['code_ine_id'] = country_data[0].id
             else:
                 country_data = self.env['code.ine'].search(
                     [('name', '=', 'Madrid')])
-                customer['state_id'] = country_data[0].state_id.id
+                state_data = self.env['res.country.state'].search(
+                    [('name', 'ilike', customer['Madrid'])])
+                customer['state_id'] = state_data[0].id
                 customer['country_id'] = country_data[0].state_id.country_id.id
                 customer['code_ine_id'] = country_data[0].id
 
