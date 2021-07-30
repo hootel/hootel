@@ -437,7 +437,7 @@ class HotelReservationImporter(Component):
             #Wubook send first the reservation, and then the reservation (other time) with pay (payment_gateway_fee=
             if not book['modified_reservations'] and book['payment_gateway_fee'] and res_company_obj.wu_journal_id != 0:
                 origin_reservation = self.env['channel.hotel.reservation'].search([("external_id","=",book["reservation_code"])], limit=1).odoo_id
-                if origin_reservation and book['payment_gateway_fee'] > 0:
+                if origin_reservation and book['payment_gateway_fee'] > 0 and book['status'] not in WUBOOK_STATUS_BAD:
                     vals = {
                         'journal_id': res_company_obj.wu_journal_id.id,  #23
                         'partner_id': origin_reservation.partner_invoice_id.id,
