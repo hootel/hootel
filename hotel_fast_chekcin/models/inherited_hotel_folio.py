@@ -15,7 +15,14 @@ class HotelFolio(models.Model):
                               default=True,
                               help='Hide or show the price in external tools (Fast Checkin, Cashiers, etc.)')
 
-    fc_mail_sended = fields.Datetime(string="Checkin email sent", required=False, )
+    fc_mail_sended = fields.Datetime(string="Checkin email sent",
+                                     required=False)
+    fc_visits = fields.Integer(string="F-C Visits",
+                               required=False,
+                               default=0)
+    fc_counts = fields.Integer(string="F-C Writed",
+                               required=False,
+                               default=0)
 
     @api.model
     def fast_checkin_mailer(self):

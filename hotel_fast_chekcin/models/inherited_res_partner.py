@@ -126,6 +126,7 @@ class ResPartner(models.Model):
                              checkin_partner_val['partner_id'],
                              checkin_partner_val['reservation_id'],
                              record.id)
+                reservation_obj.folio_id.fc_counts += 1
             except Exception as e:
                 error_name = 'Error not create Checkin '
                 error_name += str(e)

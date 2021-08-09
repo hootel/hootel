@@ -25,6 +25,7 @@ class HotelReservation(models.Model):
             reservations = reservations.filtered(
                 lambda x: x.state in ('draft', 'confirm'))
             if any(reservations):
+                reservations[0].folio_id.fc_visits += 1
                 default_arrival_hour = self.env['ir.default'].sudo().get(
                     'res.config.settings', 'default_arrival_hour')
                 checkin = "%s %s" % (reservations[0].checkin,
