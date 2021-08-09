@@ -1,24 +1,26 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-#	* hotel_fast_chekcin
+# 	* hotel_fast_chekcin
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-18 18:59+0000\n"
-"PO-Revision-Date: 2021-03-18 18:59+0000\n"
-"Last-Translator: <>\n"
+"POT-Creation-Date: 2021-08-09 17:41+0000\n"
+"PO-Revision-Date: 2021-08-09 19:44+0200\n"
+"Last-Translator: Jose Luis Algara Toledo <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: \n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: \n"
 "Language: es\n"
+"X-Generator: Poedit 2.3\n"
 
 #. module: hotel_fast_chekcin
 #: model:mail.template,body_html:hotel_fast_chekcin.mail_template_checkin_reminder
-msgid "\n"
+msgid ""
+"\n"
 "                <style type=\"text/css\">\n"
 "    .marco {\n"
 "        bgcolor: #f6f6f6;\n"
@@ -366,7 +368,8 @@ msgid "\n"
 "                    </div>\n"
 "                \n"
 "            "
-msgstr "\n"
+msgstr ""
+"\n"
 "                <style type=\"text/css\">\n"
 "    .marco {\n"
 "        bgcolor: #f6f6f6;\n"
@@ -718,7 +721,12 @@ msgstr "\n"
 #. module: hotel_fast_chekcin
 #: model:ir.model.fields,field_description:hotel_fast_chekcin.field_res_company_fc_seeed_code
 msgid "2 digit Seed Code"
-msgstr "Código semilla de 2 dígitos"
+msgstr "Codigo semilla de 2 digitos"
+
+#. module: hotel_fast_chekcin
+#: model:ir.actions.act_window,name:hotel_fast_chekcin.action_fastcheckin_lists
+msgid "Action fastcheckin list"
+msgstr "Action fastcheckin list"
 
 #. module: hotel_fast_chekcin
 #: model:ir.model.fields,help:hotel_fast_chekcin.field_res_company_fc_cash_journal
@@ -728,7 +736,7 @@ msgstr "Diario de pagos de caja."
 #. module: hotel_fast_chekcin
 #: model:ir.model.fields,field_description:hotel_fast_chekcin.field_hotel_folio_fc_mail_sended
 msgid "Checkin email sent"
-msgstr "Enviado Checkin e-mail"
+msgstr "Enviado F-C e-mail"
 
 #. module: hotel_fast_chekcin
 #: model:ir.model,name:hotel_fast_chekcin.model_res_company
@@ -741,9 +749,24 @@ msgid "Contact"
 msgstr "Contacto"
 
 #. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: hotel_fast_chekcin
 #: model:ir.model.fields,help:hotel_fast_chekcin.field_res_company_fc_credit_journal
 msgid "Credit card payment journal."
 msgstr "Diario de pagos TPV."
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
 
 #. module: hotel_fast_chekcin
 #: model:ir.actions.server,name:hotel_fast_chekcin.Guest_reservation_reminder_after_ir_actions_server
@@ -758,6 +781,16 @@ msgstr "E-mail Guest Fast-Checkin Tardes"
 #: model:ir.cron,name:hotel_fast_chekcin.Guest_reservation_reminder_morning
 msgid "E-mail Guest Fast-Checkin Morning"
 msgstr "E-mail Guest Fast-Checkin Mañanas"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_hotel_folio_fc_visits
+msgid "F-C Visits"
+msgstr "F-C Consultas"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_hotel_folio_fc_counts
+msgid "F-C Writed"
+msgstr "F-C Realizados"
 
 #. module: hotel_fast_chekcin
 #: model:ir.ui.view,arch_db:hotel_fast_chekcin.fastcheckin_url_view_company_form
@@ -776,6 +809,11 @@ msgid "Fast Checkin URL"
 msgstr "URL Fast Checkin"
 
 #. module: hotel_fast_chekcin
+#: model:ir.ui.menu,name:hotel_fast_chekcin.menu_hotel_fastcheckin_lists
+msgid "Fast Checkins"
+msgstr "Fast Checkins"
+
+#. module: hotel_fast_chekcin
 #: model:ir.model.fields,help:hotel_fast_chekcin.field_hotel_folio_hide_pay
 msgid "Hide or show the price in external tools (Fast Checkin, Cashiers, etc.)"
 msgstr "Oculta o muestra el precio en las herramientas externas (Fast Checkin, Cajeros, etc.)"
@@ -789,6 +827,26 @@ msgstr "Ficha de reservas"
 #: model:ir.model,name:hotel_fast_chekcin.model_hotel_reservation
 msgid "Hotel Reservation"
 msgstr "Reserva del hotel"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_id
+msgid "ID"
+msgstr "ID (identificación)"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api___last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_write_uid
+msgid "Last Updated by"
+msgstr "Última actualización de"
+
+#. module: hotel_fast_chekcin
+#: model:ir.model.fields,field_description:hotel_fast_chekcin.field_fastcheckin_api_write_date
+msgid "Last Updated on"
+msgstr "Última actualización en"
 
 #. module: hotel_fast_chekcin
 #: model:ir.ui.view,arch_db:hotel_fast_chekcin.fastcheckin_hide_pay_reservation_form
@@ -834,4 +892,3 @@ msgstr "Mostrar precios para pagos"
 #: model:ir.model,name:hotel_fast_chekcin.model_fastcheckin_api
 msgid "fastcheckin.api"
 msgstr "fastcheckin.api"
-

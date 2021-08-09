@@ -21,5 +21,31 @@
             </field>
         </record>
 
+        <act_window
+        id="action_fastcheckin_lists"
+        name="Action fastcheckin list"
+        res_model="hotel.folio"
+        view_mode="tree" />
+
+        <menuitem
+        id="menu_hotel_fastcheckin_lists"
+        name="Fast Checkins"
+        parent="hotel.hotel_reports_menu"
+        sequence="35"
+        action="action_fastcheckin_lists" />
+
+        <record id="fastcheckin_lists" model="ir.ui.view">
+            <field name="name">fastcheckin_lists</field>
+            <field name="model">hotel.folio</field>
+            <field name="arch" type="xml">
+                <tree string="">
+                    <field name="name"/>
+                    <field name="fc_mail_sended"/>
+                    <field name="fc_visits"/>
+                    <field name="fc_counts"/>
+                </tree>
+            </field>
+        </record>
+
     </data>
 </odoo>
