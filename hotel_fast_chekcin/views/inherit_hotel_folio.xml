@@ -11,9 +11,9 @@
                     <page string="Others">
                         <group>
                             <field name="hide_pay"/>
-                            <field name="fc_mail_sended" readonly="1"/>
-                            <field name="fc_visits" readonly="1"/>
-                            <field name="fc_counts" readonly="1"/>
+                            <field name="fc_mail_sended" readonly="0"/>
+                            <field name="fc_visits" readonly="0"/>
+                            <field name="fc_counts" readonly="0"/>
                         </group>
                     </page>
                 </xpath>
@@ -24,8 +24,14 @@
             <field name="name">Fast Checkin statistics</field>
             <field name="res_model">hotel.folio</field>
             <field name="view_mode">pivot</field>
-            <field name="domain">[('state', '!=', 'cancel'),
-                ('reservation_type', '=', 'normal')]</field>
+            <field name="domain">
+                ['&amp;','&amp;','|','|',('state', '!=', 'cancel'),
+                         ('reservation_type', '=', 'normal'),
+                         ('fc_mail_sended', '&gt;', '2021-08-08'),
+                         ('fc_visits', '&gt;', 0),
+                         ('fc_counts', '&gt;', 0),
+                ]
+            </field>
         </record>
 
         <menuitem
