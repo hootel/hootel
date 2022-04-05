@@ -87,7 +87,9 @@
                 <strong><span t-field="company.street"/>
                     <span t-field="company.street2"/></strong><br/>
                 <strong><span t-field="company.zip"/>
-                    <span t-field="company.city"/></strong><br/></p>
+                    <span t-field="company.city"/></strong><br/>
+                <small>Categoría: <span t-field="company.ine_category_id"/></small><br/>
+            </p>
             <p class="titulo2">TRAVELER'S DOCUMENT</p>
         </template>
     </data>
