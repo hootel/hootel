@@ -2,8 +2,8 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Alda Hotels <informatica@aldahotels.com>
-#                       Jose Luis Algara <osotranquilo@gmail.com>
+#    Copyright (C) 2017 - 2022 Alda Hotels <informatica@aldahotels.com>
+#                              Jose Luis Algara <osotranquilo@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 {
     'name': 'Hotel l10n_es',
-    'version': '9.0.0.3',
+    'version': '9.0.0.4',
     'author': "Jose Luis Algara",
     'website': "http://www.aldahotels.com",
     'category': 'Hotel',
@@ -36,6 +36,8 @@
         'partner_firstname',
         'partner_vat_unique',
         'base_iso3166',
+        'base_location_geonames_import',
+        'base_vat'
     ],
     'data': [
         'data/code.ine.csv',
