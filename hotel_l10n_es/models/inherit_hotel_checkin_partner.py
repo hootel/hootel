@@ -113,6 +113,7 @@ class HotelCheckinPartner(models.Model):
 
     @api.multi
     def action_on_board(self):
+        self.set_ine_code()
         self.check_required_fields()
         return super(HotelCheckinPartner, self).action_on_board()
 
