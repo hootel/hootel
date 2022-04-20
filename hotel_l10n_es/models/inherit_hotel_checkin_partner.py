@@ -152,7 +152,7 @@ class HotelCheckinPartner(models.Model):
                         break
         else:
             ine = self.env['code.ine'].search([
-                ('name', '=', self.nationality_id.name)
+                ('id', '=', self.nationality_id.id)
             ], limit=1)
         if ine:
             self.code_ine_id = ine.id
