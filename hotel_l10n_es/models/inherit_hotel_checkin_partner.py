@@ -144,7 +144,7 @@ class HotelCheckinPartner(models.Model):
             else:
                 pos = len(self.zip_id.state_id.name)
             busca = self.zip_id.state_id.name[0:pos].strip()
-            ine = self.env['code.ine'].search([('name', '=ilike', busca)], )
+            ine = self.env['code.ine'].search([('name', 'ilike', busca)], )
             if len(ine) > 0:
                 for i in ine:
                     if len(i.code) == 5:
