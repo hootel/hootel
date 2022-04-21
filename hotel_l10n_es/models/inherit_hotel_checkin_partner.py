@@ -144,16 +144,22 @@ class HotelCheckinPartner(models.Model):
             else:
                 pos = len(self.zip_id.state_id.name)
             busca = self.zip_id.state_id.name[0:pos].strip()
-            ine = self.env['code.ine'].search([('name', 'ilike', busca)],)
+            ine = self.env['code.ine'].search([('name', '=ilike', busca)], )
             if len(ine) > 0:
                 for i in ine:
                     if len(i.code) == 5:
                         ine = i
                         break
         else:
+            # ine = self.env['code.ine'].search([
+            #     ('id', '=', self.nationality_id.id)
+            # ], limit=1)
             ine = self.env['code.ine'].search([
-                ('id', '=', self.nationality_id.id)
-            ], limit=1)
+                ('name',
+                 '=ilike',
+                 self.nationality_id.with_context(lang='es_ES').name)],
+                limit=1)
+            # _logger.warning("----------------- INE: Extranjero %s", ine.name)
         if ine:
             self.code_ine_id = ine.id
 
