@@ -23,7 +23,7 @@
 
 {
     'name': 'Hotel l10n_es',
-    'version': '9.0.0.5',
+    'version': '9.0.0.6',
     'author': "Jose Luis Algara",
     'website': "http://www.aldahotels.com",
     'category': 'Hotel',
