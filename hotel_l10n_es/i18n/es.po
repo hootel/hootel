@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-01 12:26+0000\n"
-"PO-Revision-Date: 2022-04-01 14:30+0200\n"
+"POT-Creation-Date: 2022-04-21 17:19+0000\n"
+"PO-Revision-Date: 2022-04-22 11:01+0200\n"
 "Last-Translator: Jose Luis Algara Toledo <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -215,6 +215,7 @@ msgid "Display Name"
 msgstr "Nombre mostrado"
 
 #. module: hotel_l10n_es
+#: model:ir.model.fields,field_description:hotel_l10n_es.field_hotel_checkin_partner_document_number
 #: model:ir.ui.view,arch_db:hotel_l10n_es.hotel_checkin_partner_reservation_view_tree
 #: model:ir.ui.view,arch_db:hotel_l10n_es.hotel_checkin_partner_view_tree
 msgid "Doc. Number"
@@ -240,7 +241,6 @@ msgid "Document expedition date"
 msgstr "Fecha de Expedición"
 
 #. module: hotel_l10n_es
-#: model:ir.model.fields,field_description:hotel_l10n_es.field_hotel_checkin_partner_document_number
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_partner_document_number
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_res_users_document_number
 #: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_data
@@ -408,7 +408,7 @@ msgstr "Categoría del Hotel en el Ministerio de                                
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_police_wizard_id
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_tourism_category_id
 msgid "ID"
-msgstr "ID (identificación)"
+msgstr "ID"
 
 #. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.view_company_form
@@ -421,7 +421,7 @@ msgid "Image in checkin"
 msgstr "Imagen en Checkin"
 
 #. module: hotel_l10n_es
-#: code:addons/hotel_l10n_es/models/inherit_hotel_checkin_partner.py:168
+#: code:addons/hotel_l10n_es/models/inherit_hotel_checkin_partner.py:172
 #, python-format
 msgid "Incorrect DNI"
 msgstr "DNI Incorrecto"
@@ -433,6 +433,7 @@ msgstr "Categoría Ine"
 
 #. module: hotel_l10n_es
 #: model:ir.model.fields,field_description:hotel_l10n_es.field_hotel_checkin_partner_kinship
+#: model:ir.ui.view,arch_db:hotel_l10n_es.report_viajero_data
 msgid "Kinship"
 msgstr "Parentesco"
 
@@ -662,18 +663,24 @@ msgid "The Document Number %s already exists in another partner."
 msgstr "El número de Documento %s ya existe en otro contacto confirmado."
 
 #. module: hotel_l10n_es
+#: code:addons/hotel_l10n_es/models/inherit_hotel_checkin_partner.py:192
+#, python-format
+msgid "There are children, to perform the checkin,                         it is necessary to specify the relationship."
+msgstr "Hay menores en la reserva, es necesario especificar el parentesco para poder realizar el Checkin."
+
+#. module: hotel_l10n_es
 #: model:ir.ui.view,arch_db:hotel_l10n_es.view_partner_form
 msgid "This partner was deactivated and merged with another client to avoid duplicity, you can see the active client in"
 msgstr "Este cliente fue desactivado y fusionado con otro cliente para evitar duplicados, puedes ver el cliente activo en"
 
 #. module: hotel_l10n_es
-#: code:addons/hotel_l10n_es/models/inherit_hotel_checkin_partner.py:192
+#: code:addons/hotel_l10n_es/models/inherit_hotel_checkin_partner.py:199
 #, python-format
 msgid "To perform the checkin the following data are missing:                    %s"
 msgstr "Para realizar el checkin faltan los siguientes datos:                    %s"
 
 #. module: hotel_l10n_es
-#: code:addons/hotel_l10n_es/models/inherit_hotel_checkin_partner.py:196
+#: code:addons/hotel_l10n_es/models/inherit_hotel_checkin_partner.py:203
 #, python-format
 msgid "To perform the checkin the segmentation is required"
 msgstr "Para realizar el checkin es olbigatoria la segmentación de la reserva"

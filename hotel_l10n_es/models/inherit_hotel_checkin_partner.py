@@ -151,9 +151,6 @@ class HotelCheckinPartner(models.Model):
                         ine = i
                         break
         else:
-            # ine = self.env['code.ine'].search([
-            #     ('id', '=', self.nationality_id.id)
-            # ], limit=1)
             ine = self.env['code.ine'].search([
                 ('name',
                  '=ilike',
@@ -187,7 +184,10 @@ class HotelCheckinPartner(models.Model):
                                'lastname', 'firstname', 'nationality_id']
             if self.children != 0:
                 required_fields.append('kinship')
-
+                if not self.kinship:
+                    raise UserError(
+                        _('There are children, to perform the checkin,\
+                         it is necessary to specify the relationship.'))
             for field in required_fields:
                 if not record[field]:
                     missing_fields.append(record._fields[field].string)
