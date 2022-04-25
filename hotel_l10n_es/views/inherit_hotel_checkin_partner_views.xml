@@ -27,6 +27,7 @@
                     <field name='country_id' string=""/>
                     <separator/>
                     <field name="code_ine_id" options="{'no_create': True, 'no_create_edit':True}"/>
+                    <field name="kinship"/>
                     <button type="action" class="oe_stat_button"
                         icon="fa-file-pdf-o"
                         name="%(action_report_viajero)d"
@@ -102,8 +103,7 @@
                                        options="{'no_create': True, 'no_create_edit':True}"/>
                         </xpath>
                         <xpath expr="//field[@name='email']" position="after">
-                                <field name="kinship" attrs="{'invisible': [('children','=', 0)]}"/>
-                                <field name="children" attrs="{'column_invisible': 1}"/>
+                                <field name="kinship"/>
                         </xpath>
                         <xpath expr="//field[@name='partner_id']" position="attributes">
                                 <attribute name="options">{"no_create": True}</attribute>
