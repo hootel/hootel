@@ -151,10 +151,15 @@ class HotelCheckinPartner(models.Model):
                         ine = i
                         break
         else:
+            # ine = self.env['code.ine'].search([
+            #     ('name',
+            #      '=ilike',
+            #      self.nationality_id.with_context(lang='es_ES').name)],
+            #     limit=1)
             ine = self.env['code.ine'].search([
-                ('name',
-                 '=ilike',
-                 self.nationality_id.with_context(lang='es_ES').name)],
+                ('code',
+                 '=',
+                 self.nationality_id.with_context(lang='es_ES').code_alpha3)],
                 limit=1)
             # _logger.warning("----------------- INE: Extranjero %s", ine.name)
         if ine:
