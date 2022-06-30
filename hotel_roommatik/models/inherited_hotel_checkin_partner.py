@@ -61,6 +61,9 @@ class HotelCheckinPartner(models.Model):
                         ('code', '=', 'ES111')
                         ], limit=1)
 
+                nationality = self.env['res.country'].search([
+                        ('code_alpha3', '=', room_partner['Address']['Nationality'])])
+
                 checkin_partner_val = {
                     'folio_id': reservation_rm.folio_id.id,
                     'reservation_id': reservation_rm.id,
@@ -68,6 +71,7 @@ class HotelCheckinPartner(models.Model):
                     'enter_date': stay["Arrival"],
                     'exit_date': stay["Departure"],
                     'code_ine_id': code_ine.id,
+                    'nationality_id': nationality.id,
                     }
                 try:
                     record = self.env['hotel.checkin.partner'].create(
