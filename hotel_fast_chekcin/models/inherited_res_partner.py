@@ -19,6 +19,9 @@ class ResPartner(models.Model):
         ReservationId = customer['ReservationId']
         del customer['ReservationId']
 
+        customer['nationality_id'] = self.env['res.country'].search(
+                [('code', '=', customer['nationality_id'])])
+
         if customer['country_id'] == 'ESP':
             country_data = self.env['code.ine'].search(
                 [('name', 'ilike', customer['state_id'])])
