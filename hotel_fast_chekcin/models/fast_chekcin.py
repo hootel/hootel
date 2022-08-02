@@ -65,3 +65,12 @@ class FastCheckin(models.Model):
         # code = reservation Id
         apidata = self.env['account.payment']
         return apidata.sudo().fc_add_payment(code, amount, int(journal), name)
+
+    @api.model
+    def fc_check_zip(self, zip_id):
+        better = self.env['res.better.zip'].search([('name', '=', zip_id)],
+                                                   limit=1)
+
+        json_response = better.city if len(better) == 1 else False
+        json_response = json.dumps(json_response)
+        return json_response
