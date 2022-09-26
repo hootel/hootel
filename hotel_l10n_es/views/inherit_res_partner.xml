@@ -21,6 +21,7 @@
                         <group>
                             <field name="document_type"/>
                             <field name="document_number"/>
+                            <field name="document_support"/>
                         </group>
                         <group>
                             <field name="code_ine_id" placeholder="Code in INE" options="{'no_create': True,'no_open': True}"/>
@@ -33,6 +34,19 @@
                     <field name="unconfirmed" groups="base.group_no_one"/>
                 </xpath>
 
+            </field>
+        </record>
+
+        <record id="view_personal_information_page_nationality" model="ir.ui.view">
+            <field name="name">Partner nationality: personal info</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="partner_contact_personal_information_page.personal_information"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//page[@name='personal_information_page']/group[@name='personal_information_group']">
+                        <field name='nationality_id'/>
+                    </xpath>
+                </data>
             </field>
         </record>
 

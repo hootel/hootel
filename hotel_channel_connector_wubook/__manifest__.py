@@ -22,6 +22,7 @@
         'views/inherited_channel_hotel_room_type_restriction_views.xml',
         'views/inherited_channel_connector_backend_views.xml',
         'views/inherited_channel_ota_info_views.xml',
+        'views/inherit_res_company.xml',
         #'security/wubook_security.xml',
         # 'views/res_config.xml'
     ],

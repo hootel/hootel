@@ -26,7 +26,6 @@
         'security/ir.model.access.csv',
         'wizard/massive_changes.xml',
         'wizard/split_reservation.xml',
-        'wizard/duplicate_reservation.xml',
         'wizard/service_on_day.xml',
         'views/res_config.xml',
         'data/menus.xml',
@@ -62,6 +61,7 @@
         'data/email_template_cancel.xml',
         'data/email_template_reserv.xml',
         'data/email_template_exit.xml',
+        'data/email_template_survey.xml',
         'wizard/wizard_reservation.xml',
         'report/hotel_folio_templates.xml',
         'report/hotel_folio.xml'

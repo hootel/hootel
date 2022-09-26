@@ -1,0 +1,146 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* hotel_roommatik
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 11.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-10-02 08:24+0000\n"
+"PO-Revision-Date: 2020-10-02 10:28+0200\n"
+"Last-Translator: Jose Luis Algara Toledo <osotranquilo@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: es\n"
+"X-Generator: Poedit 2.3\n"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_res_company_limit_night_sale
+msgid "Allow night sale until..."
+msgstr "Permitir venta nocturna hasta..."
+
+#. module: hotel_roommatik
+#: model:ir.ui.view,arch_db:hotel_roommatik.view_company_form
+msgid "Cajero RoomMatik"
+msgstr "Cajero RoomMatik"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_channel_hotel_reservation_duplicate_keys
+#: model:ir.model.fields,field_description:hotel_roommatik.field_hotel_reservation_duplicate_keys
+msgid "Code to duplicate key"
+msgstr "Código para duplicar llave"
+
+#. module: hotel_roommatik
+#: model:ir.model,name:hotel_roommatik.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: hotel_roommatik
+#: model:ir.model,name:hotel_roommatik.model_res_partner
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_roommatik_api_create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_roommatik_api_create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: hotel_roommatik
+#: model:ir.ui.view,arch_db:hotel_roommatik.door_code_view_report
+msgid "Código para duplicar la llave: ["
+msgstr "Código para duplicar la llave: ["
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_roommatik_api_display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,help:hotel_roommatik.field_res_company_limit_night_sale
+msgid "HH:mm Format"
+msgstr "Formato HH:mm"
+
+#. module: hotel_roommatik
+#: model:ir.model,name:hotel_roommatik.model_hotel_reservation
+msgid "Hotel Reservation"
+msgstr "Reserva del hotel"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_roommatik_api_id
+msgid "ID"
+msgstr "ID (identificación)"
+
+#. module: hotel_roommatik
+#: code:addons/hotel_roommatik/models/inherited_res_company.py:27
+#, python-format
+msgid "Invalid limit hour (Format: HH:mm)"
+msgstr "Hora limite invalida (Formato: HH:mm)"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_roommatik_api___last_update
+msgid "Last Modified on"
+msgstr "Última modificación en"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_roommatik_api_write_uid
+msgid "Last Updated by"
+msgstr "Última actualización de"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_roommatik_api_write_date
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: hotel_roommatik
+#: code:addons/hotel_roommatik/models/inherited_hotel_reservation.py:103
+#, python-format
+msgid "No code yet"
+msgstr "Sin código de momento"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_res_company_rm_cash_journal
+msgid "Payment cash journal"
+msgstr "Diario pagos por caja"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,field_description:hotel_roommatik.field_res_company_rm_credit_journal
+msgid "Payment credit card journal"
+msgstr "Diario pagos tarjeta credito"
+
+#. module: hotel_roommatik
+#: model:ir.model,name:hotel_roommatik.model_account_payment
+msgid "Payments"
+msgstr "Pagos"
+
+#. module: hotel_roommatik
+#: model:ir.model,name:hotel_roommatik.model_hotel_room_type
+msgid "Room Type"
+msgstr "Tipo de Habitación"
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,help:hotel_roommatik.field_res_company_rm_cash_journal
+msgid "RoomMatik cash payment journal."
+msgstr "Diario de pagos por caja de RoomMatik."
+
+#. module: hotel_roommatik
+#: model:ir.model.fields,help:hotel_roommatik.field_res_company_rm_credit_journal
+msgid "RoomMatik credit card payment journal."
+msgstr "Diario de pagos por tarjeta de credito de RoomMatik."
+
+#. module: hotel_roommatik
+#: model:ir.model,name:hotel_roommatik.model_hotel_checkin_partner
+msgid "hotel.checkin.partner"
+msgstr "Checkins"
+
+#. module: hotel_roommatik
+#: model:ir.model,name:hotel_roommatik.model_roommatik_api
+msgid "roommatik.api"
+msgstr "roommatik.api"

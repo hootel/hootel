@@ -45,9 +45,10 @@ class ChannelHotelReservation(models.Model):
 
     @job(default_channel='root.channel')
     @api.model
-    def refresh_availability(self, checkin, checkout, backend_id, room_id):
+    def refresh_availability(self, checkin, checkout, backend_id, room_id,
+                             room_type_id=False, from_channel=False):
         self.env['channel.hotel.room.type.availability'].refresh_availability(
-            checkin, checkout, backend_id, room_id)
+            checkin, checkout, backend_id, room_id, room_type_id, from_channel)
 
     @job(default_channel='root.channel')
     @api.model
@@ -166,6 +167,11 @@ class HotelReservation(models.Model):
                  'channel_bind_ids.ota_reservation_id')
     def _compute_external_data(self):
         for record in self:
+            is_from_ota = False
+            for bind in record.channel_bind_ids:
+                if bind.ota_reservation_id and \
+                        bind.ota_reservation_id != 'undefined':
+                    is_from_ota = True
             vals = {
                 'ota_reservation_id': record.channel_bind_ids[0].
                                       ota_reservation_id if
@@ -174,8 +180,7 @@ class HotelReservation(models.Model):
                           record.channel_bind_ids else False,
                 'external_id': record.channel_bind_ids[0].external_id if
                                record.channel_bind_ids else False,
-                'is_from_ota': bool(any(bind.ota_reservation_id
-                                        for bind in record.channel_bind_ids))
+                'is_from_ota': is_from_ota
             }
             record.update(vals)
 
@@ -215,26 +220,26 @@ class HotelReservation(models.Model):
         if self._context.get('connector_no_export', True) and \
                 (vals.get('checkin') or vals.get('checkout') or
                  vals.get('room_id') or vals.get('state') or
-                 vals.get('overbooking')):
+                 'overbooking' in vals):
+            from_channel = False
             old_vals = []
             new_vals = []
             for record in self:
-                backend_id = self.env['channel.hotel.room.type'].search([
+                if record.channel_bind_ids:
+                    from_channel = True
+                old_backend_id = self.env['channel.hotel.room.type'].search([
                     ('odoo_id', '=', record.room_id.room_type_id.id)
-                ]).backend_id.id
+                ]).backend_id.id or None
                 old_vals.append({
                     'checkin': record.checkin,
                     'checkout': record.checkout,
-                    'backend_id': backend_id,
+                    'backend_id': old_backend_id,
                     'room_id': record.room_id.id,
                 })
-                # check if the reservation if moved into a new room type
-                new_room_type_id = self.env['channel.hotel.room.type'].search([
-                    ('room_ids', 'in', vals.get('room_id'))
-                ])
-                new_backend_id = backend_id
-                if new_room_type_id.odoo_id != record.room_id.room_type_id:
-                    new_backend_id = new_room_type_id.backend_id.id or None
+                # NOTE: A reservation can be moved into a room type not connected to any channel
+                new_backend_id = self.env['channel.hotel.room.type'].search([
+                    ('room_ids', 'in', vals.get('room_id', record.room_id.id))
+                ]).backend_id.id or None
                 new_vals.append({
                     'checkin': vals.get('checkin', record.checkin),
                     'checkout': vals.get('checkout', record.checkout),
@@ -250,14 +255,14 @@ class HotelReservation(models.Model):
                     checkin=v_i['checkin'],
                     checkout=v_i['checkout'],
                     backend_id=v_i['backend_id'],
-                    room_id=v_i['room_id'])
-                # NOTE: A reservation can be moved into a room type not connected to any channel
-                if new_backend_id:
-                    channel_room_type_avail_obj.sudo().refresh_availability(
-                        checkin=new_vals[k_i]['checkin'],
-                        checkout=new_vals[k_i]['checkout'],
-                        backend_id=new_vals[k_i]['backend_id'],
-                        room_id=new_vals[k_i]['room_id'])
+                    room_id=v_i['room_id'],
+                    from_channel=from_channel)
+                channel_room_type_avail_obj.sudo().refresh_availability(
+                    checkin=new_vals[k_i]['checkin'],
+                    checkout=new_vals[k_i]['checkout'],
+                    backend_id=new_vals[k_i]['backend_id'],
+                    room_id=new_vals[k_i]['room_id'],
+                    from_channel=from_channel)
         else:
             res = super().write(vals)
         return res

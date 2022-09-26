@@ -9,7 +9,7 @@
         The integration of Hootel with the RoomMatik kiosk.
         A series of requests/responses that provide the basic
         information needed by the kiosk.""",
-    'version': '11.0.1.0.0',
+    'version': '11.0.1.0.4',
     'license': 'AGPL-3',
     'author': 'Jose Luis Algara (Alda hotels) <osotranquilo@gmail.com>',
     'website': 'https://www.aldahotels.com',
@@ -17,12 +17,16 @@
     'depends': [
         'hotel',
         'partner_contact_gender',
-        'partner_second_lastname',
         'partner_contact_birthdate',
-        'base_iso3166'
+        'hotel_door_codes',
+        'base_iso3166',
+        'base_location',
     ],
     'data': [
-        'data/res_users_data.xml'
+        'data/res_users_data.xml',
+        'views/inherit_res_company.xml',
+        'views/inherit_hotel_reservation.xml',
+        'views/inherit_report_viajero.xml',
     ],
     'demo': [
     ],

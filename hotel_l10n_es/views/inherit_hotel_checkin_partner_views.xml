@@ -9,6 +9,7 @@
               <xpath expr="//field[@name='partner_id']" position="before">
                   <field name="document_type"/>
                   <field name="document_number"/>
+                  <field name="document_support"/>
                   <field name="lastname"/>
                   <field name="firstname"/>
               </xpath>
@@ -18,7 +19,15 @@
                 <xpath expr="//field[@name='reservation_id']" position="after">
                     <field name="gender"/>
                     <field name="birthdate_date"/>
-                    <field name="code_ine_id" />
+                    <field name='nationality_id'/>
+                    <separator/>
+                    <field name='city' string="Habitual residence"/>
+                    <field name='state_id' string=""/>
+                    <field name='zip' string=""/>
+                    <field name='country_id' string=""/>
+                    <separator/>
+                    <field name="code_ine_id" options="{'no_create': True, 'no_create_edit':True}"/>
+                    <field name="kinship"/>
                     <button type="action" class="oe_stat_button"
                         icon="fa-file-pdf-o"
                         name="%(action_report_viajero)d"
@@ -56,7 +65,7 @@
                     <field name="gender"/>
                     <field name="document_expedition_date" string="Exp. Date"/>
                     <field name="birthdate_date" string="Birthdate" />
-                    <field name="code_ine_id" />
+                    <field name="code_ine_id" options="{'no_create': True, 'no_create_edit':True}" />
                 </xpath>
             </field>
         </record>
@@ -79,9 +88,22 @@
                                                ]}" />
                                 <field name="document_number" string="Doc. Number" />
                                 <field name="document_expedition_date" string="Exp. Date" />
+                                <field name="document_support" string="Doc. Support" />
+                                <field name="nationality_id"
+                                       string="Nationality"
+                                       options="{'no_create': True, 'no_create_edit':True}"/>
                                 <field name="birthdate_date" string="Birthdate" />
-                                <field name="code_ine_id" />
+                                <field name="code_ine_id"
+                                       options="{'no_create': True, 'no_create_edit':True}"
+                                       attrs="{'column_invisible': 1}"/>
                                 <field name="gender" />
+                                <field name="zip_id"
+                                       string="Habitual residence"
+                                       placeholder="Location completion"
+                                       options="{'no_create': True, 'no_create_edit':True}"/>
+                        </xpath>
+                        <xpath expr="//field[@name='email']" position="after">
+                                <field name="kinship"/>
                         </xpath>
                         <xpath expr="//field[@name='partner_id']" position="attributes">
                                 <attribute name="options">{"no_create": True}</attribute>

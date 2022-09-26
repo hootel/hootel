@@ -67,10 +67,10 @@ class FolioAdvancePaymentInv(models.TransientModel):
                                   default=True,
                                   help='Automatic validation and link payment to invoice')
     count = fields.Integer(compute='_count', store=True, string='# of Orders')
-    folio_ids  = fields.Many2many("hotel.folio", string="Folios",
+    folio_ids = fields.Many2many("hotel.folio", string="Folios",
                                   help="Folios grouped",
                                   default=_get_default_folio)
-    reservation_ids  = fields.Many2many("hotel.reservation", string="Rooms",
+    reservation_ids = fields.Many2many("hotel.reservation", string="Rooms",
                                   help="Folios grouped",
                                   default=_get_default_reservation)
     group_folios = fields.Boolean('Group Folios')
@@ -287,7 +287,7 @@ class FolioAdvancePaymentInv(models.TransientModel):
 
     @api.onchange('reservation_ids')
     def prepare_invoice_lines(self):
-        vals = []
+        vals = [(5,0,0)]
         folios = self.folio_ids
         invoice_lines = {}
         for folio in folios:
@@ -297,7 +297,7 @@ class FolioAdvancePaymentInv(models.TransientModel):
                     (x.ser_room_line.id in self.reservation_ids.ids or \
                     not x.ser_room_line.id)):
                 invoice_lines[service.id] = {
-                    'description' : service.name,
+                    'description': service.name,
                     'product_id': service.product_id.id,
                     'qty': service.qty_to_invoice,
                     'discount': service.discount,
@@ -315,26 +315,38 @@ class FolioAdvancePaymentInv(models.TransientModel):
                         services = reservation.service_ids.filtered(
                             lambda x: x.is_board_service == True)
                         for service in services:
+                            service_date = day.date
+                            if service.product_id.consumed_on == 'after':
+                                service_date = (fields.Date.from_string(day.date) + \
+                                    timedelta(days=1)).strftime(DEFAULT_SERVER_DATE_FORMAT)
                             extra_price += service.price_unit * \
                                 service.service_line_ids.filtered(
-                                    lambda x: x.date == day.date).day_qty
+                                    lambda x: x.date == service_date).day_qty
                     #group_key: if group by reservation, We no need group by room_type
-                    group_key = (reservation.id, reservation.room_type_id.id, day.price + extra_price, day.discount)
-                    date = fields.Date.from_string(day.date)
+                    group_key = (reservation.id, reservation.room_type_id.id,
+                                 day.price + extra_price, day.discount,
+                                 day.cancel_discount)
+                    if day.cancel_discount == 100:
+                        continue
+                    discount_factor = 1.0
+                    for discount in [day.discount, day.cancel_discount]:
+                        discount_factor = (
+                            discount_factor * ((100.0 - discount) / 100.0))
+                    final_discount = 100.0 - (discount_factor * 100.0)
                     description = folio.name + ' ' + reservation.room_type_id.name + ' (' + \
                         reservation.board_service_room_id.hotel_board_service_id.name + ')' \
                         if board_service else folio.name + ' ' + reservation.room_type_id.name
                     if group_key not in invoice_lines:
                         invoice_lines[group_key] = {
-                                'description' : description,
-                                'reservation_id': reservation.id,
-                                'room_type_id': reservation.room_type_id,
-                                'product_id': self.env['product.product'].browse(
-                                    reservation.room_type_id.product_id.id),
-                                'discount': day.discount,
-                                'price_unit': day.price + extra_price,
-                                'reservation_line_ids': [(4, day.id)]
-                            }
+                            'description': description,
+                            'reservation_id': reservation.id,
+                            'room_type_id': reservation.room_type_id,
+                            'product_id': self.env['product.product'].browse(
+                                reservation.room_type_id.product_id.id),
+                            'discount': final_discount,
+                            'price_unit': day.price + extra_price,
+                            'reservation_line_ids': [(4, day.id)]
+                        }
                     else:
                         invoice_lines[group_key][('reservation_line_ids')].append((4,day.id))
         for group_key in invoice_lines:
@@ -376,9 +388,10 @@ class FolioAdvancePaymentInv(models.TransientModel):
         company = self.folio_ids[0].company_id
         user = self.folio_ids[0].user_id
         team = self.folio_ids[0].team_id
-        for folio in self.folio_ids:
-            if folio.pricelist_id != pricelist:
-                raise UserError(_('All Folios must hace the same pricelist'))
+        # REVIEW: Multi pricelist in folios??
+        # for folio in self.folio_ids:
+        #     if folio.pricelist_id != pricelist:
+        #         raise UserError(_('All Folios must hace the same pricelist'))
         invoice_vals = {
             'name': self.folio_ids[0].client_order_ref or '',
             'origin': origin,
@@ -468,46 +481,44 @@ class LineAdvancePaymentInv(models.TransientModel):
             :param qty: float quantity to invoice
             :returns recordset of account.invoice.line created
         """
+        self.ensure_one()
         invoice_lines = self.env['account.invoice.line']
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-        for line in self:
-            origin = line.reservation_id if line.reservation_id.id else line.service_id
-            res = {}
-            product = line.product_id
-            account = product.property_account_income_id or product.categ_id.property_account_income_categ_id
-            if not account:
-                raise UserError(_('Please define income account for this product: "%s" (id:%d) - or for its category: "%s".') %
-                    (product.name, product.id, product.categ_id.name))
+        origin = self.reservation_id if self.reservation_id.id else self.service_id
+        product = self.product_id
+        account = product.property_account_income_id or product.categ_id.property_account_income_categ_id
+        if not account:
+            raise UserError(_('Please define income account for this product: "%s" (id:%d) - or for its category: "%s".') %
+                (product.name, product.id, product.categ_id.name))
 
-            fpos = line.folio_id.fiscal_position_id or line.folio_id.partner_id.property_account_position_id
-            if fpos:
-                account = fpos.map_account(account)
-            vals = {
-                'sequence': origin.sequence,
-                'origin': origin.name,
-                'account_id': account.id,
-                'price_unit': line.price_unit,
-                'quantity': line.qty,
-                'discount': line.discount,
-                'uom_id': product.uom_id.id,
-                'product_id': product.id or False,
-                'invoice_line_tax_ids': [(6, 0, origin.tax_ids.ids)],
-                'account_analytic_id': line.folio_id.analytic_account_id.id,
-                'analytic_tag_ids': [(6, 0, origin.analytic_tag_ids.ids)]
-            }
-            if line.reservation_id:
-                vals.update({
-                    'name': line.description + ' (' + line.description_dates + ')',
-                    'invoice_id': invoice_id,
-                    'reservation_ids': [(6, 0, [origin.id])],
-                    'reservation_line_ids': [(6, 0, line.reservation_line_ids.ids)]
-                })
-            elif line.service_id:
-                vals.update({
-                    'name': line.description,
-                    'invoice_id': invoice_id,
-                    'service_ids': [(6, 0, [origin.id])]
-                })
-            invoice_lines |= self.env['account.invoice.line'].create(vals)
-
+        fpos = self.folio_id.fiscal_position_id or self.folio_id.partner_id.property_account_position_id
+        if fpos:
+            account = fpos.map_account(account)
+        vals = {
+            'sequence': origin.sequence,
+            'origin': origin.name,
+            'account_id': account.id,
+            'price_unit': self.price_unit,
+            'quantity': self.qty,
+            'discount': self.discount,
+            'uom_id': product.uom_id.id,
+            'product_id': product.id or False,
+            'invoice_line_tax_ids': [(6, 0, origin.tax_ids.ids)],
+            'account_analytic_id': self.folio_id.analytic_account_id.id,
+            'analytic_tag_ids': [(6, 0, origin.analytic_tag_ids.ids)]
+        }
+        if self.reservation_id:
+            vals.update({
+                'name': self.description + ' (' + self.description_dates + ')',
+                'invoice_id': invoice_id,
+                'reservation_ids': [(6, 0, [origin.id])],
+                'reservation_line_ids': [(6, 0, self.reservation_line_ids.ids)]
+            })
+        elif self.service_id:
+            vals.update({
+                'name': self.description,
+                'invoice_id': invoice_id,
+                'service_ids': [(6, 0, [origin.id])]
+            })
+        invoice_lines |= self.env['account.invoice.line'].create(vals)
         return invoice_lines

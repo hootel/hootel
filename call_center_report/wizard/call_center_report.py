@@ -96,9 +96,9 @@ class CallCenterReportWizard(models.TransientModel):
 
         reservations_obj = self.env['hotel.reservation']
         reservations = reservations_obj.search([
-            ('checkout', '>=', self.date_start),
+            ('checkin', '>=', self.date_start),
             ('checkout', '<=', self.date_end),
-            ('state', '=', 'done'),
+            ('state', '!=', 'cancelled'),
             ('channel_type', '=', 'call'),
             ('folio_id.pending_amount', '<', 1),
         ])

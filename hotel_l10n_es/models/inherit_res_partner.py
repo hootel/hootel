@@ -2,8 +2,8 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2017 Alda Hotels <informatica@aldahotels.com>
-#                       Jose Luis Algara <osotranquilo@gmail.com>
+#    Copyright (C) 2017-2022 Alda Hotels <informatica@aldahotels.com>
+#                            Jose Luis Algara <osotranquilo@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -45,11 +45,13 @@ class ResPartner(models.Model):
         string='Doc. type',
         )
     document_number = fields.Char('Document number', index=True)
+    document_support = fields.Char('Document support number', index=True)
     document_expedition_date = fields.Date('Document expedition date')
     code_ine_id = fields.Many2one('code.ine',
         help=_('Country or province of origin. Used for INE statistics.'))
     unconfirmed = fields.Boolean('Unconfirmed', default=True)
     main_partner_id = fields.Many2one('res.partner')
+    nationality_id = fields.Many2one("res.country", "Nationality")
 
     @api.model
     def name_search(self, name, args=None, operator='ilike', limit=100):
@@ -114,6 +116,23 @@ class ResPartner(models.Model):
                     vals['vat'] = record.fix_eu_vat_number(country_id, vat)
         return super(ResPartner, self).write(vals)
 
+    @api.constrains('zip_id', 'country_id', 'city_id', 'state_id')
+    def _check_zip(self):
+        # for rec in self.filtered('zip_id'):
+        #     if rec.zip_id.state_id != rec.state_id:
+        #         raise ValidationError(_(
+        #             "The state of the partner %s differs from that in "
+        #             "location %s") % (rec.name, rec.zip_id.name))
+        #     if rec.zip_id.country_id != rec.country_id:
+        #         raise ValidationError(_(
+        #             "The country of the partner %s differs from that in "
+        #             "location %s") % (rec.name, rec.zip_id.name))
+        #     if rec.zip_id.city_id != rec.city_id:
+        #         raise ValidationError(_(
+        #             "The city of partner %s differs from that in "
+        #             "location %s") % (rec.name, rec.zip_id.name))
+        return
+
     @api.constrains('country_id')
     def update_vat_code_country(self):
         for record in self:
@@ -138,6 +157,18 @@ class ResPartner(models.Model):
                         record.with_context({'ignore_vat_update': True}).write({
                             'vat': vat_with_code
                             })
+
+    @api.constrains('vat', 'commercial_partner_country_id')
+    def check_vat(self):
+        spain = self.env['res.country'].search([
+            ('code', '=', 'ES')
+        ])
+        from_spain = False
+        for partner in self:
+            if partner.country_id == spain:
+                from_spain = True
+        if from_spain:
+            return super(ResPartner, self).check_vat()
 
     @api.constrains('vat')
     def _check_vat_unique(self):

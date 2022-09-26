@@ -156,14 +156,15 @@ class HotelReservation(models.Model):
                     fields.Date.from_string(res.checkout) - fields.Date.from_string(res.checkin)
                 ).days
 
-    @api.depends('folio_id', 'checkin', 'checkout')
+    @api.depends('folio_id')
     def _compute_localizator(self):
         for record in self:
             if record.folio_id:
                 localizator = re.sub("[^0-9]", "", record.folio_id.name)
-                checkout = int(re.sub("[^0-9]", "", record.checkout))
-                checkin = int(re.sub("[^0-9]", "", record.checkin))
-                localizator += str((checkin + checkout) % 99)
+                total = 100
+                for a in localizator:
+                    total += int(a)
+                localizator += str((total) % 99)
                 record.localizator = localizator
 
     localizator = fields.Char('Localizator', compute='_compute_localizator',
@@ -171,7 +172,8 @@ class HotelReservation(models.Model):
     name = fields.Text('Reservation Description', required=True)
     sequence = fields.Integer(string='Sequence', default=10)
 
-    room_id = fields.Many2one('hotel.room', string='Room', ondelete='restrict')
+    room_id = fields.Many2one('hotel.room', string='Room',
+                              track_visibility='onchange', ondelete='restrict')
 
     reservation_no = fields.Char('Reservation No', size=64, readonly=True)
     adults = fields.Integer('Adults', size=64, readonly=False,
@@ -199,10 +201,11 @@ class HotelReservation(models.Model):
     cancelled_reason = fields.Selection([
         ('late', 'Late'),
         ('intime', 'In time'),
-        ('noshow', 'No Show')], 'Cause of cancelled')
+        ('noshow', 'No Show')], 'Cause of cancelled', track_visibility='onchange')
     out_service_description = fields.Text('Cause of out of service')
 
     folio_id = fields.Many2one('hotel.folio', string='Folio',
+                               track_visibility='onchange',
                                ondelete='cascade')
 
     checkin = fields.Date('Check In', required=True,
@@ -277,7 +280,8 @@ class HotelReservation(models.Model):
         ('web', 'Web'),
         ('agency', 'Agencia'),
         ('operator', 'Tour operador'),
-        ('virtualdoor', 'Virtual Door'), ], 'Sales Channel', default='door')
+        ('virtualdoor', 'Virtual Door'),
+        ('detour', 'Detour')], 'Sales Channel', default='door')
     last_updated_res = fields.Datetime('Last Updated')
     folio_pending_amount = fields.Monetary(related='folio_id.pending_amount')
     segmentation_ids = fields.Many2many(related='folio_id.segmentation_ids')
@@ -358,6 +362,7 @@ class HotelReservation(models.Model):
                             store=True)
 
     analytic_tag_ids = fields.Many2many('account.analytic.tag', string='Analytic Tags')
+    is_automatic_blocked = fields.Boolean(default=False)
 
     @api.model
     def create(self, vals):
@@ -475,6 +480,24 @@ class HotelReservation(models.Model):
                 vals.update({
                     'to_assign': True,
                 })
+            # Shared Room Compute blocked
+            new_room = self.env['hotel.room'].browse(vals['room_id']) if 'room_id' in vals else False
+            new_state = vals['state'] if 'state' in vals else False
+            if not self.env.context.get('blocked', False) and not record.is_automatic_blocked:
+                old_state = record.state
+                old_room = record.room_id
+                line_obj = self.env['hotel.reservation.line']
+                if old_state and new_state and old_state != new_state:
+                    if new_state == 'cancelled':
+                        active = False
+                    else:
+                        active = True
+                    for line in record.reservation_line_ids:
+                        line_obj._compute_rooms_beds_equivalents(old_room, line.date, active)
+                if old_room and new_room and old_room != new_room:
+                    for line in record.reservation_line_ids:
+                        line_obj._compute_rooms_beds_equivalents(old_room, line.date, False)
+                        line_obj._compute_rooms_beds_equivalents(new_room, line.date, True)
         record = super(HotelReservation, self).write(vals)
         return record
 
@@ -513,9 +536,11 @@ class HotelReservation(models.Model):
     def _prepare_add_missing_fields(self, values):
         """ Deduce missing required fields from the onchange """
         res = {}
-        onchange_fields = ['room_id', 'reservation_type', 'tax_ids',
+        onchange_fields = ['room_id', 'tax_ids',
                            'currency_id', 'name', 'service_ids']
         if values.get('room_type_id'):
+            if not values.get('reservation_type'):
+                values['reservation_type'] = 'normal'
             line = self.new(values)
             if any(f not in values for f in onchange_fields):
                 line.onchange_room_id()
@@ -780,7 +805,7 @@ class HotelReservation(models.Model):
     @api.onchange('board_service_room_id')
     def onchange_board_service(self):
         if self.board_service_room_id:
-            board_services = []
+            board_services = [(5,0,0)]
             for line in self.board_service_room_id.board_service_line_ids:
                 product = line.product_id
                 if product.per_day:
@@ -862,9 +887,13 @@ class HotelReservation(models.Model):
     @api.multi
     def action_cancel(self):
         for record in self:
+            cancel_reason = 'intime' if self._context.get("no_penalty", False) \
+                else record.compute_cancelation_reason()
+            if self._context.get("no_penalty", False):
+                _logger.info("///MODIFIED RESERVATION - NO PENALTY")
             record.write({
                 'state': 'cancelled',
-                'cancelled_reason': record.compute_cancelation_reason()
+                'cancelled_reason': cancel_reason
             })
             record._compute_cancelled_discount()
             if record.splitted:
@@ -980,6 +1009,10 @@ class HotelReservation(models.Model):
         self.ensure_one()
         pricelist = self.pricelist_id
         if self.state == 'cancelled':
+            #REVIEW: Set 0 qty on cancel room services (view constrain service_line_days)
+            for service in self.service_ids:
+                service.service_line_ids.write({'day_qty': 0})
+                service._compute_days_qty()
             if self.cancelled_reason and pricelist and pricelist.cancelation_rule_id:
                 date_start_dt = fields.Date.from_string(self.real_checkin or self.checkin)
                 date_end_dt = fields.Date.from_string(self.real_checkout or self.checkout)
@@ -1105,7 +1138,7 @@ class HotelReservation(models.Model):
         @return: array with the reservations _confirmed_ between both dates `dfrom` and `dto`
         """
         domain = self._get_domain_reservations_occupation(dfrom, dto)
-        _logger.info(domain)
+        # _logger.info(domain)
         return self.env['hotel.reservation'].search(domain)
 
     @api.model
@@ -1212,6 +1245,19 @@ class HotelReservation(models.Model):
             if record.checkin_partner_ids:
                 record.checkin_partner_ids.filtered(
                     lambda check: check.state == 'booking').action_done()
+            if record.splitted:
+                master_reservation = record.parent_reservation or record
+                splitted_reservs = self.env['hotel.reservation'].search([
+                    ('splitted', '=', True),
+                    '|',
+                    ('parent_reservation', '=', master_reservation.id),
+                    ('id', '=', master_reservation.id),
+                    ('folio_id', '=', record.folio_id.id),
+                    ('id', '!=', record.id),
+                    ('state', 'not in', ('cancelled', 'done'))
+                ])
+                if splitted_reservs:
+                    splitted_reservs.update({'state': 'done'})
         return True
 
     @api.multi
@@ -1244,23 +1290,22 @@ class HotelReservation(models.Model):
             )
             # Days Price
             reservation_lines = [[], []]
-            tprice = [0.0, 0.0]
             for rline in record.reservation_line_ids:
                 rline_dt = fields.Date.from_string(rline.date)
                 if rline_dt >= new_start_date_dt:
                     reservation_lines[1].append((0, False, {
                         'date': rline.date,
-                        'price': rline.price
+                        'price': rline.price,
+                        'cancel_discount': rline.cancel_discount,
+                        'discount': rline.discount,
+                        'invoice_line_ids': rline.invoice_line_ids,
+                        'state': rline.state,
                     }))
-                    tprice[1] += rline.price
                     reservation_lines[0].append((2, rline.id, False))
-                else:
-                    tprice[0] += rline.price
 
             parent_res = record.parent_reservation or record
             vals.update({
                 'splitted': True,
-                'price_total': tprice[1],
                 'parent_reservation': parent_res.id,
                 'room_type_id': parent_res.room_type_id.id,
                 'state': parent_res.state,
@@ -1274,7 +1319,6 @@ class HotelReservation(models.Model):
                                             Can't split reservation!"))
             record.write({
                 'checkout': new_start_date_dt.strftime(DEFAULT_SERVER_DATETIME_FORMAT),
-                'price_total': tprice[0],
                 'splitted': True,
                 'reservation_line_ids': reservation_lines[0],
             })
@@ -1331,13 +1375,15 @@ class HotelReservation(models.Model):
         reservation_line_ids = splitted_reservs.mapped('reservation_line_ids')
         reservation_line_ids.sorted(key=lambda r: r.date)
         rlines = [(5, False, False)]
-        tprice = 0.0
         for rline in reservation_line_ids:
             rlines.append((0, False, {
                 'date': rline.date,
                 'price': rline.price,
+                'cancel_discount': rline.cancel_discount,
+                'discount': rline.discount,
+                'invoice_line_ids': rline.invoice_line_ids,
+                'state': rline.state,
             }))
-            tprice += rline.price
 
         # Unify
         osplitted_reservs = splitted_reservs - master_reservation
@@ -1353,7 +1399,6 @@ class HotelReservation(models.Model):
             'checkout': last_checkout,
             'splitted': master_reservation.real_checkin != first_checkin or master_reservation.real_checkout != last_checkout,
             'reservation_line_ids': rlines,
-            'price_total': tprice,
         })
         return True
 

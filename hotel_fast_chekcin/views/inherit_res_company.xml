@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Hotel Settings -->
+    <data>
+        <!-- Inherit Company view to add 'door_code' -->
+        <record id="fastcheckin_url_view_company_form" model="ir.ui.view">
+            <field name="name">fastcheckin.config.view_company_form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='hotel_settings_page']" position="inside">
+                    <group name="fast_checkin" string="Fast Checkin">
+                        <field name="fc_server"/>
+                        <field name="fc_server_id"/>
+                        <field name="fc_seeed_code"/>
+                        <field name="fc_credit_journal"/>
+                        <field name="fc_cash_journal"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

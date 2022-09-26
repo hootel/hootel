@@ -80,13 +80,16 @@
                 <strong><span t-field="o.reservation_id.folio_id.amount_total"/></strong>
             </p>
             <p class="amount">
+                <strong><span t-field="company.property_name"/></strong><br/>
                 <strong>CIF:
                     <span t-field="company.vat"/></strong><br/>
-                <strong><span t-field="company.display_name"/></strong><br/>
+                    <span t-field="company.display_name"/><br/>
                 <strong><span t-field="company.street"/>
                     <span t-field="company.street2"/></strong><br/>
                 <strong><span t-field="company.zip"/>
-                    <span t-field="company.city"/></strong><br/></p>
+                    <span t-field="company.city"/></strong><br/>
+                <small>Categoría: <span t-field="company.ine_category_id"/></small><br/>
+            </p>
             <p class="titulo2">TRAVELER'S DOCUMENT</p>
         </template>
     </data>

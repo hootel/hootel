@@ -19,9 +19,23 @@
                         <group colspan="2">
                             <field name="order"/>
                         </group>
+                        <group>
+                            <group>
+                                <field name="xls_filename" invisible="1"/>
+                                <field name="xls_binary" filename="xls_filename" readonly="1"/>
+                            </group>
+                        </group>
                         <footer>
-                            <button type="object" class="oe_highlight" icon="fa-file-pdf-o" name="print_rooms_report" string="Print in PDF"/>
+                                <button type="object" class="oe_highlight" icon="fa-file-pdf-o" name="print_rooms_report" string="Print in PDF"/>
+                                <button type="object" class="oe_highlight" icon="fa-file-excel-o"
+                                    name="excel_rooms_report" string="Export To Excel"
+                                    style="color:white !important; margin: 0 1em;"/>
                         </footer>
+                        <style>
+                        .o_button_icon {
+                          color:white;
+                        }
+                        </style>
                     </sheet>
                 </form>
             </field>

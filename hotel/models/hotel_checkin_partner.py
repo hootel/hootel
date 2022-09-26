@@ -127,6 +127,10 @@ class HotelCheckinPartner(models.Model):
     def _check_partner_id(self):
         for record in self:
             if record.partner_id:
+                if record.partner_id.is_company:
+                    raise models.ValidationError(
+                        _('A Checkin Guest is configured like a company, \
+                          modify it in contact form if its a mistake'))
                 indoor_partner_ids = record.reservation_id.checkin_partner_ids.\
                     filtered(lambda r: r.id != record.id).mapped('partner_id.id')
                 if indoor_partner_ids.count(record.partner_id.id) > 1:
@@ -148,6 +152,22 @@ class HotelCheckinPartner(models.Model):
             record.update(vals)
             if record.reservation_id.state == 'confirm':
                 record.reservation_id.state = 'booking'
+                if record.reservation_id.splitted:
+                    master_reservation = record.reservation_id.parent_reservation or record.reservation_id
+                    splitted_reservs = self.env['hotel.reservation'].search([
+                        ('splitted', '=', True),
+                        '|',
+                        ('parent_reservation', '=', master_reservation.id),
+                        ('id', '=', master_reservation.id),
+                        ('folio_id', '=', record.folio_id.id),
+                        ('id', '!=', record.id),
+                        ('state', '=', 'confirm')
+                    ])
+                    if splitted_reservs:
+                        splitted_reservs.update({'state': 'booking'})
+        return {
+            "type": "ir.actions.do_nothing",
+        }
 
     @api.multi
     def action_done(self):

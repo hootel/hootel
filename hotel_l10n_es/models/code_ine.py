@@ -28,6 +28,9 @@ class CodeIne(models.Model):
 
     name = fields.Char('Place', required=True)
     code = fields.Char('Code', required=True)
+    state_id = fields.Many2one("res.country.state",
+                               string='State',
+                               ondelete='restrict')
 
     @api.multi
     def name_get(self):
