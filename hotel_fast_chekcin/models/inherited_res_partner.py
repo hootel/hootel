@@ -43,6 +43,9 @@ class ResPartner(models.Model):
             customer['zip_id'] = zip.id
             ine_code = self.env['code.ine'].search(
                 [('name', 'ilike', zip.state_id.name)])
+            for code in ine_code:
+                if len(code.code) > 3:
+                    ine_code = code
             if not ine_code:
                 ine_code = self.env['code.ine'].search(
                     [('name', 'ilike', 'Madrid')])
