@@ -11,9 +11,11 @@
             <field name="arch" type="xml">
                 <xpath expr="//page[@name='hotel_settings_page']" position="inside">
                     <group string="DataBi Hotel Services" name="hotel_databi">
-                        <field name="id_hotel"/>
-                        <field name="data_bi_days"/>
-                        <field name="expedia_rate"/>
+                        <field name="id_hotel" />
+                        <field name="data_bi_days" />
+                        <field name="expedia_rate" />
+                        <field name="json_reservations_v3_data" />
+                        <field name="json_outs_v3_data" />
                     </group>
                 </xpath>
             </field>
