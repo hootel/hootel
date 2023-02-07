@@ -170,7 +170,7 @@ class Data_Bi(models.Model):
         dic_tarifa = []  # Diccionario con las tarifas
         # tarifas = self.env['product.pricelist'].search_read([], ['name'])
         tarifas = self.env['product.pricelist'].search_read(
-            ['|',('active', '=', False), ('active', '=', True)], ['name'])
+            ['|', ('active', '=', False), ('active', '=', True)], ['name'])
         _logger.info("DataBi: Calculating %s fees", str(len(tarifas)))
         for tarifa in tarifas:
             dic_tarifa.append({'ID_Hotel': compan,
@@ -364,7 +364,8 @@ class Data_Bi(models.Model):
                              'Descripcion': u'Teléfono'})
         dic_clientes.append({'ID_Hotel': compan,
                              'ID_Cliente': 906,
-                             'Descripcion': u'Call Center'})
+                             'Descripcion': u'SH360 Call'})
+                            #  'Descripcion': u'Call Center'})
         dic_clientes.append({'ID_Hotel': compan,
                              'ID_Cliente': 907,
                              'Descripcion': u'Agencia'})
@@ -382,6 +383,14 @@ class Data_Bi(models.Model):
     @api.model
     def data_bi_bloqueos(self, compan, lines):
         dic_bloqueos = []  # Diccionario con Bloqueos
+        # if self.env.user.company_id.json_outs_v3_data is not False:
+        #     dic_bloqueos = self.env.user.company_id.json_outs_v3_data
+        # else:
+        #     # Debug Stop -------------------
+        #     import wdb
+        #     wdb.set_trace()
+        #     # Debug Stop ------------------
+            
         lines = lines.filtered(
             lambda n: (n.reservation_id.reservation_type != 'normal') and (
                        n.reservation_id.state != 'cancelled'))
@@ -405,6 +414,11 @@ class Data_Bi(models.Model):
     @api.model
     def data_bi_reservas(self, compan, lines, estado_array, dic_clientes):
         dic_reservas = []
+
+        if self.env.user.company_id.json_reservations_v3_data is not False:
+            dic_reservas = self.reserva_data_from_v3(dic_clientes)
+            return dic_reservas
+
         lineas = lines.filtered(
             lambda n:
                 (n.reservation_id.reservation_type == 'normal') and
@@ -521,6 +535,7 @@ class Data_Bi(models.Model):
         # PrecioDiario numérico con 2 decimales Precio por noche de la reserva
         # ID_Tarifa numérico Código de la tarifa aplicada a la reserva
         # ID_Pais numérico Código del país
+
         return dic_reservas
 
     @api.model
@@ -749,3 +764,32 @@ class Data_Bi(models.Model):
         # Debug Stop -------------------
         # import wdb; wdb.set_trace()
         # Debug Stop -------------------
+
+    @api.model
+    def reserva_data_from_v3(self, dic_clientes):
+        dic_reservas = []
+        channels = {'door': 0,
+            'mail': 1,
+            'phone': 2,
+            'call': 3,
+            'web': 4,
+            'agency': 5,
+            'operator': 6,
+            'virtualdoor': 7,
+            'detour': 8}
+        clientes = {}
+        for cliente in dic_clientes:
+            clientes[cliente["Descripcion"]] = cliente["ID_Cliente"]
+
+        reservas = json.loads(
+            self.env.user.company_id.json_reservations_v3_data)
+        _logger.info("DataBi: Calculating %s FROM V3", str(len(reservas)))
+
+        for reserva in reservas:
+            reserva["ID_Hotel"] = self.env.user.company_id[0].id_hotel
+            reserva["ID_Canal"] = channels[reserva["ID_Canal"]] if reserva["ID_Canal"] in channels else 0
+            reserva["ID_Cliente"] = clientes[reserva["ID_Cliente"]] if reserva["ID_Cliente"] in clientes else 0
+
+            dic_reservas.append(reserva)
+
+        return dic_reservas
