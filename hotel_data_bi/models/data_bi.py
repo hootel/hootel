@@ -789,6 +789,7 @@ class Data_Bi(models.Model):
             reserva["ID_Hotel"] = self.env.user.company_id[0].id_hotel
             reserva["ID_Canal"] = channels[reserva["ID_Canal"]] if reserva["ID_Canal"] in channels else 0
             reserva["ID_Cliente"] = clientes[reserva["ID_Cliente"]] if reserva["ID_Cliente"] in clientes else 0
+            reserva["ID_Regimen"] = clientes[reserva["ID_Regimen"]] if reserva["ID_Regimen"] in clientes else 0
 
             dic_reservas.append(reserva)
 
