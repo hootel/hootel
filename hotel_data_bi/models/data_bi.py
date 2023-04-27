@@ -790,6 +790,8 @@ class Data_Bi(models.Model):
             reserva["ID_Canal"] = channels[reserva["ID_Canal"]] if reserva["ID_Canal"] in channels else 0
             reserva["ID_Cliente"] = clientes[reserva["ID_Cliente"]] if reserva["ID_Cliente"] in clientes else 0
             reserva["ID_Regimen"] = clientes[reserva["ID_Regimen"]] if reserva["ID_Regimen"] in clientes else 0
+            reserva["ID_EstadoReserva"] = clientes[reserva["ID_EstadoReserva"]] - 1
+            
             if str(reserva["ID_Reserva"])[-5:] == "00000":
                 reserva["ID_Reserva"] = int(str(reserva["ID_Reserva"])[0:-3])
             if str(reserva["ID_Folio"])[-5:] == "00000":
@@ -798,3 +800,4 @@ class Data_Bi(models.Model):
             dic_reservas.append(reserva)
 
         return dic_reservas
+
