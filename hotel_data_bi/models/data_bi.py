@@ -92,8 +92,7 @@ class Data_Bi(models.Model):
         if (archivo == 0) or (archivo == 10) or (archivo == 6):
             line_res = self.env['hotel.reservation.line'].search(
                                     [('date', '>=', limit_ago)], order="id")
-        estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
-
+        estado_array = ["draft", "confirm", "onboard", "done", "cancel", "arrival_delayed", "departure_delayed"]
         if (archivo == 0) or (archivo == 1):
             dic_tarifa = self.data_bi_tarifa(compan.id_hotel)
             dic_export.append({'Tarifa': dic_tarifa})
@@ -233,7 +232,7 @@ class Data_Bi(models.Model):
         _logger.info("DataBi: Calculating all the states of the reserves")
         dic_estados = []  # Diccionario con los Estados Reserva
         estado_array_txt = ['Borrador', 'Confirmada', 'Hospedandose',
-                            'Checkout', 'Cancelada']
+                            'Checkout', 'Cancelada', "No Show", "No Checkout"]
         # estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
         for i in range(0, len(estado_array)):
             dic_estados.append({'ID_Hotel': compan,
@@ -790,7 +789,6 @@ class Data_Bi(models.Model):
             reserva["ID_Canal"] = channels[reserva["ID_Canal"]] if reserva["ID_Canal"] in channels else 0
             reserva["ID_Cliente"] = clientes[reserva["ID_Cliente"]] if reserva["ID_Cliente"] in clientes else 0
             reserva["ID_Regimen"] = clientes[reserva["ID_Regimen"]] if reserva["ID_Regimen"] in clientes else 0
-            reserva["ID_EstadoReserva"] = clientes[reserva["ID_EstadoReserva"]] - 1
             
             if str(reserva["ID_Reserva"])[-5:] == "00000":
                 reserva["ID_Reserva"] = int(str(reserva["ID_Reserva"])[0:-3])
