@@ -66,6 +66,7 @@ class Data_Bi(models.Model):
             archivo == 13 'Clientes'
             archivo == 14 'Estado Reservas'
             archivo == 15 'Room names'
+            archivo == 16 'Histocico a 31-12-2022'
         fechafoto = start date to take data
         """
 
@@ -87,12 +88,20 @@ class Data_Bi(models.Model):
         _logger.info("DataBi: Calculating From DATE: %s -------", limit_ago)
 
         dic_export = []  # Diccionario con todo lo necesario para exportar.
+        historico = False
+        if archivo == 16:
+            archivo = 0
+            historico = True
         if (archivo == 0) or (archivo == 7) or (archivo == 8):
             room_types = self.env['hotel.room.type'].search([])
         if (archivo == 0) or (archivo == 10) or (archivo == 6):
             line_res = self.env['hotel.reservation.line'].search(
                                     [('date', '>=', limit_ago)], order="id")
-        estado_array = ["draft", "confirm", "onboard", "done", "cancel", "arrival_delayed", "departure_delayed"]
+        if historico is False:
+            estado_array = ["draft", "confirm", "onboard", "done", "cancel", "arrival_delayed", "departure_delayed"]
+        else:
+            estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled',
+                                "No Show", "No Checkout"]
         if (archivo == 0) or (archivo == 1):
             dic_tarifa = self.data_bi_tarifa(compan.id_hotel)
             dic_export.append({'Tarifa': dic_tarifa})
@@ -142,6 +151,7 @@ class Data_Bi(models.Model):
                                                  line_res,
                                                  estado_array,
                                                  dic_clientes,
+                                                 historico,
                                                  )
             dic_export.append({'Reservas': dic_reservas})
 
@@ -233,7 +243,6 @@ class Data_Bi(models.Model):
         dic_estados = []  # Diccionario con los Estados Reserva
         estado_array_txt = ['Borrador', 'Confirmada', 'Hospedandose',
                             'Checkout', 'Cancelada', "No Show", "No Checkout"]
-        # estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
         for i in range(0, len(estado_array)):
             dic_estados.append({'ID_Hotel': compan,
                                 'ID_EstadoReserva': i,
@@ -389,7 +398,7 @@ class Data_Bi(models.Model):
         #     import wdb
         #     wdb.set_trace()
         #     # Debug Stop ------------------
-            
+
         lines = lines.filtered(
             lambda n: (n.reservation_id.reservation_type != 'normal') and (
                        n.reservation_id.state != 'cancelled'))
@@ -411,10 +420,11 @@ class Data_Bi(models.Model):
         return dic_bloqueos
 
     @api.model
-    def data_bi_reservas(self, compan, lines, estado_array, dic_clientes):
+    def data_bi_reservas(self, compan, lines, estado_array, dic_clientes, historico):
         dic_reservas = []
 
-        if self.env.user.company_id.json_reservations_v3_data is not False:
+        if (self.env.user.company_id.json_reservations_v3_data is not False) and (historico is False):
+            _logger.info("DataBi: Calculating From V3")
             dic_reservas = self.reserva_data_from_v3(dic_clientes)
             return dic_reservas
 
@@ -789,7 +799,7 @@ class Data_Bi(models.Model):
             reserva["ID_Canal"] = channels[reserva["ID_Canal"]] if reserva["ID_Canal"] in channels else 0
             reserva["ID_Cliente"] = clientes[reserva["ID_Cliente"]] if reserva["ID_Cliente"] in clientes else 0
             reserva["ID_Regimen"] = clientes[reserva["ID_Regimen"]] if reserva["ID_Regimen"] in clientes else 0
-            
+
             if str(reserva["ID_Reserva"])[-5:] == "00000":
                 reserva["ID_Reserva"] = int(str(reserva["ID_Reserva"])[0:-3])
             if str(reserva["ID_Folio"])[-5:] == "00000":
