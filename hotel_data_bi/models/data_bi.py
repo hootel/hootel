@@ -92,16 +92,19 @@ class Data_Bi(models.Model):
         if archivo == 16:
             archivo = 0
             historico = True
-        if (archivo == 0) or (archivo == 7) or (archivo == 8):
-            room_types = self.env['hotel.room.type'].search([])
-        if (archivo == 0) or (archivo == 10) or (archivo == 6):
-            line_res = self.env['hotel.reservation.line'].search(
-                                    [('date', '>=', limit_ago)], order="id")
         if historico is False:
             estado_array = ["draft", "confirm", "onboard", "done", "cancel", "arrival_delayed", "departure_delayed"]
+            if (archivo == 0) or (archivo == 10) or (archivo == 6):
+                line_res = self.env['hotel.reservation.line'].search(
+                                        [('date', '>=', limit_ago)], order="id")
         else:
             estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled',
                                 "No Show", "No Checkout"]
+            if (archivo == 0) or (archivo == 10) or (archivo == 6):
+                line_res = self.env['hotel.reservation.line'].search(
+                                        [('date', '<=', '2022-09-01')], order="id")
+        if (archivo == 0) or (archivo == 7) or (archivo == 8):
+            room_types = self.env['hotel.room.type'].search([])
         if (archivo == 0) or (archivo == 1):
             dic_tarifa = self.data_bi_tarifa(compan.id_hotel)
             dic_export.append({'Tarifa': dic_tarifa})
