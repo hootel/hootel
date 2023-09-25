@@ -14,6 +14,14 @@
                     </tr>
                     <tr>
                         <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                            Document support</td>
+                        <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                            <strong>
+                                <span t-field="o.document_support"/></strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                             Type</td>
                         <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                             <strong>
@@ -71,12 +79,30 @@
                     </tr>
                     <tr>
                         <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                            Nationality</td>
+                        <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                            <strong>
+                                <span t-field="o.partner_id.nationality_id"/></strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
                             Origin</td>
                         <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
                             <strong>
                                 <span t-field="o.partner_id.code_ine_id"/></strong>
                         </td>
                     </tr>
+                    <t t-if="o.kinship != False">
+                        <tr>
+                            <td width="40%" style="padding-left:3px;border:double; border-width: 1px">
+                                Kinship</td>
+                            <td width="100%" style="padding-left:3px;border:double; border-width: 1px">
+                                <strong>
+                                    <span t-field="o.kinship"/></strong>
+                            </td>
+                        </tr>
+                    </t>
                 </table><br/>
             </div>
             <div class="row" style="margin:0 0 0 0 !important; padding-left: 0 !important; padding-right: 0 !important; font-size:1.5em;">

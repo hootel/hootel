@@ -137,13 +137,18 @@ class HotelFolio(models.Model):
         ('web', 'Web'),
         ('agency', 'Agencia'),
         ('operator', 'Tour operador'),
-        ('virtualdoor', 'Virtual Door'),], 'Sales Channel', default='door')
-    user_id = fields.Many2one('res.users', string='Salesperson', index=True, ondelete='restrict',
-                              track_visibility='onchange', default=lambda self: self.env.user)
+        ('virtualdoor', 'Virtual Door'),
+        ('detour', 'Detour')
+        ], 'Sales Channel', default='door')
+    user_id = fields.Many2one('res.users', string='Salesperson',
+                              index=True, ondelete='restrict',
+                              track_visibility='onchange',
+                              default=lambda self: self.env.user)
     tour_operator_id = fields.Many2one('res.partner',
                                        'Tour Operator',
                                        ondelete='restrict',
-                                       domain=[('is_tour_operator', '=', True)])
+                                       domain=[
+                                           ('is_tour_operator', '=', True)])
     date_order = fields.Datetime(
         string='Order Date',
         required=True, readonly=True, index=True,
@@ -456,8 +461,8 @@ class HotelFolio(models.Model):
 
         addr = self.partner_id.address_get(['invoice'])
         pricelist = self.partner_id.property_product_pricelist and \
-                                 self.partner_id.property_product_pricelist.id or \
-                                 self.env['ir.default'].sudo().get('res.config.settings', 'default_pricelist_id')
+            self.partner_id.property_product_pricelist.id or \
+            self.env['ir.default'].sudo().get('res.config.settings', 'default_pricelist_id')
         values = {
             'pricelist_id': pricelist,
             'payment_term_id': self.partner_id.property_payment_term_id and self.partner_id.property_payment_term_id.id or False,
@@ -731,7 +736,7 @@ class HotelFolio(models.Model):
             compose_form_id = False
         ctx = dict()
         ctx.update({
-            'default_model': 'hotel.reservation',
+            'default_model': 'hotel.folio',
             'default_res_id': self._ids[0],
             'default_use_template': bool(template_id),
             'default_template_id': template_id,

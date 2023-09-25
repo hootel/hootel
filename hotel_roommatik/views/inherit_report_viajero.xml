@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Hotel Settings -->
+  <data>
+    <!--  Inherit viajero repdort to add 'door_code' -->
+    <template id="door_code_view_report" inherit_id="hotel_l10n_es.report_viajero_document">
+      <xpath expr="//div[@class='doorcodes']" position="inside">
+        <div class ="duplicate_keys">
+            Código para duplicar la llave: [<span t-field="o.reservation_id.duplicate_keys" style="font-size:0.8em; font-weight: bold;"/>]
+        </div>
+      </xpath>
+    </template>
+  </data>
+</odoo>

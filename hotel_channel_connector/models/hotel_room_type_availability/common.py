@@ -68,16 +68,6 @@ class HotelRoomTypeAvailability(models.Model):
           type!')
     ]
 
-    @api.constrains('max_avail', 'quota')
-    def _check_max_avail_quota(self):
-        for record in self:
-            if record.quota > record.room_type_id.total_rooms_count:
-                raise ValidationError(_("The quota assigned to the channel manager can't be greater "
-                                        "than the total rooms count!"))
-            if record.max_avail > record.room_type_id.total_rooms_count:
-                raise ValidationError(_("The maximum simultaneous availability can't be greater "
-                                        "than the total rooms count!"))
-
     @api.onchange('room_type_id')
     def onchange_room_type_id(self):
         channel_room_type = self.env['channel.hotel.room.type'].search([
@@ -187,7 +177,7 @@ class ChannelHotelRoomTypeAvailability(models.Model):
                         _logger.info(vals_avail)
                     if room_type_avail_id.channel_avail != avail:
                         vals_avail.update({'channel_avail': avail})
-                    if self._context.get('update_no_ota', False):
+                    if self._context.get('update_no_ota', False) or from_channel:
                         vals_avail.update({'channel_pushed': False})
                     if vals_avail:
                         room_type_avail_id.write(vals_avail)

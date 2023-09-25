@@ -64,9 +64,9 @@ class FolioWizard(models.TransientModel):
                                    default=_get_default_pricelist,
                                    help="Pricelist for current folio.")
     checkin = fields.Date('Check In', required=True,
-                              default=_get_default_checkin)
+                          default=_get_default_checkin)
     checkout = fields.Date('Check Out', required=True,
-                               default=_get_default_checkout)
+                           default=_get_default_checkout)
     credit_card_details = fields.Text('Credit Card Details')
     internal_comment = fields.Text(string='Internal Folio Notes')
     reservation_wizard_ids = fields.One2many('hotel.reservation.wizard',
@@ -119,7 +119,7 @@ class FolioWizard(models.TransientModel):
     @api.onchange('autoassign')
     def create_reservations(self):
         self.ensure_one()
-        cmds = []
+        cmds = [(5,0,0)]
         for line in self.room_type_wizard_ids:
             if line.rooms_num == 0:
                 continue
@@ -182,13 +182,15 @@ class FolioWizard(models.TransientModel):
         checkin_str = checkin_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
         checkout_str = checkout_dt.strftime(DEFAULT_SERVER_DATE_FORMAT)
 
+        cmds = [(5,0,0)]
         room_type_ids = self.env['hotel.room.type'].search([])
-        cmds = room_type_ids.mapped(lambda x: (0, False, {
-            'room_type_id': x.id,
-            'folio_wizard_id': self.id,
-            'checkin': checkin_str,
-            'checkout': checkout_str,
-        }))
+        for room_type in room_type_ids:
+            cmds.append((0, False, {
+                'room_type_id': room_type.id,
+                'folio_wizard_id': self.id,
+                'checkin': checkin_str,
+                'checkout': checkout_str,
+                }))
         self.update({
             'checkin': checkin_str,
             'checkout': checkout_str,
@@ -240,6 +242,7 @@ class FolioWizard(models.TransientModel):
                 'board_service_room_id': line.board_service_room_id.id,
                 'to_assign': line.to_assign,
                 'service_ids': services_room,
+                'pricelist_id': self.pricelist_id.id, # REVIEW: Create folio with reservations dont respect the pricelist_id on folio dict
             }))
         for line in self.service_wizard_ids:
             services.append((0, False, {
@@ -326,6 +329,8 @@ class HotelRoomTypeWizards(models.TransientModel):
             record.can_confirm = record.max_rooms > 0 and record.min_stay <= date_diff
 
     def _compute_max(self):
+        # REVIEW: This methid has a incorrect dependencies with hotel_channel_conector
+        # because use avail model defined on this module
         for res in self:
             user = self.env['res.users'].browse(self.env.uid)
             date_start = fields.Date.from_string(res.checkin)
@@ -358,15 +363,19 @@ class HotelRoomTypeWizards(models.TransientModel):
                     if date_min_days > min_stay:
                         min_stay = date_min_days
                 if user.has_group('hotel.group_hotel_call'):
+                    max_avail = real_max
+                    restriction = False
                     if avail_restrictions:
-                        max_avail = real_max
                         restriction = avail_restrictions.filtered(
                                     lambda r: r.date == ndate_str)
                         if restriction:
                             if restriction.channel_bind_ids[0]:
                                 max_avail = restriction.channel_bind_ids[0].channel_avail
-                        if max_avail < avail:
-                            avail = min(max_avail, real_max)
+                    if not restriction and res.room_type_id.channel_bind_ids:
+                        if res.room_type_id.channel_bind_ids[0]:
+                            max_avail = res.room_type_id.channel_bind_ids[0].default_availability
+                    if max_avail < avail:
+                        avail = min(max_avail, real_max)
                 else:
                     avail = real_max
 

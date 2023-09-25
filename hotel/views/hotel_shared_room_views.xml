@@ -29,6 +29,7 @@
                   <field name="room_type_id" string="Room Type" />
                   <field name="beds" />
                   <field name="sequence" />
+                  <field name="equivalent_room_id" />
                 </group>
                 <group>
                      <field name="bed_ids" />

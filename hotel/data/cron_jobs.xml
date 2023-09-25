@@ -26,9 +26,24 @@
             <field name="model_id" ref="model_hotel_reservation" />
             <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 05:00:00')"/>
             <field name="code">model.autocheckout()</field>
-            
         </record>
+    </data>
 
+    <data noupdate="1">
+
+        <!-- Scheduler for send Exit Survey mails -->
+        <record model="ir.cron" id="Guest_survey">
+            <field name="name">E-mail Guest send Exit Survey</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).strftime('%Y-%m-%d 08:30:00')"/>
+            <field name="doall" eval="False"/>
+            <field name="model_id" ref="model_res_partner"/>
+            <field name="code">model.send_exit_survey_mail()</field>
+            <field name="active" eval="False" />
+
+        </record>
     </data>
 
 </odoo>

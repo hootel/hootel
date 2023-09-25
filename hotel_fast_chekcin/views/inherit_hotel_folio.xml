@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit Company view to add 'door_code' in Reservation Form -->
+        <record id="fastcheckin_hide_pay_reservation_form" model="ir.ui.view">
+            <field name="name">fastcheckin_hide_pay.folio_form</field>
+            <field name="model">hotel.folio</field>
+            <field name="inherit_id" ref="hotel.hotel_folio_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='invoicing']" position="after">
+                    <page string="Others">
+                        <group>
+                            <field name="hide_pay"/>
+                            <field name="fc_mail_sended" readonly="1"/>
+                            <field name="fc_visits" readonly="1"/>
+                            <field name="fc_counts" readonly="1"/>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="action_fastcheckin_list" model="ir.actions.act_window">
+            <field name="name">Fast Checkin statistics</field>
+            <field name="res_model">hotel.folio</field>
+            <field name="view_mode">pivot</field>
+            <field name="domain">
+                ['&amp;','&amp;','|','|',('state', '!=', 'cancel'),
+                         ('reservation_type', '=', 'normal'),
+                         ('fc_mail_sended', '&gt;', '2021-08-08'),
+                         ('fc_visits', '&gt;', 0),
+                         ('fc_counts', '&gt;', 0),
+                ]
+            </field>
+        </record>
+
+        <menuitem
+        id="menu_hotel_fastcheckin_list"
+        name="Fast Checkins"
+        parent="hotel.hotel_reports_menu"
+        sequence="35"
+        action="action_fastcheckin_list" />
+
+        <record id="fastcheckin_list_pivot" model="ir.ui.view">
+            <field name="name">fastcheckin.list.pivot</field>
+            <field name="model">hotel.folio</field>
+            <field name="arch" type="xml">
+                <pivot>
+                    <field name="fc_mail_sended" interval="day" type="row" />
+                    <field name="fc_visits" type="measure"/>
+                    <field name="fc_counts" type="measure"/>
+                    <field name="state"/>
+                </pivot>
+            </field>
+        </record>
+
+    </data>
+</odoo>

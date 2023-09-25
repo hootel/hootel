@@ -6,90 +6,95 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 11.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-03-13 22:37+0000\n"
-"PO-Revision-Date: 2019-03-13 23:50+0100\n"
-"Last-Translator: <>\n"
+"POT-Creation-Date: 2020-10-01 09:48+0000\n"
+"PO-Revision-Date: 2020-10-01 11:50+0200\n"
+"Last-Translator: Jose Luis Algara Toledo <osotranquilo@gmail.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: \n"
 "Language: es\n"
-"X-Generator: Poedit 1.8.7.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #. module: hotel_channel_connector_wubook
 #: model:ir.model,name:hotel_channel_connector_wubook.model_hotel_board_service_room_type
 msgid "Board Service included in Room"
-msgstr "Servicios incluidos en la habitación"
+msgstr "BoardServices incluidos en la habitación"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:109
+#: model:ir.ui.view,arch_db:hotel_channel_connector_wubook.channel_backend_view_form
+msgid "Booking Engine"
+msgstr "Booking Engine"
+
+#. module: hotel_channel_connector_wubook
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:110
 #, python-format
 msgid "Can't activate push reservations"
 msgstr "No se puede activar la exportación Reservas"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:118
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:119
 #, python-format
 msgid "Can't activate push rooms"
 msgstr "No se puede activar la exportaciónd e habitaciones"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:321
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:349
 #, python-format
 msgid "Can't add pricing plan to wubook"
 msgstr "No se puede añadir la tarifa a Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:336
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:364
 #, python-format
 msgid "Can't add virtual pricing plan to wubook"
 msgstr "No se puede añadir la tarifa Virtual a Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:228
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:241
 #, python-format
 msgid "Can't call 'corporate_fetch' from WuBook"
 msgstr "No se puede llamar 'corporate_fetch' desde Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:272
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:285
 #, python-format
 msgid "Can't cancel reservation in WuBook"
 msgstr "No se puede cancelar la reserva en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/models/hotel_reservation/common.py:57
+#: code:addons/hotel_channel_connector_wubook/models/hotel_reservation/common.py:59
 #, python-format
 msgid "Can't cancel reservations from OTA's"
 msgstr "No se puede cancelar reservas de OTAa"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/models/hotel_reservation/common.py:78
+#: code:addons/hotel_channel_connector_wubook/models/hotel_reservation/common.py:73
 #, python-format
 msgid "Can't confirm OTA's cancelled reservations"
 msgstr "No se puede confirmar reservas canceladas de OTAa"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:80
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:81
 #, python-format
 msgid "Can't connect with channel!"
 msgstr "No se puede conectar con el Channel!"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:505
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:533
 #, python-format
 msgid "Can't create plan restriction in wubook"
 msgstr "No se puede crear el plan de restricciones en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:258
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:271
 #, python-format
 msgid "Can't create reservations in wubook"
 msgstr "No se puede crear las reservas en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:145
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:146
 #, python-format
 msgid "Can't create room in WuBook"
 msgstr "No se puede crear la habitación en Wubook"
@@ -101,38 +106,38 @@ msgid "Can't delete channel room type class"
 msgstr "No se puede eliminar la categoría de habitación"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:529
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:557
 #, python-format
 msgid "Can't delete plan restriction on wubook"
 msgstr "No se puede eliminar el plan de restricciones en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:362
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:390
 #, python-format
 msgid "Can't delete pricing plan from wubook"
 msgstr "No se puede eliminar la tarifa desde Wubook\t"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:183
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:184
 #, python-format
 msgid "Can't delete room in WuBook"
 msgstr "No se puede eliminar la habitación en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:442
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:475
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:470
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:503
 #, python-format
 msgid "Can't fetch restriction plans from wubook"
 msgstr "No se puede importar el plan de restricciones desde Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:195
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:196
 #, python-format
 msgid "Can't fetch room values from WuBook"
 msgstr "No se puede importar las habitaciones desde Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:209
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:222
 #, python-format
 msgid "Can't fetch rooms values from WuBook"
 msgstr "No se puede importar las habitaciones desde Wubook"
@@ -145,14 +150,14 @@ msgid "Can't found a backend!"
 msgstr "No se puede encontrar el backend!"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:414
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:428
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:442
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:456
 #, python-format
 msgid "Can't get pricing plans from wubook"
 msgstr "No se puede importar las tarifas desde Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:538
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:566
 #, python-format
 msgid "Can't import channels info from wubook"
 msgstr "No se puede importar la informacion de Canales desde Wubook"
@@ -164,7 +169,7 @@ msgid "Can't map a pricing plan from wubook"
 msgstr "No se puede conectar la tarifa con Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:307
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:335
 #, python-format
 msgid "Can't mark as readed a reservation in wubook"
 msgstr "No se puede marcar como leída la reserva en Wubook"
@@ -176,61 +181,57 @@ msgid "Can't modify channel room type class"
 msgstr "No se puede modificar la categoría de habitación"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:171
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:172
 #, python-format
 msgid "Can't modify room in WuBook"
 msgstr "No se puede modificar la habitación en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:351
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:379
 #, python-format
 msgid "Can't modify virtual pricing plan in wubook"
 msgstr "No se puede modificar la tarifa en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:296
-#, python-format
-msgid "Can't process reservation from wubook"
-msgstr "No se puede procesar la reserva desde Wubook"
-
-#. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:285
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:298
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:312
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:324
 #, python-format
 msgid "Can't process reservations from wubook"
 msgstr "No se puede procesar las reservas desde Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:517
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:545
 #, python-format
 msgid "Can't rename plan restriction in wubook"
 msgstr "No se puede renombrar el plan de restricciones en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:491
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:519
 #, python-format
 msgid "Can't update plan restrictions on wubook"
 msgstr "No se puede actualizar el plan de restricciones en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:389
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:417
 #, python-format
 msgid "Can't update pricing plan in wubook"
 msgstr "No se puede actualizar la tarifa en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:375
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:403
 #, python-format
 msgid "Can't update pricing plan name in wubook"
 msgstr "No se puede actualizar el nombre de la tarifa en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:403
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:431
 #, python-format
 msgid "Can't update pricing plan period in wubook"
 msgstr "No se puede actualizar el periodo de la tarifa en Wubook"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:220
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:233
 #, python-format
 msgid "Can't update rooms availability in WuBook"
 msgstr "No se puede actualizar la disponibilidad en Wubook"
@@ -258,17 +259,17 @@ msgstr "Exportar Cambios al Channel"
 #. module: hotel_channel_connector_wubook
 #: model:ir.model,name:hotel_channel_connector_wubook.model_channel_hotel_reservation
 msgid "Channel Hotel Reservation"
-msgstr "Resercas del Channel"
+msgstr "Reserva del Channel"
 
 #. module: hotel_channel_connector_wubook
 #: model:ir.model,name:hotel_channel_connector_wubook.model_channel_hotel_room_type
 msgid "Channel Hotel Room"
-msgstr "Habitaciones del Channel"
+msgstr "Habitación del Channel"
 
 #. module: hotel_channel_connector_wubook
 #: model:ir.model,name:hotel_channel_connector_wubook.model_channel_ota_info
 msgid "Channel OTA Info"
-msgstr "Información de OTAs en el Channel"
+msgstr "Channel OTA Info"
 
 #. module: hotel_channel_connector_wubook
 #: model:ir.model.fields,field_description:hotel_channel_connector_wubook.field_channel_backend_pkey
@@ -283,8 +284,18 @@ msgstr "Channel lcode"
 #. module: hotel_channel_connector_wubook
 #: code:addons/hotel_channel_connector_wubook/models/hotel_room_type_availability/importer.py:76
 #, python-format
-msgid "Channel try to change availiability!                                         Updating channel values...                                         (Odoo: %d -- Channel: %d"
-msgstr "El Channel está intentando modificar la disponibilidad!                                        Actualizando valores del Channel...                                         (Odoo: %d -- Channel: %d"
+msgid "Channel try to change availiability!                                         Updating channel values for Room Type %s...                                         (Odoo: %d -- Channel: %d)"
+msgstr "Channel try to change availiability!                                         Updating channel values for Room Type %s...                                         (Odoo: %d -- Channel: %d)"
+
+#. module: hotel_channel_connector_wubook
+#: model:ir.model.fields,field_description:hotel_channel_connector_wubook.field_channel_hotel_reservation_modified_reservations
+msgid "Code Modifications"
+msgstr "Code Modifications"
+
+#. module: hotel_channel_connector_wubook
+#: model:ir.model,name:hotel_channel_connector_wubook.model_res_company
+msgid "Companies"
+msgstr "Compañías"
 
 #. module: hotel_channel_connector_wubook
 #: model:ir.model,name:hotel_channel_connector_wubook.model_channel_backend
@@ -302,7 +313,7 @@ msgid "Hotel Reservation"
 msgstr "Reserva del hotel"
 
 #. module: hotel_channel_connector_wubook
-#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:66
+#: code:addons/hotel_channel_connector_wubook/components/backend_adapter.py:67
 #, python-format
 msgid "Invalid Channel Parameters!"
 msgstr "Parámetros del Channel incorrectos!"
@@ -315,9 +326,14 @@ msgid "Invalid Input Parameters!"
 msgstr "Parametros Incorrectos!"
 
 #. module: hotel_channel_connector_wubook
+#: model:ir.model.fields,field_description:hotel_channel_connector_wubook.field_res_company_wu_journal_id
+msgid "Payment journal"
+msgstr "Diario pagos"
+
+#. module: hotel_channel_connector_wubook
 #: model:ir.model,name:hotel_channel_connector_wubook.model_hotel_room_type_class
 msgid "Room Type Class"
-msgstr "Categoría de Habitación"
+msgstr "Room Type Class"
 
 #. module: hotel_channel_connector_wubook
 #: code:addons/hotel_channel_connector_wubook/models/hotel_room_type/common.py:39
@@ -331,11 +347,42 @@ msgid "Use restriction plan ID = 0 for the Channel default Restriction Plan."
 msgstr "Usa el ID = 0  en el plan de restruccuibes para el plan de restricciones por defecto del Channel"
 
 #. module: hotel_channel_connector_wubook
+#: model:ir.model.fields,field_description:hotel_channel_connector_wubook.field_channel_backend_wubook_parity_pricelist_id
+msgid "WuBook Parity Pricelist"
+msgstr "WuBook Parity Pricelist"
+
+#. module: hotel_channel_connector_wubook
+#: model:ir.ui.view,arch_db:hotel_channel_connector_wubook.fastcheckin_url_view_company_form
+msgid "Wubook Payments"
+msgstr "Wubook Payments"
+
+#. module: hotel_channel_connector_wubook
 #: model:ir.model.fields,field_description:hotel_channel_connector_wubook.field_hotel_folio_wseed
 msgid "Wubook Session Seed"
 msgstr "Wubook Session Seed"
 
 #. module: hotel_channel_connector_wubook
+#: model:ir.model.fields,help:hotel_channel_connector_wubook.field_res_company_wu_journal_id
+msgid "Wubook card payment journal."
+msgstr "Diario para anotar los pagos por tarjeta."
+
+#. module: hotel_channel_connector_wubook
 #: model:ir.model.fields,field_description:hotel_channel_connector_wubook.field_channel_ota_info_ical
 msgid "ical"
 msgstr "ical"
+
+#. module: hotel_channel_connector_wubook
+#: code:addons/hotel_channel_connector_wubook/models/hotel_room_type/deleter.py:22
+#: code:addons/hotel_channel_connector_wubook/models/hotel_room_type/exporter.py:48
+#: code:addons/hotel_channel_connector_wubook/models/hotel_room_type/exporter.py:83
+#: code:addons/hotel_channel_connector_wubook/models/hotel_room_type_restriction/deleter.py:22
+#: code:addons/hotel_channel_connector_wubook/models/hotel_room_type_restriction/exporter.py:27
+#: code:addons/hotel_channel_connector_wubook/models/hotel_room_type_restriction/exporter.py:38
+#: code:addons/hotel_channel_connector_wubook/models/product_pricelist/deleter.py:22
+#: code:addons/hotel_channel_connector_wubook/models/product_pricelist/exporter.py:27
+#: code:addons/hotel_channel_connector_wubook/models/product_pricelist/exporter.py:38
+#: code:addons/hotel_channel_connector_wubook/models/product_pricelist/exporter.py:73
+#: code:addons/hotel_channel_connector_wubook/models/product_pricelist/exporter.py:109
+#, python-format
+msgid "message"
+msgstr "message"

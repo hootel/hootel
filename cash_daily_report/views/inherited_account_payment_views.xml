@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<odoo>
+
+    <record id="view_account_payment_tree" model="ir.ui.view">
+        <field name="name">view.account.payment.tree</field>
+        <field name="model">account.payment</field>
+        <field name="priority">20</field>
+        <field name="inherit_id" ref="account.view_account_payment_tree"/>
+        <field name="arch" type="xml">
+          <xpath expr="//field[@name='state']" position="after">
+              <field name="validated" invisible="True" />
+                <button icon="fa fa-2x fa-check-square"
+                    type="object"
+                    class="oe_stat_button"
+                    name="validate"
+                    attrs="{'invisible':[('validated','=', False)]}"
+                    groups="hotel.group_hotel_manager" />
+                <button icon="fa fa-2x fa-square-o"
+                    type="object"
+                    class="oe_stat_button"
+                    name="validate"
+                    attrs="{'invisible':[('validated','=', True)]}"
+                    groups="hotel.group_hotel_manager" />
+        </xpath>
+        </field>
+    </record>
+
+    <record id="view_account_supplier_payment_tree" model="ir.ui.view">
+        <field name="name">view.account.supplier.payment.tree</field>
+        <field name="model">account.payment</field>
+        <field name="priority">20</field>
+        <field name="inherit_id" ref="account.view_account_supplier_payment_tree"/>
+        <field name="arch" type="xml">
+          <xpath expr="//field[@name='state']" position="after">
+                <field name="validated" invisible="True" />
+                <button icon="fa fa-2x fa-check-square"
+                    type="object"
+                    class="oe_stat_button"
+                    name="validate"
+                    attrs="{'invisible':[('validated','=', False)]}"
+                    groups="hotel.group_hotel_manager" />
+                <button icon="fa fa-2x fa-square-o"
+                    type="object"
+                    class="oe_stat_button"
+                    name="validate"
+                    attrs="{'invisible':[('validated','=', True)]}"
+                    groups="hotel.group_hotel_manager" />
+        </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -463,7 +463,7 @@
                         'exit_date': checkout,'reservation_id': id, 'hidden_checkin_partner': True, 'edit_checkin_partner': True }"
                     attrs="{'invisible':['|','|', ('state','not in',('confirm','booking')),('checkin_partner_pending_count','=', 0),('parent_reservation','!=',False)]}"
                 />
-                <field name="room_id" options="{'no_create': True,'no_open': True}" />
+                <field name="room_id" options="{'no_create': True,'no_open': True}" required="1"/>
                 <button type="action" class="oe_stat_button"
                     icon="fa fa-2x fa-list-ul"
                     name="%(open_hotel_reservation_form_tree_all)d"

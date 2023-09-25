@@ -37,7 +37,10 @@
     },
     'data': [
         'wizard/cash_daily_report.xml',
+        'views/inherited_account_payment_views.xml',
+        'views/inherited_payment_return_views.xml',
         'data/menus.xml',
+        'data/cron_jobs.xml',
     ],
     'qweb': [],
     'test': [

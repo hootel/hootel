@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
@@ -26,9 +27,14 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+def inv_percent_inc(amount, percent):
+    """Return the amount to which a percentage was increment applied."""
+    return (amount - (amount*(100-percent))/100)
+
+
 def inv_percent(amount, percent):
     """Return the amount to which a percentage was applied."""
-    return round(amount*(100/float(100-percent)) - amount, 2)
+    return amount/((100-percent)/100)
 
 
 class Data_Bi(models.Model):
@@ -40,6 +46,8 @@ class Data_Bi(models.Model):
     def export_data_bi(self,
                        archivo=False,
                        fechafoto=date.today().strftime('%Y-%m-%d')):
+                    #    bloque=10000,
+                    #    parte=0:
         u"""Prepare a Json Objet to export data for MyDataBI.
 
         Generate a dicctionary to by send in JSON
@@ -59,6 +67,8 @@ class Data_Bi(models.Model):
             archivo == 12 'Segmentos'
             archivo == 13 'Clientes'
             archivo == 14 'Estado Reservas'
+            archivo == 15 'Room names'
+            archivo == 16 'Histocico a 31-12-2022'
         fechafoto = start date to take data
         """
 
@@ -77,14 +87,30 @@ class Data_Bi(models.Model):
         limit_ago = (fechafoto - timedelta(
             days=self.env.user.company_id.data_bi_days)).strftime('%Y-%m-%d')
 
+        _logger.info("DataBi: Calculating From DATE: %s -------", limit_ago)
+
         dic_export = []  # Diccionario con todo lo necesario para exportar.
+        historico = False
+        if archivo == 16:
+            archivo = 0
+            historico = True
+            fechafoto = '2022-09-01'
+        if archivo == 17 and bloque > 0:
+            archivo = 6
+            historico = True
+        if historico is False:
+            estado_array = ["draft", "confirm", "onboard", "done", "cancel", "arrival_delayed", "departure_delayed"]
+            if (archivo == 0) or (archivo == 10) or (archivo == 6):
+                line_res = self.env['hotel.reservation.line'].search(
+                                        [('date', '>=', limit_ago)], order="id")
+        else:
+            estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled',
+                                "No Show", "No Checkout"]
+            if (archivo == 0) or (archivo == 10) or (archivo == 6):
+                line_res = self.env['hotel.reservation.line'].search(
+                                        [('date', '<=', '2022-09-01')], order="id")
         if (archivo == 0) or (archivo == 7) or (archivo == 8):
             room_types = self.env['hotel.room.type'].search([])
-        if (archivo == 0) or (archivo == 10) or (archivo == 6):
-            line_res = self.env['hotel.reservation.line'].search(
-                                    [('date', '>=', limit_ago)], order="id")
-        estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
-
         if (archivo == 0) or (archivo == 1):
             dic_tarifa = self.data_bi_tarifa(compan.id_hotel)
             dic_export.append({'Tarifa': dic_tarifa})
@@ -126,11 +152,18 @@ class Data_Bi(models.Model):
         if (archivo == 0) or (archivo == 14):
             dic_estados = self.data_bi_estados(compan.id_hotel, estado_array)
             dic_export.append({'Estado Reservas': dic_estados})
+        if (archivo == 0) or (archivo == 15):
+            dic_rooms = self.data_bi_rooms(compan.id_hotel)
+            dic_export.append({'Nombre Habitaciones': dic_rooms})
         if (archivo == 0) or (archivo == 6):
             dic_reservas = self.data_bi_reservas(compan.id_hotel,
                                                  line_res,
                                                  estado_array,
-                                                 dic_clientes)
+                                                 dic_clientes,
+                                                 historico,
+                                                #  bloque,
+                                                #  parte
+                                                 )
             dic_export.append({'Reservas': dic_reservas})
 
         dictionaryToJson = json.dumps(dic_export)
@@ -142,9 +175,22 @@ class Data_Bi(models.Model):
         return dictionaryToJson
 
     @api.model
+    def data_bi_rooms(self, compan):
+        dic_rooms = []  # Diccionario con las habitaciones
+        rooms = self.env['hotel.room'].search_read([], ['name'])
+        _logger.info("DataBi: Adding the name of %s rooms.", str(len(rooms)))
+        for room in rooms:
+            dic_rooms.append({'ID_Hotel': compan,
+                              'ID_Room': room['id'],
+                              'Descripcion': room['name']})
+        return dic_rooms
+
+    @api.model
     def data_bi_tarifa(self, compan):
         dic_tarifa = []  # Diccionario con las tarifas
-        tarifas = self.env['product.pricelist'].search_read([], ['name'])
+        # tarifas = self.env['product.pricelist'].search_read([], ['name'])
+        tarifas = self.env['product.pricelist'].search_read(
+            ['|', ('active', '=', False), ('active', '=', True)], ['name'])
         _logger.info("DataBi: Calculating %s fees", str(len(tarifas)))
         for tarifa in tarifas:
             dic_tarifa.append({'ID_Hotel': compan,
@@ -157,7 +203,7 @@ class Data_Bi(models.Model):
         _logger.info("DataBi: Calculating all channels")
         dic_canal = []  # Diccionario con los Canales
         canal_array = ['Puerta', 'Mail', 'Telefono', 'Call Center', 'Web',
-                       'Agencia', 'Touroperador', 'Virtual Door']
+                       'Agencia', 'Touroperador', 'Virtual Door', u'Desvío']
         for i in range(0, len(canal_array)):
             dic_canal.append({'ID_Hotel': compan,
                               'ID_Canal': i,
@@ -207,8 +253,7 @@ class Data_Bi(models.Model):
         _logger.info("DataBi: Calculating all the states of the reserves")
         dic_estados = []  # Diccionario con los Estados Reserva
         estado_array_txt = ['Borrador', 'Confirmada', 'Hospedandose',
-                            'Checkout', 'Cancelada']
-        # estado_array = ['draft', 'confirm', 'booking', 'done', 'cancelled']
+                            'Checkout', 'Cancelada', "No Show", "No Checkout"]
         for i in range(0, len(estado_array)):
             dic_estados.append({'ID_Hotel': compan,
                                 'ID_EstadoReserva': i,
@@ -338,7 +383,8 @@ class Data_Bi(models.Model):
                              'Descripcion': u'Teléfono'})
         dic_clientes.append({'ID_Hotel': compan,
                              'ID_Cliente': 906,
-                             'Descripcion': u'Call-Center'})
+                             'Descripcion': u'SH360 Call'})
+                            #  'Descripcion': u'Call Center'})
         dic_clientes.append({'ID_Hotel': compan,
                              'ID_Cliente': 907,
                              'Descripcion': u'Agencia'})
@@ -348,17 +394,27 @@ class Data_Bi(models.Model):
         dic_clientes.append({'ID_Hotel': compan,
                              'ID_Cliente': 909,
                              'Descripcion': u'Virtual Door'})
+        dic_clientes.append({'ID_Hotel': compan,
+                             'ID_Cliente': 910,
+                             'Descripcion': u'Desvío'})
         return dic_clientes
 
     @api.model
     def data_bi_bloqueos(self, compan, lines):
         dic_bloqueos = []  # Diccionario con Bloqueos
+        # if self.env.user.company_id.json_outs_v3_data is not False:
+        #     dic_bloqueos = self.env.user.company_id.json_outs_v3_data
+        # else:
+        #     # Debug Stop -------------------
+        #     import wdb
+        #     wdb.set_trace()
+        #     # Debug Stop ------------------
+
         lines = lines.filtered(
             lambda n: (n.reservation_id.reservation_type != 'normal') and (
                        n.reservation_id.state != 'cancelled'))
         _logger.info("DataBi: Calculating %s Bloqued", str(len(lines)))
         for line in lines:
-            # if linea.reservation_id.state != 'cancelled':
             if line.reservation_id.reservation_type == 'out':
                 id_m_b = 1
             else:
@@ -368,18 +424,35 @@ class Data_Bi(models.Model):
                 'Fecha_desde': line.date,
                 'Fecha_hasta': (datetime.strptime(line.date, "%Y-%m-%d") +
                                 timedelta(days=1)).strftime("%Y-%m-%d"),
-                'ID_Tipo_Habitacion': line.reservation_id.room_type_id.id,
+                'ID_Tipo_Habitacion':
+                    line.reservation_id.room_id.room_type_id.id,
                 'ID_Motivo_Bloqueo': id_m_b,
                 'Nro_Habitaciones': 1})
         return dic_bloqueos
 
     @api.model
-    def data_bi_reservas(self, compan, lines, estado_array, dic_clientes):
+    def data_bi_reservas(self, compan, lines, estado_array, dic_clientes, historico):
+    # def data_bi_reservas(self, compan, lines, estado_array, dic_clientes, historico, bloque, parte):
         dic_reservas = []
+
+        if (self.env.user.company_id.json_reservations_v3_data is not False) and (historico is False):
+            _logger.info("DataBi: Calculating From V3")
+            dic_reservas = self.reserva_data_from_v3(dic_clientes)
+            return dic_reservas
+
         lineas = lines.filtered(
-            lambda n: (n.reservation_id.reservation_type == 'normal') and (
-                       n.price > 0))
+            lambda n:
+                (n.reservation_id.reservation_type == 'normal') and
+                (n.price > 0)
+                )
         _logger.info("DataBi: Calculating %s reservations", str(len(lineas)))
+        # if parte > 0:
+        #     _logger.info("DataBi: Calculo por BLOQUES DE %s reservas. Bloque %s", str(bloque), str(parte))
+        #     inicio = (parte * bloque) - bloque
+        #     fin = (parte * bloque) - 1
+        #     lineas = lineas[inicio:fin]
+
+        # _logger.info("DataBi: Calculating %s reservations for parte %s", str(len(lineas), str(parte)))
         channels = {'door': 0,
                     'mail': 1,
                     'phone': 2,
@@ -387,7 +460,8 @@ class Data_Bi(models.Model):
                     'web': 4,
                     'agency': 5,
                     'operator': 6,
-                    'virtualdoor': 7}
+                    'virtualdoor': 7,
+                    'detour': 8}
 
         for linea in lineas:
             # _logger.info("DataBi: %s", linea.reservation_id.folio_id.name)
@@ -409,13 +483,32 @@ class Data_Bi(models.Model):
                 precio_dto = ota_prices[0]['precio_dto']
                 precio_iva = ota_prices[0]['precio_iva']
                 precio_comision = ota_prices[0]['precio_comision']
+            elif linea.reservation_id.channel_type == 'call':
+                # Call Center. 7% comision
+                precio_comision = (precio_neto*7/100)
+                precio_neto -= precio_comision
+                precio_iva = (precio_neto*10/100)
+                precio_neto -= precio_iva
+            else:
+                precio_iva = round((precio_neto-(precio_neto/1.1)), 2)
+                precio_neto -= precio_iva
 
-            if linea.reservation_id.discount != 0:
-                precio_dto = linea.price * (
-                    linea.reservation_id.discount/100)
+            if (linea.discount != 0) or (linea.cancel_discount != 0):
+                precio_dto = linea.price * ((linea.discount or 0.0) * 0.01)
+                price = linea.price - precio_dto
+                precio_dto += price * ((linea.cancel_discount or 0.0) * 0.01)
+            regimen = 0
 
+            if linea.reservation_id.board_service_room_id.id:
+                regimen = linea.reservation_id.board_service_room_id.\
+                                                    hotel_board_service_id.id
+
+            cuna = 0
+            for service in linea.reservation_id.service_ids:
+                if service.name.upper().find("CUNA") == 0:
+                    cuna += 1
             dic_reservas.append({
-                'ID_Reserva': linea.reservation_id.folio_id.id,
+                'ID_Reserva': linea.reservation_id.id,
                 'ID_Hotel': compan,
                 'ID_EstadoReserva': estado_array.index(
                                                 linea.reservation_id.state),
@@ -431,17 +524,26 @@ class Data_Bi(models.Model):
                 'ID_TipoHabitacion': linea.reservation_id.room_type_id.id,
                 'ID_HabitacionDuerme':
                     linea.reservation_id.room_id.room_type_id.id,
-                'ID_Regimen': 0,
+                'ID_Regimen': regimen,
                 'Adultos': linea.reservation_id.adults,
                 'Menores': linea.reservation_id.children,
-                'Cunas': 0,
+                'Cunas': cuna,
                 'PrecioDiario': precio_neto,
                 'PrecioComision': precio_comision,
                 'PrecioIva': precio_iva,
                 'PrecioDto': precio_dto,
                 'ID_Tarifa': linea.reservation_id.pricelist_id.id,
-                'ID_Pais': self.data_bi_get_codeine(linea)
+                'ID_Pais': self.data_bi_get_codeine(linea),
+                'ID_Room': linea.reservation_id.room_id.id,
+                'FechaCancelacion': "NONE",
+                'ID_Folio': linea.reservation_id.folio_id.name,
                 })
+            if linea.reservation_id.state == 'cancelled':
+                dic_reservas[-1]['FechaCancelacion'] = \
+                    linea.reservation_id.last_updated_res[:10]
+                # _logger.info("DataBi: %s CANCELADA %s",
+                #              dic_reservas[-1]['Entrada'],
+                #              dic_reservas[-1]['ID_Folio'])
         # ID_Reserva numérico Código único de la reserva
         # ID_Hotel numérico Código del Hotel
         # ID_EstadoReserva numérico Código del estado de la reserva
@@ -461,6 +563,7 @@ class Data_Bi(models.Model):
         # PrecioDiario numérico con 2 decimales Precio por noche de la reserva
         # ID_Tarifa numérico Código de la tarifa aplicada a la reserva
         # ID_Pais numérico Código del país
+
         return dic_reservas
 
     @api.model
@@ -477,6 +580,8 @@ class Data_Bi(models.Model):
             response = 906
         elif reserva.reservation_id.channel_type == "virtualdoor":
             response = 909
+        elif reserva.reservation_id.channel_type == "detour":
+            response = 910
         elif reserva.reservation_id.channel_type == "web":
             if reserva.reservation_id.ota_id.id:
                 # OTA
@@ -486,13 +591,14 @@ class Data_Bi(models.Model):
                 response = 999
         elif reserva.reservation_id.channel_type == "agency":
             tour = reserva.reservation_id.tour_operator_id
+            response = 907
             if tour.name:
                 mach = next((
                     l for l in dic_clientes if l['Descripcion'] == tour.name),
                                                                         False)
-                response = mach['ID_Cliente']
-            else:
-                response = 907
+                if mach is not False:
+                    response = mach['ID_Cliente']
+
         elif reserva.reservation_id.channel_type == "operator":
             tour = reserva.reservation_id.tour_operator_id
             if tour.name:
@@ -500,10 +606,8 @@ class Data_Bi(models.Model):
                     l for l in dic_clientes if l['Descripcion'] == tour.name),
                                                                         False)
                 response = mach['ID_Cliente']
-                # _logger.info("%s Por Agencia: %s :", mach['Descripcion'], str(response))
             else:
                 response = 908
-                # _logger.info("%s Por Agencia: %s :",reserva.reservation_id.folio_id.name, str(response))
 
         return response
 
@@ -521,68 +625,79 @@ class Data_Bi(models.Model):
             precio_iva = (precio_neto*10/100)
             precio_neto -= precio_iva
 
-        if reserva.reservation_id.ota_id.ota_id == "9":
+        elif reserva.reservation_id.ota_id.ota_id == "9":
             # Hotelbeds 20% comision
             precio_comision = (precio_neto*20/100)
             precio_neto -= precio_comision
             precio_iva = (precio_neto*10/100)
             precio_neto -= precio_iva
 
-        if reserva.reservation_id.ota_id.ota_id == "11":
+        elif reserva.reservation_id.ota_id.ota_id == "11":
             # HRS 20% comision
             precio_comision = (precio_neto*20/100)
             precio_neto -= precio_comision
             precio_iva = (precio_neto*10/100)
             precio_neto -= precio_iva
 
-        if reserva.reservation_id.ota_id.ota_id == "1":
+        elif reserva.reservation_id.ota_id.ota_id == "1":
             # Expedia.
-            precio_comision = (precio_neto*15/100)
-            precio_neto -= precio_comision
-            precio_iva = (precio_neto*10/100)
+            expedia_rate = self.data_bi_rate_expedia(reserva)
+
+            # Odoo IVA discount
+            precio_iva = precio_neto-(precio_neto/1.1)
             precio_neto -= precio_iva
-            if reserva.reservation_id.channel_bind_ids.channel_raw_data:
-                data = json.loads(
-                    reserva.reservation_id.channel_bind_ids.channel_raw_data)
 
-                jsonBooked = data['booked_rooms'][0]
-                if jsonBooked.get('ancillary').get(
-                        'channel_rate_name') is not None:
-                    jsonRate = jsonBooked.get('ancillary').get(
-                        'channel_rate_name')
-                    # _logger.warning("EXPEDIA ancillary : %s - %s",
-                    #                 jsonRate, reserva.id)
-
-                elif jsonBooked.get('roomdays')[0].get(
-                        'ancillary').get(
-                            'channel_rate_name') is not None:
-                    jsonRate = jsonBooked.get(
-                        'roomdays')[0].get(
-                        'ancillary').get('channel_rate_name')
-                    # _logger.warning("EXPEDIA roomdays : %s - %s",
-                    #                 jsonRate, reserva.id)
-
-                else:
-                    _logger.critical(
-                        "EXPEDIA Tarifa No Contemplada : "
-                        + jsonBooked)
-
-                jsonRefundable = jsonRate.upper().find('REFUNDABLE')
-                # _logger.warning("EXPEDIA Tarifa : %s", jsonRate)
-                # _logger.warning("EXPEDIA Tarifa : %s y %s",
-                #                 jsonRate, str(jsonRefundable))
-
-                # 10 % Iva
-                precio_iva = round((precio_neto-(precio_neto/1.1)), 2)
-                # 18 % comision ?
+            if (expedia_rate[3] == 'MERCHANT'):
+                # EXPEDIA COLECT
                 precio_comision = inv_percent(
-                            precio_neto, self.env.user.company_id.expedia_rate)
-                precio_neto += precio_comision
-                # 3% Refundable ?
-                if jsonRefundable >= 0:
-                    precio_dto = inv_percent(precio_neto, 3)
-                    precio_neto += precio_dto
+                    precio_neto, expedia_rate[1]) - precio_neto
+                precio_calculo = precio_neto + precio_comision
+                precio_neto -= precio_comision
+                # iva "interno" de expedia.....
+                precio_iva2 = (precio_calculo*1.1) - precio_calculo
+                precio_calculo += precio_iva2
+                if expedia_rate[2] != 'NONE':
+                    # FENCED MOD
+                    # De enero a marzo: 7%
+                    # De abril a 15 octubre: 5%
+                    # De 16 octubre a 31 diciembre: 7%
+                    fence_dto = 7
+                    fence_dia = int(reserva.date[8:10])
+                    fence_mes = int(reserva.date[5:7])
+                    if (fence_mes >= 4) and (fence_mes <= 10):
+                        fence_dto = 5
+                        if (fence_dia > 15) and (fence_mes == 10):
+                            fence_dto = 7
+                    precio_dto += inv_percent(
+                        precio_calculo, fence_dto) - precio_calculo
+                # Corrector segundo iva...
+                precio_dto += (precio_iva2 - precio_iva)
 
+            else:
+                precio_comision = inv_percent_inc(precio_neto, expedia_rate[1])
+                precio_neto -= precio_comision
+
+            # precio_neto = round(precio_neto, 2)
+            # precio_comision = round(precio_comision, 2)
+            # precio_iva = round(precio_iva, 2)
+            # precio_dto = round(precio_dto, 2)
+            # _logger.info("%s - %s - %s - %s - En Odoo:%s",
+            #              reserva.reservation_id.folio_id.name,
+            #              expedia_rate[0],
+            #              expedia_rate[2],
+            #              expedia_rate[3],
+            #              reserva.price
+            #              )
+            # _logger.info('Neto: %s Comision: %s IVA: %s DTO: %s ',
+            #              precio_neto,
+            #              precio_comision,
+            #              precio_iva,
+            #              precio_dto)
+
+        precio_neto = round(precio_neto, 2)
+        precio_comision = round(precio_comision, 2)
+        precio_iva = round(precio_iva, 2)
+        precio_dto = round(precio_dto, 2)
         response_dic.append({'ota': reserva.reservation_id.ota_id.id,
                              'ota_id': reserva.reservation_id.ota_id.ota_id,
                              'precio_odoo': reserva.price,
@@ -592,6 +707,76 @@ class Data_Bi(models.Model):
                              'precio_dto': precio_dto,
                              })
         return response_dic
+
+    @api.model
+    def data_bi_rate_expedia(self, reserva):
+        if datetime.strptime(reserva.reservation_id.folio_id.date_order[:10],
+                             "%Y-%m-%d") < datetime(2019, 5, 9):
+            comi_rate = 18
+        else:
+            comi_rate = self.env.user.company_id.expedia_rate
+        json_rate = ''
+        json_promo = 'NONE'
+        json_pay_model = ''
+        if reserva.reservation_id.channel_bind_ids.channel_raw_data:
+            data = json.loads(
+                reserva.reservation_id.channel_bind_ids.channel_raw_data)
+
+            data_channel = data.get('channel_data')
+            if 'pay_model' in data_channel:
+                json_pay_model = data.get('channel_data')['pay_model'].upper()
+            else:
+                _logger.critical("EXPEDIA NO pay_model: %s",
+                                 reserva.reservation_id.folio_id.name,)
+                json_pay_model = 'MERCHANT'
+
+            if data.get('ancillary') is not None:
+                json_rate = data.get('ancillary').get('Expedia Rates').upper()
+                # _logger.info("EXPEDIA ANCILLARY 1 : %s - %s",
+                #              json_rate,
+                #              reserva.reservation_id.folio_id.name)
+
+            else:
+                jsonBooked = data['booked_rooms'][0]
+                if jsonBooked.get('ancillary').get(
+                        'channel_rate_name') is not None:
+                    json_rate = jsonBooked.get('ancillary').get(
+                        'channel_rate_name').upper()
+                    # _logger.info("EXPEDIA ANCILLARY 2 : %s - %s",
+                    #              json_rate,
+                    #              reserva.reservation_id.folio_id.name)
+
+                elif data.get('booked_rooms')[0].get(
+                        'roomdays')[0].get('ancillary').get(
+                                            'channel_rate_name') is not None:
+                    json_rate = data.get(
+                                'booked_rooms')[0].get(
+                                'roomdays')[0].get(
+                                'ancillary').get('channel_rate_name').upper()
+                    json_promo = data.get(
+                                'booked_rooms')[0].get(
+                                'roomdays')[0].get(
+                                'ancillary').get('promoName').upper()
+                    # _logger.info("EXPEDIA ANCILLARY 3 : %s - %s",
+                    #              json_rate,
+                    #              reserva.reservation_id.folio_id.name)
+
+                else:
+                    _logger.critical("EXPEDIA Tarifa No Contemplada: %s",
+                                     reserva.reservation_id.folio_id.name)
+                    json_rate = 'ROOM ONLY'
+        else:
+            _logger.error("EXPEDIA NO RAW DATA: %s",
+                          reserva.reservation_id.folio_id.name)
+            json_rate = 'ROOM ONLY'
+
+        if json_rate == '':
+            _logger.critical("EXPEDIA Tarifa No Contemplada: %s",
+                             reserva.reservation_id.folio_id.name)
+            json_rate = 'ROOM ONLY'
+        if json_promo == '':
+            json_promo = 'NONE'
+        return [json_rate, comi_rate, json_promo, json_pay_model]
 
     @api.model
     def data_bi_get_codeine(self, reserva):
@@ -607,3 +792,39 @@ class Data_Bi(models.Model):
         # Debug Stop -------------------
         # import wdb; wdb.set_trace()
         # Debug Stop -------------------
+
+    @api.model
+    def reserva_data_from_v3(self, dic_clientes):
+        dic_reservas = []
+        channels = {'door': 0,
+            'mail': 1,
+            'phone': 2,
+            'call': 3,
+            'web': 4,
+            'agency': 5,
+            'operator': 6,
+            'virtualdoor': 7,
+            'detour': 8}
+        clientes = {}
+        for cliente in dic_clientes:
+            clientes[cliente["Descripcion"]] = cliente["ID_Cliente"]
+
+        reservas = json.loads(
+            self.env.user.company_id.json_reservations_v3_data)
+        _logger.info("DataBi: Calculating %s FROM V3", str(len(reservas)))
+
+        for reserva in reservas:
+            reserva["ID_Hotel"] = self.env.user.company_id[0].id_hotel
+            reserva["ID_Canal"] = channels[reserva["ID_Canal"]] if reserva["ID_Canal"] in channels else 0
+            reserva["ID_Cliente"] = clientes[reserva["ID_Cliente"]] if reserva["ID_Cliente"] in clientes else 0
+            reserva["ID_Regimen"] = clientes[reserva["ID_Regimen"]] if reserva["ID_Regimen"] in clientes else 0
+
+            if str(reserva["ID_Reserva"])[-5:] == "00000":
+                reserva["ID_Reserva"] = int(str(reserva["ID_Reserva"])[0:-3])
+            if str(reserva["ID_Folio"])[-5:] == "00000":
+                reserva["ID_Folio"] = int(str(reserva["ID_Folio"])[0:-3])
+
+            dic_reservas.append(reserva)
+
+        return dic_reservas
+
