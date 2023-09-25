@@ -45,9 +45,9 @@ class Data_Bi(models.Model):
     @api.model
     def export_data_bi(self,
                        archivo=False,
-                       fechafoto=date.today().strftime('%Y-%m-%d')),
-                       bloque=10000,
-                       parte=0:
+                       fechafoto=date.today().strftime('%Y-%m-%d')):
+                    #    bloque=10000,
+                    #    parte=0:
         u"""Prepare a Json Objet to export data for MyDataBI.
 
         Generate a dicctionary to by send in JSON
@@ -161,8 +161,8 @@ class Data_Bi(models.Model):
                                                  estado_array,
                                                  dic_clientes,
                                                  historico,
-                                                 bloque,
-                                                 parte
+                                                #  bloque,
+                                                #  parte
                                                  )
             dic_export.append({'Reservas': dic_reservas})
 
@@ -431,7 +431,8 @@ class Data_Bi(models.Model):
         return dic_bloqueos
 
     @api.model
-    def data_bi_reservas(self, compan, lines, estado_array, dic_clientes, historico, bloque, parte):
+    def data_bi_reservas(self, compan, lines, estado_array, dic_clientes, historico):
+    # def data_bi_reservas(self, compan, lines, estado_array, dic_clientes, historico, bloque, parte):
         dic_reservas = []
 
         if (self.env.user.company_id.json_reservations_v3_data is not False) and (historico is False):
@@ -445,13 +446,13 @@ class Data_Bi(models.Model):
                 (n.price > 0)
                 )
         _logger.info("DataBi: Calculating %s reservations", str(len(lineas)))
-        if parte > 0:
-            _logger.info("DataBi: Calculo por BLOQUES DE %s reservas. Bloque %s", str(bloque), str(parte))
-            inicio = (parte * bloque) - bloque
-            fin = (parte * bloque) - 1
-            lineas = lineas[inicio:fin]
+        # if parte > 0:
+        #     _logger.info("DataBi: Calculo por BLOQUES DE %s reservas. Bloque %s", str(bloque), str(parte))
+        #     inicio = (parte * bloque) - bloque
+        #     fin = (parte * bloque) - 1
+        #     lineas = lineas[inicio:fin]
 
-        _logger.info("DataBi: Calculating %s reservations for parte %s", str(len(lineas), str(parte)))
+        # _logger.info("DataBi: Calculating %s reservations for parte %s", str(len(lineas), str(parte)))
         channels = {'door': 0,
                     'mail': 1,
                     'phone': 2,
